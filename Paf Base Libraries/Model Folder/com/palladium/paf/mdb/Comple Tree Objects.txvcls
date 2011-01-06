@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<nodeSet  version="1.1">
+	<view uin="381ocev4ae7db-s33a3o">
+		<property name="$metaclass" value="Class Diagram"/>
+		<property name="#invoke_inplace" value="com.tssap.selena.model.ui.navigator.view"/>
+		<property name="$name" value="Comple Tree Objects"/>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafDimTree">
+			<property name="bounds" value="720,5,200,137"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafBaseTree">
+			<property name="bounds" value="525,215,200,1034"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<property name="collapsedCompartments" value=""/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.mdb.PafBaseTree:PafDimTree">
+				<property name="sourceAnchor" value="630,220"/>
+				<property name="targetAnchor" value="774,147"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafBaseTree:rootNode">
+				<property name="sourceAnchor" value="635,1254"/>
+				<property name="targetAnchor" value="635,1327"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafAttributeTree">
+			<property name="bounds" value="864,202,200,1060"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafAttributeTree:rootNode">
+				<property name="sourceAnchor" value="993,1267"/>
+				<property name="targetAnchor" value="993,1327"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.mdb.PafAttributeTree:PafDimTree">
+				<property name="sourceAnchor" value="969,207"/>
+				<property name="targetAnchor" value="823,147"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafDimMember">
+			<property name="bounds" value="745,692,99,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafBaseMember">
+			<property name="bounds" value="535,1322,200,241"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.mdb.PafBaseMember:PafDimMember">
+				<property name="sourceAnchor" value="687,1327"/>
+				<property name="targetAnchor" value="783,777"/>
+				<property name="bendpoints" value="783,1214"/>
+				<property name="smooth_bendpoints" value="783,1214"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafBaseMember:pafBaseMemberProps">
+				<property name="sourceAnchor" value="540,1447"/>
+				<property name="targetAnchor" value="460,1447"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafBaseMember:parent">
+				<property name="sourceAnchor" value="740,1564"/>
+				<property name="targetAnchor" value="736,1568"/>
+				<property name="bendpoints" value="769,1564,769,1597,736,1597"/>
+				<property name="smooth_bendpoints" value="769,1564,769,1597,736,1597"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafAttributeMember">
+			<property name="bounds" value="855,1322,200,241"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.mdb.PafAttributeMember:PafDimMember">
+				<property name="sourceAnchor" value="926,1327"/>
+				<property name="targetAnchor" value="816,777"/>
+				<property name="bendpoints" value="816,1246"/>
+				<property name="smooth_bendpoints" value="816,1246"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafAttributeMember:parent">
+				<property name="sourceAnchor" value="1060,1564"/>
+				<property name="targetAnchor" value="1056,1568"/>
+				<property name="bendpoints" value="1089,1564,1089,1597,1056,1597"/>
+				<property name="smooth_bendpoints" value="1089,1564,1089,1597,1056,1597"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafAttributeMember:pafAttributeMemberProps">
+				<property name="sourceAnchor" value="860,1528"/>
+				<property name="targetAnchor" value="210,1481"/>
+				<property name="bendpoints" value="640,1628,274,1628"/>
+				<property name="smooth_bendpoints" value="640,1628,274,1628"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafDimMemberProps">
+			<property name="bounds" value="130,644,200,176"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafAttributeMemberProps">
+			<property name="bounds" value="5,1387,200,111"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.mdb.PafAttributeMemberProps:PafDimMemberProps">
+				<property name="sourceAnchor" value="172,1392"/>
+				<property name="targetAnchor" value="172,825"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafBaseMemberProps">
+			<property name="bounds" value="255,1328,200,228"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.mdb.PafBaseMemberProps:PafDimMemberProps">
+				<property name="sourceAnchor" value="297,1333"/>
+				<property name="targetAnchor" value="297,825"/>
+			</reference>
+		</reference>
+	</view>
+</nodeSet>

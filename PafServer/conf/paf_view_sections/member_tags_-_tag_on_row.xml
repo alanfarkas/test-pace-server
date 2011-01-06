@@ -1,0 +1,129 @@
+<ViewSection>
+  <name>Member Tags - Tag on Row</name>
+  <description></description>
+  <primaryFormattingAxis>1</primaryFormattingAxis>
+  <readOnly>false</readOnly>
+  <managed>false</managed>
+  <isEmpty>false</isEmpty>
+  <topOffset>0</topOffset>
+  <leftOffset>0</leftOffset>
+  <scaleUnit>CELL</scaleUnit>
+  <pafViewHeaders>
+    <ViewHeader>
+      <label>Member Tags - Tag on Row</label>
+      <globalStyleName>Header Left 12pt</globalStyleName>
+    </ViewHeader>
+    <ViewHeader>
+      <label>@Location</label>
+      <globalStyleName>Header Left 10pt</globalStyleName>
+    </ViewHeader>
+    <ViewHeader>
+      <label>@Measures</label>
+      <globalStyleName>Header Left 10pt</globalStyleName>
+    </ViewHeader>
+  </pafViewHeaders>
+  <rowAxisDims>
+    <string>Time</string>
+  </rowAxisDims>
+  <colAxisDims>
+    <string>Product</string>
+  </colAxisDims>
+  <rowTuples>
+    <ViewTuple>
+      <dataGlobalStyleName>Data Bold</dataGlobalStyleName>
+      <headerGlobalStyleName>Bold Light Blue</headerGlobalStyleName>
+      <memberTag>true</memberTag>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>Dept_Desc</string>
+       </memberDefs>
+    </ViewTuple>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Bold Light Blue</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@LEVEL(@UOW_ROOT, 1)</string>
+      </memberDefs>
+    </ViewTuple>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Bold Light Blue</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@UOW_ROOT</string>
+      </memberDefs>
+    </ViewTuple>
+  </rowTuples>
+  <colTuples>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Bold Light Blue</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@ICHILDREN(@UOW_ROOT)</string>
+      </memberDefs>
+    </ViewTuple>
+  </colTuples>
+  <pageTuples>
+    <PageTuple>
+      <axis>PlanType</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Years</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Measures</axis>
+      <member>SLS_DLR</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Version</axis>
+      <member>@PLAN_VERSION</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Location</axis>
+      <member>@USER_SEL(L1)</member>
+    </PageTuple>
+  </pageTuples>
+  <hierarchyFormatName>LocProd</hierarchyFormatName>
+  <isCompressed>false</isCompressed>
+  <memberTagCommentEntries>
+  	<MemberTagCommentEntry>
+    	<name>Dept_Desc</name>
+    	<isVisible>true</isVisible>
+  	</MemberTagCommentEntry>
+  </memberTagCommentEntries>
+</ViewSection>

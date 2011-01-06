@@ -1,0 +1,10 @@
+<!ELEMENT configuration (#PCDATA | service)*>  
+<!ATTLIST configuration xmlns CDATA #IMPLIED>
+<!ELEMENT service (#PCDATA | interface)*>
+<!ATTLIST service name CDATA #IMPLIED>
+<!ATTLIST service targetNamespace CDATA #IMPLIED>
+<!ATTLIST service typeNamespace CDATA #IMPLIED>
+<!ATTLIST service packageName CDATA #IMPLIED>
+<!ELEMENT interface (#PCDATA)>
+<!ATTLIST interface name CDATA #IMPLIED>
+

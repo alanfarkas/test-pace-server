@@ -1,0 +1,134 @@
+<UserSelection-array>
+  <UserSelection>
+    <id>CLIMATE1</id>
+    <dimension>ClimateZone</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Climate Zone:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>CLIMATE2</id>
+    <dimension>ClimateZone</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Climate Zones:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>IO1</id>
+    <dimension>Indoor.Outdoor</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Indoor Outdoor:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>IO2</id>
+    <dimension>Indoor.Outdoor</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Indoor Outdoors:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>L1</id>
+    <dimension>Location</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Location:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>L2</id>
+    <dimension>Location</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Locations:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>M1</id>
+    <dimension>Measures</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Measure:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>M2</id>
+    <dimension>Measures</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Measures:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>P1</id>
+    <dimension>Product</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Product:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>P2</id>
+    <dimension>Product</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Products:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>PURPOSE1</id>
+    <dimension>Purpose</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Purpose:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>PURPOSE2</id>
+    <dimension>Purpose</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Purposes:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>SEASON1</id>
+    <dimension>Season</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Season:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>SEASON2</id>
+    <dimension>Season</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Seasons:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>STATE1</id>
+    <dimension>State</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 State:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>STATE2</id>
+    <dimension>State</dimension>
+    <multiples>true</multiples>
+    <promptString>Select States:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>T1</id>
+    <dimension>Time</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Time Period:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>T2</id>
+    <dimension>Time</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Time Periods:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>V1</id>
+    <dimension>Version</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Version:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>V2</id>
+    <dimension>Version</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Versions:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>Y1</id>
+    <dimension>Years</dimension>
+    <multiples>false</multiples>
+    <promptString>Select 1 Year:</promptString>
+  </UserSelection>
+  <UserSelection>
+    <id>Y2</id>
+    <dimension>Years</dimension>
+    <multiples>true</multiples>
+    <promptString>Select Years:</promptString>
+  </UserSelection>
+</UserSelection-array>

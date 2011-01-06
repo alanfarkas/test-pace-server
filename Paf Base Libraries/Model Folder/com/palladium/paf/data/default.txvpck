@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<nodeSet  version="1.1">
+	<view uin="V574ng9est3arvt-6kajjd">
+		<property name="$defaultDiagram" value="true"/>
+		<property name="$metaclass" value="Package Diagram"/>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.IPafDataCache">
+			<property name="bounds" value="424,427,126,121"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="label:$name:jdt:e_class:src:com.palladium.paf.data.IPafDataCache">
+				<property name="bounds" value="492,563,0,0"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.ExpOpCode">
+			<property name="bounds" value="114,422,141,160"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.IntersectionUtil">
+			<property name="bounds" value="176,0,200,80"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.Intersection">
+			<property name="bounds" value="395,196,171,212"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.ExpOperation">
+			<property name="bounds" value="5,9,152,121"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.data.ExpOperation:opCode">
+				<property name="sourceAnchor" value="140,135"/>
+				<property name="targetAnchor" value="140,427"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.PafSimpleUow">
+			<property name="bounds" value="658,0,185,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.data.PafSimpleUow:pafMemberEntries">
+				<property name="sourceAnchor" value="663,58"/>
+				<property name="targetAnchor" value="303,127"/>
+			</reference>
+		</reference>
+		<reference referencedUin="design:view:::Vd7rsvfest3bmcgqadkzk">
+			<property name="bounds" value="395,0,225,177"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.MemberTreeSet">
+			<property name="bounds" value="186,198,200,121"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.PafMemberList">
+			<property name="bounds" value="176,99,122,80"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.TreeParseOrder">
+			<property name="bounds" value="265,441,150,95"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.data.PafDataSlice">
+			<property name="bounds" value="47,149,128,254"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+	</view>
+</nodeSet>

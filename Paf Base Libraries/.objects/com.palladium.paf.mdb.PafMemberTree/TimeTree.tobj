@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ObjectData>
+<InternalProperties category="user" type="com.palladium.paf.mdb.PafMemberTree" identifier="12236027521150923191067"/>
+ <Ast ver="1.1">
+  <Type ref="1" name="com.palladium.paf.mdb.PafMemberTree"/>
+  <Type ref="3" name="com.palladium.paf.mdb.testCommonParms"/>
+  <MethodDecl elemNum="0" declType="3" ref="2" type="1" name="getTimeTree" params=""/>
+  <FactoryMethodInv methodDecl="2" elemNum="0" ref="0" name="getTimeTree" args=""/>
+ </Ast>
+</ObjectData>

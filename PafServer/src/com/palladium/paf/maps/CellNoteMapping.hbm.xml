@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 11, 2007 12:10:50 PM by Hibernate Tools 3.2.0.b9 -->
+<hibernate-mapping package="com.palladium.paf.db.cellnotes">
+    <class name="CellNoteMapping" table="cell_note_mappings" >
+        <comment></comment>
+        <id name="id" type="int">
+            <column name="ID" />
+            <generator class="identity" />
+        </id>
+        <property name="memberName" type="string">
+            <column name="member_name" length="255" not-null="true">
+                <comment></comment>
+            </column>
+        </property>
+        
+        <many-to-one name="dimension" column="dimension_id" 
+            class="com.palladium.paf.db.Dimension" not-null="true" cascade="save-update"  />	
+	      
+        <many-to-one name="cellNote" column="cell_note_id" 
+        	class="CellNote" not-null="true" />	
+	      
+    </class>
+</hibernate-mapping>

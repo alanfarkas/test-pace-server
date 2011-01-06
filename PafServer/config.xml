@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE configuration SYSTEM "config.dtd">
+
+<configuration xmlns="http://java.sun.com/xml/ns/jax-rpc/ri/config">
+  <service name="PafService" targetNamespace="http://PafServer/PafService"
+    typeNamespace="http://PafServer/PafService" packageName="com.palladium.paf.server">
+    <interface name="com.palladium.paf.server.IPafService"/>
+  </service>
+</configuration>

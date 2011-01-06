@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ObjectData>
+<InternalProperties category="user" type="com.palladium.paf.server.PafDataService" identifier="20943539891150613099031"/>
+ <Ast ver="1.1">
+  <Type ref="2" name="com.palladium.paf.server.PafDataService"/>
+  <Type ref="3" name="boolean"/>
+  <ConstrDecl elemNum="1" declType="2" ref="1" name="com.palladium.paf.server.PafDataService" params="3"/>
+  <ConstrInv constr="1" elemNum="1" ref="0" name="com.palladium.paf.server.PafDataService" args="4">
+   <ConstExpr ref="4" type="3" value="true"/>
+  </ConstrInv>
+ </Ast>
+</ObjectData>

@@ -1,0 +1,9 @@
+<PafView>
+  <viewSectionNames>
+    <string>Sales by Location</string>
+  </viewSectionNames>
+  <name>Sales by Location</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+</PafView>

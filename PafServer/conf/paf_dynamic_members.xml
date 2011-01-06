@@ -1,0 +1,10 @@
+<DynamicMemberDef-array>
+  <DynamicMemberDef>
+    <dimension>Version</dimension>
+    <memberSpecs>
+      <string>@PLAN_VERSION</string>
+      <string>@PLAN_VERSION_vs_LY</string>
+      <string>@PLAN_VERSION_vs_LY_%</string>
+    </memberSpecs>
+  </DynamicMemberDef>
+</DynamicMemberDef-array>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseData>
+    <InternalProperties category="user" context="com.palladium.paf.utils.ElapsedPeriodUpdateUtil.ElapsedPeriodUpdateUtil(com.palladium.paf.utils.model.ElapsedPeriod, [Lcom.palladium.paf.app.PafApplicationDef;)" identifier="9923420451156430746543" template="false"/>
+    <AstData>
+        <Ast ver="1.1">
+            <Type name="com.palladium.paf.utils.model.ElapsedPeriod" ref="4"/>
+            <Type name="com.palladium.paf.app.PafApplicationDef" ref="10"/>
+            <Type name="com.palladium.paf.utils.ElapsedPeriodUpdateUtil" ref="24"/>
+            <Type dim="1" ref="9" type="10"/>
+            <ConstrDecl declType="24" elemNum="2" name="com.palladium.paf.utils.ElapsedPeriodUpdateUtil" params="4 9" ref="23"/>
+            <ConstrDecl declType="24" elemNum="2" name="com.palladium.paf.utils.ElapsedPeriodUpdateUtil" params="4 9" ref="28"/>
+            <Block elemNum="7" ref="0" stats="1 6 12 16 20 31 35">
+                <ExprStat expr="2" ref="1">
+                    <Assign ref="2" value="5" var="3">
+                        <Var name="Input-Arg0" ref="3" type="4"/>
+                        <NullExpr ref="5" type="4"/>
+                    </Assign>
+                </ExprStat>
+                <ExprStat expr="7" ref="6">
+                    <Assign ref="7" value="11" var="8">
+                        <Var name="Input-Arg1" ref="8" type="9"/>
+                        <NullExpr ref="11" type="9"/>
+                    </Assign>
+                </ExprStat>
+                <ExprStat expr="13" ref="12">
+                    <Assign ref="13" value="15" var="14">
+                        <Var name="Output-Arg0" ref="14" type="4"/>
+                        <SameExpr ref="15" target="5" type="4"/>
+                    </Assign>
+                </ExprStat>
+                <ExprStat expr="17" ref="16">
+                    <Assign ref="17" value="19" var="18">
+                        <Var name="Output-Arg1" ref="18" type="9"/>
+                        <SameExpr ref="19" target="11" type="9"/>
+                    </Assign>
+                </ExprStat>
+                <ExprStat expr="21" ref="20">
+                    <AssertExpr act="27" exp="22" ref="21">
+                        <ConstrInv args="25 26" constr="23" elemNum="2" name="com.palladium.paf.utils.ElapsedPeriodUpdateUtil" ref="22">
+                            <NullExpr ref="25" type="4"/>
+                            <NullExpr ref="26" type="9"/>
+                        </ConstrInv>
+                        <ConstrInv args="29 30" constr="28" elemNum="2" name="com.palladium.paf.utils.ElapsedPeriodUpdateUtil" ref="27">
+                            <Var name="Input-Arg0" ref="29" type="4"/>
+                            <Var name="Input-Arg1" ref="30" type="9"/>
+                        </ConstrInv>
+                    </AssertExpr>
+                </ExprStat>
+                <ExprStat expr="32" ref="31">
+                    <AssertExpr act="34" exp="33" ref="32">
+                        <Var name="Output-Arg0" ref="33" type="4"/>
+                        <Var name="Input-Arg0" ref="34" type="4"/>
+                    </AssertExpr>
+                </ExprStat>
+                <ExprStat expr="36" ref="35">
+                    <AssertExpr act="38" exp="37" ref="36">
+                        <Var name="Output-Arg1" ref="37" type="9"/>
+                        <Var name="Input-Arg1" ref="38" type="9"/>
+                    </AssertExpr>
+                </ExprStat>
+            </Block>
+        </Ast>
+    </AstData>
+</TestCaseData>

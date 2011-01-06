@@ -1,0 +1,84 @@
+<PlannerRole-array>
+  <PlannerRole>
+    <roleName>Admin</roleName>
+    <roleDesc>A role that is allowed to enter LY for Class Chn</roleDesc>
+    <planType>ClassChn</planType>
+    <seasonIds>
+      <string>Fall - Approval - 2006</string>
+      <string>Fall - Forecast - 2006</string>
+      <string>Fall - Plan - 2006</string>
+      <string>Fall - Plan - 2007</string>
+      <string>Spring - Forecast - 2006</string>
+      <string>Spring - Forecast - 2007</string>
+      <string>Spring - Plan - 2007</string>
+    </seasonIds>
+    <readOnly>false</readOnly>
+  </PlannerRole>
+  <PlannerRole>
+    <roleName>Approver for Buyer Plan</roleName>
+    <roleDesc>A role for approving Buyer plans</roleDesc>
+    <planType>DeptChn</planType>
+    <seasonIds>
+      <string>Fall - Approval - 2006</string>
+    </seasonIds>
+    <readOnly>false</readOnly>
+  </PlannerRole>
+  <PlannerRole>
+    <roleName>Buyer</roleName>
+    <planType>ClassChn</planType>
+    <seasonIds>
+      <string>Fall - Plan - 2006</string>
+      <string>Spring - Forecast - 2006</string>
+    </seasonIds>
+    <readOnly>false</readOnly>
+  </PlannerRole>
+  <PlannerRole>
+    <roleName>Division Planner</roleName>
+    <planType>DeptChn</planType>
+    <seasonIds>
+      <string>Fall - Forecast - 2006</string>
+      <string>Fall - Plan - 2006</string>
+      <string>Fall - Plan - 2007</string>
+      <string>Spring - Forecast - 2006</string>
+      <string>Spring - Plan - 2007</string>
+    </seasonIds>
+    <readOnly>false</readOnly>
+  </PlannerRole>
+  <PlannerRole>
+    <roleName>Store Planner</roleName>
+    <planType>ClassChn</planType>
+    <seasonIds>
+      <string>Fall - Plan - 2006</string>
+      <string>Fall - Plan - 2007</string>
+      <string>Spring - Forecast - 2006</string>
+      <string>Spring - Forecast - 2007</string>
+      <string>Spring - Plan - 2007</string>
+    </seasonIds>
+    <readOnly>false</readOnly>
+  </PlannerRole>
+  <PlannerRole>
+    <roleName>Strategic Planner</roleName>
+    <planType>CorpChn</planType>
+    <seasonIds>
+      <string>Fall - Plan - 2006</string>
+      <string>Spring - Plan - 2007</string>
+      <string>Fall - Plan - 2007</string>
+      <string>Spring - Forecast - 2006</string>
+      <string>Fall - Forecast - 2006</string>
+    </seasonIds>
+    <readOnly>false</readOnly>
+  </PlannerRole>
+  <PlannerRole>
+    <roleName>Testing</roleName>
+    <roleDesc>A role that has access to Test Views</roleDesc>
+    <planType>ClassChn</planType>
+    <seasonIds>
+      <string>Fall - Plan - 2006</string>
+      <string>Spring - Plan - 2007</string>
+      <string>Fall - Plan - 2007</string>
+      <string>Spring - Forecast - 2006</string>
+      <string>Fall - Forecast - 2006</string>
+    </seasonIds>
+    <readOnly>false</readOnly>
+  </PlannerRole>
+</PlannerRole-array>

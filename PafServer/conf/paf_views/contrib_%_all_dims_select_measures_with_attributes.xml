@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>Contrib % All Dims Select Measures with Attributes vs</string>
+  </viewSectionNames>
+  <name>Contrib % All Dims Select Measures with Attributes</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <pageOrientation>Landscape</pageOrientation>
+  <pagesTall>1</pagesTall>
+  <pagesWide>1</pagesWide>
+</PafView>

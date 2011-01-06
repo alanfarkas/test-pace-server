@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ObjectData>
+    <InternalProperties category="user" identifier="16645048041142280249325" type="com.palladium.paf.mdb.PafConnection"/>
+    <Ast ver="1.1">
+        <Type name="com.palladium.paf.mdb.PafConnection" ref="2"/>
+        <Type name="java.lang.String" ref="3"/>
+        <ConstrDecl declType="2" elemNum="3" name="com.palladium.paf.mdb.PafConnection" params="3 3 3" ref="1"/>
+        <ConstrInv args="4 5 6" constr="1" elemNum="3" name="com.palladium.paf.mdb.PafConnection" ref="0">
+            <ConstExpr ref="4" type="3" value=""/>
+            <ConstExpr ref="5" type="3" value=""/>
+            <ConstExpr ref="6" type="3" value=""/>
+        </ConstrInv>
+    </Ast>
+</ObjectData>

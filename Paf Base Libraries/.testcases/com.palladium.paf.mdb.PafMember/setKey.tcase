@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseData>
+<InternalProperties context="com.palladium.paf.mdb.PafMember.setKey(java.lang.String)" category="user" template="false" identifier="7506168871150157219066"/>
+<AstData>
+ <Ast ver="1.1">
+  <Type ref="4" name="com.palladium.paf.mdb.PafMember"/>
+  <Type ref="10" name="java.lang.String"/>
+  <Type ref="22" name="void"/>
+  <ConstrDecl elemNum="0" declType="4" ref="6" name="com.palladium.paf.mdb.PafMember" params=""/>
+  <MethodDecl elemNum="1" declType="4" ref="23" type="22" name="setKey" params="10"/>
+  <Block elemNum="7" stats="1 7 12 16 20 26 30" ref="0">
+   <ExprStat ref="1" expr="2">
+    <Assign ref="2" var="3" value="5">
+     <Var ref="3" type="4" name="Input-This"/>
+     <ConstrInv constr="6" elemNum="0" ref="5" name="com.palladium.paf.mdb.PafMember" args=""/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="7" expr="8">
+    <Assign ref="8" var="9" value="11">
+     <Var ref="9" type="10" name="Input-Arg0"/>
+     <ConstExpr ref="11" type="10" value="Child1"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="12" expr="13">
+    <Assign var="14" value="15" ref="13" special="true">
+     <Var ref="14" type="4" name="Output-This"/>
+     <RandomExpr ref="15" special="true" type="4"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="16" expr="17">
+    <Assign ref="17" var="18" value="19">
+     <Var ref="18" type="10" name="Output-Arg0"/>
+     <SameExpr ref="19" type="10" target="11"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="20" expr="21">
+    <MethodInv methodDecl="23" elemNum="1" receiver="24" ref="21" name="setKey" args="25">
+     <Var ref="24" type="4" name="Input-This"/>
+     <Var ref="25" type="10" name="Input-Arg0"/>
+    </MethodInv>
+   </ExprStat>
+   <ExprStat ref="26" expr="27">
+    <AssertExpr act="29" ref="27" exp="28">
+     <Var ref="28" type="4" name="Output-This"/>
+     <Var ref="29" type="4" name="Input-This"/>
+    </AssertExpr>
+   </ExprStat>
+   <ExprStat ref="30" expr="31">
+    <AssertExpr process="false" exp="32" ref="31" act="33">
+     <Var ref="32" type="10" name="Output-Arg0"/>
+     <Var ref="33" type="10" name="Input-Arg0"/>
+    </AssertExpr>
+   </ExprStat>
+  </Block>
+ </Ast>
+</AstData>
+</TestCaseData>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="var" path="JTEST_HOME/jtest.jar"/>
+	<classpathentry sourcepath="JTEST_HOME/junitsrc.zip" kind="var" path="JTEST_HOME/junit.jar"/>
+	<classpathentry kind="src" path="/PafServer"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="com.genuitec.eclipse.j2eedt.core.J2EE14_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/XStream 1.1.2"/>
+	<classpathentry sourcepath="ECLIPSE_HOME/plugins/org.eclipse.jdt.source_3.1.0/src/org.junit_3.8.1/junitsrc.zip" kind="var" path="JUNIT_HOME/junit.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Log4j 1.2.9"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Derby 10.1.1"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JFormula"/>
+	<classpathentry kind="con" path="melibrary.com.genuitec.eclipse.springframework.MYECLIPSE_SPRING12_CORE"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Essbase Provider"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Paf Base Libraries"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/PafCustomCommands"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/PafCustomFunctions"/>
+	<classpathentry kind="lib" path="/PafServer/WebRoot/WEB-INF/lib/esbprv.jar"/>
+	<classpathentry kind="lib" path="/PafServer/WebRoot/WEB-INF/lib/paf_base.jar"/>
+	<classpathentry kind="lib" path="/PafServer/WebRoot/WEB-INF/lib/pafcc.jar"/>
+	<classpathentry kind="lib" path="/PafServer/WebRoot/WEB-INF/lib/pafcf.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Hibernate 3.1"/>
+	<classpathentry kind="output" path="WebRoot/WEB-INF/classes"/>
+</classpath>

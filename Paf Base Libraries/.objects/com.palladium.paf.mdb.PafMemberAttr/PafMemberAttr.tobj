@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ObjectData>
+<InternalProperties category="user" type="com.palladium.paf.mdb.PafMemberAttr" identifier="13847513411150148873081"/>
+ <Ast ver="1.1">
+  <Type ref="2" name="com.palladium.paf.mdb.PafMemberAttr"/>
+  <ConstrDecl elemNum="0" declType="2" ref="1" name="com.palladium.paf.mdb.PafMemberAttr" params=""/>
+  <ConstrInv constr="1" elemNum="0" ref="0" name="com.palladium.paf.mdb.PafMemberAttr" args=""/>
+ </Ast>
+</ObjectData>

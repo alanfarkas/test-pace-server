@@ -1,0 +1,10 @@
+<PafView>
+  <viewSectionNames>
+    <string>Approval Detail Section 1</string>
+  </viewSectionNames>
+  <name>Approval Detail</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <pageOrientation>Landscape</pageOrientation>
+</PafView>

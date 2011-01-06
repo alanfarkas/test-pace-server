@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<nodeSet  version="1.1">
+	<view uin="V574ng9est3b07l3hg4el">
+		<property name="$defaultDiagram" value="true"/>
+		<property name="$metaclass" value="Package Diagram"/>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.ParsedFunction">
+			<property name="bounds" value="5,443,200,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.funcs.ParsedFunction:AbstractFunction">
+				<property name="sourceAnchor" value="110,448"/>
+				<property name="targetAnchor" value="695,374"/>
+				<property name="bendpoints" value="110,438"/>
+				<property name="smooth_bendpoints" value="110,438"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.AbstractFunction">
+			<property name="bounds" value="665,209,200,160"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_impl:src:com.palladium.paf.funcs.AbstractFunction:IPafFunction">
+				<property name="sourceAnchor" value="770,214"/>
+				<property name="targetAnchor" value="770,144"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.F_TriggerIntersection">
+			<property name="bounds" value="1105,443,200,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.funcs.F_TriggerIntersection:AbstractFunction">
+				<property name="sourceAnchor" value="1210,448"/>
+				<property name="targetAnchor" value="820,374"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.IPafFunction">
+			<property name="bounds" value="665,5,200,134"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="label:$name:jdt:e_class:src:com.palladium.paf.funcs.IPafFunction">
+				<property name="bounds" value="770,154,0,0"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.F_Prev">
+			<property name="bounds" value="665,443,200,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.funcs.F_Prev:AbstractFunction">
+				<property name="sourceAnchor" value="770,448"/>
+				<property name="targetAnchor" value="770,374"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.F_Bop">
+			<property name="bounds" value="225,435,200,95"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.funcs.F_Bop:AbstractFunction">
+				<property name="sourceAnchor" value="330,440"/>
+				<property name="targetAnchor" value="720,374"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.F_Cum">
+			<property name="bounds" value="445,435,200,95"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.funcs.F_Cum:AbstractFunction">
+				<property name="sourceAnchor" value="550,440"/>
+				<property name="targetAnchor" value="745,374"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.F_Next">
+			<property name="bounds" value="885,443,200,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.funcs.F_Next:AbstractFunction">
+				<property name="sourceAnchor" value="990,448"/>
+				<property name="targetAnchor" value="795,374"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.CustomFunctionDef">
+			<property name="bounds" value="885,5,122,80"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.funcs.F_PrevCum">
+			<property name="bounds" value="1325,429,200,108"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.funcs.F_PrevCum:AbstractFunction">
+				<property name="sourceAnchor" value="1430,434"/>
+				<property name="targetAnchor" value="845,374"/>
+			</reference>
+		</reference>
+	</view>
+</nodeSet>

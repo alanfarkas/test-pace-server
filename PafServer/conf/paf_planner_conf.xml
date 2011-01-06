@@ -1,0 +1,323 @@
+<PafPlannerConfig-array>
+  <PafPlannerConfig>
+    <role>Admin</role>
+    <cycle></cycle>
+    <viewTreeItemNames>
+      <string>Planning Views</string>
+    </viewTreeItemNames>
+    <ruleSetNames/>
+    <defaultRulesetName></defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>false</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Approver for Buyer Plan</role>
+    <isUserFilteredUow>true</isUserFilteredUow>
+    <isDataFilteredUow>true</isDataFilteredUow>
+    <userFilterSpec>
+      <attrDimNames>
+        <string>Purpose</string>
+        <string>Season</string>
+        <string>State</string>
+      </attrDimNames>
+    </userFilterSpec>
+    <dataFilterSpec>
+      <dimSpec>
+        <DimSpec>
+          <dimension>Measures</dimension>
+          <expressionList>
+            <string>ACCT1</string>
+          </expressionList>
+        </DimSpec>
+        <DimSpec>
+          <dimension>PlanType</dimension>
+          <expressionList>
+            <string>@UOW_ROOT</string>
+          </expressionList>
+        </DimSpec>
+        <DimSpec>
+          <dimension>Time</dimension>
+          <expressionList>
+            <string>WK01</string>
+          </expressionList>
+        </DimSpec>
+        <DimSpec>
+          <dimension>Version</dimension>
+          <expressionList>
+            <string>@PLAN_VERSION</string>
+          </expressionList>
+        </DimSpec>
+        <DimSpec>
+          <dimension>Years</dimension>
+          <expressionList>
+            <string>@UOW_ROOT</string>
+          </expressionList>
+        </DimSpec>
+      </dimSpec>
+    </dataFilterSpec>
+    <viewTreeItemNames>
+      <string>Approval Views</string>
+      <string>Testing Views</string>
+    </viewTreeItemNames>
+    <menuItemNames>
+      <string>mnuApprovePlan</string>
+      <string>mnuRejectPlan</string>
+    </menuItemNames>
+    <ruleSetNames>
+      <string>StoreSales</string>
+    </ruleSetNames>
+    <defaultRulesetName>StoreSales</defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>false</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+    <versionFilter>
+      <string>WP</string>
+      <string>LY</string>
+      <string>WP_vs_LY</string>
+      <string>WP_vs_LY_%</string>
+    </versionFilter>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Buyer</role>
+    <cycle>Forecast</cycle>
+    <viewTreeItemNames>
+      <string>Forecasting Views</string>
+    </viewTreeItemNames>
+    <ruleSetNames/>
+    <defaultRulesetName></defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>false</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Buyer</role>
+    <cycle>Plan</cycle>
+    <viewTreeItemNames>
+      <string>Planning Views</string>
+      <string>Testing Views</string>
+      <string>Attribute Views</string>
+    </viewTreeItemNames>
+    <menuItemNames>
+      <string>mnuSubmitPlan</string>
+    </menuItemNames>
+    <ruleSetNames/>
+    <defaultRulesetName></defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>false</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Division Planner</role>
+    <cycle>Forecast</cycle>
+    <viewTreeItemNames>
+      <string>Forecasting Views</string>
+    </viewTreeItemNames>
+    <ruleSetNames/>
+    <defaultRulesetName></defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>false</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Division Planner</role>
+    <cycle>Plan</cycle>
+    <uowSizeLarge>3000000</uowSizeLarge>
+    <uowSizeMax>10000000</uowSizeMax>
+    <isUserFilteredUow>true</isUserFilteredUow>
+    <isDataFilteredUow>true</isDataFilteredUow>
+    <userFilterSpec>
+      <attrDimNames>
+        <string>Season</string>
+        <string>Purpose</string>
+        <string>Indoor.Outdoor</string>
+        <string>ClimateZone</string>
+        <string>State</string>
+      </attrDimNames>
+    </userFilterSpec>
+    <dataFilterSpec>
+      <dimSpec>
+        <DimSpec>
+          <dimension>Measures</dimension>
+          <expressionList>
+            <string>ACCT1</string>
+          </expressionList>
+        </DimSpec>
+        <DimSpec>
+          <dimension>PlanType</dimension>
+          <expressionList>
+            <string>@UOW_ROOT</string>
+          </expressionList>
+        </DimSpec>
+        <DimSpec>
+          <dimension>Time</dimension>
+          <expressionList>
+            <string>WK01</string>
+          </expressionList>
+        </DimSpec>
+        <DimSpec>
+          <dimension>Version</dimension>
+          <expressionList>
+            <string>@PLAN_VERSION</string>
+          </expressionList>
+        </DimSpec>
+        <DimSpec>
+          <dimension>Years</dimension>
+          <expressionList>
+            <string>@UOW_ROOT</string>
+          </expressionList>
+        </DimSpec>
+      </dimSpec>
+    </dataFilterSpec>
+    <viewTreeItemNames>
+      <string>Planning Views</string>
+      <string>Testing Views</string>
+      <string>Attribute Views</string>
+      <string>Member Tag Views</string>
+      <string>Rounding Views</string>
+    </viewTreeItemNames>
+    <ruleSetNames/>
+    <defaultRulesetName>InventoryReact</defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>false</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+    <versionFilter>
+      <string>WP</string>
+      <string>LY</string>
+      <string>WP_%_Prod_Parent</string>
+      <string>WP_%_Prod_Total</string>
+      <string>WP_%_Time_Parent</string>
+      <string>WP_%_Time_Total</string>
+      <string>WP_%_Location_Parent</string>
+      <string>WP_%_Location_Total</string>
+      <string>WP_%_Sales</string>
+      <string>WP_vs_LY</string>
+      <string>WP_vs_LY_%</string>
+    </versionFilter>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Store Planner</role>
+    <cycle>Forecast</cycle>
+    <viewTreeItemNames>
+      <string>Testing Views</string>
+      <string>Attribute Views</string>
+      <string>Rounding Views</string>
+      <string>Planning Views</string>
+      <string>Store Planning Views</string>
+    </viewTreeItemNames>
+    <ruleSetNames>
+      <string>ContribPct</string>
+      <string>StoreSales</string>
+    </ruleSetNames>
+    <defaultRulesetName>StoreSales</defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>true</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Store Planner</role>
+    <cycle>Plan</cycle>
+    <isUserFilteredUow>true</isUserFilteredUow>
+    <userFilterSpec>
+      <attrDimNames>
+        <string>Purpose</string>
+        <string>Season</string>
+        <string>Indoor.Outdoor</string>
+        <string>State</string>
+        <string>ClimateZone</string>
+      </attrDimNames>
+    </userFilterSpec>
+    <viewTreeItemNames>
+      <string>Store Planning Views</string>
+      <string>Testing Views</string>
+      <string>Planning Views</string>
+      <string>Attribute Views</string>
+      <string>Rounding Views</string>
+    </viewTreeItemNames>
+    <ruleSetNames>
+      <string>ContribPct</string>
+      <string>StoreSales</string>
+    </ruleSetNames>
+    <defaultRulesetName>StoreSales</defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>false</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Strategic Planner</role>
+    <cycle></cycle>
+    <viewTreeItemNames>
+      <string>Planning Views</string>
+    </viewTreeItemNames>
+    <ruleSetNames/>
+    <defaultRulesetName></defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>false</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Testing</role>
+    <cycle>Forecast</cycle>
+    <viewTreeItemNames>
+      <string>Rounding Views</string>
+      <string>Attribute Views</string>
+      <string>Testing Views</string>
+      <string>Approval Views</string>
+      <string>Member Tag Views</string>
+      <string>Store Planning Views</string>
+      <string>Planning Views</string>
+      <string>Forecasting Views</string>
+    </viewTreeItemNames>
+    <menuItemNames>
+      <string>mnuSubmitPlan</string>
+	  <string>mnuGeneratePlan</string>	  
+    </menuItemNames>
+    <ruleSetNames/>
+    <defaultRulesetName>InventoryReact</defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>false</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+    <versionFilter>
+      <string>WF</string>
+      <string>LY</string>
+      <string>WF_vs_LY</string>
+      <string>WF_vs_LY_%</string>
+    </versionFilter>
+    <replicateEnabled>true</replicateEnabled>
+    <replicateAllEnabled>true</replicateAllEnabled>
+  </PafPlannerConfig>
+  <PafPlannerConfig>
+    <role>Testing</role>
+    <cycle></cycle>
+    <viewTreeItemNames>
+      <string>Planning Views</string>
+      <string>Forecasting Views</string>
+      <string>Approval Views</string>
+      <string>Testing Views</string>
+      <string>Attribute Views</string>
+      <string>Member Tag Views</string>
+      <string>Rounding Views</string>
+    </viewTreeItemNames>
+    <menuItemNames>
+      <string>mnuSubmitPlan</string>
+      <string>mnuGeneratePlan</string>	  
+    </menuItemNames>
+    <ruleSetNames/>
+    <defaultRulesetName>InventoryReact</defaultRulesetName>
+    <defaultEvalEnabledWorkingVersion>true</defaultEvalEnabledWorkingVersion>
+    <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
+    <calcElapsedPeriods>false</calcElapsedPeriods>
+    <versionFilter>
+      <string>WP</string>
+      <string>LY</string>
+      <string>LY_%_Prod_Parent</string>
+      <string>WP_%_Prod_Parent</string>
+      <string>WP_%_Prod_Total</string>
+      <string>WP_%_Time_Parent</string>
+      <string>WP_%_Time_Total</string>
+      <string>WP_%_Sales</string>
+      <string>WP_vs_LY</string>
+      <string>WP_vs_LY_%</string>
+    </versionFilter>
+  </PafPlannerConfig>
+</PafPlannerConfig-array>

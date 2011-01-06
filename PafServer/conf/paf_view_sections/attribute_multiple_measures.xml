@@ -1,0 +1,147 @@
+<ViewSection>
+  <name>Attribute Multiple Measures</name>
+  <description></description>
+  <primaryFormattingAxis>0</primaryFormattingAxis>
+  <readOnly>false</readOnly>
+  <managed>false</managed>
+  <isEmpty>false</isEmpty>
+  <topOffset>0</topOffset>
+  <leftOffset>0</leftOffset>
+  <scaleUnit>CELL</scaleUnit>
+  <pafViewHeaders>
+    <ViewHeader>
+      <label>Attribute Multiple Measures</label>
+      <globalStyleName>Bold Only</globalStyleName>
+    </ViewHeader>
+  </pafViewHeaders>
+  <rowAxisDims>
+    <string>Purpose</string>
+    <string>Product</string>
+  </rowAxisDims>
+  <colAxisDims>
+    <string>Measures</string>
+    <string>Season</string>
+  </colAxisDims>
+  <rowTuples>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Header Left 10pt</headerGlobalStyleName>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@IDESC(Purpose, L0)</string>
+        <string>@IDESC(@UOW_ROOT, L0)</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+      </symetricGroupNo>
+    </ViewTuple>
+  </rowTuples>
+  <colTuples>
+    <ViewTuple>
+      <headerGlobalStyleName>Header Center 10pt</headerGlobalStyleName>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@MEMBERS(SLS_DLR, SLS_U, SLS_AUR, MDPERM_DLR, MDPERM_%)</string>
+        <string>Holiday</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+      </symetricGroupNo>
+    </ViewTuple>
+    <ViewTuple>
+      <headerGlobalStyleName>Header Center 10pt</headerGlobalStyleName>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@MEMBERS(SLS_DLR, SLS_U, SLS_AUR, MDPERM_DLR, MDPERM_%)</string>
+        <string>Seasonal</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+      </symetricGroupNo>
+    </ViewTuple>
+    <ViewTuple>
+      <headerGlobalStyleName>Header Center 10pt</headerGlobalStyleName>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@MEMBERS(SLS_DLR, SLS_U, SLS_AUR, MDPERM_DLR, MDPERM_%)</string>
+        <string>Annual</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+      </symetricGroupNo>
+    </ViewTuple>
+    <ViewTuple>
+      <headerGlobalStyleName>Header Center 10pt</headerGlobalStyleName>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@MEMBERS(SLS_DLR, SLS_U, SLS_AUR, MDPERM_DLR, MDPERM_%)</string>
+        <string>Season</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+      </symetricGroupNo>
+    </ViewTuple>
+    <ViewTuple>
+      <headerGlobalStyleName></headerGlobalStyleName>
+      <headerBorder>
+        <border>0</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>PAFBLANK</string>
+        <string>PAFBLANK</string>
+      </memberDefs>
+      <columnWidth>4</columnWidth>
+      <symetricGroupNo>
+        <int>1</int>
+      </symetricGroupNo>
+    </ViewTuple>
+  </colTuples>
+  <pageTuples>
+    <PageTuple>
+      <axis>Location</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>PlanType</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Time</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Version</axis>
+      <member>@PLAN_VERSION</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Years</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+  </pageTuples>
+  <hierarchyFormatName>ProdAtt</hierarchyFormatName>
+</ViewSection>

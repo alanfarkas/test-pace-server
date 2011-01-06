@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/XStream 1.1.2"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/Jep"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/Log4j 1.2.9"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/LdapBp 1.0"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/Derby 10.2.2"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/Hibernate 3.2"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/Ostermiller Utils 1.6.0"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/Jtds-1.2.5"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Essbase Provider"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Paf Base Libraries"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/PafCustomCommands"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/PafCustomFunctions"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/CXF 2.2.5"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/paf_base.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/pafcc.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/pafcf.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/esbprv.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/ess_japi.jar"/>
+	<classpathentry kind="output" path="WebRoot/WEB-INF/classes"/>
+</classpath>

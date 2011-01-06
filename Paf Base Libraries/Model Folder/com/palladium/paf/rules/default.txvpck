@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<nodeSet  version="1.1">
+	<view uin="V574ng9est3b6tp-ldg2kn">
+		<property name="$defaultDiagram" value="true"/>
+		<property name="$metaclass" value="Package Diagram"/>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.rules.DependencySet">
+			<property name="bounds" value="264,145,197,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.rules.DependencySet:dependencyGroup">
+				<property name="sourceAnchor" value="269,190"/>
+				<property name="targetAnchor" value="189,190"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.rules.RuleGroup">
+			<property name="bounds" value="481,31,173,329"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.rules.RuleGroup:rules">
+				<property name="sourceAnchor" value="659,200"/>
+				<property name="targetAnchor" value="739,200"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.rules.DependencyGroup">
+			<property name="bounds" value="5,145,179,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.rules.DependencyGroup:dependencyList">
+				<property name="sourceAnchor" value="99,150"/>
+				<property name="targetAnchor" value="99,90"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.rules.Formula">
+			<property name="bounds" value="734,456,200,397"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.rules.DependencyList">
+			<property name="bounds" value="34,5,120,80"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.rules.FormulaTest">
+			<property name="bounds" value="179,885,200,118"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.rules.RuleSet">
+			<property name="bounds" value="5,885,154,189"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.rules.Rule">
+			<property name="bounds" value="734,5,200,381"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.rules.Rule:formula">
+				<property name="sourceAnchor" value="839,391"/>
+				<property name="targetAnchor" value="839,461"/>
+			</reference>
+		</reference>
+	</view>
+</nodeSet>

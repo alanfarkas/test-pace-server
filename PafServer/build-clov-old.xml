@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="build" name="PafServer">
+	
+	<!-- 
+		SCRIPT NAME: build-clov.xml
+		PURPOSE: Bamboo/Clover continuous integration build testing
+			  
+		THIS CONTENTS OF THIS ANT BUILD SCRIPT ARE UNIQUE TO THE PafServer PROJECT    
+	-->	
+	
+	
+	<!--   P R O P E R T Y   S E T U P    -->		
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.5"/>
+    <property name="source" value="1.5"/>
+    <property name="src" location="src"/>
+    <property name="bin" value="bin"/>
+    <property name="test.src" location="src"/>
+    <property name="test.bin" location="bin"/>
+	<property name="test.result" location="test-results"/>
+    <property name="Paf Base Libraries.location" value="../${env.proj.key}-PBL"/>	
+    <property name="Essbase Provider.location" value="../${env.proj.key}-ESB"/>	
+    <property name="PafCustomCommands.location" value="../${env.proj.key}-CC"/>	
+    <property name="PafCustomFunctions.location" value="../${env.proj.key}-CF"/>	
+    <property name="PafServer.location" value="../${env.proj.key}-SRVR"/>	
+
+	<!--   Clover Properties    -->		
+	<property name="clover.jar" value="c:/java/userlib/clover-ant-2.6.3/lib/clover.jar"/>
+	<taskdef resource="cloverlib.xml" classpath="${clover.jar}"/>
+	<taskdef resource="cloverjunitlib.xml" classpath="${clover.jar}"/>
+	<property name="clover.version" value="2_6_3"/>
+	<property name="clover.coverage.db" value="clover${clover.version}.db"/>
+	<property name="clover.dir" value=".clover"/>
+	<property name="clover.db.path" value="${clover.dir}/${clover.coverage.db}"/>
+	<property name="clover.consolidated.db" value="clover-consolidated.db"/>
+	<property name="clover.consolidated.dir" value=".clover-consolidated"/>
+	<property name="clover.consolidated.db.path" value="${clover.consolidated.dir}/${clover.consolidated.db}"/>
+    <property name="clover.ordering" value="failfast"/>   <!-- @ordering: optional; values "failfast", "orginal" or "random"; default: "failfast"; -->
+    <property name="clover.optimize" value="true"/>      <!-- Enable/Disable optimization -->
+    <property name="clover.minimize" value="true"/>      <!-- Exclude tests, or run all?  -->
+    <property name="clover.fullrunevery" value="10"/>    <!-- Determine how many builds between full builds. -->
+	<clover-env/>
+	
+	<property name="clover.snapshot.dir" value="/clover-snapshots/${env.build.dir}"/>
+<!--	<property name="clover.snapshot.dir" value=".cloverhistory/Paf Base Libraries/"/> -->
+	<property name="clover.custom.snapshot.file" value="${clover.snapshot.dir}/clover.snapshot"/>
+
+	<property name="clover.rptdir" location="clover"/>
+	<property name="clover.consolidated.rptdir" location="clover-consolidated"/>
+
+  	<echo message="project key : ${env.proj.key}"/>
+   	<echo message="build dir : ${env.build.dir}"/>
+   	<echo message="snapshot file : ${clover.custom.snapshot.file}"/>
+
+	<!--   End of Clover Properties  -->	
+	
+	 
+	<path id="CXF 2.2.5.userclasspath">
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/abdera-core-0.4.0-incubating.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/abdera-extensions-json-0.4.0-incubating.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/abdera-extensions-main-0.4.0-incubating.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/abdera-i18n-0.4.0-incubating.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/abdera-parser-0.4.0-incubating.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/aopalliance-1.0.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/asm-2.2.3.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/axiom-api-1.2.7.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/axiom-impl-1.2.7.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/bcprov-jdk15-1.43.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/commons-codec-1.3.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/commons-collections-3.2.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/commons-lang-2.4.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/commons-logging-1.1.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/commons-pool-1.5.2.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/cxf-2.2.5.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/cxf-manifest.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/FastInfoset-1.2.7.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/geronimo-activation_1.1_spec-1.0.2.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/geronimo-annotation_1.0_spec-1.1.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/geronimo-javamail_1.4_spec-1.6.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/geronimo-jaxws_2.1_spec-1.0.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/geronimo-jms_1.1_spec-1.1.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/geronimo-servlet_2.5_spec-1.2.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/geronimo-ws-metadata_2.0_spec-1.1.2.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/jaxb-api-2.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/jaxb-impl-2.1.12.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/jaxb-xjc-2.1.12.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/jaxen-1.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/jettison-1.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/jetty-6.1.21.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/jetty-util-6.1.21.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/jra-1.0-alpha-4.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/js-1.7R1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/jsr311-api-1.0.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/neethi-2.0.4.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/oro-2.0.8.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/saaj-api-1.3.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/saaj-impl-1.3.2.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/serializer-2.7.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/slf4j-api-1.5.8.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/slf4j-jdk14-1.5.8.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/spring-beans-2.5.5.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/spring-context-2.5.5.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/spring-context-support-2.5.5.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/spring-core-2.5.5.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/spring-jms-2.5.5.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/spring-tx-2.5.5.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/spring-web-2.5.5.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/velocity-1.6.2.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/wsdl4j-1.6.2.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/wss4j-1.5.8.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/wstx-asl-3.2.9.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/xalan-2.7.1.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/xmlbeans-2.4.0.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/xml-resolver-1.2.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/XmlSchema-1.4.5.jar"/>
+        <pathelement location="c:/java/userlib/apache-cxf-2.2.5/lib/xmlsec-1.4.3.jar"/>
+    </path>    
+    <path id="Derby 10.2.2.userclasspath">
+        <pathelement location="c:/java/userlib/Derby 10.2.2/lib/derby.jar"/>
+        <pathelement location="c:/java/userlib/Derby 10.2.2/lib/derbyclient.jar"/>
+        <pathelement location="c:/java/userlib/Derby 10.2.2/lib/derbynet.jar"/>
+        <pathelement location="c:/java/userlib/Derby 10.2.2/lib/derbyrun.jar"/>
+        <pathelement location="c:/java/userlib/Derby 10.2.2/lib/derbytools.jar"/>
+    </path>
+    <path id="EDS 9.3.userclasspath">
+        <pathelement location="c:/java/userlib/EDS 9.3/ess_japi.jar"/>
+    </path>
+    <path id="Hibernate 3.2.userclasspath">
+        <pathelement location="c:/java/userlib/hibernate-3.2/hibernate3.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/asm.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/asm-attrs.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/c3p0-0.9.1.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/cglib-2.1.3.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/checkstyle-all.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/cleanimports.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/commons-collections-2.1.1.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/commons-logging-1.0.4.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/concurrent-1.3.2.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/connector.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/dom4j-1.6.1.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/ehcache-1.2.3.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jaas.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jacc-1_0-fr.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/javassist.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jaxen-1.1-beta-7.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jboss-cache.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jboss-common.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jboss-jmx.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jboss-system.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jdbc2_0-stdext.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jgroups-2.2.8.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/jta.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/log4j-1.2.11.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/oscache-2.1.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/proxool-0.8.3.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/swarmcache-1.0rc2.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/syndiag2.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/versioncheck.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/xerces-2.6.2.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-3.2/lib/xml-apis.jar"/>    	
+    </path>
+	<path id="Hibernate Annotations 3.3.userclasspath">
+        <pathelement location="c:/java/userlib/hibernate-annotations-3.3/hibernate-annotations.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-annotations-3.3/lib/ejb3-persistence.jar"/>
+        <pathelement location="c:/java/userlib/hibernate-annotations-3.3/lib/hibernate-commons-annotations.jar"/>
+    </path>
+    <path id="JavaMail.userclasspath">
+        <pathelement location="c:/java/userlib/JavaMail/smtp.jar"/>
+        <pathelement location="c:/java/userlib/JavaMail/activation.jar"/>
+        <pathelement location="c:/java/userlib/JavaMail/mailapi.jar"/>
+    </path>
+    <path id="Jep.userclasspath">
+        <pathelement location="c:/java/userlib/Jep/dist/jep-2.4.0.jar"/>
+        <pathelement location="c:/java/userlib/Jep/dist/ext-1.1.0.jar"/>
+    </path>
+	<path id="Junit.userclasspath">
+        <pathelement location="c:/java/userlib/junit-3.8.2/junit-3.8.2.jar"/>
+    </path>
+    <path id="LdapBp 1.0.userclasspath">
+        <pathelement location="c:/java/userlib/ldapbp 1.0/lib/ldapbp.jar"/>
+    </path>
+	<path id="Log4j 1.2.9.userclasspath">
+        <pathelement location="c:/java/userlib/log4j 1.2.9/dist/lib/log4j-1.2.9.jar"/>
+    </path>
+    <path id="melibrary.com.genuitec.eclipse.j2eedt.core.MYECLIPSE_JAVAEE_5_CONTAINER.libraryclasspath"/>
+    <path id="Ostermiller Utils 1.6.0.userclasspath">
+        <pathelement location="c:/java/userlib/ostermillerutils-1.6.0/ostermillerutils_1_06_00.jar"/>
+    </path>
+    <path id="servlet-api.userclasspath">
+        <pathelement location="c:/java/servlet-api/servlet-api.jar"/>
+    </path>
+    <path id="Spring 2.0.7.userclasspath">
+        <pathelement location="c:/java/userlib/spring-framework-2.0.7/dist/spring.jar"/>
+    </path>
+    <path id="XStream 1.1.2.userclasspath">
+        <pathelement location="c:/java/userlib/xstream-1.1.2/xstream-1.1.2/xstream-1.1.2.jar"/>
+        <pathelement location="c:/java/userlib/xstream-1.1.2/xstream-1.1.2/lib/xpp3-1.1.3.4d_b4_min.jar"/>
+    </path>
+  	<path id="Paf Base Libraries.classpath">
+        <pathelement location="${Paf Base Libraries.location}/${bin}"/>
+    	<pathelement path="${clover.jar}"/>
+    	<path refid="XStream 1.1.2.userclasspath"/>
+        <path refid="EDS 9.3.userclasspath"/>
+        <path refid="Hibernate 3.2.userclasspath"/>
+        <path refid="JavaMail.userclasspath"/>
+        <path refid="Jep.userclasspath"/>
+        <path refid="Junit.userclasspath"/>
+        <path refid="Log4j 1.2.9.userclasspath"/>
+        <path refid="Hibernate Annotations 3.3.userclasspath"/>
+    </path>
+    <path id="Essbase Provider.classpath">
+        <pathelement location="${Essbase Provider.location}/${bin}"/>
+        <path refid="Paf Base Libraries.classpath"/>
+    </path>
+    <path id="PafCustomCommands.classpath">
+        <pathelement location="${PafCustomCommands.location}/${bin}"/>
+        <path refid="Paf Base Libraries.classpath"/>
+        <path refid="Essbase Provider.classpath"/>
+    </path>
+    <path id="PafCustomFunctions.classpath">
+        <pathelement location="${PafCustomFunctions.location}/${bin}"/>
+        <path refid="Paf Base Libraries.classpath"/>
+        <path refid="Essbase Provider.classpath"/>
+    </path>
+    <path id="PafServer.classpath">
+		<pathelement location="${PafServer.location}/${bin}"/>
+    	<path refid="LdapBp 1.0.userclasspath"/>
+        <path refid="Derby 10.2.2.userclasspath"/> 
+        <path refid="servlet-api.userclasspath"/>
+        <path refid="Spring 2.0.7.userclasspath"/>
+        <path refid="Hibernate 3.2.userclasspath"/> 
+        <path refid="CXF 2.2.5.userclasspath"/>
+        <path refid="Ostermiller Utils 1.6.0.userclasspath"/>
+ <!--		<path refid="melibrary.com.genuitec.eclipse.j2eedt.core.MYECLIPSE_JAVAEE_5_CONTAINER.libraryclasspath"/> -->
+        <path refid="Essbase Provider.classpath"/>
+        <path refid="Paf Base Libraries.classpath"/>
+        <path refid="PafCustomCommands.classpath"/>
+        <path refid="PafCustomFunctions.classpath"/>
+    </path>
+ 
+	<!--   E N D   O F   P R O P E R T Y   S E T U P    -->	
+
+
+	<!--   T A R G E T: with.clover -->
+	<target name="with.clover">
+		<clover-setup/>
+	</target>
+	
+	<!--   T A R G E T: clean -->
+    <target name="clean">
+        <delete dir="${bin}"/>
+    	<clover-clean/>
+    </target>
+	
+	<!--   T A R G E T: init -->
+	<target depends="clean" name="init">
+        <mkdir dir="${bin}"/>
+        <copy includeemptydirs="false" todir="${bin}">
+            <fileset dir="${src}" excludes="**/*.launch, **/*.java"/>
+        </copy>
+    </target>
+	
+	<!--   T A R G E T: build -->
+	<target depends="with.clover, init" name="build"
+            description="Compiles sources ${ant.project.name}">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="${bin}" source="${source}" target="${target}">
+           	<src path="${src}"/>
+          	<classpath refid="${ant.project.name}.classpath"/>
+        </javac>
+    </target>
+
+	<!--   T A R G E T: test -->
+    <target name="test" depends="build" description="Runs the junit tests">
+        <delete dir="${test.result}" failonerror="false" />
+        <mkdir dir="${test.result}"/>
+        <junit fork="yes" failureproperty="junit_test_failed" printsummary="true" showoutput="true">
+            <classpath refid="${ant.project.name}.classpath"/>
+            <formatter type="xml"/>
+            <batchtest fork="yes" todir="${test.result}">
+                <clover-optimized-testset fullrunevery="${clover.fullrunevery}"
+                                          enabled="${clover.optimize}"
+                                          minimize="${clover.minimize}"
+                                          ordering="${clover.ordering}">
+                    <fileset dir="${test.bin}" includes="**/*Test.class"/>
+                </clover-optimized-testset>
+<!--				<fileset dir="${test.bin}" includes="**/*Test.class"/> -->
+            </batchtest>
+        </junit>
+  <!--  	<fail if="junit_test_failed" message="One or more JUnit tests failed"/>  -->      	
+    </target>
+
+	<!--   T A R G E T: clover.snapshot -->
+	<target name="clover.snapshot" depends="with.clover">
+	  	<mkdir dir="${clover.snapshot.dir}"/>
+		<clover-snapshot file="${clover.custom.snapshot.file}"/>
+ 	</target>
+
+	<!--   T A R G E T: clover.report -->
+	<target name="clover.report" depends="with.clover" description="Produces the clover reports">
+        <delete dir="${clover.rptdir}" failonerror="false" />
+        <mkdir dir="${clover.rptdir}"/>
+		<clover-report>
+			<current outfile="${clover.rptdir}/clover.xml">
+				<format type="xml"/>
+			</current>
+		</clover-report>
+		<clover-html-report outdir="${clover.rptdir}" title="${ant.project.name}"/>
+	</target>
+
+	<!--   T A R G E T: clover.consolidated.report -->
+	<target name="clover.consolidated.report" depends="with.clover" description="Produces the consolidated clover reports">
+ 
+		<delete dir="${clover.consolidated.dir}" failonerror="false" />
+        <mkdir dir="${clover.consolidated.dir}"/>
+		<clover-merge initString="${clover.consolidated.db.path}">
+			<cloverDb initString="${Paf Base Libraries.location}/${clover.db.path}" span="0s"/>
+			<cloverDb initString="${Essbase Provider.location}/${clover.db.path}" span="0s"/>
+			<cloverDb initString="${PafCustomCommands.location}/${clover.db.path}" span="0s"/>
+			<cloverDb initString="${PafCustomFunctions.location}/${clover.db.path}" span="0s"/>
+			<cloverDb initString="${clover.dir}/${clover.coverage.db}" span="0s"/>
+		</clover-merge>	
+
+		<delete dir="${clover.consolidated.rptdir}" failonerror="false" />
+        <mkdir dir="${clover.consolidated.rptdir}"/>
+		<clover-pdf-report	initString="${clover.consolidated.db.path}"
+							outfile="${clover.consolidated.rptdir}/clover.pdf">
+		</clover-pdf-report>
+		<clover-html-report initString="${clover.consolidated.db.path}" 
+							outdir="${clover.consolidated.rptdir}" 
+							title="All PafServer Projects"/>
+	</target>
+
+	<!--   T A R G E T: clover.all.reports -->
+	<target name="clover.all.reports" depends="clover.report, clover.consolidated.report" description="Produces all clover reports"/>
+
+	<!--   T A R G E T: clover.all -->
+	<target name="clover.all" depends="test, clover.snapshot, clover.all.reports" description="Runs the build, unit tests, and produces the clover reports"/>
+	
+</project>

@@ -1,0 +1,244 @@
+/*
+ *	File: @(#)ES_EvalStdRulegroup.java 	Package: com.palladium.paf.eval 	Project: PafServer
+ *	Created: Sep 26, 2005  		By: JWatkins
+ *	Version: x.xx
+ *
+ * 	Copyright (c) 2005-2006 Palladium Group, Inc. All rights reserved.
+ *
+ *	This software is the confidential and proprietary information of Palladium Group, Inc.
+ *	("Confidential Information"). You shall not disclose such Confidential Information and 
+ * 	should use it only in accordance with the terms of the license agreement you entered into
+ *	with Palladium Group, Inc.
+ *
+ *
+ *
+	Date			Author			Version			Changes
+	xx/xx/xx		xxxxxxxx		x.xx			..............
+ * 
+ */
+package com.palladium.paf.eval;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+
+import com.palladium.paf.PafException;
+import com.palladium.paf.app.MeasureDef;
+import com.palladium.paf.app.MeasureType;
+import com.palladium.paf.data.Intersection;
+import com.palladium.paf.funcs.IPafFunction;
+import com.palladium.paf.mdb.PafDataCache;
+import com.palladium.paf.rules.Formula;
+import com.palladium.paf.rules.Rule;
+import com.palladium.paf.server.RuleMngr;
+import com.palladium.paf.state.EvalState;
+import com.palladium.utility.LogUtil;
+
+/**
+ * Class_description_goes_here
+ *
+ * @version	x.xx
+ * @author JWatkins
+ *
+ */
+public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
+
+	private static Logger logger = Logger.getLogger(ES_EvalStdRulegroup.class);
+
+    
+    public void performEvaluation(EvalState evalState) throws PafException {
+
+        long startTime = System.currentTimeMillis();
+        long stepTime;
+        PafDataCache dataCache = evalState.getDataCache();        
+        String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
+       	Map<String, MeasureDef> measureCat = evalState.getAppDef().getMeasureDefs();
+        
+        HashSet<Intersection> newChngCells = new HashSet<Intersection>(1000);
+        HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>(1000);
+        Intersection calcIntersection;
+
+		IPafFunction measFunc = null;
+		if (evalState.getRule().getFormula().isResultFunction()  )
+			measFunc = evalState.getRule().getFormula().extractResultFunction();
+       	
+		String currentMeasure = evalState.getMeasureName();
+		
+		
+
+
+       
+        stepTime = System.currentTimeMillis();   
+        
+        HashSet<Intersection> cellsToLock = new HashSet<Intersection>(1000);
+
+        if (logger.isDebugEnabled())
+        	logger.debug(LogUtil.timedStep("Finding newly changed cells out of " + evalState.getCurrentChangedCells().size() + " cells", stepTime));        
+        
+        stepTime = System.currentTimeMillis();
+        Rule leadingRule;
+
+        // 1st find any changed or locked intersection by measure that could impact this rule
+//         Set<Intersection> chngSet = EvalUtil.getChangeSet(evalState.getRule(), evalState);
+        Set<Intersection> chngSet = impactingChangeList(evalState.getRule(), evalState);
+        chngSet.addAll(evalState.getOrigLockedCells()); //   getCurrentLockedCells());
+        
+
+        if (logger.isDebugEnabled())
+        	logger.debug(LogUtil.timedStep("Filtered to " + chngSet.size() + " cells", stepTime));
+        
+        stepTime = System.currentTimeMillis();        
+        
+        // Now put on the stack any measure that needs to be calculated
+        for (Intersection is: chngSet) {
+            if ( EvalUtil.changeTriggersFormula( is, evalState.getRule(), evalState) ) {
+                
+                if (evalState.getMeasureType() == MeasureType.Recalc) { 
+                    leadingRule = evalState.getRule();
+                }
+                else {
+                    leadingRule = RuleMngr.findLeadingRule(evalState.getRuleGroup(), evalState, is);
+                }
+                
+                if (leadingRule != null && leadingRule.equals(evalState.getRule())) {
+                    calcIntersection = is.clone();
+                    calcIntersection.setCoordinate(msrDim, currentMeasure);
+                    
+                    //override locks set or not locked to begin with and not already specified as having a formula
+                    if (
+                    		(evalState.getRule().getEvalLockedIntersections()  
+                    				|| (evalState.isRoundingResourcePass() == false && !evalState.getCurrentLockedCells().contains(calcIntersection))
+                    				|| (evalState.isRoundingResourcePass() == true && !evalState.getCurrentLockedCells().contains(calcIntersection)
+                    						&& !evalState.getAllocatedLockedCells().contains(calcIntersection)))
+                    		&& !cellsToCalc.containsKey(calcIntersection) 
+                    )
+                    {
+//                    if ((evalState.getRule().getEvalLockedIntersections() || !evalState.getCurrentLockedCells().contains(calcIntersection))
+//                            && !cellsToCalc.containsKey(calcIntersection))
+//                    {
+                        // WARNING, this intersection is NOT translocated. that process is done during the evaluation step below
+                        // This is done to preserve the current time position of the evaluation, However the LOCKED version below
+                        // is translocated as no further evaluation is performed on that version and the original time position is not needed
+                        
+                        cellsToCalc.put(calcIntersection, leadingRule.getFormula());
+                        
+                        // only lock the results of evaluation if the recalc component of the formula is changed or locked
+                        // or if the "lock/allocate override" flag is set
+                        
+                        // this is the override check and continue.
+                        if ( evalState.getRule().isLockSystemEvaluationResult() ) {
+                            if (measFunc != null) {
+                                calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
+                            }
+                        	cellsToLock.add(calcIntersection);
+                        	continue;
+                        }
+                        
+                        // normal scenario, look for recalc component
+                        int tCount = 0;
+                        for (String term : leadingRule.getFormula().getTermMeasures()) {                      	
+
+                        	// skip function components, this is specifically for the IF function wich is currently 
+                        	// undeterminable as a recalc dependency, however this is true for most functions at this time.
+                        	if (leadingRule.getFormula().getFunctionTermFlags()[tCount++]) continue;
+                        	                      	
+                            if (measureCat.get(term).getType() == MeasureType.Recalc) {
+                            	Intersection recalcComp = is.clone();
+                                recalcComp.setCoordinate(msrDim, term);
+//                                if (evalState.getCurrentLockedCells().contains(recalcComp) ||
+//                                        evalState.getCurrentChangedCells().contains(recalcComp)) {
+                                if (evalState.getOrigLockedCells().contains(recalcComp)) {
+                                	if (measFunc != null) {
+                                        calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
+                                    }
+                                    if (calcIntersection != null) {
+                                    	// instead of locking, treat as an original user change, TTN-695
+                                    	                                    	
+                                        cellsToLock.add(calcIntersection);
+                                    }
+                                    break;
+                                }
+                            }
+                            
+                            // additional locking scenario, component is a user change
+                            else if (evalState.getRule().getLockUserEvaluationResult()){
+                                Intersection userChngComp = is.clone();
+                                userChngComp.setCoordinate(msrDim, term);
+                                if (evalState.getOrigChangedCells().contains(userChngComp) || evalState.getOrigLockedCells().contains(userChngComp)) {
+                                    if (measFunc != null) {
+                                        calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
+                                    }
+                                    if (calcIntersection != null) {
+                                        cellsToLock.add(calcIntersection);
+                                    }
+                                    break;                                    
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (logger.isDebugEnabled())    
+        	logger.debug(LogUtil.timedStep("Identified " + cellsToCalc.size() + " cells to calculate", stepTime));
+        
+        stepTime = System.currentTimeMillis();
+
+        
+        Intersection srcIs;
+        // calculate all intersections determined to need calculation.
+        for (Intersection is : cellsToCalc.keySet()) {
+                if (measFunc != null) { // apply function operation to intersection to be calculated
+                    srcIs = EvalUtil.translocateIntersection(is, measFunc, evalState);
+                    if (srcIs != null) {
+                    	// skip over elapsed time periods if there are any
+                    	if (evalState.getDataCache().getLockedPeriods().contains(srcIs.getCoordinate(evalState.getTimeDim()))) {
+                    		cellsToLock.remove(srcIs);
+                    		newChngCells.remove(srcIs);
+                    		continue;
+                    	}
+
+                    	EvalUtil.evalFormula(cellsToCalc.get(is), msrDim, srcIs, is, dataCache, evalState);
+                    }
+                }
+                else {
+                    srcIs = is;
+                    
+                	// skip over elapsed time periods if there are any
+                	if (evalState.getDataCache().getLockedPeriods().contains(srcIs.getCoordinate(evalState.getTimeDim()))) {
+                		cellsToLock.remove(srcIs);
+                		newChngCells.remove(srcIs);
+                		continue;
+                	}
+
+                    EvalUtil.evalFormula(cellsToCalc.get(is), msrDim, is, dataCache, evalState);  
+                }
+ 
+                              
+                if (srcIs != null)
+                	newChngCells.add(srcIs);
+
+        }
+        
+        if (logger.isDebugEnabled())
+        	logger.debug(LogUtil.timedStep("Calculated " + cellsToCalc.size() + " cells", stepTime));
+
+        if (newChngCells.size() > 0) {
+
+            evalState.getCurrentLockedCells().addAll(cellsToLock); 
+            evalState.addAllAllocations(cellsToLock);
+            evalState.addAllChangedCells(newChngCells);
+
+            evalState.setStateChanged(true);
+        }
+
+        logEvalDetail(this, evalState, dataCache);
+        
+        if (logger.isDebugEnabled())
+        	logger.debug("Evaluate measures step performed in "
+				+ (System.currentTimeMillis() - startTime) + " ms");
+    }
+}

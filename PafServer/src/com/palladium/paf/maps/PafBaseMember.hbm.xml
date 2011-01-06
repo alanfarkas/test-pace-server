@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+       <hibernate-mapping>
+            <class name="com.palladium.paf.mdb.PafBaseMember" table="PafMember">
+                <id name="Key" column="member_key" />
+                        
+                <list name="Children" table="PafMemberChildren" >
+                    <key column="parent_id" not-null="true" />
+                    <index column="position"/>
+                    <many-to-many column="child_id" class="com.palladium.paf.mdb.PafBaseMember"/>
+                </list>
+                
+                <many-to-one name="Parent" class="com.palladium.paf.mdb.PafBaseMember" column="parent_id" />
+                               
+                <component name="MemberProps" class="com.palladium.paf.mdb.PafBaseMemberProps" >
+                    
+                    <map name="Aliases" cascade="all, delete-orphan" >
+                        <key column ="alias_key" />
+                        <map-key column="alias_id" type="string" />
+                        <element column="alias_value" type="string" />
+                    </map>                    
+                    
+                    <map name="AssociatedAttributes" >
+                        <key column="ASSOC_ATTR_ID" />
+                        <map-key column="ASSOC_ATTR_KEY" type="string" />
+                        <element column="AssocAttribValue" type="string" />
+                    </map>
+                    
+                    <!--
+                    <one-to-one name="ConsolidationType" class="com.essbase.api.metadata.IEssMember.EEssConsolidationType" />
+                    -->
+                    <property name="Description" column="description" type="string" />
+
+                    <property name="LevelNumber" column="lvl_nmbr" type="int" not-null="true" />
+                    <property name="Formula" column="formula" type="string" />
+                    <property name="LastFormula" column="last_formula" type="string" />
+                    <property name="GenerationNumber" column="gen_nmbr" type="int" not-null="true" />
+                    <!--
+                    <one-to-one name="ShareOption" class="com.essbase.api.metadata.IEssMember.EEssShareOption" />
+                   -->
+                    <array name="UDAs" table="UDA" >
+                        <key column="id" />
+                        <list-index column="sortOrder" />                
+                        <element type="string" column="Value"/>
+                    </array>                                 
+                </component>
+                
+            </class>
+
+        </hibernate-mapping>
+        

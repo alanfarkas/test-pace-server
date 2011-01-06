@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<nodeSet  version="1.1">
+	<view uin="V574ng9est3u6dy-m48w2v">
+		<property name="$defaultDiagram" value="true"/>
+		<property name="$metaclass" value="Package Diagram"/>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.comm.ClientInitRequest">
+			<property name="bounds" value="222,425,116,121"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.comm.EvaluateViewRequest">
+			<property name="bounds" value="273,145,164,144"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.comm.EvaluateViewRequest:lockedCells">
+				<property name="sourceAnchor" value="278,242"/>
+				<property name="targetAnchor" value="118,242"/>
+			</reference>
+			<reference referencedUin="jdt:l_gnt:src:com.palladium.paf.comm.EvaluateViewRequest:PafRequest">
+				<property name="sourceAnchor" value="360,150"/>
+				<property name="targetAnchor" value="360,90"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.comm.EvaluateViewRequest:changedCells">
+				<property name="sourceAnchor" value="278,222"/>
+				<property name="targetAnchor" value="118,222"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.comm.EvaluateViewRequest:protectedCells">
+				<property name="sourceAnchor" value="278,202"/>
+				<property name="targetAnchor" value="118,202"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.comm.PafRequest">
+			<property name="bounds" value="299,5,112,80"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.comm.PafViewTreeItem">
+			<property name="bounds" value="457,5,178,147"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.comm.PafViewTreeItem:items">
+				<property name="sourceAnchor" value="640,153"/>
+				<property name="targetAnchor" value="636,157"/>
+				<property name="bendpoints" value="669,153,669,186,636,186"/>
+				<property name="smooth_bendpoints" value="669,153,669,186,636,186"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.comm.SimpleCoordList">
+			<property name="bounds" value="5,177,108,80"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.comm.CustomMenuDef">
+			<property name="bounds" value="5,325,197,212"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.comm.PafPlannerConfig">
+			<property name="bounds" value="457,225,162,160"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+	</view>
+</nodeSet>

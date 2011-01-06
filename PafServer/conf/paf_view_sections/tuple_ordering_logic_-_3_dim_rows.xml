@@ -1,0 +1,102 @@
+<ViewSection>
+  <name>Tuple Ordering Logic - 3 Dim Rows</name>
+  <description></description>
+  <primaryFormattingAxis>0</primaryFormattingAxis>
+  <readOnly>false</readOnly>
+  <managed>false</managed>
+  <isEmpty>false</isEmpty>
+  <topOffset>0</topOffset>
+  <leftOffset>0</leftOffset>
+  <scaleUnit>CELL</scaleUnit>
+  <pafViewHeaders>
+    <ViewHeader>
+      <label>Tuple Ordering Logic - 3 Dim Rows</label>
+      <globalStyleName>Bold Only</globalStyleName>
+    </ViewHeader>
+  </pafViewHeaders>
+  <rowAxisDims>
+    <string>Product</string>
+    <string>Measures</string>
+    <string>Version</string>
+  </rowAxisDims>
+  <colAxisDims>
+    <string>Time</string>
+  </colAxisDims>
+  <rowTuples>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Header Left 10pt</headerGlobalStyleName>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@ICHILDREN(@UOW_ROOT)</string>
+        <string>@MEMBERS(SLS_DLR, SLS_U, SLS_APS_DLR, MDTTL_DLR, MDTTL_%)</string>
+        <string>@MEMBERS(WP, LY, WP_vs_LY)</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+        <int>0</int>
+      </symetricGroupNo>
+    </ViewTuple>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Header Left 10pt</headerGlobalStyleName>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@ICHILDREN(@UOW_ROOT)</string>
+        <string>@MEMBERS(GM_DLR, GM_%)</string>
+        <string>@MEMBERS(WP, LY)</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+        <int>1</int>
+      </symetricGroupNo>
+    </ViewTuple>
+  </rowTuples>
+  <colTuples>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Bold Light Blue</headerGlobalStyleName>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>true</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@IDESC(@UOW_ROOT)</string>
+      </memberDefs>
+    </ViewTuple>
+  </colTuples>
+  <pageTuples>
+    <PageTuple>
+      <axis>PlanType</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Location</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Years</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+  </pageTuples>
+  <hierarchyFormatName>ProdTime</hierarchyFormatName>
+  <isCompressed>false</isCompressed>
+</ViewSection>

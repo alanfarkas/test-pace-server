@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseData>
+<InternalProperties context="com.palladium.paf.rules.Rule.isCalcAllPeriods()" category="user" template="false" identifier="19089317411150822996402"/>
+<AstData>
+ <Ast ver="1.1">
+  <Type ref="4" name="com.palladium.paf.rules.Rule"/>
+  <Type ref="7" name="java.lang.String"/>
+  <Type ref="11" name="boolean"/>
+  <Type ref="18" name="com.palladium.paf.rules.Formula"/>
+  <Type ref="22" name="int"/>
+  <Type ref="38" type="7" dim="1"/>
+  <MethodDecl elemNum="0" declType="4" ref="79" type="11" name="isCalcAllPeriods" params=""/>
+  <Block elemNum="4" stats="1 41 75 81" ref="0">
+   <ExprStat ref="1" expr="2">
+    <Assign ref="2" var="3" value="5">
+     <Var ref="3" type="4" name="Input-This"/>
+     <MemberwiseInit ref="5" type="4" elemNum="10" name="com.palladium.paf.rules.Rule" propNum="0" fieldInits="6 10 14 17 21 25 28 31 34 37">
+      <FieldInit ref="6" value="9" field="8">
+       <FieldDecl ref="8" declType="4" name="baseAllocateMeasure" type="7"/>
+       <ConstExpr ref="9" type="7" value=""/>
+      </FieldInit>
+      <FieldInit ref="10" value="13" field="12">
+       <FieldDecl ref="12" declType="4" name="calcAllPeriods" type="11"/>
+       <ConstExpr ref="13" type="11" value="true"/>
+      </FieldInit>
+      <FieldInit ref="14" value="16" field="15">
+       <FieldDecl ref="15" declType="4" name="evalLockedIntersections" type="11"/>
+       <ConstExpr ref="16" type="11" value="true"/>
+      </FieldInit>
+      <FieldInit ref="17" value="20" field="19">
+       <FieldDecl ref="19" declType="4" name="formula" type="18"/>
+       <NullExpr ref="20" type="18"/>
+      </FieldInit>
+      <FieldInit ref="21" value="24" field="23">
+       <FieldDecl ref="23" declType="4" name="key" type="22"/>
+       <ConstExpr ref="24" type="22" value="0"/>
+      </FieldInit>
+      <FieldInit ref="25" value="27" field="26">
+       <FieldDecl ref="26" declType="4" name="lockAllocation" type="11"/>
+       <ConstExpr ref="27" type="11" value="true"/>
+      </FieldInit>
+      <FieldInit ref="28" value="30" field="29">
+       <FieldDecl ref="29" declType="4" name="lockEvaluation" type="11"/>
+       <ConstExpr ref="30" type="11" value="true"/>
+      </FieldInit>
+      <FieldInit ref="31" value="33" field="32">
+       <FieldDecl ref="32" declType="4" name="skipAggregation" type="11"/>
+       <ConstExpr ref="33" type="11" value="true"/>
+      </FieldInit>
+      <FieldInit ref="34" value="36" field="35">
+       <FieldDecl ref="35" declType="4" name="skipAllocation" type="11"/>
+       <ConstExpr ref="36" type="11" value="true"/>
+      </FieldInit>
+      <FieldInit ref="37" value="40" field="39">
+       <FieldDecl ref="39" declType="4" name="triggerMeasures" type="38"/>
+       <NullExpr ref="40" type="38"/>
+      </FieldInit>
+     </MemberwiseInit>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="41" expr="42">
+    <Assign var="43" value="44" ref="42" special="true">
+     <Var ref="43" type="4" name="Output-This"/>
+     <MemberwiseInit ref="44" special="true" type="4" elemNum="10" name="com.palladium.paf.rules.Rule" propNum="0" fieldInits="45 48 51 54 57 60 63 66 69 72">
+      <FieldInit field="46" value="47" ref="45" special="true">
+       <FieldDecl ref="46" declType="4" name="baseAllocateMeasure" type="7"/>
+       <RandomExpr ref="47" special="true" type="7"/>
+      </FieldInit>
+      <FieldInit field="49" value="50" ref="48" special="true">
+       <FieldDecl ref="49" declType="4" name="calcAllPeriods" type="11"/>
+       <RandomExpr ref="50" special="true" type="11"/>
+      </FieldInit>
+      <FieldInit field="52" value="53" ref="51" special="true">
+       <FieldDecl ref="52" declType="4" name="evalLockedIntersections" type="11"/>
+       <RandomExpr ref="53" special="true" type="11"/>
+      </FieldInit>
+      <FieldInit field="55" value="56" ref="54" special="true">
+       <FieldDecl ref="55" declType="4" name="formula" type="18"/>
+       <RandomExpr ref="56" special="true" type="18"/>
+      </FieldInit>
+      <FieldInit field="58" value="59" ref="57" special="true">
+       <FieldDecl ref="58" declType="4" name="key" type="22"/>
+       <RandomExpr ref="59" special="true" type="22"/>
+      </FieldInit>
+      <FieldInit field="61" value="62" ref="60" special="true">
+       <FieldDecl ref="61" declType="4" name="lockAllocation" type="11"/>
+       <RandomExpr ref="62" special="true" type="11"/>
+      </FieldInit>
+      <FieldInit field="64" value="65" ref="63" special="true">
+       <FieldDecl ref="64" declType="4" name="lockEvaluation" type="11"/>
+       <RandomExpr ref="65" special="true" type="11"/>
+      </FieldInit>
+      <FieldInit field="67" value="68" ref="66" special="true">
+       <FieldDecl ref="67" declType="4" name="skipAggregation" type="11"/>
+       <RandomExpr ref="68" special="true" type="11"/>
+      </FieldInit>
+      <FieldInit field="70" value="71" ref="69" special="true">
+       <FieldDecl ref="70" declType="4" name="skipAllocation" type="11"/>
+       <RandomExpr ref="71" special="true" type="11"/>
+      </FieldInit>
+      <FieldInit field="73" value="74" ref="72" special="true">
+       <FieldDecl ref="73" declType="4" name="triggerMeasures" type="38"/>
+       <RandomExpr ref="74" special="true" type="38"/>
+      </FieldInit>
+     </MemberwiseInit>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="75" expr="76">
+    <AssertExpr act="78" ref="76" exp="77">
+     <ConstExpr ref="77" type="11" value="true"/>
+     <MethodInv methodDecl="79" elemNum="0" receiver="80" ref="78" name="isCalcAllPeriods" args="">
+      <Var ref="80" type="4" name="Input-This"/>
+     </MethodInv>
+    </AssertExpr>
+   </ExprStat>
+   <ExprStat ref="81" expr="82">
+    <AssertExpr act="84" ref="82" exp="83">
+     <Var ref="83" type="4" name="Output-This"/>
+     <Var ref="84" type="4" name="Input-This"/>
+    </AssertExpr>
+   </ExprStat>
+  </Block>
+ </Ast>
+</AstData>
+</TestCaseData>

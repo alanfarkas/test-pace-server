@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<nodeSet  version="1.1">
+	<view uin="Vd7rsvfetwa1g1ktka6aa">
+		<property name="$metaclass" value="Class Diagram"/>
+		<property name="$name" value="Current Dimension Trees"/>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafMemberTree">
+			<property name="bounds" value="15,155,185,166"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<property name="collapsedCompartments" value="Property,Operation"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafMemberTree:rootNode">
+				<property name="sourceAnchor" value="112,326"/>
+				<property name="targetAnchor" value="112,363"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafMemberAttr">
+			<property name="bounds" value="235,358,200,215"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<property name="collapsedCompartments" value="Property"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafMember">
+			<property name="bounds" value="15,358,189,228"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<property name="collapsedCompartments" value="Property"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafMember:pafMemberAttr">
+				<property name="sourceAnchor" value="209,464"/>
+				<property name="targetAnchor" value="240,464"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafSimpleTree">
+			<property name="bounds" value="520,158,187,160"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafSimpleTree:memberObjects">
+				<property name="sourceAnchor" value="712,230"/>
+				<property name="targetAnchor" value="744,230"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafSimpleMember">
+			<property name="bounds" value="739,158,200,134"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.mdb.PafSimpleMember:pafSimpleMemberAttr">
+				<property name="sourceAnchor" value="830,297"/>
+				<property name="targetAnchor" value="830,346"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.mdb.PafSimpleMemberAttr">
+			<property name="bounds" value="801,341,138,150"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<property name="collapsedCompartments" value="Attribute,Property"/>
+		</reference>
+		<reference referencedUin="design:node:::1g64yetwawiqk486l3z">
+			<property name="bounds" value="266,212,137,25"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="bounds_setted_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="design:link:::ieje0retwaxqvz-dyrpk1:1g64yetwawiqk486l3z">
+				<property name="sourceAnchor" value="400,229"/>
+				<property name="targetAnchor" value="525,229"/>
+			</reference>
+			<reference referencedUin="design:link:::ieje0retwayei8cg1yfe:1g64yetwawiqk486l3z">
+				<property name="sourceAnchor" value="271,231"/>
+				<property name="targetAnchor" value="204,231"/>
+			</reference>
+		</reference>
+		<reference referencedUin="design:node:::1g64yetwb1tgveuvuo2">
+			<property name="bounds" value="537,418,179,38"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="bounds_setted_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+		</reference>
+		<reference referencedUin="design:node:::1g64yetwb2ufm-bvhe21">
+			<property name="bounds" value="537,358,170,36"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="bounds_setted_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="design:link:::ieje0retwb5xf9-yyp7nm:1g64yetwb2ufm-bvhe21">
+				<property name="sourceAnchor" value="618,363"/>
+				<property name="targetAnchor" value="618,322"/>
+			</reference>
+			<reference referencedUin="design:link:::ieje0retwb65zfy956hq:1g64yetwb2ufm-bvhe21">
+				<property name="sourceAnchor" value="618,399"/>
+				<property name="targetAnchor" value="618,423"/>
+			</reference>
+		</reference>
+		<reference referencedUin="design:node:::1g64yetyoxr4v-oooeei">
+			<property name="bounds" value="15,95,173,33"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="bounds_setted_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+		</reference>
+		<reference referencedUin="design:node:::ix5jdetyp4fpw69ppe7">
+			<property name="bounds" value="15,48,171,25"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="bounds_setted_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="design:link:::ieje0retyp7974-he9y6b:ix5jdetyp4fpw69ppe7">
+				<property name="sourceAnchor" value="105,78"/>
+				<property name="targetAnchor" value="105,100"/>
+			</reference>
+		</reference>
+		<reference referencedUin="design:node:::1g64yetyp5cqp-l9oqdb">
+			<property name="bounds" value="537,475,179,45"/>
+			<property name="location_set_by_user" value="true"/>
+			<property name="bounds_setted_by_user" value="true"/>
+			<property name="$shortcutReference" value="true"/>
+			<reference referencedUin="design:link:::ieje0retyp6gqdw4o2rb:1g64yetyp5cqp-l9oqdb">
+				<property name="sourceAnchor" value="631,480"/>
+				<property name="targetAnchor" value="631,461"/>
+			</reference>
+		</reference>
+	</view>
+</nodeSet>

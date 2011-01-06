@@ -1,0 +1,172 @@
+<com.palladium.paf.db.cellnotes.SimpleCellNote-array>
+  <com.palladium.paf.db.cellnotes.SimpleCellNote>
+    <simpleCoordList>
+      <axis>
+        <string>Years</string>
+        <string>Measures</string>
+        <string>Product</string>
+        <string>Version</string>
+        <string>PlanType</string>
+        <string>Location</string>
+        <string>Time</string>
+      </axis>
+      <coordinates>
+        <string>FY2006</string>
+        <string>SLS_DLR</string>
+        <string>DIV05</string>
+        <string>WP</string>
+        <string>CorpChn</string>
+        <string>StoreTotal</string>
+        <string>WK29</string>
+      </coordinates>
+      <isCompressed>false</isCompressed>
+    </simpleCoordList>
+    <id>-1</id>
+    <text>last updated: jim
+3/12/2008 5:34:08 PM
+javaj:
+comment 5</text>
+    <creator>jim</creator>
+    <lastUpdated class="sql-timestamp">2008-03-12 17:34:08.531</lastUpdated>
+    <visible>false</visible>
+    <applicationName>TitanCopy</applicationName>
+    <dataSourceName>Titan</dataSourceName>
+    <isCompressed>false</isCompressed>
+  </com.palladium.paf.db.cellnotes.SimpleCellNote>
+  <com.palladium.paf.db.cellnotes.SimpleCellNote>
+    <simpleCoordList>
+      <axis>
+        <string>Years</string>
+        <string>Measures</string>
+        <string>Product</string>
+        <string>Version</string>
+        <string>PlanType</string>
+        <string>Location</string>
+        <string>Time</string>
+      </axis>
+      <coordinates>
+        <string>FY2006</string>
+        <string>SLS_DLR</string>
+        <string>DIV01</string>
+        <string>WP</string>
+        <string>CorpChn</string>
+        <string>StoreTotal</string>
+        <string>WK27</string>
+      </coordinates>
+      <isCompressed>false</isCompressed>
+    </simpleCoordList>
+    <id>-1</id>
+    <text>last updated: jim
+3/12/2008 5:34:07 PM
+javaj:
+comment 1</text>
+    <creator>jim</creator>
+    <lastUpdated class="sql-timestamp">2008-03-12 17:34:08.359</lastUpdated>
+    <visible>false</visible>
+    <applicationName>TitanCopy</applicationName>
+    <dataSourceName>Titan</dataSourceName>
+    <isCompressed>false</isCompressed>
+  </com.palladium.paf.db.cellnotes.SimpleCellNote>
+  <com.palladium.paf.db.cellnotes.SimpleCellNote>
+    <simpleCoordList>
+      <axis>
+        <string>Years</string>
+        <string>Measures</string>
+        <string>Product</string>
+        <string>Version</string>
+        <string>PlanType</string>
+        <string>Location</string>
+        <string>Time</string>
+      </axis>
+      <coordinates>
+        <string>FY2006</string>
+        <string>SLS_DLR</string>
+        <string>DIV04</string>
+        <string>WP</string>
+        <string>CorpChn</string>
+        <string>StoreTotal</string>
+        <string>WK28</string>
+      </coordinates>
+      <isCompressed>false</isCompressed>
+    </simpleCoordList>
+    <id>-1</id>
+    <text>last updated: jim
+3/12/2008 5:34:08 PM
+javaj:
+comment 4</text>
+    <creator>jim</creator>
+    <lastUpdated class="sql-timestamp">2008-03-12 17:34:08.515</lastUpdated>
+    <visible>false</visible>
+    <applicationName>TitanCopy</applicationName>
+    <dataSourceName>Titan</dataSourceName>
+    <isCompressed>false</isCompressed>
+  </com.palladium.paf.db.cellnotes.SimpleCellNote>
+  <com.palladium.paf.db.cellnotes.SimpleCellNote>
+    <simpleCoordList>
+      <axis>
+        <string>Years</string>
+        <string>Measures</string>
+        <string>Product</string>
+        <string>Version</string>
+        <string>PlanType</string>
+        <string>Location</string>
+        <string>Time</string>
+      </axis>
+      <coordinates>
+        <string>FY2006</string>
+        <string>SLS_DLR</string>
+        <string>DIV03</string>
+        <string>WP</string>
+        <string>CorpChn</string>
+        <string>StoreTotal</string>
+        <string>WK27</string>
+      </coordinates>
+      <isCompressed>false</isCompressed>
+    </simpleCoordList>
+    <id>-1</id>
+    <text>last updated: jim
+3/12/2008 5:34:08 PM
+javaj:
+comment 2</text>
+    <creator>jim</creator>
+    <lastUpdated class="sql-timestamp">2008-03-12 17:34:08.469</lastUpdated>
+    <visible>false</visible>
+    <applicationName>TitanCopy</applicationName>
+    <dataSourceName>Titan</dataSourceName>
+    <isCompressed>false</isCompressed>
+  </com.palladium.paf.db.cellnotes.SimpleCellNote>
+  <com.palladium.paf.db.cellnotes.SimpleCellNote>
+    <simpleCoordList>
+      <axis>
+        <string>Years</string>
+        <string>Measures</string>
+        <string>Product</string>
+        <string>Version</string>
+        <string>PlanType</string>
+        <string>Location</string>
+        <string>Time</string>
+      </axis>
+      <coordinates>
+        <string>FY2006</string>
+        <string>SLS_DLR</string>
+        <string>DIV04</string>
+        <string>WP</string>
+        <string>CorpChn</string>
+        <string>StoreTotal</string>
+        <string>WK27</string>
+      </coordinates>
+      <isCompressed>false</isCompressed>
+    </simpleCoordList>
+    <id>-1</id>
+    <text>last updated: jim
+3/12/2008 5:34:08 PM
+javaj:
+comment 3</text>
+    <creator>jim</creator>
+    <lastUpdated class="sql-timestamp">2008-03-12 17:34:08.484</lastUpdated>
+    <visible>false</visible>
+    <applicationName>TitanCopy</applicationName>
+    <dataSourceName>Titan</dataSourceName>
+    <isCompressed>false</isCompressed>
+  </com.palladium.paf.db.cellnotes.SimpleCellNote>
+</com.palladium.paf.db.cellnotes.SimpleCellNote-array>

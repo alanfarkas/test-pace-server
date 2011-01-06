@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<nodeSet  version="1.1">
+	<view uin="V574ng9est3b8zhxhzi39">
+		<property name="$defaultDiagram" value="true"/>
+		<property name="$metaclass" value="Package Diagram"/>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafScaleUnit">
+			<property name="bounds" value="575,24,111,82"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafNumberFormat">
+			<property name="bounds" value="335,1310,138,173"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafMemberLists">
+			<property name="bounds" value="2240,125,122,80"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.LevelFormat">
+			<property name="bounds" value="1437,245,107,108"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafStyle">
+			<property name="bounds" value="150,1284,135,225"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafStyle:alignment">
+				<property name="sourceAnchor" value="290,1487"/>
+				<property name="targetAnchor" value="1718,1471"/>
+				<property name="bendpoints" value="430,1526,1448,1526"/>
+				<property name="smooth_bendpoints" value="430,1526,1448,1526"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.LockedIntersections">
+			<property name="bounds" value="1289,245,128,95"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafViewSection">
+			<property name="bounds" value="591,186,200,501"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafViewSection:notPlannableLockedCells">
+				<property name="sourceAnchor" value="796,417"/>
+				<property name="targetAnchor" value="916,417"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafViewSection:forwardPlannableLockedCell">
+				<property name="sourceAnchor" value="796,466"/>
+				<property name="targetAnchor" value="916,466"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafViewSection:pageTuples">
+				<property name="sourceAnchor" value="753,191"/>
+				<property name="targetAnchor" value="753,131"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafViewSection:scaleUnit">
+				<property name="sourceAnchor" value="627,191"/>
+				<property name="targetAnchor" value="627,111"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafViewSection:pafViewHeaders">
+				<property name="sourceAnchor" value="762,692"/>
+				<property name="targetAnchor" value="1319,1321"/>
+				<property name="bendpoints" value="1319,958"/>
+				<property name="smooth_bendpoints" value="1319,958"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafViewSection:colTuples">
+				<property name="sourceAnchor" value="629,692"/>
+				<property name="targetAnchor" value="169,762"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafViewSection:rowTuples">
+				<property name="sourceAnchor" value="662,692"/>
+				<property name="targetAnchor" value="232,762"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.ViewTuple">
+			<property name="bounds" value="101,757,190,433"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.ViewTuple:dataStyle">
+				<property name="sourceAnchor" value="200,1195"/>
+				<property name="targetAnchor" value="200,1289"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.ViewTuple:headerStyle">
+				<property name="sourceAnchor" value="245,1195"/>
+				<property name="targetAnchor" value="245,1289"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.ViewTuple:numberFormat">
+				<property name="sourceAnchor" value="270,1195"/>
+				<property name="targetAnchor" value="409,1315"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.ViewTuple:headerBorder">
+				<property name="sourceAnchor" value="116,1195"/>
+				<property name="targetAnchor" value="115,1255"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.ViewTuple:border">
+				<property name="sourceAnchor" value="126,1195"/>
+				<property name="targetAnchor" value="125,1255"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PageTuple">
+			<property name="bounds" value="706,5,90,121"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.AxisDimension">
+			<property name="bounds" value="1568,1356,95,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.AxisDimension:axis">
+				<property name="sourceAnchor" value="1573,1401"/>
+				<property name="targetAnchor" value="1493,1401"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafBorder">
+			<property name="bounds" value="5,1250,125,293"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafDimensions">
+			<property name="bounds" value="2270,12,148,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafDimensions:dimensionType">
+				<property name="sourceAnchor" value="2275,57"/>
+				<property name="targetAnchor" value="2195,57"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafView">
+			<property name="bounds" value="993,1311,178,170"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafView:userSelections">
+				<property name="sourceAnchor" value="1087,1486"/>
+				<property name="targetAnchor" value="1244,1618"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafView:viewSections">
+				<property name="sourceAnchor" value="1142,1316"/>
+				<property name="targetAnchor" value="728,692"/>
+				<property name="bendpoints" value="1142,873"/>
+				<property name="smooth_bendpoints" value="1142,873"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafView:headers">
+				<property name="sourceAnchor" value="1176,1401"/>
+				<property name="targetAnchor" value="1256,1401"/>
+			</reference>
+			<reference referencedUin="jdt:l_impl:src:com.palladium.paf.view.PafView:IPafView">
+				<property name="sourceAnchor" value="1060,1316"/>
+				<property name="targetAnchor" value="1060,1066"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.IPafView">
+			<property name="bounds" value="934,875,183,186"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="label:$name:jdt:e_class:src:com.palladium.paf.view.IPafView">
+				<property name="bounds" value="1030,1076,0,0"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafMVS">
+			<property name="bounds" value="523,1329,181,134"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafMVS:viewSection">
+				<property name="sourceAnchor" value="618,1334"/>
+				<property name="targetAnchor" value="695,692"/>
+				<property name="bendpoints" value="618,978"/>
+				<property name="smooth_bendpoints" value="618,978"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafMVS:view">
+				<property name="sourceAnchor" value="709,1401"/>
+				<property name="targetAnchor" value="998,1401"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafUserSelection">
+			<property name="bounds" value="1193,1613,139,251"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.PafUserSelection:pafAxis">
+				<property name="sourceAnchor" value="1290,1618"/>
+				<property name="targetAnchor" value="1448,1496"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.Dimension">
+			<property name="bounds" value="861,145,200,160"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.NumericMemberFormat">
+			<property name="bounds" value="1854,1356,177,80"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="jdt:l_ast:src:com.palladium.paf.view.NumericMemberFormat:numberFormat">
+				<property name="sourceAnchor" value="1859,1425"/>
+				<property name="targetAnchor" value="478,1461"/>
+				<property name="bendpoints" value="1811,1516,606,1516"/>
+				<property name="smooth_bendpoints" value="1811,1516,606,1516"/>
+				<property name="location_set_by_user" value="true"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafDimType">
+			<property name="bounds" value="2051,5,139,95"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.GenerationFormat">
+			<property name="bounds" value="1081,245,188,134"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.LockedCell">
+			<property name="bounds" value="911,363,90,147"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafViewHeader">
+			<property name="bounds" value="1251,1316,127,160"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafAxis">
+			<property name="bounds" value="1398,1302,90,189"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.view.PafAlignment">
+			<property name="bounds" value="1713,1308,91,176"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+	</view>
+</nodeSet>

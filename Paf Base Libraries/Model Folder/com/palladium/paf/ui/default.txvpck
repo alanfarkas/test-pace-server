@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<nodeSet  version="1.1">
+	<view uin="V574ng9est3u6g3p359vg">
+		<property name="$defaultDiagram" value="true"/>
+		<property name="$metaclass" value="Package Diagram"/>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.ui.IPafMapModelManager">
+			<property name="bounds" value="5,125,143,199"/>
+			<property name="location_set_by_user" value="true"/>
+			<reference referencedUin="label:$name:jdt:e_class:src:com.palladium.paf.ui.IPafMapModelManager">
+				<property name="bounds" value="81,339,0,0"/>
+			</reference>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.ui.PafAdminConsoleView">
+			<property name="bounds" value="532,5,200,410"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.ui.PafViewSectionUI">
+			<property name="bounds" value="312,5,200,459"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.ui.PafProject">
+			<property name="bounds" value="5,5,106,82"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.ui.PafServer">
+			<property name="bounds" value="5,505,176,238"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+		<reference referencedUin="jdt:e_class:src:com.palladium.paf.ui.PafAdminConsoleViewTest">
+			<property name="bounds" value="131,5,161,80"/>
+			<property name="location_set_by_user" value="true"/>
+		</reference>
+	</view>
+</nodeSet>
