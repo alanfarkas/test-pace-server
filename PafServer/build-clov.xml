@@ -52,7 +52,7 @@
 	<property name="PafServer.location" value="../${SRVR.proj.key}"/>	
 
 	<!--   Clover Properties    -->		
-	<property name="clover.jar" value="c:/java/userlib/clover-ant-2.6.3/lib/clover.jar"/>
+	<property name="clover.jar" value="/opt/clover-ant-2.6.3/lib/clover.jar"/>
 	<taskdef resource="cloverlib.xml" classpath="${clover.jar}"/>
 	<taskdef resource="cloverjunitlib.xml" classpath="${clover.jar}"/>
 	<property name="clover.coverage.db" value="clover.db"/>
