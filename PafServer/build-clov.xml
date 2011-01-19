@@ -29,6 +29,7 @@
 	<property name="env.branch.key" value="DESPLAINES"/>
 	<property name="env.build.dir" value="${env.project.key}-${env.branch.key}"/>
 	-->
+	<property name="bamboo.BAMBOO_HOME" value="/opt/bamboo/bamboo-home"/>
 	<property name="debuglevel" value="source,lines,vars"/>
 	<property name="target" value="1.6"/>
 	<property name="source" value="1.6"/>
