@@ -38,7 +38,7 @@
 	<property name="test.bin" value="bin"/>
 	<property name="test.result" location="../test-results"/>
 	<property name="testfile.dir" value="test_files"/>
-	<property name="server.testfile.path" location="${bamboo.BAMBOO_HOME}/${testfile.dir}"/>
+	<property name="server.testfile.path" location="${system.BAMBOO_HOME}/${testfile.dir}"/>
 	<property name="PBL.proj.key" value="Paf Base Libraries"/>	
 	<property name="Paf Base Libraries.location" value="../${PBL.proj.key}"/>	
 	<property name="Paf Base Libraries.testfile.path" value="${Paf Base Libraries.location}/${testfile.dir}"/>
