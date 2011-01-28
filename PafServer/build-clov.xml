@@ -37,6 +37,7 @@
 	<property name="userlib.path" value="${env.PACE_HOME}/userlib"/>	
 	<property name="env.CLOVER_HOME" value="/opt/clover-ant-3.0.2"/>
 	<property name="clover.snapshot.home" value="/opt/clover-snapshots"/>	
+	<property name="clover.report.home" value="/opt/clover-reports"/>	
 	<!-- -->
 	
 	<property name="debuglevel" value="source,lines,vars"/>
@@ -79,7 +80,8 @@
 	<property name="clover.snapshot.dir" value="${clover.snapshot.home}/${env.proj.key}-${env.branch.key}"/>
 	<!--	<property name="clover.snapshot.dir" value=".cloverhistory/Paf Base Libraries/"/> -->
 	<property name="clover.custom.snapshot.file" value="${clover.snapshot.dir}/clover.snapshot"/>
-	<property name="clover.rptdir" value="../clover"/>
+	<property name="clover.web.dir" value="../clover"/>
+	<property name="clover.report.dir" value="${clover.report.home}/${env.proj.key}-${env.branch.key}"/>
 
 	<!--   End of Clover Properties  -->	
 
@@ -392,14 +394,17 @@
 
 	<!--   T A R G E T: clover.report -->
 	<target name="clover.report" depends="with.clover" description="Produces the clover reports">
-	    <delete dir="${clover.rptdir}" failonerror="false" />
-	    <mkdir dir="${clover.rptdir}"/>
+	    <delete dir="${clover.web.dir}" failonerror="false" />
+	    <mkdir dir="${clover.web.dir}"/>
 		<clover-report>
-			<current outfile="${clover.rptdir}/clover.xml">
+			<current outfile="${clover.webdir}/clover.xml">
 				<format type="xml"/>
 			</current>
 		</clover-report>
-		<clover-html-report outdir="${clover.rptdir}" title="Pace Server"/>
+		<clover-html-report outdir="${clover.web.dir}" title="Pace Server"/>
+		<clover-pdf-report	outfile="${clover.report.dir}/clover.pdf"
+							title="Pace Server">
+		</clover-pdf-report>
 	</target>
 
 	<!--   T A R G E T: clover.consolidated.report -->
