@@ -34,7 +34,7 @@
 	<property name="env.PACE_HOME" value="/opt/pace-home"/>	
 	<property name="env.proj.key" value="PACESRVR"/>
 	<property name="env.branch.key" value="TRUNK"/>
-	<property name="userlib.path" value="${pace.home}/userlib"/>	
+	<property name="userlib.path" value="${env.PACE_HOME}/userlib"/>	
 	<!-- -->
 	
 	<property name="debuglevel" value="source,lines,vars"/>
