@@ -396,6 +396,7 @@
 	<target name="clover.report" depends="with.clover" description="Produces the clover reports">
 	    <delete dir="${clover.web.dir}" failonerror="false" />
 	    <mkdir dir="${clover.web.dir}"/>
+	    <mkdir dir="${clover.report.dir}"/>
 		<clover-report>
 			<current outfile="${clover.webdir}/clover.xml">
 				<format type="xml"/>
