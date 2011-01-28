@@ -35,7 +35,7 @@
 	<property name="env.proj.key" value="PACESRVR"/>
 	<property name="env.branch.key" value="TRUNK"/>
 	<property name="userlib.path" value="${env.PACE_HOME}/userlib"/>	
-	<property name="env.CLOVER_HOME" value="/opt/clover-ant-2.6.3"/>
+	<property name="env.CLOVER_HOME" value="/opt/clover-ant-3.0.2"/>
 	<property name="clover.snapshot.home" value="/opt/clover-snapshots"/>	
 	<!-- -->
 	
