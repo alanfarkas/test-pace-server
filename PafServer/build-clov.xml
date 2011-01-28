@@ -403,6 +403,9 @@
 			</current>
 		</clover-report>
 		<clover-html-report outdir="${clover.web.dir}" title="Pace Server"/>
+		<clover-pdf-report	outfile="${clover.web.dir}/clover.pdf"
+							title="Pace Server">
+		</clover-pdf-report>
 		<clover-pdf-report	outfile="${clover.report.dir}/clover.pdf"
 							title="Pace Server">
 		</clover-pdf-report>
