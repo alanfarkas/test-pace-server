@@ -31,10 +31,12 @@
 	<property name="env.build.dir" value="${env.project.key}-${env.branch.key}"/>
 	-->
 	<property name="env.BAMBOO_HOME" value="//opt/bamboo/bamboo-home"/>
-	<property name="env.PACE_HOME" value="//opt/pace-home"/>	
+	<property name="env.PACE_HOME" value="/opt/pace-home"/>	
 	<property name="env.proj.key" value="PACESRVR"/>
 	<property name="env.branch.key" value="TRUNK"/>
 	<property name="userlib.path" value="${env.PACE_HOME}/userlib"/>	
+	<property name="env.CLOVER_HOME" value="/opt/clover-ant-2.6.3"/>
+	<property name="clover.snapshot.home" value="/opt/clover-snapshots"/>	
 	<!-- -->
 	
 	<property name="debuglevel" value="source,lines,vars"/>
@@ -60,7 +62,7 @@
 	<property name="PafServer.location" value="../${SRVR.proj.key}"/>	
 
 	<!--   Clover Properties    -->		
-	<property name="clover.jar" value="/opt/clover-ant-2.6.3/lib/clover.jar"/>
+	<property name="clover.jar" value="${env.CLOVER_HOME}/lib/clover.jar"/>
 	<taskdef resource="cloverlib.xml" classpath="${clover.jar}"/>
 	<taskdef resource="cloverjunitlib.xml" classpath="${clover.jar}"/>
 	<property name="clover.coverage.db" value="clover.db"/>
@@ -74,7 +76,7 @@
 <!--	<property name="clover.fullrunevery" value="50"/> -->   <!-- Determine how many builds between full builds (50 = 10 [default value] * 5 [#projects]) -->
 	<property name="clover.fullrunevery" value="999999"/>    <!-- Determine how many builds between full builds (Unneccessary for optimized runs, since full builds are scheduled daily) -->
 	<clover-env/>
-	<property name="clover.snapshot.dir" value="/clover-snapshots/${env.proj.key}-${env.branch.key}"/>
+	<property name="clover.snapshot.dir" value="${clover.snapshot.home}/${env.proj.key}-${env.branch.key}"/>
 	<!--	<property name="clover.snapshot.dir" value=".cloverhistory/Paf Base Libraries/"/> -->
 	<property name="clover.custom.snapshot.file" value="${clover.snapshot.dir}/clover.snapshot"/>
 	<property name="clover.rptdir" value="../clover"/>
