@@ -30,8 +30,8 @@
 	<property name="env.branch.key" value="DESPLAINES"/>
 	<property name="env.build.dir" value="${env.project.key}-${env.branch.key}"/>
 	-->
-	<property name="env.BAMBOO_HOME" value="/opt/bamboo/bamboo-home"/>
-	<property name="env.PACE_HOME" value="/opt/pace-home"/>	
+	<property name="env.BAMBOO_HOME" value="//opt/bamboo/bamboo-home"/>
+	<property name="env.PACE_HOME" value="//opt/pace-home"/>	
 	<property name="env.proj.key" value="PACESRVR"/>
 	<property name="env.branch.key" value="TRUNK"/>
 	<property name="userlib.path" value="${env.PACE_HOME}/userlib"/>	
@@ -46,7 +46,7 @@
 	<property name="test.bin" value="bin"/>
 	<property name="test.result" location="../test-results"/>
 	<property name="testfile.dir" value="test_files"/>
-	<property name="server.testfile.path" location="/${env.BAMBOO_HOME}/${testfile.dir}"/>
+	<property name="server.testfile.path" location="${env.BAMBOO_HOME}/${testfile.dir}"/>
 	<property name="PBL.proj.key" value="Paf Base Libraries"/>	
 	<property name="Paf Base Libraries.location" value="../${PBL.proj.key}"/>	
 	<property name="Paf Base Libraries.testfile.path" value="${Paf Base Libraries.location}/${testfile.dir}"/>
