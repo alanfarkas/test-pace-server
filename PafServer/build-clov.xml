@@ -398,7 +398,7 @@
 	    <mkdir dir="${clover.web.dir}"/>
 	    <mkdir dir="${clover.report.dir}"/>
 		<clover-report>
-			<current outfile="${clover.webdir}/clover.xml">
+			<current outfile="${clover.web.dir}/clover.xml">
 				<format type="xml"/>
 			</current>
 		</clover-report>
