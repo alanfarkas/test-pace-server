@@ -8,7 +8,7 @@
     <property name="local_web" location="${proj_root}/WebRoot"/>
 	<property name="esb_driver_dir" value="mdb_drivers\essbase"/>
 	<property name="esb_local_driver_path" location="${local_web}\${esb_driver_dir}"/>
-	<property name="install_stg_root"  location="\proj_wrksp\install_stage\PafServer" />
+	<property name="install_stg_root"  location="\proj_wrksp\server-stage\PafServer" />
 	<property name="esb_redist_dir"  location="${install_stg_root}\redist\essbase" />
 	<property name="app_install" location= "C:\Program Files\Pace\PafServer" />
 	<property name="dev_web"  location="${app_install}\server\server\default\deploy\PafServer.war" />
@@ -28,9 +28,11 @@
 	<path id="EDS 9.3.0.userclasspath">
 		<pathelement location="/java/userlib/EDS 9.3/ess_japi.jar"/>
 	</path>
+	<!-- Replaced by 11.1.2 jars
 	<path id="EDS 11.1.userclasspath">
 	    <pathelement location="/java/userlib/EDS 11.1/ess_japi.jar"/>
-	</path>
+	</path>		
+	-->
 	<path id="EDS 11.1.2.userclasspath">
 	    <pathelement location="/java/userlib/EDS 11.1.2/ess_japi.jar"/>
 	</path>
@@ -66,8 +68,10 @@
 		<compile esb.ver="9.3.0">
 		</compile>
 		
+<!-- Replaced by 11.1.2 jars
 		<compile esb.ver="11.1">
 		</compile>
+-->
 	
 		<compile esb.ver="11.1.2">
 		</compile>
