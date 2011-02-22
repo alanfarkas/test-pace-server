@@ -5,7 +5,7 @@
 
 <!--
 	=================================
-	EDS/APS connection url examples
+	EDS/APS/HPS connection url examples
 	=================================
 	
 	EDS 7.x, APS 9.0.x to 9.2.x:	
@@ -15,7 +15,7 @@
 	APS 9.3.x:
 		EDSUrl=http://localhost:13080/aps/JAPI
 	
-	APS 11.1.x and above:
+	HPS 11.1.x and above:
 		EDSUrl=Embedded	
 		EDSUrl=http://localhost:13080/aps/JAPI
 	
