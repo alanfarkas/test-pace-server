@@ -14,9 +14,9 @@
 	<property name="extra_jars_plugin" location="${wrksp_root}\com.palladium.paf.adminconsole.extrajars" />	
 	
 	
-	<property name="install_stg_root"  location="C:\proj_wrksp\install_stage\PafServer" />
+	<property name="install_stg_root"  location="C:\proj_wrksp\pace-server-installs\server-stage" />
 	<property name="install_war"  location="${install_stg_root}\server\server\default\deploy\PafServer.war" />
-	<property name="setup_build_client" location="C:\proj_wrksp\install_stage\SetupBundles\client" />
+	<property name="setup_build_client" location="C:\proj_wrksp\pace-server-installs\setup-bundles\client" />
 	<property name="install_stg_client" location="${install_stg_root}\server\server\default\deploy\installs.war\client" />	
 	<property name="install_stg_redist" location="${install_stg_root}\redist" />	
 	<property name="install_stg_redist_ws61" location="${install_stg_redist}\WS61" />			
@@ -277,14 +277,15 @@
 		<echo>"Copying files to installation staging area."</echo>
 		
 		<echo>"Configuration files."</echo>
-
+		
+	    <mkdir dir="${install_stg_root}\conf"/>
 		<copy todir="${install_stg_root}\conf">
-			<fileset dir="${app_install}\conf" />
+			<fileset dir="${proj_root}\conf" />
 		</copy>
-		<delete dir="${install_stg_root}\conf\backup" />
 	
+	    <mkdir dir="${install_stg_root}\conf_server"/>
 		<copy todir="${install_stg_root}\conf_server">
-			<fileset dir="${app_install}\conf_server" />
+			<fileset dir="${proj_root}\conf_server" />
 		</copy>		
 		
 		<echo>"Pace server code."</echo>		

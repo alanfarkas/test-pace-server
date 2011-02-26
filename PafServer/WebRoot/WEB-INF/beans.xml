@@ -35,10 +35,18 @@
 -->
     
     
-    <jaxws:endpoint 
+    <jaxws:endpoint
         id="pafService" 
         implementor="com.palladium.paf.server.PafServiceProvider" 
-        address="/PafService" />
+        address="/PafService">
+        
+       <jaxws:properties>
+			<entry key="javax.xml.ws.session.maintain"> <value type="java.lang.Boolean">true</value> </entry>
+			<entry key="thread.local.request.context"> <value type="java.lang.Boolean">true</value> </entry>
+    	</jaxws:properties>
+        
+        
+     </jaxws:endpoint>
   
 
     

@@ -16,11 +16,11 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/PafCustomCommands"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/PafCustomFunctions"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/CXF 2.2.5"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/ess_japi.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/esbprv.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/paf_base.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/pafcc.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/pafcf.jar"/>
-	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/esbprv.jar"/>
-	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/ess_japi.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/ess_es_server.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/ojdl.jar"/>
 	<classpathentry kind="output" path="WebRoot/WEB-INF/classes"/>

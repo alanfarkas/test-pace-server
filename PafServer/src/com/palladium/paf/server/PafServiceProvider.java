@@ -20,58 +20,23 @@ package com.palladium.paf.server;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Resource;
 import javax.jws.WebService;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
-import com.palladium.paf.AuthMode;
-import com.palladium.paf.InvalidPasswordException;
-import com.palladium.paf.InvalidUserNameException;
-import com.palladium.paf.NoEmailAddressException;
-import com.palladium.paf.PafBaseConstants;
-import com.palladium.paf.PafErrHandler;
-import com.palladium.paf.PafErrSeverity;
-import com.palladium.paf.PafException;
-import com.palladium.paf.PafInvalidLogonInformation;
-import com.palladium.paf.PafNotAbletoGetLDAPContext;
-import com.palladium.paf.PafNotAuthenticatedSoapException;
-import com.palladium.paf.PafNotAuthorizedSoapException;
-import com.palladium.paf.PafSecurityToken;
-import com.palladium.paf.PafSoapException;
-import com.palladium.paf.app.AppSettings;
-import com.palladium.paf.app.MeasureDef;
-import com.palladium.paf.app.PafApplicationDef;
-import com.palladium.paf.app.PafDimSpec;
-import com.palladium.paf.app.PafPlannerRole;
-import com.palladium.paf.app.PafSecurityDomainGroups;
-import com.palladium.paf.app.PafSecurityDomainUserNames;
-import com.palladium.paf.app.PafSecurityGroup;
-import com.palladium.paf.app.PafUserDef;
-import com.palladium.paf.app.PafUserNamesSecurityGroup;
-import com.palladium.paf.app.Season;
-import com.palladium.paf.app.UnitOfWork;
-import com.palladium.paf.app.VersionDef;
-import com.palladium.paf.app.VersionType;
-import com.palladium.paf.comm.ClientInitRequest;
-import com.palladium.paf.comm.DataFilterSpec;
-import com.palladium.paf.comm.EvaluateViewRequest;
-import com.palladium.paf.comm.PafPlannerConfig;
-import com.palladium.paf.comm.PafRequest;
-import com.palladium.paf.comm.PafResponse;
-import com.palladium.paf.comm.PafViewTreeItem;
-import com.palladium.paf.comm.SimpleCoordList;
-import com.palladium.paf.comm.UserFilterSpec;
+import com.palladium.paf.*;
+import com.palladium.paf.app.*;
+import com.palladium.paf.comm.*;
 import com.palladium.paf.data.Intersection;
 import com.palladium.paf.data.MemberTreeSet;
 import com.palladium.paf.data.PafDataSlice;
@@ -81,80 +46,10 @@ import com.palladium.paf.db.cellnotes.CellNotesInformation;
 import com.palladium.paf.db.cellnotes.SimpleCellNote;
 import com.palladium.paf.db.membertags.MemberTagDef;
 import com.palladium.paf.db.membertags.SimpleMemberTagData;
-import com.palladium.paf.mdb.IPafConnectionProps;
-import com.palladium.paf.mdb.PafAttributeTree;
-import com.palladium.paf.mdb.PafBaseTree;
-import com.palladium.paf.mdb.PafDataCache;
-import com.palladium.paf.mdb.PafDataSliceParms;
-import com.palladium.paf.mdb.PafDimMember;
-import com.palladium.paf.mdb.PafDimTree;
-import com.palladium.paf.mdb.PafSimpleDimTree;
-import com.palladium.paf.mdb.TreeTraversalOrder;
+import com.palladium.paf.mdb.*;
 import com.palladium.paf.rules.RuleGroup;
 import com.palladium.paf.rules.RuleSet;
-import com.palladium.paf.server.comm.AttributeDimInfo;
-import com.palladium.paf.server.comm.PafAuthRequest;
-import com.palladium.paf.server.comm.PafAuthResponse;
-import com.palladium.paf.server.comm.PafCellNoteInformationResponse;
-import com.palladium.paf.server.comm.PafClearImportedAttrRequest;
-import com.palladium.paf.server.comm.PafClearImportedAttrResponse;
-import com.palladium.paf.server.comm.PafClientCacheBlock;
-import com.palladium.paf.server.comm.PafClientCacheRequest;
-import com.palladium.paf.server.comm.PafClientChangePasswordRequest;
-import com.palladium.paf.server.comm.PafClientSecurityPasswordResetResponse;
-import com.palladium.paf.server.comm.PafClientSecurityRequest;
-import com.palladium.paf.server.comm.PafClientSecurityResponse;
-import com.palladium.paf.server.comm.PafCommandResponse;
-import com.palladium.paf.server.comm.PafCustomCommandRequest;
-import com.palladium.paf.server.comm.PafCustomCommandResponse;
-import com.palladium.paf.server.comm.PafFilteredMbrTagRequest;
-import com.palladium.paf.server.comm.PafGetFilteredUOWSizeRequest;
-import com.palladium.paf.server.comm.PafGetFilteredUOWSizeResponse;
-import com.palladium.paf.server.comm.PafGetMemberTagDataResponse;
-import com.palladium.paf.server.comm.PafGetMemberTagDefsRequest;
-import com.palladium.paf.server.comm.PafGetMemberTagDefsResponse;
-import com.palladium.paf.server.comm.PafGetMemberTagInfoResponse;
-import com.palladium.paf.server.comm.PafGetNotesRequest;
-import com.palladium.paf.server.comm.PafGetNotesResponse;
-import com.palladium.paf.server.comm.PafGetPaceGroupsRequest;
-import com.palladium.paf.server.comm.PafGetPaceGroupsResponse;
-import com.palladium.paf.server.comm.PafGroupSecurityRequest;
-import com.palladium.paf.server.comm.PafGroupSecurityResponse;
-import com.palladium.paf.server.comm.PafImportAttrRequest;
-import com.palladium.paf.server.comm.PafImportAttrResponse;
-import com.palladium.paf.server.comm.PafImportMemberTagRequest;
-import com.palladium.paf.server.comm.PafMdbPropsRequest;
-import com.palladium.paf.server.comm.PafMdbPropsResponse;
-import com.palladium.paf.server.comm.PafPlanSessionRequest;
-import com.palladium.paf.server.comm.PafPlanSessionResponse;
-import com.palladium.paf.server.comm.PafPopulateRoleFilterResponse;
-import com.palladium.paf.server.comm.PafSaveMbrTagRequest;
-import com.palladium.paf.server.comm.PafSaveNotesRequest;
-import com.palladium.paf.server.comm.PafSaveNotesResponse;
-import com.palladium.paf.server.comm.PafServerAck;
-import com.palladium.paf.server.comm.PafSetPaceGroupsRequest;
-import com.palladium.paf.server.comm.PafSetPaceGroupsResponse;
-import com.palladium.paf.server.comm.PafSimpleCellNoteExportRequest;
-import com.palladium.paf.server.comm.PafSimpleCellNoteExportResponse;
-import com.palladium.paf.server.comm.PafSimpleCellNoteImportRequest;
-import com.palladium.paf.server.comm.PafSimpleCellNoteImportResponse;
-import com.palladium.paf.server.comm.PafSuccessResponse;
-import com.palladium.paf.server.comm.PafTreeRequest;
-import com.palladium.paf.server.comm.PafTreeResponse;
-import com.palladium.paf.server.comm.PafTreesRequest;
-import com.palladium.paf.server.comm.PafTreesResponse;
-import com.palladium.paf.server.comm.PafUpdateDatacacheRequest;
-import com.palladium.paf.server.comm.PafUserNamesforSecurityGroupsRequest;
-import com.palladium.paf.server.comm.PafUserNamesforSecurityGroupsResponse;
-import com.palladium.paf.server.comm.PafValidAttrRequest;
-import com.palladium.paf.server.comm.PafValidAttrResponse;
-import com.palladium.paf.server.comm.PafVerifyUsersRequest;
-import com.palladium.paf.server.comm.PafVerifyUsersResponse;
-import com.palladium.paf.server.comm.PafViewRequest;
-import com.palladium.paf.server.comm.SaveWorkRequest;
-import com.palladium.paf.server.comm.SimpleMeasureDef;
-import com.palladium.paf.server.comm.SimpleVersionDef;
-import com.palladium.paf.server.comm.ViewRequest;
+import com.palladium.paf.server.comm.*;
 import com.palladium.paf.state.PafClientState;
 import com.palladium.paf.view.PafMVS;
 import com.palladium.paf.view.PafStyle;
@@ -178,6 +73,10 @@ import com.palladium.utility.Odometer;
 
 public class PafServiceProvider implements IPafService {
 
+	// injected handle to the web service context
+	@Resource
+	WebServiceContext wsCtx;	
+	
 	private PafViewService viewService;
 	private PafDataService dataService;
 	private PafAppService appService;
@@ -240,8 +139,23 @@ public class PafServiceProvider implements IPafService {
 	public PafView getView(ViewRequest viewRequest) throws PafSoapException {
 
 		PafView pf = null, compressedView = null;
+		String clientId = viewRequest.getClientId();
 		
 		try {
+
+			// Set logger client info property to user name
+			pushToNDCStack(viewRequest.getClientId());
+			
+			// Troubleshoot load balancer cookies
+			listCookies(clientId);
+			
+			// Verify client id is good
+			if ( ! clients.containsKey( viewRequest.getClientId() ) ) {
+				logger.error("ClientID not found: " + viewRequest.getClientId());
+				throw new PafSoapException(new PafException(Messages.getString("PafServiceProvider.InvalidClientIdReInit"), PafErrSeverity.Error));			
+			}		
+			
+			
 			// Get client state
 			PafClientState cs = clients.get(viewRequest.getClientId());
 			
@@ -249,9 +163,6 @@ public class PafServiceProvider implements IPafService {
 				throw new PafException(Messages.getString("PafServiceProvider.9"), //$NON-NLS-1$
 						PafErrSeverity.Fatal);
 			}
-
-			// Set logger client info property to user name
-			pushToNDCStack(viewRequest.getClientId());
 
 			logger.info(Messages.getString("PafServiceProvider.10") + viewRequest.getViewName()); //$NON-NLS-1$
 
@@ -379,7 +290,7 @@ public class PafServiceProvider implements IPafService {
 		try {
 			
 			String clientId = String.valueOf(Math.random());
-
+			
 			// Display client initialization message (TTN-
 			char[] banner = new char[90];
 			Arrays.fill (banner, '*');
@@ -391,6 +302,10 @@ public class PafServiceProvider implements IPafService {
 			logger.info(String.valueOf(banner));
 			logger.info(""); //$NON-NLS-1$
 
+						
+			// block to debug load balancer cookies.
+			listCookies(clientId);
+			
 			// validate client version
 			if (!appService.isValidClient(pcInit.getClientVersion(), pcInit.getClientType())) {
 				// setup response with version mismatch
@@ -483,16 +398,21 @@ public class PafServiceProvider implements IPafService {
 			throws RemoteException, PafSoapException{
 
 		PafAuthResponse response = null;
+		String clientId = authReq.getClientId();
 
 		try {
 			// Set logger client info property to user name
-			pushToNDCStack(authReq.getClientId());
+			pushToNDCStack(clientId);
+			
+			// block to debug load balancer cookies.
+			listCookies(clientId);
 			
 			// Verify client id is good
-			if ( ! clients.containsKey( authReq.getClientId() ) ) {
+			if ( ! clients.containsKey( clientId ) ) {
+				logger.error("ClientID not found: " + clientId);
 				throw new PafSoapException(new PafException(Messages.getString("PafServiceProvider.InvalidClientIdReInit"), PafErrSeverity.Error));			
-			}			
-			
+			}				
+
 			//Reset the client state to the state it is in after ClientInit
 			//This ensures that a user can cleanly change roles
 			reinitializeClientState(authReq.getClientId());
@@ -1445,13 +1365,23 @@ public class PafServiceProvider implements IPafService {
 		PafDataSlice dataSlice = null;
 		PafView pView = null;
 		PafView pViewEmpty = null;
+		String clientId = evalRequest.getClientId();
 
 		// Evaluate view
 		try {
 
 			// Set logger client info property to user name
 			pushToNDCStack(evalRequest.getClientId());
-						
+					
+			// Troubleshoot load balancer cookies
+			listCookies(clientId);
+			
+			// Verify client id is good
+			if ( ! clients.containsKey( evalRequest.getClientId() ) ) {
+				logger.error("ClientID not found: " + evalRequest.getClientId());
+				throw new PafSoapException(new PafException(Messages.getString("PafServiceProvider.InvalidClientIdReInit"), PafErrSeverity.Error));			
+			}		
+			
 			// Get client state
 			PafClientState clientState = clients.get(evalRequest.getClientId());
 
@@ -3984,6 +3914,7 @@ public class PafServiceProvider implements IPafService {
 	}
 
 
+
 	/**
 	 * 
 	 * Checks to see if a client session is active by using the client id
@@ -4011,5 +3942,25 @@ public class PafServiceProvider implements IPafService {
 		
 		return response;
 	}
+	
+	
+	private void listCookies(String clientId) {
+		MessageContext mc = wsCtx.getMessageContext();		   
+		//HttpSession session = ((javax.servlet.http.HttpServletRequest)mc.get(MessageContext.SERVLET_REQUEST)).getSession();
+		HttpServletRequest req = (HttpServletRequest)mc.get(mc.SERVLET_REQUEST);
+
+	   Cookie cookies[] = req.getCookies();
+	   if (cookies != null) {
+		   logger.info("Listing Cookies in Session (" + clientId + ")");		   
+		   for (Cookie c : cookies) {
+			   logger.info( c.getName() + ":" + c.getValue() );
+		   }
+	   }
+	   else {
+		   logger.info("Cookies are null in session");
+	   }		
+	}
+	
+	
 
 }
