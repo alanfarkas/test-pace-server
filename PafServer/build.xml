@@ -13,7 +13,6 @@
 	<property name="web_service_client_plugin" location="${wrksp_root}\com.palladium.paf.adminconsole.webservicesclient" />
 	<property name="extra_jars_plugin" location="${wrksp_root}\com.palladium.paf.adminconsole.extrajars" />	
 	
-	
 	<property name="install_stg_root"  location="C:\proj_wrksp\pace-server-installs\server-stage" />
 	<property name="install_war"  location="${install_stg_root}\server\server\default\deploy\PafServer.war" />
 	<property name="setup_build_client" location="C:\proj_wrksp\pace-server-installs\setup-bundles\client" />

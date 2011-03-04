@@ -50,7 +50,7 @@
 		<property name="ldapSettings"><ref bean="ldapSettings"/></property>
 		<property name="authMode" value="nativeMode" />
 		<property name="clientUpdateUrl" value="http://localhost:8080/installs/client/setup.exe" />
-		<property name="clientMinVersion" value="2.8.1.0" />				
+		<property name="clientMinVersion" value="2.8.1.1" />				
 				
 		<!-- 
 		<property name="pathToServerConfDir" value="C:\different conf" />	

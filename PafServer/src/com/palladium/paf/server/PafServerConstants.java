@@ -27,7 +27,7 @@ package com.palladium.paf.server;
  */
 public class PafServerConstants {
 
-	public static final String SERVER_VERSION = "2.8.1.1.2 DEV";
+	public static final String SERVER_VERSION = "2.8.1.1 GA";
 //    public static final String SERVER_HOME_ENV = "PafServerHome";
 	
 }
