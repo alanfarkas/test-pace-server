@@ -3951,13 +3951,13 @@ public class PafServiceProvider implements IPafService {
 
 	   Cookie cookies[] = req.getCookies();
 	   if (cookies != null) {
-		   logger.info("Listing Cookies in Session (" + clientId + ")");		   
+		   logger.debug("Listing Cookies in Session (" + clientId + ")");		   
 		   for (Cookie c : cookies) {
-			   logger.info( c.getName() + ":" + c.getValue() );
+			   logger.debug( c.getName() + ":" + c.getValue() );
 		   }
 	   }
 	   else {
-		   logger.info("Cookies are null in session");
+		   logger.debug("Cookies are null in session");
 	   }		
 	}
 	
