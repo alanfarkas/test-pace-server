@@ -3,10 +3,11 @@
   type="WEB"
   name="PafServer"
   id="myeclipse.1299279495007"
+  context-root="/PafServer"
   j2ee-spec="1.4"
   archive="PafServer.war">
   <attributes>
-    <attribute name="webrootdir" value="WebRoot" />
+    <attribute name="webrootdir" value="/WebRoot" />
   </attributes>
 </project-module>
 
