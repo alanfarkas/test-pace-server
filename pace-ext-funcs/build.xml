@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="PafCustomFunctions" default="deploy" basedir=".">
+	<property name = "proj_root" location = "\proj_wrksp\eclipse\PafServer" />
+	<property name = "local_web" location = "${proj_root}\WebRoot" />
+	<property name = "src" location = "..\src" />
+	<property name = "bin" location = "bin" />
+	<property name = "dist" location = "dist" />
+
+
+	<target name="deploy" >	
+		<echo>"Building Custom Functions Jar File"</echo>
+	    <!-- Create the distribution directory -->
+	    <mkdir dir="${dist}"/>
+	    <!-- Building Jar file -->
+	    <jar jarfile="${dist}/pafcf.jar" basedir="${bin}" excludes="*.properties" />
+		<echo>"Deploying Jar file to local web server"</echo>
+		<copy todir="${local_web}\web-inf\lib" file = "${dist}/pafcf.jar"/> 	
+
+	</target>
+</project>
