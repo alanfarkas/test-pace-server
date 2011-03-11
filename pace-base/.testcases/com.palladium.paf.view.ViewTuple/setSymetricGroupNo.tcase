@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseData>
+<InternalProperties context="com.palladium.paf.view.ViewTuple.setSymetricGroupNo(int, java.lang.Integer)" category="user" template="false" identifier="9916988381150491701293"/>
+<AstData>
+ <Ast ver="1.1">
+  <Type ref="4" name="com.palladium.paf.view.ViewTuple"/>
+  <Type ref="7" name="java.lang.Integer"/>
+  <Type ref="11" name="com.palladium.paf.view.PafBorder"/>
+  <Type ref="18" name="java.lang.String"/>
+  <Type ref="22" name="com.palladium.paf.view.PafStyle"/>
+  <Type ref="34" name="java.lang.Boolean"/>
+  <Type ref="54" name="com.palladium.paf.view.PafNumberFormat"/>
+  <Type ref="61" name="java.lang.Short"/>
+  <Type ref="89" name="int"/>
+  <Type ref="176" name="void"/>
+  <Type ref="26" type="7" dim="1"/>
+  <Type ref="50" type="18" dim="1"/>
+  <MethodDecl elemNum="2" declType="4" ref="177" type="176" name="setSymetricGroupNo" params="89 7"/>
+  <Block elemNum="10" stats="1 86 91 95 166 170 174 181 185 189" ref="0">
+   <ExprStat ref="1" expr="2">
+    <Assign ref="2" var="3" value="5">
+     <Var ref="3" type="4" name="Input-This"/>
+     <MemberwiseInit ref="5" type="4" elemNum="21" name="com.palladium.paf.view.ViewTuple" propNum="0" fieldInits="6 10 14 17 21 25 33 37 40 43 46 49 53 57 60 64 67 70 73 76 83">
+      <FieldInit ref="6" value="9" field="8">
+       <FieldDecl ref="8" declType="4" name="axis" type="7"/>
+       <ConstExpr ref="9" type="7" value="0"/>
+      </FieldInit>
+      <FieldInit ref="10" value="13" field="12">
+       <FieldDecl ref="12" declType="4" name="border" type="11"/>
+       <NullExpr ref="13" type="11"/>
+      </FieldInit>
+      <FieldInit ref="14" value="16" field="15">
+       <FieldDecl ref="15" declType="4" name="columnWidth" type="7"/>
+       <ConstExpr ref="16" type="7" value="0"/>
+      </FieldInit>
+      <FieldInit ref="17" value="20" field="19">
+       <FieldDecl ref="19" declType="4" name="dataGlobalStyleName" type="18"/>
+       <ConstExpr ref="20" type="18" value=""/>
+      </FieldInit>
+      <FieldInit ref="21" value="24" field="23">
+       <FieldDecl ref="23" declType="4" name="dataStyle" type="22"/>
+       <NullExpr ref="24" type="22"/>
+      </FieldInit>
+      <FieldInit ref="25" value="28" field="27">
+       <FieldDecl ref="27" declType="4" name="derivedHeaderGroupNo" type="26"/>
+       <ArrayInit elemNum="4" ref="28" type="26" elems="29 30 31 32">
+        <NullExpr ref="29" type="7"/>
+        <NullExpr ref="30" type="7"/>
+        <NullExpr ref="31" type="7"/>
+        <NullExpr ref="32" type="7"/>
+       </ArrayInit>
+      </FieldInit>
+      <FieldInit ref="33" value="36" field="35">
+       <FieldDecl ref="35" declType="4" name="drillable" type="34"/>
+       <ConstExpr ref="36" type="34" value="true"/>
+      </FieldInit>
+      <FieldInit ref="37" value="39" field="38">
+       <FieldDecl ref="38" declType="4" name="expanded" type="34"/>
+       <ConstExpr ref="39" type="34" value="true"/>
+      </FieldInit>
+      <FieldInit ref="40" value="42" field="41">
+       <FieldDecl ref="41" declType="4" name="headerBorder" type="11"/>
+       <NullExpr ref="42" type="11"/>
+      </FieldInit>
+      <FieldInit ref="43" value="45" field="44">
+       <FieldDecl ref="44" declType="4" name="headerGlobalStyleName" type="18"/>
+       <ConstExpr ref="45" type="18" value=""/>
+      </FieldInit>
+      <FieldInit ref="46" value="48" field="47">
+       <FieldDecl ref="47" declType="4" name="headerStyle" type="22"/>
+       <NullExpr ref="48" type="22"/>
+      </FieldInit>
+      <FieldInit ref="49" value="52" field="51">
+       <FieldDecl ref="51" declType="4" name="memberDefs" type="50"/>
+       <NullExpr ref="52" type="50"/>
+      </FieldInit>
+      <FieldInit ref="53" value="56" field="55">
+       <FieldDecl ref="55" declType="4" name="numberFormat" type="54"/>
+       <NullExpr ref="56" type="54"/>
+      </FieldInit>
+      <FieldInit ref="57" value="59" field="58">
+       <FieldDecl ref="58" declType="4" name="numberFormatOverrideLabel" type="18"/>
+       <ConstExpr ref="59" type="18" value=""/>
+      </FieldInit>
+      <FieldInit ref="60" value="63" field="62">
+       <FieldDecl ref="62" declType="4" name="order" type="61"/>
+       <ConstExpr ref="63" type="61" value="0"/>
+      </FieldInit>
+      <FieldInit ref="64" value="66" field="65">
+       <FieldDecl ref="65" declType="4" name="overrideLabel" type="18"/>
+       <ConstExpr ref="66" type="18" value=""/>
+      </FieldInit>
+      <FieldInit ref="67" value="69" field="68">
+       <FieldDecl ref="68" declType="4" name="parentFirst" type="34"/>
+       <ConstExpr ref="69" type="34" value="true"/>
+      </FieldInit>
+      <FieldInit ref="70" value="72" field="71">
+       <FieldDecl ref="71" declType="4" name="plannable" type="34"/>
+       <ConstExpr ref="72" type="34" value="true"/>
+      </FieldInit>
+      <FieldInit ref="73" value="75" field="74">
+       <FieldDecl ref="74" declType="4" name="rowHeight" type="7"/>
+       <ConstExpr ref="75" type="7" value="0"/>
+      </FieldInit>
+      <FieldInit ref="76" value="78" field="77">
+       <FieldDecl ref="77" declType="4" name="symetricGroupNo" type="26"/>
+       <ArrayInit elemNum="4" ref="78" type="26" elems="79 80 81 82">
+        <NullExpr ref="79" type="7"/>
+        <NullExpr ref="80" type="7"/>
+        <NullExpr ref="81" type="7"/>
+        <ConstExpr ref="82" type="7" value="1"/>
+       </ArrayInit>
+      </FieldInit>
+      <FieldInit ref="83" value="85" field="84">
+       <FieldDecl ref="84" declType="4" name="visible" type="34"/>
+       <ConstExpr ref="85" type="34" value="true"/>
+      </FieldInit>
+     </MemberwiseInit>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="86" expr="87">
+    <Assign ref="87" var="88" value="90">
+     <Var ref="88" type="89" name="Input-Arg0"/>
+     <ConstExpr ref="90" type="89" value="3"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="91" expr="92">
+    <Assign ref="92" var="93" value="94">
+     <Var ref="93" type="7" name="Input-Arg1"/>
+     <ConstExpr ref="94" type="7" value="1"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="95" expr="96">
+    <Assign var="97" value="98" ref="96" special="true">
+     <Var ref="97" type="4" name="Output-This"/>
+     <MemberwiseInit ref="98" special="true" type="4" elemNum="21" name="com.palladium.paf.view.ViewTuple" propNum="0" fieldInits="99 102 105 108 111 114 117 120 123 126 129 132 135 138 141 144 147 150 153 156 163">
+      <FieldInit field="100" value="101" ref="99" special="true">
+       <FieldDecl ref="100" declType="4" name="axis" type="7"/>
+       <RandomExpr ref="101" special="true" type="7"/>
+      </FieldInit>
+      <FieldInit field="103" value="104" ref="102" special="true">
+       <FieldDecl ref="103" declType="4" name="border" type="11"/>
+       <RandomExpr ref="104" special="true" type="11"/>
+      </FieldInit>
+      <FieldInit field="106" value="107" ref="105" special="true">
+       <FieldDecl ref="106" declType="4" name="columnWidth" type="7"/>
+       <RandomExpr ref="107" special="true" type="7"/>
+      </FieldInit>
+      <FieldInit field="109" value="110" ref="108" special="true">
+       <FieldDecl ref="109" declType="4" name="dataGlobalStyleName" type="18"/>
+       <RandomExpr ref="110" special="true" type="18"/>
+      </FieldInit>
+      <FieldInit field="112" value="113" ref="111" special="true">
+       <FieldDecl ref="112" declType="4" name="dataStyle" type="22"/>
+       <RandomExpr ref="113" special="true" type="22"/>
+      </FieldInit>
+      <FieldInit field="115" value="116" ref="114" special="true">
+       <FieldDecl ref="115" declType="4" name="derivedHeaderGroupNo" type="26"/>
+       <RandomExpr ref="116" special="true" type="26"/>
+      </FieldInit>
+      <FieldInit field="118" value="119" ref="117" special="true">
+       <FieldDecl ref="118" declType="4" name="drillable" type="34"/>
+       <RandomExpr ref="119" special="true" type="34"/>
+      </FieldInit>
+      <FieldInit field="121" value="122" ref="120" special="true">
+       <FieldDecl ref="121" declType="4" name="expanded" type="34"/>
+       <RandomExpr ref="122" special="true" type="34"/>
+      </FieldInit>
+      <FieldInit field="124" value="125" ref="123" special="true">
+       <FieldDecl ref="124" declType="4" name="headerBorder" type="11"/>
+       <RandomExpr ref="125" special="true" type="11"/>
+      </FieldInit>
+      <FieldInit field="127" value="128" ref="126" special="true">
+       <FieldDecl ref="127" declType="4" name="headerGlobalStyleName" type="18"/>
+       <RandomExpr ref="128" special="true" type="18"/>
+      </FieldInit>
+      <FieldInit field="130" value="131" ref="129" special="true">
+       <FieldDecl ref="130" declType="4" name="headerStyle" type="22"/>
+       <RandomExpr ref="131" special="true" type="22"/>
+      </FieldInit>
+      <FieldInit field="133" value="134" ref="132" special="true">
+       <FieldDecl ref="133" declType="4" name="memberDefs" type="50"/>
+       <RandomExpr ref="134" special="true" type="50"/>
+      </FieldInit>
+      <FieldInit field="136" value="137" ref="135" special="true">
+       <FieldDecl ref="136" declType="4" name="numberFormat" type="54"/>
+       <RandomExpr ref="137" special="true" type="54"/>
+      </FieldInit>
+      <FieldInit field="139" value="140" ref="138" special="true">
+       <FieldDecl ref="139" declType="4" name="numberFormatOverrideLabel" type="18"/>
+       <RandomExpr ref="140" special="true" type="18"/>
+      </FieldInit>
+      <FieldInit field="142" value="143" ref="141" special="true">
+       <FieldDecl ref="142" declType="4" name="order" type="61"/>
+       <RandomExpr ref="143" special="true" type="61"/>
+      </FieldInit>
+      <FieldInit field="145" value="146" ref="144" special="true">
+       <FieldDecl ref="145" declType="4" name="overrideLabel" type="18"/>
+       <RandomExpr ref="146" special="true" type="18"/>
+      </FieldInit>
+      <FieldInit field="148" value="149" ref="147" special="true">
+       <FieldDecl ref="148" declType="4" name="parentFirst" type="34"/>
+       <RandomExpr ref="149" special="true" type="34"/>
+      </FieldInit>
+      <FieldInit field="151" value="152" ref="150" special="true">
+       <FieldDecl ref="151" declType="4" name="plannable" type="34"/>
+       <RandomExpr ref="152" special="true" type="34"/>
+      </FieldInit>
+      <FieldInit field="154" value="155" ref="153" special="true">
+       <FieldDecl ref="154" declType="4" name="rowHeight" type="7"/>
+       <RandomExpr ref="155" special="true" type="7"/>
+      </FieldInit>
+      <FieldInit ref="156" value="158" field="157">
+       <FieldDecl ref="157" declType="4" name="symetricGroupNo" type="26"/>
+       <ArrayInit elemNum="4" ref="158" type="26" elems="159 160 161 162">
+        <NullExpr ref="159" type="7"/>
+        <NullExpr ref="160" type="7"/>
+        <NullExpr ref="161" type="7"/>
+        <ConstExpr ref="162" type="7" value="1"/>
+       </ArrayInit>
+      </FieldInit>
+      <FieldInit field="164" value="165" ref="163" special="true">
+       <FieldDecl ref="164" declType="4" name="visible" type="34"/>
+       <RandomExpr ref="165" special="true" type="34"/>
+      </FieldInit>
+     </MemberwiseInit>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="166" expr="167">
+    <Assign ref="167" var="168" value="169">
+     <Var ref="168" type="89" name="Output-Arg0"/>
+     <SameExpr ref="169" type="89" target="90"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="170" expr="171">
+    <Assign ref="171" var="172" value="173">
+     <Var ref="172" type="7" name="Output-Arg1"/>
+     <SameExpr ref="173" type="7" target="94"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="174" expr="175">
+    <MethodInv methodDecl="177" elemNum="2" receiver="178" ref="175" name="setSymetricGroupNo" args="179 180">
+     <Var ref="178" type="4" name="Input-This"/>
+     <Var ref="179" type="89" name="Input-Arg0"/>
+     <Var ref="180" type="7" name="Input-Arg1"/>
+    </MethodInv>
+   </ExprStat>
+   <ExprStat ref="181" expr="182">
+    <AssertExpr act="184" ref="182" exp="183">
+     <Var ref="183" type="4" name="Output-This"/>
+     <Var ref="184" type="4" name="Input-This"/>
+    </AssertExpr>
+   </ExprStat>
+   <ExprStat ref="185" expr="186">
+    <AssertExpr process="false" exp="187" ref="186" act="188">
+     <Var ref="187" type="89" name="Output-Arg0"/>
+     <Var ref="188" type="89" name="Input-Arg0"/>
+    </AssertExpr>
+   </ExprStat>
+   <ExprStat ref="189" expr="190">
+    <AssertExpr process="false" exp="191" ref="190" act="192">
+     <Var ref="191" type="7" name="Output-Arg1"/>
+     <Var ref="192" type="7" name="Input-Arg1"/>
+    </AssertExpr>
+   </ExprStat>
+  </Block>
+ </Ast>
+</AstData>
+</TestCaseData>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseData>
+<InternalProperties context="com.palladium.paf.rules.Rule.setCalcAllPeriods(boolean)" category="user" template="false" identifier="18160665081150823120005"/>
+<AstData>
+ <Ast ver="1.1">
+  <Type ref="4" name="com.palladium.paf.rules.Rule"/>
+  <Type ref="10" name="boolean"/>
+  <Type ref="17" name="java.lang.String"/>
+  <Type ref="27" name="com.palladium.paf.rules.Formula"/>
+  <Type ref="31" name="int"/>
+  <Type ref="56" name="void"/>
+  <Type ref="47" type="17" dim="1"/>
+  <ConstrDecl elemNum="0" declType="4" ref="6" name="com.palladium.paf.rules.Rule" params=""/>
+  <MethodDecl elemNum="1" declType="4" ref="57" type="56" name="setCalcAllPeriods" params="10"/>
+  <Block elemNum="7" stats="1 7 12 50 54 60 64" ref="0">
+   <ExprStat ref="1" expr="2">
+    <Assign ref="2" var="3" value="5">
+     <Var ref="3" type="4" name="Input-This"/>
+     <ConstrInv constr="6" elemNum="0" ref="5" name="com.palladium.paf.rules.Rule" args=""/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="7" expr="8">
+    <Assign ref="8" var="9" value="11">
+     <Var ref="9" type="10" name="Input-Arg0"/>
+     <ConstExpr ref="11" type="10" value="true"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="12" expr="13">
+    <Assign var="14" value="15" ref="13" special="true">
+     <Var ref="14" type="4" name="Output-This"/>
+     <MemberwiseInit ref="15" special="true" type="4" elemNum="10" name="com.palladium.paf.rules.Rule" propNum="0" fieldInits="16 20 23 26 30 34 37 40 43 46">
+      <FieldInit field="18" value="19" ref="16" special="true">
+       <FieldDecl ref="18" declType="4" name="baseAllocateMeasure" type="17"/>
+       <RandomExpr ref="19" special="true" type="17"/>
+      </FieldInit>
+      <FieldInit ref="20" value="22" field="21">
+       <FieldDecl ref="21" declType="4" name="calcAllPeriods" type="10"/>
+       <ConstExpr ref="22" type="10" value="true"/>
+      </FieldInit>
+      <FieldInit field="24" value="25" ref="23" special="true">
+       <FieldDecl ref="24" declType="4" name="evalLockedIntersections" type="10"/>
+       <RandomExpr ref="25" special="true" type="10"/>
+      </FieldInit>
+      <FieldInit field="28" value="29" ref="26" special="true">
+       <FieldDecl ref="28" declType="4" name="formula" type="27"/>
+       <RandomExpr ref="29" special="true" type="27"/>
+      </FieldInit>
+      <FieldInit field="32" value="33" ref="30" special="true">
+       <FieldDecl ref="32" declType="4" name="key" type="31"/>
+       <RandomExpr ref="33" special="true" type="31"/>
+      </FieldInit>
+      <FieldInit field="35" value="36" ref="34" special="true">
+       <FieldDecl ref="35" declType="4" name="lockAllocation" type="10"/>
+       <RandomExpr ref="36" special="true" type="10"/>
+      </FieldInit>
+      <FieldInit field="38" value="39" ref="37" special="true">
+       <FieldDecl ref="38" declType="4" name="lockEvaluation" type="10"/>
+       <RandomExpr ref="39" special="true" type="10"/>
+      </FieldInit>
+      <FieldInit field="41" value="42" ref="40" special="true">
+       <FieldDecl ref="41" declType="4" name="skipAggregation" type="10"/>
+       <RandomExpr ref="42" special="true" type="10"/>
+      </FieldInit>
+      <FieldInit field="44" value="45" ref="43" special="true">
+       <FieldDecl ref="44" declType="4" name="skipAllocation" type="10"/>
+       <RandomExpr ref="45" special="true" type="10"/>
+      </FieldInit>
+      <FieldInit field="48" value="49" ref="46" special="true">
+       <FieldDecl ref="48" declType="4" name="triggerMeasures" type="47"/>
+       <RandomExpr ref="49" special="true" type="47"/>
+      </FieldInit>
+     </MemberwiseInit>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="50" expr="51">
+    <Assign ref="51" var="52" value="53">
+     <Var ref="52" type="10" name="Output-Arg0"/>
+     <SameExpr ref="53" type="10" target="11"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="54" expr="55">
+    <MethodInv methodDecl="57" elemNum="1" receiver="58" ref="55" name="setCalcAllPeriods" args="59">
+     <Var ref="58" type="4" name="Input-This"/>
+     <Var ref="59" type="10" name="Input-Arg0"/>
+    </MethodInv>
+   </ExprStat>
+   <ExprStat ref="60" expr="61">
+    <AssertExpr act="63" ref="61" exp="62">
+     <Var ref="62" type="4" name="Output-This"/>
+     <Var ref="63" type="4" name="Input-This"/>
+    </AssertExpr>
+   </ExprStat>
+   <ExprStat ref="64" expr="65">
+    <AssertExpr process="false" exp="66" ref="65" act="67">
+     <Var ref="66" type="10" name="Output-Arg0"/>
+     <Var ref="67" type="10" name="Input-Arg0"/>
+    </AssertExpr>
+   </ExprStat>
+  </Block>
+ </Ast>
+</AstData>
+</TestCaseData>

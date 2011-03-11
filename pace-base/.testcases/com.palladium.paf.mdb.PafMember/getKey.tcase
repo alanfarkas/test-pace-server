@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseData>
+<InternalProperties context="com.palladium.paf.mdb.PafMember.getKey()" category="user" template="false" identifier="18252505161150126614463"/>
+<AstData>
+ <Ast ver="1.1">
+  <Type ref="4" name="com.palladium.paf.mdb.PafMember"/>
+  <Type ref="7" name="java.lang.String"/>
+  <ConstrDecl elemNum="1" declType="4" ref="6" name="com.palladium.paf.mdb.PafMember" params="7"/>
+  <MethodDecl elemNum="0" declType="4" ref="17" type="7" name="getKey" params=""/>
+  <Block elemNum="4" stats="1 9 13 19" ref="0">
+   <ExprStat ref="1" expr="2">
+    <Assign ref="2" var="3" value="5">
+     <Var ref="3" type="4" name="Input-This"/>
+     <ConstrInv constr="6" elemNum="1" ref="5" name="com.palladium.paf.mdb.PafMember" args="8">
+      <ConstExpr ref="8" type="7" value="Member1"/>
+     </ConstrInv>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="9" expr="10">
+    <Assign var="11" value="12" ref="10" special="true">
+     <Var ref="11" type="4" name="Output-This"/>
+     <RandomExpr ref="12" special="true" type="4"/>
+    </Assign>
+   </ExprStat>
+   <ExprStat ref="13" expr="14">
+    <AssertExpr act="16" ref="14" exp="15">
+     <ConstExpr ref="15" type="7" value="Member1"/>
+     <MethodInv methodDecl="17" elemNum="0" receiver="18" ref="16" name="getKey" args="">
+      <Var ref="18" type="4" name="Input-This"/>
+     </MethodInv>
+    </AssertExpr>
+   </ExprStat>
+   <ExprStat ref="19" expr="20">
+    <AssertExpr act="22" ref="20" exp="21">
+     <Var ref="21" type="4" name="Output-This"/>
+     <Var ref="22" type="4" name="Input-This"/>
+    </AssertExpr>
+   </ExprStat>
+  </Block>
+ </Ast>
+</AstData>
+</TestCaseData>
