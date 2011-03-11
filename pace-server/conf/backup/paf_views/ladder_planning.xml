@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>Ladder Plan</string>
+  </viewSectionNames>
+  <name>Ladder Planning</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <pageOrientation>Landscape</pageOrientation>
+  <pagesTall>1</pagesTall>
+  <pagesWide>1</pagesWide>
+</PafView>

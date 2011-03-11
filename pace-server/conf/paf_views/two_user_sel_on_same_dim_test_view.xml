@@ -1,0 +1,15 @@
+<PafView>
+  <viewSectionNames>
+    <string>Two User Sel on Same Dim Test View vs</string>
+  </viewSectionNames>
+  <name>Two User Sel on Same Dim Test View</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <pageOrientation>Landscape</pageOrientation>
+  <pagesTall>1</pagesTall>
+  <pagesWide>1</pagesWide>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

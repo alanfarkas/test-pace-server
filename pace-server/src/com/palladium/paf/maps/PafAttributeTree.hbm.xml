@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.palladium.paf.mdb.PafAttributeTree" table="PAF_ATTR_TREE" >
+        <id column="member_tree_id" type="int">
+        	<generator class="identity"/>
+        </id>
+
+        <one-to-one name="rootNode" class="com.palladium.paf.mdb.PafAttributeMember" cascade="all" />
+
+        <property name="baseDimName" column="BASE_DIM_NAME" type="string" length="80" not-null="false" />
+        <property name="attributeType" column="ATTRIBUTE_TYPE" type="short" not-null="false" />
+        <property name="id" column="MEMBER_TREE_NAME" type="string" length="80" not-null="false" />
+ 
+        <map name="Members" cascade="all, delete-orphan" >
+            <key column ="member_tree_id" />
+            <map-key column="member_name" type="string" />
+            <one-to-many class="com.palladium.paf.mdb.PafAttributeMember"/>
+        </map>    
+          
+        <array name="AliasTableNames" table="PAF_ATTR_ALIAS_TBL_NAME" >
+            <key column="member_tree_id"/>
+            <list-index column="sortOrder" />                
+            <element type="string" column="ALIAS_TABLE_NAME"/>
+        </array>
+    </class>
+</hibernate-mapping>

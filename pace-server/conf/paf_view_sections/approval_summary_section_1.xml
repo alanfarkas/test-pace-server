@@ -1,0 +1,81 @@
+<ViewSection>
+  <name>Approval Summary Section 1</name>
+  <description></description>
+  <primaryFormattingAxis>0</primaryFormattingAxis>
+  <readOnly>false</readOnly>
+  <managed>false</managed>
+  <isEmpty>false</isEmpty>
+  <topOffset>0</topOffset>
+  <leftOffset>0</leftOffset>
+  <scaleUnit>CELL</scaleUnit>
+  <pafViewHeaders>
+    <ViewHeader>
+      <label>Approval Summary</label>
+      <globalStyleName>Header Center 14pt</globalStyleName>
+    </ViewHeader>
+  </pafViewHeaders>
+  <rowAxisDims>
+    <string>Product</string>
+    <string>Measures</string>
+  </rowAxisDims>
+  <colAxisDims>
+    <string>Time</string>
+    <string>Version</string>
+  </colAxisDims>
+  <rowTuples>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Header Left 10pt</headerGlobalStyleName>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@ICHILDREN(@UOW_ROOT)</string>
+        <string>SLS_DLR</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+      </symetricGroupNo>
+    </ViewTuple>
+  </rowTuples>
+  <colTuples>
+    <ViewTuple>
+      <headerGlobalStyleName>Header Center 10pt</headerGlobalStyleName>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@IDESC(@UOW_ROOT)</string>
+        <string>@MEMBERS(@PLAN_VERSION, WP)</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+      </symetricGroupNo>
+    </ViewTuple>
+  </colTuples>
+  <pageTuples>
+    <PageTuple>
+      <axis>Location</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>PlanType</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Years</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+  </pageTuples>
+  <hierarchyFormatName>ProdTime</hierarchyFormatName>
+</ViewSection>

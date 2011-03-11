@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>Margin Merch Planning Sect</string>
+  </viewSectionNames>
+  <name>Margin Merch Planning</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>Product by Location vs</string>
+  </viewSectionNames>
+  <name>Product by Location</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <pageOrientation>Landscape</pageOrientation>
+  <pagesTall>1</pagesTall>
+  <pagesWide>1</pagesWide>
+</PafView>

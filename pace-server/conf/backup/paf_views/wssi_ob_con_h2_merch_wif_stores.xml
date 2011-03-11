@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>WSSI Ob/Con H2 Merch WIF Stores Sect</string>
+  </viewSectionNames>
+  <name>WSSI Ob/Con H2 Merch WIF Stores</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

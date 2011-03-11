@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>Margin Brand Planning Sect</string>
+  </viewSectionNames>
+  <name>Margin Brand Planning</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

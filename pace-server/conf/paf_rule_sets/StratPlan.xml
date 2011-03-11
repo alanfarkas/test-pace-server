@@ -1,0 +1,96 @@
+<RuleSet xmlns="http://www.thepalladiumgroup.com/paf_rule_set">
+  <name>StratPlan</name>
+   
+  <ruleGroups>
+  
+  <!-- USED IN TTH 1239_YOY ON 4/29/08 DO NOT CHANGE -->
+  
+    <!-- EXAMPLE OF COMMON EVALUATION TAGS  
+      <RuleGroup>
+         <perpetual>true</perpetual>
+         <skipProtProc>true</skipProtProc>
+      <rules>
+      
+        <Rule>
+          <formula>
+            <resultTerm></resultTerm>
+            <expression></expression>
+          </formula>
+             <baseAllocateMeasure>SALES</baseAllocateMeasure>
+             <skipAllocation>true</skipAllocation>
+             <skipAggregation>true</skipAggregation>
+             <lockSystemEvaluationResult>true</lockSystemEvaluationResult>
+             <lockUserEvaluationResult>true</lockUserEvaluationResult>
+             <initialTBFirstAllocation>true</initialTBFirstAllocation>
+             <triggerMeasures>
+                  <string>FWOS</string>
+             </triggerMeasures>        
+        </Rule>
+        
+      </rules>
+    </RuleGroup>
+ EXAMPLE EVALUATION TAGS -->  
+  
+
+   <RuleGroup>
+	<balanceSetKey>SalesYOY</balanceSetKey>    
+     <perpetual>true</perpetual> 	 	 	    
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>SLS_DLR</resultTerm>
+            <expression>(1 + SLSLY_%) * @PREV(SLS_DLR)</expression>
+          </formula>
+			<triggerMeasures>
+				<string>SLSLY_%</string>
+			</triggerMeasures>
+			<lockSystemEvaluationResult>true</lockSystemEvaluationResult>          
+         </Rule> 
+        <Rule>
+          <formula>
+            <resultTerm>SLSLY_%</resultTerm>
+            <expression>(SLS_DLR - @PREV(SLS_DLR)) / @PREV(SLS_DLR)</expression>
+          </formula>
+			<triggerMeasures>
+				<string>SLS_DLR</string>
+			</triggerMeasures>
+        </Rule>         
+      </rules>
+    </RuleGroup>
+
+
+	<RuleGroup>
+		<balanceSetKey>SalesYOY</balanceSetKey>
+		<perpetual>true</perpetual>
+         <skipProtProc>true</skipProtProc>		
+			<rules>
+				<Rule>
+					<formula>
+						<resultTerm>@NEXT(SLS_DLR)</resultTerm>
+						<expression>(1 + @NEXT(SLSLY_%)) * SLS_DLR</expression>
+					</formula>
+					<triggerMeasures>
+						<string>SLS_DLR</string>
+					</triggerMeasures>
+					<lockSystemEvaluationResult>true</lockSystemEvaluationResult>
+				</Rule>
+			</rules>
+		</RuleGroup>
+
+	<RuleGroup>
+         <skipProtProc>true</skipProtProc>		
+			<rules>
+				<Rule>
+					<formula>
+  			          <resultTerm>SLSLY_%</resultTerm>
+  			          <expression>(SLS_DLR - @PREV(SLS_DLR)) / @PREV(SLS_DLR)</expression>
+					</formula>
+					<triggerMeasures>
+						<string>SLS_DLR</string>
+					</triggerMeasures>
+				</Rule>
+			</rules>
+		</RuleGroup>
+    
+  </ruleGroups>
+</RuleSet>

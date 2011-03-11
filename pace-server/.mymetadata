@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="pace-server"
+  id="myeclipse.1299871328154"
+  context-root="/pace"
+  j2ee-spec="5.0"
+  archive="pace-server.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

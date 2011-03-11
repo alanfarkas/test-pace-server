@@ -1,0 +1,115 @@
+<tree-map>
+  <no-comparator/>
+  <entry>
+    <string>$0D</string>
+    <NumberFormat>
+      <name>$0D</name>
+      <pattern>$#,##0_);[Red]($#,##0)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>$1D</string>
+    <NumberFormat>
+      <name>$1D</name>
+      <pattern>$#,##0.0_);[Red]($#,##0.0)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>$2D</string>
+    <NumberFormat>
+      <name>$2D</name>
+      <pattern>$#,##0.00_);[Red]($#,##0.00)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>$Left 0D</string>
+    <NumberFormat>
+      <name>$Left 0D</name>
+      <pattern>$* #,##0_);[Red]$* #,##0</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>$Left 1D</string>
+    <NumberFormat>
+      <name>$Left 1D</name>
+      <pattern>$* #,##0.0_);[Red]$* #,##0.0</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>$Left 2D</string>
+    <NumberFormat>
+      <name>$Left 2D</name>
+      <pattern>$* #,##0.00_);[Red]$* #,##0.00</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>$Thousands</string>
+    <NumberFormat>
+      <name>$Thousands</name>
+      <pattern>$#,###,_);[Red]($#,###,)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>0D</string>
+    <NumberFormat>
+      <name>0D</name>
+      <pattern>#,##0_);[Red](#,##0)</pattern>
+      <defaultFormat>true</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>0D%</string>
+    <NumberFormat>
+      <name>0D%</name>
+      <pattern>0%;[Red](0%)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>1D</string>
+    <NumberFormat>
+      <name>1D</name>
+      <pattern> #,##0.0_);[Red]( #,##0.0)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>1D%</string>
+    <NumberFormat>
+      <name>1D%</name>
+      <pattern>0.0%;[Red](0.0%)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>2D</string>
+    <NumberFormat>
+      <name>2D</name>
+      <pattern>#,##0.00_);[Red](#,##0.00)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>2D%</string>
+    <NumberFormat>
+      <name>2D%</name>
+      <pattern>0.00%;[Red](0.00%)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+  <entry>
+    <string>3D</string>
+    <NumberFormat>
+      <name>3D</name>
+      <pattern>#,##0.000_);[Red](#,##0.000)</pattern>
+      <defaultFormat>false</defaultFormat>
+    </NumberFormat>
+  </entry>
+</tree-map>

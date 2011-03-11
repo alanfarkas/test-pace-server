@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+<!--
+	=================================
+	EDS/APS/HPS connection url examples
+	=================================
+	
+	EDS 7.x, APS 9.0.x to 9.2.x:	
+		EDSUrl=tcpip://pchiadg1:5001
+		EDSUrl=http://localhost:11080/eds/EssbaseEnterprise
+	
+	APS 9.3.x:
+		EDSUrl=http://localhost:13080/aps/JAPI
+	
+	HPS 11.1.x and above:
+		EDSUrl=Embedded	
+		EDSUrl=http://localhost:13080/aps/JAPI
+	
+-->
+
+
+	<bean id="Titan"
+		class = "com.palladium.paf.mdb.PafConnectionProps">
+		<property name="connectionString" value="EDSDomain=Essbase;EDSUrl=Embedded;Server=localhost;User=admin;Password=password;Application=Titan;Database=Titan"/>			
+		<property name="metaDataServiceProvider" value="com.palladium.paf.mdb.essbase.EsbMetaData" />
+		<property name="dataServiceProvider" value="com.palladium.paf.mdb.essbase.EsbData" />			  	
+	</bean>
+
+</beans>

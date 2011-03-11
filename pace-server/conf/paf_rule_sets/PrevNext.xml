@@ -1,0 +1,269 @@
+<RuleSet xmlns="http://www.thepalladiumgroup.com/paf_rule_set">
+  <name>PrevNext</name>
+  <measureList>
+    <string>Measures</string>
+    <string>SLS_DLR</string>
+    <string>SLS_U</string>
+    <string>SLS_AUR</string>
+    <string>SLSLY_%</string> 
+    <string>EOPRTL_DLR</string>                                                            
+    <string>BOPRTL_DLR</string>                                                            
+    <string>STORE_COUNT</string> 
+    <string>ADJUST</string>
+    <string>APPROVED</string>
+    <string>AUTO</string> 
+    <string>CANCEL</string>                                                                                                                                                                                                                                                                                                                   
+    <string>UNAPPROVED</string>                                                                                                                                               
+    <string>GL</string>  
+    <string>ACCT1</string>
+    <string>ACCT2</string>    
+    <string>SACCT1</string>            
+  </measureList>
+
+  <!-- Used in TTHs on 4/26/08 Do not update -->  
+  
+   <!-- MEASURE HIERARCHIES
+ 	GL
+ 		EXCLUDE10
+ 		ACCT1
+ 		ACCT2
+ 			SACCT1
+ 			EXCLUDE1
+  -->
+  
+  <!-- THIS RULE SET IS NOT INTENDED TO MAKE ANY BUSINESS SENSE.  IT IS USED STRICTLY
+       TO TEST THE MECHANICAL FUNCTIONING OF PREV AND NEXT FUNCTIONS. DATA SHOULD 
+       NOT BE SAVED AFTER BEING CHANGED WITH THIS RULESET -->
+ 
+  <!-- EXAMPLE OF COMMON EVALUATION TAGS  
+      <RuleGroup>
+         <perpetual>true</perpetual>
+         <skipProtProc>true</skipProtProc>
+      <rules>
+      
+        <Rule>
+          <formula>
+            <resultTerm></resultTerm>
+            <expression></expression>
+          </formula>
+             <baseAllocateMeasure>SALES</baseAllocateMeasure>
+             <skipAllocation>true</skipAllocation>
+             <skipAggregation>true</skipAggregation>
+             <lockSystemEvaluationResult>true</lockSystemEvaluationResult>
+             <lockUserEvaluationResult>true</lockUserEvaluationResult>
+             <initialTBFirstAllocation>true</initialTBFirstAllocation>
+             <triggerMeasures>
+                  <string>FWOS</string>
+             </triggerMeasures>        
+        </Rule>
+        
+      </rules>
+    </RuleGroup>
+ EXAMPLE EVALUATION TAGS -->  
+
+  <ruleGroups>
+  
+<!-- THIS RULE IS TO TEST IF A RECALC MEASURE INSIDE OF AN @PREV WILL CAUSE THE AGG MEASURE TO LOCK AND ALLOCATE  -->  
+ 
+ 
+  <!-- POPULATE A RECALC MEASURE USING A FUNCTION 
+  		While this rule does test if a recalc measure used in the same expression as a PREV function
+  		will cause an aggregate measure to lock, it doesn't test if having a recalc measure INSIDE the
+  		PREV function will trigger a lock.
+  -->    
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>SLS_DLR</resultTerm>
+            <expression>(1 + SLSLY_%) * @PREV(SLS_DLR)</expression>
+          </formula>
+             <lockUserEvaluationResult>true</lockUserEvaluationResult>          
+         </Rule>              
+        <Rule>
+          <formula>
+            <resultTerm>SLSLY_%</resultTerm>
+            <expression>(SLS_DLR - @PREV(SLS_DLR)) / @PREV(SLS_DLR)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	 	 	
+    </RuleGroup>         
+  
+   
+ 
+<!-- USE FUNCTION WITH DEFAULT PARAMETERS 
+		-	SHOULD ALSO TEST THAT A CHANGE TO SOME MEASURE BESIDES SLS_DLR DOES NOT CAUSE THIS RULE TO FIRE -->   
+		
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>ADJUST</resultTerm>
+            <expression>@PREV(SLS_DLR)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	
+     <skipProtProc>true</skipProtProc>     
+    </RuleGroup>    
+    
+  	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>APPROVED</resultTerm>
+            <expression>@NEXT(SLS_DLR)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	 	
+     <skipProtProc>true</skipProtProc>  
+    </RuleGroup>    
+ 
+<!-- USE FUNCTION WITH LARGE OFFSET -->    
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>AUTO</resultTerm>
+            <expression>@PREV(SLS_DLR, Time,3)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	 	
+     <skipProtProc>true</skipProtProc>  
+    </RuleGroup>     
+
+
+ 
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>CANCEL</resultTerm>
+            <expression>@NEXT(SLS_DLR, Time,3)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	 	
+     <skipProtProc>true</skipProtProc>  
+    </RuleGroup>     
+
+<!-- USE FUNCTIONS IN RESULT TERM WITHOUT SPECIFYING DEFAULT PARAMETERS -->    
+    <RuleGroup>
+       <rules>
+        <Rule>
+          <formula>
+            <resultTerm>@Prev(EOPRTL_DLR)</resultTerm>
+            <expression>BOPRTL_DLR</expression>
+          </formula>
+        </Rule>
+        <Rule>
+          <formula>
+            <resultTerm>@Next(BOPRTL_DLR)</resultTerm>
+            <expression>EOPRTL_DLR</expression>
+          </formula>
+        </Rule>
+      </rules>
+      <perpetual>true</perpetual>    
+    </RuleGroup>
+
+<!-- FIND PREV VALUE OF TB FIRST MEASURE -->    
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>UNAPPROVED</resultTerm>
+            <expression>@PREV(BOPRTL_DLR, Time,2)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	 	
+     <skipProtProc>true</skipProtProc>  
+    </RuleGroup>     
+
+
+ <!-- FIND NEXT VALUE OF TB LAST MEASURE FOR A PARENT HIERARCHY MEASURE -->    
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>GL</resultTerm>
+            <expression>@NEXT(EOPRTL_DLR, Time,2)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	 	
+     <skipProtProc>true</skipProtProc>  
+    </RuleGroup>     
+    
+
+
+ <!-- POPULATE A NONAGG MEASURE USING A FUNCTION -->    
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>STORE_COUNT</resultTerm>
+            <expression>@NEXT(SLS_DLR, Time,2)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	 	 	
+     <skipProtProc>true</skipProtProc>     
+    </RuleGroup>         
+
+ <!-- POPULATE A MEASURE WITH A NONAGG MEASURE USING A FUNCTION -->    
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>ACCT1</resultTerm>
+            <expression>@NEXT(STORE_COUNT, Time,2)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	 	 	
+     <skipProtProc>true</skipProtProc>     
+    </RuleGroup>     
+    
+ <!-- MOVED THIS RULEGROUP INTO ITS OWN RULESET SO IT WOULDN'T BE AFFECTED BY 
+ 	  OTHER NEXT PREV FUNCTIONALITY.  LEFT IT HERE TO SO IT WOULDN'T BREAK
+ 	  OTHER TTH FILES USING THIS PREVNEXT RULESET.
+
+	This rule is just to cause ACCT2 to be protected, so that we can test
+      TTN-1112 where a parent measure that was protected was preventing a child
+      measure from having a Replicate All work on it, on an Attribute view.  ACCT2
+      is the parent of SACCT1. This was occurring because measure hierarchies were 
+      being treated like other hierarchies for attribute allocation purposes. -->    
+
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>ACCT2</resultTerm>
+            <expression>ACCT2</expression>
+          </formula>
+        </Rule>
+      </rules>
+    </RuleGroup>    
+    
+ <!-- TEST THAT @PREV_CUM IS WORKING -->   
+    
+ 	<RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>SACCT1</resultTerm>
+            <expression>@PREV_CUM(SLS_DLR)</expression>
+          </formula>
+        </Rule>
+      </rules>
+     <perpetual>true</perpetual> 	 	 	
+     <skipProtProc>true</skipProtProc>     
+    </RuleGroup>                      
+
+  
+  </ruleGroups>
+</RuleSet>

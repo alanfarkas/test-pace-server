@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>Phasing Brand Summary Sect</string>
+  </viewSectionNames>
+  <name>Phasing Brand Summary</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

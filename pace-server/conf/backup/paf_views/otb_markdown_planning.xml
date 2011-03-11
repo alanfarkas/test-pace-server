@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>OTB Markdown Sect</string>
+  </viewSectionNames>
+  <name>OTB Markdown Planning</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

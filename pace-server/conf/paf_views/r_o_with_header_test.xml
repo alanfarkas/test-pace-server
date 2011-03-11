@@ -1,0 +1,9 @@
+<PafView>
+  <viewSectionNames>
+    <string>Read-Only View</string>
+  </viewSectionNames>
+  <name>R/O with Header Test</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+</PafView>

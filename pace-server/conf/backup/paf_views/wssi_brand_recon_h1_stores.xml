@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>WSSI Brand Recon H1 Stores Sect</string>
+  </viewSectionNames>
+  <name>WSSI Brand Recon H1 Stores</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

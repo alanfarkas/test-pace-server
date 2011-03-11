@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="PafServer" default="Build All" basedir=".">
+	<property name="wrksp_root" location="${basedir}\.."/>
+	<property name="proj_root" location="${basedir}" />
+	<property name="client_dir" location="${proj_root}\client" />	
+	<property name="local_web" location="${proj_root}\WebRoot" />
+	<property name="app_install" location= "C:\Program Files\Pace\PafServer" />
+	<property name="dev_web"  location="${app_install}\server\server\default\deploy\PafServer.war" />
+	<property name="test_web"  location="T:\PafServer\server\server\default\deploy\PafServer.war" />
+	<property name="proj_pafbase" location="${wrksp_root}\PafBaseLibraries" />
+	<property name="esb_deployed_class_path"  location="${dev_web}\WEB-INF\classes\com\palladium\paf\mdb\essbase" />
+
+	<property name="web_service_client_plugin" location="${wrksp_root}\com.palladium.paf.adminconsole.webservicesclient" />
+	<property name="extra_jars_plugin" location="${wrksp_root}\com.palladium.paf.adminconsole.extrajars" />	
+	
+	<property name="install_stg_root"  location="C:\proj_wrksp\pace-server-installs\server-stage" />
+	<property name="install_war"  location="${install_stg_root}\server\server\default\deploy\PafServer.war" />
+	<property name="setup_build_client" location="C:\proj_wrksp\pace-server-installs\setup-bundles\client" />
+	<property name="install_stg_client" location="${install_stg_root}\server\server\default\deploy\installs.war\client" />	
+	<property name="install_stg_redist" location="${install_stg_root}\redist" />	
+	<property name="install_stg_redist_ws61" location="${install_stg_redist}\WS61" />			
+	
+	
+	<target name="Build All" depends="update-all-config">
+		<echo>Deployment completed</echo>
+	</target>
+
+	<target name="libraries">
+		<echo>"Running builds for dependent libraries"</echo>
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\Paf Base Libraries" target="deploy"/>	
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\Essbase Provider" target="deploy"/>		
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\PafCustomCommands" target="deploy"/>
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\PafCustomFunctions" target="deploy"/>
+	</target>	
+	
+	<target name="assign-essbase">
+		<echo>"Deploying Essbase 11.1.1.3 Configuration"</echo>
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\Paf Base Libraries" target="deploy"/>	
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\Essbase Provider" target="deploy"/>		
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\PafCustomCommands" target="deploy"/>
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\PafCustomFunctions" target="deploy"/>
+	</target>		
+	
+	
+	<target name="wsdl" depends="libraries">
+		<echo>"Compiling WSDL"</echo>
+		<exec executable="${proj_root}\pafwscompile.bat" />
+		
+		<echo>"Moving WSDL"</echo>
+		<move file="${local_web}\WEB-INF\classes\PafService.wsdl"
+			todir="${local_web}\WEB-INF\wsdl" />				
+	</target>
+
+
+	<target name="deploy" >
+		<echo>"Delete files"</echo>
+		<delete dir="${dev_web}" />
+
+		<echo>"Deploying Exploded War Files"</echo>
+
+		<copy todir="${dev_web}">
+			<fileset dir="${local_web}" />
+		</copy>
+	</target>
+	
+	<target name="deploy wo spring" depends="wsdl">
+		<echo>"Delete files"</echo>
+		<delete>
+		<fileset dir="${local_web}">
+			<exclude name="**/spring-config.xml"/>	
+		</fileset>
+			
+		</delete>
+
+		<echo>"Deploying Exploded War Files"</echo>
+
+		<copy todir="${dev_web}">
+			<fileset dir="${local_web}">
+				<exclude name="**/spring-config.xml"/>	
+			</fileset>
+		</copy>
+	</target>	
+	
+	
+	<target name="deploy-test" depends="wsdl">
+		<echo>"Delete files"</echo>
+		<delete dir="${test_web}" />
+		
+		<echo>"Deploying Exploded War Files to Test Server"</echo>
+		
+		<copy todir="${test_web}">
+			<fileset dir="${local_web}" />
+		</copy>
+	</target>	
+	
+	
+
+
+	<target name="update-all-config" depends="update-server-config, update-app-config">
+	</target>	
+
+
+	<target name="update-app-config">
+		<echo>"Updating application configuration"</echo>		
+		
+		<echo>"Backing up previous configuration files"</echo>
+		<delete dir="${app_install}\conf\backup" /> 
+		
+		<move todir="${app_install}\conf\backup" >
+			<fileset dir="${app_install}\conf" />
+		</move>			
+
+		<copy todir="${app_install}\conf" >
+			<fileset dir="${proj_root}\conf" />
+		</copy>	
+	</target>	
+	
+	<target name="update-server-config">
+		<echo>"Updating server configuration"</echo>
+
+		<delete dir="${app_install}\conf_server" /> 
+
+		<copy todir="${app_install}\conf_server" >
+			<fileset dir="${proj_root}\conf_server" />	
+		</copy>	
+	</target>	
+	
+	
+
+<!-- this block is prototyping for subversion control from ant -->
+<!-- 
+	this taskdef can also be defined in the eclipse preferences, but is less portable
+	for external calls. Requires the svnant jar's are added in Preferences->Ant->Runtime.
+	Also required the svn command line client be added to the path env rather than 
+	specifying the javahl connection.
+
+
+	<taskdef name="svn" classname="org.tigris.subversion.svnant.SvnTask"/>
+	
+	<target name="clean checkout" depends="clean build, checkout" />	
+	
+	<target name="clean build" >
+		<echo>"Deleting build folder"</echo>
+		<delete dir="c:\build" />
+	</target>	
+	
+	<target name="checkout">
+		<svn>
+			<checkout url="http://63.122.66.56/svn/Titan/Components/PafServer" destPath="c:\build\PafServer" />
+		</svn> 	
+	</target>
+	
+-->
+
+
+
+	
+	<!--
+	
+		<target name="update">
+		<echo>"Deploying files"</echo>
+		<copy todir="${dev_web}">
+		<fileset dir="${local_web}" />
+		</copy>	
+		</target>		
+	
+	
+	<taskdef 
+		name="hibernatetool" 
+		classname="org.hibernate.tool.ant.HibernateToolTask" 
+		classpath="hibernate-tools.jar;velocity-1.4.jar;velocity-tools-generic-1.4.jar;jtidy-r8-21122004.jar;hibernate3.jar;jdbcdrivers"/> 
+	
+	<target name="build-db-schema">
+		<hibernatetool destdir="[output dir]"> 
+			<classpath> 
+				<path location="[classpath of needed classes, such as domain classes and usertypes - dependent on the chosen exporter]"/> 
+			</classpath> 
+			
+			<configuration configurationfile="hibernate.cfg.xml" > 
+				<fileset dir="${src.dir}/com/palladium/paf/maps" id="id">  [A configuration can take a configurationfile and/or a fileset of hbm.xml's]
+					<include name="*.hbm.xml"/> 
+				</fileset> 
+			</configuration> 
+			
+			<hbm2ddl drop="false"/> 
+		</hibernatetool>
+	</target>
+	-->
+
+
+	<target name="make-client-jar" > 
+		
+		<echo>"Compiling client WSDL and classes"</echo>
+		<delete dir="${client_dir}\classes" />
+		<mkdir dir="${client_dir}\classes"/>		
+		<exec executable="${proj_root}\pafwsclientcompile-cxf.bat">
+			<arg line="${proj_root}" />
+		</exec>
+		
+		<echo>"Making jar"</echo>		
+		<mkdir dir="${client_dir}\dist"/>
+		<jar jarfile="${client_dir}\dist\paf_client.jar" basedir="${client_dir}\classes" excludes="*.java" />
+	
+		<copy file="${client_dir}\dist\paf_client.jar" todir="${web_service_client_plugin}\lib" />
+		<copy file="${local_web}\WEB-INF\lib\paf_base.jar" todir="${extra_jars_plugin}\lib" />
+		
+	</target>	
+
+	
+	<target name="make-websphere61-jar" > 
+		
+		<echo>"Clearing/Creating scratch directory"</echo>
+		<delete dir="${install_stg_redist_ws61}" />
+		<mkdir dir="${install_stg_redist_ws61}\working" />	
+		
+		<echo>"Copying deployable WAR to working directory"</echo>		
+		<copy todir="${install_stg_redist_ws61}\working">
+	    	<fileset dir="${dev_web}" excludes="**/*.java"/>
+		</copy>
+
+		
+		<echo>"Removing wsdl4j.jar"</echo>				
+		<move file="${install_stg_redist_ws61}\working\WEB-INF\lib\wsdl4j-1.6.2.jar" todir="${install_stg_redist_ws61}" />		
+		
+		<echo>"Making jar"</echo>		
+		<jar jarfile="${install_stg_redist_ws61}\PafServer.war" basedir="${install_stg_redist_ws61}\working" excludes="*.java" />
+	
+
+
+		<echo>"Removing scratch directory"</echo>
+		<delete dir="${install_stg_redist_ws61}\working" />
+		
+	</target>	
+	
+	
+	<target name="clear-db" depends="">
+	<echo>Clearing embedded database.</echo>
+	<java classname="com.palladium.paf.server.UtilityStubs">
+		<classpath>
+			<pathelement location="${dev_web}\WEB-INF\classes\"/>
+			<fileset dir="${dev_web}\WEB-INF\lib">
+				<include name="**/*.jar"/>
+			</fileset>
+			<fileset dir="C:\Program Files\Palladium\PafServer\server\server\default\lib">
+				<include name="**/*.jar"/>
+			</fileset>			
+			<fileset dir="C:\Program Files\Palladium\PafServer\server\server\default\deploy\jboss-hibernate.deployer">
+				<include name="**/*.jar"/>
+			</fileset>	
+	
+			<pathelement path="${java.class.path}"/>
+		</classpath>
+	</java>
+	</target>
+
+	<target name="make-war" depends="libraries">
+		<echo>"Making war"</echo>		
+	    <mkdir dir="${proj_root}\dist"/>
+	    <war destfile="${proj_root}\dist\PafServer.war" basedir="${local_web}" webxml="${local_web}\WEB-INF\web.xml"  />
+	</target>			
+	
+	<target name="stage-installation" depends="make-war, update-all-config">
+		<echo>"Deleting files."</echo>
+		<delete dir="${install_stg_root}\conf" />
+		<delete dir="${install_stg_root}\conf_server" />		
+		<delete dir="${install_war}" />
+		
+		<echo>"Copying files to installation staging area."</echo>
+		
+		<echo>"Configuration files."</echo>
+		
+	    <mkdir dir="${install_stg_root}\conf"/>
+		<copy todir="${install_stg_root}\conf">
+			<fileset dir="${proj_root}\conf" />
+		</copy>
+	
+	    <mkdir dir="${install_stg_root}\conf_server"/>
+		<copy todir="${install_stg_root}\conf_server">
+			<fileset dir="${proj_root}\conf_server" />
+		</copy>		
+		
+		<echo>"Pace server code."</echo>		
+		<copy todir="${install_war}">
+			<fileset dir="${dev_web}" />
+		</copy>
+		
+		<echo>"Bin dependent jars."</echo>
+		<copy 
+			file="${install_war}\WEB-INF\lib\paf_base.jar"
+			todir="${install_stg_root}\lib" />
+		
+		<echo>"Autoupdate installs."</echo>
+		<copy
+			file="${setup_build_client}\setup.exe"
+			todir="${install_stg_client}" />
+
+		<echo>"Redistributable war."</echo>
+		<copy
+			file="${proj_root}\dist\PafServer.war"
+			todir="${install_stg_root}\redist\war" />		
+		
+<!--
+		<echo>"Redistributable Essbase jars."</echo>
+		<copy todir="${install_stg_root}\redist\essbase">
+			<fileset dir="${app_install}\redist\essbase" />
+		</copy>		
+-->		
+		
+		<echo>"Pace Installation Files Staged."</echo>		
+		
+	</target>	
+
+	<target name="clean-essbase" description="remove the esssbase class files">
+		<echo>Removing Essbase Class Files.....</echo>
+		<delete dir="${esb_deployed_class_path}" failonerror="true" />	
+	</target>
+	
+	
+</project>

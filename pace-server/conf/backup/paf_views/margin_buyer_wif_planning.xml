@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>Margin Buyer WIF Planning Sect</string>
+  </viewSectionNames>
+  <name>Margin Buyer WIF Planning</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

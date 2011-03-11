@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>WSSI H2 Stores Sect</string>
+  </viewSectionNames>
+  <name>WSSI H2 Stores</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

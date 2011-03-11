@@ -1,0 +1,99 @@
+<RuleSet xmlns="http://www.thepalladiumgroup.com/paf_rule_set">
+  <name>DUA</name>
+  <measureList>
+    <string>Measures</string>  
+    <string>SLS_DLR</string>
+    <string>SLS_U</string>
+    <string>SLS_AUR</string>
+  </measureList>
+   
+  <ruleGroups>
+  
+    <!-- Used in TTHs on 4/26/08 Do not update -->  
+ 
+   <!-- TEST LUE TO BE SURE IT CAUSES UNITS TO LOCK AND ALLOCATE IN RESPONSE
+   		TO AN UPPER LEVEL CHANGE TO SLS DLR -->
+ 
+    <RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>SLS_DLR</resultTerm>
+            <expression>SLS_U * SLS_AUR</expression>
+          </formula>
+         </Rule> 
+        <Rule>
+          <formula>
+            <resultTerm>SLS_U</resultTerm>
+            <expression>SLS_DLR / SLS_AUR</expression>
+          </formula>
+          <lockUserEvaluationResult>true</lockUserEvaluationResult>                    
+        </Rule>         
+       <Rule>
+          <formula>
+            <resultTerm>SLS_AUR</resultTerm>
+            <expression>SLS_DLR / SLS_U</expression>
+          </formula>
+        </Rule>              
+      </rules>
+    </RuleGroup>
+    
+    <!-- CONTROL TEST TO VERIFY THAT A CHANGE TO SLS DLR AT AN UPPER LEVEL WILL
+   		NOT HOLD WITHOUT THE LUE EVAL TAG 
+  
+    <RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>SLS_DLR</resultTerm>
+            <expression>SLS_U * SLS_AUR</expression>
+          </formula>
+         </Rule> 
+        <Rule>
+          <formula>
+            <resultTerm>SLS_U</resultTerm>
+            <expression>SLS_DLR / SLS_AUR</expression>
+          </formula>
+        </Rule>         
+       <Rule>
+          <formula>
+            <resultTerm>SLS_AUR</resultTerm>
+            <expression>SLS_DLR / SLS_U</expression>
+          </formula>
+        </Rule>              
+      </rules>
+    </RuleGroup>
+ 
+-->   
+
+  <!-- TEST LUE IN A PERPETUAL RULEGROUP -->
+  <!-- DOES NOT WORK AS OF 2.1.39.4  SLS AUR DOES NOT RECALC EITHER  
+  
+    <RuleGroup>
+     <perpetual>true</perpetual> 	 	 	    
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>SLS_DLR</resultTerm>
+            <expression>SLS_U * SLS_AUR</expression>
+          </formula>
+         </Rule> 
+        <Rule>
+          <formula>
+            <resultTerm>SLS_U</resultTerm>
+            <expression>SLS_DLR / SLS_AUR</expression>
+          </formula>
+          <lockUserEvaluationResult>true</lockUserEvaluationResult>                    
+        </Rule>         
+       <Rule>
+          <formula>
+            <resultTerm>SLS_AUR</resultTerm>
+            <expression>SLS_DLR / SLS_U</expression>
+          </formula>
+        </Rule>              
+      </rules>
+    </RuleGroup>
+ -->     
+    
+  </ruleGroups>
+</RuleSet>

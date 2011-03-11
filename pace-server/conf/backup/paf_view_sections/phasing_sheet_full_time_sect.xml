@@ -1,0 +1,140 @@
+<ViewSection>
+  <name>Phasing Sheet Full Time Sect</name>
+  <description></description>
+  <primaryFormattingAxis>0</primaryFormattingAxis>
+  <readOnly>false</readOnly>
+  <managed>false</managed>
+  <isEmpty>false</isEmpty>
+  <topOffset>0</topOffset>
+  <leftOffset>0</leftOffset>
+  <scaleUnit>CELL</scaleUnit>
+  <pafViewHeaders>
+    <ViewHeader>
+      <label>Phasing Sheet - @years</label>
+      <globalStyleName>Global Header Row Bold</globalStyleName>
+    </ViewHeader>
+    <ViewHeader>
+      <label>@USER_SEL(STORE_SNGL_SEL)</label>
+      <globalStyleName>Global Header Row Bold</globalStyleName>
+    </ViewHeader>
+    <ViewHeader>
+      <label>@USER_SEL(SEASON_SNGL_SEL)</label>
+      <globalStyleName>Global Header Row Bold</globalStyleName>
+    </ViewHeader>
+    <ViewHeader>
+      <label>@USER_SEL(MERCH_SNGL_SEL)</label>
+      <globalStyleName>Global Header Row Bold</globalStyleName>
+    </ViewHeader>
+    <ViewHeader>
+      <label>All numbers are in £ thousands</label>
+      <globalStyleName>Global Header Row Bold</globalStyleName>
+    </ViewHeader>
+  </pafViewHeaders>
+  <rowAxisDims>
+    <string>time</string>
+  </rowAxisDims>
+  <colAxisDims>
+    <string>accounts</string>
+    <string>version</string>
+  </colAxisDims>
+  <rowTuples>
+    <ViewTuple>
+      <headerGlobalStyleName>Global Header Row</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@IDESC(@UOW_ROOT)</string>
+      </memberDefs>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+  </rowTuples>
+  <colTuples>
+    <ViewTuple>
+      <headerGlobalStyleName>Global Header Column</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@MEMBERS(sales_spti, realised_md, realised_md_%, csm, csm%_spte)</string>
+        <string>@MEMBERS(@PLAN_VERSION, LY, @PLAN_VERSIONvsLY.Variance%)</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+      </symetricGroupNo>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+    <ViewTuple>
+      <headerGlobalStyleName>Global Header Column</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>0</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <plannable>false</plannable>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>vat_%</string>
+        <string>@PLAN_VERSION</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>1</int>
+      </symetricGroupNo>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+    <ViewTuple>
+      <headerGlobalStyleName>Global Header Column</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@MEMBERS(intake%_margin, vat_%_input)</string>
+        <string>@PLAN_VERSION</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>2</int>
+      </symetricGroupNo>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+  </colTuples>
+  <pageTuples>
+    <PageTuple>
+      <axis>brand</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>location</axis>
+      <member>@USER_SEL(STORE_SNGL_SEL)</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>merchandise</axis>
+      <member>@USER_SEL(MERCH_SNGL_SEL)</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>plantype</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>seasonality</axis>
+      <member>@USER_SEL(SEASON_SNGL_SEL)</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>years</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+  </pageTuples>
+  <isCompressed>false</isCompressed>
+  <isSuppressed>false</isSuppressed>
+</ViewSection>

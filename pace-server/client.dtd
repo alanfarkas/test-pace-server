@@ -1,0 +1,6 @@
+<!ELEMENT configuration (#PCDATA | wsdl)*>  
+<!ATTLIST configuration xmlns CDATA #IMPLIED>
+<!ELEMENT wsdl (#PCDATA) >
+<!ATTLIST wsdl location CDATA #IMPLIED>
+<!ATTLIST wsdl packageName CDATA #IMPLIED>
+

@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>WF Var Version Test</string>
+  </viewSectionNames>
+  <name>WF Var Version Test</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <pageOrientation>Landscape</pageOrientation>
+  <pagesTall>1</pagesTall>
+  <pagesWide>1</pagesWide>
+</PafView>

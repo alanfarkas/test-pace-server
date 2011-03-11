@@ -1,0 +1,15 @@
+<PafView>
+  <viewSectionNames>
+    <string>Contrib % All Dims with CZ Attribute vs</string>
+  </viewSectionNames>
+  <name>Contrib % All Dims with CZ Attribute</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <pageOrientation>Landscape</pageOrientation>
+  <pagesTall>1</pagesTall>
+  <pagesWide>1</pagesWide>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

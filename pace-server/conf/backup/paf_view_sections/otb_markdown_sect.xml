@@ -1,0 +1,149 @@
+<ViewSection>
+  <name>OTB Markdown Sect</name>
+  <description>OTB Markdown Planning</description>
+  <primaryFormattingAxis>0</primaryFormattingAxis>
+  <readOnly>false</readOnly>
+  <managed>false</managed>
+  <isEmpty>false</isEmpty>
+  <topOffset>0</topOffset>
+  <leftOffset>0</leftOffset>
+  <scaleUnit>CELL</scaleUnit>
+  <pafViewHeaders>
+    <ViewHeader>
+      <label>@time @years</label>
+      <globalStyleName>Global Header Row Bold</globalStyleName>
+    </ViewHeader>
+    <ViewHeader>
+      <label>@USER_SEL(STORE_SEL)</label>
+      <globalStyleName>Global Header Row Bold</globalStyleName>
+    </ViewHeader>
+    <ViewHeader>
+      <label>All numbers are in £ thousands</label>
+      <globalStyleName>Global Header Row Bold</globalStyleName>
+    </ViewHeader>
+  </pafViewHeaders>
+  <rowAxisDims>
+    <string>location</string>
+    <string>seasonality</string>
+    <string>accounts</string>
+  </rowAxisDims>
+  <colAxisDims>
+    <string>merchandise</string>
+    <string>version</string>
+  </colAxisDims>
+  <rowTuples>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Global Header Row</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <plannable>false</plannable>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@USER_SEL(STORE_SEL)</string>
+        <string>@MEMBERS(all_seasons)</string>
+        <string>@MEMBERS(sales_spti, actioned_md_spti, actioned_md%_spti, clearance, clearance_%, promo, promo_%, pchange_up, pchange_up_%, pchange_down, pchange_down_%, pos, pos_%, other, other_%)</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+        <int>0</int>
+      </symetricGroupNo>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Global Header Row</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@USER_SEL(STORE_SEL)</string>
+        <string>@MEMBERS(ss)</string>
+        <string>@MEMBERS(sales_inseason, markdown_sales_spti, actioned_md_spti, actioned_md%_spti, clearance, clearance_%, promo, promo_%, pchange_up, pchange_up_%, pchange_down, pchange_down_%, pos, pos_%, other, other_%)</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+        <int>1</int>
+      </symetricGroupNo>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Global Header Row</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@USER_SEL(STORE_SEL)</string>
+        <string>@MEMBERS(aw, continuity, last_season_and_older, other_season)</string>
+        <string>@MEMBERS(sales_spti, actioned_md_spti, actioned_md%_spti, clearance, clearance_%, promo, promo_%, pchange_up, pchange_up_%, pchange_down, pchange_down_%, pos, pos_%, other, other_%)</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+        <int>2</int>
+      </symetricGroupNo>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+  </rowTuples>
+  <colTuples>
+    <ViewTuple>
+      <dataGlobalStyleName>Data</dataGlobalStyleName>
+      <headerGlobalStyleName>Global Header Column</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>@CHILDREN(@UOW_ROOT)</string>
+        <string>@MEMBERS(@PLAN_VERSION, LY, @PLAN_VERSIONvsLY.Variance%)</string>
+      </memberDefs>
+      <symetricGroupNo>
+        <int>0</int>
+      </symetricGroupNo>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+  </colTuples>
+  <pageTuples>
+    <PageTuple>
+      <axis>plantype</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>years</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>time</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>brand</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+  </pageTuples>
+  <isCompressed>false</isCompressed>
+  <isSuppressed>false</isSuppressed>
+</ViewSection>

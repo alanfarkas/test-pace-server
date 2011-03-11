@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>Gross Margin Planning</string>
+  </viewSectionNames>
+  <name>Gross Margin Planning</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <pageOrientation>Landscape</pageOrientation>
+  <pagesTall>1</pagesTall>
+  <pagesWide>1</pagesWide>
+</PafView>

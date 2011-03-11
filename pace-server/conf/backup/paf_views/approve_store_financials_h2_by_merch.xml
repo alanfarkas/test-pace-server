@@ -1,0 +1,12 @@
+<PafView>
+  <viewSectionNames>
+    <string>Approve Store Financials H2 by Merch Sect</string>
+  </viewSectionNames>
+  <name>Approve Store Financials H2 by Merch</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>
