@@ -28,13 +28,16 @@
 	<target name="libraries">
 		<echo>"Running builds for dependent libraries"</echo>
 		<ant antfile="build.xml"
-			dir="${wrksp_root}\Paf Base Libraries" target="deploy"/>	
+			dir="${wrksp_root}\pace-base" target="deploy"/>	
 		<ant antfile="build.xml"
-			dir="${wrksp_root}\Essbase Provider" target="deploy"/>		
+			dir="${wrksp_root}\pace-prvdr-mdb-esb" target="deploy"/>	
+		
+		<!--
 		<ant antfile="build.xml"
-			dir="${wrksp_root}\PafCustomCommands" target="deploy"/>
+			dir="${wrksp_root}\pace-ext-cmds" target="deploy"/>
 		<ant antfile="build.xml"
-			dir="${wrksp_root}\PafCustomFunctions" target="deploy"/>
+			dir="${wrksp_root}\pace-ext-funcs" target="deploy"/>
+		-->
 	</target>	
 	
 	<target name="assign-essbase">

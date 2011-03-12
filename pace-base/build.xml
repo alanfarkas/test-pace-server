@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="Paf Base Libraries" default="deploy" basedir=".">
+<project name="pace-base-libraries" default="deploy" basedir=".">
 	
 	<property name="wrksp_root" location="${basedir}\.." />
 	<property name="proj_root" location="${basedir}" />
-	<property name="server_proj_root" location="${wrksp_root}\PafServer" />	
+	<property name="server_proj_root" location="${wrksp_root}\pace-server" />	
 
 	<property name = "local_web" location = "${server_proj_root}\WebRoot" />
 	<property name = "dev_web" location = "\appservers\jboss-4.0.2\server\default\deploy\PafServer.war" />
-	<property name = "bin" location = "bin" />
+	<property name = "bin" location = "target" />
 	<property name = "dist" location = "dist" />
 
 
@@ -18,10 +18,10 @@
 	    <mkdir dir="${dist}"/>
 		
 	    <!-- Building Jar file -->
-	    <jar jarfile="${dist}/paf_base.jar" basedir="${bin}"/>
+	    <jar jarfile="${dist}/pace-base.jar" basedir="${bin}"/>
 		
 		<echo>"Deploying Jar file to local web server"</echo>
-		<copy todir="${server_proj_root}\WebRoot\web-inf\lib" file = "${dist}/paf_base.jar"/> 	
-		<copy todir="${server_proj_root}\client\dist" file = "${dist}/paf_base.jar"/> 			
+		<copy todir="${server_proj_root}\WebRoot\web-inf\lib" file = "${dist}/pace-base.jar"/> 	
+		<copy todir="${server_proj_root}\client\dist" file = "${dist}/pace-base.jar"/> 			
 	</target>
 </project>

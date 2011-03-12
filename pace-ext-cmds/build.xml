@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="PafCustomCommands" default="deploy" basedir=".">
-	<property name = "proj_root" location = "\proj_wrksp\eclipse\PafServer" />
+
+	<property name="wrksp_root" location="${basedir}\.." />
+	<property name="proj_root" location="${basedir}" />
+	<property name="server_proj_root" location="${wrksp_root}\pace-server" />	
+	
 	<property name = "local_web" location = "${proj_root}\WebRoot" />
 	<property name = "src" location = "..\src" />
-	<property name = "bin" location = "bin" />
+	<property name = "bin" location = "target" />
 	<property name = "dist" location = "dist" />
 
 
