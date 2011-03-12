@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="Essbase Provider" default="deploy" basedir=".">
+<project name="pace-prvdr-mdb-esb" default="deploy" basedir=".">
 	
 	<property name="debuglevel" value="source,lines,vars"/>
 	<property name="target" value="1.5"/>
@@ -42,11 +42,11 @@
 	<path id="Log4j 1.2.9.userclasspath">
 		<pathelement location="/java/userlib/log4j 1.2.9/dist/lib/log4j-1.2.9.jar"/>
 	</path>
-	<path id="Essbase Provider.classpath">
+	<path id="pace-prvdr-mdb-esb.classpath">
 	    <pathelement location="${redist}"/>
 	    <path refid="Log4j 1.2.9.userclasspath"/>
 	    <path refid="Junit.userclasspath"/>
-	    <pathelement location="${Paf Base Libraries.location}/target"/>
+	    <pathelement location="${Paf Base Libraries.location}/dist"/>
 	</path>
 
 
@@ -91,7 +91,10 @@
 			<!-- Compile Essbase Provider -->
   			<echo>"Compiling Essbase @{esb.ver} Provider"</echo>
         	<echo message="${ant.project.name}: ${ant.file}"/>
-        	<mkdir dir="${driver-bin}"/>		
+        	<mkdir dir="${driver-bin}"/>	
+			<echo message="Compile Source: ${src}"/>
+			<echo message="${ant.project.name}.classpath"/>
+			<echo message="EDS @{esb.ver}.userclasspath"/>
         	<javac debug="true" debuglevel="${debuglevel}" destdir="${driver-bin}" source="${source}" target="${target}">
          		<src path="${src}"/>
          		<classpath refid="${ant.project.name}.classpath"/>
