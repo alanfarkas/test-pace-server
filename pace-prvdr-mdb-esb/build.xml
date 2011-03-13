@@ -46,8 +46,9 @@
 	    <pathelement location="${redist}"/>
 	    <path refid="Log4j 1.2.9.userclasspath"/>
 	    <path refid="Junit.userclasspath"/>
-	    <pathelement location="${Paf Base Libraries.location}/dist"/>
+	    <pathelement location="/proj_wrksp/eclipse/pace-base/target/classes"/>
 	</path>
+	
 
 
 	<target name="check_env" description="Checks if ant build is being run from eclipse">
@@ -93,21 +94,30 @@
         	<echo message="${ant.project.name}: ${ant.file}"/>
         	<mkdir dir="${driver-bin}"/>	
 			<echo message="Compile Source: ${src}"/>
-			<echo message="${ant.project.name}.classpath"/>
-			<echo message="EDS @{esb.ver}.userclasspath"/>
-        	<javac debug="true" debuglevel="${debuglevel}" destdir="${driver-bin}" source="${source}" target="${target}">
+			<echo message="Ant Project Classpath: ${ant.project.name}.classpath"/>
+			<echo message="EDS Classpath Key: EDS @{esb.ver}.userclasspath"/>
+			<echo message="Base Libraries Classpath: ${Paf Base Libraries.location}\dist"/>
+        	<javac debug="true" debuglevel="${debuglevel}" 
+        		destdir="${driver-bin}" source="${source}" target="${target}">
          		<src path="${src}"/>
-         		<classpath refid="${ant.project.name}.classpath"/>
+        		<!--        		
+        		<classpath location="/proj_wrksp/eclipse/pace-base/target/classes"/>
+
+        		<classpath refid="pace-prvdr-mdb-esb.classpath"/>     
+-->
+        		
+        		<classpath refid="${ant.project.name}.classpath"/>
            		<classpath refid="EDS @{esb.ver}.userclasspath"/>       	
-       		</javac>
+
+        	</javac>
  
 			<!-- Create the distribution directory -->
         	<mkdir dir="${dist}"/>
         	<!-- Building Jar file -->
-        	<jar jarfile="${dist}/esbprv.jar" basedir="${driver-bin}" excludes="*.properties" />
+        	<jar jarfile="${dist}/${ant.project.name}-@{esb.ver}.jar" basedir="${driver-bin}" excludes="*.properties" />
         	<echo>"Deploying Essbase @{esb.ver} Provider Jar file to redist directory"</echo>
 <!--        	<copy todir="${esb_local_driver_path}\@{esb.ver}\" file = "${dist}/esbprv.jar"/> -->
-	       	<copy todir="${esb_redist_dir}\@{esb.ver}\" file = "${dist}/esbprv.jar"/> 
+	       	<copy todir="${esb_redist_dir}\@{esb.ver}\\" file = "${dist}/${ant.project.name}-@{esb.ver}.jar"/> 
 	
         	<!-- Remove the driver bin folder -->
 			<delete dir="${driver-bin}" failonerror="false" />
@@ -117,9 +127,9 @@
 
 	<target name="deploy_local_web" description="Deploy Essbase Provider (version: @{esb.ver} to Local Web">
 			<!-- Deploy essbase provider that is compiled with default project's version of ess_japi.jar -->
-			<jar jarfile="${dist}/esbprv.jar" basedir="${bin}"/>
+			<jar jarfile="${dist}/${ant.project.name}.jar" basedir="${bin}"/>
 			<echo>"Deploying Essbase Provider Jar file to local web server"</echo>
-			<copy todir="${local_web}\web-inf\lib" file = "${dist}/esbprv.jar"/> 	
+			<copy todir="${local_web}\web-inf\lib" file = "${dist}/${ant.project.name}.jar"/> 	
 	</target>
 
 
