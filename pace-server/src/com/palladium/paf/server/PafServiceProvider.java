@@ -69,7 +69,7 @@ import com.palladium.paf.server.comm.*;
  *
  */
 
-@WebService(endpointInterface="com.pace.base.server.IPafService")
+@WebService(endpointInterface="com.palladium.paf.server.IPafService")
 
 public class PafServiceProvider implements IPafService {
 
