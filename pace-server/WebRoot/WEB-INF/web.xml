@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee   http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+ <context-param>
+  <param-name>contextConfigLocation</param-name>
+  <param-value>WEB-INF/beans.xml</param-value>
+ </context-param>
+ <listener>
+  <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+ </listener>
+ <servlet>
+  <display-name>CXF Servlet</display-name>
+  <servlet-name>CXFServlet</servlet-name>
+  <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
+ </servlet>
+ <servlet>
+  <description>This servlet loads caches and performs other time consuming initialization tasks for the webservice</description>
+  <display-name>Paf Initialization Servlet</display-name>
+  <servlet-name>PafInitServlet</servlet-name>
+  <servlet-class>com.palladium.paf.server.PafInitServlet</servlet-class>
+  <load-on-startup>1</load-on-startup>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>CXFServlet</servlet-name>
+  <url-pattern>/*</url-pattern>
+ </servlet-mapping>
+ <servlet-mapping>
+  <servlet-name>PafInitServlet</servlet-name>
+  <url-pattern>/servlet/PafInitServlet</url-pattern>
+ </servlet-mapping>
+ <login-config>
+  <auth-method>BASIC</auth-method>
+ </login-config>
+ <env-entry>
+  <env-entry-name>pace/paceHome</env-entry-name>
+  <env-entry-type>java.lang.String</env-entry-type>
+  <env-entry-value>..\..</env-entry-value>
+ </env-entry>
+</web-app>
