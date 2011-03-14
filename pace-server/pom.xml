@@ -60,11 +60,6 @@
   		<version>1.0</version>
 	</dependency>
     <dependency>
-    	<groupId>spring</groupId>
-    	<artifactId>spring</artifactId>
-    	<version>1.0.2</version>
-    </dependency>
-    <dependency>
     	<groupId>junit</groupId>
     	<artifactId>junit</artifactId>
     	<version>4.8.2</version>
@@ -78,6 +73,17 @@
     	<groupId>org.ostermiller</groupId>
     	<artifactId>utils</artifactId>
     	<version>1.07.00</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring</artifactId>
+    	<version>2.5.6.SEC02</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.cxf</groupId>
+    	<artifactId>apache-cxf</artifactId>
+    	<version>2.3.3</version>
+    	<type>pom</type>
     </dependency>
   </dependencies>
   <build>
