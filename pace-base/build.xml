@@ -7,7 +7,7 @@
 
 	<property name = "local_web" location = "${server_proj_root}\WebRoot" />
 	<property name = "dev_web" location = "\appservers\jboss-4.0.2\server\default\deploy\PafServer.war" />
-	<property name = "bin" location = "target" />
+	<property name = "bin" location = "target\classes" />
 	<property name = "dist" location = "dist" />
 
 

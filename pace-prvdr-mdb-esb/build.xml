@@ -15,7 +15,7 @@
 	<property name="esb_deployed_driver_path" location="${dev_web}\${esb_driver_dir}"/>
     <property name="src" location="src/main/java"/>
     <property name="dist" location="dist" />
-	<property name="bin" location="target" />
+	<property name = "bin" location = "target\classes" />
    	<property name="driver-bin" location="driver-bin" />
 	<property name="PBL.proj.key" value="pace-base"/>	
 	<property name="Paf Base Libraries.location" location="../${PBL.proj.key}"/>	
@@ -46,7 +46,7 @@
 	    <pathelement location="${redist}"/>
 	    <path refid="Log4j 1.2.9.userclasspath"/>
 	    <path refid="Junit.userclasspath"/>
-	    <pathelement location="/proj_wrksp/eclipse/pace-base/target/classes"/>
+	    <pathelement location="/proj_wrksp/eclipse/pace-base/dist"/>
 	</path>
 	
 
