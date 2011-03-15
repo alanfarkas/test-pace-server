@@ -7,7 +7,7 @@
       <enableButton>false</enableButton>
       <customActionDefs>
         <CustomActionDef>
-          <actionClassName>com.palladium.paf.cc.EsbCalcCmd</actionClassName>
+          <actionClassName>com.pace.ext.cmds.EsbCalcCmd</actionClassName>
           <actionNamedParameters>
             <string>datasourceId=Titan</string>
             <string>calcscript=tSubCls</string>            
@@ -31,7 +31,7 @@
     <enableButton>false</enableButton>
     <customActionDefs>
       <CustomActionDef>
-        <actionClassName>com.palladium.paf.cc.ExecProcess</actionClassName>
+        <actionClassName>com.pace.ext.cmds.ExecProcess</actionClassName>
         <actionNamedParameters>
           <string>pathToProcess=c:\windows\</string>
           <string>processToRun=notepad.exe</string>
@@ -52,7 +52,7 @@
       <enableButton>false</enableButton>
       <customActionDefs>
         <CustomActionDef>
-          <actionClassName>com.palladium.paf.cc.EsbCalcCmd</actionClassName>
+          <actionClassName>com.pace.ext.cmds.EsbCalcCmd</actionClassName>
           <actionNamedParameters>
             <string>datasourceId=Titan</string>
             <string>calcscript=tAppCls</string>     
@@ -78,7 +78,7 @@
       <enableButton>false</enableButton>
       <customActionDefs>
         <CustomActionDef>
-          <actionClassName>com.palladium.paf.cc.EsbCalcCmd</actionClassName>
+          <actionClassName>com.pace.ext.cmds.EsbCalcCmd</actionClassName>
           <actionNamedParameters>
             <string>datasourceId=Titan</string>
             <string>calcscript=tRejCls</string>     
@@ -105,7 +105,7 @@
       <enableButton>false</enableButton>
       <customActionDefs>
         <CustomActionDef>
-          <actionClassName>com.palladium.paf.cc.EsbCalcCmd</actionClassName>
+          <actionClassName>com.pace.ext.cmds.EsbCalcCmd</actionClassName>
           <actionNamedParameters>
             <string>datasourceId=Titan</string>
             <string>calcscript=AggUow</string>            

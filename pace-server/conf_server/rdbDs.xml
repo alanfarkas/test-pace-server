@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="pafDB" class="com.palladium.paf.db.RdbProps">
+	<bean id="pafDB" class="com.pace.base.db.RdbProps">
 		<property name="hibernateProperties">
 			<props>
 				
@@ -38,7 +38,7 @@
 		</property>
 	</bean>
 
-	<bean id="pafClientCache" class="com.palladium.paf.db.RdbProps">
+	<bean id="pafClientCache" class="com.pace.base.db.RdbProps">
 		<property name="hibernateProperties">
 			<props>
 				
@@ -73,7 +73,7 @@
 		</property>
 	</bean>
 
-	<bean id="pafExtAttr" class="com.palladium.paf.db.RdbProps">
+	<bean id="pafExtAttr" class="com.pace.base.db.RdbProps">
 		<property name="hibernateProperties">
 			<props>
 				
@@ -97,7 +97,7 @@
 		</property>
 	</bean>
 	
-	<bean id="pafSecurity" class="com.palladium.paf.db.RdbProps">
+	<bean id="pafSecurity" class="com.pace.base.db.RdbProps">
 		<property name="hibernateProperties">
 			<props>
 				

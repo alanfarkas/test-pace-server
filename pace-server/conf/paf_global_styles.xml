@@ -2,26 +2,26 @@
   <no-comparator/>
   <entry>
     <string>Bold Gold</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Gold</name>
       <bold>true</bold>
       <bgHexFillColor>FFCC00</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Gray</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Gray</name>
       <fontName>Arial</fontName>
       <bold>true</bold>
       <size>10</size>
       <bgHexFillColor>C0C0C0</bgHexFillColor>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Gray Double Underline</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Gray Double Underline</name>
       <fontName>Arial</fontName>
       <bold>true</bold>
@@ -29,120 +29,120 @@
       <size>10</size>
       <bgHexFillColor>C0C0C0</bgHexFillColor>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Hot Pink</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Hot Pink</name>
       <bold>true</bold>
       <bgHexFillColor>FF99CC</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Light Blue</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Light Blue</name>
       <bold>true</bold>
       <bgHexFillColor>99CCFF</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Light Cyan</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Light Cyan</name>
       <bold>true</bold>
       <bgHexFillColor>CCFFFF</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Magenta</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Magenta</name>
       <bold>true</bold>
       <bgHexFillColor>FF00FF</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Medium Blue</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Medium Blue</name>
       <bold>true</bold>
       <bgHexFillColor>0000FF</bgHexFillColor>
       <fontHexColor>FFFFFF</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Medium Turquoise</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Medium Turquoise</name>
       <bold>true</bold>
       <bgHexFillColor>33CCCC</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Only</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Only</name>
       <bold>true</bold>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold SeaGreen</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold SeaGreen</name>
       <bold>true</bold>
       <bgHexFillColor>339966</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Sky Blue</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Sky Blue</name>
       <bold>true</bold>
       <bgHexFillColor>00CCFF</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Tan</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Tan</name>
       <bold>true</bold>
       <bgHexFillColor>FFCC99</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Bold Teal</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Bold Teal</name>
       <bold>true</bold>
       <bgHexFillColor>008080</bgHexFillColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Data</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Data</name>
       <fontName>Arial</fontName>
       <alignment/>
       <size>10</size>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Data Bold</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Data Bold</name>
       <fontName>Arial</fontName>
       <alignment/>
       <bold>true</bold>
       <size>10</size>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Header Center 10pt</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Header Center 10pt</name>
       <fontName>Arial</fontName>
       <alignment>
@@ -152,11 +152,11 @@
       <size>10</size>
       <bgHexFillColor>99CCFF</bgHexFillColor>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Header Center 14pt</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Header Center 14pt</name>
       <fontName>Arial</fontName>
       <alignment>
@@ -166,11 +166,11 @@
       <size>14</size>
       <bgHexFillColor>99CCFF</bgHexFillColor>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Header Left 10pt</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Header Left 10pt</name>
       <fontName>Arial</fontName>
       <alignment/>
@@ -178,11 +178,11 @@
       <size>10</size>
       <bgHexFillColor>99CCFF</bgHexFillColor>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Header Left 12pt</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Header Left 12pt</name>
       <fontName>Arial</fontName>
       <alignment/>
@@ -190,11 +190,11 @@
       <size>12</size>
       <bgHexFillColor>99CCFF</bgHexFillColor>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Header Left 14pt</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Header Left 14pt</name>
       <fontName>Arial</fontName>
       <alignment/>
@@ -202,11 +202,11 @@
       <size>14</size>
       <bgHexFillColor>99CCFF</bgHexFillColor>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
   <entry>
     <string>Header Right 10pt</string>
-    <com.palladium.paf.view.PafStyle>
+    <PafStyle>
       <name>Header Right 10pt</name>
       <fontName>Arial</fontName>
       <alignment>
@@ -216,6 +216,6 @@
       <size>10</size>
       <bgHexFillColor>99CCFF</bgHexFillColor>
       <fontHexColor>000000</fontHexColor>
-    </com.palladium.paf.view.PafStyle>
+    </PafStyle>
   </entry>
 </tree-map>

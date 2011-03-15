@@ -1,55 +1,55 @@
 <CustomFunctionDef-array xmlns="http://www.thepalladiumgroup.com/paf_functions">
     <CustomFunctionDef>
         <functionName>@CUMCOUNT</functionName>
-        <className>com.palladium.paf.cf.CUMCountFunc</className>
+        <className>com.pace.ext.funcs.CUMCountFunc</className>
     </CustomFunctionDef>    
     <CustomFunctionDef>
         <functionName>@IF</functionName>
-        <className>com.palladium.paf.cf.IFFunc</className>
+        <className>com.pace.ext.funcs.IFFunc</className>
     </CustomFunctionDef>    
     <CustomFunctionDef>
         <functionName>@IWOS</functionName>
-        <className>com.palladium.paf.cf.IWOSFunc</className>
+        <className>com.pace.ext.funcs.IWOSFunc</className>
     </CustomFunctionDef>    
     <CustomFunctionDef>
         <functionName>@RELATIVECOUNT</functionName>
-        <className>com.palladium.paf.cf.RelativeCountFunc</className>
+        <className>com.pace.ext.funcs.RelativeCountFunc</className>
     </CustomFunctionDef>    
     <CustomFunctionDef>
         <functionName>@WOS</functionName>
-        <className>com.palladium.paf.cf.WOSFunc</className>
+        <className>com.pace.ext.funcs.WOSFunc</className>
     </CustomFunctionDef>
     <CustomFunctionDef>
         <functionName>@ABS</functionName>
-        <className>com.palladium.paf.funcs.F_Abs</className>
+        <className>com.pace.base.funcs.F_Abs</className>
     </CustomFunctionDef>
     <CustomFunctionDef>
         <functionName>@BOP</functionName>
-        <className>com.palladium.paf.funcs.F_Bop</className>
+        <className>com.pace.base.funcs.F_Bop</className>
     </CustomFunctionDef>
     <CustomFunctionDef>
         <functionName>@CROSSDIM</functionName>
-        <className>com.palladium.paf.funcs.F_CrossDim</className>
+        <className>com.pace.base.funcs.F_CrossDim</className>
     </CustomFunctionDef>
     <CustomFunctionDef>
         <functionName>@CUM</functionName>
-        <className>com.palladium.paf.funcs.F_Cum</className>
+        <className>com.pace.base.funcs.F_Cum</className>
     </CustomFunctionDef>
     <CustomFunctionDef>
         <functionName>@NEXT</functionName>
-        <className>com.palladium.paf.funcs.F_Next</className>
+        <className>com.pace.base.funcs.F_Next</className>
     </CustomFunctionDef>
     <CustomFunctionDef>
         <functionName>@PREV</functionName>
-        <className>com.palladium.paf.funcs.F_Prev</className>
+        <className>com.pace.base.funcs.F_Prev</className>
     </CustomFunctionDef>
     <CustomFunctionDef>
         <functionName>@PREV_CUM</functionName>
-        <className>com.palladium.paf.funcs.F_PrevCum</className>
+        <className>com.pace.base.funcs.F_PrevCum</className>
     </CustomFunctionDef>
     <CustomFunctionDef>
         <functionName>@TRIGGER_IS</functionName>
-        <className>com.palladium.paf.funcs.F_TriggerIntersection</className>
+        <className>com.pace.base.funcs.F_TriggerIntersection</className>
     </CustomFunctionDef>    
         
 </CustomFunctionDef-array>
