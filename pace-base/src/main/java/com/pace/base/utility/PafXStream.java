@@ -170,6 +170,7 @@ public class PafXStream {
 		xs.alias("Dimension", Dimension.class);
 		xs.alias("LevelFormat", LevelFormat.class);
 		xs.alias("GenFormat", GenFormat.class);
+		xs.alias("PafStyle", PafStyle.class);
 
 		xs.alias(CUSTOM_FUNCTION_DEF, CustomFunctionDef.class);
 		xs.alias("CustomActionDef", CustomActionDef.class);
