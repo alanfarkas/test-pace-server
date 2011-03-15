@@ -2,8 +2,8 @@
 <!DOCTYPE hibernate-mapping PUBLIC
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-       <hibernate-mapping>
-            <class name="com.palladium.paf.mdb.PafAttributeMember" table="PAF_ATTR_MBR" >
+       <hibernate-mapping package="com.pace.base.mdb">
+            <class name="PafAttributeMember" table="PAF_ATTR_MBR" >
                 <id column="member_id" type="int">
                 	<generator class="identity"/>
 		        </id>
@@ -13,12 +13,12 @@
                 <list name="Children" table="PAF_ATTR_MBR_CHILDREN" >
                     <key column="parent_id" not-null="true" />
                     <index column="position"/>
-                    <many-to-many column="child_id" class="com.palladium.paf.mdb.PafAttributeMember"/>
+                    <many-to-many column="child_id" class="PafAttributeMember"/>
                 </list>
                 
-                <many-to-one name="Parent" class="com.palladium.paf.mdb.PafAttributeMember" column="parent_id" />
+                <many-to-one name="Parent" class="PafAttributeMember" column="parent_id" />
          		
-                <component name="memberProps" class="com.palladium.paf.mdb.PafAttributeMemberProps" >
+                <component name="memberProps" class="PafAttributeMemberProps" >
                     <property name="LevelNumber" column="lvl_nmbr" type="int" not-null="true" />
                     <property name="GenerationNumber" column="gen_nmbr" type="int" not-null="true" />
                     

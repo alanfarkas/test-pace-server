@@ -2,14 +2,14 @@
 <!DOCTYPE hibernate-mapping PUBLIC
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<hibernate-mapping>
-    <class name="com.palladium.paf.mdb.PafBaseTree" table="PafMemberTree">
+<hibernate-mapping package="com.pace.base.mdb">
+    <class name="PafBaseTree" table="PafMemberTree">
         <id name="id" column="tree_id" />
-        <one-to-one name="rootNode" class="com.palladium.paf.mdb.PafBaseMember" cascade = "none" />
+        <one-to-one name="rootNode" class="PafBaseMember" cascade = "none" />
         <map name="Members" cascade="all, delete-orphan" >
             <key column ="member_tree_id" />
             <map-key column="member_tree_key" type="string" />
-            <one-to-many class="com.palladium.paf.mdb.PafBaseMember" />
+            <one-to-many class="PafBaseMember" />
         </map>    
         
         <map name="attributeDimInfo" table="ATTRIBUTETREEINFO" cascade="all, delete-orphan" >

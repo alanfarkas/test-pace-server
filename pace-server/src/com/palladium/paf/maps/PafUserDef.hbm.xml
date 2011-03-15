@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE hibernate-mapping PUBLIC
-        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-       <hibernate-mapping>
-            <class name="com.palladium.paf.app.PafUserDef" table="users">
-                <id name="userName" column="username" />
-                <property name="firstName" column="first_name" type="string" />
-                <property name="lastName" column="last_name" type="string" />
-                <property name="password" column="password" type="string" />
-                <property name="email" column="email" type="string" />  
-                <property name="admin" column="admin" type="true_false" />                                     
-                <property name="changePassword" column="change_password" type="true_false" />
-            </class>
-
-        </hibernate-mapping>
-        
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+                                   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.pace.base.app">
+ <class name="PafUserDef" table="users">
+  <id column="username" name="userName"/>
+  <property column="first_name" generated="never" lazy="false"
+   name="firstName" type="string"/>
+  <property column="last_name" generated="never" lazy="false"
+   name="lastName" type="string"/>
+  <property column="password" generated="never" lazy="false"
+   name="password" type="string"/>
+  <property column="email" generated="never" lazy="false" name="email" type="string"/>
+  <property column="admin" generated="never" lazy="false" name="admin" type="true_false"/>
+  <property column="change_password" generated="never" lazy="false"
+   name="changePassword" type="true_false"/>
+ </class>
+</hibernate-mapping>
