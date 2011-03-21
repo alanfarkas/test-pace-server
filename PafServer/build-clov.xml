@@ -397,8 +397,6 @@
 	<target name="clover.report" depends="with.clover" description="Produces the clover reports">
 	    <delete dir="${clover.web.dir}" failonerror="false" />
 	    <mkdir dir="${clover.web.dir}"/>
-	    <delete dir="${clover.report.dir}" failonerror="false" />
-	    <mkdir dir="${clover.report.dir}"/>
 		<clover-report>
 			<current outfile="${clover.web.dir}/clover.xml">
 				<format type="xml"/>
@@ -408,9 +406,13 @@
 		<clover-pdf-report	outfile="${clover.web.dir}/clover.pdf"
 							title="Pace Server">
 		</clover-pdf-report>
-		<clover-pdf-report	outfile="${clover.report.dir}/clover.pdf"
-							title="Pace Server">
-		</clover-pdf-report>
+
+		<!-- Copy clover reports to external reports directory -->
+		<delete dir="${clover.report.dir}" failonerror="false" />
+	    <mkdir dir="${clover.report.dir}"/>
+	    <copy todir="${clover.report.dir}">
+	        <fileset dir="${clover.web.dir}"/>
+	    </copy>
 	</target>
 
 	<!--   T A R G E T: clover.consolidated.report -->
