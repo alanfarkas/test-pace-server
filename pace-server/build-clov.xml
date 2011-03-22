@@ -365,7 +365,8 @@
 		<echo message="========================================="/>
 		<echo message="Project key : ${env.proj.key}"/>
 		<echo message="Branch key : ${env.branch.key}"/>
-		<echo message="Pace home : ${env.PACE_HOME}"/>
+		<echo message="Pace home : ${env.PACEHOME}"/>
+		<echo message="Pace test home : ${env.PACE_HOME}"/>
 		<echo message="Clover home : ${env.CLOVER_HOME}"/>
 		<echo message="Clover dir : ${env.CLOVER_DIR}"/>
 		<echo message=""/>
