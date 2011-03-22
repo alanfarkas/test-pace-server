@@ -214,7 +214,7 @@
 		<pathelement location="${userlib.path}/xstream-1.1.2/xstream-1.1.2/xstream-1.1.2.jar"/>
 		<pathelement location="${userlib.path}/xstream-1.1.2/xstream-1.1.2/lib/xpp3-1.1.3.4d_b4_min.jar"/>
 	</path>
-	<path id="Paf Base Libraries.classpath">
+	<path id="pace-base.classpath">
 	    <pathelement location="${Paf Base Libraries.location}/${bin}"/>
 		<pathelement path="${clover.jar}"/>
 	    <path refid="EDS 11.1.2.userclasspath"/>
@@ -228,21 +228,21 @@
 	    <path refid="POI 3.5.userclasspath"/>
 		<path refid="XStream 1.1.2.userclasspath"/>
 	</path>
-	<path id="Essbase Provider.classpath">
+	<path id="pace-prvdr-mdb-esb.classpath">
 	    <pathelement location="${Essbase Provider.location}/${bin}"/>
 	    <path refid="Paf Base Libraries.classpath"/>
 	</path>
-	<path id="PafCustomCommands.classpath">
+	<path id="pace-ext-cmds.classpath">
 	    <pathelement location="${PafCustomCommands.location}/${bin}"/>
 	    <path refid="Paf Base Libraries.classpath"/>
 	    <path refid="Essbase Provider.classpath"/>
 	</path>
-	<path id="PafCustomFunctions.classpath">
+	<path id="pace-ext-funcs.classpath">
 	    <pathelement location="${PafCustomFunctions.location}/${bin}"/>
 	    <path refid="Paf Base Libraries.classpath"/>
 	    <path refid="Essbase Provider.classpath"/>
 	</path>
-    <path id="PafServer.classpath">
+    <path id="pace-server.classpath">
 		<pathelement location="${PafServer.location}/${bin}"/>
         <path refid="XStream 1.1.2.userclasspath"/>
         <path refid="Jep.userclasspath"/>
