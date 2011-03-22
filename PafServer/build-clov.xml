@@ -156,6 +156,8 @@
 	</path>
 	<path id="EDS 11.1.2.userclasspath">
 	    <pathelement location="${userlib.path}/EDS 11.1.2/ess_japi.jar"/>
+	    <pathelement location="${userlib.path}/EDS 11.1.2/ess_es_server.jar"/>
+		<pathelement location="${userlib.path}/EDS 11.1.2/ojdl.jar"/>
 	</path>
 	<path id="Hibernate 3.2.userclasspath">
 		<pathelement location="${userlib.path}/hibernate-3.2/hibernate3.jar"/>
