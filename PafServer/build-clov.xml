@@ -8,35 +8,28 @@
 		ENVIRONMENT VARIABLES USED :
 		(System Environment Variables)
 			env.PACE_HOME - Pace home directory			
-			env.BAMBOO_HOME - Bamboo home directory			
-		(Supplied by Bamboo)
-			env.build.dir 	- Bamboo build directory
-			env.proj.key 	- Bamboo project key
-			env.branch.key 	- Pace Server code branch
-
+			env.CLOVER_HOME - Clover home 	
+			env.CLOVER_DIR - Clover directory 	
+			env.proj.key - Project key			
+			env.branch.key - Branch Key			
 			  
 		THIS ANT SCRIPT PEFORMS THE BUILD & TESTING OF THE FOLLOWING PAFSERVER PROJECTS: 
 		Essbase Provider, Paf Base Libraries, PafCustomCommands, PafCustomFunctions, and PafServer.
 		
-		THIS ANT SCRIPT IS INTENDED TO BE RUN FROM THE BAMBOO SERVER. IT CAN NOT BE RUN
+		THIS ANT SCRIPT IS INTENDED TO BE RUN FROM TEAM CITY. IT CAN NOT BE RUN
 		STAND-ALONE WITHOUT SUPPLING VALUES FOR THE ENVIRONMENT VARIABLES LISTED ABOVE.  
 	-->	
 	
 	<!--   P R O P E R T Y   S E T U P    -->		
 	<property environment="env"/>
-	<!-- For testing outside of Bamboo
-	<property name="env.proj.key" value="PACESRVR"/>
-	<property name="env.branch.key" value="DESPLAINES"/>
-	<property name="env.build.dir" value="${env.project.key}-${env.branch.key}"/>
-	-->
-<!--	<property name="env.PACE_HOME" value="/opt/pace-server-test-home"/>	-->
-	<property name="env.proj.key" value="PACESRVR"/>
-	<property name="env.branch.key" value="TRUNK"/>
-	<property name="userlib.path" value="${env.PACE_HOME}/userlib"/>	
-<!--
+	<!-- For testing outside of Team City
+	<property name="env.PACE_HOME" value="/opt/pace-server-test-home"/>
 	<property name="env.CLOVER_HOME" value="/opt/clover"/>
 	<property name="env.CLOVER_DIR" value="clover-ant-3.0.2"/>
--->
+	<property name="env.proj.key" value="PACESRVR"/>
+	<property name="env.branch.key" value="TRUNK"/>
+	-->
+	<property name="userlib.path" value="${env.PACE_HOME}/userlib"/>	
 	<property name="clover.snapshot.home" value="${env.CLOVER_HOME}/clover-snapshots"/>	
 	<property name="clover.report.home" value="${env.CLOVER_HOME}/clover-reports"/>	
 	<!-- -->
@@ -366,14 +359,13 @@
 	<target depends="clean.project" name="init.project">
 
 		<echo message="========================================="/>
-		<echo message="PafServer project : ${project.name}"/>
+		<echo message="Pace Server Project : ${project.name}"/>
 		<echo message="========================================="/>
-		<echo message="Pace home dir : ${env.PACE_HOME}"/>
-		<echo message="Bamboo home dir : ${env.BAMBOO_HOME}"/>
-		<echo message="Bamboo build dir : ${env.build.dir}"/>
-		<echo message="Bamboo project key : ${env.proj.key}"/>
-		<echo message="Bamboo branch key : ${env.branch.key}"/>
-		<echo message="Clover snapshot file : ${clover.custom.snapshot.file}"/>
+		<echo message="Project key : ${env.proj.key}"/>
+		<echo message="Branch key : ${env.branch.key}"/>
+		<echo message="Pace home : ${env.PACE_HOME}"/>
+		<echo message="Clover home : ${env.CLOVER_HOME}"/>
+		<echo message="Clover dir : ${env.CLOVER_DIR}"/>
 		<echo message=""/>
 
 	    <mkdir dir="${project.location}/${bin}"/>
