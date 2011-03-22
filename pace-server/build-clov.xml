@@ -26,6 +26,7 @@
 	<property name="env.PACE_HOME" value="/opt/pace-server-test-home"/>
 	<property name="env.CLOVER_HOME" value="/opt/clover"/>
 	<property name="env.CLOVER_DIR" value="clover-ant-3.0.2"/>
+	<property name="env.proj.name" value="PACESRVR-COVERAGE-TRUNK"/>
 	<property name="env.proj.key" value="PACESRVR"/>
 	<property name="env.branch.key" value="TRUNK"/>
 	-->
@@ -75,7 +76,9 @@
 	<!--	<property name="clover.snapshot.dir" value=".cloverhistory/Paf Base Libraries/"/> -->
 	<property name="clover.custom.snapshot.file" value="${clover.snapshot.dir}/clover.snapshot"/>
 	<property name="clover.web.dir" value="../clover"/>
-	<property name="clover.report.dir" value="${clover.report.home}/${env.proj.key}-${env.branch.key}"/>
+<!--	<property name="clover.report.dir" value="${clover.report.home}/${env.proj.key}-${env.branch.key}"/>
+-->
+	<property name="clover.report.dir" value="${clover.report.home}/${env.proj.name}"/>
 
 	<!--   End of Clover Properties  -->	
 
@@ -230,17 +233,17 @@
 	</path>
 	<path id="pace-prvdr-mdb-esb.classpath">
 	    <pathelement location="${Essbase Provider.location}/${bin}"/>
-	    <path refid="Paf Base Libraries.classpath"/>
+	    <path refid="${PBL.proj.key}.classpath"/>
 	</path>
 	<path id="pace-ext-cmds.classpath">
 	    <pathelement location="${PafCustomCommands.location}/${bin}"/>
-	    <path refid="Paf Base Libraries.classpath"/>
-	    <path refid="Essbase Provider.classpath"/>
+	    <path refid="${PBL.proj.key}.classpath"/>
+	    <path refid="${ESB.proj.key}.classpath"/>
 	</path>
 	<path id="pace-ext-funcs.classpath">
 	    <pathelement location="${PafCustomFunctions.location}/${bin}"/>
-	    <path refid="Paf Base Libraries.classpath"/>
-	    <path refid="Essbase Provider.classpath"/>
+	    <path refid="${PBL.proj.key}.classpath"/>
+	    <path refid="${ESB.proj.key}.classpath"/>
 	</path>
     <path id="pace-server.classpath">
 		<pathelement location="${PafServer.location}/${bin}"/>
@@ -255,11 +258,11 @@
         <path refid="servlet-api.userclasspath"/>
         <path refid="CXF 2.2.5.userclasspath"/> <!-- This must go last (but before Ostermiller & Server Project class paths) to avoid Hibernate conflicts -->
         <path refid="Ostermiller Utils 1.6.0.userclasspath"/>
-        <path refid="Essbase Provider.classpath"/>
-        <path refid="Paf Base Libraries.classpath"/>
-        <path refid="PafCustomCommands.classpath"/>
-        <path refid="PafCustomFunctions.classpath"/>
-    </path>
+	    <path refid="${ESB.proj.key}.classpath"/>
+	    <path refid="${PBL.proj.key}.classpath"/>
+	    <path refid="${CC.proj.key}.classpath"/>
+		<path refid="${CF.proj.key}.classpath"/>
+     </path>
 
 	<!--   E N D   O F   P R O P E R T Y   S E T U P    -->	
 
