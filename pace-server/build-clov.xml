@@ -10,8 +10,7 @@
 			env.PACE_HOME - Pace home directory			
 			env.CLOVER_HOME - Clover home 	
 			env.CLOVER_DIR - Clover directory 	
-			env.proj.key - Project key			
-			env.branch.key - Branch Key			
+			env.job.name - Job name						
 			  
 		THIS ANT SCRIPT PEFORMS THE BUILD & TESTING OF THE FOLLOWING PAFSERVER PROJECTS: 
 		Essbase Provider, Paf Base Libraries, PafCustomCommands, PafCustomFunctions, and PafServer.
@@ -26,9 +25,7 @@
 	<property name="env.PACE_HOME" value="/opt/pace-server-test-home"/>
 	<property name="env.CLOVER_HOME" value="/opt/clover"/>
 	<property name="env.CLOVER_DIR" value="clover-ant-3.0.2"/>
-	<property name="env.proj.name" value="PACESRVR-COVERAGE-TRUNK"/>
-	<property name="env.proj.key" value="PACESRVR"/>
-	<property name="env.branch.key" value="TRUNK"/>
+	<property name="env.job.name" value="PACESRVR-COVERAGE-TRUNK"/>
 	-->
 	<property name="userlib.path" value="${env.PACE_HOME}/userlib"/>	
 	<property name="clover.snapshot.home" value="${env.CLOVER_HOME}/clover-snapshots"/>	
@@ -78,7 +75,7 @@
 	<property name="clover.web.dir" value="../clover"/>
 <!--	<property name="clover.report.dir" value="${clover.report.home}/${env.proj.key}-${env.branch.key}"/>
 -->
-	<property name="clover.report.dir" value="${clover.report.home}/${env.proj.name}"/>
+	<property name="clover.report.dir" value="${clover.report.home}/${env.job.name}"/>
 
 	<!--   End of Clover Properties  -->	
 
@@ -366,8 +363,7 @@
 		<echo message="========================================="/>
 		<echo message="Pace Server Project : ${project.name}"/>
 		<echo message="========================================="/>
-		<echo message="Project key : ${env.proj.key}"/>
-		<echo message="Branch key : ${env.branch.key}"/>
+		<echo message="Job name : ${env.job.name}"/>
 		<echo message="Pace home : ${env.PACEHOME}"/>
 		<echo message="Pace test home : ${env.PACE_HOME}"/>
 		<echo message="Clover home : ${env.CLOVER_HOME}"/>
