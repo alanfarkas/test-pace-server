@@ -367,7 +367,8 @@
 		<echo message="Pace Server Project : ${project.name}"/>
 		<echo message="========================================="/>
 		<echo message="Job name : ${env.job.name}"/>
-		<echo message="Pace home : ${env.PACEHOME}"/>
+		<echo message="Pace Home : ${env.PaceHome}"/>
+		<echo message="PACE HOME : ${env.PACEHOME}"/>
 		<echo message="Pace test home : ${env.PACE_HOME}"/>
 		<echo message="Clover home : ${env.CLOVER_HOME}"/>
 		<echo message="Clover dir : ${env.CLOVER_DIR}"/>
