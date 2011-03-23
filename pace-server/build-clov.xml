@@ -35,9 +35,9 @@
 	<property name="debuglevel" value="source,lines,vars"/>
 	<property name="target" value="1.6"/>
 	<property name="source" value="1.6"/>
-	<property name="src" value="src"/>
+	<property name="src" value="src/main/java"/>
 	<property name="bin" value="bin"/>
-	<property name="test.src" value="src"/>
+	<property name="test.src" value="src/main/java"/>
 	<property name="test.bin" value="bin"/>
 	<property name="test.result" location="../test-results"/>
 	<property name="testfile.dir" value="test_files"/>
@@ -294,6 +294,7 @@
 	    	<param name="project.name" value="${PBL.proj.key}"/>
 	    	<param name="project.location" value="${Paf Base Libraries.location}"/>
 	  	</antcall>
+		<!--
 		<antcall target="test.project">
 	    	<param name="project.name" value="${ESB.proj.key}"/>
 	    	<param name="project.location" value="${Essbase Provider.location}"/>
@@ -310,6 +311,7 @@
 	    	<param name="project.name" value="${SRVR.proj.key}"/>
 	    	<param name="project.location" value="${PafServer.location}"/>
 	  	</antcall>
+	  	-->
 	</target>
 
 	<!--   T A R G E T: init -->
