@@ -294,7 +294,7 @@
 	    	<param name="project.name" value="${PBL.proj.key}"/>
 	    	<param name="project.location" value="${Paf Base Libraries.location}"/>
 	  	</antcall>
-		<!--
+		<!-- -->
 		<antcall target="test.project">
 	    	<param name="project.name" value="${ESB.proj.key}"/>
 	    	<param name="project.location" value="${Essbase Provider.location}"/>
@@ -310,8 +310,9 @@
 		<antcall target="test.project">
 	    	<param name="project.name" value="${SRVR.proj.key}"/>
 	    	<param name="project.location" value="${PafServer.location}"/>
+			<param name="src" value="src"/>
 	  	</antcall>
-	  	-->
+	  <!--	-->
 	</target>
 
 	<!--   T A R G E T: init -->
