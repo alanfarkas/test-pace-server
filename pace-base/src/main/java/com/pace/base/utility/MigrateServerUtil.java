@@ -102,8 +102,8 @@ public class MigrateServerUtil {
 		
 		origFileName = origFileName.replaceAll("\\p{Cntrl}"," ").replaceAll("[\\<\\>\\\\:\\*\\?\"\\/\\|]", " ");
 		
-		// Trim and convert to lower case
-		String generatedFileName = origFileName.trim().toLowerCase();
+		// Trim file name 
+		String generatedFileName = origFileName.trim(); /* TTN-1153 - removed lower case conversion logic */
 		
 		//consolidate spaces and then replace with _
 		generatedFileName = generatedFileName.replaceAll("[ ]+", "_");
