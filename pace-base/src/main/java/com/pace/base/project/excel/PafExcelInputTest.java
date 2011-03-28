@@ -18,6 +18,7 @@
  */
 package com.pace.base.project.excel;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public class PafExcelInputTest extends TestCase {
 		
 	String sheetId = "testSheet1";
 	
-	String workbookDir = "c:\\";
+	String workbookDirName = "test_workbook";  // TTN-1556 (Changed to folder name)
 	
 	String workbookName = "test workbook";
 	
@@ -72,8 +73,8 @@ public class PafExcelInputTest extends TestCase {
 		
 	}
 	
-	String fullWorkbookNameExcel2007 = workbookDir + workbookName + PafBaseConstants.XLSX_EXT;
-	String fullWorkbookNameExcel2007WithMacros = workbookDir + workbookName + PafBaseConstants.XLSM_EXT;
+	String fullWorkbookNameExcel2007 = workbookDirName + File.separator + workbookName + PafBaseConstants.XLSX_EXT;
+	String fullWorkbookNameExcel2007WithMacros = workbookDirName + File.separator + workbookName + PafBaseConstants.XLSM_EXT;
 	
 	PafExcelInput inputWorkbookExcel2007 = null;
 	PafExcelInput inputWorkbookExcel2007withMacros = null;
@@ -82,7 +83,7 @@ public class PafExcelInputTest extends TestCase {
 	Workbook workbookExcel2007 = null;
 	Workbook workbookExcel2007withMacros = null;
 	
-	private static final String TEST_FILES = ".\\test_files\\";
+	private static final String TEST_FILES = "." + File.separator + "test_files" + File.separator;
 	
 	private static final String TEST_FILES_PROJECT_TEMPLATE = "project-template";
 	
@@ -95,10 +96,16 @@ public class PafExcelInputTest extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
-						
+		
+		// Create workbook directory (TTN-1556)
+		File workbookDir = new File(workbookDirName);	
+		if ( ! workbookDir.exists() ) {	
+			assertTrue(workbookDir.mkdir());
+		}
+		
 		inputWorkbookExcel2007 = new PafExcelInput.Builder(fullWorkbookNameExcel2007, sheetId, 1).build();
 		inputWorkbookExcel2007withMacros = new PafExcelInput.Builder(fullWorkbookNameExcel2007WithMacros, sheetId, 1).build();
-		inputWorkbookDirAndName = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		inputWorkbookDirAndName = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		 	
 		try {
 			workbookExcel2007 = PafExcelUtil.readWorkbook(TEST_FILES_PROJECT_TEMPLATE_XLSX);
@@ -129,7 +136,7 @@ public class PafExcelInputTest extends TestCase {
 		inputWorkbookExcel2007 = new PafExcelInput.Builder(fullWorkbookNameExcel2007, sheetId, 1).build();
 		
 		assertNotNull(inputWorkbookExcel2007);
-		assertEquals(workbookDir, inputWorkbookExcel2007.getWorkbookDirectory());
+		assertEquals(workbookDirName, inputWorkbookExcel2007.getWorkbookDirectory());
 		assertEquals(workbookName, inputWorkbookExcel2007.getWorkbookName());
 		assertEquals(fullWorkbookNameExcel2007, inputWorkbookExcel2007.getFullWorkbookName());
 		assertEquals(sheetId, inputWorkbookExcel2007.getSheetId());
@@ -138,7 +145,7 @@ public class PafExcelInputTest extends TestCase {
 		inputWorkbookExcel2007withMacros = new PafExcelInput.Builder(fullWorkbookNameExcel2007WithMacros, sheetId, 1).build();
 		
 		assertNotNull(inputWorkbookExcel2007withMacros);
-		assertEquals(workbookDir, inputWorkbookExcel2007withMacros.getWorkbookDirectory());
+		assertEquals(workbookDirName, inputWorkbookExcel2007withMacros.getWorkbookDirectory());
 		assertEquals(workbookName, inputWorkbookExcel2007withMacros.getWorkbookName());
 		assertEquals(fullWorkbookNameExcel2007WithMacros, inputWorkbookExcel2007withMacros.getFullWorkbookName());
 		assertEquals(sheetId, inputWorkbookExcel2007withMacros.getSheetId());
@@ -212,9 +219,9 @@ public class PafExcelInputTest extends TestCase {
 	 */
 	public void testGetWorkbookDirectory() {
 				
-		PafExcelInput input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		PafExcelInput input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
-		assertEquals(workbookDir, input.getWorkbookDirectory());
+		assertEquals(workbookDirName, input.getWorkbookDirectory());
 		
 	}
 
@@ -223,7 +230,7 @@ public class PafExcelInputTest extends TestCase {
 	 */
 	public void testGetWorkbookName() {
 		
-		PafExcelInput input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		PafExcelInput input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertEquals(workbookName, input.getWorkbookName());
 		
@@ -238,7 +245,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertEquals(sheetId, input.getSheetId());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertEquals(sheetId, input.getSheetId());
 		
@@ -256,7 +263,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertEquals(1, input.getColumnLimit());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertEquals(1, input.getColumnLimit());
 		
@@ -268,7 +275,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertEquals(colLimit, input.getColumnLimit());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, colLimit).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, colLimit).build();
 		
 		assertEquals(colLimit, input.getColumnLimit());
 		
@@ -286,7 +293,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertEquals(0, input.getRowLimit());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertEquals(0, input.getRowLimit());
 		
@@ -298,7 +305,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertEquals(rowLimit, input.getRowLimit());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).rowLimit(rowLimit).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).rowLimit(rowLimit).build();
 		
 		assertEquals(rowLimit, input.getRowLimit());
 		
@@ -317,7 +324,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertNull(input.getEndOfSheetIdnt());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertNull(input.getEndOfSheetIdnt());
 		
@@ -330,7 +337,7 @@ public class PafExcelInputTest extends TestCase {
 		assertNotNull(input.getEndOfSheetIdnt());
 		assertEquals(endOfSheetIdnt, input.getEndOfSheetIdnt());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).endOfSheetIdnt(endOfSheetIdnt).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).endOfSheetIdnt(endOfSheetIdnt).build();
 		
 		assertNotNull(input.getEndOfSheetIdnt());
 		assertEquals(endOfSheetIdnt, input.getEndOfSheetIdnt());
@@ -351,7 +358,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertFalse(input.isExcludeHeaderRows());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertFalse(input.isExcludeHeaderRows());
 		
@@ -375,11 +382,11 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isExcludeHeaderRows());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).excludeHeaderRows(false).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).excludeHeaderRows(false).build();
 		
 		assertFalse(input.isExcludeHeaderRows());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).excludeHeaderRows(true).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).excludeHeaderRows(true).build();
 		
 		assertTrue(input.isExcludeHeaderRows());
 	}
@@ -393,7 +400,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertFalse(input.isExcludeEmptyRows());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertFalse(input.isExcludeEmptyRows());
 		
@@ -409,11 +416,11 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isExcludeEmptyRows());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).excludeEmptyRows(false).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).excludeEmptyRows(false).build();
 		
 		assertFalse(input.isExcludeEmptyRows());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).excludeEmptyRows(true).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).excludeEmptyRows(true).build();
 		
 		assertTrue(input.isExcludeEmptyRows());
 		
@@ -437,7 +444,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertFalse(input.isExcludeDataRows());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertFalse(input.isExcludeDataRows());
 
@@ -453,11 +460,11 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isExcludeDataRows());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).excludeDataRows(false).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).excludeDataRows(false).build();
 		
 		assertFalse(input.isExcludeDataRows());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).excludeDataRows(true).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).excludeDataRows(true).build();
 		
 		assertTrue(input.isExcludeDataRows());
 		
@@ -479,7 +486,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertFalse(input.isEnableCellReferencing());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertFalse(input.isEnableCellReferencing());
 		
@@ -495,11 +502,11 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isEnableCellReferencing());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).enableCellReferencing(false).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).enableCellReferencing(false).build();
 		
 		assertFalse(input.isEnableCellReferencing());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).enableCellReferencing(true).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).enableCellReferencing(true).build();
 		
 		assertTrue(input.isEnableCellReferencing());
 		
@@ -522,7 +529,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertFalse(input.isMultiDataRow());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertFalse(input.isMultiDataRow());
 		
@@ -538,11 +545,11 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isMultiDataRow());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).multiDataRow(false).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).multiDataRow(false).build();
 		
 		assertFalse(input.isMultiDataRow());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).multiDataRow(true).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).multiDataRow(true).build();
 		
 		assertTrue(input.isMultiDataRow());
 		
@@ -564,7 +571,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertNull(input.getStartDataReadColumnIndex());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertNull(input.getStartDataReadColumnIndex());
 		
@@ -576,7 +583,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertEquals(Integer.valueOf(startColumn), input.getStartDataReadColumnIndex());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).startDataReadColumnIndex(startColumn).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).startDataReadColumnIndex(startColumn).build();
 		
 		assertEquals(Integer.valueOf(startColumn), input.getStartDataReadColumnIndex());
 		
@@ -590,7 +597,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertEquals(Integer.valueOf(startColumn), input.getStartDataReadColumnIndex());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).startDataReadColumnIndex(startColumn).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).startDataReadColumnIndex(startColumn).build();
 		
 		assertEquals(Integer.valueOf(startColumn), input.getStartDataReadColumnIndex());
 		
@@ -608,7 +615,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertFalse(input.isSheetRequired());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertFalse(input.isSheetRequired());
 		
@@ -624,11 +631,11 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isSheetRequired());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).sheetRequired(false).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).sheetRequired(false).build();
 		
 		assertFalse(input.isSheetRequired());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).sheetRequired(true).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).sheetRequired(true).build();
 		
 		assertTrue(input.isSheetRequired());
 		
@@ -651,7 +658,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertFalse(input.isExcludeDefaultValuesOnWrite());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertFalse(input.isExcludeDefaultValuesOnWrite());
 		
@@ -667,11 +674,11 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isExcludeDefaultValuesOnWrite());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).excludeDefaultValuesOnWrite(false).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).excludeDefaultValuesOnWrite(false).build();
 		
 		assertFalse(input.isExcludeDefaultValuesOnWrite());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).excludeDefaultValuesOnWrite(true).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).excludeDefaultValuesOnWrite(true).build();
 		
 		assertTrue(input.isExcludeDefaultValuesOnWrite());
 		
@@ -693,7 +700,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isAutoSizeColumns());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertTrue(input.isAutoSizeColumns());
 		
@@ -709,11 +716,11 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isAutoSizeColumns());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).autoSizeColumns(false).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).autoSizeColumns(false).build();
 		
 		assertFalse(input.isAutoSizeColumns());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).autoSizeColumns(true).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).autoSizeColumns(true).build();
 		
 		assertTrue(input.isAutoSizeColumns());
 		
@@ -735,7 +742,7 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertFalse(input.isAutoWriteToFileSystem());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).build();
 		
 		assertFalse(input.isAutoWriteToFileSystem());
 		
@@ -751,11 +758,11 @@ public class PafExcelInputTest extends TestCase {
 		
 		assertTrue(input.isAutoWriteToFileSystem());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).autoWriteToFileSystem(false).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).autoWriteToFileSystem(false).build();
 		
 		assertFalse(input.isAutoWriteToFileSystem());
 		
-		input = new PafExcelInput.Builder(workbookDir, workbookName, sheetId, 1).autoWriteToFileSystem(true).build();
+		input = new PafExcelInput.Builder(workbookDirName, workbookName, sheetId, 1).autoWriteToFileSystem(true).build();
 		
 		assertTrue(input.isAutoWriteToFileSystem());
 		
