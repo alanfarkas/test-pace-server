@@ -56,7 +56,7 @@ import com.pace.base.view.*;
  */
 public class ExcelPaceProjectTest extends TestCase {
 
-	private static final String TEST_FILES = ".\\test_files\\";
+	private static final String TEST_FILES = "." + File.separator + "test_files" + File.separator;
 	
 	private static final String TEST_FILES_PROJECT_TEMPLATE = "project-template";
 	
