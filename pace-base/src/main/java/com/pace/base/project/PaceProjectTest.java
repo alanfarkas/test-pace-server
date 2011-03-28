@@ -161,7 +161,7 @@ public class PaceProjectTest extends MigrationActionTestCase {
 			assertNotNull(cmd.getCustomActionDefs());
 			assertEquals(1, cmd.getCustomActionDefs().length);
 			
-			assertEquals("com.pace.base.cc.EsbCalcCmd", cmd.getCustomActionDefs()[0].getActionClassName());
+			assertEquals("com.pace.ext.cmds.EsbCalcCmd", cmd.getCustomActionDefs()[0].getActionClassName());
 			assertNotNull(cmd.getCustomActionDefs()[0].getActionNamedParameters());
 			assertEquals(2, cmd.getCustomActionDefs()[0].getActionNamedParameters().length);
 			
