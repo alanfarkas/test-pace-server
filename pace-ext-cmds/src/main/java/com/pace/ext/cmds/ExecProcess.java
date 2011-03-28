@@ -1,6 +1,21 @@
-/**
+/*
+ *	File: @(#)ExecProcess.java 	Package: com.pace.ext.cmds 	Project: pace-ext-cmds
+ *	Created: May 7, 2006  		By:jim
+ *	Version: x.xx
+ *
+ * 	Copyright (c) 2005-2006 Palladium Group, Inc. All rights reserved.
+ *
+ *	This software is the confidential and proprietary information of Palladium Group, Inc.
+ *	("Confidential Information"). You shall not disclose such Confidential Information and 
+ * 	should use it only in accordance with the terms of the license agreement you entered into
+ *	with Palladium Group, Inc.
+ *
+ *
+ *
+	Date			Author			Version			Changes
+	xx/xx/xx		xxxxxxxx		x.xx			..............
  * 
- */
+*/
 package com.pace.ext.cmds;
 
 import java.io.BufferedReader;
@@ -16,10 +31,6 @@ import com.pace.base.IPafCustomCommand;
 import com.pace.base.PafException;
 import com.pace.base.state.IPafClientState;
 
-/**
- * @author jim
- *
- */
 public class ExecProcess extends AbstractCommand implements IPafCustomCommand {
 
 	/* (non-Javadoc)

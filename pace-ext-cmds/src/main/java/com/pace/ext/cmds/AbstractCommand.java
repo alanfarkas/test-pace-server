@@ -1,6 +1,6 @@
 /*
- *	File: @(#)Abstractt.java 	Package: com.pace.base.cc 	Project: PafCustomCommands
- *	Created: May 19, 2009  		By: AFarkas
+ *	File: @(#)AbstractCommand.java 	Package: com.pace.ext.cmds 	Project: pace-ext-cmds
+ *	Created: May 19, 2009  			By: AFarkas
  *	Version: x.xx
  *
  * 	Copyright (c) 2005-2009 Palladium Group, Inc. All rights reserved.

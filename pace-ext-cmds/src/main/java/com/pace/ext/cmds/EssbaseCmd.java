@@ -1,5 +1,5 @@
 /*
- *	File: @(#)EsbCalcCmd.java 	Package: com.pace.base.cc 	Project: PafCustomCommands
+ *	File: @(#)EsbCalcCmd.java 	Package: com.pace.ext.cmds 	Project: PafCustomCommands
  *	Created: May 7, 2006  		By: AFarkas
  *	Version: x.xx
  *
@@ -22,7 +22,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.mdb.IPafConnectionProps;
 import com.pace.base.state.IPafClientState;

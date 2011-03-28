@@ -1,5 +1,5 @@
 /*
- *	File: @(#)EsbCalculateTest.java 	Package: com.pace.base.mdb 	Project: PafCustomCommands
+ *	File: @(#)EsbCalculateTest.java 	Package: com.pace.ext.cmds 	Project: pace-ext-cmds
  *	Created: May 12, 2006  				By: Alan Farkas
  *	Version: x.xx
  *
