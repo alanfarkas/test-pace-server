@@ -71,7 +71,7 @@ public class PafExcelUtilTest extends TestCase {
 	logger.info("emptyWorkbookName:[" + emptyWorkbookName.toString() + "]");		
 			assertNotNull(pafExcelRows);
 			assertEquals(1, pafExcelRows.size());
-			
+	logger.info("should not get here");		
 			input = new PafExcelInput.Builder(emptyWorkbookName, "Sheet1", 10).build();
 			
 			pafExcelRows = PafExcelUtil.readExcelSheet(input);
