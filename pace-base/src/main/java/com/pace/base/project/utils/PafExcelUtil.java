@@ -77,9 +77,9 @@ public class PafExcelUtil {
 		}
 		
 		List<PafExcelRow> pafRowList = new ArrayList<PafExcelRow>();
-				
+if (wb ==null) logger.info("Workbook(WB) is null");				
 		if ( wb != null ) {
-		
+logger.info("Workbook(WB) exists");		
 			Sheet sheet = wb.getSheet(input.getSheetId());	
 			
 			if ( sheet != null ) {
