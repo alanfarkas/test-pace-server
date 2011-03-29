@@ -1,11 +1,8 @@
 package com.pace.base.project.utils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -15,12 +12,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.pace.base.PafException;
-import com.pace.base.project.*;
+import com.pace.base.project.ExcelPaceProjectConstants;
+import com.pace.base.project.ExcelProjectDataErrorException;
+import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.excel.PafExcelInput;
 import com.pace.base.project.excel.PafExcelRow;
 import com.pace.base.project.excel.PafExcelValueObject;
 import com.pace.base.project.excel.PafExcelValueObjectType;
-import com.pace.base.utility.FileUtils;
 
 public class PafExcelUtilTest extends TestCase {
 
@@ -70,14 +68,14 @@ public class PafExcelUtilTest extends TestCase {
 			List<PafExcelRow> pafExcelRows = PafExcelUtil.readExcelSheet(input);
 			
 			assertNotNull(pafExcelRows);
-			assertEquals(1, pafExcelRows.size());
+			assertEquals(4, pafExcelRows.size());
 			
 			input = new PafExcelInput.Builder(emptyWorkbookName, "Sheet1", 10).build();
 			
 			pafExcelRows = PafExcelUtil.readExcelSheet(input);
 			
 			assertNotNull(pafExcelRows);
-			assertEquals(1, pafExcelRows.size());
+			assertEquals(5, pafExcelRows.size());
 			
 			input = new PafExcelInput.Builder(emptyWorkbookName, "Sheet1", 1).excludeEmptyRows(true).build();
 									
