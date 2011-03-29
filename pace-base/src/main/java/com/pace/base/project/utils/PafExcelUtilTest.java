@@ -8,6 +8,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -22,7 +23,8 @@ import com.pace.base.project.excel.PafExcelValueObjectType;
 
 public class PafExcelUtilTest extends TestCase {
 
-
+	private static Logger logger = Logger.getLogger(PafExcelUtilTest.class);
+	
 	String emptyWorkbookName = "./test_files/emptyWorkbook.xlsx";
 	
 	String sampleWorkbookName = "./test_files/Sample.xlsx";
@@ -33,7 +35,7 @@ public class PafExcelUtilTest extends TestCase {
 	
 	private static final String EXCEL_PROJECT_DATA_ERROR_EXCEPTION_SHOULD_HAVE_BEEN_THROWN = "ExcelProjectDataErrorException should have been thrown";
 	List<PafExcelValueObject> nullExcelValueList = null;
-			
+	
 	public PafExcelUtilTest(String name) {
 		super(name);
 	}
@@ -66,16 +68,16 @@ public class PafExcelUtilTest extends TestCase {
 		try {
 			
 			List<PafExcelRow> pafExcelRows = PafExcelUtil.readExcelSheet(input);
-			
+	logger.info("emptyWorkbookName:[" + emptyWorkbookName.toString() + "]");		
 			assertNotNull(pafExcelRows);
-			assertEquals(4, pafExcelRows.size());
+			assertEquals(1, pafExcelRows.size());
 			
 			input = new PafExcelInput.Builder(emptyWorkbookName, "Sheet1", 10).build();
 			
 			pafExcelRows = PafExcelUtil.readExcelSheet(input);
 			
 			assertNotNull(pafExcelRows);
-			assertEquals(5, pafExcelRows.size());
+			assertEquals(1, pafExcelRows.size());
 			
 			input = new PafExcelInput.Builder(emptyWorkbookName, "Sheet1", 1).excludeEmptyRows(true).build();
 									
