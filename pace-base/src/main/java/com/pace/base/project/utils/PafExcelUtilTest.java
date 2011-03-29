@@ -67,6 +67,7 @@ public class PafExcelUtilTest extends TestCase {
 		
 		try {
 			
+logger.info("Full workbook name: [" + input.getFullWorkbookName().toString() + "]");			
 			List<PafExcelRow> pafExcelRows = PafExcelUtil.readExcelSheet(input);
 	logger.info("emptyWorkbookName:[" + emptyWorkbookName.toString() + "]");		
 			assertNotNull(pafExcelRows);
