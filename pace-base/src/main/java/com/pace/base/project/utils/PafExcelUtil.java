@@ -81,9 +81,9 @@ if (wb ==null) logger.info("Workbook(WB) is null");
 		if ( wb != null ) {
 logger.info("Workbook(WB) exists");		
 			Sheet sheet = wb.getSheet(input.getSheetId());	
-			
+if (sheet ==null) logger.info("Sheet is null");							
 			if ( sheet != null ) {
-			
+logger.info("Sheet is not null");			
 				int sheetLastRowNumber = sheet.getLastRowNum();	
 				
 				//if row limit is less than max row number on sheet, reset last row number to row limit.
@@ -116,7 +116,7 @@ logger.info("Workbook(WB) exists");
 					
 						//by default, include empty row
 						if ( ! input.isExcludeEmptyRows() ) {										
-							
+logger.info("Adding PafExcelRow");
 							pafRowList.add(new PafExcelRow());
 													
 						}	
