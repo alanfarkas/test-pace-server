@@ -60,9 +60,9 @@ public class ViewTuple implements Cloneable, IPafCompressedObj {
 	
 	private List<String> memberTagCommentValues;
 	
-	private Integer rowHeight;
+	private Float rowHeight;
 	
-	private Integer columnWidth;
+	private Float columnWidth;
 	
 	private Integer[] symetricGroupNo;
 
@@ -288,19 +288,19 @@ public class ViewTuple implements Cloneable, IPafCompressedObj {
 		this.headerBorder = headerBorder;
 	}
 
-	public Integer getColumnWidth() {
+	public Float getColumnWidth() {
 		return columnWidth;
 	}
 
-	public void setColumnWidth(Integer columnWidth) {
+	public void setColumnWidth(Float columnWidth) {
 		this.columnWidth = columnWidth;
 	}
 
-	public Integer getRowHeight() {
+	public Float getRowHeight() {
 		return rowHeight;
 	}
 
-	public void setRowHeight(Integer rowHeight) {
+	public void setRowHeight(Float rowHeight) {
 		this.rowHeight = rowHeight;
 	}
 
