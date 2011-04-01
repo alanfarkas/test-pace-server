@@ -902,8 +902,8 @@ public class PafMemberTagManagerTest extends TestCase {
 //			String sqlPath = "C:\\proj_wrksp\\eclipse\\Paf Base Libraries\\src\\com\\palladium\\paf\\db\\membertags\\";
 			String sqlPath = paceHome + ".." + File.separator + "pace-base" + File.separator +  "src" 
 				+ File.separator + "main"  + File.separator + "java" + File.separator + "com" 
-				+ File.separator + "pace" + File.separator + "db" + File.separator + "membertags"
-				+ File.separator;
+				+ File.separator + "pace" + File.separator + "base" + File.separator + "db" 
+				+ File.separator + "membertags" + File.separator;
 			String sqlFile = null;
 			session = PafMemberTagManager.getSession();
 			
