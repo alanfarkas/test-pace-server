@@ -11,8 +11,10 @@
 	<property name="install_stg_root"  location="\proj_wrksp\server-stage" />
 	<property name="esb_redist_dir"  location="${install_stg_root}\redist\essbase" />
 	<property name="app_install" location= "C:\Program Files\Pace\PafServer" />
+	<!-- following properties are curently unused
 	<property name="dev_web"  location="${app_install}\server\server\default\deploy\PafServer.war" />
 	<property name="esb_deployed_driver_path" location="${dev_web}\${esb_driver_dir}"/>
+	-->
     <property name="src" location="src/main/java"/>
     <property name="dist" location="dist" />
 	<property name = "bin" location = "target\classes" />
@@ -46,7 +48,7 @@
 	    <pathelement location="${redist}"/>
 	    <path refid="Log4j 1.2.9.userclasspath"/>
 	    <path refid="Junit.userclasspath"/>
-	    <pathelement location="/proj_wrksp/eclipse/pace-base/dist"/>
+	    <pathelement location="/proj_wrksp/eclipse/pace-base/dist/pace-base.jar"/>
 	</path>
 	
 
@@ -77,7 +79,9 @@
 		<compile esb.ver="11.1.2">
 		</compile>
 	
+		<!-- Commented out as Maven is automatically pushing out Essbase provider jar
 		<antcall target="deploy_local_web"/>
+		-->
 		
 		<!--
 		<antcall target="refresh_local_web"/>
@@ -125,14 +129,18 @@
 		</sequential>
 	</macrodef>
 
+<!-- Commented out as Maven is automatically pushing out Essbase provider jar
 	<target name="deploy_local_web" description="Deploy Essbase Provider (version: @{esb.ver} to Local Web">
+	-->
 			<!-- Deploy essbase provider that is compiled with default project's version of ess_japi.jar -->
+<!--
 			<jar jarfile="${dist}/${ant.project.name}.jar" basedir="${bin}"/>
 			<echo>"Deploying Essbase Provider Jar file to local web server"</echo>
 			<copy todir="${local_web}\web-inf\lib" file = "${dist}/${ant.project.name}.jar"/> 	
 	</target>
+-->
 
-
+	
 <!--	
 	<target name="refresh_local_web" if="in.eclipse" description="Refresh the local web mdb drivers directory"> 
 		<echo>Refreshing local web mdb drivers directory</echo>
