@@ -93,7 +93,7 @@ public class WOSFunc extends AbstractFunction {
     		logger.warn(errMsg);
     		return 0;
     	}
-       double beginInv = dataCache.getCellValue(tempIs.getCoordinates());
+       double beginInv = dataCache.getCellValue(tempIs);
        	
         // If beginning inventory <= 0, return 0
         if (beginInv <= 0) {
@@ -144,7 +144,7 @@ public class WOSFunc extends AbstractFunction {
         	}
 
         	// Compute cumulative sales
-        	periodSales = dataCache.getCellValue(tempIs.getCoordinates());
+        	periodSales = dataCache.getCellValue(tempIs);
         	cumSales += periodSales;
         	
         	// Exit loop if cumulative sales > beginning inventory or max weeks have

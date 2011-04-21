@@ -76,7 +76,7 @@ public class F_Prev extends AbstractFunction {
 				result = 0;
 			else {
 				dataIs.setCoordinate(offsetDim, prevMbr.getKey());
-				result = dataCache.getCellValue(dataIs.getCoordinates());
+				result = dataCache.getCellValue(dataIs);
 			}
 			
 			

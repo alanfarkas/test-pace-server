@@ -88,7 +88,7 @@ public class F_PrevCum extends AbstractFunction {
 		List<Intersection>floorIs = IntersectionUtil.buildFloorIntersections(dataIs, evalState);
 		double sum = 0;
 		for (Intersection is : floorIs) 
-			sum+= dataCache.getCellValue(is.getCoordinates());
+			sum+= dataCache.getCellValue(is);
 		return sum;
 	}
 

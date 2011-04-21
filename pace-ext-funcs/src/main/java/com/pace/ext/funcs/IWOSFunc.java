@@ -72,7 +72,7 @@ public class IWOSFunc extends AbstractFunction {
        	// Get POS value
       	tempIs = sourceIs.clone();
       	tempIs.setCoordinate(measureDim, wosMeas);
-        double pos = dataCache.getCellValue(tempIs.getCoordinates());
+        double pos = dataCache.getCellValue(tempIs);
     	int posFloor = (int) pos;
 
         if (!bWrap) {
@@ -105,7 +105,7 @@ public class IWOSFunc extends AbstractFunction {
         	// Compute cumulative sales
         	String weekIs = periods.get(periodInx).getKey();
         	tempIs.setCoordinate(timeDim, weekIs);
-        	weeklySales = dataCache.getCellValue(tempIs.getCoordinates());
+        	weeklySales = dataCache.getCellValue(tempIs);
         	cumSales += weeklySales;
         	
         	// Advance to next week
@@ -124,7 +124,7 @@ public class IWOSFunc extends AbstractFunction {
         	int lastWeekNo = (currPeriodNo + posFloor) % periods.size();
         	String lastWeek = periods.get(lastWeekNo).getKey();
         	tempIs.setCoordinate(timeDim, lastWeek);
-        	double lastWeekOfSales = dataCache.getCellValue(tempIs.getCoordinates());
+        	double lastWeekOfSales = dataCache.getCellValue(tempIs);
         	beginInv += partialWeek * lastWeekOfSales;
         }
         

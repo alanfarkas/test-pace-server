@@ -491,7 +491,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 
 
 		// allocation amount starts as full value of intersection to be allocated
-		double allocAvailable = dataCache.getCellValue(intersection.getCoordinates());
+		double allocAvailable = dataCache.getCellValue(intersection);
 
 
         Set lockedTimePeriods = null;
@@ -511,14 +511,14 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		List<Intersection> elapsedLocks = new ArrayList<Intersection>();
 		for (Intersection target : targets ) {
 			if (tempAllocLocks.contains(target)) {
-				lockedTargetTotal += dataCache.getCellValue(target.getCoordinates());
+				lockedTargetTotal += dataCache.getCellValue(target);
 			}
 			else if (lockedTimePeriods.contains(target.getCoordinate(timeDim))) {
-				lockedTargetTotal += dataCache.getCellValue(target.getCoordinates());
+				lockedTargetTotal += dataCache.getCellValue(target);
 				elapsedLocks.add(target);
 			}
 			else {
-				origTargetSum += dataCache.getCellValue(target.getCoordinates());
+				origTargetSum += dataCache.getCellValue(target);
 			}
 		}    
 
@@ -533,7 +533,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		double allocValue = 0;
 		for (Intersection target : targets ) {
 
-			origValue = dataCache.getCellValue(target.getCoordinates());
+			origValue = dataCache.getCellValue(target);
 
 			if (origTargetSum == 0) {                
 				allocValue = allocAvailable / targets.size();
@@ -542,7 +542,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 				allocValue = ((origValue / origTargetSum) * (allocAvailable));
 			}
 
-			dataCache.setCellValue(target.getCoordinates(), allocValue);
+			dataCache.setCellValue(target, allocValue);
 		}
 
 		// add these new allocations to the temporary bucket

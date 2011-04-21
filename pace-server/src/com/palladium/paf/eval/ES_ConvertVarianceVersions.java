@@ -155,12 +155,12 @@ public class ES_ConvertVarianceVersions implements IEvalStep {
         Map<Intersection, Double> varianceReplicationValues = new HashMap<Intersection, Double>();
         for (Intersection is : evalState.getSliceState().getReplicateAllCells()) {
             if (vdNames.contains(is.getCoordinate(versDim))) {
-            	varianceReplicationValues.put(is, dataCache.getCellValue(is.getCoordinates()));
+            	varianceReplicationValues.put(is, dataCache.getCellValue(is));
             }
         }
         for (Intersection is : evalState.getSliceState().getReplicateExistingCells()) {
             if (vdNames.contains(is.getCoordinate(versDim))) {
-            	varianceReplicationValues.put(is, dataCache.getCellValue(is.getCoordinates()));
+            	varianceReplicationValues.put(is, dataCache.getCellValue(is));
             }
         }
         
@@ -190,7 +190,7 @@ public class ES_ConvertVarianceVersions implements IEvalStep {
     		// get cell value of corresponding comparison version intersection
     		Intersection tempIs = is.clone();
     	  	tempIs.setCoordinate(versDim, versFormula.getCompareVersion());
-    		compareValue = dataCache.getCellValue(tempIs.getCoordinates());
+    		compareValue = dataCache.getCellValue(tempIs);
     		// Get the variance reporting flag for the measure being calculated
     		String measure = is.getCoordinate(measDim);
     		try {

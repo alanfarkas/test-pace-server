@@ -101,7 +101,7 @@ public class ES_ProcessReplication implements IEvalStep {
     			isVarVer = true;
     			replicatedValue = evalState.getVarianceReplicationValues().get(ix);
     		}else{
-    			replicatedValue = dataCache.getCellValue(ix.getCoordinates());
+    			replicatedValue = dataCache.getCellValue(ix);
     		}
     		
     		if(flrIx != null){
@@ -129,7 +129,7 @@ public class ES_ProcessReplication implements IEvalStep {
 			    					tempIx = convertChange(i, evalState, dataCache, replicatedValue);
 			    				}else{
 			    					//just update the value.
-			    					dataCache.setCellValue(i.getCoordinates(), replicatedValue);
+			    					dataCache.setCellValue(i, replicatedValue);
 			    					tempIx = i;
 			    				}
 			    				break;
@@ -143,8 +143,8 @@ public class ES_ProcessReplication implements IEvalStep {
 				    					cellChanged = false;
 				    				}
 			    				}else{
-				    				if (dataCache.getCellValue(i.getCoordinates()) != 0){
-				    					dataCache.setCellValue(i.getCoordinates(), replicatedValue);
+				    				if (dataCache.getCellValue(i) != 0){
+				    					dataCache.setCellValue(i, replicatedValue);
 				    				} else {
 				    					cellChanged = false;
 				    				}
@@ -207,7 +207,7 @@ public class ES_ProcessReplication implements IEvalStep {
 		// get cell value of corresponding comparison version intersection
 		Intersection tempIs = is.clone();
 		tempIs.setCoordinate(versDim, versFormula.getCompareVersion());
-		double compareValue = dataCache.getCellValue(tempIs.getCoordinates());
+		double compareValue = dataCache.getCellValue(tempIs);
 
 		// Get the variance reporting flag for the measure being calculated
    		String measure = is.getCoordinate(measDim);
@@ -254,7 +254,7 @@ public class ES_ProcessReplication implements IEvalStep {
 		Intersection tempIs = is.clone();
 		tempIs.setCoordinate(versDim, versFormula.getBaseVersion());
 
-		return dataCache.getCellValue(tempIs.getCoordinates());
+		return dataCache.getCellValue(tempIs);
 		
     }
     

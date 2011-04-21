@@ -91,7 +91,7 @@ public class F_CrossDim extends AbstractFunction {
 		lockRecalcComps(sourceIs, crossDimIs, evalState);
 		
 		// Return value of cross dimensional intersection
-		double result = dataCache.getCellValue(crossDimIs.getCoordinates());
+		double result = dataCache.getCellValue(crossDimIs);
 		return result;
 	}
 

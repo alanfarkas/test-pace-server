@@ -943,16 +943,16 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 				// any intersections whose that floor descendants are all zero. (TTN-1467)
 				if (!isVarianceIs) {
 					// Base version intersection
-					double replicatedValue = dsCache.getCellValue(attrIs.getCoordinates());
+					double replicatedValue = dsCache.getCellValue(attrIs);
 					for (Intersection baseIs:baseIntersections) {
 						
 						// Skip Replicate Existing intersections that are zero and whose floor descendants
 						// are all equal to zero. (TTN-1467)
-						if (isReplicateExisting && uowCache.getCellValue(baseIs.getCoordinates()) == 0) {
+						if (isReplicateExisting && uowCache.getCellValue(baseIs) == 0) {
 							List<Intersection> floorIntersections = EvalUtil.buildFloorIntersections(baseIs, dsEvalState);
 							boolean isValueFound = false;
 							for (Intersection floorIs : floorIntersections) {
-								if (uowCache.getCellValue(floorIs.getCoordinates()) != 0) {
+								if (uowCache.getCellValue(floorIs) != 0) {
 									isValueFound = true;
 									break;
 								}
@@ -961,7 +961,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 						}
 						
 						// Apply replicated value to each exploded base intersection
-						uowCache.setCellValue(baseIs.getCoordinates(), replicatedValue);
+						uowCache.setCellValue(baseIs, replicatedValue);
 						// Add replication intersection to data slice collection
 						replicatedBaseCells[i].add(baseIs); 
 					}	
@@ -976,11 +976,11 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 						// Skip Replicate Existing intersections that are zero and who's floor descendants
 						// are all equal to zero. (TTN-1467)
-						if (isReplicateExisting && uowCache.getCellValue(baseIs.getCoordinates()) == 0) {
+						if (isReplicateExisting && uowCache.getCellValue(baseIs) == 0) {
 							List<Intersection> floorIntersections = EvalUtil.buildFloorIntersections(baseIs, dsEvalState);
 							boolean isValueFound = false;
 							for (Intersection floorIs : floorIntersections) {
-								if (uowCache.getCellValue(floorIs.getCoordinates()) != 0) {
+								if (uowCache.getCellValue(floorIs) != 0) {
 									isValueFound = true;
 									break;
 								}
@@ -1772,10 +1772,10 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 						.getMdbDef().getMeasureDim());
 				if (evalState.getRoundingRules().containsKey(measure)) {
 					PafDataCache dataCache = evalState.getDataCache();
-					origValue = dataCache.getCellValue(is.getCoordinates());
+					origValue = dataCache.getCellValue(is);
 					places = evalState.getRoundingRules().get(measure)
 							.getDigits();
-					dataCache.setCellValue(is.getCoordinates(), EvalUtil
+					dataCache.setCellValue(is, EvalUtil
 							.Round(origValue, places));
 				}
 			}

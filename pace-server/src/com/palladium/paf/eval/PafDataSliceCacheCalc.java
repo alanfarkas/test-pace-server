@@ -196,14 +196,14 @@ public abstract class PafDataSliceCacheCalc {
 				if (uowLockedCells.contains(target) ||
                     (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
                             target.getCoordinate(yearDim).equals(currentYear))  ) {
-					lockedTotal += uowCache.getCellValue(target.getCoordinates());
+					lockedTotal += uowCache.getCellValue(target);
 					lockedTargets.add(target);
 				}
 			}
 
 			// Determine the amount to be allocated	as well as the base intersection 
 			// target area.
-			double allocTotal = dsCache.getCellValue(dsAllocCell.getCoordinates()); 
+			double allocTotal = dsCache.getCellValue(dsAllocCell); 
 			double allocAvailable = 0;
 			if (lockedTargets.size() != targets.size()) {
 				
@@ -271,7 +271,7 @@ public abstract class PafDataSliceCacheCalc {
 					// locked targets from that set of allocation targets. Adjust available
 					// allocation amount accordingly.
 					for (Intersection lockedTarget:descendantLockedTargets) {
-						lockedDescendantTotal += uowCache.getCellValue(lockedTarget.getCoordinates());
+						lockedDescendantTotal += uowCache.getCellValue(lockedTarget);
 					}
 					if (!isNonAggregateMeasure) {
 						// Aggregate measure
@@ -292,7 +292,7 @@ public abstract class PafDataSliceCacheCalc {
 			// Calculate current sum of target intersections
 			double targetTotal = 0;
 			for (Intersection target:targets) {
-				targetTotal += uowCache.getCellValue(target.getCoordinates());
+				targetTotal += uowCache.getCellValue(target);
 			}			
 
 			// Check for base measure allocation (TTN-1171)
@@ -311,7 +311,7 @@ public abstract class PafDataSliceCacheCalc {
 		        for (Intersection target : targets ) {
 		        	Intersection baseCellTarget = target.clone();
 		        	baseCellTarget.setCoordinate(measureDim, baseAllocateMeasure);
-		            baseTargetTotal+= uowCache.getCellValue(baseCellTarget.getCoordinates());
+		            baseTargetTotal+= uowCache.getCellValue(baseCellTarget);
 		        }
 		   	} else {
 		   		// No base measure allocation
@@ -327,13 +327,13 @@ public abstract class PafDataSliceCacheCalc {
 					newCellValue = allocAvailable;
 				} else if (targetTotal != 0) {
 					// Proportional spread
-					currentCellValue = uowCache.getCellValue(target.getCoordinates());
+					currentCellValue = uowCache.getCellValue(target);
 					newCellValue = allocAvailable * (currentCellValue / targetTotal);
 				} else  if (isBaseMeasureAllocation && baseTargetTotal != 0){
 					// Base measure allocation
 					Intersection baseTarget = target.clone();
 					baseTarget.setCoordinate(measureDim, baseAllocateMeasure);
-					currentCellValue = uowCache.getCellValue(baseTarget.getCoordinates());
+					currentCellValue = uowCache.getCellValue(baseTarget);
 					newCellValue = allocAvailable * (currentCellValue / baseTargetTotal);					
 				} else  {
 					// Do an even spread if allocation base is zero
@@ -348,7 +348,7 @@ public abstract class PafDataSliceCacheCalc {
 	    		}
 	    		
 	    		// Write new target to uow cache
-				uowCache.setCellValue(target.getCoordinates(), newCellValue);
+				uowCache.setCellValue(target, newCellValue);
 
 				// Add target intersection to changed and locked cells collections
 				sessionAllocTargets.add(target);
@@ -556,7 +556,7 @@ public abstract class PafDataSliceCacheCalc {
 			else {
 				Intersection isTerm = srcIs.clone();
 				isTerm.setCoordinate(axis, terms[i].trim());
-				values[i] = dataCache.getCellValue(isTerm.getCoordinates());
+				values[i] = dataCache.getCellValue(isTerm);
 			}
 		}
 
@@ -567,7 +567,7 @@ public abstract class PafDataSliceCacheCalc {
 			result = 0;
 
 		// update value in dataCache
-		dataCache.setCellValue(targetIs.getCoordinates(), result);
+		dataCache.setCellValue(targetIs, result);
 
 	}
 

@@ -78,7 +78,7 @@ public class F_Next extends AbstractFunction {
 				result = 0;
 			else {
 				dataIs.setCoordinate(offsetDim, nextMbr.getKey());
-				result = dataCache.getCellValue(dataIs.getCoordinates());
+				result = dataCache.getCellValue(dataIs);
 			}
 			
 		} catch (RuntimeException e) {

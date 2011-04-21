@@ -194,7 +194,7 @@ public class EvalUtil {
             else {
         		Intersection isTerm = srcIs.clone();
         		isTerm.setCoordinate(axis, terms[i].trim());
-        		values[i] = dataCache.getCellValue(isTerm.getCoordinates());
+        		values[i] = dataCache.getCellValue(isTerm);
             }
     	}
     	      
@@ -241,7 +241,7 @@ public class EvalUtil {
 		//}
        
     	// update value in dataCache
-    	dataCache.setCellValue(targetIs.getCoordinates(), result);
+    	dataCache.setCellValue(targetIs, result);
 
     	}
 

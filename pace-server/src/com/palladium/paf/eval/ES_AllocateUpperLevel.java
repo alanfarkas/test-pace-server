@@ -98,7 +98,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 	            	// set all intersections to the changed intersections value
 	            	
 	            	// get value
-	            	double chngVal = dataCache.getCellValue( chngedTBFirst.getCoordinates() );
+	            	double chngVal = dataCache.getCellValue( chngedTBFirst );
 	            	
 	            	// remove change from list
 	            	ancNames.remove(chngedTBFirst.getCoordinate(timeDim));
@@ -107,7 +107,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 	            	for (String name : ancNames) {
 		            	Intersection tmp = chngedTBFirst.clone();	            		
 	            		tmp.setCoordinate(timeDim, name);
-	            		dataCache.setCellValue(tmp.getCoordinates(), chngVal);
+	            		dataCache.setCellValue(tmp, chngVal);
 	            		evalState.addChangedCell(tmp);
 	            	}
 	            }
@@ -175,7 +175,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
      */
     public PafDataCache allocateChange(Intersection intersection, EvalState evalState, PafDataCache dataCache) throws PafException {
 
-    	double allocTotal = dataCache.getCellValue(intersection.getCoordinates());
+    	double allocTotal = dataCache.getCellValue(intersection);
 //  	if (logger.isDebugEnabled()) logger.debug("Allocating change for :" + intersection.toString() + " = " + allocTotal);
 
     	// useful values
@@ -222,7 +222,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
             if (evalState.getCurrentLockedCells().contains(target) || 
                     (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
                             target.getCoordinate(yearDim).equals(currentYear))  ) {
-                lockedTotal += dataCache.getCellValue(target.getCoordinates());
+                lockedTotal += dataCache.getCellValue(target);
                 lockedTargets.add(target);              
             }
         }
@@ -255,7 +255,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
                 // total elapsed period locks and add them to a specific collection
                 if (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
                                 target.getCoordinate(yearDim).equals(currentYear) ) {
-                	elapsedTotal += dataCache.getCellValue(target.getCoordinates());
+                	elapsedTotal += dataCache.getCellValue(target);
                 	elapsedTargets.add(target);              
                 }  
             	
@@ -266,7 +266,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
                 		&&
                 		(!elapsedTargets.contains(target)) // not already counted as an elapsed period
                 ) {
-                	userLockedTotal += dataCache.getCellValue(target.getCoordinates());
+                	userLockedTotal += dataCache.getCellValue(target);
                     userLockedTargets.add(target);              
                 }
             }
@@ -292,7 +292,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
             
         double origTargetSum = 0;        
         for (Intersection target : targets ) {
-            origTargetSum += dataCache.getCellValue(target.getCoordinates());
+            origTargetSum += dataCache.getCellValue(target);
         }
         
         // begin timing allocation step

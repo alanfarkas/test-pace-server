@@ -173,8 +173,8 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 
 					// Evaluate change in data slice cache and copy to uow cache
 					EvalUtil.evalFormula(f, versionDim, targetIntersection, dsCache, dsEvalState);
-					double newBaseValue = dsCache.getCellValue(targetIntersection.getCoordinates());
-					uowCache.setCellValue(targetIntersection.getCoordinates(), newBaseValue);
+					double newBaseValue = dsCache.getCellValue(targetIntersection);
+					uowCache.setCellValue(targetIntersection, newBaseValue);
 					uowEvalState.addUserChanges(targetIntersection);
 					
 				}
@@ -269,7 +269,7 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		dsEvalState.removeAllUserChanges(changedContribPctCells);
 		Map<Intersection, Double> changedContribPctValueMap = new HashMap<Intersection, Double>();
 		for (Intersection changedCell : changedContribPctCells) {
-			changedContribPctValueMap.put(changedCell, dataCache.getCellValue(changedCell.getCoordinates()));
+			changedContribPctValueMap.put(changedCell, dataCache.getCellValue(changedCell));
 		}
 		dsEvalState.addAllChangedContribPctCells(changedContribPctValueMap);
 		
@@ -277,7 +277,7 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		Set<Intersection> lockedContribPctCells  = IntersectionUtils.getFilteredIntersections(lockedCells, memberFilter);
 		dsEvalState.removeAllUserChanges(lockedContribPctCells);
 		for (Intersection lockedCell : lockedContribPctCells) {
-			changedContribPctValueMap.put(lockedCell, dataCache.getCellValue(lockedCell.getCoordinates()));
+			changedContribPctValueMap.put(lockedCell, dataCache.getCellValue(lockedCell));
 		}
 		dsEvalState.addAllChangedContribPctCells(changedContribPctValueMap);
 		

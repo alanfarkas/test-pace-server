@@ -101,7 +101,7 @@ public class IFFunc extends AbstractFunction {
             else {
         		Intersection isTerm = srcIs.clone();
         		isTerm.setCoordinate(axis, terms[i].trim());
-        		values[i] = dataCache.getCellValue(isTerm.getCoordinates());
+        		values[i] = dataCache.getCellValue(isTerm);
             }
     	}
     	      

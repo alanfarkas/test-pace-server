@@ -56,7 +56,7 @@ public class F_TriggerIntersection extends AbstractFunction {
     	if ( parms.length > 0 )
     		dataIs.setCoordinate(app.getMdbDef().getMeasureDim(), parms[0]);
     	
-        result = dataCache.getCellValue(dataIs.getCoordinates());
+        result = dataCache.getCellValue(dataIs);
 
     	return result;
     }

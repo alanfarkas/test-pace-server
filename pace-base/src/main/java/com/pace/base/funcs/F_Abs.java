@@ -59,7 +59,7 @@ public class F_Abs extends AbstractFunction {
 		}
 				
 		// Return value of cross dimensional intersection
-		double result = dataCache.getCellValue(cloneIs.getCoordinates());
+		double result = dataCache.getCellValue(cloneIs);
 		return Math.abs(result);
 	}
 

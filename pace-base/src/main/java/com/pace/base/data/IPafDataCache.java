@@ -11,7 +11,8 @@ import com.pace.base.PafException;
  */
 public interface IPafDataCache {
 
-    public double getCellValue(String[] members) throws PafException;
+ //   public double getCellValue(String[] members) throws PafException;
+    public double getCellValue(Intersection intersection) throws PafException;
 	public int getMeasureAxis();    
 	public String getMeasureDim();    
 	public String getTimeDim();

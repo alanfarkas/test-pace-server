@@ -66,7 +66,7 @@ public class F_Bop extends AbstractFunction {
         PafDimMember firstMbr = offsetTree.getLowestLevelMembers().get(0);
 
 		dataIs.setCoordinate(offsetDim, firstMbr.getKey());
-		result = dataCache.getCellValue(dataIs.getCoordinates());
+		result = dataCache.getCellValue(dataIs);
 
     	return result;
     }

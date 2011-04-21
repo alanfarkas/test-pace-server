@@ -67,7 +67,7 @@ public abstract class ES_AllocateBase extends ES_EvalBase implements IEvalStep {
         
         for (Intersection target : targets ) {
 
-            origValue = dataCache.getCellValue(target.getCoordinates());
+            origValue = dataCache.getCellValue(target);
 //            if (origValue == 0 && origTargetSum == 0) {
             if (origTargetSum == 0) {                
                 allocValue = allocAvailable / targets.size();
@@ -86,7 +86,7 @@ public abstract class ES_AllocateBase extends ES_EvalBase implements IEvalStep {
 	    		}
     		}
             
-            dataCache.setCellValue(target.getCoordinates(), allocValue);
+            dataCache.setCellValue(target, allocValue);
             
 //            if (logger.isDebugEnabled()) logger.debug("Allocating " + target.toString() + " new value: " + allocValue);
             
@@ -173,7 +173,7 @@ public abstract class ES_AllocateBase extends ES_EvalBase implements IEvalStep {
             // put target msr coordinate back to original measure for assignment
             target.setCoordinate(msrDim, targetMsr);
             
-            dataCache.setCellValue(target.getCoordinates(), allocValue);
+            dataCache.setCellValue(target, allocValue);
             
 //            if (logger.isDebugEnabled()) logger.debug("Allocating " + target.toString() + " new value: " + allocValue);
             
