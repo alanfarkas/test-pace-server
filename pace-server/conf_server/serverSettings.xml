@@ -3,7 +3,7 @@
 
 <beans>
 	<bean id="ldapSettings"
-		class = "com.palladium.paf.server.PafLDAPSettings">
+		class = "com.pace.server.PafLDAPSettings">
 		<property name="ldapProviderName" value="ADG" />
 		<property name="securityPrincipal" value="CORP\ADG" />
 		<property name="securityCredentials" value="" />
@@ -32,7 +32,7 @@
 		<property name="connectTimeout" value="30000"></property>
 	</bean>
 	<bean id="appServerSettings"
-		class = "com.palladium.paf.server.ServerSettings">
+		class = "com.pace.server.ServerSettings">
 		<property name="debugMode" value="false" />
 		<property name="evaluationStepLogging" value="false" />	
 		<property name="changedCellLogging" value="false" />						

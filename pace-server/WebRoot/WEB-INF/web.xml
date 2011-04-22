@@ -17,7 +17,7 @@
   <description>This servlet loads caches and performs other time consuming initialization tasks for the webservice</description>
   <display-name>Paf Initialization Servlet</display-name>
   <servlet-name>PafInitServlet</servlet-name>
-  <servlet-class>com.palladium.paf.server.PafInitServlet</servlet-class>
+  <servlet-class>com.pace.server.PafInitServlet</servlet-class>
   <load-on-startup>1</load-on-startup>
  </servlet>
  <servlet-mapping>

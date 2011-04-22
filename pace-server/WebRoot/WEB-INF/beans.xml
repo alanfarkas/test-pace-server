@@ -37,7 +37,7 @@
     
     <jaxws:endpoint
         id="pafService" 
-        implementor="com.palladium.paf.server.PafServiceProvider" 
+        implementor="com.pace.server.PafServiceProvider" 
         address="/PafService">
         
        <jaxws:properties>

@@ -30,10 +30,10 @@
 		
 		<property name="mappingResources">
 			<list>
-				<value>com/palladium/paf/maps/PafBaseMember.hbm.xml</value>
-				<value>com/palladium/paf/maps/PafBaseTree.hbm.xml</value>
-				<value>com/palladium/paf/maps/PafAttributeTree.hbm.xml</value>
-				<value>com/palladium/paf/maps/PafAttributeMember.hbm.xml</value>				
+				<value>com/pace/server/maps/PafBaseMember.hbm.xml</value>
+				<value>com/pace/server/maps/PafBaseTree.hbm.xml</value>
+				<value>com/pace/server/maps/PafAttributeTree.hbm.xml</value>
+				<value>com/pace/server/maps/PafAttributeMember.hbm.xml</value>				
 			</list>
 		</property>
 	</bean>
@@ -59,15 +59,15 @@
 		<property name="mappingResources">			
 			
 			<list>
-				<value>com/palladium/paf/maps/Application.hbm.xml</value>
-				<value>com/palladium/paf/maps/CellNote.hbm.xml</value>
-				<value>com/palladium/paf/maps/DataSource.hbm.xml</value>
-				<value>com/palladium/paf/maps/Dimension.hbm.xml</value>	
-				<value>com/palladium/paf/maps/CellNoteMapping.hbm.xml</value>	
-				<value>com/palladium/paf/maps/MemberTagCoord.hbm.xml</value>	
-				<value>com/palladium/paf/maps/MemberTagData.hbm.xml</value>	
-				<value>com/palladium/paf/maps/MemberTagId.hbm.xml</value>	
-				<value>com/palladium/paf/maps/SecurityGroups.hbm.xml</value>				
+				<value>com/pace/server/maps/Application.hbm.xml</value>
+				<value>com/pace/server/maps/CellNote.hbm.xml</value>
+				<value>com/pace/server/maps/DataSource.hbm.xml</value>
+				<value>com/pace/server/maps/Dimension.hbm.xml</value>	
+				<value>com/pace/server/maps/CellNoteMapping.hbm.xml</value>	
+				<value>com/pace/server/maps/MemberTagCoord.hbm.xml</value>	
+				<value>com/pace/server/maps/MemberTagData.hbm.xml</value>	
+				<value>com/pace/server/maps/MemberTagId.hbm.xml</value>	
+				<value>com/pace/server/maps/SecurityGroups.hbm.xml</value>				
 							
 			</list>
 		</property>
@@ -91,8 +91,8 @@
 		
 		<property name="mappingResources">
 			<list>
-				<value>com/palladium/paf/maps/PafAttributeTree.hbm.xml</value>
-				<value>com/palladium/paf/maps/PafAttributeMember.hbm.xml</value>				
+				<value>com/pace/server/maps/PafAttributeTree.hbm.xml</value>
+				<value>com/pace/server/maps/PafAttributeMember.hbm.xml</value>				
 			</list>
 		</property>
 	</bean>
@@ -115,7 +115,7 @@
 		
 		<property name="mappingResources">
 			<list>
-				<value>com/palladium/paf/maps/PafUserDef.hbm.xml</value>
+				<value>com/pace/server/maps/PafUserDef.hbm.xml</value>
 			</list>
 		</property>
 	</bean>
