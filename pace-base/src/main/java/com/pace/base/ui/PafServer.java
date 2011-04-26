@@ -37,6 +37,7 @@ public class PafServer implements Comparable, Cloneable {
 		this.port = port;
 		this.homeDirectory = homeDirectory;
 		this.defaultServer = defaultServer;
+		this.https = false;
 		
 	}
 
@@ -143,8 +144,13 @@ public class PafServer implements Comparable, Cloneable {
 	}
 
 	public String getCompleteWSDLService() {
-		 
-		return "http://" + host + ":" + port + "/" + webappName + "/" + wsdlServiceName;
+		String protocol = "http";
+		
+		if(https){
+			protocol = "https";
+		}
+		
+		return protocol + "://" + host + ":" + port + "/" + webappName + "/" + wsdlServiceName;
 	}
 
 	/**
