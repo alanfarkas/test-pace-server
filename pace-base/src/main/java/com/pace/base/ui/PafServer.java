@@ -18,6 +18,7 @@ public class PafServer implements Comparable, Cloneable {
 	private Long serverStartupTimeoutInMilliseconds;
 	private boolean doesNotPromptOnHotDeploy;
 	private boolean doesNotPromptOnHotRefresh;
+	private boolean https;
 		
 
 	public PafServer() {		
@@ -251,6 +252,14 @@ public class PafServer implements Comparable, Cloneable {
 	 */
 	public void setDoesNotPromptOnHotRefresh(boolean doesNotPromptOnHotRefresh) {
 		this.doesNotPromptOnHotRefresh = doesNotPromptOnHotRefresh;
+	}
+
+	public void setHttps(boolean https) {
+		this.https = https;
+	}
+
+	public boolean isHttps() {
+		return https;
 	}
 
 }
