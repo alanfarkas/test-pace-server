@@ -82,6 +82,7 @@ public class PafServiceProvider implements IPafService {
 	private PafAppService appService;
 	private static String serverPlatform = null;
 	private static Logger logger = Logger.getLogger(PafServiceProvider.class);
+	private static Logger logAudit = Logger.getLogger("pace.audit");
 	private static ConcurrentHashMap<String, PafClientState> clients = new ConcurrentHashMap<String, PafClientState>();
 
 	public PafServiceProvider() {
@@ -1389,6 +1390,12 @@ public class PafServiceProvider implements IPafService {
 			clientState.setCurrentMsrRulesetName(evalRequest.getRuleSetName());
 			
 			//dataSlice = dataService.evaluateView(evalRequest, clientState);
+			if (logAudit.isInfoEnabled()) {
+				logAudit.info(
+						"User: " + clientState.getClientId() + 
+						" changed cells " + evalRequest.getChangedCells().toString());
+			}
+			
 			
 			//Evaluate view
 			PafView currentView = clientState.getView(evalRequest.getViewName());

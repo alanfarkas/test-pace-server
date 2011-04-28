@@ -89,7 +89,7 @@ public class PafViewService {
 	
 	private Map<String, Map<String, PafAxis>> validMemberTagMap = null;
 
-	private static Logger logger = Logger.getLogger("PafViewService");
+	private static Logger logger = Logger.getLogger(PafViewService.class);
 
 	public void getViewMetaData() {
 		// IMdStore mdstore = MdFactory.createIMdStore("test1");
