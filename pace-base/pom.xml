@@ -84,21 +84,21 @@
          <artifactId>jep-main</artifactId>
          <version>2.4</version>
          <scope>system</scope>
-         <systemPath>c:/java/userlib/Jep/dist/jep-2.4.0.jar</systemPath>
+         <systemPath>${HOMEDRIVE}/java/userlib/Jep/dist/jep-2.4.0.jar</systemPath>
  </dependency>
  <dependency>
          <groupId>org.lsmp.djep</groupId>
          <artifactId>jep-ext</artifactId>
          <version>1.1.0</version>
          <scope>system</scope>
-         <systemPath>c:/java/userlib/Jep/dist/ext-1.1.0.jar</systemPath>
+         <systemPath>${HOMEDRIVE}/java/userlib/Jep/dist/ext-1.1.0.jar</systemPath>
  </dependency>
   <dependency>
          <groupId>com.essbase.api</groupId>
          <artifactId>ess-11.1.2</artifactId>
          <version>11.1.2</version>
          <scope>system</scope>
-         <systemPath>c:/java/userlib/EDS 11.1.2/ess_japi.jar</systemPath>
+         <systemPath>${HOMEDRIVE}/java/userlib/EDS 11.1.2/ess_japi.jar</systemPath>
  </dependency>
   </dependencies>
   <build>
