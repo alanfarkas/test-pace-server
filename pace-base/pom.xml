@@ -19,7 +19,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
-      <scope>test</scope>
     </dependency>
 <dependency>
   <groupId>log4j</groupId>
@@ -80,6 +79,27 @@
 	<artifactId>mail</artifactId>
 	<version>1.4.1</version>
 </dependency>
+<dependency>
+         <groupId>org.nfunk.jep</groupId>
+         <artifactId>jep-main</artifactId>
+         <version>2.4</version>
+         <scope>system</scope>
+         <systemPath>c:/java/userlib/Jep/dist/jep-2.4.0.jar</systemPath>
+ </dependency>
+ <dependency>
+         <groupId>org.lsmp.djep</groupId>
+         <artifactId>jep-ext</artifactId>
+         <version>1.1.0</version>
+         <scope>system</scope>
+         <systemPath>c:/java/userlib/Jep/dist/ext-1.1.0.jar</systemPath>
+ </dependency>
+  <dependency>
+         <groupId>com.essbase.api</groupId>
+         <artifactId>ess-11.1.2</artifactId>
+         <version>11.1.2</version>
+         <scope>system</scope>
+         <systemPath>c:/java/userlib/EDS 11.1.2/ess_japi.jar</systemPath>
+ </dependency>
   </dependencies>
   <build>
   <plugins>
