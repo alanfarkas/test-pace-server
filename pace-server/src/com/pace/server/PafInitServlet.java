@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 public class PafInitServlet extends HttpServlet {
@@ -94,6 +95,7 @@ public class PafInitServlet extends HttpServlet {
 	 */
 	@SuppressWarnings("unused")
 	public void init() throws ServletException {
+		// logger.getRootLogger().setLevel(Level.INFO);
 		logger.debug("Initialization Servlet Called");
         logger.info("--------------------------------------------------");       
         logger.info("Starting Pace Application Framework Server.");
