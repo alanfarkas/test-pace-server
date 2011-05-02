@@ -26,5 +26,25 @@
     	<artifactId>log4j</artifactId>
     	<version>1.2.16</version>
     </dependency>
+    <dependency>
+         <groupId>com.essbase.api</groupId>
+         <artifactId>ess-11.1.2</artifactId>
+         <version>11.1.2</version>
+         <scope>system</scope>
+         <systemPath>${HOMEDRIVE}/java/userlib/EDS 11.1.2/ess_japi.jar</systemPath>
+ </dependency>
   </dependencies>
+   
+  <build>
+  <plugins>
+   <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <configuration>
+     <source>1.5</source>
+     <target>1.5</target>
+    </configuration>
+   </plugin>
+  </plugins>
+ </build>
 </project>
