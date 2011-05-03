@@ -37,7 +37,7 @@
  	<artifactId>com.pace.base</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
  	<scope>system</scope>
- 	<systemPath>${basedir}/../pace-base/target/</systemPath>
+ 	<systemPath>${basedir}/../pace-base/target/com.pace.base-0.0.1-SNAPSHOT.jar</systemPath>
  </dependency>
   </dependencies>
    
