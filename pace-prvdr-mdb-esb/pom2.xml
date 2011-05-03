@@ -32,13 +32,11 @@
          <scope>system</scope>
          <systemPath>${HOMEDRIVE}/java/userlib/EDS 11.1.2/ess_japi.jar</systemPath>
  </dependency>
- <dependency>
+  <dependency>
  	<groupId>com.pace.base</groupId>
  	<artifactId>com.pace.base</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
- 	<scope>system</scope>
- 	<systemPath>${basedir}/../pace-base/target/com.pace.base-0.0.1-SNAPSHOT.jar</systemPath>
- </dependency>
+  </dependency>
   </dependencies>
    
   <build>
