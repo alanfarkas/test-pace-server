@@ -128,24 +128,26 @@
  	<groupId>com.pace.base</groupId>
  	<artifactId>com.pace.base</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
+ 	<type>war</type>
   </dependency>
  <dependency>
  	<groupId>pace-prvdr-mdb-esb</groupId>
  	<artifactId>pace-prvdr-mdb-esb</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
+ 	<type>war</type>
  </dependency>
  <dependency>
  	<groupId>pace-ext-cmds</groupId>
  	<artifactId>pace-ext-cmds</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
- 	<type>jar</type>
+ 	<type>war</type>
  	<scope>compile</scope>
  </dependency>
  <dependency>
  	<groupId>pace-ext-funcs</groupId>
  	<artifactId>pace-ext-funcs</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
- 	<type>jar</type>
+ 	<type>war</type>
  	<scope>compile</scope>
  </dependency>
   </dependencies>
@@ -177,4 +179,5 @@
       </plugin>
     </plugins>
   </build>
+  
 </project>
