@@ -117,16 +117,13 @@
  <dependency>
  	<groupId>javax.faces</groupId>
  	<artifactId>jsf-api</artifactId>
- 	<version>1.2_04</version>
- 	<type>pom</type>
- 	<scope>compile</scope>
+ 	<version>1.2_02</version>
  </dependency>
  <dependency>
  	<groupId>javax.faces</groupId>
  	<artifactId>jsf-impl</artifactId>
- 	<version>1.2_04</version>
- 	<type>pom</type>
- 	<scope>compile</scope>
+ 	<version>1.2</version>
+ 	<classifier>NIGHTLY_20060227</classifier>
  </dependency>
   </dependencies>
   <build>
