@@ -179,5 +179,8 @@
       </plugin>
     </plugins>
   </build>
+  <properties>
+  	<localRepository>${user.home}/.m2/repository</localRepository>
+  </properties>
   
 </project>
