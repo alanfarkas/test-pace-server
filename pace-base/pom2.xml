@@ -49,11 +49,11 @@
 	<artifactId>persistence-api</artifactId>
 	<version>1.0</version>
 </dependency>
-<dependency>
-	<groupId>hibernate</groupId>
-	<artifactId>hibernate</artifactId>
-	<version>3.1rc2</version>
-</dependency>
+ <dependency>
+    	<groupId>org.hibernate</groupId>
+    	<artifactId>hibernate</artifactId>
+    	<version>3.2.7.ga</version>
+    </dependency>
 <dependency>
 	<groupId>org.apache.poi</groupId>
 	<artifactId>poi</artifactId>
