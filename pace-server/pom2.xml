@@ -128,7 +128,6 @@
  	<groupId>com.pace.base</groupId>
  	<artifactId>com.pace.base</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
- 	<type>jar</type>
  	<scope>system</scope>
  	<systemPath>${basedir}/../pace-base/target</systemPath>
  </dependency>
@@ -136,7 +135,6 @@
  	<groupId>pace-prvdr-mdb-esb</groupId>
  	<artifactId>pace-prvdr-mdb-esb</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
- 	<type>jar</type>
  	<scope>system</scope>
  	<systemPath>${basedir}/../pace-prvdr-mdb-esb/target</systemPath>
  </dependency>
