@@ -128,11 +128,13 @@
  	<groupId>com.pace.base</groupId>
  	<artifactId>com.pace.base</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
- </dependency>
+ 	<type>pom</type>
+  </dependency>
  <dependency>
  	<groupId>pace-prvdr-mdb-esb</groupId>
  	<artifactId>pace-prvdr-mdb-esb</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
+ 	<type>pom</type>
  </dependency>
   </dependencies>
   <build>
