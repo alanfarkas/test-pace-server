@@ -125,6 +125,13 @@
  	<version>1.2</version>
  	<classifier>NIGHTLY_20060227</classifier>
  </dependency>
+ <dependency>
+ 	<groupId>com.pace.base</groupId>
+ 	<artifactId>com.pace.base</artifactId>
+ 	<version>0.0.1-SNAPSHOT</version>
+ 	<type>jar</type>
+ 	<scope>compile</scope>
+ </dependency>
   </dependencies>
   <build>
     <sourceDirectory>${basedir}/src</sourceDirectory>
