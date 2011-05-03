@@ -143,6 +143,7 @@
  	<artifactId>com.pace.base</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
  	<type>war</type>
+ 	<scope>system</scope>
  	<systemPath>${basedir}/../pace-base/target/com.pace.base-0.0.1-SNAPSHOT.jar</systemPath>
    </dependency>
  <dependency>
@@ -150,6 +151,7 @@
  	<artifactId>pace-prvdr-mdb-esb</artifactId>
  	<version>0.0.1-SNAPSHOT</version>
  	<type>war</type>
+ 	<scope>system</scope>
  	<systemPath>${basedir}/../pace-prvdr-mdb-esb/target/pace-prvdr-mdb-esb-0.0.1-SNAPSHOT.jar</systemPath>
  </dependency>
   </dependencies>
