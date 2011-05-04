@@ -28,10 +28,8 @@
     </dependency>
     <dependency>
          <groupId>com.essbase.api</groupId>
-         <artifactId>ess-11.1.2</artifactId>
+         <artifactId>com.essbase.api</artifactId>
          <version>11.1.2</version>
-         <scope>system</scope>
-         <systemPath>${HOMEDRIVE}/java/userlib/EDS 11.1.2/ess_japi.jar</systemPath>
  </dependency>
   <dependency>
  	<groupId>com.pace.base</groupId>
