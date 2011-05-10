@@ -4,7 +4,7 @@
 	<property name="proj_root" location="${basedir}" />
 	<property name="client_dir" location="${proj_root}\client" />	
 	<property name="local_web" location="${proj_root}\WebRoot" />
-	<property name="app_install" location= "C:\Program Files\Pace\PafServer" />
+	<property name="app_install" location= "C:\Program Files\AM Software\Pace Server" />
 	<property name="dev_web"  location="${app_install}\server\server\default\deploy\PafServer.war" />
 	<property name="test_web"  location="T:\PafServer\server\server\default\deploy\PafServer.war" />
 	<property name="proj_pafbase" location="${wrksp_root}\PafBaseLibraries" />
