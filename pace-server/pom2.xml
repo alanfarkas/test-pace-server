@@ -18,6 +18,7 @@
       <groupId>org.apache.openejb</groupId>
       <artifactId>javaee-api</artifactId>
       <version>5.0-1</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -113,12 +114,14 @@
  	<groupId>javax.faces</groupId>
  	<artifactId>jsf-api</artifactId>
  	<version>1.2_02</version>
+ 	<scope>provided</scope>
  </dependency>
  <dependency>
  	<groupId>javax.faces</groupId>
  	<artifactId>jsf-impl</artifactId>
  	<version>1.2</version>
  	<classifier>NIGHTLY_20060227</classifier>
+ 	<scope>provided</scope>
  </dependency>
   <dependency>
  	<groupId>com.pace.base</groupId>
