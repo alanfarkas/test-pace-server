@@ -2,13 +2,15 @@
 <project name="pace-prvdr-mdb-esb" default="deploy" basedir=".">
 	
 	<property name="debuglevel" value="source,lines,vars"/>
-	<property name="target" value="1.5"/>
-	<property name="source" value="1.5"/>
-	<property name="proj_root" location="${basedir}\..\pace-server"/>
-    <property name="local_web" location="${proj_root}/WebRoot"/>
+	<property name="target" value="1.6"/>
+	<property name="source" value="1.6"/>
+	<property name="wrksp_root" value = "${basedir}\.."/>
+	<property name="proj_root" location="${basedir}"/>
+	<property name="server_proj" location="${wrksp_root}\pace-server"/>
+    <property name="local_web" location="${server_proj}/WebRoot"/>
 	<property name="esb_driver_dir" value="mdb_drivers\essbase"/>
 	<property name="esb_local_driver_path" location="${local_web}\${esb_driver_dir}"/>
-	<property name="install_stg_root"  location="\proj_wrksp\server-stage" />
+	<property name="install_stg_root"  location="${wrksp_root}\pace-server-installs\ia-project\server-stage" />
 	<property name="esb_redist_dir"  location="${install_stg_root}\redist\essbase" />
 	<property name="app_install" location= "C:\Program Files\Pace\PafServer" />
 	<!-- following properties are curently unused

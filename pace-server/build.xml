@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="PafServer" default="Build All" basedir=".">
-	<property name="wrksp_root" location="${basedir}\.."/>
+
 	<property name="proj_root" location="${basedir}" />
+	<property name="wrksp_root" location="${proj_root}\.."/>	
+	<property name="proj_wrksp" location="${wrksp_root}\.."/>
+
 	<property name="client_dir" location="${proj_root}\client" />	
 	<property name="local_web" location="${proj_root}\WebRoot" />
-	<property name="app_install" location= "D:\app-srvrs" />
-	<property name="dev_web"  location="${app_install}\server\server\default\deploy\PafServer.war" />
-	<property name="test_web"  location="T:\PafServer\server\server\default\deploy\PafServer.war" />
-	<property name="proj_pafbase" location="${wrksp_root}\PafBaseLibraries" />
-	<property name="esb_deployed_class_path"  location="${dev_web}\WEB-INF\classes\com\palladium\paf\mdb\essbase" />
+	<property name="app_install" location= "${proj_wrksp}\app-srvrs" />
+	<property name="dev_web"  location="${app_install}\server\server\default\deploy\pace.war" />
+	<property name="test_web"  location="T:\PafServer\server\server\default\deploy\pace.war" />
+	<property name="proj_pafbase" location="${wrksp_root}\pace-base" />
+	<property name="esb_deployed_class_path"  location="${dev_web}\WEB-INF\classes\com\pace\mdb\essbase" />
 
 	<property name="web_service_client_plugin" location="${wrksp_root}\com.palladium.paf.adminconsole.webservicesclient" />
 	<property name="extra_jars_plugin" location="${wrksp_root}\com.palladium.paf.adminconsole.extrajars" />	
 	
-	<property name="install_stg_root"  location="C:\proj_wrksp\pace-server-installs\server-stage" />
-	<property name="install_war"  location="${install_stg_root}\server\server\default\deploy\PafServer.war" />
-	<property name="setup_build_client" location="C:\proj_wrksp\pace-server-installs\setup-bundles\client" />
+	<property name="install_stg_root"  location="${proj_wrksp}\pace-server-installs\ia-project\server-stage" />
+	<property name="install_war"  location="${install_stg_root}\server\server\default\deploy\pace.war" />
+	<property name="setup_build_client" location="${proj_wrksp}\pace-server-installs\setup-bundles\client" />
 	<property name="install_stg_client" location="${install_stg_root}\server\server\default\deploy\installs.war\client" />	
 	<property name="install_stg_redist" location="${install_stg_root}\redist" />	
 	<property name="install_stg_redist_ws61" location="${install_stg_redist}\WS61" />			
-	
 	
 	<target name="Build All" depends="update-all-config">
 		<echo>Deployment completed</echo>
@@ -267,7 +269,7 @@
 	<target name="make-war" depends="libraries">
 		<echo>"Making war"</echo>		
 	    <mkdir dir="${proj_root}\dist"/>
-	    <war destfile="${proj_root}\dist\PafServer.war" basedir="${local_web}" webxml="${local_web}\WEB-INF\web.xml"  />
+	    <war destfile="${proj_root}\dist\pace.war" basedir="${local_web}" webxml="${local_web}\WEB-INF\web.xml"  />
 	</target>			
 	
 	<target name="stage-installation" depends="make-war, update-all-config">
@@ -295,19 +297,25 @@
 			<fileset dir="${dev_web}" />
 		</copy>
 		
+
 		<echo>"Bin dependent jars."</echo>
 		<copy 
-			file="${install_war}\WEB-INF\lib\paf_base.jar"
+			file="${install_war}\WEB-INF\lib\pace-base.jar"
 			todir="${install_stg_root}\lib" />
+
 		
+		
+		<!-- Skip for now, do as part of installation build -->
+		<!--		
 		<echo>"Autoupdate installs."</echo>
 		<copy
 			file="${setup_build_client}\setup.exe"
 			todir="${install_stg_client}" />
-
+		-->
+		
 		<echo>"Redistributable war."</echo>
 		<copy
-			file="${proj_root}\dist\PafServer.war"
+			file="${proj_root}\dist\pace.war"
 			todir="${install_stg_root}\redist\war" />		
 		
 <!--

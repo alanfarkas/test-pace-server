@@ -84,7 +84,7 @@ public class PafMetaData {
 	
 	private static boolean debugMode = false;
 	
-	//FIXME Migrate these string constants into Paf Base Libraries for 2.8.1 GA
+	//FIXME Migrate these string constants into Paf Base Libraries
 	private static final String lclJndiCtxt = "java:comp/env";
 	private static final String glblJndiCtxt = "java:";	
 	
