@@ -1390,7 +1390,7 @@ public class PafServiceProvider implements IPafService {
 			clientState.setCurrentMsrRulesetName(evalRequest.getRuleSetName());
 			
 			//dataSlice = dataService.evaluateView(evalRequest, clientState);
-			if (logAudit.isInfoEnabled()) {
+			if (logAudit.isInfoEnabled() && evalRequest.getChangedCells() != null && evalRequest.getChangedCells().getCompressedData() != null) {
 				logAudit.info(
 						"User: " + clientState.getClientId() + 
 						" changed cells " + evalRequest.getChangedCells().toString());
