@@ -867,24 +867,34 @@ public abstract class PafDataCache implements IPafDataCache {
 	}
 
 	/**
-	 *	Return the cell value for the specified intersection
+	 *	Return the cell value for the specified intersection. If the requested intersection
+	 *  is valid, but does not exist, then a zero value is returned.
 	 *
-	 * @param intersection Member intersection object that corresponds to cell
-	 * @return Returns the cell value.
+	 * @param intersection Member intersection object that corresponds to data cache cell
+	 * 
+	 * @return Returns the cell value
 	 * @throws PafException 
 	 */
 	public double getCellValue(Intersection intersection) throws PafException {
 
-		// Check for valid intersection
-		Integer cellIndex = cellIndexMap.get(intersection);
-		if (cellIndex == null) {
-			String errMsg = "Unable to get data cache cell value for invalid intersection ["
-				+ StringUtils.arrayToString(intersection.getCoordinates()) + "]";
-			throw new IllegalArgumentException(errMsg);
-		}
-		
 		// Return cell value
-		return cellArray[cellIndex];
+		Integer cellIndex = cellIndexMap.get(intersection);
+		if (cellIndex != null) {
+			// Intersection exists
+			return cellArray[cellIndex];
+		} else {
+			// Intersection does not exist
+			if (isValidIntersection(intersection)) {
+				// Valid intersection - return 0
+				return 0;
+			} else {
+				// Invalid intersection - throw error
+				String errMsg = "Unable to get data cache cell value for invalid intersection ["
+					+ StringUtils.arrayToString(intersection.getCoordinates()) + "]";
+				throw new IllegalArgumentException(errMsg);
+			}
+		}
+
 	}
 
 	/**
@@ -2324,6 +2334,70 @@ public abstract class PafDataCache implements IPafDataCache {
 	}
 
 
+	/**
+	 *	Determines if the specified intersection exists in the data cache
+	 *
+	 * @param intersection Cell intersection
+	 * @return True if the specified intersection exists in the data cache
+	 */
+	public boolean isExistingIntersection(Intersection intersection) {
+
+		boolean isFound = false;
+
+		// Look for intersection
+		if (this.cellIndexMap.containsKey(intersection)) {
+			isFound = true;
+		}
+
+		// Return status
+		return isFound;
+	}
+
+	/**
+	 *	Determines if the specified intersection is a valid data cache intersection. This
+	 *  does not mean that the intersection necessarily exists in the data cache.
+	 *
+	 * @param intersection Cell intersection
+	 * @return True if the specified intersection is a valid data cache intersection
+	 */
+	public boolean isValidIntersection(Intersection intersection) {
+
+		// Assume that intersection is not null
+		
+		// Check intersection size
+		int axisCount = this.getAxisCount();
+		if (intersection.getDimensions().length != axisCount) {
+			return false;
+		}
+		
+		// Cycle through each data cache axis
+		for (int axis = 0; axis < axisCount; axis++) {
+			
+			// Validate dimension name and dimension order
+			String dim = intersection.getDimensions()[axis];
+			if (!dim.equals(this.getDimension(axis))) {
+				return false;
+			}
+			
+			//Validate member name
+			String member = intersection.getCoordinate(dim);
+			if (!this.isMember(dim, member)) {
+				return false;
+			}
+		}
+
+
+		// Return status
+		return true;
+	}
+
+	
+	/**
+	 *	Validate member filters used for retrieving filtered data cache data
+	 *
+	 * @param memberFilters Map comprised of member lists for each filtered dimension
+	 * @throws IllegalArgumentException
+	 */
 	public void validateMemberFilters(Map<String, List<String>> memberFilters) {
 		for (String dimension:memberFilters.keySet()) {
 			List<String> members = memberFilters.get(dimension);
