@@ -52,7 +52,7 @@ public class ZipPaceProject extends PaceProject {
 	
 	private XMLPaceProject xmlPaceProject;
 	
-	private File paceTempDir = new File(PafBaseConstants.DN_PaceTmpFldr);
+	//private File paceTempDir = new File(PafBaseConstants.DN_PaceTmpFldr);
 		
 	/**
 	 * @param projectDataMap
@@ -112,11 +112,13 @@ public class ZipPaceProject extends PaceProject {
 	 */
 	@Override
 	protected void read(Set<ProjectElementId> filterSet) {
+		
+		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
 
-		File tempDirectory = FileUtils.createTempDirectory(paceTempDir);
+		File tempDirectory = FileUtils.createTempDirectory(systemTempDir);
 		
 		String dynamicDirName = tempDirectory.getAbsolutePath();
-				
+		
 		try {
 			PafZipUtil.unzipFile(getProjectInput(), dynamicDirName);
 		} catch (IOException e) {
@@ -137,8 +139,8 @@ public class ZipPaceProject extends PaceProject {
 		
 		super.read(filterSet);
 		
-		//FileUtils.deleteDirectory(tempDirectory);
-		FileUtils.deleteDirectory(paceTempDir);
+		FileUtils.deleteDirectory(tempDirectory);
+		//FileUtils.deleteDirectory(paceTempDir);
 		
 		xmlPaceProject = null;
 	}
@@ -161,7 +163,11 @@ public class ZipPaceProject extends PaceProject {
 	@Override
 	protected void write(Set<ProjectElementId> filterSet) throws ProjectSaveException {
 		 		
-		File tempDirectory = FileUtils.createTempDirectory(paceTempDir);
+		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
+
+		File tempDirectory = FileUtils.createTempDirectory(systemTempDir);
+		
+		//File tempDirectory = FileUtils.createTempDirectory(paceTempDir);
 		
 		String dynamicDirName = tempDirectory.getAbsolutePath();
 						
@@ -253,8 +259,8 @@ public class ZipPaceProject extends PaceProject {
 			
 		}
 		
-		//FileUtils.deleteDirectory(tempDirectory);
-		FileUtils.deleteDirectory(paceTempDir);
+		FileUtils.deleteDirectory(tempDirectory);
+		//FileUtils.deleteDirectory(paceTempDir);
 		
 		xmlPaceProject = null;
 		

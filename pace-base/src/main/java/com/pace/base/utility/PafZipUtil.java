@@ -12,6 +12,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.Logger;
@@ -70,11 +71,13 @@ public class PafZipUtil {
 	    in.close();
 	    out.close();
 	  }
+	
+	
 
 	
 	public static void unzipFile(String zipFileName, String extractDirectory) throws IOException {
 		
-		ZipFile zipFile = zipFile = new ZipFile(zipFileName);		      
+		ZipFile zipFile =  new ZipFile(zipFileName);		      
 		Enumeration entries = zipFile.entries();
 
 		while(entries.hasMoreElements()) {
@@ -82,14 +85,20 @@ public class PafZipUtil {
 			ZipEntry entry = (ZipEntry)entries.nextElement();
 
 			String outputName = extractDirectory + File.separator + entry.getName();
-    
+			
 			if(entry.isDirectory()) {
 				// Assume directories are stored parents first then children.
 				logger.info("Extracting directory " + entry.getName() + " to " + outputName);
 				// This is not robust, just for demonstration purposes.
 				(new File(outputName)).mkdir();
 				continue;
-			} /*else {
+			} else{
+				File outputFile = new File(outputName);
+		        if (!outputFile.getParentFile().exists()){
+		        	logger.info("Creating parent directory: " + outputFile.getParentFile().getPath());
+		            outputFile.getParentFile().mkdir();
+		        } 
+			}/*else {
 				
 				File fileToExtract = new File(entry.getName()).getParentFile();
 				
