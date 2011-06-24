@@ -18,7 +18,7 @@
             <element column="ATTR_MAP_LVL" type="int" />
         </map>    
 
-        <array name="AliasTableNames" >
+        <array name="AliasTableNames" table="ALIASTABLENAMES" >
             <key column="id" />
             <list-index column="sortOrder" />                
             <element type="string" column="Value"/>

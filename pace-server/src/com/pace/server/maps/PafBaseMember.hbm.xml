@@ -12,12 +12,12 @@
   </list>
   <many-to-one class="PafBaseMember" column="parent_id" name="Parent"/>
   <component class="PafBaseMemberProps" name="MemberProps">
-   <map cascade="all, delete-orphan" name="Aliases" sort="unsorted">
+   <map cascade="all, delete-orphan" name="Aliases" table="ALIASES" sort="unsorted">
     <key column="alias_key"/>
     <map-key column="alias_id" type="string"/>
     <element column="alias_value" type="string"/>
    </map>
-   <map name="AssociatedAttributes" sort="unsorted">
+   <map name="AssociatedAttributes" table="ASSOCIATEDATTRIBUTES" sort="unsorted">
     <key column="ASSOC_ATTR_ID"/>
     <map-key column="ASSOC_ATTR_KEY" type="string"/>
     <element column="AssocAttribValue" type="string"/>

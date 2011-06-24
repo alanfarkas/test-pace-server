@@ -3,12 +3,16 @@
 
 <jboss-web>
 
-<!-- <class-loading java2ClassLoadingCompliance="false">	-->
-<!-- <loader-repository>-->
-<!-- com.pace:loader=MyClassLoader-->
-<!-- <loader-repository-config>java2ParentDelegation=false</loader-repository-config>-->
-<!-- </loader-repository>-->
-<!-- </class-loading>-->
- 
-</jboss-web>  
+
+	<class-loading java2ClassLoadingCompliance="false">	
+ 	<loader-repository>
+ 	com.pace:loader=MyClassLoader
+ 	<loader-repository-config>java2ParentDelegation=false</loader-repository-config>
+ 	</loader-repository>
+ 	</class-loading>
+
+ 	
+ </jboss-web>  
+
+
 
