@@ -42,6 +42,7 @@
   <artifactId>log4j</artifactId>
   <version>1.2.16</version>
   <scope>compile</scope>
+
   <exclusions>
     <exclusion>
       <groupId>javax.mail</groupId>
