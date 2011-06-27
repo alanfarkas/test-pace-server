@@ -70,6 +70,7 @@
     	<groupId>junit</groupId>
     	<artifactId>junit</artifactId>
     	<version>4.8.2</version>
+    	<scope>test</scope>
     </dependency>
     <dependency>
     	<groupId>org.ostermiller</groupId>
@@ -81,29 +82,22 @@
     <dependency>
     	<groupId>org.apache.derby</groupId>
     	<artifactId>derbyclient</artifactId>
-    	<version>10.7.1.1</version>    	
+    	<version>10.7.1.1</version>
+    	<scope>provided</scope>    	
     </dependency>
 
  <dependency>
     	<groupId>org.hibernate</groupId>
     	<artifactId>hibernate-core</artifactId>
     	<version>3.6.4.Final</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.springframework</groupId>
-    	<artifactId>spring-core</artifactId>
-    	<version>3.0.5.RELEASE</version>    	
-    </dependency>
-    <dependency>
-    	<groupId>org.springframework</groupId>
-    	<artifactId>spring-web</artifactId>
-    	<version>3.0.5.RELEASE</version>    	
-    </dependency>
+    	<scope>provided</scope>
+ </dependency>
     <dependency>
     	<groupId>org.apache.cxf</groupId>
     	<artifactId>apache-cxf</artifactId>
     	<version>2.4.0</version>
     	<type>pom</type>
+    	<scope>provided</scope>
     </dependency>
     <dependency>
          <groupId>org.nfunk.jep</groupId>
