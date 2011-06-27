@@ -300,7 +300,7 @@
 
 		<echo>"Bin dependent jars."</echo>
 		<copy 
-			file="${install_war}\WEB-INF\lib\pace-base.jar"
+			file="${install_war}\WEB-INF\lib\pace-base_classes.jar"
 			todir="${install_stg_root}\lib" />
 
 		

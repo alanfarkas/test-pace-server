@@ -22,9 +22,11 @@
 -->
 
 
+
+
 	<bean id="Titan"
 		class = "com.pace.base.mdb.PafConnectionProps">
-		<property name="connectionString" value="EDSDomain=Essbase;EDSUrl=Embedded;Server=localhost;User=admin;Password=password;Application=Titan;Database=Titan"/>			
+		<property name="connectionString" value="EDSDomain=Essbase;EDSUrl=EDSUrl=http://localhost:13080/aps/JAPI;Server=localhost;User=admin;Password=password;Application=Titan;Database=Titan"/>			
 		<property name="metaDataServiceProvider" value="com.pace.mdb.essbase.EsbMetaData" />
 		<property name="dataServiceProvider" value="com.pace.mdb.essbase.EsbData" />			  	
 	</bean>
