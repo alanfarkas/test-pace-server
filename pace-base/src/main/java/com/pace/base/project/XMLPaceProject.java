@@ -281,6 +281,8 @@ public class XMLPaceProject extends PaceProject {
 		//if upgrade project project
 		if ( upgradeProject) {
 			
+			new PafGlobalStylesClassNameMigrationAction(this).run();
+			
 			//run global Styles migration action
 			new PafGlobalStylesMigrationAction(this).run();
 			
