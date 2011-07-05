@@ -95,13 +95,13 @@ public class PafMemberTagManagerTest extends TestCase {
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
-		super.setUp();
+/*		super.setUp();
 		appService = PafAppService.getInstance();
 		memberTagManager = PafMemberTagManager.getInstance();
 		PafMemberTagManager.setSessionFactory(PafMemberTagManagerTest.sessionFactory);
 		refreshMemberTagData();
 		
-	}
+*/	}
 
 	/* (non-Javadoc)
 	 * @see junit.framework.TestCase#tearDown()

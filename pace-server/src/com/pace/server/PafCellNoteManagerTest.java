@@ -424,25 +424,25 @@ public class PafCellNoteManagerTest extends TestCase {
 			fail(e.getMessage());
 		}
 */
-		Session s = currentSession();
+/*		Session s = currentSession();
 	
 		try  {
 			
-			/*
+			
 			List<Application> applications = s.createQuery("from Application").list();
 			
 			assertEquals(applications.size(), 0);
-			*/
+			
 			
 			List<DataSource> dataSources = s.createQuery("from DataSource").list();
 			
 			assertEquals(dataSources.size(), 0);
 			
-			/*
+			
 			List<Dimension> dimensions =  s.createQuery("from Dimension").list();
 						
 			assertEquals(dimensions.size(), 0);
-			*/
+			
 			
 			List<CellNote> cellNotes =  s.createQuery("from CellNote").list();
 			
@@ -458,7 +458,7 @@ public class PafCellNoteManagerTest extends TestCase {
 			
 		} 
 		
-	
+*/	
 	}
 
 	/**
