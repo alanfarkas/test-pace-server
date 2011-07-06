@@ -297,7 +297,7 @@ public class PafAppsMigrationActionTest extends MigrationActionTestCase {
 
 		try {
 			
-			defaultPP = new XMLPaceProject(tempConfDir.getName(), set, false);
+			defaultPP = new XMLPaceProject(tempConfDir.getAbsolutePath(), set, false);
 			
 		} catch (InvalidPaceProjectInputException e) {
 			// TODO Auto-generated catch block

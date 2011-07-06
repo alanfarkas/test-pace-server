@@ -139,7 +139,7 @@ public class PafGenerationToHierarchyMigrationTest extends MigrationActionTestCa
 		assertEquals(MigrationActionStatus.NotStarted, action.getStatus());
 		
 		try {
-			pp = new XMLPaceProject(tempConfDir.getName(), true);
+			pp = new XMLPaceProject(tempConfDir.getAbsolutePath(), true);
 		} catch (InvalidPaceProjectInputException e) {
 			fail(e.getMessage());
 		} catch (PaceProjectCreationException e) {
@@ -163,7 +163,7 @@ public class PafGenerationToHierarchyMigrationTest extends MigrationActionTestCa
 		assertEquals(MigrationActionStatus.NotStarted, action.getStatus());
 		
 		try {
-			pp = new XMLPaceProject(tempConfDir.getName(), false);
+			pp = new XMLPaceProject(tempConfDir.getAbsolutePath(), false);
 		} catch (InvalidPaceProjectInputException e) {
 			fail(e.getMessage());
 		} catch (PaceProjectCreationException e) {
