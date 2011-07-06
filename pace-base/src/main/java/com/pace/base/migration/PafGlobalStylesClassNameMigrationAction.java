@@ -107,6 +107,7 @@ public class PafGlobalStylesClassNameMigrationAction extends MigrationAction {
 		//iterate thru the old style map and convert the PafStyle.
 		for(Map.Entry<String, com.palladium.paf.view.PafStyle> e : map.entrySet())
 		{
+			logger.info("Converting PafStyle: '" + e.getValue().getName() +  "' to Pace Server format: 2.8.2.x");
 			mapToSet.put(e.getKey(), e.getValue().convert());
 		}
 		
