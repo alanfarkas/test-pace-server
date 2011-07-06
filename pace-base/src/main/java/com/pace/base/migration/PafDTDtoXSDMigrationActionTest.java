@@ -43,10 +43,7 @@ import com.pace.base.utility.*;
  */
 public class PafDTDtoXSDMigrationActionTest extends TestCase {
 
-	
-	File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
-
-	File tempDirectory = FileUtils.createTempDirectory(systemTempDir);
+	File tempDirectory = FileUtils.createTempDirectory();
 	
 	String dynamicDirName = tempDirectory.getAbsolutePath();
 	

@@ -351,6 +351,18 @@ public class FileUtils {
 	
 	/**
 	 * 
+	 *  Creates a new temporary directory in the temp directory specified by "java.io.tmpdir"
+	 *  The name of the directory is dynamically created based of of the date.
+	 *
+	 * @return a file instance of the temp directory created
+	 */
+	public static File createSystemTempDirectory() {
+		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
+		return createTempDirectory(systemTempDir);
+	}
+	
+	/**
+	 * 
 	 *  Creates a new directory.  The name of the directory is 
 	 *  dynamically created based of of the date.
 	 *
@@ -415,8 +427,8 @@ public class FileUtils {
 	 * @return a file instance of the temp directory created
 	 */
 	public static File createTempDirectory() {
-		
-		return createTempDirectory(null);
+		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
+		return createTempDirectory(systemTempDir);
 		
 	}
 	

@@ -100,9 +100,7 @@ public class MigrationActionTestCase extends TestCase {
 	}
 
 	private static File getTempDirectory(){
-		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
-
-		return FileUtils.createTempDirectory(systemTempDir);
+		return FileUtils.createTempDirectory();
 	}
 
 }

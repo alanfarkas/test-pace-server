@@ -113,9 +113,7 @@ public class ZipPaceProject extends PaceProject {
 	@Override
 	protected void read(Set<ProjectElementId> filterSet) {
 		
-		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
-
-		File tempDirectory = FileUtils.createTempDirectory(systemTempDir);
+		File tempDirectory = FileUtils.createTempDirectory();
 		
 		String dynamicDirName = tempDirectory.getAbsolutePath();
 		
@@ -162,10 +160,8 @@ public class ZipPaceProject extends PaceProject {
 	 */
 	@Override
 	protected void write(Set<ProjectElementId> filterSet) throws ProjectSaveException {
-		 		
-		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
 
-		File tempDirectory = FileUtils.createTempDirectory(systemTempDir);
+		File tempDirectory = FileUtils.createTempDirectory();
 		
 		//File tempDirectory = FileUtils.createTempDirectory(paceTempDir);
 		

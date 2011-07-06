@@ -19,6 +19,7 @@
 package com.pace.base.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -270,15 +271,15 @@ public class XMLPaceProjectTest extends TestCase {
 		Map<String, RuleSet> ruleSetMap = pp.getRuleSets();
 		
 		assertNotNull(ruleSetMap);
-		assertEquals(14, ruleSetMap.size());
+		assertEquals(15, ruleSetMap.size());
 		
 		List<PafView> viewList = pp.getViews();
 		assertNotNull(viewList);
-		assertEquals(82, viewList.size());
+		assertEquals(84, viewList.size());
 		
 		List<PafViewSection> viewSectionList = pp.getViewSections();
 		assertNotNull(viewSectionList);
-		assertEquals(83, viewSectionList.size());
+		assertEquals(85, viewSectionList.size());
 		
 		List<DynamicMemberDef> dynamicMemberList = pp.getDynamicMembers();
 		assertNotNull(dynamicMemberList);
@@ -341,7 +342,7 @@ public class XMLPaceProjectTest extends TestCase {
 		
 		filterSet.clear();
 						
-		assertEquals(82, pp.getViews().size());
+		assertEquals(84, pp.getViews().size());
 				
 		try {
 			pp.reloadData();
@@ -350,7 +351,52 @@ public class XMLPaceProjectTest extends TestCase {
 		}
 		
 		assertEquals(3, pp.getProjectDataMap().size());
-		assertEquals(82, pp.getViews().size());
+		assertEquals(84, pp.getViews().size());
+		
+	}
+	
+    public void testProjectUpgrade1210To2820(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace1210.paf");
+		
+	}
+	
+	public void testProjectUpgrade2400To2820(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2400.paf");
+		
+	}
+	
+	
+	public void testProjectUpgrade2600To2820(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2600.paf");
+		
+	}
+	
+	public void loadUpgradeAndTestProject(String path){
+		
+		File tempDir = FileUtils.createTempDirectory();
+		
+		
+		try {
+			PafZipUtil.unzipFile(path, tempDir.toString());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+		
+		try {
+			pp = new XMLPaceProject(tempDir.toString(), true);
+		} catch (InvalidPaceProjectInputException e) {
+			fail(e.getMessage());
+		} catch (PaceProjectCreationException e) {
+			fail(e.getMessage());
+		}
+		
+		assertNotNull(pp);
+		assertEquals(0, pp.getProjectErrorList().size());
+		
+		FileUtils.deleteDirectory(tempDir);
 		
 	}
 
