@@ -43,7 +43,16 @@ import com.pace.base.utility.*;
  */
 public class PafDTDtoXSDMigrationActionTest extends TestCase {
 
+	
+	File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
+
+	File tempDirectory = FileUtils.createTempDirectory(systemTempDir);
+	
+	String dynamicDirName = tempDirectory.getAbsolutePath();
+	
 	XMLPaceProject titanPP = null;
+	
+	XMLPaceProject titanPP2820 = null;
 	
 	XMLPaceProject aafesPP = null;
 	
@@ -52,6 +61,8 @@ public class PafDTDtoXSDMigrationActionTest extends TestCase {
 	File confParentDir = new File(PafBaseConstants.DN_PaceTestFldr);
 	
 	File confDir = new File(confParentDir, "confTitan");
+	
+	File confDir2820 = new File(dynamicDirName);
 	
 	File confAafesDir = new File(confParentDir, "confAAFES");
 	
@@ -73,9 +84,11 @@ public class PafDTDtoXSDMigrationActionTest extends TestCase {
 		
 		PafZipUtil.unzipFile("./test_files/pace2400.paf", confDir.toString());
 		PafZipUtil.unzipFile("./test_files/aafes2400.paf", confAafesDir.toString());
+		PafZipUtil.unzipFile("./test_files/pace2820.paf", confDir2820.toString());
 		
 		titanPP = new XMLPaceProject(confDir.getAbsolutePath(), set, false);
 		aafesPP = new XMLPaceProject(confAafesDir.getAbsolutePath(), set, false);
+		titanPP2820 = new XMLPaceProject(confDir2820.getAbsolutePath(), set, false);
 	}
 
 	/* (non-Javadoc)
@@ -86,10 +99,12 @@ public class PafDTDtoXSDMigrationActionTest extends TestCase {
 		
 		titanPP = null;
 		aafesPP = null;
+		titanPP2820 = null;
 		
 		set.clear();
 		
 		FileUtils.deleteDirectory(confParentDir);
+		FileUtils.deleteDirectory(new File(dynamicDirName));
 	}
 
 	/**
@@ -143,7 +158,8 @@ public class PafDTDtoXSDMigrationActionTest extends TestCase {
 			assertEquals(MigrationActionStatus.Completed, action2.getStatus());
 			
 			try {
-				xmlPaceProject = new XMLPaceProject(xmlPaceProject.getProjectInput(), false);
+				//changed to true because of changes in 2.8.2.x xml
+				xmlPaceProject = new XMLPaceProject(xmlPaceProject.getProjectInput(), true);
 			} catch (InvalidPaceProjectInputException e) {
 				fail(e.getMessage());
 			} catch (PaceProjectCreationException e) {
@@ -156,6 +172,9 @@ public class PafDTDtoXSDMigrationActionTest extends TestCase {
 		}
 						
 		FileUtils.deleteFilesInDir(confDir, true);
+		FileUtils.deleteFilesInDir(confDir2820, true);
+		
+		//===============start 2.4 tests=============
 		
 		try {
 			PafZipUtil.unzipFile("./test_files/pace2400.paf", confDir.toString());
@@ -192,7 +211,10 @@ public class PafDTDtoXSDMigrationActionTest extends TestCase {
 		assertEquals(MigrationActionStatus.NotStarted, action.getStatus());
 		
 		try {
-			titanPP = new XMLPaceProject(confDir.getAbsolutePath(), false);
+			HashSet<ProjectElementId> filter = new HashSet<ProjectElementId>();
+			filter.add(ProjectElementId.ApplicationDef);
+			filter.add(ProjectElementId.NumericFormats);
+			titanPP = new XMLPaceProject(confDir.getAbsolutePath(), filter, false);
 		} catch (InvalidPaceProjectInputException e) {
 			fail(e.getMessage());
 		} catch (PaceProjectCreationException e) {
@@ -205,7 +227,59 @@ public class PafDTDtoXSDMigrationActionTest extends TestCase {
 						
 		assertEquals(MigrationActionStatus.NotStarted, action.getStatus());		
 		
+		//=-==============end 2.4 tests==================
 		
+		
+		//==============start 2.8.2.0 tests==========
+		try {
+			PafZipUtil.unzipFile("./test_files/pace2820.paf", confDir2820.toString());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+		
+		action = new PafDTDtoXSDMigrationAction(titanPP2820);
+		
+		assertEquals(MigrationActionStatus.Completed, action.getStatus());
+		
+		try {
+			titanPP2820 = new XMLPaceProject(confDir2820.getAbsolutePath(), true);
+		} catch (InvalidPaceProjectInputException e) {
+			fail(e.getMessage());
+		} catch (PaceProjectCreationException e) {
+			fail(e.getMessage());
+		}
+		
+		assertNotNull(titanPP2820);
+		
+		action.setXMLPaceProject(titanPP2820);
+						
+		assertEquals(MigrationActionStatus.Completed, action.getStatus());
+		
+		FileUtils.deleteFilesInDir(confDir2820, true);
+						
+		try {
+			PafZipUtil.unzipFile("./test_files/pace2820.paf", confDir2820.toString());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+		
+		assertEquals(MigrationActionStatus.Completed, action.getStatus());
+		
+		try {
+			HashSet<ProjectElementId> filter = new HashSet<ProjectElementId>();
+			titanPP2820 = new XMLPaceProject(confDir2820.getAbsolutePath(), filter, false);
+		} catch (InvalidPaceProjectInputException e) {
+			fail(e.getMessage());
+		} catch (PaceProjectCreationException e) {
+			fail(e.getMessage());
+		}
+		
+		assertNotNull(titanPP2820);
+		
+		action.setXMLPaceProject(titanPP2820);
+						
+		assertEquals(MigrationActionStatus.Completed, action.getStatus());	
+		//============end 2.8.2.0 tests=============
 	}
 
 }
