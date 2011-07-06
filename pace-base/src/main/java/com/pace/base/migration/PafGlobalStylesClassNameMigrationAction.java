@@ -74,22 +74,23 @@ public class PafGlobalStylesClassNameMigrationAction extends MigrationAction {
 	@Override
 	public void run() {
 		
-		//if not already completed
-		if (getStatus().equals(MigrationActionStatus.NotStarted)) {
-
-			//get input file
-			File inputFile = getInputFile();
-						
-			if ( inputFile != null && inputFile.isFile() && inputFile.canRead() ) {
-				
-				//try to backup orig file
-				try {
-					FileUtils.copy(inputFile, new File(inputFile.toString() + PafBaseConstants.BAK_EXT));
-				} catch (IOException e1) {
-					logger.error("Couldn't backup file " + inputFile.toString() + ". Error: " + e1.getMessage());
-				} 
-						
-			}
+		if (getStatus().equals(MigrationActionStatus.Completed)) {
+			return;
+		}
+		
+		
+		//get input file
+		File inputFile = getInputFile();
+					
+		if ( inputFile != null && inputFile.isFile() && inputFile.canRead() ) {
+			
+			//try to backup orig file
+			try {
+				FileUtils.copy(inputFile, new File(inputFile.toString() + PafBaseConstants.BAK_EXT));
+			} catch (IOException e1) {
+				logger.error("Couldn't backup file " + inputFile.toString() + ". Error: " + e1.getMessage());
+			} 
+					
 		}
 		
 		Map<String, com.palladium.paf.view.PafStyle> map = null;

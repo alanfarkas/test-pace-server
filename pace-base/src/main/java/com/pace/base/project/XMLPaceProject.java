@@ -31,17 +31,46 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
-import com.pace.base.app.*;
+import com.pace.base.app.DynamicMemberDef;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PafPlannerRole;
+import com.pace.base.app.PafUserSecurity;
+import com.pace.base.app.PlanCycle;
+import com.pace.base.app.Season;
+import com.pace.base.app.SeasonList;
+import com.pace.base.app.VersionDef;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
-import com.pace.base.migration.*;
+import com.pace.base.migration.MigrationAction;
+import com.pace.base.migration.MigrationActionStatus;
+import com.pace.base.migration.PafAppsMigrationAction;
+import com.pace.base.migration.PafDTDtoXSDMigrationAction;
+import com.pace.base.migration.PafDynamicMembersMigrationAction;
+import com.pace.base.migration.PafGenerationToHierarchyMigration;
+import com.pace.base.migration.PafGlobalStylesClassNameMigrationAction;
+import com.pace.base.migration.PafGlobalStylesMigrationAction;
+import com.pace.base.migration.PafPlannerConfigMigrationAction;
+import com.pace.base.migration.PafRuleSetsSeparationMigrationAction;
+import com.pace.base.migration.PafSecurityMigrationAction;
+import com.pace.base.migration.PafStringCaseInsensitiveComparatorMigrationAction;
+import com.pace.base.migration.PafViewGroupsMigrationAction;
+import com.pace.base.migration.PafViewSectionBorderMigration;
+import com.pace.base.migration.PafViewSectionsSeparationMigrationAction;
+import com.pace.base.migration.PafViewsSeparationMigrationAction;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.utility.FileUtils;
 import com.pace.base.utility.MigrateServerUtil;
-import com.pace.base.view.*;
+import com.pace.base.view.HierarchyFormat;
+import com.pace.base.view.PafNumberFormat;
+import com.pace.base.view.PafStyle;
+import com.pace.base.view.PafUserSelection;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewGroup;
+import com.pace.base.view.PafViewSection;
 
 /**
  * Class_description_goes_here
@@ -302,6 +331,8 @@ public class XMLPaceProject extends PaceProject {
 		//if auto convert project, try to convert gen formats to hier formats
 		if ( upgradeProject ) {
 
+			new PafStringCaseInsensitiveComparatorMigrationAction(new String[] {PafBaseConstants.FN_HierarchyFormats }, this.getProjectInputDir()).run();
+			
 			//run conversion action
 			new PafGenerationToHierarchyMigration(this).run();
 			

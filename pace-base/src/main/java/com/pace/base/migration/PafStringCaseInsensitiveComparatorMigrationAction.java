@@ -85,7 +85,7 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 	
 							//if one of the project files need migration
 							try {
-								if ( searchString(confDirChild, SEARCH_FOR)) {
+								if ( findLineNumber(confDirChild, SEARCH_FOR) > 0) {
 									return MigrationActionStatus.NotStarted;
 								}
 							} catch (IOException e) {
@@ -145,8 +145,6 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 							
 							fullFileContents = FileUtils.readFile(confDirChild);
 						
-							
-							
 							String fileLine = fullFileContents.get(pos);
 	
 							if ( fileLine.contains(SEARCH_FOR)) {										
@@ -167,7 +165,7 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 							}
 													
 						}				
-						
+						logger.info("Upgrading: " + SEARCH_FOR + " with " + REPLACE_WITH + " in file: " + confDirChild);
 						FileUtils.writeFile(confDirChild, fullFileContents);
 						
 					} catch (PafException e) {
@@ -182,34 +180,24 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 		}
 
 	}
-
-	public boolean searchString(File file, String phrase) throws IOException {
-		Scanner fileScanner = new Scanner(file);
-		int lineID = 0;
-		ArrayList<Integer> lineNumbers = new ArrayList<Integer>();
-
-		while(fileScanner.hasNextLine()){
-			String line = fileScanner.nextLine();
-			lineID++;
-			if(line.contains(phrase)){
-				lineNumbers.add(lineID);
-				return true;
-			}
-		}
-		return false;
-	}
 	
-	public int findLineNumber(File file, String phrase) throws IOException {
+	private int findLineNumber(File file, String phrase) throws IOException {
 		Scanner fileScanner = new Scanner(file);
 		int lineID = 0;
-		while(fileScanner.hasNextLine()){
-			String line = fileScanner.nextLine();
-			if(line.contains(phrase)){
-				return lineID;
+		try {
+			while(fileScanner.hasNextLine()){
+				String line = fileScanner.nextLine();
+				if(line.contains(phrase)){
+					return lineID;
+				}
+				lineID++;
 			}
-			lineID++;
+			return -1;
+		} catch(Exception e){
+			return -1;
+		} finally {
+			fileScanner.close();
 		}
-		return -1;
 	}
 
 	private boolean isValidProjectFileOrDir(File childFile) {

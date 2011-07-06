@@ -1,5 +1,5 @@
 <tree-map>
-  <no-comparator/>
+  <comparator class="java.lang.String$CaseInsensitiveComparator"/>
   <entry>
     <string>LocProd</string>
     <HierarchyFormat>
