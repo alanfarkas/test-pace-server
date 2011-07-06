@@ -44,7 +44,9 @@ public class MigrationActionTestCase extends TestCase {
 	
 	Set<ProjectElementId> set = new HashSet<ProjectElementId>();
 
-	protected File tempConfDir = new File(PafBaseConstants.DN_PaceTestFldr);	
+	//protected File tempConfDir = new File(PafBaseConstants.DN_PaceTestFldr);
+	
+	protected File tempConfDir = getTempDirectory();	
 	
 	protected void setUp(String paceArchiveFileName) throws Exception {
 		
@@ -70,7 +72,7 @@ public class MigrationActionTestCase extends TestCase {
 		
 		PafZipUtil.unzipFile(paceArchiveFileName, tempConfDir.toString());
 		
-		pp = new XMLPaceProject(tempConfDir.getName(), set, false);
+		pp = new XMLPaceProject(tempConfDir.getAbsolutePath(), set, false);
 		
 	}
 	
@@ -97,6 +99,10 @@ public class MigrationActionTestCase extends TestCase {
 		
 	}
 
+	private static File getTempDirectory(){
+		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
 
-	
+		return FileUtils.createTempDirectory(systemTempDir);
+	}
+
 }
