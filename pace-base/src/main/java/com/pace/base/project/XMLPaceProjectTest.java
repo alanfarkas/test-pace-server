@@ -355,22 +355,136 @@ public class XMLPaceProjectTest extends TestCase {
 		
 	}
 	
-    public void testProjectUpgrade1210To2820(){
+    public void testProjectUpgrade1210ToCurrent(){
 		
     	loadUpgradeAndTestProject("./test_files/pace1210.paf");
 		
 	}
+    
+    public void testProjectUpgrade2000ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2000.paf");
+		
+	}
+    
+    public void testProjectUpgrade2010ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2010.paf");
+		
+	}
+    
+    public void testProjectUpgrade2020ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2020.paf");
+		
+	}
+    
+    public void testProjectUpgrade2021ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2021.paf");
+		
+	}
+    
+    public void testProjectUpgrade2030ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2030.paf");
+		
+	}
+    
+    public void testProjectUpgrade2031ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2031.paf");
+		
+	}
+    
+    public void testProjectUpgrade2032ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2032.paf");
+		
+	}
+    
+    public void testProjectUpgrade2200ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2200.paf");
+		
+	}
 	
-	public void testProjectUpgrade2400To2820(){
+	public void testProjectUpgrade2400ToCurrent(){
 		
 		loadUpgradeAndTestProject("./test_files/pace2400.paf");
 		
 	}
 	
+	public void testProjectUpgrade2410ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2410.paf");
+		
+	}
 	
-	public void testProjectUpgrade2600To2820(){
+	public void testProjectUpgrade2420ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2420.paf");
+		
+	}
+	
+	public void testProjectUpgrade2430ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2430.paf");
+		
+	}
+	
+	public void testProjectUpgrade2440ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2440.paf");
+		
+	}
+	
+	public void testProjectUpgrade2600ToCurrent(){
 		
 		loadUpgradeAndTestProject("./test_files/pace2600.paf");
+		
+	}
+	
+	public void testProjectUpgrade2601ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2601.paf");
+		
+	}
+	
+	public void testProjectUpgrade2602ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2602.paf");
+		
+	}
+	
+	public void testProjectUpgrade2610ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2610.paf");
+		
+	}
+	
+	public void testProjectUpgrade2800ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2800.paf");
+		
+	}
+	
+	public void testProjectUpgrade2810ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2810.paf");
+		
+	}
+	
+	
+	public void testProjectUpgrade2811ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2811.paf");
+		
+	}
+	
+	public void testProjectUpgrade2820ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2820.paf");
 		
 	}
 	
