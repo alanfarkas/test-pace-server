@@ -39,7 +39,6 @@
         </actionNamedParameters>
       </CustomActionDef>
     </customActionDefs>
-    <userPrompts/>
     <autoSaveUow>false</autoSaveUow>
     <autoRefreshUow>true</autoRefreshUow>
     <confirmationMessage>Do you want to generate a new optimized plan?</confirmationMessage>
