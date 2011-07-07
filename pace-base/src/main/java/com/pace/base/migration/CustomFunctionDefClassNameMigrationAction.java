@@ -18,12 +18,15 @@ package com.pace.base.migration;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafBaseConstants;
 import com.pace.base.funcs.CustomFunctionDef;
+import com.pace.base.project.PaceProjectReadException;
+import com.pace.base.project.PafXStreamElementItem;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
@@ -59,7 +62,13 @@ public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 		// if server home directory location is specified
 		if (xmlPaceProject != null) {		
 			
-			List<CustomFunctionDef> customFunctions = this.xmlPaceProject.getCustomFunctions();
+			List<CustomFunctionDef> customFunctions = null;
+			try {
+				customFunctions = readCustomFunctions();
+			} catch (PaceProjectReadException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
 			//if map not null
 			if ( customFunctions != null ) {				
@@ -91,7 +100,7 @@ public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 		
 		
 		//get input file
-		File inputFile = getInputFile();
+		File inputFile = getInputFile(PafBaseConstants.FN_CustomFunctionMetaData);
 					
 		if ( inputFile != null && inputFile.isFile() && inputFile.canRead() ) {
 			
@@ -104,7 +113,13 @@ public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 					
 		}
 		
-		List<CustomFunctionDef> customFunctions = this.xmlPaceProject.getCustomFunctions();
+		List<CustomFunctionDef> customFunctions = null;
+		try {
+			customFunctions = readCustomFunctions();
+		} catch (PaceProjectReadException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		//create a new Dictionary with the new style PafStyle
 		List<CustomFunctionDef> customFunctionsToSet = new ArrayList<CustomFunctionDef>();
@@ -115,10 +130,10 @@ public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 			//if fill color is not null, migration hasn't started yet
 			if ( function.getClassName().contains(SEARCH_NS_1) ) {
 				s = function.getClassName().replace(SEARCH_NS_1, REPLACE_NS_1);
-				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to " + s);
+				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to '" + s + "'");
 			} else if(function.getClassName().contains(SEARCH_NS_2)){
 				s = function.getClassName().replace(SEARCH_NS_2, REPLACE_NS_1);
-				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to " + s);
+				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to '" + s + "'");
 			}
 			
 			function.setClassName(s);
@@ -134,24 +149,14 @@ public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-
-	/**
-	 * 
-	 * Gets the input file
-	 *
-	 * @return Input file
-	 */
-	private File getInputFile() {
+	
+	private List<CustomFunctionDef> readCustomFunctions() throws PaceProjectReadException {
 		
-		String confDirectory = xmlPaceProject.getProjectInput();		
+		PafXStreamElementItem<CustomFunctionDef[]> pafXStreamElementItem = new PafXStreamElementItem<CustomFunctionDef[]>(xmlPaceProject.getProjectInput() + PafBaseConstants.FN_CustomFunctionMetaData);
 		
-		//if conf dir is null, return null
-		if ( confDirectory == null ) {
-			return null;
-		}
+		CustomFunctionDef[] objectAr = pafXStreamElementItem.read();
+			
+		return Arrays.asList(objectAr);
 		
-		// get file reference to paf_rules.xml file
-		return new File(confDirectory + File.separator
-				+ PafBaseConstants.FN_CustomFunctionMetaData);
 	}
 }
