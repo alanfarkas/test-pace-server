@@ -1013,7 +1013,7 @@ public class ExcelPaceProjectTest extends TestCase {
 						
 			List<MeasureDef> measureList = xmlPaceProject.getMeasures();
 			
-			assertEquals(89, measureList.size());
+			assertEquals(88, measureList.size());
 			
 			MeasureDef newMeasure = new MeasureDef();
 			newMeasure.setName("TEST");
