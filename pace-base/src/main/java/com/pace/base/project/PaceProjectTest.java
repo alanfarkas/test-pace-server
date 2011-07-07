@@ -136,7 +136,7 @@ public class PaceProjectTest extends MigrationActionTestCase {
 		assertEquals(1, pp.getLoadedProjectElementIdSet().size());
 		assertTrue(pp.getLoadedProjectElementIdSet().contains(ProjectElementId.CustomFunctions));
 		
-		assertEquals(12, pp.getCustomFunctions().size());
+		assertEquals(13, pp.getCustomFunctions().size());
 		
 	}
 
@@ -232,7 +232,7 @@ public class PaceProjectTest extends MigrationActionTestCase {
 		assertEquals(1, pp.getLoadedProjectElementIdSet().size());
 		assertTrue(pp.getLoadedProjectElementIdSet().contains(ProjectElementId.Measures));
 		
-		assertEquals(89, pp.getMeasures().size());
+		assertEquals(88, pp.getMeasures().size());
 	}
 
 	/**
@@ -349,7 +349,7 @@ public class PaceProjectTest extends MigrationActionTestCase {
 		assertEquals(1, pp.getLoadedProjectElementIdSet().size());
 		assertTrue(pp.getLoadedProjectElementIdSet().contains(ProjectElementId.RuleSets));
 		
-		assertEquals(14, pp.getRuleSets().size());
+		assertEquals(15, pp.getRuleSets().size());
 	}
 
 	/**
@@ -363,7 +363,7 @@ public class PaceProjectTest extends MigrationActionTestCase {
 		assertEquals(1, pp.getLoadedProjectElementIdSet().size());
 		assertTrue(pp.getLoadedProjectElementIdSet().contains(ProjectElementId.UserSecurity));
 		
-		assertEquals(7, pp.getUserSecurity().size());
+		assertEquals(6, pp.getUserSecurity().size());
 	}
 
 	/**
@@ -406,7 +406,7 @@ public class PaceProjectTest extends MigrationActionTestCase {
 		assertEquals(1, pp.getLoadedProjectElementIdSet().size());
 		assertTrue(pp.getLoadedProjectElementIdSet().contains(ProjectElementId.ViewGroups));
 		
-		assertEquals(8, pp.getViewGroups().size());
+		assertEquals(9, pp.getViewGroups().size());
 	}
 
 	/**
@@ -420,7 +420,7 @@ public class PaceProjectTest extends MigrationActionTestCase {
 		assertEquals(1, pp.getLoadedProjectElementIdSet().size());
 		assertTrue(pp.getLoadedProjectElementIdSet().contains(ProjectElementId.ViewSections));
 		
-		assertEquals(83, pp.getViewSections().size());
+		assertEquals(85, pp.getViewSections().size());
 	}
 
 	/**
@@ -434,7 +434,7 @@ public class PaceProjectTest extends MigrationActionTestCase {
 		assertEquals(1, pp.getLoadedProjectElementIdSet().size());
 		assertTrue(pp.getLoadedProjectElementIdSet().contains(ProjectElementId.Views));
 		
-		assertEquals(82, pp.getViews().size());
+		assertEquals(84, pp.getViews().size());
 	}
 
 	/**

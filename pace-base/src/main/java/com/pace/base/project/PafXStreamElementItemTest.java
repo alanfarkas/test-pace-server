@@ -46,7 +46,7 @@ public class PafXStreamElementItemTest extends MigrationActionTestCase {
 		// TODO Auto-generated method stub
 		super.setUp();
 		
-		pafAppXStreamDataItem = new PafXStreamElementItem<PafApplicationDef[]>(tempConfDir.getName() + File.separator + PafBaseConstants.FN_ApplicationMetaData);
+		pafAppXStreamDataItem = new PafXStreamElementItem<PafApplicationDef[]>(tempConfDir.getAbsolutePath() + File.separator + PafBaseConstants.FN_ApplicationMetaData);
 		
 	}
 
@@ -64,7 +64,7 @@ public class PafXStreamElementItemTest extends MigrationActionTestCase {
 	 */
 	public void testPafXStreamDataItem() {
 		
-		pafAppXStreamDataItem = new PafXStreamElementItem<PafApplicationDef[]>(tempConfDir.getName() + File.separator + PafBaseConstants.FN_ApplicationMetaData);
+		pafAppXStreamDataItem = new PafXStreamElementItem<PafApplicationDef[]>(tempConfDir.getAbsolutePath() + File.separator + PafBaseConstants.FN_ApplicationMetaData);
 		
 		assertNotNull(pafAppXStreamDataItem);
 		
