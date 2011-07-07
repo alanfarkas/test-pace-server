@@ -113,7 +113,7 @@ public class PafGlobalStylesMigrationAction extends MigrationAction {
 		if (getStatus().equals(MigrationActionStatus.NotStarted)) {
 
 			//get input file
-			File inputFile = getInputFile();
+			File inputFile = getInputFile(PafBaseConstants.FN_GlobalStyleMetaData);
 						
 			if ( inputFile != null && inputFile.isFile() && inputFile.canRead() ) {
 				
@@ -246,25 +246,6 @@ public class PafGlobalStylesMigrationAction extends MigrationAction {
 		
 	}
 	
-	/**
-	 * 
-	 * Gets the input file
-	 *
-	 * @return Input file
-	 */
-	private File getInputFile () {
-		
-		String confDirectory = xmlPaceProject.getProjectInput();		
-		
-		//if conf dir is null, return null
-		if ( confDirectory == null ) {
-			return null;
-		}
-		
-		// get file reference to paf_rules.xml file
-		return new File(confDirectory + File.separator
-				+ PafBaseConstants.FN_GlobalStyleMetaData);
-	}
 	
 	private Map<String, PafStyle> getGlobalStylesMap() {
 		

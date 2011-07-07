@@ -1,5 +1,5 @@
 /*
- *	File: @(#)PafGlobalStylesClassNameMigrationActionTest.java
+ *	File: @(#)CustomFunctionDefClassNameMigrationActionTest.java
  * 	Package: com.pace.base.migration 	
  *  Project: Paf Base Libraries
  *  Created: July 07, 2011  		
@@ -13,11 +13,10 @@
  * 	should use it only in accordance with the terms of the license agreement you entered into
  *	with A&M Software, Inc.
  */
+
 package com.pace.base.migration;
 
-
-public class PafGlobalStylesClassNameMigrationActionTest extends MigrationActionTestCase {
-
+public class CustomFunctionDefClassNameMigrationActionTest extends MigrationActionTestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp("./test_files/pace2600.paf");
@@ -27,9 +26,8 @@ public class PafGlobalStylesClassNameMigrationActionTest extends MigrationAction
 		super.tearDown();
 	}
 
-	public void testPafGlobalStylesClassNameMigrationAction() {
-		
-		MigrationAction action = new PafGlobalStylesClassNameMigrationAction(pp);
+	public void testCustomFunctionDefClassNameMigrationAction() {
+		MigrationAction action = new CustomFunctionDefClassNameMigrationAction(pp);
 		
 		assertNotNull(action);
 		assertNotNull(action.getXMLPaceProject());
@@ -37,13 +35,13 @@ public class PafGlobalStylesClassNameMigrationActionTest extends MigrationAction
 	}
 
 	public void testGetStatus() {
-		MigrationAction action = new PafGlobalStylesClassNameMigrationAction(pp);
+		MigrationAction action = new CustomFunctionDefClassNameMigrationAction(pp);
 		
 		assertEquals(MigrationActionStatus.NotStarted, action.getStatus());
 	}
 
 	public void testRun() {
-		MigrationAction action = new PafGlobalStylesClassNameMigrationAction(pp);
+		MigrationAction action = new CustomFunctionDefClassNameMigrationAction(pp);
 		
 		assertEquals(MigrationActionStatus.NotStarted, action.getStatus());
 		

@@ -114,68 +114,82 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 	 */
 	public void run() {
 
-		if ( getStatus().equals(MigrationActionStatus.NotStarted)) {
-
-			//File[] filesToMigrate = getProjectFilesToMigrate();
-				
-			if ( filesToConvert != null ) {
-				
-				//for (File fileToMigrate : filesToMigrate) {
-				for (String file : filesToConvert ) {
-						
-						File confDirChild = new File(confDirectory + File.separator + file);
-				
+		if (getStatus().equals(MigrationActionStatus.Completed)) {
+			return;
+		}
+		
+		
+		//get input file
+		File inputFile = getInputFile(PafBaseConstants.FN_HierarchyFormats);
+					
+		if ( inputFile != null && inputFile.isFile() && inputFile.canRead() ) {
+			
+			//try to backup orig file
+			try {
+				FileUtils.copy(inputFile, new File(inputFile.toString() + PafBaseConstants.BAK_EXT));
+			} catch (IOException e1) {
+				logger.error("Couldn't backup file " + inputFile.toString() + ". Error: " + e1.getMessage());
+			} 
+					
+		}
+		
+			
+		if ( filesToConvert != null ) {
+			
+			//for (File fileToMigrate : filesToMigrate) {
+			for (String file : filesToConvert ) {
+					
+					File confDirChild = new File(confDirectory + File.separator + file);
+			
+				try {
+					
+					
+					int pos = 0;
 					try {
-						
-						
-						int pos = 0;
-						try {
-							pos = findLineNumber(confDirChild, SEARCH_FOR);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						pos = findLineNumber(confDirChild, SEARCH_FOR);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
+					
+					List<String> fullFileContents = null;//FileUtils.readFile(file);
+					
+					//List<String> updatedFileContents = new ArrayList<String>();
+					
+					if ( pos > 0 ) {
 						
-						List<String> fullFileContents = null;//FileUtils.readFile(file);
-						
-						//List<String> updatedFileContents = new ArrayList<String>();
-						
-						if ( pos > 0 ) {
+						fullFileContents = FileUtils.readFile(confDirChild);
+					
+						String fileLine = fullFileContents.get(pos);
+
+						if ( fileLine.contains(SEARCH_FOR)) {										
+
+							String updatedStr = fileLine.replace(SEARCH_FOR, REPLACE_WITH);
 							
-							fullFileContents = FileUtils.readFile(confDirChild);
-						
-							String fileLine = fullFileContents.get(pos);
-	
-							if ( fileLine.contains(SEARCH_FOR)) {										
-
-								String updatedStr = fileLine.replace(SEARCH_FOR, REPLACE_WITH);
+							if ( updatedStr.trim().length() > 0 ) {
 								
-								if ( updatedStr.trim().length() > 0 ) {
-									
-									//updatedFileContents.add(updatedStr);
-									
-									fullFileContents.set(pos, updatedStr);
-									
-								} else {
-									
-									continue;
-								}
-																		
+								//updatedFileContents.add(updatedStr);
+								
+								fullFileContents.set(pos, updatedStr);
+								
+							} else {
+								
+								continue;
 							}
-													
-						}				
-						logger.info("Upgrading: " + SEARCH_FOR + " with " + REPLACE_WITH + " in file: " + confDirChild);
-						FileUtils.writeFile(confDirChild, fullFileContents);
-						
-					} catch (PafException e) {
-						logger.info(e.getMessage());
-					}		
+																	
+						}
+												
+					}				
+					logger.info("Upgrading: " + SEARCH_FOR + " with " + REPLACE_WITH + " in file: " + confDirChild);
+					FileUtils.writeFile(confDirChild, fullFileContents);
 					
-					
+				} catch (PafException e) {
+					logger.info(e.getMessage());
 				}		
 				
-			}
+				
+			}		
 			
 		}
 
@@ -214,6 +228,7 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 		
 		return false;
 	}
+	
 
 	public static void main(String[] args) {
 		

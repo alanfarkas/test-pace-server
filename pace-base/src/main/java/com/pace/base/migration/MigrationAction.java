@@ -18,6 +18,8 @@
  */
 package com.pace.base.migration;
 
+import java.io.File;
+
 import com.pace.base.project.XMLPaceProject;
 
 /**
@@ -45,6 +47,28 @@ public abstract class MigrationAction implements IMigrationAction {
 		this.xmlPaceProject = xmlPaceProject;
 	}
 
+	/**
+	 * Gets the input file (the xml file) from the conf directory.
+	 * Pace Project must not be null and initialized.
+	 * @param xmlFileName
+	 * @return
+	 */
+	protected File getInputFile(String xmlFileName) {
+		
+		if(xmlPaceProject == null || xmlPaceProject.getProjectInput()== null){
+			return null;
+		}
+		
+		String confDirectory = xmlPaceProject.getProjectInput();		
+		
+		//if conf dir is null, return null
+		if ( confDirectory == null ) {
+			return null;
+		}
+		
+		// get file reference to paf_rules.xml file
+		return new File(confDirectory + File.separator + xmlFileName);
+	}
 
 	
 }

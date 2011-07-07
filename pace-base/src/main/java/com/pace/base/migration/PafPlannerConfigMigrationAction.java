@@ -96,7 +96,7 @@ public class PafPlannerConfigMigrationAction extends MigrationAction {
 		//if server home directory location is specified
 		if (confDirectory != null) {
 			
-			File pafPlannerconfigXmlFile = getInputFile();
+			File pafPlannerconfigXmlFile = getInputFile(PafBaseConstants.FN_PlannerConfigs);
 			
 			if ( pafPlannerconfigXmlFile != null ) {
 			
@@ -124,7 +124,7 @@ public class PafPlannerConfigMigrationAction extends MigrationAction {
 		if ( getStatus().equals(MigrationActionStatus.NotStarted)) {
 		
 			//get input file
-			File pafPlannerconfigXmlFile = getInputFile();
+			File pafPlannerconfigXmlFile = getInputFile(PafBaseConstants.FN_PlannerConfigs);
 			
 			//if is file not null and exists
 			if ( pafPlannerconfigXmlFile != null  && pafPlannerconfigXmlFile.exists() ) {
@@ -206,23 +206,4 @@ public class PafPlannerConfigMigrationAction extends MigrationAction {
 		}		
 
 	}
-	
-	/**
-	 * 
-	 * Gets the input file
-	 *
-	 * @return Input file
-	 */
-	private File getInputFile () {
-		
-		//if conf dir is null, return null
-		if ( confDirectory == null ) {
-			return null;
-		}
-		
-		// get file reference to paf_rules.xml file
-		return new File(confDirectory + File.separator
-				+ PafBaseConstants.FN_PlannerConfigs);
-	}
-
 }

@@ -44,22 +44,7 @@ import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
-import com.pace.base.migration.MigrationAction;
-import com.pace.base.migration.MigrationActionStatus;
-import com.pace.base.migration.PafAppsMigrationAction;
-import com.pace.base.migration.PafDTDtoXSDMigrationAction;
-import com.pace.base.migration.PafDynamicMembersMigrationAction;
-import com.pace.base.migration.PafGenerationToHierarchyMigration;
-import com.pace.base.migration.PafGlobalStylesClassNameMigrationAction;
-import com.pace.base.migration.PafGlobalStylesMigrationAction;
-import com.pace.base.migration.PafPlannerConfigMigrationAction;
-import com.pace.base.migration.PafRuleSetsSeparationMigrationAction;
-import com.pace.base.migration.PafSecurityMigrationAction;
-import com.pace.base.migration.PafStringCaseInsensitiveComparatorMigrationAction;
-import com.pace.base.migration.PafViewGroupsMigrationAction;
-import com.pace.base.migration.PafViewSectionBorderMigration;
-import com.pace.base.migration.PafViewSectionsSeparationMigrationAction;
-import com.pace.base.migration.PafViewsSeparationMigrationAction;
+import com.pace.base.migration.*;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.utility.FileUtils;
@@ -264,6 +249,12 @@ public class XMLPaceProject extends PaceProject {
 	
 	@Override
 	protected void readCustomFunctions() throws PaceProjectReadException {
+		
+		if ( upgradeProject ) {
+			
+			 new CustomFunctionDefClassNameMigrationAction(this).run();
+			 
+		 }
 		
 		PafXStreamElementItem<CustomFunctionDef[]> pafXStreamElementItem = new PafXStreamElementItem<CustomFunctionDef[]>(getProjectInput() + PafBaseConstants.FN_CustomFunctionMetaData);
 		

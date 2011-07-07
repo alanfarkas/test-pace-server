@@ -91,7 +91,7 @@ public class PafSecurityMigrationAction extends MigrationAction {
 //		 if server home directory location is specified
 		if (confDirectory != null) {
 			
-			File pafSecurityXmlFile = getInputFile();
+			File pafSecurityXmlFile = getInputFile(PafBaseConstants.FN_SecurityMetaData);
 			
 			if ( pafSecurityXmlFile != null ) {
 			
@@ -120,7 +120,7 @@ public class PafSecurityMigrationAction extends MigrationAction {
 		if ( getStatus().equals(MigrationActionStatus.NotStarted)) {
 		
 			//get input file
-			File pafSecurityXmlFile = getInputFile();
+			File pafSecurityXmlFile = getInputFile(PafBaseConstants.FN_SecurityMetaData);
 			
 			//if is file not null and exists
 			if ( pafSecurityXmlFile != null  && pafSecurityXmlFile.exists() ) {
@@ -141,24 +141,6 @@ public class PafSecurityMigrationAction extends MigrationAction {
 			
 		}		
 
-	}
-	
-	/**
-	 * 
-	 * Gets the input file
-	 *
-	 * @return Input file
-	 */
-	private File getInputFile () {
-		
-		//if conf dir is null, return null
-		if ( confDirectory == null ) {
-			return null;
-		}
-		
-		// get file reference to paf_rules.xml file
-		return new File(confDirectory + File.separator
-				+ PafBaseConstants.FN_SecurityMetaData);
 	}
 
 }
