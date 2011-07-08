@@ -6,9 +6,7 @@ package com.pace.base.migration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import org.apache.log4j.Logger;
 
@@ -18,7 +16,6 @@ import com.pace.base.project.InvalidPaceProjectInputException;
 import com.pace.base.project.PaceProjectCreationException;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.utility.FileUtils;
-import com.pace.base.utility.PafXStream;
 
 /**
  * Upgrades all the "<comparator class="java.lang.String-CaseInsensitiveComparator"/>" strings in the xml
@@ -85,7 +82,7 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 	
 							//if one of the project files need migration
 							try {
-								if ( findLineNumber(confDirChild, SEARCH_FOR) > 0) {
+								if ( FileUtils.findLineNumber(confDirChild, SEARCH_FOR) > 0) {
 									return MigrationActionStatus.NotStarted;
 								}
 							} catch (IOException e) {
@@ -120,7 +117,7 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 		
 		
 		//get input file
-		File inputFile = getInputFile(PafBaseConstants.FN_HierarchyFormats);
+		File inputFile = new File(confDirectory + File.separator + PafBaseConstants.FN_HierarchyFormats);
 					
 		if ( inputFile != null && inputFile.isFile() && inputFile.canRead() ) {
 			
@@ -146,7 +143,7 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 					
 					int pos = 0;
 					try {
-						pos = findLineNumber(confDirChild, SEARCH_FOR);
+						pos = FileUtils.findLineNumber(confDirChild, SEARCH_FOR);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -195,41 +192,6 @@ public class PafStringCaseInsensitiveComparatorMigrationAction extends Migration
 
 	}
 	
-	private int findLineNumber(File file, String phrase) throws IOException {
-		Scanner fileScanner = new Scanner(file);
-		int lineID = 0;
-		try {
-			while(fileScanner.hasNextLine()){
-				String line = fileScanner.nextLine();
-				if(line.contains(phrase)){
-					return lineID;
-				}
-				lineID++;
-			}
-			return -1;
-		} catch(Exception e){
-			return -1;
-		} finally {
-			fileScanner.close();
-		}
-	}
-
-	private boolean isValidProjectFileOrDir(File childFile) {
-
-		if ( childFile != null) {
-			
-			if ( childFile.isFile() && childFile.toString().endsWith(PafBaseConstants.XML_EXT) ) {
-				return true;
-			} else if ( childFile.isDirectory() && ! childFile.toString().endsWith(PafBaseConstants.SVN_HIDDEN_DIR_NAME) ) {
-				return true;
-			}
-			
-		}
-		
-		return false;
-	}
-	
-
 	public static void main(String[] args) {
 		
 		XMLPaceProject pp = null;

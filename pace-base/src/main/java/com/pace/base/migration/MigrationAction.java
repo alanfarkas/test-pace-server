@@ -20,6 +20,7 @@ package com.pace.base.migration;
 
 import java.io.File;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.project.XMLPaceProject;
 
 /**
@@ -69,6 +70,26 @@ public abstract class MigrationAction implements IMigrationAction {
 		// get file reference to paf_rules.xml file
 		return new File(confDirectory + File.separator + xmlFileName);
 	}
+	
+	/**
+	 * Tests a file to see if it is a valid  xml file, and a non .svn file.
+	 * @param childFile
+	 * @return
+	 */
+	protected boolean isValidProjectFileOrDir(File childFile) {
 
+		if ( childFile != null) {
+			
+			if ( childFile.isFile() && childFile.toString().endsWith(PafBaseConstants.XML_EXT) ) {
+				return true;
+			} else if ( childFile.isDirectory() && ! childFile.toString().endsWith(PafBaseConstants.SVN_HIDDEN_DIR_NAME) ) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	
 	
 }

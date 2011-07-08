@@ -48,6 +48,8 @@ public class ZipPaceProject extends PaceProject {
 	
 	private static final Logger logger = Logger.getLogger(ZipPaceProject.class);
 	
+	private boolean upgradeProject;
+	
 	private String outputZipFile;
 	
 	private XMLPaceProject xmlPaceProject;
@@ -66,14 +68,17 @@ public class ZipPaceProject extends PaceProject {
 	 * 
 	 * @param projectInput zip file location
 	 * @param filterSet	   set to filter on
+	 * @param upgradeProject auto upgrade the project.
 	 * @throws InvalidPaceProjectInputException 
 	 * @throws PafException
 	 */
-	public ZipPaceProject(String projectInput, Set<ProjectElementId> filterSet)
+	public ZipPaceProject(String projectInput, Set<ProjectElementId> filterSet, boolean upgradeProject)
 			throws PaceProjectCreationException, InvalidPaceProjectInputException {
 		
 		super(projectInput, filterSet);
 
+		this.upgradeProject = upgradeProject;
+		
 		//test project input for
 		if ( projectInput == null ) {
 			
@@ -102,7 +107,20 @@ public class ZipPaceProject extends PaceProject {
 			throw new PaceProjectCreationException(getProjectErrorMap());
 			
 		}
+	}
+	
+	/**
+	 * Creates a zip pace project and only loads in the project element id's passed in.
+	 * 
+	 * @param projectInput zip file location
+	 * @param filterSet	   set to filter on
+	 * @throws InvalidPaceProjectInputException 
+	 * @throws PafException
+	 */
+	public ZipPaceProject(String projectInput, Set<ProjectElementId> filterSet)
+			throws PaceProjectCreationException, InvalidPaceProjectInputException {
 		
+		this(projectInput, filterSet, false);
 	}
 
 	
@@ -126,7 +144,7 @@ public class ZipPaceProject extends PaceProject {
 		
 		//create empty xml pace project
 		try {
-			xmlPaceProject = new XMLPaceProject(dynamicDirName, new HashSet<ProjectElementId>(), false);
+			xmlPaceProject = new XMLPaceProject(dynamicDirName, new HashSet<ProjectElementId>(), upgradeProject);
 		} catch (InvalidPaceProjectInputException e) {
 			// TODO: do something
 			e.printStackTrace();

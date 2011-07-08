@@ -36,6 +36,8 @@ import java.nio.channels.OverlappingFileLockException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
 
 import org.apache.log4j.Logger;
 
@@ -386,7 +388,11 @@ public class FileUtils {
 			}			
 		}
 		
+		Random rand = new Random();
+		int randomInt = 1 + rand.nextInt();
 		String dynamicDirName = new Long((new Date()).getTime()).toString();
+		
+		dynamicDirName = "pace-" + randomInt + dynamicDirName;
 		
 		File tempDirectory = null;
 		
@@ -510,5 +516,47 @@ public class FileUtils {
 		
 		return isFileLocked;
 		
+	}
+	
+	/**
+	 * Searches a file for an occurrence of a phrase.
+	 * @param file file to search
+	 * @param phrase phrase to search for
+	 * @return the line number the first result
+	 * @throws IOException
+	 */
+	public static int findLineNumber(File file, String phrase) throws IOException {
+		List<Integer> lineNums = findLineNumbers(file, phrase);
+		if(lineNums == null || lineNums.size() == 0){
+			return -1;
+		}
+		return lineNums.get(0);
+	}
+	
+	/**
+	 * Searches a file for an occurrence of a phrase.
+	 * @param file file to search
+	 * @param phrase phrase to search for
+	 * @return a list of line numbers.
+	 * @throws IOException
+	 */
+	public static List<Integer> findLineNumbers(File file, String phrase) throws IOException {
+		Scanner fileScanner = new Scanner(file);
+		List<Integer> lineNums = new ArrayList<Integer>();
+		int lineID = 0;
+		try {
+			while(fileScanner.hasNextLine()){
+				String line = fileScanner.nextLine();
+				if(line.contains(phrase)){
+					lineNums.add(lineID);
+				}
+				lineID++;
+			}
+			return lineNums;
+		} catch(Exception e){
+			return null;
+		} finally {
+			fileScanner.close();
+		}
 	}
 }

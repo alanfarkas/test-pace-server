@@ -331,20 +331,6 @@ public class PafDTDtoXSDMigrationAction extends MigrationAction {
 			
 	}
 
-	private boolean isValidProjectFileOrDir(File childFile) {
-
-		if ( childFile != null) {
-			
-			if ( childFile.isFile() && childFile.toString().endsWith(PafBaseConstants.XML_EXT) ) {
-				return true;
-			} else if ( childFile.isDirectory() && ! childFile.toString().endsWith(PafBaseConstants.SVN_HIDDEN_DIR_NAME) ) {
-				return true;
-			}
-			
-		}
-		
-		return false;
-	}
 
 	public static void main(String[] args) {
 		

@@ -351,6 +351,11 @@ public class XMLPaceProject extends PaceProject {
 	@Override
 	protected void readMemberTags() throws PaceProjectReadException {
 
+		//if auto convert project, try to convert member tags.
+		if ( upgradeProject ) {
+			new MemberTagDefTypeClassNameMigrationAction(new String[] {PafBaseConstants.FN_MemberTagMetaData }, this.getProjectInputDir()).run();
+		}
+		
 		PafXStreamElementItem<MemberTagDef[]> pafXStreamElementItem = new PafXStreamElementItem<MemberTagDef[]>(getProjectInput() + PafBaseConstants.FN_MemberTagMetaData);
 		
 		MemberTagDef[] objectAr = pafXStreamElementItem.read();
