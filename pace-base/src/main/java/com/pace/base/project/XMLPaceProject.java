@@ -253,7 +253,6 @@ public class XMLPaceProject extends PaceProject {
 		if ( upgradeProject ) {
 			
 			 new CustomFunctionDefClassNameMigrationAction(this).run();
-			 
 		 }
 		
 		PafXStreamElementItem<CustomFunctionDef[]> pafXStreamElementItem = new PafXStreamElementItem<CustomFunctionDef[]>(getProjectInput() + PafBaseConstants.FN_CustomFunctionMetaData);
@@ -266,6 +265,11 @@ public class XMLPaceProject extends PaceProject {
 
 	@Override
 	protected void readCustomMenus() throws PaceProjectReadException {
+		
+		if ( upgradeProject ) {
+			
+			 new CustomMenuDefActionClassNameMigrationAction(this).run();
+		 }
 		
 		PafXStreamElementItem<CustomMenuDef[]> pafXStreamElementItem = new PafXStreamElementItem<CustomMenuDef[]>(getProjectInput() + PafBaseConstants.FN_CustomMenus);
 		
