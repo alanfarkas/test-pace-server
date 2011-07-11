@@ -59,9 +59,9 @@ public class XMLPaceProjectTest extends TestCase {
 	
 	PaceProject pp = null;
 		
-	protected File tempConfDir = new File(PafBaseConstants.DN_PaceTestFldr+"2");
+	//protected File tempConfDir = new File(PafBaseConstants.DN_PaceTestFldr+"2");
 	
-	//String CONF_DIR_2 = "C:\\Program Files (x86)\\Pace\\PafServer\\conf_test\\";
+	protected File tempConfDir = FileUtils.createTempDirectory();
 	
 	String CONF_DIR_2 = null;
 	
@@ -488,6 +488,23 @@ public class XMLPaceProjectTest extends TestCase {
 		
 	}
 	
+	public void testProjectUpgradeCatLiteSafewayToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/CatLiteSafeway.paf");
+		
+	}
+	
+	public void testProjectUpgradeMerchPlanAafesToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/MerchPlnAAFES.paf");
+		
+	}
+	
+	public void testProjectUpgradeTestProjectToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/TestProject.paf");
+		
+	}	
 	public void loadUpgradeAndTestProject(String path){
 		
 		File tempDir = FileUtils.createTempDirectory();
