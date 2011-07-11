@@ -34,7 +34,7 @@ import com.pace.base.app.PafApplicationDef;
 public class PafUowCacheParms {
 
 	private PafApplicationDef appDef = null;
-	private Set lockedPeriods = null;
+	private Set<String> lockedPeriods = null;
 	private boolean[] isSlicerAxis = null;
 	private int axisCount = 0;
 	private int[] axisSize = null;
@@ -144,13 +144,13 @@ public class PafUowCacheParms {
 	/**
 	 * @return Returns the locked periods.
 	 */
-	public Set getLockedPeriods() {
+	public Set<String> getLockedPeriods() {
 		return lockedPeriods;
 	}
 	/**
 	 * @param lockedPeriods The locked periods to set.
 	 */
-	public void setLockedPeriods(Set lockedPeriods) {
+	public void setLockedPeriods(Set<String> lockedPeriods) {
 		this.lockedPeriods = lockedPeriods;
 	}
 

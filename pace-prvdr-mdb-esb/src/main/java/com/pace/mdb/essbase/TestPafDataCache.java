@@ -187,7 +187,7 @@ public class TestPafDataCache extends TestCase {
 							+ StringUtils.arrayToString(index[i], "{", "}", "[", "]", " "));
 					cellValue = pafUowCache.getCellValue(index[i]);
 					logger.info("Cell Value is: " + cellValue);
-				} catch (PafException pfe) {
+			//	} catch (PafException pfe) {
 				} catch (Exception e) {
 					logger.error("*** Java Exception: " + e.getMessage() + " ***");
 				}
@@ -200,7 +200,7 @@ public class TestPafDataCache extends TestCase {
 							+ StringUtils.arrayToString(members[i], "{", "}", "[", "]", " "));
 					cellValue = pafUowCache.getCellValue(members[i]);
 					logger.info("Cell Value is: " + cellValue);
-				} catch (PafException pfe) {
+//				} catch (PafException pfe) {
 				} catch (Exception e) {
 					logger.error("*** Java Exception: " + e.getMessage() + " ***");
 				}
@@ -275,7 +275,7 @@ public class TestPafDataCache extends TestCase {
 						isSuccess = false;
 					}
 					
-				} catch (PafException pfe) {
+//				} catch (PafException pfe) {
 				} catch (Exception e) {
 					logger.error("*** Java Exception: " + e.getMessage() + " ***");
 				}
@@ -297,7 +297,7 @@ public class TestPafDataCache extends TestCase {
 						logger.error ("*** Error in setValue process ***");
 						isSuccess = false;
 					}
-				} catch (PafException pfe) {
+//				} catch (PafException pfe) {
 				} catch (Exception e) {
 					logger.error("*** Java Exception: " + e.getMessage() + " ***");
 				}

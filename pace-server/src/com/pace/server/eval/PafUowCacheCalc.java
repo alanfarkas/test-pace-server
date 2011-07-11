@@ -162,7 +162,7 @@ public abstract class PafUowCacheCalc {
 		if (memberFilters != null){
 
 			//BEGIN(1) - TTN-584
-			//if time arr and member filter contains time filter
+			//if time aggregation and member filter contains time filter
 			if ( isTimeAggregation && memberFilters.containsKey(timeDim)) {
 
 				//get time open periods
@@ -170,7 +170,7 @@ public abstract class PafUowCacheCalc {
 					timeOpenPeriods = memberFilters.get(timeDim);
 				}
 
-				//remove time filter from map, we will readd at end of method
+				//remove time filter from map, we will read at end of method
 				memberFilters.remove(timeDim);
 
 			}
@@ -217,106 +217,97 @@ public abstract class PafUowCacheCalc {
 		// remaining dimensions. Only aggregate the following measure types: 
 		// Aggregate, TimeBalanceFirst, and TimeBalanceLast
 		logger.debug("Starting main aggregation process for dimension [" + aggDimension + "]....");
-		try {
-			// Create a lookup set of the valid Measure Types for aggregation
-			aggMeasureTypes.add(MeasureType.Aggregate);
-			aggMeasureTypes.add(MeasureType.TimeBalFirst);
-			aggMeasureTypes.add(MeasureType.TimeBalLast);
 
-			// Get list of members to aggregate - level 1  and above (Post Order)
-			logger.debug("Getting list of members to aggregate");
-			aggMembers = memberTree.getMemberNames(TreeTraversalOrder.POST_ORDER, 1);
+		// Create a lookup set of the valid Measure Types for aggregation
+		aggMeasureTypes.add(MeasureType.Aggregate);
+		aggMeasureTypes.add(MeasureType.TimeBalFirst);
+		aggMeasureTypes.add(MeasureType.TimeBalLast);
 
-			// Initialize indexing objects
-			intersections = new PafIntersectionIterator(intersectDimIndexes, dataCache, memberFilters);
-			cellIndex = new int[dimCount];
+		// Get list of members to aggregate - level 1  and above (Post Order)
+		logger.debug("Getting list of members to aggregate");
+		aggMembers = memberTree.getMemberNames(TreeTraversalOrder.POST_ORDER, 1);
 
-			// Cycle through aggregation members
-			for (String member:aggMembers) {
+		// Initialize indexing objects
+		intersections = new PafIntersectionIterator(intersectDimIndexes, dataCache, memberFilters);
+		cellIndex = new int[dimCount];
 
-				//BEGIN(2) - TTN-584
-				if ( isTimeAggregation && timeOpenPeriods.size() > 0 && ! timeOpenPeriods.contains(member)) {
+		// Cycle through aggregation members
+		for (String member:aggMembers) {
 
-					logger.debug("Skipping aggregation on time member [" + member + "]");
+			//BEGIN(2) - TTN-584
+			if ( isTimeAggregation && timeOpenPeriods.size() > 0 && ! timeOpenPeriods.contains(member)) {
 
-					continue;
+				logger.debug("Skipping aggregation on time member [" + member + "]");
 
-				} else {
+				continue;
 
-					logger.debug("Aggregating member [" + member + "]");
+			} else {
 
-				}
-				//END(2) - TTN-584
+				logger.debug("Aggregating member [" + member + "]");
 
-				List<PafDimMember> children = memberTree.getMember(member).getChildren();
-				intersections.reset();
-
-				// Process the member only if the member has children
-				if (children.size() > 0) {
-
-					// Cycle through all member intersections in data cache
-					while (intersections.hasNext()) {
-						// Get next member intersection
-						intersection = intersections.getNext();
-						// Update data cell index
-						cellIndex = dataCache.updateCellIndex(cellIndex, intersectDimIndexes, intersection);
-						double aggAmount = 0;
-						// Determine the "Measure Type" property
-						int measureIndex = cellIndex[measureAxis];
-						String measure = dataCache.getDimMember(measureAxis, measureIndex);
-						MeasureDef measureDef = dataCache.getMeasureDef(measure);
-						MeasureType measureType = measureDef.getType();
-
-						// Filter on valid aggregation types
-						if (aggMeasureTypes.contains(measureType)) {
-
-							// Aggregate children across selected member intersection. When aggregating 
-							// across the "Time" dimension, the aggregation process must properly aggregate 
-							// any measures set with the "Time Balance First" or "Time Balance Last" proptery.
-							if (!isTimeAggregation || measureType == MeasureType.Aggregate){
-								// Standard aggregation process - sum up children of selected member
-								for (PafDimMember child:children) {
-									cellIndex[aggDimIndex] = dataCache.getMemberIndex(child.getKey(), aggDimIndex);
-									double cellValue = dataCache.getCellValue(cellIndex);
-									aggAmount = aggAmount + cellValue;
-								}
-							} else if (measureType == MeasureType.TimeBalFirst)  {
-								// Time Balance First - selected time dimension member equals it's first child
-								PafDimMember child = children.get(0);
-								cellIndex[aggDimIndex] = dataCache.getMemberIndex(child.getKey(), aggDimIndex);
-								aggAmount = dataCache.getCellValue(cellIndex);												
-							} else if (measureType == MeasureType.TimeBalLast) {
-								// Time Balance Last - selected time dimension member equals it's last child
-								PafDimMember child = children.get(children.size() - 1);
-								cellIndex[aggDimIndex] = dataCache.getMemberIndex(child.getKey(), aggDimIndex);
-								aggAmount = dataCache.getCellValue(cellIndex);	
-							} else {
-								// Invalid Measure Type - Throw IllegalArgumentException
-								String errMsg = "Agg Dimension error - invalid Measure Type of [" + measureType.toString() + "] encountered.";
-								logger.error(errMsg);
-								IllegalArgumentException iae = new IllegalArgumentException(errMsg);
-								throw iae;
-							}
-
-							// Update member total
-							cellIndex[aggDimIndex] = dataCache.getMemberIndex(member, aggDimIndex);
-							dataCache.setCellValueAndTrackChanges(cellIndex, aggAmount);	
-
-						}
-					}
-				}	
 			}
+			//END(2) - TTN-584
 
-		} catch (PafException pfe) {
-			// throw Paf Exception
-			throw pfe;
-		} catch (Exception ex) {
-			// throw Paf Exception
-			String errMsg = ex.getMessage();
-			logger.error(errMsg);
-			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
-			throw pfe;
+			List<PafDimMember> children = memberTree.getMember(member).getChildren();
+			intersections.reset();
+
+			// Process the member only if the member has children
+			if (children.size() > 0) {
+
+				// Cycle through all member intersections in data cache
+				while (intersections.hasNext()) {
+					// Get next member intersection
+					intersection = intersections.getNext();
+					// Update data cell index
+					cellIndex = dataCache.updateCellIndex(cellIndex, intersectDimIndexes, intersection);
+					double aggAmount = 0;
+					// Determine the "Measure Type" property
+					int measureIndex = cellIndex[measureAxis];
+					String measure = dataCache.getDimMember(measureAxis, measureIndex);
+					MeasureDef measureDef = dataCache.getMeasureDef(measure);
+					MeasureType measureType = measureDef.getType();
+
+					// Filter on valid aggregation types
+					if (aggMeasureTypes.contains(measureType)) {
+
+						// Aggregate children across selected member intersection. When aggregating 
+						// across the "Time" dimension, the aggregation process must properly aggregate 
+						// any measures set with the "Time Balance First" or "Time Balance Last" property.
+						if (!isTimeAggregation || measureType == MeasureType.Aggregate){
+							// Standard aggregation process - sum up children of selected member
+							for (PafDimMember child:children) {
+								cellIndex[aggDimIndex] = dataCache.getMemberIndex(child.getKey(), aggDimIndex);
+								double cellValue = dataCache.getCellValue(cellIndex);
+								aggAmount = aggAmount + cellValue;
+							}
+						} else if (measureType == MeasureType.TimeBalFirst)  {
+							// Time Balance First - selected time dimension member equals it's first child
+							PafDimMember child = children.get(0);
+							cellIndex[aggDimIndex] = dataCache.getMemberIndex(child.getKey(), aggDimIndex);
+							aggAmount = dataCache.getCellValue(cellIndex);												
+						} else if (measureType == MeasureType.TimeBalLast) {
+							// Time Balance Last - selected time dimension member equals it's last child
+							PafDimMember child = children.get(children.size() - 1);
+							cellIndex[aggDimIndex] = dataCache.getMemberIndex(child.getKey(), aggDimIndex);
+							aggAmount = dataCache.getCellValue(cellIndex);	
+						} else {
+							// Invalid Measure Type - Throw IllegalArgumentException
+							String errMsg = "Agg Dimension error - invalid Measure Type of [" + measureType.toString() + "] encountered.";
+							logger.error(errMsg);
+							IllegalArgumentException iae = new IllegalArgumentException(errMsg);
+							throw iae;
+						}
+
+						// Update member total
+						cellIndex[aggDimIndex] = dataCache.getMemberIndex(member, aggDimIndex);
+						dataCache.setCellValueAndTrackChanges(cellIndex, aggAmount);	
+
+					}
+				}
+			}	
 		}
+
+
 
 		// Return aggregated data cache
 		calcEnd = System.currentTimeMillis();

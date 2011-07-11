@@ -46,13 +46,17 @@ import com.pace.base.view.PafMVS;
  * @author Alan Farkas
  *
  */
-public abstract class PafDataCache implements IPafDataCache {
+public abstract class PafDataCacheOLD implements IPafDataCache {
 
-	private Map<Intersection, Integer> dataBlockIndexMap = null;
-	private List<double[][]> dataBlockPool = null;	// [Measure][Time]
-	private int blockSize = 0;
-	private int axisCount = 0, indexedDataBlockCount = 0;
-	private int[] axisSizes = null, indexedAxes = null;
+	private Map<Intersection, Integer> cellIndexMap = new HashMap<Intersection, Integer>();
+	private int indexedCellCount = 0;
+	private double[] cellArray = null;
+	private double[][][] dataCells = null;	//[versionIndex][measureIndex][memberIndex] 
+//	private PafDataCacheCellProps[][][] dataCellProps = null;	//[versionIndex][measureIndex][memberIndex] 
+	private PafDataCacheCellProps[] dataCellProps = null;	
+	private int axisCount = 0;
+	private int[] axisSizes = null;
+	private int[] blockSize = null;
 	private Set<String> lockedPeriods = null;
 	private String[] activeVersions = null, allDimensions = null, indexedDimensions = null;	//TODO Change name of "activeVersions" to "planningVersions"
 	private String[][] memberArray = null;
@@ -62,11 +66,8 @@ public abstract class PafDataCache implements IPafDataCache {
 	private PafDataCacheCells changedCells = new PafDataCacheCells();
 	private PafApplicationDef appDef = null;
 	private boolean isDirty = true;
-	private final static int NON_INDEXED_DIM_COUNT = 2;	// Measure and Time Dimension
-	private static Logger logger = Logger.getLogger(PafDataCache.class);
-	private static Logger performanceLogger = Logger.getLogger(PafDataCache.class);
-	
-	final static int DEFAULT_BLOCK_COUNT = 100;
+	private static int NON_INDEXED_DIM_COUNT = 2;	// Measure and Version Dimension
+	private static Logger logger = Logger.getLogger(PafDataCacheOLD.class);
 
 
 
@@ -92,13 +93,12 @@ public abstract class PafDataCache implements IPafDataCache {
 	 */
 	protected void initDataCache() {
 
-		int initialBlockCount = DEFAULT_BLOCK_COUNT;
-		
+		int measureSize = 0, memberCombinations = 0, versionSize = 0;
+
 		// Create axisIndexMap
 		setAxisIndexMap(createAxisIndexMap());
 
-		// Create indexedDimension arrays
-		setIndexedAxes(createIndexedAxes());
+		// Create indexedDimensions array
 		setIndexedDimensions(createIndexedDimensions());
 
 		// Create dimIndexMap
@@ -107,16 +107,20 @@ public abstract class PafDataCache implements IPafDataCache {
 		// Create memberIndexMap
 		setMemberIndexMap(createMemberIndexMap());
 
-		// Initialize data block index and data block pool. To minimize the
-		// the time it takes to initially populate the data cache, the index
-		// and pool are pre-allocated to hold all initially defined blocks.
-		setBlockSize(getMeasureSize() * getTimeSize());
-		initialBlockCount = getMaxDataBlockCount();
-		setDataBlockIndex(new HashMap<Intersection, Integer>(initialBlockCount));
-		setDataBlockPool(new ArrayList<double[][]>(initialBlockCount));
-		
-		// Initialize data block list
-		performanceLogger.debug("Initializing data cell array...");
+		// Create blockSize array
+		setBlockSize(computeBlockSize());
+
+		// Initialize data cell array
+		logger.info("Initializing data cell array...");
+		versionSize = getVersionSize();
+		measureSize = getMeasureSize();
+		memberCombinations = getIndexedMemberCombinations();
+/*		setDataCells(new double[versionSize][measureSize][memberCombinations]);
+		logger.info("Data cell array has been intialized - Dimension sizes: [" 
+				+ versionSize + "] [" + measureSize + "] [" + memberCombinations
+				+ "] - Cell count: [" + getCellCount() + "]");
+*/
+		setCellArray(new double[versionSize*measureSize*memberCombinations]);
 		logger.info("Data cell array has been intialized - Cell count: [" + getCellCount() + "]");
 
 	}
@@ -268,6 +272,41 @@ public abstract class PafDataCache implements IPafDataCache {
 	}
 
 	/**
+	 *	Compute the blockSize for each dimension
+	 *
+	 * @return The blockSize - a factor used in calculating the correct access path to a specific cell.
+	 */
+	protected int[] computeBlockSize() {
+
+		int axisIndex = 0, dimCount = 0;
+		int[] blockSize = null;
+
+		// Compute the blocksize by dimension. The blocksize is used in determining
+		// the correct access path to a given cell in the PafUowCache.
+		logger.debug("Computing blockSize...");
+
+		// The blocksize for a given dimension is calculated by taking
+		// the product of the sizes of all the indexed dimensions that 
+		// have a lower index value than the dimension that is currently 
+		// being calculated. Index[0] is considered the innermost dimension.
+		//
+		dimCount = indexedDimensions.length;
+		blockSize = new int[dimCount];  
+		for (int i = 0; i < dimCount; i++) {
+			blockSize[i] = 1;
+			for (int j = 0; j < i; j++) {
+				String dimension = indexedDimensions[j];				
+				axisIndex = getAxisIndex(dimension);
+				blockSize[i] = blockSize[i] * axisSizes[axisIndex];
+			}
+			logger.debug("Dimension [" + i + "]: [" + indexedDimensions[i] + 
+					"] - Blocksize: " + blockSize[i]);
+		}
+		return blockSize;
+	}
+
+
+	/**
 	 *	Create PafUowCache axis index map
 	 *
 	 * @return HashMap used for resolving dimension names to a specific axis index value.
@@ -288,61 +327,30 @@ public abstract class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 *	Create indexed axis array
-	 *
-	 * @return An array containing the list of Indexed dimensions axes (excludes Measure and Time)
-	 */
-	protected int[] createIndexedAxes() {
-
-		int dimCount = 0, dimIndex = 0;
-		int measureAxis = getMeasureAxis(), timeAxis = getTimeAxis();
-		int[] indexedAxes = null;
-
-		// Fill the indexedAxis array, which contains the list of all
-		// UOW dimensions axis that comprise the data block index. This would be 
-		// all dimensions except Measure and Time, which are not included as 
-		// they each are represented within the data block itself.
-		logger.debug("Creating indexedAxis array...");
-		dimCount = getAllDimensions().length - NON_INDEXED_DIM_COUNT;
-		indexedAxes = new int[dimCount];
-		for (int axisIndex = 0; axisIndex < axisCount; axisIndex++) {
-			if (axisIndex != measureAxis && axisIndex != timeAxis) {
-				// Check for index out of bounds condition
-				if (dimIndex >= dimCount) {
-					String errMsg = "DataCache init error - index out of bounds error when creating the Indexed Axis array. Possible issue with the naming of the Time or Measure dimension.";
-					logger.error(errMsg);
-					throw new  ArrayIndexOutOfBoundsException(errMsg);
-				}
-				indexedAxes[dimIndex++] = axisIndex;
-			}
-		}
-		return indexedAxes;
-	}
-
-	/**
 	 *	Create indexed dimensions array
 	 *
-	 * @return An array containing the list of Indexed dimensions (excludes Measure and Time)
+	 * @return An array containing the list of Indexed dimensions (excludes Measure and Version)
 	 */
 	protected String[] createIndexedDimensions() {
 
 		int dimCount = 0, dimIndex = 0;
-		String measureDim = getMeasureDim(), timeDim = getTimeDim();
+		String measureDim = getMeasureDim(), versionDim = getVersionDim();
 		String[] indexedDimensions = null;
 
 		// Fill the indexedDimensions array, which contains the list of all
-		// UOW dimensions that comprise the data block index. This would be 
-		// all dimensions except Measure and Time, which are not included as 
-		// they each are represented within the data block itself.
+		// planning dimensions that are indexed in the last dimension of the
+		// dataCells array. This would be all dimensions except Measure and
+		// Version, which are not included as they each are represented by
+		// their own dimension in the dataCells array.`
 		logger.debug("Creating indexedDimensions array...");
 		dimCount = getAllDimensions().length - NON_INDEXED_DIM_COUNT;
 		indexedDimensions = new String[dimCount];
 		for (int axisIndex = 0; axisIndex < axisCount; axisIndex++) {
 			String dimension = getDimension(axisIndex);
-			if (!dimension.equalsIgnoreCase(measureDim) && !dimension.equalsIgnoreCase(timeDim)) {
+			if (!dimension.equalsIgnoreCase(measureDim) && !dimension.equalsIgnoreCase(versionDim)) {
 				// Check for index out of bounds condition
 				if (dimIndex >= dimCount) {
-					String errMsg = "PafDataCache init error - index out of bounds error when creating the Indexed Dimensions array. Possible issue with the naming of the Time or Measure dimension.";
+					String errMsg = "PafDataCache init error - index out of bounds error when creating the Indexed Dimensions array. Possible issue with the naming of the Version or Measure dimension.";
 					logger.error(errMsg);
 					throw new  ArrayIndexOutOfBoundsException(errMsg);
 				}
@@ -403,23 +411,12 @@ public abstract class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 *	Returns the existing number of data blocks in the data cache
-	 *
-	 * @return The existing number of data blocks in the data cache
-	 */
-	public int getDataBlockCount() {
-
-		int dataBlockCount = dataBlockPool.size();
-		return dataBlockCount;
-	}
-
-	/**
-	 *	Returns the maximum number of member combinations across the Indexed
+	 *	Returns the number of member combinations across the Indexed
 	 *	Dimensions
 	 *
-	 * @return The maximum number of member combinations across the Indexed Dimensions
+	 * @return The number of member combinations across the Indexed Dimensions
 	 */
-	public int getMaxDataBlockCount() {
+	public int getIndexedMemberCombinations() {
 
 		int memberCombinations = 1;
 
@@ -430,46 +427,6 @@ public abstract class PafDataCache implements IPafDataCache {
 		}
 
 		return memberCombinations;
-	}
-
-
-	/**
-	 * @param dataBlockIndex the dataBlockIndex to set
-	 */
-	private void setDataBlockIndex(Map<Intersection, Integer> dataBlockIndex) {
-		this.dataBlockIndexMap = dataBlockIndex;
-	}
-
-
-	/**
-	 * @return the dataBlockPool
-	 */
-	protected List<double[][]> getDataBlockPool() {
-		return dataBlockPool;
-	}
-
-
-	/**
-	 * @param dataBlockPool the dataBlockPool to set
-	 */
-	protected void setDataBlockPool(List<double[][]> dataBlockPool) {
-		this.dataBlockPool = dataBlockPool;
-	}
-
-
-	/**
-	 * @return the blockSize
-	 */
-	public int getBlockSize() {
-		return blockSize;
-	}
-
-
-	/**
-	 * @param blockSize the blockSize to set
-	 */
-	protected void setBlockSize(int blockSize) {
-		this.blockSize = blockSize;
 	}
 
 
@@ -772,6 +729,36 @@ public abstract class PafDataCache implements IPafDataCache {
 		this.axisSizes = axisSizes;
 	}
 
+	/**
+	 *	Return the blocksize array
+	 *
+	 * @return Returns the blockSize array.
+	 */
+	public int[] getBlockSize() {
+		return blockSize;
+	}
+	/**
+	 * @param blockSize the blockSize to set
+	 */
+	protected void setBlockSize(int[] blockSize) {
+		this.blockSize = blockSize;
+	}
+
+	/**
+	 * @return the cellArray
+	 */
+	public double[] getCellArray() {
+		return cellArray;
+	}
+
+
+	/**
+	 * @param cellArray the cellArray to set
+	 */
+	public void setCellArray(double[] cellArray) {
+		this.cellArray = cellArray;
+	}
+
 
 	/**
 	 *	Return the data cache cell count
@@ -779,21 +766,104 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @return Returns the data cache cell count.
 	 */
 	public int getCellCount() {
-		return getDataBlockCount() * blockSize;
+//		return dataCells.length * dataCells[0].length * dataCells[0][0].length;
+		return cellArray.length;
 	}
 
-	
+
+	/**
+	 *	Return the cell properties for the specified dimension member intersection
+	 *
+	 * @param members Array of dimension members that define a single cell intersection
+	 * 
+	 * @return Returns the cell properties.
+	 * @throws PafException 
+	 */
+	public PafDataCacheCellProps getCellProps(String[] members) throws PafException {
+
+		int index[] = membersToIndex(members);
+		return getCellProps(index);
+	}
+
+	/**
+	 *	Return the cell properties for the specified index
+	 *
+	 * @param nDimIndex Array of n-dimensional indexes that define a single cell intersection 
+	 * 
+	 * @return Returns the cell properties.
+	 * @throws PafException 
+	 */
+	public PafDataCacheCellProps getCellProps(int[] nDimIndex) throws PafException {
+
+//		int dataCellIndex[] = getDataCellIndex(nDimIndex);    	
+//		return dataCellProps[dataCellIndex[0]][dataCellIndex[1]][dataCellIndex[2]];
+		int dataCellIndex = getDataCellIndex(nDimIndex);    	
+//		return dataCellProps[dataCellIndex[0]][dataCellIndex[1]][dataCellIndex[2]];
+		return dataCellProps[dataCellIndex];
+	}
+
+	/**
+	 *	Set the properties for the specified dimension member intersection
+	 *
+	 * @param members Array of dimension members that define a single cell intersection
+	 * @param props Cell properties
+	 * 
+	 * @throws PafException 
+	 */
+	public void setCellProps(String[] members, PafDataCacheCellProps props) throws PafException {
+
+		int index[] = membersToIndex(members);
+		setCellProps(index, props);
+	}
+
+	/**
+	 *	Set the properties for a specific data cache cell
+	 *
+	 * @param nDimIndex Array of n-dimensional indexes that define a single cell intersection 
+	 * @param props Cell properties
+	 * 
+	 * @throws PafException 
+	 */
+	public void setCellProps(int[] nDimIndex, PafDataCacheCellProps props) throws PafException {
+
+		int dataCellIndex = getDataCellIndex(nDimIndex);
+
+		// Set data cache cell value
+//		dataCellProps[dataCellIndex[0]][dataCellIndex[1]][dataCellIndex[2]] = props;
+		dataCellProps[dataCellIndex] = props;
+	}
+
+	/**
+	 * Set the properties for the member range defined by the specified member filter
+
+	 * @param memberFilter Collection of dimensions and corresponding members
+	 * @param props Cell properties
+	 * 
+	 */
+	public void setCellProps(Map<String,List<String>> memberFilter, PafDataCacheCellProps props) {
+
+		//TODO Complete logic for this method - set cell properties for the given range.
+//		int dataCellIndex[] = {0,0,0};
+		int dataCellIndex = 0;
+
+		// Set data cache cell value
+//		dataCellProps[dataCellIndex[0]][dataCellIndex[1]][dataCellIndex[2]] = props;
+		dataCellProps[dataCellIndex] = props;
+	}
+
 
 	/**
 	 *	Return the cell value for the specified intersection coordinates
 	 *
 	 * @param members Array of dimension members that define a single cell intersection
 	 * @return Returns the cell value.
+	 * @throws PafException 
 	 */
-	public double getCellValue(String[] members) {
+	public double getCellValue(String[] members) throws PafException {
 
-		Intersection intersection = new Intersection(getAllDimensions(), members);
-		return getCellValue(intersection);
+		//int index[] = membersToIndex(members);
+		Intersection index = new Intersection(this.getAllDimensions(), members);
+		return getCellValue(index);
 	}
 
 	/**
@@ -803,17 +873,15 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @param intersection Member intersection object that corresponds to data cache cell
 	 * 
 	 * @return Returns the cell value
+	 * @throws PafException 
 	 */
-	public double getCellValue(Intersection intersection)  {
-
-		// Get the cell address of the specified intersection
-		DataCacheCellAddress cellAddress = createCellAddress(intersection);
+	public double getCellValue(Intersection intersection) throws PafException {
 
 		// Return cell value
-		double[][] dataBlock = findDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
-		if (dataBlock != null) {
-			// Intersection exists - return cell value
-			return dataBlock[cellAddress.getCoordX()][cellAddress.getCoordY()];
+		Integer cellIndex = cellIndexMap.get(intersection);
+		if (cellIndex != null) {
+			// Intersection exists
+			return cellArray[cellIndex];
 		} else {
 			// Intersection does not exist
 			if (isValidIntersection(intersection)) {
@@ -834,21 +902,57 @@ public abstract class PafDataCache implements IPafDataCache {
 	 *
 	 * @param nDimIndex Array of n-dimensional indexes that define a single cell intersection 
 	 * @return Returns the cell value.
+	 * @throws PafException 
 	 */
-	public double getCellValue(int[] nDimIndex) {
+	public double getCellValue(int[] nDimIndex) throws PafException {
 
-		Intersection intersection = createIntersection(nDimIndex);    	
+//		int dataCellIndex[] = getDataCellIndex(nDimIndex);    	
+//		return dataCells[dataCellIndex[0]][dataCellIndex[1]][dataCellIndex[2]];
+		Intersection intersection = this.createIntersection(nDimIndex);    	
 		return getCellValue(intersection);
 	}
 
 	
 	/**
+	 *	Add a new data cell to the data cache
+	 *
+	 * @param nDimIndex Array of n-dimensional indexes that define a single cell intersection 
+	 * @param value Value to put into cell
+	 * @throws PafException 
+	 */
+	public void addCell(int[] nDimIndex, double value) throws PafException {
+
+		// Convert nDimensional cell index to intersection based index
+		Intersection intersection = createIntersection(nDimIndex);
+
+		// Set cell value
+		addCell(intersection, value);
+	}
+
+	/**
+	 *	Add a new data cell to the data cache
+	 *
+	 * @param intersection Member intersection object that corresponds to cell
+	 * @param value Value to put into cell
+	 * @throws PafException 
+	 */
+	public void addCell(Intersection intersection, double value) throws PafException {
+
+		// Add index entry for new cell (index is auto-incremented)
+		cellIndexMap.put(intersection, indexedCellCount++);
+
+		// Set cell value
+		setCellValue(intersection, value);
+	}
+
+	/**
 	 *	Set the value for a specific data cache cell
 	 *
 	 * @param members Array of dimension members that define a single cell intersection
 	 * @param value Value to put into cell
+	 * @throws PafException 
 	 */
-	public void setCellValue(String[] members, double value) {
+	public void setCellValue(String[] members, double value) throws PafException {
 
 		int index[] = membersToIndex(members);
 		setCellValue(index, value);
@@ -857,13 +961,81 @@ public abstract class PafDataCache implements IPafDataCache {
 	/**
 	 *	Set the value for a specific data cache cell
 	 *
+	 * @param intersection Member intersection object that corresponds to cell
+	 * @param value Value to put into cell
+	 * @throws PafException 
+	 */
+	public void setCellValue(Intersection intersection, double value) throws PafException {
+
+		// Get cell index corresponding to specified intersection
+		Integer cellIndex = cellIndexMap.get(intersection);
+		
+		// Does cell exist?
+		if (cellIndex != null) {
+			// Yes - Set cell value
+			setCellValue(cellIndex, value);
+		} else {
+			// No - Add new cell and set value
+			addCell(intersection, value);
+		}
+		
+	}
+
+	/**
+	 *	Set the value for a specific data cache cell
+	 *
 	 * @param nDimIndex Array of n-dimensional indexes that define a single cell intersection 
 	 * @param value Value to put into cell
+	 * @throws PafException 
 	 */
-	public void setCellValue(int[] nDimIndex, double value) {
+	public void setCellValue(int[] nDimIndex, double value) throws PafException {
 
-		Intersection intersection = createIntersection(nDimIndex);
+//		int dataCellIndex[] = getDataCellIndex(nDimIndex);
+		Intersection intersection = this.createIntersection(nDimIndex);
+//		double roundedMantissa = 0, roundedValue = 0, signedMantissa = 0;
+//		long longValue = 0; 
+
+		// Round updated cell value to a pre-defined number of digits to mask any potential precision errors
+//		longValue = (long) value;
+//		signedMantissa = value - longValue;
+//		roundedMantissa = Math.round(signedMantissa * PafBaseConstants.DC_ROUNDING_CONSTANT)
+//								/ PafBaseConstants.DC_ROUNDING_CONSTANT;
+//		roundedValue = longValue + roundedMantissa;
+
+		// Set data cache cell value
+//		dataCells[dataCellIndex[0]][dataCellIndex[1]][dataCellIndex[2]] = roundedValue;
+//		cellArray[dataCellIndex] = roundedValue;
+		
+		
+		// Set dirty flag
+//		setDirty(true);
 		setCellValue(intersection, value);
+	}
+
+	/**
+	 *	Set the value for a specific data cache cell
+	 *
+	 * @param dataCellIndex Internal data cell index 
+	 * @param value Value to put into cell
+	 * @throws PafException 
+	 */
+	public void setCellValue(int dataCellIndex, double value) throws PafException {
+
+		double roundedMantissa = 0, roundedValue = 0, signedMantissa = 0;
+		long longValue = 0; 
+
+		// Round updated cell value to a pre-defined number of digits to mask any potential precision errors
+		longValue = (long) value;
+		signedMantissa = value - longValue;
+		roundedMantissa = Math.round(signedMantissa * PafBaseConstants.DC_ROUNDING_CONSTANT)
+								/ PafBaseConstants.DC_ROUNDING_CONSTANT;
+		roundedValue = longValue + roundedMantissa;
+
+		// Set data cache cell value
+		cellArray[dataCellIndex] = roundedValue;
+				
+		// Set dirty flag
+		setDirty(true);
 	}
 
 	/**
@@ -871,8 +1043,9 @@ public abstract class PafDataCache implements IPafDataCache {
 	 *
 	 * @param cellIndex Data cache cell index
 	 * @param cellValue Value to put into cell
+	 * @throws PafException 
 	 */
-	public void setCellValueAndTrackChanges(int[] cellIndex, double cellValue) {
+	public void setCellValueAndTrackChanges(int[] cellIndex, double cellValue) throws PafException {
 
 		double oldCellValue = getCellValue(cellIndex);
 		setCellValue(cellIndex, cellValue);
@@ -881,156 +1054,6 @@ public abstract class PafDataCache implements IPafDataCache {
 			System.arraycopy(cellIndex, 0, changedCellIndex, 0, axisCount);
 			addChangedCell(changedCellIndex, cellValue);
 		}
-	}
-
-	/**
-	 *	Set the value for a specific data cache cell
-	 *
-	 * @param intersection Cell intersection
-	 * @param value Value to put into cell
-	 */
-	public void setCellValue(Intersection intersection, double value) {
-		
-		DataBlockResponse dataBlockResp = null;
-		double[][] dataBlock = null;
-
-		// Get the cell address of the specified intersection
-		//TODO - add logic to convert other types of intersections (Attribute, synthetic time, etc.)
-		DataCacheCellAddress cellAddress = createCellAddress(intersection);
-		
-		// Get the corresponding data block
-		Intersection dataBlockKey = cellAddress.getDataBlockKey();
-		dataBlockResp = findDataBlock(dataBlockKey);
-		dataBlock = dataBlockResp.getDataBlock();
-
-		// Create data block if it doesn't already exist
-		if (dataBlock == null) {
-			dataBlockResp = addDataBlock(dataBlockKey);
-			dataBlock = dataBlockResp.getDataBlock();
-		}
-		
-		// Round updated cell value to a predefined number of digits to mask any potential precision errors
-		long longValue = (long) value;
-		double signedMantissa = value - longValue;
-		double roundedMantissa = Math.round(signedMantissa * PafBaseConstants.DC_ROUNDING_CONSTANT)
-								/ PafBaseConstants.DC_ROUNDING_CONSTANT;
-		double roundedValue = longValue + roundedMantissa;
-		
-		// Update cell value
-		dataBlock[cellAddress.getCoordX()][cellAddress.getCoordY()] = roundedValue;
-
-		// Set dirty flag
-		setDirty(true);
-	}
-
-
-	/**
-	 *	Add a new data block to the data cache
-	 *
-	 * @param key Data block key
-	 * @return DataBlockResponse
-	
-	 */
-	public DataBlockResponse addDataBlock(Intersection key) {
-
-		// Add index entry for new data block (index is auto-incremented)
-		Integer surrogateKey = indexedDataBlockCount++;
-		dataBlockIndexMap.put(key, surrogateKey);
-		
-		// Create new dataBlock and add it to data block pool
-		//TODO Check for alias intersections - if adding, create base intersection first
-		// if it doesn't exist, else find it.
-		double[][] dataBlock = new double[getMeasureSize()][getTimeSize()];
-		dataBlockPool.add(dataBlock);
-		
-		// Return data block response
-		DataBlockResponse dataBlockResp = new DataBlockResponse();
-		dataBlockResp.setSurrogateKey(surrogateKey);
-		dataBlockResp.setDataBlock(dataBlock);
-		return dataBlockResp;
-	}
-
-	/**
-	 *	Return the data block corresponding to the specified intersection.
-	 *  Additional information is also returned.
-	 *
-	 * @param intersection Data block key
-	 * @return DataBlockResponse
-	 */
-	private DataBlockResponse findDataBlock(Intersection dataBlockKey) {
-		
-		double[][] dataBlock = null;
-		
-		// Find data block index entry
-		Integer  surrogateKey = dataBlockIndexMap.get(dataBlockKey);
-		
-		// Get data block (if an index entry exists)
-		if (surrogateKey != null) {
-			dataBlock = dataBlockPool.get(surrogateKey);
-			if (dataBlock == null) {
-				String errMsg = "Data Cache Error - Non-existing data block at intersection: " 
-					+ StringUtils.arrayToString(dataBlockKey.getCoordinates());
-				throw new NullPointerException(errMsg);
-			}
-		}
-		
-		// Return data block response
-		DataBlockResponse dataBlockResp = new DataBlockResponse();
-		dataBlockResp.setSurrogateKey(surrogateKey);
-		dataBlockResp.setDataBlock(dataBlock);
-		return dataBlockResp;
-	}
-
-
-	/**
-	 * 	Update the contents of the specified data block
-	 * 
-	 * @param dataBlockResp Data Block Response Object
-	 */
-	private void updateDataBlock(DataBlockResponse dataBlockResp) {
-		dataBlockPool.set(dataBlockResp.getSurrogateKey(), dataBlockResp.getDataBlock());
-	}
-
-
-	/**
-	 * 	Update the contents of the specified data block
-	 * 
-	 * @param dataBlockIndex Data Block Index
-	 * @param dataBlock Data Block
-	 */
-	private void updateDataBlock(Intersection dataBlockIndex, double[][] dataBlock) {
-		
-		Integer  surrogateKey = dataBlockIndexMap.get(dataBlockIndex);	
-		dataBlockPool.set(surrogateKey, dataBlock);
-		
-	}
-
-
-	/**
-	 *	Return the cell address for the specified intersection
-	 *
-	 * @param intersection Cell intersection 
-	 * @return DataCacheCellAddress
-	 */
-	private DataCacheCellAddress createCellAddress(Intersection intersection) {
-		
-		int measureAxis = getMeasureAxis();
-		int timeAxis = getTimeAxis();
-		DataCacheCellAddress cellAddress = new DataCacheCellAddress();
-
-		// Convert intersection to data block index
-		//TODO - add logic to convert other types of intersections (Attribute, synthetic)
-		Intersection dataBlockIndex = intersection.createSubIntersection(indexedAxes);
-		cellAddress.setDataBlockKey(dataBlockIndex);
-		
-		// Set x and y coordinates (measure, time)
-		int measureIndex = getMemberIndex(intersection.getCoordinates()[measureAxis], measureAxis);
-		cellAddress.setCoordX(measureIndex);
-		int timeIndex = getMemberIndex(intersection.getCoordinates()[timeAxis], timeAxis);
-		cellAddress.setCoordY(timeIndex);
-
-		// Return cell address
-		return cellAddress;
 	}
 
 
@@ -1069,31 +1092,156 @@ public abstract class PafDataCache implements IPafDataCache {
 		}
 
 		// Get a data cell iterator object
-		cellIterator = new PafIntersectionIterator(axes, this, memberFilters);
+	//	cellIterator = new PafIntersectionIterator(axes, this, memberFilters);
 		return cellIterator;
 	}
 
 	
+//	/**
+//	 *	Convert an n-dimensional index to the internal format required by the dataCell array
+//	 *
+//	 * @param index N-dimensional cell index
+//	 * @return DataCell array index
+//	 * 
+//	 * @throws PafException 
+//	 */
+//	private int[] getDataCellIndex(int[] index) throws PafException {
+//
+//		// Offset will have one member for each non-indexed dimension plus a single
+//		// member for all remaining dimensions
+//		int[] dataCellIndex = new int[NON_INDEXED_DIM_COUNT + 1];
+//
+//		try {
+//			// Validate index array
+//			if (index == null || index.length == 0) {
+//				// Empty or null axisSize array
+//				String errMsg = "N-dimensional index to dataCell index conversion error - empty or null index array";
+//				logger.error(errMsg);
+//				PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
+//				throw pfe; 
+//			} else if (index.length != axisCount) {
+//				// index array length does not match axisCount
+//				String errMsg = "Index array length does not match axisCount";
+//				logger.error(errMsg);
+//				PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
+//				throw pfe; 
+//			}
+//
+//			// Compute index of indexed dimension members
+//			dataCellIndex[0] = index[getVersionAxis()];
+//			dataCellIndex[1] = index[getMeasureAxis()];
+//
+//			// Compute indices of remaining dimensions
+//			for (int axisIndex = 0; axisIndex < axisCount; axisIndex++) {
+//				String dimension = getDimension(axisIndex);
+//				if (dimIndexMap.containsKey(dimension)) {
+//					int memberIndex = index[axisIndex];
+//					// Validate index
+//					if (memberIndex < 0 || memberIndex >= axisSizes[axisIndex] ) {
+//						// Member index is > than axisSize
+//						String errMsg = "N-dimensional index to dataCell index conversion error - supplied index of " + memberIndex 
+//						+ " for Axis [" + axisIndex + "] - Dimension [" + dimension + "] is out of bounds";
+//						logger.error(errMsg);
+//						PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
+//						throw pfe; 
+//					}
+//					int dimIndex = dimIndexMap.get(dimension);
+//					dataCellIndex[NON_INDEXED_DIM_COUNT] 
+//					              = dataCellIndex[NON_INDEXED_DIM_COUNT] + index[axisIndex] * blockSize[dimIndex];
+//				}
+//			}
+//
+//			// Validate dataCell Index
+//			if (dataCellIndex[0] > dataCells.length - 1 || 
+//					dataCellIndex[1] > dataCells[0].length - 1 ||
+//					dataCellIndex[2] > dataCells[0][0].length - 1) {
+//				// Invalid dataCell index
+//				String errMsg = "N-dimensional index to dataCell index conversion error - computed index of " 
+//					+ StringUtils.arrayToString(dataCellIndex) + " is out of bounds";
+//				logger.error(errMsg);
+//				PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
+//				throw pfe; 
+//			}
+//
+//		} catch (PafException pfe) {
+//			// throw Paf Exception
+//			throw pfe;
+//		} catch (Exception ex) {
+//			// throw Paf Exception
+//			String errMsg = ex.getMessage();
+//			logger.error(errMsg);
+//			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
+//			throw pfe;
+//		}
+//
+//		return dataCellIndex;
+//	}
+
 	/**
 	 *	Convert an n-dimensional index to an intersection object
 	 *
 	 * @param index N-dimensional cell index
 	 * @return DataCell index (int)
+	 * 
+	 * @throws PafException 
 	 */
-	private Intersection createIntersection(int[] index) {
+	private Intersection createIntersection(int[] index) throws PafException {
 
 		// Convert cell index to intersection object
 		String members[] = new String[index.length];
 		for (int axis = 0; axis < index.length; axis++) {
 			members[axis] = this.getDimMember(axis, index[axis]);
 		}
-		Intersection intersection = new Intersection(getAllDimensions(), members);
+		Intersection intersection = new Intersection(this.getAllDimensions(), members);
 		
 		
 		// Return intersection
 		return intersection;
 	}
 
+	/**
+	 *	Convert an n-dimensional index to corresponding intersection object
+	 *
+	 * @param index N-dimensional cell index
+	 * @return DataCell index (int)
+	 * 
+	 * @throws PafException 
+	 */
+	private int getDataCellIndex(int[] index) throws PafException {
+
+	
+		// Validate index array
+		if (index == null || index.length == 0) {
+			// Empty or null axisSize array
+			String errMsg = "N-dimensional index to dataCell index conversion error - empty or null index array";
+			logger.error(errMsg);
+			PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
+			throw pfe; 
+		} else if (index.length != axisCount) {
+			// index array length does not match axisCount
+			String errMsg = "Index array length does not match axisCount";
+			logger.error(errMsg);
+			PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
+			throw pfe; 
+		}
+	
+
+		// Convert cell index to intersection object
+		Intersection intersection = createIntersection(index);
+		
+		// Check for valid intersection
+		Integer cellIndex = cellIndexMap.get(intersection);
+		if (cellIndex == null) {
+			String errMsg = "Unable to get data cache cell value for invalid intersection ["
+				+ StringUtils.arrayToString(intersection.getCoordinates()) + "]";
+			throw new IllegalArgumentException(errMsg);
+		}
+		
+		// Return intersection index
+		return cellIndex;
+	}
+
+	
 	/**
 	 *	Enter dimension member indexes into appropriate elements of the 
 	 *	data cache cell index, based on the dimension order found in the 
@@ -1112,27 +1260,35 @@ public abstract class PafDataCache implements IPafDataCache {
 		return cellIndex;
 	}
 
+	/**
+	 *	Return all the data cells in the data cache
+	 *
+	 * @return Returns an array containing all the data cells in the data cache.
+	 */
+	protected double[][][] getDataCells() {
+		return dataCells;
+	}
+	/**
+	 * @param dataCells the dataCells to set
+	 */
+	protected void setDataCells(double[][][] dataCells) {
+		this.dataCells = dataCells;
+	}
 
 	/**
 	 * @param dimIndexMap the dimIndexMap to set
 	 */
-	private void setDimIndexMap(Map<String, Integer> dimIndexMap) {
+	protected void setDimIndexMap(Map<String, Integer> dimIndexMap) {
 		this.dimIndexMap = dimIndexMap;
-	}
-
-	/**
-	 * @param indexedAxes the indexedAxes to set
-	 */
-	private void setIndexedAxes(int[] indexedAxes) {
-		this.indexedAxes = indexedAxes;
 	}
 
 	/**
 	 * @param indexedDimensions the indexedDimensions to set
 	 */
-	private void setIndexedDimensions(String[] indexedDimensions) {
+	protected void setIndexedDimensions(String[] indexedDimensions) {
 		this.indexedDimensions = indexedDimensions;
 	}
+
 	/**
 	 * @return Returns the lockedPeriods.
 	 */
@@ -1264,15 +1420,6 @@ public abstract class PafDataCache implements IPafDataCache {
 	 */
 	public String getTimeDim() {
 		return appDef.getMdbDef().getTimeDim();
-	}
-
-	/**
-	 *	Return the number of members in the Time dimension
-	 *
-	 * @return The number of members in the Time dimension
-	 */
-	public int getTimeSize() {
-		return getAxisSize(getTimeAxis());
 	}
 
 	/**
@@ -1507,7 +1654,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @return PafDataCache
 	 * @throws PafException 
 	 */
-	public void loadCacheCells(final PafDataCache sourceCache) throws PafException  {
+	public void loadCacheCells(final PafDataCacheOLD sourceCache) throws PafException  {
 		loadCacheCells(sourceCache, null);
 	}
 
@@ -1520,7 +1667,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @return PafDataCache
 	 * @throws PafException 
 	 */
-	public void loadCacheCells(final PafDataCache sourceCache, final Map<String, List<String>> memberFilter) throws PafException  {
+	public void loadCacheCells(final PafDataCacheOLD sourceCache, final Map<String, List<String>> memberFilter) throws PafException  {
 
 		Map<String, List<String>> generatedMemberFilter = new HashMap<String, List<String>>();
 
@@ -1574,15 +1721,15 @@ public abstract class PafDataCache implements IPafDataCache {
 			int[] cacheIndex = cacheIterator.getNext();
 			String[] sourceCacheIndex;
 			sourceCacheIndex = indexToMembers(cacheIndex);
-//			try {
+			try {
 				setCellValue(cacheIndex, sourceCache.getCellValue(sourceCacheIndex));
-//			} catch (PafException pfe) {
-//				// Problem encountered with source cache index
-//				String errMsg = "Unable to load data into DESTINATION data cache - requested member don't exist in SOURCE data cache.";
-//				logger.error(errMsg);
-//				errMsg = pfe.getMessage() + "  --- " + errMsg;
-//				throw new PafException(errMsg, PafErrSeverity.Error);
-//			}
+			} catch (PafException pfe) {
+				// Problem encountered with source cache index
+				String errMsg = "Unable to load data into DESTINATION data cache - requested member don't exist in SOURCE data cache.";
+				logger.error(errMsg);
+				errMsg = pfe.getMessage() + "  --- " + errMsg;
+				throw new PafException(errMsg, PafErrSeverity.Error);
+			}
 		}
 	}
 
@@ -2035,43 +2182,54 @@ public abstract class PafDataCache implements IPafDataCache {
 	 *	Convert an array of member names to array of index values
 	 *
 	 * @param members Array of members that define a single cell intersection
+	 * 
 	 * @return Returns a data cache cell index.
+	 * @throws PafException 
 	 */
-	private int[] membersToIndex(String[] members) {
+	private int[] membersToIndex(String[] members) throws PafException {
 
 		int[] cellIndex = null;
 		String member = null;
 
-		// Validate the the members array is not null
-		if (members == null) {
-			String errMsg = "Member array to index conversion error - member array is null";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
-
-		// Validate that the array is the proper size
-		if (members.length != axisCount) {
-			// array length does not match axisCount
-			String errMsg = "Member array to index conversion error - member array length ["  
-				+ members.length + "] - does not match axisCount [" + axisCount + "]";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
-
-		// Compute cell index
-		cellIndex = new int[axisCount];
-		for (int i = 0; i < axisCount; i++) {
-			member = members[i];
-			if (member == null) {
-				String errMsg = "Member array to index conversion error - member corresponding to [" + 
-				allDimensions[i] + "] dimension (axis [" + i + "]) is null";
+		try {
+			// Validate the the members array is not null
+			if (members == null) {
+				String errMsg = "Member array to index conversion error - member array is null";
 				logger.error(errMsg);
 				IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-				throw iae;          			
+				throw iae; 
 			}
-			cellIndex[i] = getMemberIndex(member, i);
+
+			// Validate that the array is the proper size
+			if (members.length != axisCount) {
+				// array length does not match axisCount
+				String errMsg = "Member array to index conversion error - member array length ["  
+					+ members.length + "] - does not match axisCount [" + axisCount + "]";
+				logger.error(errMsg);
+				IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
+				throw iae; 
+			}
+
+			// Compute cell index
+			cellIndex = new int[axisCount];
+			for (int i = 0; i < axisCount; i++) {
+				member = members[i];
+				if (member == null) {
+					String errMsg = "Member array to index conversion error - member corresponding to [" + 
+					allDimensions[i] + "] dimension (axis [" + i + "]) is null";
+					logger.error(errMsg);
+					IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
+					throw iae;          			
+				}
+				cellIndex[i] = getMemberIndex(member, i);
+			}
+
+		} catch (Exception ex) {
+			// throw Paf Exception
+			String errMsg = ex.getMessage();
+			logger.error(errMsg);
+			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
+			throw pfe;
 		}
 
 		return cellIndex;
@@ -2187,7 +2345,7 @@ public abstract class PafDataCache implements IPafDataCache {
 		boolean isFound = false;
 
 		// Look for intersection
-		if (this.dataBlockIndexMap.containsKey(intersection)) {
+		if (this.cellIndexMap.containsKey(intersection)) {
 			isFound = true;
 		}
 
@@ -2271,24 +2429,26 @@ public abstract class PafDataCache implements IPafDataCache {
 
 
 	/*
-	 *	Represent the DataCache as a 2-dimensional array of data cells
+	 *	Represent the PafUowCache as a 2-dimensional array of data cells
 	 *
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
 
 		int measureSize = getMeasureSize();
-		int timeSize = getTimeSize();
+		int memberCombinations = getIndexedMemberCombinations();
+		@SuppressWarnings("unused") int rowCount = getRowCount();
+		int versionSize = getVersionSize();
 		StringBuffer stringBuffer = new StringBuffer("\n");	
 		String format = "%#11.2f\t";
 
-		for (double[][] dataBlock : dataBlockPool) {
+		for (int versionIndex = 0; versionIndex < versionSize; versionIndex++) {
 			for (int measureIndex = 0; measureIndex < measureSize; measureIndex++ ) {
-				for (int timeIndex = 0; timeIndex < timeSize; timeIndex++ ) {
-					stringBuffer.append(String.format(format, dataBlock[measureIndex][timeIndex]));
+				for (int indexedMemberIndex = 0; indexedMemberIndex < memberCombinations; indexedMemberIndex++ ) {
+					stringBuffer.append(String.format(format, dataCells[versionIndex][measureIndex][indexedMemberIndex]));
 				}
-				stringBuffer.append("\n");
 			}
+			stringBuffer.append("\n");
 		}
 		return stringBuffer.toString();
 	}
