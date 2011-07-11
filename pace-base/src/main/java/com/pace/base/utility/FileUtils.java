@@ -181,6 +181,29 @@ public class FileUtils {
 	}
 	
 	/**
+	 * Deletes a file
+	 * @param file string representation of a file.
+	 */
+	public static void deleteFile(String file) {
+
+		if (file != null) {
+			
+			File fileToDelete = new File(file);
+			
+			if(fileToDelete != null && fileToDelete.isFile()){
+
+				fileToDelete.delete();
+				
+				logger.info("Deleted file: " + file);
+
+			}
+
+		}
+
+	}
+	
+	
+	/**
 	 * Deletes an array of files.
 	 * @param directory Directory that contains the files.
 	 * @param filesToDelete Array files to delete.
@@ -424,6 +447,54 @@ public class FileUtils {
 		
 	}
 	
+	/**
+	 * 
+	 *  Creates a new temp file.  The name of the directory is 
+	 *  dynamically created based of of the date.
+	 *
+	 * @return a file instance of the temp file created
+	 */
+	public static String createTempFile(String extension) {
+		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
+		return createTempFile(systemTempDir, extension);
+		
+	}
+	
+	/**
+	 * 
+	 *  Creates a new directory.  The name of the directory is 
+	 *  dynamically created based of of the date.
+	 *
+	 * @return a file instance of the temp directory created
+	 */
+	public static String createTempFile(File parentDir, String extension) {
+		
+		//if parent dir is not null, check to see if exists.  If not, create
+		if ( parentDir != null ) {
+			
+			if ( ! parentDir.exists() ) {
+			
+				parentDir.mkdir();
+				
+				if ( ! parentDir.exists() ) {
+					
+					logger.warn("Could not create directory '" + parentDir.toString() + "'. Current directory will be used instead.");
+					
+				}
+				
+			}			
+		}
+		
+		Random rand = new Random();
+		int randomInt = 1 + rand.nextInt();
+		String dynamicFileName = new Long((new Date()).getTime()).toString();
+		
+		dynamicFileName = parentDir + File.separator + randomInt + dynamicFileName + extension;
+		
+		logger.info("returning temp file: '" + dynamicFileName + "'");
+		
+		return dynamicFileName;
+	}
 	
 	/**
 	 * 

@@ -19,6 +19,7 @@
 package com.pace.base.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -32,6 +33,7 @@ import com.pace.base.PafException;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.utility.FileUtils;
+import com.pace.base.utility.PafZipUtil;
 
 /**
  * Class_description_goes_here
@@ -488,6 +490,210 @@ public class ZipPaceProjectTest extends TestCase {
 		
 	}
 	
+    public void testProjectUpgrade1210ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace1210.paf");
+		
+	}
+    
+    public void testProjectUpgrade2000ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2000.paf");
+		
+	}
+    
+    public void testProjectUpgrade2010ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2010.paf");
+		
+	}
+    
+    public void testProjectUpgrade2020ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2020.paf");
+		
+	}
+    
+    public void testProjectUpgrade2021ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2021.paf");
+		
+	}
+    
+    public void testProjectUpgrade2030ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2030.paf");
+		
+	}
+    
+    public void testProjectUpgrade2031ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2031.paf");
+		
+	}
+    
+    public void testProjectUpgrade2032ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2032.paf");
+		
+	}
+    
+    public void testProjectUpgrade2200ToCurrent(){
+		
+    	loadUpgradeAndTestProject("./test_files/pace2200.paf");
+		
+	}
+	
+	public void testProjectUpgrade2400ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2400.paf");
+		
+	}
+	
+	public void testProjectUpgrade2410ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2410.paf");
+		
+	}
+	
+	public void testProjectUpgrade2420ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2420.paf");
+		
+	}
+	
+	public void testProjectUpgrade2430ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2430.paf");
+		
+	}
+	
+	public void testProjectUpgrade2440ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2440.paf");
+		
+	}
+	
+	public void testProjectUpgrade2600ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2600.paf");
+		
+	}
+	
+	public void testProjectUpgrade2601ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2601.paf");
+		
+	}
+	
+	public void testProjectUpgrade2602ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2602.paf");
+		
+	}
+	
+	public void testProjectUpgrade2610ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2610.paf");
+		
+	}
+	
+	public void testProjectUpgrade2800ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2800.paf");
+		
+	}
+	
+	public void testProjectUpgrade2810ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2810.paf");
+		
+	}
+	
+	
+	public void testProjectUpgrade2811ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2811.paf");
+		
+	}
+	
+	public void testProjectUpgrade2820ToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/pace2820.paf");
+		
+	}
+	
+	public void testProjectUpgradeCatLiteSafewayToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/CatLiteSafeway.paf");
+		
+	}
+	
+	public void testProjectUpgradeMerchPlanAafesToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/MerchPlnAAFES.paf");
+		
+	}
+	
+	public void testProjectUpgradeTestProjectToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/TestProject.paf");
+		
+	}	
+	public void loadUpgradeAndTestProject(String path){
+		
+		//convert project
+		PaceProject tempPaceProject = null;
+		
+		try {
+			tempPaceProject = new ZipPaceProject(path, null, true);
+		} catch (InvalidPaceProjectInputException e) {
+			fail(e.getMessage());
+		} catch (PaceProjectCreationException e) {
+			fail(e.getMessage());
+		}
+		
+		assertNotNull(tempPaceProject);
+		assertEquals(0, tempPaceProject.getProjectErrorList().size());
+		
+		
+		PaceProject zp = (ZipPaceProject) tempPaceProject.convertTo(ProjectSerializationType.PAF);
+		String tempFile = FileUtils.createTempFile(".paf");
+		
+		try {
+			zp.saveTo(tempFile);
+		} catch (ProjectSaveException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		//Test converted project.
+		File tempDir = FileUtils.createTempDirectory();
+		
+		try {
+			PafZipUtil.unzipFile(tempFile, tempDir.toString());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+		
+		try {
+			pp = new XMLPaceProject(tempDir.toString(), false);
+		} catch (InvalidPaceProjectInputException e) {
+			fail(e.getMessage());
+		} catch (PaceProjectCreationException e) {
+			fail(e.getMessage());
+		}
+		
+		assertNotNull(pp);
+		assertEquals(0, pp.getProjectErrorList().size());
+		
+
+		FileUtils.deleteDirectory(tempDir);
+		
+		FileUtils.deleteFile(tempFile);
+
+	}
 	
 	
 }

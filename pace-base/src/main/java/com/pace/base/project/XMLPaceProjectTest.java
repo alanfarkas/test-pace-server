@@ -527,6 +527,20 @@ public class XMLPaceProjectTest extends TestCase {
 		assertNotNull(pp);
 		assertEquals(0, pp.getProjectErrorList().size());
 		
+		
+		
+		try {
+			pp = new XMLPaceProject(tempDir.toString(), false);
+		} catch (InvalidPaceProjectInputException e) {
+			fail(e.getMessage());
+		} catch (PaceProjectCreationException e) {
+			fail(e.getMessage());
+		}
+		
+		assertNotNull(pp);
+		assertEquals(0, pp.getProjectErrorList().size());
+		
+		
 		FileUtils.deleteDirectory(tempDir);
 		
 	}
