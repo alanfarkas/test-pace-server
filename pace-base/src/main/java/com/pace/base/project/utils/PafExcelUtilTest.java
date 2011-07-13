@@ -25,7 +25,7 @@ public class PafExcelUtilTest extends TestCase {
 
 	private static Logger logger = Logger.getLogger(PafExcelUtilTest.class);
 	
-	String emptyWorkbookName = "./test_files/emptyWorkbook.xlsx";
+	String emptyWorkbookName = "./test_files/EmptyWorkbook.xlsx";
 	
 	String sampleWorkbookName = "./test_files/Sample.xlsx";
 	
