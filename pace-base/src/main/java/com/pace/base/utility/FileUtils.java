@@ -374,17 +374,17 @@ public class FileUtils {
 		
 	}
 	
-	/**
-	 * 
-	 *  Creates a new temporary directory in the temp directory specified by "java.io.tmpdir"
-	 *  The name of the directory is dynamically created based of of the date.
-	 *
-	 * @return a file instance of the temp directory created
-	 */
-	public static File createSystemTempDirectory() {
-		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
-		return createTempDirectory(systemTempDir);
-	}
+//	/**
+//	 * 
+//	 *  Creates a new temporary directory in the temp directory specified by "java.io.tmpdir"
+//	 *  The name of the directory is dynamically created based of of the date.
+//	 *
+//	 * @return a file instance of the temp directory created
+//	 */
+//	public static File createSystemTempDirectory() {
+//		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
+//		return createTempDirectory(systemTempDir);
+//	}
 	
 	/**
 	 * 
@@ -412,7 +412,7 @@ public class FileUtils {
 		}
 		
 		Random rand = new Random();
-		int randomInt = 1 + rand.nextInt();
+		int randomInt = 1 + rand.nextInt(Integer.MAX_VALUE);
 		String dynamicDirName = new Long((new Date()).getTime()).toString();
 		
 		dynamicDirName = "pace-" + randomInt + dynamicDirName;
@@ -455,7 +455,7 @@ public class FileUtils {
 	 * @return a file instance of the temp file created
 	 */
 	public static String createTempFile(String extension) {
-		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
+		File systemTempDir = getSystemTempDirectory();
 		return createTempFile(systemTempDir, extension);
 		
 	}
@@ -497,14 +497,24 @@ public class FileUtils {
 	}
 	
 	/**
-	 * 
-	 *  Creates a new directory.  The name of the directory is 
-	 *  dynamically created based of of the date.
+	 *  Gets the temporary directory specified by "java.io.tmpdir"
+	 *
+	 * @return a file instance
+	 */
+	public static File getSystemTempDirectory() {
+		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
+		return systemTempDir;
+		
+	}
+
+	/**
+	 *  Creates a new temporary directory in the temp directory specified by "java.io.tmpdir"
+	 *  The name of the directory is dynamically created based of of the date.
 	 *
 	 * @return a file instance of the temp directory created
 	 */
 	public static File createTempDirectory() {
-		File systemTempDir = new File(System.getProperty("java.io.tmpdir"));
+		File systemTempDir = getSystemTempDirectory();
 		return createTempDirectory(systemTempDir);
 		
 	}

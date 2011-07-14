@@ -35,7 +35,21 @@ import junit.framework.TestCase;
 
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
-import com.pace.base.app.*;
+import com.pace.base.app.AppSettings;
+import com.pace.base.app.CustomActionDef;
+import com.pace.base.app.DynamicMemberDef;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.MeasureType;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PafDimSpec;
+import com.pace.base.app.PafPlannerRole;
+import com.pace.base.app.PafUserSecurity;
+import com.pace.base.app.PlanCycle;
+import com.pace.base.app.Season;
+import com.pace.base.app.VersionDef;
+import com.pace.base.app.VersionFormula;
+import com.pace.base.app.VersionType;
+import com.pace.base.app.VersionVarianceType;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.db.membertags.MemberTagDef;
@@ -45,7 +59,13 @@ import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.utility.FileUtils;
 import com.pace.base.utility.PafZipUtil;
-import com.pace.base.view.*;
+import com.pace.base.view.HierarchyFormat;
+import com.pace.base.view.PafNumberFormat;
+import com.pace.base.view.PafStyle;
+import com.pace.base.view.PafUserSelection;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewGroup;
+import com.pace.base.view.PafViewSection;
 
 /**
  * Class_description_goes_here
@@ -58,29 +78,36 @@ public class ExcelPaceProjectTest extends TestCase {
 
 	private static final String TEST_FILES = "." + File.separator + "test_files" + File.separator;
 	
+	private static final String TEST_FILES1 = FileUtils.getSystemTempDirectory().getAbsolutePath() + File.separator;
+	
 	private static final String TEST_FILES_PROJECT_TEMPLATE = "project-template";
 	
 	private static final String TEST_FILES_PROJECT_TEMPLATE_XLSX = TEST_FILES + TEST_FILES_PROJECT_TEMPLATE + PafBaseConstants.XLSX_EXT;
 	
-	private static final String TEST_FILES_PROJECT_TEMPLATE_XLSM = TEST_FILES + TEST_FILES_PROJECT_TEMPLATE + PafBaseConstants.XLSM_EXT;
+	//private static final String TEST_FILES_PROJECT_TEMPLATE_XLSM = TEST_FILES + TEST_FILES_PROJECT_TEMPLATE + PafBaseConstants.XLSM_EXT;
 	
-	private static final String TEST_FILES_PROJECT_WRITE_XLSX = TEST_FILES + "project-write.xlsx";
+	private static final String TEST_FILES_PROJECT_WRITE_XLSX = TEST_FILES1 + "project-write.xlsx";
 	
-	private static final String TEST_FILES_PROJECT_TESTING_XLSX = TEST_FILES + "project-test.xlsx";
+	//private static final String TEST_FILES_PROJECT_TESTING_XLSX = TEST_FILES + "project-test.xlsx";
 	
-	private static final String TEST_FILES_PROJECT_TESTING2_XLSX = TEST_FILES + "project-test222.xlsx";
+	private static final String TEST_FILES_PROJECT_TESTING2_XLSX = TEST_FILES1 + "project-test222.xlsx";
 	
-	private static final String TEST_FILES_PROJECT_TESTING2_XLSM = TEST_FILES + "project-test222.xlsm";
+	private static final String TEST_FILES_PROJECT_TESTING2_XLSM = TEST_FILES1 + "project-test222.xlsm";
 
 	private ExcelPaceProject excelPP = null;
 	
-	String paceTestFldr = PafBaseConstants.DN_PaceTestFldr + File.separator;
+	//String paceTestFldr = PafBaseConstants.DN_PaceTestFldr + File.separator;
 	
-	File testDir = new File(paceTestFldr);
+	//File testDir = new File(paceTestFldr);
+	
+	
+	File testDir = FileUtils.createTempDirectory();
 	
 	Set<ProjectElementId> projectElementIdSet;
 			
-	protected File tempDir = new File(PafBaseConstants.DN_PaceTestFldr+"2");
+	//protected File tempDir = new File(PafBaseConstants.DN_PaceTestFldr+"2");
+	
+	protected File tempDir = FileUtils.createTempDirectory();
 	
 	String tempDirName = null;
 	
@@ -2031,6 +2058,48 @@ public class ExcelPaceProjectTest extends TestCase {
 		} catch (ProjectSaveException e) {
 			fail(e.getMessage());
 		}
+
+	}
+	
+	public void testExcelProjectImport2811TitanProjectToCurrent(){
+		
+		ImportExcelFile("./test_files/2811-ExcelExport.xlsx", null);
+		
+	}	
+
+	public void testExcelProjectImportCatLite28xxToCurrent(){
+	
+		ImportExcelFile("./test_files/CatLite-project-xml-28xx.xlsx", null);
+	
+	}	
+	
+	public void testExcelProjectImportKatz28xxToCurrent(){
+		
+		ImportExcelFile("./test_files/2811-KatzExcelExport.xlsx", null);
+	
+	}	
+	
+	private void ImportExcelFile(String importPathFileName, Set<ProjectElementId> filter) {
+		
+		ExcelPaceProject epp = null;
+
+		//create an Excel Pace Project.
+		try {
+			epp = new ExcelPaceProject(importPathFileName, filter);
+		} catch (InvalidPaceProjectInputException e) {
+			fail(e.getMessage());
+		} catch (PaceProjectCreationException e) {
+			fail(e.getMessage());
+		}
+		
+		assertNotNull(epp);
+		assertEquals(0, epp.getProjectErrorList().size());
+
+			
+		PaceProject paceProject = epp.convertTo(ProjectSerializationType.XML);
+		
+		assertNotNull(paceProject);
+		assertEquals(0, paceProject.getProjectErrorList().size());
 
 	}
 	
