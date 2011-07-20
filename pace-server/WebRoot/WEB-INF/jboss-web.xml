@@ -5,13 +5,13 @@
 
 
 	<class-loading java2ClassLoadingCompliance="false">	
- 	<loader-repository>
- 	com.pace:loader=MyClassLoader
- 	<loader-repository-config>java2ParentDelegation=false</loader-repository-config>
- 	</loader-repository>
+	 	<loader-repository>
+		 	com.pace:loader=pace.war
+		 	<loader-repository-config>java2ParentDelegation=false</loader-repository-config>
+	 	</loader-repository>
  	</class-loading>
 
- 	
+  
  </jboss-web>  
 
 

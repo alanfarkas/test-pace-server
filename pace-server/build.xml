@@ -269,7 +269,7 @@
 	<target name="make-war" depends="libraries">
 		<echo>"Making war"</echo>		
 	    <mkdir dir="${proj_root}\dist"/>
-	    <war destfile="${proj_root}\dist\pace.war" basedir="${local_web}" webxml="${local_web}\WEB-INF\web.xml"  />
+	    <war destfile="${proj_root}\dist\pace.war" basedir="${dev_web}" webxml="${dev_web}\WEB-INF\web.xml"  />
 	</target>			
 	
 	<target name="stage-installation" depends="make-war, update-all-config">

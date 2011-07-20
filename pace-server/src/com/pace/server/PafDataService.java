@@ -1934,12 +1934,13 @@ public class PafDataService {
 //		memberIndexLists.clear();
 	}
 
+
 	public IMdbMetaData getMetaDataProvider(IPafConnectionProps connectionProps) {
 
 		IMdbMetaData mdbProvider = null;
 
 		try {
-
+			@SuppressWarnings("rawtypes")
 			Constructor C = Class.forName(connectionProps.getMetaDataServiceProvider()).getConstructor(new Class[] {Properties.class} );
 
 			mdbProvider = (IMdbMetaData) C.newInstance(new Object[] { connectionProps.getProperties() } );
@@ -1964,6 +1965,7 @@ public class PafDataService {
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block
+			e.getTargetException().printStackTrace();
 			e.printStackTrace();
 		}
 

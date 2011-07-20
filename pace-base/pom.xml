@@ -14,6 +14,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <issueManagement>
+  	<system>Jira</system>
+  	<url>http://ams.pace-planning.com/jira</url>
+  </issueManagement>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

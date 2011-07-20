@@ -21,7 +21,6 @@
 	    <jar jarfile="${dist}/pace-base.jar" basedir="${bin}"/>
 		
 		<echo>"Deploying Jar file to local web server"</echo>
-		<copy todir="${server_proj_root}\WebRoot\web-inf\lib" file = "${dist}/pace-base.jar"/> 	
 		<copy todir="${server_proj_root}\client\dist" file = "${dist}/pace-base.jar"/> 			
 	</target>
 </project>
