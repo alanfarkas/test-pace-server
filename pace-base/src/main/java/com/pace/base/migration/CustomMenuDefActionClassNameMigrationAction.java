@@ -39,7 +39,7 @@ import com.pace.base.utility.FileUtils;
  **/
 public class CustomMenuDefActionClassNameMigrationAction extends MigrationAction {
 	
-	private static Logger logger = Logger.getLogger(CustomMenuDefActionClassNameMigrationAction.class);
+	private static final Logger logger = Logger.getLogger(CustomMenuDefActionClassNameMigrationAction.class);
 
 	private static final String SEARCH_NS_1 = "com.palladium.paf.cc";
 

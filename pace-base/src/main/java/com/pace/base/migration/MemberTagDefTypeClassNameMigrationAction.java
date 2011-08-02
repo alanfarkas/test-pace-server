@@ -32,7 +32,7 @@ import com.pace.base.utility.FileUtils;
  **/
 public class MemberTagDefTypeClassNameMigrationAction extends MigrationAction {
 	
-	private static Logger logger = Logger.getLogger(MemberTagDefTypeClassNameMigrationAction.class);
+	private static final Logger logger = Logger.getLogger(MemberTagDefTypeClassNameMigrationAction.class);
 
 	private static final String SEARCH_FOR = " class=\"com.palladium.paf.db.membertags.MemberTagType\"";
 

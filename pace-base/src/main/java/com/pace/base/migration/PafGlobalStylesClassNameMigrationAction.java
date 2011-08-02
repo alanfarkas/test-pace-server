@@ -23,7 +23,7 @@ import com.pace.base.view.PafStyle;
 public class PafGlobalStylesClassNameMigrationAction extends MigrationAction {
 
 	
-	private static Logger logger = Logger
+	private static final Logger logger = Logger
 	.getLogger(PafGlobalStylesClassNameMigrationAction.class);
 
 	

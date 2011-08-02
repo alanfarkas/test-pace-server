@@ -45,7 +45,7 @@ import com.pace.base.utility.FileUtils;
  */
 public class PafPlannerConfigMigrationAction extends MigrationAction {
 
-	private static Logger logger = Logger
+	private static final Logger logger = Logger
 	.getLogger(PafPlannerConfigMigrationAction.class);
 	
 	private static Set<String> filterSet = new HashSet<String>();

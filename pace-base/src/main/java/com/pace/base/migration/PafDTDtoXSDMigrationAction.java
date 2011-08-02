@@ -30,7 +30,7 @@ import com.pace.base.utility.PafXStream;
  */
 public class PafDTDtoXSDMigrationAction extends MigrationAction {
 
-	private static Logger logger = Logger.getLogger(PafDTDtoXSDMigrationAction.class);
+	private static final Logger logger = Logger.getLogger(PafDTDtoXSDMigrationAction.class);
 		
 	private static final String DTD_HEADER_IDENT = "<!DOCTYPE";
 	

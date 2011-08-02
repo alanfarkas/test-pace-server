@@ -12,7 +12,7 @@ import com.pace.base.project.XMLPaceProject;
 public class PafMemberTagsMigrationAction extends MigrationAction {
 
 	
-	private static Logger logger = Logger.getLogger(PafMemberTagsMigrationAction.class);
+	private static final Logger logger = Logger.getLogger(PafMemberTagsMigrationAction.class);
 
 	
 	public PafMemberTagsMigrationAction(XMLPaceProject xmlPaceProject) {

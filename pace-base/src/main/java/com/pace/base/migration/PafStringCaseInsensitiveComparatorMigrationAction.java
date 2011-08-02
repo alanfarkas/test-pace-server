@@ -26,7 +26,7 @@ import com.pace.base.utility.FileUtils;
  */
 public class PafStringCaseInsensitiveComparatorMigrationAction extends MigrationAction {
 
-	private static Logger logger = Logger.getLogger(PafStringCaseInsensitiveComparatorMigrationAction.class);
+	private static final Logger logger = Logger.getLogger(PafStringCaseInsensitiveComparatorMigrationAction.class);
 		
 	private static final String SEARCH_FOR = "<comparator class=\"java.lang.String-CaseInsensitiveComparator\"/>";
 

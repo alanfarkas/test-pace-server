@@ -38,7 +38,7 @@ import com.pace.base.utility.FileUtils;
  **/
 public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 	
-	private static Logger logger = Logger.getLogger(CustomFunctionDefClassNameMigrationAction.class);
+	private static final Logger logger = Logger.getLogger(CustomFunctionDefClassNameMigrationAction.class);
 
 	private static final String SEARCH_NS_1 = "com.palladium.paf.cf";
 
@@ -129,10 +129,10 @@ public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 		for (CustomFunctionDef function : customFunctions) {
 			String s = null;
 			//if fill color is not null, migration hasn't started yet
-			if ( function.getClassName().contains(SEARCH_NS_1) ) {
+			if ( function.getClassName().substring(0, SEARCH_NS_1.length()).equalsIgnoreCase(SEARCH_NS_1) ) {
 				s = function.getClassName().replace(SEARCH_NS_1, REPLACE_NS_1);
 				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to '" + s + "'");
-			} else if(function.getClassName().contains(SEARCH_NS_2)){
+			} else if ( function.getClassName().substring(0, SEARCH_NS_2.length()).equalsIgnoreCase(SEARCH_NS_2) ) {
 				s = function.getClassName().replace(SEARCH_NS_2, REPLACE_NS_2);
 				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to '" + s + "'");
 			}
