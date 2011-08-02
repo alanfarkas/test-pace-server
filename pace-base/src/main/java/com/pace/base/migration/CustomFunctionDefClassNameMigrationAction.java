@@ -46,6 +46,7 @@ public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 	
 	private static final String SEARCH_NS_2 = "com.palladium.paf.funcs";
 	
+	private static final String REPLACE_NS_2 = "com.pace.base.funcs";
 	
 	public CustomFunctionDefClassNameMigrationAction(XMLPaceProject xmlPaceProject) {
 		this.xmlPaceProject = xmlPaceProject;
@@ -132,7 +133,7 @@ public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 				s = function.getClassName().replace(SEARCH_NS_1, REPLACE_NS_1);
 				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to '" + s + "'");
 			} else if(function.getClassName().contains(SEARCH_NS_2)){
-				s = function.getClassName().replace(SEARCH_NS_2, REPLACE_NS_1);
+				s = function.getClassName().replace(SEARCH_NS_2, REPLACE_NS_2);
 				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to '" + s + "'");
 			}
 			
