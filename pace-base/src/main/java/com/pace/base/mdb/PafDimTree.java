@@ -1578,6 +1578,23 @@ public abstract class PafDimTree {
     }
     
     /**
+     *  Converts a list of paf dim members to a list of member names
+     *  
+     * @param dimMembers List of paf dim members
+     * @return List of member names
+     */
+    public List<String> getMemberNames(List<PafDimMember> dimMembers) {
+    	
+    	List<String> memberList = new ArrayList<String>();
+    	for (PafDimMember dimMember : dimMembers) {
+    		memberList.add(dimMember.getKey());
+    	}
+    	
+    	return memberList;
+    }
+    
+    
+    /**
      *  Returns all the member aliases from the PafBaseTree using the 
      *  specified tree traversal method. This is a convenience method that 
      *  calls getMemberAliases(traversalOrder, aliasTableName) with the 

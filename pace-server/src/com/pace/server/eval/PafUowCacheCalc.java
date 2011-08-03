@@ -124,7 +124,7 @@ public abstract class PafUowCacheCalc {
 		long calcStart = 0, calcEnd = 0;
 		String versionDim = dataCache.getVersionDim();
 		String timeDim = dataCache.getTimeDim();
-		String[] activeVersions = dataCache.getActiveVersions();
+		String[] activeVersions = dataCache.getPlanVersions();
 		List<String> aggMembers = null;
 		Set<MeasureType> aggMeasureTypes = new HashSet<MeasureType>();
 		PafIntersectionIterator intersections = null;

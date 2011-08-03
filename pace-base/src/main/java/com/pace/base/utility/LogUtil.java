@@ -28,6 +28,6 @@ package com.pace.base.utility;
 public class LogUtil {
 
     public static String timedStep(String stepDesc, long startTime) {
-        return (stepDesc + " completed in " + (System.currentTimeMillis() - startTime) + " ms");
+        return (stepDesc + " completed in " + StringUtils.decimalFormat((System.currentTimeMillis() - startTime), "#,###") + " ms");
     }
 }

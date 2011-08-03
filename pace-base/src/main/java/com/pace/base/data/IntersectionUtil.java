@@ -50,10 +50,10 @@ public class IntersectionUtil {
         }
 
         // precalculate size of arraylist
-        long size = 1;
-        for (ArrayList list : memberArrays) {
-            size *= list.size();
-        }
+//        long size = 1;
+//        for (ArrayList list : memberArrays) {
+//            size *= list.size();
+//        }
         ArrayList<Intersection> intersections = new ArrayList<Intersection>();
         
         

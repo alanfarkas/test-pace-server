@@ -46,12 +46,16 @@ import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.PafDimSpec;
+import com.pace.base.app.UnitOfWork;
+import com.pace.base.data.Intersection;
 import com.pace.base.mdb.IMdbData;
 import com.pace.base.mdb.PafIntersectionIterator;
 import com.pace.base.mdb.PafUowCache;
 import com.pace.base.mdb.PafUowCacheParms;
 import com.pace.base.state.IPafClientState;
 import com.pace.base.state.PafClientState;
+import com.pace.base.utility.LogUtil;
+import com.pace.base.utility.Odometer;
 import com.pace.base.utility.StringUtils;
 
 /**
@@ -69,6 +73,7 @@ public class EsbData implements IMdbData{
 	private boolean useConnPool = false;
 	private final static String ESS_TEXT_FILE_SUFFIX = PafBaseConstants.ESS_TEXT_FILE_SUFFIX;
 	private static Logger logger = Logger.getLogger(EsbData.class);
+	private static Logger performanceLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_MDB_IO);
 	
 	
 	/**
@@ -90,7 +95,7 @@ public class EsbData implements IMdbData{
 		String esbConnAlias = "[" + connectionProps.getProperty("SERVER") + "/" 
 				+ connectionProps.getProperty("APPLICATION") + "/" 
 				+ connectionProps.getProperty("DATABASE") + "]";
-		logger.info("Creating instance of EsbData - Connection Alias: " 
+		logger.debug("Creating instance of EsbData - Connection Alias: " 
 				+ esbConnAlias + " - Use Connection Pool: " + useConnPool);
 		this.esbConnAlias = esbConnAlias;
 		this.connectionProps = connectionProps;
@@ -115,345 +120,334 @@ public class EsbData implements IMdbData{
 	 */
 	public EsbData(String esbConnAlias, boolean useConnPool ) {
 		
-		logger.info("Creating instance of EsbData - Connection Alias: " 
+		logger.debug("Creating instance of EsbData - Connection Alias: " 
 				+ esbConnAlias + " - Use Connection Pool: " + useConnPool);
 		this.esbConnAlias = esbConnAlias;
 		this.useConnPool = useConnPool;
 	}
 	
 
-	/** 
-	 *	Return a populated Data Cache based on the supplied UOW, and 
-	 *  Application Definition. This method is a convenience method for 
-	 *  getUowCache(expandedUow, activeVersions, lockedPeriods), where the 
-	 *  "lockedPeriods" parameter is set to an empty Hash Set.
-	 *
-	 * @param expandedUow Fully expanded unit of work
-	 * @param appDef Paf Application Definition
-	 * @param activeVersions Array containing the active planning versions
-	 * 
-	 * @return PafUowCache - Result set and corresponding meta-data
-	 * @throws PafException
-	 */
-	public PafUowCache getUowCache(Map<Integer, List<String>> expandedUow, PafApplicationDef appDef, String[] activeVersions) throws PafException {
-		return getUowCache(expandedUow, appDef, activeVersions, new HashSet<String>());		
-	}
 	
 	/** 
 	 *	Return a populated Data Cache based on the supplied UOW, and 
 	 *  Application Definition. 
 	 *
-	 * @param expandedUow Fully expanded unit of work
-	 * @param appDef Paf Application Definition
-	 * @param activeVersions Array containing the active planning versions
+	 * @param dataSpecByVersion Specifies the intersections to retrieve for each version
+	 * @param attributeDims Set of attribute dimension names 
+	 * @param clientState Client State
 	 * @param lockedPeriods List of locked reporting periods
 	 * 
 	 * @return PafUowCache - Result set and corresponding meta-data
 	 * @throws PafException
 	 */
-	public PafUowCache getUowCache(Map<Integer, List<String>> expandedUow, PafApplicationDef appDef, String[] activeVersions, Set<String> lockedPeriods) throws PafException {
+	public PafUowCache loadUowCache(Map<String, Map<Integer, List<String>>> dataSpecByVersion, String[] attributeDims, PafClientState clientState, Set<String> lockedPeriods) throws PafException {
 		
-		int axisCount = 0, mdxCellCount = 0, versionAxis = appDef.getMdbDef().getVersionAxis();
-		int[] axisSize = null, dimCount = null;
-		boolean[] isSlicerAxis = null;
-		String cubeViewName = null, versionDim = appDef.getMdbDef().getVersionDim();
-		String esbApp = null, esbDb = null;
-		String mdxFrom = null, mdxSelect = null, mdxQuery = null, mdxWhere = "";
-		String[] dimensions = null;
-		String[][] memberArray = null;
-			
-		EsbCubeView esbCubeView = null;
-		IEssMdAxis[] axes = null;
-		IEssMdDataSet essMdDataSet = null;
-		IEssMdMember[] essMdMembers = null;
+		//TODO migrate this method to the data service (or data cache) since the logic here is not specific to the Essbase provider
+//		int axisCount = 0;
+//		int[] axisSize = null;
+//		String[] uowDims = uowSpec.getDimensions();
+//		String[][] memberArray = null;
+		
+//		PafApplicationDef appDef = clientState.getApp();
 		PafUowCache dataCache = null;
-		PafUowCacheParms dataCacheParms = null;
+//		PafUowCacheParms dataCacheParms = null;
 		
 		
-		// Retrieve data
-		logger.info("Beginning data retrieval" ); 
-		try {
-			// Open a cube view
-			cubeViewName = "Paf View - " + esbConnAlias;
-			logger.info("Opening cube view: " + cubeViewName);   
-			esbCubeView = new EsbCubeView(cubeViewName,  connectionProps, useConnPool, false, false, true);				
-			
-			// Run MDX query with the "Dataless" option set to true. At this point only meta-data will be generated.
-			// The data will be returned in a separate call in which any versions containing formulas will be removed
-			// from the MDX query.
-			esbApp = esbCubeView.getEsbApp();
-			esbDb = esbCubeView.getEsbDb(); 
-			mdxSelect = buildMdxQuery(expandedUow, false);
-			mdxFrom = " FROM " + esbApp + "." + esbDb;
-			mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
-			logger.info("Running meta-data query: " + mdxQuery);
-			essMdDataSet = esbCubeView.runMdxQuery(mdxQuery, true, false, appDef.getEssNetTimeOut());
-			
-			// Determine basic result set statistics.
-			mdxCellCount = essMdDataSet.getCellCount();
-			axes = essMdDataSet.getAllAxes();
-			axisCount = axes.length;
-			logger.info("Axis count: " + axisCount);
-			
-			// Check for empty result set
-			if (axisCount == 0) {
-				// Throw Paf Exception
-				String errMsg = "Paf Exception: empty Mdx result set ";
-				logger.error(errMsg);
-				PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
-				throw pfe;
-			}
-			
-			// Determine axis statistics. 
-			logger.debug("Computing axis statistics..." );
-			axisSize = new int[axisCount];
-			dimCount = new int[axisCount];
-			dimensions = new String[axisCount];
-			isSlicerAxis = new boolean[axisCount];
-			memberArray = new String[axisCount][];
-			
-			// Cycle through each axis and gather axis statistics
-			for (int i = 0; i < axisCount; i++) {
-				
-				// Store the dimension that corresponds to each axis
-				essMdMembers = axes[i].getAllDimensions();
-				dimensions[i] = essMdMembers[0].getName();
-				logger.debug("Axis [" + i + "] Dimension: " + dimensions[i]);
-				
-				// Determine if we have a slicer axis
-				isSlicerAxis[i] = axes[i].isSlicerAxis();
-				if (isSlicerAxis[i]) {
-					// throw Paf Exception
-					String errMsg = "Mdx query validation error - not all dimensions in cube assigned to an axis";
-					logger.error(errMsg);
-					PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
-					throw pfe;
-				}
-				
-				// Determine the number of members in each axis
-				axisSize[i] = axes[i].getTupleCount();
-				logger.debug("Axis [" + i + "] Size: " + axisSize[i]);
-				
-				// Store the list of members in each axis
-				logger.debug("Getting member names for axis [" + i + "]");
-				String axisMembers[] = new String[axisSize[i]];
-				for (int j = 0; j < axisSize[i]; j++) {
-					essMdMembers = axes[i].getAllTupleMembers(j);
-					axisMembers[j] = essMdMembers[0].getName();
-				}
-				memberArray[i] = axisMembers;
-				
-				// Determine the number of Essbase dimensions in each axis
-				dimCount[i] = axes[i].getDimensionCount();
-				logger.debug("Axis [" + i + "] Dim Count: " + dimCount[i]);
-			}										
+		// B u i l d   a n d   l o a d   t h e   u n i t   o f   w o r k
+//		logger.info("Initializing UOW..." ); 
+//		dataCache = new PafUowCache(clientState, attributeDims, lockedPeriods);
+		
+//		// Parse out the dimensional specification in the expanded 
+//		// unit of work map
+//		axisCount = uowDims.length;
+//		axisSize = new int[axisCount];
+//		memberArray = new String[axisCount][];
+//		for (int axis = 0; axis < axisCount; axis++) {
+//			String[] members = uowSpec.getDimMembers(uowDims[axis]);
+//			memberArray[axis] = members;
+//			axisSize[axis] = members.length;
+//		}
+//
+//		//  Create a data cache conforming to the unit of work specification
+//		logger.debug("Inserting Essbase meta-data into PafUowCache...");
+//		dataCacheParms = new PafUowCacheParms();
+//		dataCacheParms.setAppDef(appDef);
+//		dataCacheParms.setActiveVersion(new String[]{clientState.getPlanningVersion().getName()});
+//		dataCacheParms.setLockedPeriods(lockedPeriods);
+//		dataCacheParms.setAxisCount(axisCount);
+//		dataCacheParms.setAxisSize(axisSize);
+//		dataCacheParms.setDimensions(uowDims);
+//		dataCacheParms.setMemberArray(memberArray);
+//		dataCache = new PafUowCache(dataCacheParms);
 
-			
-			// Extract Essbase meta-data into PafUowCache
-			logger.info("Inserting Essbase meta-data into PafUowCache...");
-			dataCacheParms = new PafUowCacheParms();
-			dataCacheParms.setAppDef(appDef);
-			dataCacheParms.setActiveVersion(activeVersions);
-			dataCacheParms.setLockedPeriods(lockedPeriods);
-			dataCacheParms.setAxisCount(axisCount);
-			dataCacheParms.setAxisSize(axisSize);
-			dataCacheParms.setIsSlicerAxis(isSlicerAxis);
-			dataCacheParms.setDimCountByAxis(dimCount);
-			dataCacheParms.setDimensions(dimensions);
-			dataCacheParms.setMemberArray(memberArray);
-			dataCacheParms.setMdxQuery(mdxQuery);
-			dataCache = new PafUowCache(dataCacheParms);
+		// Load the data cache with the required Essbase data
+//		refreshDataCache(dataCache, dataSpecByVersion);
 
-
-			// Extract Essbase data into PafUowCache. A custom Iterator object is used to 
-			// iterate through all the member intersections in the PafUowCache. The iterator 
-			// member intersection order corresponds exactly to the cell order in the MDX 
-			// result set. The only exception to this is are calculated versions, which
-			// won't be in the MDX result set at all.
-			logger.debug("Extracting Essbase data into PafUowCache...");   
-			Map<Integer, List<String>> dimMembers = new HashMap<Integer, List<String>>();
-			dimMembers.putAll(expandedUow);
-			mdxCellCount = 0;
-			
-			// Pull data by version
-			String[] versions = dataCache.getVersions();
-			for (String version:versions) {
-				
-				// Construct MDX query to pull data for selected version
-				dimMembers.put(versionAxis, Arrays.asList(new String[]{version}));
-				String dataQuery = buildMdxQuery(dimMembers, false);
-				
-				// Run update mdx query against Essbase, returning data for selected version
-				String updatedMdxQuery = dataQuery + mdxFrom + mdxWhere; 
-				logger.info("Running data query (for version " + version + "): " + updatedMdxQuery);
-				essMdDataSet = esbCubeView.runMdxQuery(updatedMdxQuery, appDef.getEssNetTimeOut());
-				mdxCellCount += essMdDataSet.getCellCount();
-				
-				// Populate data cache with Essbase data for selected version
-				int mdxCellIndex = 0;
-				Map<String, List<String>> versionFilter = new HashMap<String, List<String>>();
-				versionFilter.put(versionDim, Arrays.asList(new String[]{version}));
-				PafIntersectionIterator cellIterator = dataCache.getDataCellIterator(versionFilter);
-				while (cellIterator.hasNext()) { 
-					// Get next data cache cell Index
-					int[] dcCellIndex = cellIterator.getNext();
-					// Get next cell value - Replace #MISSING values with 0
-					double cellValue = (essMdDataSet.isMissingCell(mdxCellIndex)?  0 : essMdDataSet.getCellValue(mdxCellIndex));
-					mdxCellIndex++;
-					// Copy each MDX result cell into data cache
-					dataCache.setCellValue(dcCellIndex, cellValue);	
-				}
-			}
-			logger.info("\n[" + mdxCellCount + "] cells retrieved from Essbase.");            
-			logger.debug("Population of data cell array has been completed.");
-						
-		} catch (EssException esx) {
-			// throw Paf Exception
-			String errMsg = esx.getMessage();
-			logger.error(errMsg);
-			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, esx);	
-			throw pfe;
-		} catch (Exception ex) {
-			// throw Paf Exception
-			String errMsg = ex.getMessage();
-			logger.error(errMsg);
-			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
-			throw pfe;
-		} finally {
-			try {
-				// Close cube view
-				logger.info("Closing cube view...");            
-				if (esbCubeView != null) {
-					esbCubeView.disconnect();
-				}
-			} catch (PafException pfe) {
-				// throw Paf Exception
-				throw pfe;
-			}
-		}
-		logger.info("Returning Paf Data Cache");
+		
+		logger.debug("Returning Paf Data Cache");
 		return dataCache;
 	}
 	
+
 	/** 
-	 *	Refresh the specified uow cache from the mdb for the specified version filter.
-	 *  If the version filter is empty, then all uow cache versions will be refreshed.
+	 *	Refresh the data cache across any version listed in the version filter.
 	 *
-	 * @param uowCache Uow cache
-	 * @param expandedUow Expanded uow definition
+	 * 	Any refreshed version will first be initialized before the data is refreshed
+	 *  from the mdb using the supplided data specification. Any refreshed versions not 
+	 *  referneced in the data spec will be loaded as needed during view rendering or 
+	 *  evaluation.
+	 * 
+	 *  No data will be refreshed if the vesion filter is empty.
+	 *  
+	 * @param dataCache Uow cache
+	 * @param mdbDataSpec Specifies the data intersections to reload from Essbase, by version
 	 * @param versionFilter List of versions to refresh
+	 * 	  
+	 * @return List of updated versions
+	 * @throws PafException 
+	 */ 
+	public List<String> refreshDataCache(PafUowCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException {
+	
+		// Initialize refreshed versions
+		dataCache.clearVersionData(versionFilter);
+
+		// Reload specified data intersections
+		return updateUowCache(dataCache, mdbDataSpec);
+	}
+
+	/** 
+	 *	Update the data cache with mdb data for the specified versions. For
+	 * 	performance reasons, existing data blocks will not be updated.
+	 * 
+	 *  Any versions that need to be completely refreshed should be cleared before 
+	 *  calling this method.
+	 *
+	 *  No data will be refreshed if the vesion filter is empty.
+	 *  
+	 * @param dataCache Uow cache
+	 * @param expandedUow Expanded unit of work specification
+	 * @param versionFilter List of versions to refresh
+	 * 	  
+	 * @return List of updated versions
+	 * @throws PafException 
+	 */ 
+	public List<String> updateDataCache(PafUowCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException {
+	
+		// Exit if version filter is empty
+		if (versionFilter == null || versionFilter.isEmpty()) {
+			return new ArrayList<String>();
+		}
+		
+		// Create a data specification for each filtered version that specifies that
+		// all UOW data (for the filtered version) is loaded from the mdb.
+		int versionAxis = dataCache.getVersionAxis();
+		Map<String, Map<Integer, List<String>>> mdbDataSpec = new HashMap<String, Map<Integer, List<String>>>();
+		for (String version : versionFilter) {
+			Map<Integer, List<String>> expandedUowMap = expandedUow.getUowMap(); 
+			List<String> versionSpec = new ArrayList<String>(Arrays.asList(new String[]{version}));
+			expandedUowMap.put(versionAxis, versionSpec);
+			mdbDataSpec.put(version, expandedUowMap);
+		}
+		
+		// Update filtered versions
+		return updateUowCache(dataCache, mdbDataSpec);
+	}
+
+	/** 
+	 *	Update the data cache with mdb data for the intersections specified, by version.
+	 * 	For performance reasons, existing data blocks will not be updated.
+	 * 
+	 *  Any versions that need to be completely refreshed should be cleared before 
+	 *  calling this method.
+	 *
+	 *  No data will be loaded if the data specification is empty.
+	 *  
+	 * @param dataCache Uow cache
+	 * @param mdbDataSpec Specifies the intersections to retrieve from Essbse, by version
 	 * 
 	 * @return List of refreshed versions
 	 * @throws PafException
 	 */
-    public List<String> refreshDataCache(PafUowCache uowCache, Map<Integer, List<String>> expandedUow, List<String> versionFilter) throws PafException {
+    public List<String> updateUowCache(PafUowCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException {
 
-    	int mdxCellCount = 0, versionAxis = uowCache.getVersionAxis();
-		String cubeViewName = null, versionDim = uowCache.getVersionDim();
+    	int mdxCellCount = 0;
+		long loadDcStartTime = System.currentTimeMillis();
+		String cubeViewName = null;
 		String esbApp = null, esbDb = null;
 		String mdxFrom = null, mdxWhere = "";
+		String logMsg = null;
     
-		PafApplicationDef appDef = uowCache.getAppDef();
 		EsbCubeView esbCubeView = null;
-		IEssMdDataSet essMdDataSet = null;
+
+		// Exit if no data has been specified
+		if (mdbDataSpec == null || mdbDataSpec.size() == 0) {
+			logger.debug("UpdateDataCache() - empty data spec - no data loaded");
+			return new ArrayList<String>();
+		}
 		
-		// Retrieve data
-		logger.info("Beginning data retrieval" ); 
+		logger.info("Loading UOW from cube: " + esbConnAlias ); 
+
+		// Connect to Essbase Cube
+		cubeViewName = "Paf View - " + esbConnAlias;
+		logger.debug("Opening cube view: " + cubeViewName); 
+		long esbConnectStartTime = System.currentTimeMillis();
+		String stepDesc = "Connection to Essbase Cube: " + esbConnAlias;
+		esbCubeView = new EsbCubeView(cubeViewName,  connectionProps, useConnPool, false, false, true);	
+		logMsg = LogUtil.timedStep(stepDesc, esbConnectStartTime);
+		performanceLogger.info(logMsg);
+
+		// Extract Essbase data into data cache a version at a time.
+		logger.debug("Extracting Essbase data into DataCache...");   
+		mdxCellCount = 0;		
+		esbApp = esbCubeView.getEsbApp();
+		esbDb = esbCubeView.getEsbDb(); 
+		mdxFrom = " FROM " + esbApp + "." + esbDb;
+		Set<String> extractedVersions = mdbDataSpec.keySet();
+		for (String version: extractedVersions) {
+
+			// Filter out existing intersections - skip version, if no data to load
+			Map<Integer, List<String>> memberMap = mdbDataSpec.get(version);
+			Map<Integer, List<String>> filteredMemberMap = dataCache.getFilteredRefDataSpec(memberMap);
+			if (filteredMemberMap.isEmpty()) {
+				logMsg = "UpdateDataCache() - all requested data already exists - no data updated";
+				logger.debug(logMsg);
+				performanceLogger.info(logMsg);
+				continue;
+			}
+			
+			// Construct MDX select statement that will extract data for selected version,
+			// suppressing misssing intersection rows
+			String mdxSelect = buildMdxSelect(filteredMemberMap, true);
+			String mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
+
+			// Update data cache with Essbase data for selected version
+			int retrievedCells = loadCubeData(esbCubeView, mdxQuery, dataCache);
+			mdxCellCount += retrievedCells;
+
+		}
+		logMsg = "[" + StringUtils.commaFormat(mdxCellCount) + "] total cells retrieved from Essbase.";
+		logger.info(logMsg); 
+		logMsg = LogUtil.timedStep("UOW Load", loadDcStartTime);
+		logger.info(logMsg);
+		performanceLogger.info(logMsg);
+
+		// Close cube view
+		logger.debug("Closing cube view...");            
+		if (esbCubeView != null) {
+			esbCubeView.disconnect();
+		}
+
+		// Return list of retrieved versions
+		return new ArrayList<String>(extractedVersions);
+
+    }
+
+
+	/**
+	 * 	Extract Essbase data into the data cache
+	 * 
+	 * @param esbCubeView Essbase cube view that points to the cube being queried
+	 * @param mdxQuery MDX retrieval query
+	 * @param dataCache Data cache
+	 * 
+	 * @return Number of retrieved cells
+	 * @throws PafException 
+	 */
+	private int loadCubeData(EsbCubeView esbCubeView, String mdxQuery, PafUowCache dataCache) throws PafException {
+		
+		int axisCount = dataCache.getAxisCount(), retrievedCellCount = 0;
+		String dimensions[] = dataCache.getBaseDimensions();
+		String logMsg = null;
+		PafApplicationDef appDef = dataCache.getAppDef();
+		IEssMdAxis[] axes = null;
+		IEssMdDataSet essMdDataSet = null;
+		IEssMdMember[] essMdMembers = null;
+
+		// Extract Essbase data into data cache using MDX to query the data. Missing data is 
+		// suppressed to optimize retrieval time. 
+		// 
+		// The query will (almost always) return only a subset of the data intersections 
+		// defined to the data cache. However, the results of each MDX query to Essbase 
+		// contain meta-data that indicates which data intersections were retrieved. This 
+		// meta-data is used to define the member intersections to iterate through when 
+		// loading the retrieved data into the data cache.
+
 		try {
-			// Open a cube view
-			cubeViewName = "Paf View - " + esbConnAlias;
-			logger.info("Opening cube view: " + cubeViewName);   
-			esbCubeView = new EsbCubeView(cubeViewName,  connectionProps, useConnPool, false, false, true);				
-			
-			// Extract Essbase data into PafUowCache. A custom Iterator object is used to 
-			// iterate through all the member intersections in the PafUowCache. The iterator 
-			// member intersection order corresponds exactly to the cell order in the MDX 
-			// result set. The only exception to this is are calculated versions, which
-			// won't be in the MDX result set at all.
-			logger.debug("Extracting Essbase data into PafUowCache...");   
-			Map<Integer, List<String>> dimMembers = new HashMap<Integer, List<String>>();
-			dimMembers.putAll(expandedUow);
-			mdxCellCount = 0;
-			
-			// Get list of versions to pull. If no filtered versions specified, then
-			// pull all versions
-			String [] versions = null;
-			if (versionFilter.size() > 0) {
-				versions = versionFilter.toArray(new String[0]);
-			} else {
-				versions = uowCache.getVersions();
+			// Extract data from cube using supplied Mdx query
+			logger.debug("Running Essbse data query: " + mdxQuery);
+			performanceLogger.info("Running Essbse data query: " + mdxQuery);
+			essMdDataSet = esbCubeView.runMdxQuery(mdxQuery, appDef.getEssNetTimeOut());
+			long qryStartTime = System.currentTimeMillis();
+			retrievedCellCount = essMdDataSet.getCellCount();
+			logMsg = LogUtil.timedStep("Essbase data query", qryStartTime);
+			performanceLogger.info(logMsg);
+			logMsg = "Essbase data query returned " + StringUtils.decimalFormat(retrievedCellCount, "###,###,###") + " cells";
+			logger.debug(logMsg);
+			performanceLogger.info(logMsg);
+
+			// Exit method if no data was found
+			if (retrievedCellCount == 0) {
+				return 0;
 			}
-			
-			// Pull data by version
-			esbApp = esbCubeView.getEsbApp();
-			esbDb = esbCubeView.getEsbDb(); 
-			mdxFrom = " FROM " + esbApp + "." + esbDb;
-			for (String version:versions) {
-				
-				// Construct MDX query to pull data for selected version
-				dimMembers.put(versionAxis, Arrays.asList(new String[]{version}));
-				String dataQuery = buildMdxQuery(dimMembers, false);
-				
-				// Run update mdx query against Essbase, returning data for selected version
-				String updatedMdxQuery = dataQuery + mdxFrom + mdxWhere; 
-				logger.info("Running data query (for version " + version + "): " + updatedMdxQuery);
-				essMdDataSet = esbCubeView.runMdxQuery(updatedMdxQuery, appDef.getEssNetTimeOut());
-				mdxCellCount += essMdDataSet.getCellCount();
-				
-				// Populate data cache with Essbase data for selected version
-				int mdxCellIndex = 0;
-				Map<String, List<String>> versionFilterMap = new HashMap<String, List<String>>();
-				versionFilterMap.put(versionDim, Arrays.asList(new String[]{version}));
-				PafIntersectionIterator cellIterator = uowCache.getDataCellIterator(versionFilterMap);
-				while (cellIterator.hasNext()) { 
-					// Get next data cache cell Index
-					int[] dcCellIndex = cellIterator.getNext();
-					// Get next cell value - Replace #MISSING values with 0
-					double cellValue = (essMdDataSet.isMissingCell(mdxCellIndex)?  0 : essMdDataSet.getCellValue(mdxCellIndex));
-					mdxCellIndex++;
-					// Copy each MDX result cell into data cache
-					uowCache.setCellValue(dcCellIndex, cellValue);	
+
+			// Get list of retrieved members for each dimension
+			long dcLoadStartTime = System.currentTimeMillis();
+			axes = essMdDataSet.getAllAxes();
+			@SuppressWarnings("unchecked")
+			List<String>[] memberLists = new ArrayList[axisCount]; 
+			for (int i = 0; i < axisCount; i++) {
+				int memberCount = axes[i].getTupleCount();
+				ArrayList<String> memberList  = new ArrayList<String>(memberCount);
+				for (int j = 0; j < memberCount; j++) {
+					essMdMembers = axes[i].getAllTupleMembers(j);
+					memberList.add(essMdMembers[0].getName());
 				}
+				memberLists[i] = memberList;
 			}
-			logger.info("\n[" + mdxCellCount + "] cells retrieved from Essbase.");            
-			logger.debug("Population of data cell array has been completed.");
-						
+
+			// Populate data cache with retrieved Essbase data. Iterate through
+			// all data intersections retrieved from Essbase.
+			int mdxCellIndex = 0;
+			Odometer cellIterator = new Odometer(memberLists);
+			while (cellIterator.hasNext()) { 
+				// Load next data cache cell - Ignore #MISSING values
+				@SuppressWarnings("unchecked")
+				Intersection intersection = new Intersection(dimensions, (String[])cellIterator.nextValue().toArray(new String[0]));
+				// Ignore missing values
+				if (!essMdDataSet.isMissingCell(mdxCellIndex)) {
+					double cellValue = essMdDataSet.getCellValue(mdxCellIndex);
+					dataCache.setCellValue(intersection, cellValue);	
+				}
+				mdxCellIndex++;
+			}
+			logMsg = LogUtil.timedStep("Essbase data load", dcLoadStartTime);
+			performanceLogger.info(logMsg);
+
 		} catch (EssException esx) {
 			// throw Paf Exception
 			String errMsg = esx.getMessage();
 			logger.error(errMsg);
 			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, esx);	
 			throw pfe;
-		} finally {
-			try {
-				// Close cube view
-				logger.info("Closing cube view...");            
-				if (esbCubeView != null) {
-					esbCubeView.disconnect();
-				}
-			} catch (PafException pfe) {
-				// throw Paf Exception
-				throw pfe;
-			}
 		}
-		logger.info("Returning Paf Data Cache");
-		return versionFilter;
-    	
-    }
 
-    
+		// Return count of retrieved data cells
+		return retrievedCellCount;
+	}
+
+	
 	/**
-	 *	Build an Mdx query using the supplied list of dimension members.
+	 *	Build an MDX select statement using the supplied collection of dimension members.
 	 *
  	 * @param dimMembers A map containing a list of members for each axis
  	 * @param isNonEmptyFlagUsed Indicates that only "non empty" flag should be appended to MDX query
  	 *  	  
- 	 * @return Returns an Mdx query string that matches the specified dimensionality.
+ 	 * @return Returns an MDX select statement that matches the specified dimensionality.
 	 */
-	public String buildMdxQuery(Map<Integer, List<String>> dimMembers, Boolean isNonEmptyFlagUsed) {
+	public String buildMdxSelect(Map<Integer, List<String>> dimMembers, Boolean isNonEmptyFlagUsed) {
 
 		int axis = 0;
-		String mdxQuery = null;
+		String mdxSelect = null;
 		StringBuilder sb = new StringBuilder("SELECT ");
 
 		logger.debug("Building MDX Query...");
@@ -478,7 +472,7 @@ public class EsbData implements IMdbData{
 			throw iae;			
 		}
 				
-		// Build MDX Query
+		// Build MDX Select
 		for (axis = 0; axis < dimMembers.size(); axis++) {
 			List<String> memberList = dimMembers.get(axis);
 			
@@ -494,9 +488,9 @@ public class EsbData implements IMdbData{
 		}
 		sb.deleteCharAt(sb.lastIndexOf(","));
 		
-		// Return Mdx Query
-		mdxQuery = sb.toString();
-		return mdxQuery;
+		// Return MDX Select
+		mdxSelect = sb.toString();
+		return mdxSelect;
 
 	}
 
@@ -527,7 +521,7 @@ public class EsbData implements IMdbData{
 		float sendElapsed = 0;
 		long sendStart = 0, sendEnd = 0;
 		String dataFileName = null, dataFileShortName = null;
-		String[] activeVersions = dataCache.getActiveVersions();
+		String[] activeVersions = dataCache.getPlanVersions();
  		FileWriter dataLoadFile = null;
 		List<String> versionFilter = new ArrayList<String>();
 		Set<Integer> nonRowIndexes = new HashSet<Integer>();
@@ -807,7 +801,7 @@ public class EsbData implements IMdbData{
 			// from the MDX query.
 			esbApp = esbCubeView.getEsbApp();
 			esbDb = esbCubeView.getEsbDb(); 
-			mdxSelect = buildMdxQuery(expandedUOW, true);
+			mdxSelect = buildMdxSelect(expandedUOW, true);
 			mdxFrom = " FROM " + esbApp + "." + esbDb;
 			mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
 			logger.info("Running meta-data filter query: " + mdxQuery);
@@ -1251,5 +1245,6 @@ public class EsbData implements IMdbData{
 	public boolean isUseConnPool() {
 		return useConnPool;
 	}
+
 
 }

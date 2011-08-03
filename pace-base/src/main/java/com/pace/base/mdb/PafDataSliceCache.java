@@ -43,7 +43,6 @@ public class PafDataSliceCache extends PafDataCache {
 	private PafMVS pafMVS = null;
 	private PafDataCache uowCache = null;
 	private Boolean hasAttributes = null;
-	private String[] attributeDims = null;
 
 	// Lazy-loaded collection of component base member names, indexed by base member intersection
 	private Map<Intersection, List<String>> componentBaseMemberMap = new HashMap<Intersection, List<String>>();
@@ -70,9 +69,10 @@ public class PafDataSliceCache extends PafDataCache {
 		setHasAttributes(sliceCacheParms.getPafMVS().getViewSection().hasAttributes());
 		setAttributeDims(sliceCacheParms.getPafMVS().getViewSection().getAttributeDims());
 		setAppDef(uowCache.getAppDef());
-		setActiveVersions(uowCache.getActiveVersions());
+		setPlanVersions(uowCache.getPlanVersions());
 		setLockedPeriods(uowCache.getLockedPeriods());
 		setAllDimensions(sliceCacheParms.geDatatSliceCacheSpec().getDimensions());
+		setCoreDimensions(getAllDimensions());
 		setAxisCount(getAllDimensions().length);
 
 		// Create memberArray and axisSizes array
@@ -208,22 +208,6 @@ public class PafDataSliceCache extends PafDataCache {
 	 */
 	public Boolean hasAttributes() {
 		return hasAttributes;
-	}
-
-
-	/**
-	 * @return the attributeDims
-	 */
-	public String[] getAttributeDims() {
-		return attributeDims;
-	}
-
-
-	/**
-	 * @param strings the attributeDims to set
-	 */
-	private void setAttributeDims(String[] strings) {
-		this.attributeDims = strings;
 	}
 
 

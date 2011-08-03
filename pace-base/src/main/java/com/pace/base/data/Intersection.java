@@ -196,8 +196,7 @@ public class Intersection {
 	 * Generate a copy of this intersection comprised of only
 	 * the specified dimensions, in the specified order.
 	 * 
-	 * @param dimIndexes An array of indexes specifying the 
-	 * desired dimensions
+	 * @param dimIndexes An array of indexes specifying the desired dimensions
 	 * 
 	 * @return Intersection
 	 */
@@ -217,6 +216,45 @@ public class Intersection {
 		Intersection subIntersection = new Intersection(dimensions, coordinates);
 		
 		return subIntersection;
+	}
+
+	/**
+	 * Generate a truncated copy of this intersection 
+	 * for the specified number dimensions
+	 * 
+	 * @param dimCount The number of dimensions to carry over
+	 * to the intersection copy 
+	 * 
+	 * @return Intersection
+	 */
+	public Intersection createSubIntersection(int dimCount) {
+
+		String[] dimensions = new String[dimCount];
+		String[] coordinates = new String[dimCount];
+		
+		
+		// Create sub intersection
+		for (int i = 0; i < dimCount; i++) {
+			dimensions[i] = getDimensions()[i];
+			coordinates[i] = getCoordinates()[i];
+		}
+		Intersection subIntersection = new Intersection(dimensions, coordinates);
+		
+		return subIntersection;
+	}
+
+	/**
+	 * 	Return intersection size
+	 * 
+	 * @return Intersection size
+	 */
+	public int getSize() {
+		
+		int size = 0;
+		if (dimensions != null) {
+			size = dimensions.length;
+		}
+		return size;
 	}
 
 }

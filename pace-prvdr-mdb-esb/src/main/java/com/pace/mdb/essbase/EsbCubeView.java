@@ -109,7 +109,7 @@ public class EsbCubeView   {
 	 */
 	public EsbCubeView (String cubeViewName, Properties connectionProps, boolean useConnPool, boolean connPerOp, boolean useCluster, boolean readOnly) throws PafException {
 
-		logger.info("Creating instance of EsbCubeView");
+		logger.debug("Creating instance of EsbCubeView");
 		try {
 			// Get connection parameters for specified connection property string 
 			esbServer = connectionProps.getProperty("SERVER");

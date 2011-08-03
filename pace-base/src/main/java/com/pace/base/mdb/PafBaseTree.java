@@ -81,7 +81,7 @@ public class PafBaseTree extends PafDimTree {
      */
     public PafBaseTree(PafBaseMember root, String[] aliasTableNames, int initialCapacity, float loadFactor) {
         
-        logger.info ("Creating instance of PafBaseTree");
+        logger.debug ("Creating instance of PafBaseTree - root is: " + root);
 
         // Add root node to PafBaseTree
         setMembers(new HashMap<String,PafDimMember>(initialCapacity, loadFactor));

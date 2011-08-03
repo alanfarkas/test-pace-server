@@ -21,14 +21,16 @@ package com.pace.base.app;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.pace.base.data.PafMemberList;
 import com.pace.base.data.PafSimpleUow;
 
 /**
- * Holds a completely qualified multidiemnsional space.
+ * Holds a completely qualified multidimensional space.
  * Each dimension has a list of members associated with it.
  *
  * @version	x.xx
@@ -39,6 +41,7 @@ public class UnitOfWork{
     HashMap <String, String[]>dimMembers = new HashMap<String, String[]>();
     String[] dimensions; // this is kept to preserve the order or retrieval from the hashmap
     private HashMap<Integer, String> axisIndex = new HashMap<Integer, String>();
+    private HashMap<String, Integer> dimIndex = new HashMap<String, Integer>();
     
     public UnitOfWork() {
     }
@@ -49,6 +52,7 @@ public class UnitOfWork{
         int i = 0;
         for (PafMemberList memberList : simpleUow.getPafMemberEntries()) {
         	axisIndex.put(i, memberList.getDimName());
+        	dimIndex.put(memberList.getDimName(), i);
             dimensions[i++] = memberList.getDimName();
             dimMembers.put(memberList.getDimName(), memberList.getMemberNames());
         } 
@@ -59,8 +63,9 @@ public class UnitOfWork{
         
         int i =0;
         for (String dim : dimensions) {
-        	axisIndex.put(i++, dim);
-            dimMembers.put(dim, new String[] {dim});
+           	dimIndex.put(dim, i);
+           	axisIndex.put(i++, dim);
+           	dimMembers.put(dim, new String[] {dim});
         }
     }
     
@@ -73,7 +78,8 @@ public class UnitOfWork{
         int i =0;
         for (String dim : dimensions) {
         	axisIndex.put(i, dim);
-            dimMembers.put(dim, members[i++]);
+           	dimIndex.put(dim, i);
+           	dimMembers.put(dim, members[i++]);
         }
     }
     
@@ -83,7 +89,8 @@ public class UnitOfWork{
 		
         for (PafDimSpec pafDimSpec : pafDimSpecs) {
         	axisIndex.put(i, pafDimSpec.getDimension());
-            dimensions[i++] = pafDimSpec.getDimension();
+          	dimIndex.put(pafDimSpec.getDimension(), i);
+          	dimensions[i++] = pafDimSpec.getDimension();
             dimMembers.put(pafDimSpec.getDimension(), pafDimSpec.getExpressionList());
         }
 	}
@@ -93,6 +100,7 @@ public class UnitOfWork{
         
         int i =0;
         for (String dim : dimensions) {
+          	dimIndex.put(dim, i);
         	axisIndex.put(i++, dim);
             dimMembers.put(dim, new String[] {dim});
         }
@@ -190,4 +198,31 @@ public class UnitOfWork{
 		return emptyDimensions.toArray(new String[0]);
 	}
 
+	
+	/**
+	 *  Convert unit of work to a map
+	 *  
+	 * @return Map<Integer, List<String>>
+	 */
+	public Map<Integer, List<String>> getUowMap() {
+		
+		Map <Integer, List<String>> uowMap = new HashMap<Integer, List<String>>(axisIndex.size());
+		for (int axis = 0; axis < axisIndex.size(); axis++) {
+			String[] members = getDimMembers(axisIndex.get(axis)); 
+			List<String> memberList = new ArrayList<String>(Arrays.asList(members));
+			uowMap.put(axis, memberList);
+		}
+		return uowMap;
+		
+	}
+
+	/**
+	 * 	Return axis for specified dimension
+	 * 
+	 * @param dimension Uow Dimension
+	 * @return Axis number
+	 */
+	public Integer getDimIndex(String dimension) {
+		return dimIndex.get(dimension);
+	}
 }

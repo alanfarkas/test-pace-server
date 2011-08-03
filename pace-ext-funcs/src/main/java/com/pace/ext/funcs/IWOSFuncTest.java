@@ -29,11 +29,12 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
-import com.pace.base.comm.ClientInitRequest;
+import com.pace.base.app.UnitOfWork;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDataCache;
+import com.pace.base.mdb.PafUowCache;
 import com.pace.base.mdb.testCommonParms;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
@@ -53,7 +54,10 @@ public class IWOSFuncTest extends TestCase {
     private static String[] activeVersions = testCommonParms.getActiveVersions();
 	private PafApplicationDef appDef = testCommonParms.getAppDef();
 	private Properties props = testCommonParms.getConnectionProps();
-	private Map<Integer, List<String>> uowSpec = testCommonParms.getExpandedUow();
+	private UnitOfWork uowSpec = testCommonParms.getUowSpec();
+	private Map<String, Map<Integer, List<String>>> dataSpecByVersion = testCommonParms.getDataSpecByVersion(uowSpec.getUowMap(), appDef);
+	private String[] uowDims = testCommonParms.getUowDims();
+	private PafClientState clientState = testCommonParms.getClientState();
 	private static Logger logger = Logger.getLogger(IWOSFuncTest.class);
 	
 	/*
@@ -73,7 +77,6 @@ public class IWOSFuncTest extends TestCase {
 		PafDataCache dataCache = null;
 		EvalState evalState = null;
 		IWOSFunc iwosFunc = new IWOSFunc();
-		PafClientState clientState = null;
 		
 		logger.info("***************************************************");
 		logger.info(this.getName() +  " - Test Started");
@@ -81,8 +84,9 @@ public class IWOSFuncTest extends TestCase {
 			
 			// Get data
 			logger.info("Getting essbase data");
-			EsbData esbData = new EsbData(props);		
-			dataCache = esbData.getUowCache(uowSpec, appDef, activeVersions);
+			EsbData esbData = new EsbData(props);	
+			dataCache = new PafUowCache(clientState);
+			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
 			measureDim = dataCache.getMeasureDim();
 			timeDim = dataCache.getTimeDim();
 			

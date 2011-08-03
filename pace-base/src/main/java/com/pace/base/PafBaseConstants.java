@@ -245,6 +245,19 @@ public class PafBaseConstants {
 	public static final String VIEW_PAGE_ORIENTATION_LANDSCAPE = "Landscape";
 	public static final String VIEW_PAGE_ORIENTATION_PORTRAIT = "Portrait";
 
+	//performance logging statistic constants
+	public static final String PERFORMANCE_LOGGER_AUTH = "pace.performance.authentication";
+	public static final String PERFORMANCE_LOGGER_CELLNOTES_IO = "pace.performance.cellnotes.io";
+	public static final String PERFORMANCE_LOGGER_DC = "pace.performance.datacache";
+	public static final String PERFORMANCE_LOGGER_EVAL = "pace.performance.eval";
+	public static final String PERFORMANCE_LOGGER_MBRTAGS_IO = "pace.performance.membertags.io";
+	public static final String PERFORMANCE_LOGGER_MDB_IO = "pace.performance.mdb.io";
+	public static final String PERFORMANCE_LOGGER_VIEW_RNDR = "pace.performance.view.render";
+	public static final String PERFORMANCE_LOGGER_UOW_LOAD = "pace.performance.uow.load";
+	
+
+	
+	
 	/**
 	 * 
 	 *  Generates the namespace line for xml validation

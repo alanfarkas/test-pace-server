@@ -697,7 +697,7 @@ public class PafServiceProvider implements IPafService {
 			clientState.setMemberIndexLists(memberIndexLists);
 			
 			// Load data cache based on unit of work
-			dataService.loadUowCache(clientState, app, clientState.getUnitOfWork());
+			dataService.loadUowCache(clientState);
 			
 			// calculate dynamic rule sets for the client
 			RuleSet[] fullRuleSets = RuleMngr.getInstance().calculateRuleSets(
@@ -872,8 +872,7 @@ public class PafServiceProvider implements IPafService {
 			dataService.evaluateDefaultRuleset(clientState);
 
 			// add the active versions to the client state
-			clientState.setActiveVersions(getActiveVersions(clientState
-					.getPlanningVersion()));
+			clientState.setActiveVersions(getActiveVersions(clientState.getPlanningVersion()));
 			
 			
 			//if replicate exists on planner config, use it, else if app settings 
@@ -1511,8 +1510,7 @@ public class PafServiceProvider implements IPafService {
 					.getClientId());
 
 			// Reload data cache for specified client state
-			dataService.loadUowCache(clientState, clientState.getApp(),
-					clientState.getUnitOfWork());
+			dataService.loadUowCache(clientState);
 
 			// run the default evaluation process 
 			dataService.evaluateDefaultRuleset(clientState);
@@ -1560,7 +1558,11 @@ public class PafServiceProvider implements IPafService {
 	}
 	
 	/**
-	 *	Updated selected versions in data cache from the mdb
+	 *	Refresh selected versions in data cache from the mdb
+	 *
+	 *	This method is typically called from the Pace Client after a custom action is run
+	 *	with the <refreshUow> parameter set to true and the <refreshUowVersionFilter>
+	 *	parameter utilized.
 	 *
 	 * @param updateRequest Update data cache request
 	 * 

@@ -41,7 +41,7 @@ import com.pace.base.state.IPafEvalState;
  */
 public class F_Abs extends AbstractFunction {
 
-	private static Logger logger = Logger.getLogger(F_CrossDim.class);
+	private static Logger logger = Logger.getLogger(F_Abs.class);
 		
 	public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 

@@ -149,10 +149,11 @@ public abstract class testCommonParms {
 		sl.addSeason(s);
 		appDef.setSeasonList(sl);
 		
-		PlanCycle pc1 = new PlanCycle("Forecast", "WP");
+		PlanCycle pc1 = new PlanCycle("Forecast", "WF");
 		PlanCycle pc2 = new PlanCycle("Plan", "WP");        
+		PlanCycle pc3 = new PlanCycle("Approval", "WAP");        
 		
-		appDef.setPlanCycles(new PlanCycle[] {pc1, pc2});
+		appDef.setPlanCycles(new PlanCycle[] {pc1, pc2, pc3});
 				
 		
 		return appDef;
@@ -569,6 +570,10 @@ public abstract class testCommonParms {
 		return filePath;
 	}
 
+	public static String[] getUowDims() {
+		// TODO Auto-generated method stub
+		return getAppDef().getMdbDef().getAllDims();
+	}
 	/**
 	 *	Return an expanded unit of work
 	 *
@@ -577,7 +582,7 @@ public abstract class testCommonParms {
 	public static Map<Integer, List<String>> getExpandedUow() {
 		
 		Map<Integer, List<String>> expandedUow = new HashMap<Integer, List<String>>();
-		String[] allDims = getAppDef().getMdbDef().getAllDims();
+		String[] allDims = getUowDims();
 		
 		for (int i = 0; i < allDims.length; i++) {
 			
@@ -686,7 +691,74 @@ public abstract class testCommonParms {
 		boolean debugMode = true;
 		
 		PafClientState clientState = new PafClientState(clientId, pcInit, paceHome, transferDirPath, debugMode);
+		clientState.setApp(getAppDef());
+		clientState.setUnitOfWork(getUowSpec());
+		Season season = new Season();
+		season.setId("Fall - Plan - 2006");
+		season.setOpen(true);
+		season.setPlanCycle("Plan");
+		season.setYear("FY2007");
+		season.setTimePeriod("@IDESCENDENTS(S01)");
+		clientState.setPlanSeason(season);
 		return clientState;
+	}
+
+	/**
+	 * @param expandedUowSpec
+	 * @param appDef
+	 * @return
+	 */
+	public static Map<String, Map<Integer, List<String>>> getDataSpecByVersion(
+			Map<Integer, List<String>> expandedUowSpec, PafApplicationDef appDef) {
+		// TODO Auto-generated method stub
+		Map<String, Map<Integer, List<String>>> mdbExtractionMap = new HashMap<String, Map<Integer, List<String>>>();
+		int versionAxis = appDef.getMdbDef().getVersionAxis();
+		List<String> extractedVersions = expandedUowSpec.get(versionAxis);
+		for (String version : extractedVersions) {
+			Map<Integer, List<String>> intersectionMap = expandedUowSpec;
+			mdbExtractionMap.put(version, intersectionMap);
+		}
+		return mdbExtractionMap;
+	}
+
+	/**
+	 * @return UnitOfWork
+	 */
+	public static UnitOfWork getUowSpec() {
+		
+		String[] allDims = getUowDims();
+		String[][]memberArray = new String[allDims.length][];
+		for (int i = 0; i < allDims.length; i++) {
+			
+			String dim = allDims[i];
+	
+			if (dim.equalsIgnoreCase("Time")) {
+//				String[] members = {"Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"};
+				String[] members = {"S01", "Q1", "Feb", "WK01", "WK02", "WK03", "WK04", "Mar", "WK05", "WK06", "WK07", "WK08", "Apr", "WK09", "WK10", "WK11", "WK12", "WK13", "Q2", "May", "WK14", "WK15", "WK16", "WK17", "Jun", "WK18", "WK19", "WK20", "WK21", "Jul", "WK22", "WK23", "WK24", "WK25", "WK26"};	
+				memberArray[i] = members;
+			} else if (dim.equalsIgnoreCase("Measures")) {
+				String[] members = {"SLS_DLR", "MDTTL_DLR", "RECRTL_DLR", "BOPRTL_DLR", "EOPRTL_DLR", "FWOS"};
+				memberArray[i] = members;
+			} else if (dim.equalsIgnoreCase("PlanType")) {
+				String[] members = {"ClassChn"};
+				memberArray[i] = members;
+			} else if (dim.equalsIgnoreCase("Product")) {
+				String[] members = {"DPT110", "DPT120", "DPT130"};
+				memberArray[i] = members;
+			} else if (dim.equalsIgnoreCase("Version")) {
+				String[] members = {"WP", "LY", "WAP", "WF", "OP", "WAF"};
+				memberArray[i] = members;
+			} else if (dim.equalsIgnoreCase("Location")) {
+				String[] members = {"Location", "StoreTotal", "Store1", "Store2"};
+				memberArray[i] = members;
+			} else if (dim.equalsIgnoreCase("Years")) {
+				String[] members = {"FY2006" ,"FY2007"};
+				memberArray[i] = members;
+			}
+
+		}
+		UnitOfWork uowSpec = new UnitOfWork(allDims, memberArray);
+		return uowSpec;
 	}
 
 }

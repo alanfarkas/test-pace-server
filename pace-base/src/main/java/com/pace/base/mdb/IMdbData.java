@@ -20,11 +20,11 @@ package com.pace.base.mdb;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.PafDimSpec;
+import com.pace.base.app.UnitOfWork;
 import com.pace.base.state.PafClientState;
 
 /**
@@ -42,47 +42,81 @@ import com.pace.base.state.PafClientState;
  * @author ADG
  *
  */
+/**
+ * @author Alan
+ *
+ */
+/**
+ * @author Alan
+ *
+ */
 public interface IMdbData {
 
-	/** 
-	 *	Return a populated Uow Cache based on the supplied Uow specification
-	 *	and Application Definition. This method is a convience method
-	 *  for getUowCache(expandedUow, appDef, activeVersions, lockedPeriods), 
-	 *  where the "lockedPeriods" parameter is set to null.
-	 *
-	 * @param expandedUow Fully expanded unit of work
-	 * @param appDef Paf Application Definition
-	 * @param activeVersions Array containing the active planning versions
-	 * 
-	 * @return PafUowCache - Result set and corresponding meta-data
-	 * @throws PafException
-	 */
-	public PafUowCache getUowCache(Map<Integer, List<String>> expandedUow, PafApplicationDef appDef, String[] activeVersions) throws PafException;		
-	
-	/** 
-	 *	Return a populated Uow Cache based on the supplied Uow specification
-	 *	and Application Definition. 
-	 *
-	 * @param expandedUow Fully expanded unit of work
-	 * @param appDef Paf Application Definition
-	 * @param activeVersions Array containing the active planning versions
-	 * @param lockedPeriods List of locked reporting periods
-	 * 
-	 * @return PafUowCache - Result set and corresponding meta-data
-	 * @throws PafException
-	 */
-	public PafUowCache getUowCache(Map<Integer, List<String>> expandedUow, PafApplicationDef appDef, String[] activeVersions, Set<String> lockedPeriods) throws PafException;
-	//TODO Change name of "activeVersions" to "planningVersions"
 
-    /**
+	/** 
+	 *	Refresh the data cache with mdb data for the specified versions. Each 
+	 *	specified version will be completely cleared and reloaded for across
+	 *	all unit of work intersections.
+	 *
+	 *  No data will be refreshed if the vesion filter is empty.
+	 *  
+	 * @param uowCache Uow cache
+	 * @param mdbDataSpec Specifies the intersections to retrieve for each version
+	 * @param versionFilter List of versions to refresh
+	 * 	  
+	 * @return List of updated versions
+	 * @throws PafException 
+	 */ 
+	public abstract List<String> refreshDataCache(PafUowCache uowCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException;
+
+
+	/** 
+	 *	Update the data cache with mdb data for the specified versions. For 
+	 * 	performance reasons, existing data blocks will be not be updated.
+	 * 
+	 *  Any versions that need to be completely refreshed should be cleared before 
+	 *  calling this method.
+	 *
+	 *
+	 *  No data will be refreshed if the vesion filter is empty.
+	 *  
+	 * @param uowCache Uow cache
+	 * @param expandedUow Expanded unit of work specification
+	 * @param versionFilter List of versions to refresh
+	 * 	  
+	 * @return List of updated versions
+	 * @throws PafException 
+	 */ 
+	public abstract List<String> updateDataCache(PafUowCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException;
+	
+
+	/** 
+	 *	Update the data cache with mdb data for the intersections specified, by version.
+	 * 	For performance reasons, existing data blocks will not be updated.
+	 * 
+	 *  Any versions that need to be completely refreshed should be cleared before 
+	 *  calling this method.
+	 *
+	 *  No data will be loaded if the data specification is empty.
+	 *  
+	 * @param uowCache Uow cache
+	 * @param mdbDataSpec Specifies the intersections to retrieve for each version
+	 * 
+	 * @return List of updated versions
+	 * @throws PafException 
+	 */
+    public abstract List<String> updateUowCache(PafUowCache uowCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException;
+
+	
+	/**
      *	Send data back to Essbase
      *
-	 * @param pafUowCache PafUowCache Object - Updated data and associated meta-data
+	 * @param uowCache PafUowCache Object - Updated data and associated meta-data
      * @param clientState Client State Object
      * 
 	 * @throws PafException
      */
-    public abstract void sendData(PafUowCache pafUowCache, PafClientState clientState) throws PafException;
+    public abstract void sendData(PafUowCache uowCache, PafClientState clientState) throws PafException;
     
     /**
      *	Get Filtered meta-data from Essbase
@@ -91,19 +125,7 @@ public interface IMdbData {
 	 * @param appDef Paf Application Definition
 	 * @throws PafException
      */
-    public PafDimSpec[] getFilteredMetadata(Map<Integer, List<String>> expandedUOW, PafApplicationDef appDef) throws PafException;
+    public abstract PafDimSpec[] getFilteredMetadata(Map<Integer, List<String>> expandedUOW, PafApplicationDef appDef) throws PafException;
 
-	/** 
-	 *	Refresh the specified uow cache from the mdb for the specified version filter.
-	 *  If the version filter is empty, then all uow cache versions will be refreshed.
-	 *
-	 * @param uowCache Uow cache
-	 * @param expandedUow Expanded uow definition
-	 * @param versionFilter List of versions to refresh
-	 * 
-	 * @return List of refreshed versions
-	 * @throws PafException 
-	 */
-    public List<String> refreshDataCache(PafUowCache uowCache, Map<Integer, List<String>> expandedUow, List<String> versionFilter) throws PafException;
 
 }

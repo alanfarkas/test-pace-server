@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.UnitOfWork;
 import com.pace.base.mdb.PafIntersectionIterator;
 import com.pace.base.mdb.PafUowCache;
 import com.pace.base.mdb.testCommonParms;
@@ -42,7 +43,7 @@ import com.pace.base.state.PafClientState;
  * @author Alan Farkas
  *
  */
-public class TestEsbData extends TestCase {
+public class EsbDataTest extends TestCase {
 	
 	@SuppressWarnings("unused")
 	private PafApplicationDef appDef = testCommonParms.getAppDef();
@@ -50,9 +51,12 @@ public class TestEsbData extends TestCase {
 	@SuppressWarnings("unused")
 	private String[] activeVersions = testCommonParms.getActiveVersions();
 	@SuppressWarnings("unused")
+	PafClientState clientState = testCommonParms.getClientState();
 	private Set<String> lockedPeriods = testCommonParms.getLockedPeriods();
-	private Map<Integer,List<String>> expandedUow = null;
-	private static Logger logger = Logger.getLogger(TestEsbData.class);
+	private UnitOfWork uowSpec = testCommonParms.getUowSpec();
+	private Map<String, Map<Integer, List<String>>> dataSpecByVersion = testCommonParms.getDataSpecByVersion(uowSpec.getUowMap(), appDef);
+	private String[] uowDims = testCommonParms.getUowDims();
+	private static Logger logger = Logger.getLogger(EsbDataTest.class);
 	
 	/*
 	 * Test method for 'com.pace.base.mdb.essbase.EsbData'
@@ -112,136 +116,9 @@ public class TestEsbData extends TestCase {
 	}
 	
 	
-	/*
-	 * Test method for 'com.pace.base.mdb.essbase.EsbData.getDataUsingMdx '
-	 */
-	public void testGetDataUsingMdx() {
-		
-		boolean isSuccess = false;
-		
-		boolean useConnPool = true;
-		String esbConnAlias = null;
-		//Get Essbase data
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		esbConnAlias = "TitanCube";
-		isSuccess = getDataUsingMdxCommon(esbConnAlias, useConnPool);
-		
-		// Check for success
-		assertTrue(isSuccess);
-		if (isSuccess) {
-			logger.info(this.getName() + " - Successful");
-			logger.info("***************************************************\n");
-		}
-		else {
-			logger.info(this.getName() + " - Failed");			
-			logger.info("***************************************************\n");
-		}
-	}
-	
-	/*
-	 * Test method for 'com.pace.base.mdb.essbase.EsbData.getDataUsingMdx '
-	 */
-	public void testGetDataUsingMdx2() {
-		
-		boolean isSuccess = false;
-		
-		boolean useConnPool = true;
-		
-		//Get Essbase data
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		isSuccess = getDataUsingMdxCommon(props, useConnPool);
-		
-		// Check for success
-		assertTrue(isSuccess);
-		if (isSuccess) {
-			logger.info(this.getName() + " - Successful");
-			logger.info("***************************************************\n");
-		}
-		else {
-			logger.info(this.getName() + " - Failed");			
-			logger.info("***************************************************\n");
-		}
-	}
-	
-	/*
-	 * Common getDataUsingMdx code
-	 */
-	public boolean getDataUsingMdxCommon(String esbConnAlias, boolean useConnPool)  {
-		
-		boolean isSuccess = true;
-		
-		@SuppressWarnings("unused")
-		EsbData esbData = null;
-		PafUowCache pafUowCache = null;
-		
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(esbConnAlias, useConnPool);
-			
-			// Run mdx query to result set 
-//			pafDataCache = esbData.getDataUsingMdx(mdxSelect, mdxWhere, appDef, activeVersions, lockedPeriods);
-			
-			if (pafUowCache.getCellCount() != 0) {
-//				logger.info("Displaying data...\n" + pafDataCache.toString());
-			} else {
-				isSuccess = false;
-				logger.info("Retrieval error - No data retrieved!");
-			}
-			
-//		} catch (PafException pfe) {
-//			logger.info("*** " + pfe.getMessage() + " ***");
-//			isSuccess = false;
-		} catch (Exception ex) {
-			logger.info("*** Java Exception: " + ex.getMessage() + " ***");
-			isSuccess = false;
-		} finally {
-			esbData = null;
-		}
-		
-		return isSuccess;
-	}
 	
 	
-	/*
-	 * Common getDataUsingMdx code
-	 */
-	public boolean getDataUsingMdxCommon(Properties props, boolean useConnPool)  {
-		
-		boolean isSuccess = true;
-		
-		@SuppressWarnings("unused")
-		EsbData esbData = null;
-		PafUowCache pafUowCache = null;
-		
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(props, useConnPool);
-			
-			// Run mdx query to result set 
-//			pafDataCache = esbData.getDataUsingMdx(mdxSelect, mdxWhere, appDef, activeVersions, lockedPeriods);
-			
-			if (pafUowCache.getCellCount() != 0) {
-//				logger.info("Displaying data...\n" + pafDataCache.toString());
-			} else {
-				isSuccess = false;
-				logger.info("Retrieval error - No data retrieved!");
-			}
-			
-//		} catch (PafException pfe) {
-//			logger.info("*** " + pfe.getMessage() + " ***");
-//			isSuccess = false;
-		} catch (Exception ex) {
-			logger.info("*** Java Exception: " + ex.getMessage() + " ***");
-			isSuccess = false;
-		} finally {
-			esbData = null;
-		}
-		
-		return isSuccess;
-	}
-
+	
 	/*
 	 * Test method for 'com.pace.base.mdb.essbase.EsbData.SendData(String, String, boolean, String, String)'
 	 */
@@ -255,10 +132,10 @@ public class TestEsbData extends TestCase {
 		logger.info("***************************************************");
 		logger.info(this.getName() +  "Test Started");
 		try {
-			// Create new EsbData object
-			esbData = new EsbData(props);
+			dataCache = new PafUowCache(clientState);
+			esbData = new EsbData(props);		
+			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
 			
-			dataCache = esbData.getUowCache(expandedUow, appDef, activeVersions, lockedPeriods);			
 			//logger.info("Displaying existing data...\n" + dataCache.toString());
 			
 			// Update data cache
@@ -339,9 +216,9 @@ public class TestEsbData extends TestCase {
 			esbData = new EsbData(props);
 			
 			// Retrieve data from Essbase - Displaying existing data
-			mdxSelect = testCommonParms.getSampleMdxSelect();
-//			dataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);			
-			//logger.info("Displaying existing data...\n" + dataCache.toString());
+			dataCache = new PafUowCache(clientState);
+			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+			logger.info("Displaying existing data...\n" + dataCache.toString());
 			
 			// Update data cache
 			PafIntersectionIterator dcIterator = dataCache.getDataCellIterator();
@@ -359,9 +236,9 @@ public class TestEsbData extends TestCase {
 			esbData.sendData(dataCache, testCommonParms.getClientState());
 			
 			// Retrieve data from Essbase - Verify sent data
-			//logger.info("Getting updated data from Essbase");
-			//dataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);			
-			//logger.info("Displaying updated data...\n" + dataCache.toString());
+			logger.info("Getting updated data from Essbase");
+			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);			
+			logger.info("Displaying updated data...\n" + dataCache.toString());
 			
 		} catch (PafException pfe) {
 			logger.info("*** " + pfe.getMessage() + "***");
@@ -419,9 +296,9 @@ public class TestEsbData extends TestCase {
 			esbData = new EsbData(props);
 			
 			// Retrieve data from Essbase - Displaying existing data
-			mdxSelect = testCommonParms.getSampleMdxSelect();
-//			dataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);			
-			//logger.info("Displaying existing data...\n" + dataCache.toString());
+			dataCache = new PafUowCache(clientState);
+			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+			logger.info("Displaying existing data...\n" + dataCache.toString());
 			
 			// Update data cache
 			PafIntersectionIterator dcIterator = dataCache.getDataCellIterator();
@@ -439,9 +316,9 @@ public class TestEsbData extends TestCase {
 			esbData.sendData(dataCache, testCommonParms.getClientState());
 			
 			// Retrieve data from Essbase - Verify sent data
-			//logger.info("Getting updated data from Essbase");
-			//dataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);			
-			//logger.info("Displaying updated data...\n" + dataCache.toString());
+			logger.info("Getting updated data from Essbase");
+			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+			logger.info("Displaying updated data...\n" + dataCache.toString());
 			
 		} catch (PafException pfe) {
 			logger.info("*** " + pfe.getMessage() + "***");

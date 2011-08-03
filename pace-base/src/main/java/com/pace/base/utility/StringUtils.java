@@ -22,6 +22,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -214,7 +216,39 @@ public class StringUtils {
         return arrayToString(array, "{", "}", "[", "]", ", ", elementsPerLine);
     }
 
+    
 	/**
+	 * 	Format the integer as a string with a comma seperator
+	 * 	between each set of three digts
+	 * 
+	 * @param number Number to format
+	 * @return
+	 */
+	public static String commaFormat(int number) {
+		
+		String defaultPattern = "#,###,###,###,###";
+		return decimalFormat(number, defaultPattern);
+	}
+
+	/**
+     * 	Format a number using the supplied decimal format patterh
+     * 
+     * @param number Number to format
+     * @param pattern Decimal format pattern
+     * 
+     * @return Formatted number
+     */
+    public static String decimalFormat(Number number, String pattern) {
+    	
+		NumberFormat formatter = new DecimalFormat(pattern);
+		String formattedNumber = formatter.format(number);
+		
+		return formattedNumber;
+	
+    }
+    
+    
+    /**
      *  convenience wrapper providing some default options.
      *
      * @param list List of objects containing alpha-numeric characters

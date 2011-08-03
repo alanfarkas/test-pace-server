@@ -36,7 +36,7 @@ import com.pace.base.mdb.*;
  * @author Alan Farkas
  *
  */
-public class TestEsbMetaData extends TestCase {
+public class EsbMetaDataTest extends TestCase {
 
 	private Properties props = testCommonParms.getConnectionProps();
 	private Properties sampleProps = testCommonParms.getConnectionSampleBasicProps();
@@ -275,171 +275,13 @@ public class TestEsbMetaData extends TestCase {
 
 
 	/*
-	 * Test method for 'com.pace.base.mdb.essbase.EsbMetaData.getAttributeDimension(int, String, MdbProps)'
-	 */
-	public void testGetAttributeDimensionValidation() {
-				
-		boolean isSuccess = true;
-		String branch = "Purpose";
-//		String branch = "Population";
-		EsbMetaData esbMetaData = null;
-		PafAttributeTree pafAttrTree = null, pafAttrTreeOld = null;
-		PafMdbProps mdbProps = null;
-
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbMetaData object
-			logger.info("-- Creating new EsbMetaData object");
-			esbMetaData = new EsbMetaData(props);
-//			esbMetaData = new EsbMetaData(sampleProps);
-			
-			// Get MDB Properties
-			mdbProps = esbMetaData.getMdbProps();
-			
-			// Get Attribute branch (new method)
-			logger.info("-- Getting Attribute Hierarchy - " + branch);
-			startTime = System.currentTimeMillis();
-			pafAttrTree = esbMetaData.getAttributeDimension(essNetTimeOut, branch, mdbProps); 
-			stopTime = System.currentTimeMillis();
-			elapsedTime = stopTime - startTime;
-			
-			
-			// Log elapsed time
-			logger.info("--Completed in " + elapsedTime / 1000.0 + " seconds\n");
-			
-			// Compare both trees
-			logger.info("-- Comparing both trees... ");
-			if (!pafAttrTree.equals(pafAttrTreeOld)) {
-				isSuccess = false;
-			}
-			
-			
-		} catch (PafException pfe) {
-			logger.info("*** " + pfe.getMessage() + " ***");
-			isSuccess = false;
-		} catch (Exception e) {
-			logger.info("*** Java Exception: " + e.getMessage() + " ***");
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
-					pafAttrTree = null;
-				}
-			}
-		}
-	}
-
-
-	/*
-	 * Test method for 'com.pace.base.mdb.essbase.EsbMetaData.getBaseDimension(int, String)'
-	 */
-	public void testGetBaseDimensionValidation() {
-				
-		boolean isSuccess = true;
-//		String branch = "Time";
-		String branch = "Product";
-//		String branch = "CBowman";
-//		branch = "Measures";
-		EsbMetaData esbMetaData = null;
-		PafBaseTree pafBaseTree = null, pafBaseTreeOld = null;
-//		props.setProperty("APPLICATION", "IPP_AOP");
-//		props.setProperty("DATABASE", "IPP_AOP");
-//		branch = "PRODUCT";
-//		props.setProperty("APPLICATION", "Self");props.setProperty("DATABASE", "Self");branch = "time";
-//		props.setProperty("APPLICATION", "CA03");props.setProperty("DATABASE", "CA03");branch = "Accounts";
-
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbMetaData object
-			logger.info("-- Creating new EsbMetaData object");
-			esbMetaData = new EsbMetaData(props);
-//			esbMetaData = new EsbMetaData(sampleProps);
-			
-			// Get Base dimension branch
-			logger.info("-- Getting Dimension Hierarchy - " + branch);
-			startTime = System.currentTimeMillis();
-			pafBaseTree = esbMetaData.getBaseDimension(essNetTimeOut, branch); 
-			stopTime = System.currentTimeMillis();
-			elapsedTime = stopTime - startTime;
-			
-			// Log elapsed time
-			logger.info("--Completed in " + elapsedTime / 1000.0 + " seconds\n");
-			
-			// Compare both trees
-			logger.info("-- Comparing both trees... ");
-			if (!pafBaseTree.equals(pafBaseTreeOld)) {
-				isSuccess = false;
-			}
-			
-			
-		} catch (PafException pfe) {
-			logger.info("*** " + pfe.getMessage() + " ***");
-			isSuccess = false;
-		} catch (Exception e) {
-			logger.info("*** Java Exception: " + e.getMessage() + " ***");
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
-					pafBaseTree = null;
-				}
-			}
-		}
-	}
-
-
-	/*
 	 * Test method for 'com.pace.base.mdb.essbase.EsbMetaData.getQueriedMembers(String)'
 	 */
 	public void testGetQueriedMembers() {
 
 		boolean isSuccess = true;
 		int essNetTimeOut = PafBaseConstants.ESS_NET_TIMEOUT_DEFAULT;
-		final String mdxSelect = "SELECT Withattr([Pkg Type], \"==\", \"Bottle\" ) ON AXIS(0)";
+		final String mdxSelect = "SELECT Withattr([State], \"==\", \"TX\" ) ON AXIS(0)";
 		String[] members = null;
 		EsbMetaData esbMetaData = null;
 
@@ -448,11 +290,11 @@ public class TestEsbMetaData extends TestCase {
 		try {
 			// Create new EsbMetaData object
 			logger.info("-- Creating new EsbMetaData object");
-			esbMetaData = new EsbMetaData(sampleProps);
+			esbMetaData = new EsbMetaData(props);
 
 			// Run mdx query
 			logger.info("-- Running Mdx query - " + mdxSelect);
-			EsbCubeView esbCubeView = new EsbCubeView("Attribute Query", sampleProps);
+			EsbCubeView esbCubeView = new EsbCubeView("Attribute Query", props);
 			members = esbMetaData.getQueriedMembers(esbCubeView, mdxSelect, essNetTimeOut);
 
 			// Display the returned members

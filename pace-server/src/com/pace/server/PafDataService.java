@@ -85,16 +85,18 @@ public class PafDataService {
 	private Map <String, Set<Intersection>> systemLockedIntersections = new HashMap<String, Set<Intersection>> ();
 
 	/**
-	 *	Load uow cache for selected client state, application definition, and unit-of-work
+	 *	Load uow cache for selected client state
 	 *
 	 * @param clientState Client state
-	 * @param appDef Application definition
-	 * @param uow Unit of work
 	 * 
 	 * @throws PafException
 	 */
-	public void loadUowCache(PafClientState clientState, PafApplicationDef appDef, UnitOfWork uow) throws PafException {
+	public void loadUowCache(PafClientState clientState) throws PafException {
+		
 		String clientId = clientState.getClientId();
+		PafApplicationDef appDef = clientState.getApp();
+		UnitOfWork uow = clientState.getUnitOfWork();
+		
 		logger.info("Loading uow cache for client: " + clientId);
 		logger.info("Unit of Work: " + uow.toString() );
 
@@ -107,16 +109,8 @@ public class PafDataService {
 //		IMdbClassLoader mdbClassLoader = this.getMdbClassLoader(connProps);
 //		IMdbData mdbData = mdbClassLoader.getMdbDataProvider();
 		IMdbData mdbData = getMdbDataProvider(connProps);
-		//Convert unit of work to a Map
-		Map<Integer, List<String>> expandedUow = new HashMap<Integer, List<String>>();
-		int i = 0;
-		for (String dim : uow.getDimensions()){
-			expandedUow.put(i++, Arrays.asList(uow.getDimMembers(dim)));	
-		}
+
 		
-		//Map<Integer, List<String>> expandedUow = expandUow(uow, clientState);
-
-
 		//BEGIN - TTN-584
 		// create empty locked time set
 		Set<String> lockedTimeSet = new HashSet<String>();
@@ -125,63 +119,56 @@ public class PafDataService {
 
 		if ( ! clientState.getPlannerConfig().isCalcElapsedPeriods() ) {
 
-			logger.info("Calculate Elapsed Periods: " + clientState.getPlannerConfig().isCalcElapsedPeriods());
+			logger.debug("Calculate Elapsed Periods: " + clientState.getPlannerConfig().isCalcElapsedPeriods());
 
 			//get current planning version
 			String currentVersion = clientState.getPlanningVersion().getName();
 
 			//if current planning version exists
 			if ( currentVersion != null ) {
-
 				//get verstion type map.
 				Map<String, VersionType> versionsTypeMap = PafMetaData.getVersionTypeMap();
-
 				//if version type map contains planning version
-				if ( versionsTypeMap != null && versionsTypeMap.containsKey(currentVersion) ) {
-
+				if ( versionsTypeMap != null && versionsTypeMap.containsKey(currentVersion) ) {				
 					//get version type
 					VersionType versionType = versionsTypeMap.get(currentVersion);
-
 					//if version type is foward plannable, check to see if in current year
 					if ( versionType != null && versionType.equals(VersionType.ForwardPlannable)) {
-
 						PafApplicationDef pafApp = clientState.getApp(); 
-
 						//get elapsed year
 						String elapsedYear = pafApp.getCurrentYear();
-
 						//get year dimension name
 						String yearDim = pafApp.getMdbDef().getYearDim();
-
 						//get year members, should only be 1
 						String[] yearMembers = clientState.getUnitOfWork().getDimMembers(yearDim);
-
 						//if year members exists and there are more then 0
-						if ( yearMembers != null && yearMembers.length > 0) {
-
+						if ( yearMembers != null && yearMembers.length > 0) {							
 							//get 1st year member
 							String yearMember = yearMembers[0]; 
-
 							//see if uow year member equals elapsed year member and if so, get locked time members
 							if ( yearMember.equalsIgnoreCase(elapsedYear) ) {
-
 								lockedTimeSet.addAll(PafAppService.getInstance().getLockedList(clientState));
-
 							}
-
 						}
 					}
-
 				}
-
 			}            
-
 		}        
 		//END - TTN-584
 
 
-		PafUowCache cache = mdbData.getUowCache(expandedUow, appDef, new String[]{ clientState.getPlanningVersion().getName()}, lockedTimeSet);          
-		uowCache.put(clientId, cache);           
+		// Determine which data intersections to extract for each version
+		Map<String, Map<Integer, List<String>>> mdbDataSpecByVersion = buildUowLoadDataSpec(uow, clientState);
+		
+		// Load data cache
+		//TODO Add attribute dims and associated members to work spec, pass in as seperate parm
+		//TODO Use UowCacheParms again, create a method "createDataCache()" to hold this exra processing
+		//TDO Add uow trees to Cache Parms
+		String[] attributeDims = getAttributeDimNames().toArray(new String[0]);
+		PafUowCache dataCache = new PafUowCache(clientState, attributeDims, lockedTimeSet);
+		List<String>loadedVersions = mdbData.updateUowCache(dataCache, mdbDataSpecByVersion);
+		logger.info("UOW intialized with version(s): " + StringUtils.listToString(loadedVersions));
+		uowCache.put(clientId, dataCache);           
 
 		logger.info("Data cache loaded, cached object count: " + uowCache.size());
 
@@ -189,18 +176,68 @@ public class PafDataService {
 
 
 	/**
-	 * Refresh selected versions of the client's current uow cache. If a null 
-	 * or empty version filter is specified, then all versions will be updated.
+	 * 	Determine which data intersections need to be extracted from the multidimensional
+	 * 	database when initiallyloading the unit of work.
+	 * 
+	 * @param expandedUowSpec Expanded UOW specification
+	 * @param clientState Client State
+	 * 
+	 * @return Map<String, Map<Integer, List<String>>>
+	 */
+	private Map<String, Map<Integer, List<String>>> buildUowLoadDataSpec(UnitOfWork expandedUowSpec, PafClientState clientState) {
+
+		Map<String, Map<Integer, List<String>>> mdbDataSpecByVersion = new HashMap<String, Map<Integer, List<String>>>();
+		String versionDim = clientState.getMdbDef().getVersionDim();
+		int versionAxis = expandedUowSpec.getDimIndex(versionDim); 
+		List<String> uowVersions = Arrays.asList(expandedUowSpec.getDimMembers(versionDim));
+		List<String> extractedVersions = new ArrayList<String>();
+
+
+		// Check each version to see if they should be extracted from the mdb. Optimally, only the active planning
+		// version needs to be selected during the initial UOW load. 
+		
+
+		// First select the active planning version
+		String planVersion = clientState.getPlanningVersion().getName();
+		extractedVersions.add(planVersion);
+		
+		// Add any reference versions used in default evaluation
+		PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
+		String[] evalRefVersions = plannerConfig.getDefaultEvalRefVersions();
+    	if (evalRefVersions != null && evalRefVersions.length> 0) {
+    		List<String> evalRefVersionList = new ArrayList<String>(Arrays.asList(plannerConfig.getDefaultEvalRefVersions()));
+     		extractedVersions.addAll(evalRefVersionList);
+    	}
+		
+    	
+    	// Filter out any versions not in the uow (to be safe)
+    	extractedVersions.retainAll(uowVersions);
+    	
+    	// Add a data spec entry for each version being extracted that selects all uow
+    	// intersectons for that version
+		for (String version : extractedVersions) {
+			Map<Integer, List<String>> mdbDataSpec = expandedUowSpec.getUowMap();
+			mdbDataSpec.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
+			mdbDataSpecByVersion.put(version, mdbDataSpec);
+		}
+		return mdbDataSpecByVersion;
+	}
+
+
+
+	/**
+	 * 	Refresh selected versions of the client's current uow cache. If a null 
+	 * 	or empty version filter is specified, then all versions will be updated.
 	 * 
 	 * @param clientState Client state
 	 * @param appDef Application definition
-	 * @param unitOfWork Unit of work
+	 * @param expandedUow Expanded unit of work
 	 * @param versionFilter Versions to update
 	 *
 	 * @return List of updated versions
 	 * @throws PafException 
 	 */
-	public List<String> refreshUowCache(PafClientState clientState,PafApplicationDef appDef, UnitOfWork uow, 
+	public List<String> refreshUowCache(PafClientState clientState,PafApplicationDef appDef, UnitOfWork expandedUow, 
 			List <String> versionFilter) throws PafException {
 	
 		List<String> validatedVersionFilter = new ArrayList<String>();
@@ -209,8 +246,7 @@ public class PafDataService {
 		// Get client id
 		String clientId = clientState.getClientId();
 
-		// Get uow cache
-//		PafUowCache cache = mdbData.getUowCache(expandedUow, appDef, new String[]{ clientState.getPlanningVersion().getName()}, lockedTimeSet);          
+		// Get uow cache for current client session
 		logger.info("Updating uow cache for client: " + clientId);
 		PafUowCache cache = uowCache.get(clientId);         
 		if (cache == null) {
@@ -219,10 +255,9 @@ public class PafDataService {
 		
 		// Validate version filter, resolving tokens and case differences
 		if (versionFilter != null && versionFilter.size() > 0) {
-			String planVersion = cache.getActiveVersions()[0];
+			String planVersion = cache.getPlanVersions()[0];
 			String versionDim = cache.getVersionDim();
 			StringBuffer foundVersion = new StringBuffer(); 
-//			validatedVersionFilter = new String[versionFilter.length];
 			for (String version : versionFilter) {
 				// Check for plan version token and resolve it
 				if (version.equalsIgnoreCase(PafBaseConstants.PLAN_VERSION)) {
@@ -236,30 +271,60 @@ public class PafDataService {
 					}
 				}
 			}
-		}
-		
-		//Convert unit of work to a Map
-		Map<Integer, List<String>> expandedUow = new HashMap<Integer, List<String>>();
-		int i = 0;
-		for (String dim : uow.getDimensions()){
-			expandedUow.put(i++, Arrays.asList(uow.getDimMembers(dim)));	
+		} else {
+			// Empty filter - retrieve all non-derived versions (plan version + reference versions)
+			versionFilter = cache.getBaseVersions();
 		}
 		
 		// Get mdb data provider corresponding to application data source id
 		String dsId = appDef.getMdbDef().getDataSourceId();
-//		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getAppContext().getBean(dsId);
 		IPafConnectionProps connProps =	clientState.getDataSources().get(dsId);
 		IMdbData mdbData = getMdbDataProvider(connProps);
 // 		TTN-1406
 //		IMdbClassLoader mdbClassLoader = this.getMdbClassLoader(connProps);
 //		IMdbData mdbData = mdbClassLoader.getMdbDataProvider();
 		
-		// Update filtered versions
-		updatedVersions = mdbData.refreshDataCache(cache, expandedUow, validatedVersionFilter);
-		logger.info("Data cache updated for versions: " + StringUtils.listToString(validatedVersionFilter));
+
+		// Determine which data intersections need to extracted for the versions being refreshed. Start
+		// out with the data spec that covers all data needed for the initial UOW load and filter down
+		// to just the versions being refreshed.
+		Map<String, Map<Integer, List<String>>> mdbDataSpec = buildUowLoadDataSpec(clientState.getUnitOfWork(), clientState);
+		Set<String> dataSpecVersions = mdbDataSpec.keySet();
+		for (String dataSpecVersion : dataSpecVersions) {
+			if (!validatedVersionFilter.contains(dataSpecVersion)) {
+				mdbDataSpec.remove(dataSpecVersion);
+			}
+		}
+		
+		// Load mdb data for the required intersections. Any refreshed versions not in the data spec
+		// will be loaded as needed during view rendering or evaluation.
+		updatedVersions = mdbData.refreshDataCache(cache, mdbDataSpec, validatedVersionFilter);
+		logger.info("Data cache updated for versions: " + StringUtils.listToString(updatedVersions));
 		logger.info("Cached object count: " + uowCache.size());
 
 		return updatedVersions;
+	}
+
+	/**
+	 *	Update the uow cache from the mdb for the specified versions
+	 *
+	 * @param clientState Client State	
+	 * @param dataCache Uow cache
+	 * @param versionFilter List of versions to update
+	 * 
+	 * @throws PafException 
+	 */
+	public void updateUowCache(PafClientState clientState, PafUowCache dataCache, List<String> versionFilter) throws PafException {
+
+		// Get mdb data provider corresponding to application data source id
+		String dsId = clientState.getApp().getMdbDef().getDataSourceId();
+		IPafConnectionProps connProps =	clientState.getDataSources().get(dsId);
+		IMdbData mdbData = getMdbDataProvider(connProps);
+
+		// Refresh filtered versions
+		List<String> updatedVersions = mdbData.updateDataCache(dataCache, clientState.getUnitOfWork(), versionFilter);
+		logger.info("Data cache updated for versions: " + StringUtils.listToString(updatedVersions));
+		
 	}
 
 	/**
@@ -291,6 +356,8 @@ public class PafDataService {
 		return yearTreeStrList;
 	}
 	 */
+
+		
 
 	/**
 	 *	Expand out the members in a unit of work using the base trees
@@ -799,7 +866,7 @@ public class PafDataService {
 				+ viewSection.getName() + "]";
 			throw new PafException(errMsg, PafErrSeverity.Fatal);
 		}
-
+		
 		// Build data slice parameters
 		sliceParms = buildDataSliceParms(viewSection);
 		pafMVS.setDataSliceParms(sliceParms);
@@ -807,7 +874,12 @@ public class PafDataService {
 		// Build data slice cache spec
 		sliceCacheSpec = buildDataSliceCacheSpec(sliceParms, viewSection, uowCache, clientState);
 		pafMVS.setDataSliceCacheParms(sliceCacheSpec);
-
+ 
+		
+		// Populate data cache with supporting reference data
+		loadViewReferenceData(uowCache, sliceCacheSpec, clientState, viewSection.hasAttributes());
+		
+		
 		// Build data slice cache
 		logger.debug("Building the data slice cache...");
 		PafDataSliceCacheParms sliceCacheParms = new PafDataSliceCacheParms();
@@ -880,6 +952,174 @@ public class PafDataService {
 		// Return dataSlice
 		return dataSlice;
 	}
+
+	/**
+	 * 	Load mdb reference data intersections required to support the rendering of 
+	 *  the current view
+	 * 
+	 * @param dataCache Data cache
+	 * @param viewMemberSpec View member specification per dimesion
+	 * @param isAttributeView If true, indicates the current view is an attribute view
+	 * 
+	 * @throws PafException 
+	 */
+	private void loadViewReferenceData(PafDataCache dataCache, UnitOfWork viewMemberSpec, PafClientState clientState, Boolean isAttributeView) throws PafException {
+	
+		PafApplicationDef pafApp = clientState.getApp();
+		MdbDef mdbDef = pafApp.getMdbDef();
+		String measureDim = mdbDef.getMeasureDim(), timeDim = mdbDef.getTimeDim(), versionDim = mdbDef.getVersionDim();
+		int versionAxis = dataCache.getVersionAxis();
+		UnitOfWork refDataSpec = null;
+		Map<String, Map<Integer, List<String>>> dataSpecByVersion = new HashMap<String, Map<Integer, List<String>>>();
+
+
+		// As a safeguard, filter out any versions not defined to the data cache. This
+		// prevents the attempted loading of a version the user doesn't have security 
+		// rights to, in the case of any unauthorized versions specified in the view.
+		List<String> viewVersions = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(versionDim)));
+		List<String> referenceVersions = new ArrayList<String>(dataCache.getReferenceVersions());
+		referenceVersions.retainAll(viewVersions);
+		List<String> contribPctVersions = new ArrayList<String>(pafApp.getContribPctVersions());
+		contribPctVersions.retainAll(viewVersions);
+
+		
+		// Exit if no data to update
+		if (referenceVersions.size() == 0 && contribPctVersions.size() == 0) {
+			return;
+		}
+		
+		
+		// First process base (non-dynamic) reference versions - determine which reference 
+		// data intersections to update. Store this data specification in the format of a 
+		// uow specification and clone for each base version.
+		if (!isAttributeView) {
+
+			// Regular view - select all members on view, plus all uow measures 
+			// and time periods
+			refDataSpec = viewMemberSpec.clone();
+			refDataSpec.setDimMembers(measureDim, dataCache.getDimMembers(measureDim));
+			refDataSpec.setDimMembers(timeDim, dataCache.getDimMembers(timeDim));
+			
+		} else {
+			
+			// Attribute view - select the supporting base dimension intersections. All uow
+			// measures and time periods will be selected, regardless of which members are
+			// specified on view. Only the members on the view will be selected for the 
+			// remaining base dimensions. 
+			//
+			// The one exception to this is for any base dimension with an associated
+			// attribute dimension on the view. Since all upper level attribute intersections
+			// are calculated in Pace, only reference data for base members at the attribute
+			// mapping level will be selected for these base dimensions with attributes
+			// on the view.
+			String[]dcBaseDims = dataCache.getBaseDimensions();
+			refDataSpec = new UnitOfWork(dcBaseDims);
+			Set<String> viewDims = new HashSet<String>(Arrays.asList(viewMemberSpec.getDimensions()));
+			for (String baseDim : dcBaseDims) {
+				
+				// All uow measures and periods will be selected
+				if (baseDim.equals(measureDim) || baseDim.equals(timeDim)) {
+					refDataSpec.setDimMembers(baseDim, dataCache.getDimMembers(baseDim));
+					continue;
+				}
+				
+				// Check remaining base dimensions for associated attributes
+				PafBaseTree baseTree = (PafBaseTree) clientState.getUowTrees().getTree(baseDim);
+				Set<String> associatedAttrDims = new HashSet<String> (baseTree.getAttributeDimNames());
+				associatedAttrDims.retainAll(viewDims);
+				if (associatedAttrDims.size() > 0) {
+					// Base dimension has attributes - select all uow members at the attribute
+					// mapping level.
+					int level = baseTree.getAttributeMappingLevel(associatedAttrDims.toArray(new String[0])[0]);
+					List<PafDimMember> baseMembers = baseTree.getMembersAtLevel(baseTree.getRootNode().getKey(), level);
+					refDataSpec.setDimMembers(baseDim, baseTree.getMemberNames(baseMembers).toArray(new String[0]));
+				} else {
+					// No associated attribute - just select members on the view
+					refDataSpec.setDimMembers(baseDim, viewMemberSpec.getDimMembers(baseDim));
+				}
+			}
+		}
+
+		// Take data specification, convert to a map, and clone it across each reference version on the view
+		for (String version : referenceVersions) {
+			
+			// Clone data specification for current version
+			Map <Integer, List<String>> dataSpecAsMap = refDataSpec.getUowMap();
+			dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
+			
+			// Add filtered version-specific data spec to master map
+			dataSpecByVersion.put(version, dataSpecAsMap);
+		}
+		
+		
+	
+		// Contribtion % versions - Populate all UOW intersections for any base reference
+		// versions (on or off the view) that meets one of the following criteria:
+		//
+		// 	1. Base reference version is used in the compare intersection spec of any 
+		//	   contribution % version formula on the view. 
+		// 			OR 
+		//	2. Base reference version is used as the base version in a contribution % 
+		//	   formula and no other version is specified in the cross dim spec.
+		//
+		//
+		// Some data specifications that were previously generated earlier in this methods
+		// may be updated in this logic.
+		//
+		//
+		// While this logic could be better optimized to pull in only the required 
+		// intersections, it doesn't seem worth the effort at this point, due to the 
+		// complex logic required and the chance of introducing calculation errors. However,
+		// this may have to be revisited in the future if additional data load optimations 
+		// are required.
+		for (String contribPctVersion : contribPctVersions) {
+			
+			// Get the formula's base version and optional comparison version
+			VersionDef versionDef = pafApp.getVersionDef(contribPctVersion);
+			String baseVersion = versionDef.getVersionFormula().getBaseVersion();
+			String compareVersion = "";
+			PafDimSpec[] compareIsSpec = versionDef.getVersionFormula().getCompareIsSpec();
+			for (PafDimSpec crossDimSpec : compareIsSpec) {
+				if (crossDimSpec.getDimension().equals(versionDim)) {
+					compareVersion = crossDimSpec.getExpressionList()[0];
+					break;
+				}
+			}
+			
+			// Select any version that meets the selection criteria
+			Set<String> selectedVersions = new HashSet<String>();
+			if (referenceVersions.contains(compareVersion)) {
+				selectedVersions.add(compareVersion);
+			}
+			if (referenceVersions.contains(baseVersion) && !baseVersion.equals(compareVersion)) {
+				selectedVersions.add(compareVersion);
+			}
+			
+			// Select all UOW intersections for any of the selected reference versions
+			refDataSpec = dataCache.getUowSpec();
+			for (String version : selectedVersions) {
+				
+				// Clone data specification for current version
+				Map <Integer, List<String>> dataSpecAsMap = refDataSpec.getUowMap();
+				dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
+				
+				// Add filtered version-specific data spec to master map
+				dataSpecByVersion.put(version, dataSpecAsMap);
+			}
+				
+		}
+		
+		
+		
+		// Update view reference data using data speficification map
+		String dsId = mdbDef.getDataSourceId();
+		IPafConnectionProps connProps = clientState.getDataSources().get(dsId);
+		IMdbData mdbData = this.getMdbDataProvider(connProps);
+		mdbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+
+		
+	}
+
 
 	/**
 	 * Build the necessary parms for generating a data slice
@@ -2300,7 +2540,7 @@ public class PafDataService {
         //
 		//
 		// Ultimately, we end up with the following after fully expanding this set of tuples,
-		// making sure to iterate through the inner each axis dimensions first.
+		// making sure to iterate through the inner axis dimensions first.
 		//
 		// Symetric Group#		Members
 		// ---------------		------------------------------
@@ -2499,9 +2739,9 @@ public class PafDataService {
 
 	private boolean isBlankViewTuple(ViewTuple viewTuple) {
 
-		String[] memberAr = viewTuple.getMemberDefs();
-		if (memberAr != null) {
-			for (String member : memberAr) {
+		String[] members = viewTuple.getMemberDefs();
+		if (members != null) {
+			for (String member : members) {
 				if ( member.equals(PafBaseConstants.PAF_BLANK)) {
 					return true;
 				}
@@ -4034,6 +4274,8 @@ public class PafDataService {
 		String[] validAttributeMembers = validAttributeSet.toArray(new String[0]);
 		return validAttributeMembers;
 	}
+
+		
 
 
 	

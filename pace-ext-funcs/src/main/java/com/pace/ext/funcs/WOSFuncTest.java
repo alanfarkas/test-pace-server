@@ -29,11 +29,12 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
-import com.pace.base.comm.ClientInitRequest;
+import com.pace.base.app.UnitOfWork;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDataCache;
+import com.pace.base.mdb.PafUowCache;
 import com.pace.base.mdb.testCommonParms;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
@@ -51,9 +52,12 @@ import com.pace.mdb.essbase.EsbMetaData;
 public class WOSFuncTest extends TestCase {
 	
     private static String[] activeVersions = testCommonParms.getActiveVersions();
-	private static Map<Integer, List<String>> expandedUow = testCommonParms.getExpandedUow();
+	private static UnitOfWork uowSpec = testCommonParms.getUowSpec();
+	private String[] uowDims = testCommonParms.getUowDims();
 	private PafApplicationDef appDef = testCommonParms.getAppDef();
 	private Properties props = testCommonParms.getConnectionProps();
+	private PafClientState clientState = testCommonParms.getClientState();
+	private Map<String, Map<Integer, List<String>>> dataSpecByVersion = testCommonParms.getDataSpecByVersion(uowSpec.getUowMap(), appDef);
 	private static Logger logger = Logger.getLogger(WOSFuncTest.class);
 	
 	/*
@@ -73,7 +77,6 @@ public class WOSFuncTest extends TestCase {
 		PafDataCache dataCache = null;
 		EvalState evalState = null;
 		WOSFunc wosFunc = new WOSFunc();
-		PafClientState clientState = null;
 		
 		logger.info("***************************************************");
 		logger.info(this.getName() +  " - Test Started");
@@ -81,8 +84,9 @@ public class WOSFuncTest extends TestCase {
 			
 			// Get data
 			logger.info("Getting essbase data");
+			dataCache = new PafUowCache(clientState);
 			EsbData esbData = new EsbData(props);		
-			dataCache = esbData.getUowCache(expandedUow, appDef, activeVersions);
+			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
 			measureDim = dataCache.getMeasureDim();
 			timeDim = dataCache.getTimeDim();
 			

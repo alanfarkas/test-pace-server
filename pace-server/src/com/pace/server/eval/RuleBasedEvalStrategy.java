@@ -29,17 +29,22 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.SortOrder;
 import com.pace.base.app.MdbDef;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.VersionType;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.funcs.F_CrossDim;
 import com.pace.base.funcs.IPafFunction;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataSliceCache;
+import com.pace.base.mdb.PafUowCache;
 import com.pace.base.rules.*;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
@@ -49,6 +54,7 @@ import com.pace.base.utility.StringUtils;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewSection;
+import com.pace.server.PafDataService;
 import com.pace.server.PafMetaData;
 import com.pace.server.RuleMngr;
 import com.pace.server.eval.ES_ProcessReplication.ReplicationType;
@@ -78,6 +84,7 @@ import com.pace.server.eval.ES_ProcessReplication.ReplicationType;
 public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 	private static Logger logger = Logger.getLogger(RuleBasedEvalStrategy.class);
+	private static Logger performanceLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_EVAL);
 
 	private ES_EvalStdRulegroup evalStdRulegroup = new ES_EvalStdRulegroup();
 	private ES_EvalPepetualRulegroup evalPerpetualRulegroup = new ES_EvalPepetualRulegroup();
@@ -113,7 +120,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		// Initialization
 		PafDataCache uowCache = uowEvalState.getDataCache();
-		long startTime = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis(), stepTime = 0;
 		uowEvalState.setStartTime(startTime);
 		
 		logger.info(Messages.getString("RuleBasedEvalStrategy.0")); //$NON-NLS-1$
@@ -128,7 +135,13 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		this.measureCat = uowEvalState.getAppDef().getMeasureDefs();
 
-		long stepTime = System.currentTimeMillis();
+		
+		// Load supporting multidimensional database data
+		stepTime = System.currentTimeMillis();
+		loadMdbData(uowEvalState);
+		performanceLogger.info(LogUtil.timedStep(Messages.getString("RuleBasedEvalStrategy.67"), stepTime));   //$NON-NLS-1$
+		
+		stepTime = System.currentTimeMillis();
 		logger.info(Messages.getString("RuleBasedEvalStrategy.4")); //$NON-NLS-1$
 		processLooseMeasures(ruleSet, uowEvalState);
 		logger.info(LogUtil.timedStep(Messages.getString("RuleBasedEvalStrategy.5"), stepTime));   //$NON-NLS-1$
@@ -173,7 +186,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		PafClientState clientState = dsEvalState.getClientState();
 		MemberTreeSet memberTrees = clientState.getUowTrees();
 
-		long startTime = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis(), stepTime = 0;
 		dsEvalState.setStartTime(startTime);
 		logger.info(Messages.getString("RuleBasedEvalStrategy.12")); //$NON-NLS-1$
 
@@ -187,6 +200,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		this.measureCat = dsEvalState.getAppDef().getMeasureDefs();
 
+		
 		// Convert variance changes to base version changes
 		logger.info(Messages.getString("RuleBasedEvalStrategy.16")); //$NON-NLS-1$
 		convertVarianceVersions.performEvaluation(dsEvalState);    
@@ -194,11 +208,6 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		// Stage contribution % changes
 		logger.info(Messages.getString("RuleBasedEvalStrategy.81")); //$NON-NLS-1$
 		evalContribPctVersions.stageContributionPctChanges(dsEvalState);
-		
-		// Updating uow cache with converted data slice cache values,
-		// only pulling base dimensions from the uow cache.
-		logger.info(Messages.getString("RuleBasedEvalStrategy.17")); //$NON-NLS-1$
-		uowCache.loadCacheCells(dsCache);
 		
 		// Create uowEvalState out of existing dsEvalState
 		EvalState uowEvalState = null;
@@ -210,6 +219,16 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		}
 		uowEvalState.setDataCache(uowCache);
 
+		// Load supporting multidimensional database data
+		stepTime = System.currentTimeMillis();
+		loadMdbData(uowEvalState);
+		performanceLogger.info(LogUtil.timedStep(Messages.getString("RuleBasedEvalStrategy.67"), stepTime));   //$NON-NLS-1$
+		
+		// Updating uow cache with converted data slice cache values,
+		// only pulling base dimensions from the uow cache.
+		logger.info(Messages.getString("RuleBasedEvalStrategy.17")); //$NON-NLS-1$
+		uowCache.loadCacheCells(dsCache);
+		
 		// Convert replicated changes to base intersection changes
 		logger.info(Messages.getString("RuleBasedEvalStrategy.18")); //$NON-NLS-1$
 		processReplication.performEvaluation(uowEvalState); 
@@ -240,7 +259,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		logger.info(Messages.getString("RuleBasedEvalStrategy.22")); //$NON-NLS-1$
 		Map<String, List<RuleGroup>>balanceSets = createBalanceSets(ruleSet);
 
-		long stepTime = System.currentTimeMillis();
+		stepTime = System.currentTimeMillis();
 		logger.info(Messages.getString("RuleBasedEvalStrategy.23")); //$NON-NLS-1$
 		processLooseMeasures(ruleSet, uowEvalState, dsEvalState);
 		logger.info(LogUtil.timedStep(Messages.getString("RuleBasedEvalStrategy.24"), stepTime));   //$NON-NLS-1$
@@ -310,6 +329,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 			logger.info(Messages.getString("RuleBasedEvalStrategy.33")); //$NON-NLS-1$
 		}
 
+		
 		// Create the list of base dimensions that will be exploded as part of an attribute
 		// allocation. Currently, allocations are not performed over the measures dimension.
 		Set<String> explodedBaseDims = new HashSet<String>(Arrays.asList(uowCache.getAllDimensions()));
@@ -350,7 +370,13 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		uowEvalState.setAttributeEval(true);
 		uowEvalState.setVarianceReplicationValues(varianceReplicationBaseValues);
 		uowEvalState.setContribPctFormulas(dsEvalState.hasContribPctFormulas());
+		uowEvalState.setMeasureRuleSet(ruleSet);
 		
+		// Load supporting multidimensional database data
+		stepTime = System.currentTimeMillis();
+		loadMdbData(uowEvalState);
+		performanceLogger.info(LogUtil.timedStep(Messages.getString("RuleBasedEvalStrategy.67"), stepTime));   //$NON-NLS-1$
+				
 		//Load rounding rules
 		if (uowEvalState.getAppDef().getAppSettings().isEnableRounding()) {
 			logger.info(Messages.getString("RuleBasedEvalStrategy.35")); //$NON-NLS-1$
@@ -402,7 +428,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		stepDesc = Messages.getString("RuleBasedEvalStrategy.45"); //$NON-NLS-1$
 		stepTime = System.currentTimeMillis();
 		Map<String, List<String>> memberFilter = new HashMap<String, List<String>>();
-		List<String> activeVersions = Arrays.asList(dsCache.getActiveVersions());
+		List<String> activeVersions = Arrays.asList(dsCache.getPlanVersions());
 		memberFilter.put(versionDim, activeVersions);
 		List<String> openPeriods = dsCache.getForwardPlannablePeriods();
 		memberFilter.put(timeDim, openPeriods);
@@ -422,6 +448,157 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		// Return fully calculated data slice cache
 		return dsCache;
+	}
+
+
+	/**
+	 * Load any mdb data required for evaluation
+	 * 
+	 * @param evalState Eval state object
+	 * @throws PafException 
+	 */
+	private void loadMdbData(EvalState evalState) throws PafException {
+		
+		Set<String> versionsToLoad = new HashSet<String>();
+		PafApplicationDef appDef = evalState.getAppDef();
+		PafClientState clientState = evalState.getClientState();
+		SliceState sliceState = evalState.getSliceState();
+		PafDataCache dataCache = evalState.getDataCache();
+		String versionDim = evalState.getVersionDim();
+		List<String> varianceVersions = evalState.getVarVersNames();
+		List<String> contribPctVersions = dataCache.getVersionsByType(VersionType.ContribPct);
+		List<String> referenceVersions = dataCache.getReferenceVersions();
+		
+		// This method determines which reference data is needed specifically to
+		// perform the current evaluation request, beyond what have already been
+		// loaded either at the initial uow load or during view rendering.
+		//
+		// Reference data that is needed to generically support default evaluation 
+		// is loaded as part of the inital UOW load.
+		long startTime = System.currentTimeMillis();
+		performanceLogger.info("Determining which mdb data to load for evaluation");
+   
+		// Check dependencies related to user-initiated (non-default) evaluation. If
+		// calculations are dependent on a particular version, that entire version
+		// will be loaded into the data cache.
+    	if(evalState.getSliceState() != null){
+    		
+    		// Check for replication on reference versions or variance versions 
+    		List<Intersection> replicatedCellList = new ArrayList<Intersection>();
+    	    Intersection[] replicatedCells = sliceState.getReplicateAllCells();
+    	    if (replicatedCells != null) {
+    	    	replicatedCellList.addAll(Arrays.asList(replicatedCells));
+    	    }
+    	    replicatedCells = sliceState.getReplicateExistingCells();
+    	    if (replicatedCells != null) {
+    	    	replicatedCellList.addAll(Arrays.asList(replicatedCells));
+    	    }
+    	    
+    	    // Check the version member on each replicated cell intersection. If the 
+    	    // version is a reference version then load it. Or, if the version is a 
+    	    // variance version, check the "compare version". Load the compare version
+    	    // if it is a reference version.
+    	    for (Intersection replicatedIs: replicatedCellList) {
+    	    	
+    	    	String version = replicatedIs.getCoordinate(versionDim);
+    	    	if (referenceVersions.contains(version)) {
+    	    		versionsToLoad.add(version);
+    	    	} else if (varianceVersions.contains(version)) {
+    	    		String compareVersion = appDef.getVersionDef(version).getVersionFormula().getCompareVersion();
+    	    		versionsToLoad.add(compareVersion);
+    	    	}
+    	    	
+    	    	// To save time, exit loop if all reference versions have already been selected
+    	    	if (versionsToLoad.size() >= referenceVersions.size()) {
+    	    		break;
+    	    	}
+    	    } 
+		
+    	} 
+
+    	// Check for version dependencies that impact both default and non-default evaluation
+    	
+    	// -- Check for any data that needs to be loaded because of cross dim formulas
+    	Set<String> crossDimVersions = findMdbCrossDimDependencies(evalState, referenceVersions);
+    	versionsToLoad.addAll(crossDimVersions);
+    	
+    	
+    	// Refresh data cache
+		PafDataService.getInstance().updateUowCache(clientState, (PafUowCache) dataCache, new ArrayList<String>(versionsToLoad));
+		String stepDesc = "Mdb data load to support evaluation";
+		performanceLogger.info(LogUtil.timedStep(stepDesc, startTime));
+	}
+
+
+	/**
+	 * 	Return the set of reference versions whose data may be needed to calculate any cross
+	 * 	dim formulas in the current rule set
+	 *  
+	 * @param evalState Evaluation state
+	 * @param referenceVersions List of valid reference versions
+	 * 
+	 * @return Set of required versions
+	 * @throws PafException 
+	 */
+	private Set<String> findMdbCrossDimDependencies(EvalState evalState, List<String> referenceVersions) throws PafException {
+		
+//		PafClientState clientState = evalState.getClientState();
+		PafApplicationDef pafApp = evalState.getAppDef();
+		String versionDim = pafApp.getMdbDef().getVersionDim();
+		Set<String> crossDimDependencies = new HashSet<String>();
+		
+		
+		// This method will return any reference versions that are required
+		// to support any cross dim formulas in the current rule set. 
+		// 
+		// The current assumption is that if a version is referenced in a cross
+		// dim formula, then that entire version will need to be loaded. That's
+		// not necessarily true, depending on the members and/or tokens utilized 
+		// in the cross dim. Futher optimization could be added in the future that
+		// would instead return a member map that would better define the actual
+		// data blocks needed.
+		
+		RuleSet ruleSet = evalState.getMeasureRuleSet(); 
+		for (RuleGroup rg : ruleSet.getRuleGroups()){
+			for (Rule rule : rg.getRules()) {
+				Formula formula = rule.getFormula();
+			  	// get formula terms
+		    	String[] terms = formula.getExpressionTerms();
+		        boolean[] funcFlags = formula.getFunctionTermFlags();
+		        IPafFunction function = null;
+		          
+		    	//lookup each term
+		    	for (int i = 0; i < terms.length; i++) {
+		            // funcflags indicate a complex function that must be evaluated differently
+		            if (funcFlags[i]) {
+		                function = formula.extractFunctionTerms()[i];
+		                if (function.getClass().equals(F_CrossDim.class)) {
+		                	// Cross Dim function - look for any specified reference versions
+		                	String[] parms = function.getParms();
+		                	for (int parmInx = 0; parmInx < parms.length / 2; parmInx++) {
+		        				String dim = parms[parmInx*2];
+		        				String memberSpec = parms[parmInx*2+1];
+		        				if (dim.equals(versionDim)) {
+		        					if (referenceVersions.contains(memberSpec)) {
+		        						crossDimDependencies.add(memberSpec);
+		        						break;
+		        					}
+		        				}
+		                	}
+		                }
+		            }
+		    	}
+		    	
+			}
+			
+			// To save time, we can stop parsing the rules if all reference data has
+			// already been selected.
+			if (crossDimDependencies.size() >= referenceVersions.size()) {
+				break;
+			}
+		}
+		
+		return crossDimDependencies;
 	}
 
 
@@ -565,7 +742,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		// and open periods (or current time slice if running in time slice mode).
 		Map<String, List<String>> memberFilters = new HashMap<String, List<String>>();
 		memberFilters.put(measureDim, measureFilter);
-		memberFilters.put(versionDim, Arrays.asList(dsCache.getActiveVersions()));
+		memberFilters.put(versionDim, Arrays.asList(dsCache.getPlanVersions()));
 		if (!dsEvalState.isTimeSliceMode()) {
 			memberFilters.put(timeDim, dsCache.getForwardPlannablePeriods());
 		} else {
@@ -640,6 +817,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		convertedClientState.setActiveVersions(attrClientState.getActiveVersions());
 		convertedClientState.setApp(attrClientState.getApp());
 		convertedClientState.setCurrentMsrRulesetName(attrClientState.getCurrentMsrRulesetName());
+		convertedClientState.getDataSources().putAll(attrClientState.getDataSources());
 		convertedClientState.setLockedPeriods(attrClientState.getLockedPeriods());
 		convertedClientState.setMemberIndexLists(attrClientState.getMemberIndexLists()); //TTN-1391
 		convertedClientState.setPlannerConfig(attrClientState.getPlannerConfig());
@@ -946,7 +1124,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 					double replicatedValue = dsCache.getCellValue(attrIs);
 					for (Intersection baseIs:baseIntersections) {
 						
-						// Skip Replicate Existing intersections that are zero and whose floor descendants
+						// Skip Replicate Existing on intersections that are zero and whose floor descendants
 						// are all equal to zero. (TTN-1467)
 						if (isReplicateExisting && uowCache.getCellValue(baseIs) == 0) {
 							List<Intersection> floorIntersections = EvalUtil.buildFloorIntersections(baseIs, dsEvalState);
@@ -971,10 +1149,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 					double replicatedValue = varianceReplicationValues.get(attrIs);
 					for (Intersection baseIs:baseIntersections) {	
 						
-						// Remap replication intersection back to original variance version
-						baseIs.setCoordinate(versionDim, origVersion);
-
-						// Skip Replicate Existing intersections that are zero and who's floor descendants
+						// Skip Replicate Existing on intersections that are zero and who's floor descendants
 						// are all equal to zero. (TTN-1467)
 						if (isReplicateExisting && uowCache.getCellValue(baseIs) == 0) {
 							List<Intersection> floorIntersections = EvalUtil.buildFloorIntersections(baseIs, dsEvalState);
@@ -988,6 +1163,9 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 							if (!isValueFound) continue;
 						}
 												
+						// Remap replication intersection back to original variance version
+						baseIs.setCoordinate(versionDim, origVersion);
+
 						// Add replication intersection to data slice collection
 						replicatedBaseCells[i].add(baseIs); 
 
@@ -1302,7 +1480,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 										measureList.add(currentMeasure);
 										dsCacheFilter.put(measureDim, measureList);
 										dsCacheFilter.put(timeDim, dsCache.getForwardPlannablePeriods());
-										dsCacheFilter.put(versionDim, Arrays.asList(dsCache.getActiveVersions()));
+										dsCacheFilter.put(versionDim, Arrays.asList(dsCache.getPlanVersions()));
 										dsCache.loadCacheCells(uowCache, dsCacheFilter);
 									} 
 //								} 
@@ -1325,7 +1503,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 				logger.debug(Messages.getString("RuleBasedEvalStrategy.61"));             //$NON-NLS-1$
 				int passCount = 1;
 				if (hasContribPctConflicts(dsEvalState, rg)) {
-					logger.info(Messages.getString("RuleBasedEvalStrategy.85"));
+					logger.info(Messages.getString("RuleBasedEvalStrategy.85"));		  //$NON-NLS-1$
 					passCount = 2;
 				}
 				
@@ -1370,7 +1548,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 									List<String> periodList = new ArrayList<String>(); 
 									periodList.add(timeSlice);
 									dsCacheFilter.put(timeDim, periodList);
-									dsCacheFilter.put(versionDim, Arrays.asList(dsCache.getActiveVersions()));
+									dsCacheFilter.put(versionDim, Arrays.asList(dsCache.getPlanVersions()));
 									dsCache.loadCacheCells(uowCache, dsCacheFilter);
 								} 
 	//						} 
@@ -1647,7 +1825,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 					if (isRoundingEnabled) {
 						if(dsEvalState.getDataCache().isMember(measureDim, currentMeasure)){													
 							Map<String, List<String>> dimFilter = new HashMap<String, List<String>>();
-							List<String> activeVersions = Arrays.asList(uowEvalState.getDataCache().getActiveVersions());
+							List<String> activeVersions = Arrays.asList(uowEvalState.getDataCache().getPlanVersions());
 							List<String> currentMeasures = new ArrayList<String>();
 							currentMeasures.add(currentMeasure);
 							dimFilter.put(versionDim, activeVersions);

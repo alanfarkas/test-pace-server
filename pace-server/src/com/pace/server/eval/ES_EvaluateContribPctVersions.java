@@ -105,7 +105,7 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		List<String> measureFilter = new ArrayList<String>();
 		measureFilter.add(currentMeasure);
 		dsCacheMemberFilter.put(measureDim, measureFilter);
-		dsCacheMemberFilter.put(versionDim, Arrays.asList(dsCache.getActiveVersions()));
+		dsCacheMemberFilter.put(versionDim, Arrays.asList(dsCache.getPlanVersions()));
 		List<String> periodList = null;
 		if (dsEvalState.isTimeSliceMode()) {
 			periodList = Arrays.asList(new String[]{currentPeriod});

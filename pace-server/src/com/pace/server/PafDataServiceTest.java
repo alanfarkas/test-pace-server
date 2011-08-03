@@ -56,12 +56,13 @@ public class PafDataServiceTest extends TestCase {
 
     	clientState.setApp(appDef);
     	clientState.setActiveVersions(activeVersions);
+    	clientState.setUnitOfWork(UtilityStubs.getTestUow());
     	plannerConfig = PafMetaData.getPaceProject().getRoleConfigurations().get(0);
     	plannerConfig.setCalcElapsedPeriods(true);
     	clientState.setPlannerConfig(plannerConfig);
     	clientState.setPlanSeason(season);
         try {
-            pds.loadUowCache(clientState, appDef, UtilityStubs.getTestUow() );
+            pds.loadUowCache(clientState);
             isSuccess = true;
         } catch (PafException pex) {
             PafErrHandler.handleException(pex);

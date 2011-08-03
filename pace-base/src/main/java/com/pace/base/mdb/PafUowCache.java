@@ -18,8 +18,16 @@
  */
 package com.pace.base.mdb;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafBaseConstants;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.UnitOfWork;
+import com.pace.base.state.PafClientState;
+import com.pace.base.utility.LogUtil;
 import com.pace.base.view.PafMVS;
 
 /**
@@ -31,35 +39,93 @@ import com.pace.base.view.PafMVS;
  */
 public class PafUowCache extends PafDataCache {
 
-	private boolean[] isSlicerAxis = null;	// Expected to be false
-	private int[] dimCountByAxis = null;
-	private String mdxQuery = null;
 	private static Logger logger = Logger.getLogger(PafUowCache.class);
+	private static Logger performanceLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_DC);
+
+	/**
+	 * Convenience constructor for testing purposes
+	 * 
+	 * @param clientState Client State
+	 */
+	public PafUowCache(PafClientState clientState) {
+		this(clientState, new String[0], new HashSet<String>());
+	}
+	
+	/**
+	 * @param clientState Client State
+	 * @param attributeDims Attribute dimension names 
+	 * @param lockedPeriods Set of locked periods
+	 */
+	public PafUowCache(PafClientState clientState, String[] attributeDims, Set<String> lockedPeriods) {
+
+		int axisCount = 0;
+		int[] axisSizes = null;
+		String[][] memberArray = null;
+		String[] planVersion = new String[]{clientState.getPlanningVersion().getName()};
+		long createStartTime = System.currentTimeMillis();
+		PafApplicationDef appDef = clientState.getApp();
+		UnitOfWork expandedUowSpec = clientState.getUnitOfWork();
+		String[] uowDims = expandedUowSpec.getDimensions();
+
+//TODO Pull in UOWTrees and add as DC parameter
+//TODO Add baseDims as a parm and use it to set global baseDims var
+
+		logger.debug("Creating instance of PafUowCache");
+		
+		// Parse out the dimensional info in the unit of work specification
+		// and generate needed data structures including an array containing 
+		// the list of members for each dimension axis.
+		axisCount = uowDims.length;
+		axisSizes = new int[axisCount];
+		memberArray = new String[axisCount][];
+		for (int axis = 0; axis < axisCount; axis++) {
+			String[] members = expandedUowSpec.getDimMembers(uowDims[axis]);
+			memberArray[axis] = members;
+			axisSizes[axis] = members.length;
+		}
+
+		// Set instance variables
+		setAppDef(appDef);
+		setPlanVersions(planVersion);
+		setLockedPeriods(lockedPeriods);
+		setAxisCount(axisCount);
+		setAxisSizes(axisSizes);
+		setAllDimensions(uowDims);
+		setCoreDimensions(uowDims);
+		setAttributeDims(attributeDims);
+		setMemberArray(memberArray);
+
+		// Initialize data cache
+		initDataCache();  // combine constructor logic with this
+		String logMsg = LogUtil.timedStep("Data Cache creation", createStartTime);
+		performanceLogger.info(logMsg);
+		
+	}
 
 	/**
 	 * @param cacheParms parameters required for constructing the data cache
 	 */
 	public PafUowCache(PafUowCacheParms cacheParms) {
 		
+		long createStartTime = System.currentTimeMillis();
 		logger.info("Creating instance of PafUowCache");
 				
 		// Set instance variables
 		setAppDef(cacheParms.getAppDef());
-		setActiveVersions(cacheParms.getActiveVersions());
+		setPlanVersions(cacheParms.getActiveVersions());
 		setLockedPeriods(cacheParms.getLockedPeriods());
 		setAxisCount(cacheParms.getAxisCount());
 		setAxisSizes(cacheParms.getAxisSize());
-		setDimCountByAxis(cacheParms.getDimCountByAxis());
 		setAllDimensions(cacheParms.getDimensions());
-		setIsSlicerAxis(cacheParms.getIsSlicerAxis());
 		setMemberArray(cacheParms.getMemberArray());
-		setMdxQuery(cacheParms.getMdxQuery());
 
 		// Validate object parameters
 		validateUowCacheParms();
 		
 		// Initialize uow cache
 		initDataCache();
+		String logMsg = LogUtil.timedStep("Data Cache creation", createStartTime);
+		performanceLogger.debug(logMsg);
 		
 	}
 	
@@ -69,7 +135,7 @@ public class PafUowCache extends PafDataCache {
 	 */
 	private void validateUowCacheParms() {
 		
-		logger.info("Validating PafUowCache parameters");
+		logger.debug("Validating PafUowCache parameters");
 
 		// Validate "appDef"
 		logger.debug("Validating [appDef]");
@@ -94,22 +160,13 @@ public class PafUowCache extends PafDataCache {
 		// Validate "activeVersions"
 		//TODO Change name of "activeVersions" to "planningVersions"
 		logger.debug("Validating [activeVersions]");
-		if (getActiveVersions() == null) {
+		if (getPlanVersions() == null) {
 			// Throw Illegal Argument Exception
 			String errMsg = "PafUowCache parms error - null activeVersions";
 			logger.error(errMsg);
 			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
 			throw iae; 
 		}
-		
-		// Validate "mdxQuery"
-		if (getMdxQuery() == null || getMdxQuery() == "") {
-			// mdxQuery is null or blank
-			String errMsg = "PafUowCache parms error - mdxQuery is blank or null ***";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}	
 		
 		// Validate "axisCount"
 		logger.debug("Validating [axisCount]");
@@ -130,106 +187,26 @@ public class PafUowCache extends PafDataCache {
 			axisProduct = axisProduct * getAxisSizes()[i]; 
 		}
 		
-		// Validate "isSlicerAxis"
-		logger.debug("Validating [isSlicerAxis]");
-		validateArray(isSlicerAxis, "isSlicerAxis");
-		
-		// Validate "dimCountByAxis"
-		logger.debug("Validating [dimCountByAxis]");
-		validateArray(getDimCountByAxis(), "dimCountByAxis");
-		for (int i = 0; i < getAxisCount(); i++) {
-			if (getDimCountByAxis()[i] > 1) {
-				// Axis has more than one dimension
-				String errMsg = "PafUowCache parms error - axis [" + i + "] has more than one dimension (possible issue with Mdx query syntax)";
-				logger.error(errMsg);
-				IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-				throw iae; 
-			}	
-		}
 		
 		// Validate "allDimensions"
 		logger.debug("Validating [allDimensions]");
 		validateArray(getAllDimensions(), "allDimensions");
 		
 		// Validate "memberArray"
-		logger.debug("Validating [memberArray]");
-		validateArray(getMemberArray(), "memberArray");
-		for (int i = 0; i < getAxisCount(); i++) {
-			if (getMemberArray()[i].length != getAxisSizes()[i]) {
-				// Number of axis members in memberArray for don't match axis size 
-				// throw Illegal Argument Exception
-				String errMsg = "PafUowCache parms error - number of members in memberArray for axis [" + i + "] does not match axis size";
-				logger.error(errMsg);
-				IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-				throw iae; 
-			}	
-		}
+//		logger.debug("Validating [memberArray]");
+//		validateArray(getMemberArray(), "memberArray");
+//		for (int i = 0; i < getAxisCount(); i++) {
+//			if (getMemberArray()[i].length != getAxisSizes()[i]) {
+//				// Number of axis members in memberArray for don't match axis size 
+//				// throw Illegal Argument Exception
+//				String errMsg = "PafUowCache parms error - number of members in memberArray for axis [" + i + "] does not match axis size";
+//				logger.error(errMsg);
+//				IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
+//				throw iae; 
+//			}	
+//		}
 	}
 	
-	/**
-	 *	Return the number of columns in the uow cache
-	 *
- 	 * @return Returns the number of columns in the uow cache.
-	 */
-	public int getColumnCount() {
-		
-		int columnCount = 0;
-		
-		if (isSlicerAxis[0]) {
-			columnCount = getAxisSizes()[1];
-		} else {
-			columnCount = getAxisSizes()[0];
-		}
-		return columnCount;
-	}
-
-	/**
-	 * @return the dimCountByAxis
-	 */
-	private int[] getDimCountByAxis() {
-		return dimCountByAxis;
-	}
-	/**
-	 * @param dimCountByAxis the dimCountByAxis to set
-	 */
-	private void setDimCountByAxis(int[] dimCountByAxis) {
-		this.dimCountByAxis = dimCountByAxis;
-	}
-
-	/**
-	 *	Return the isSlicerAxis array
-	 *
- 	 * @return Returns the isSlicerAxis array.
-	 */
-	public boolean[] getIsSlicerAxis() {
-		return isSlicerAxis;
-	}
-	/**
-	 *	Update the isSlicerAxis array
-	 *
- 	 * @param isSlicerAxis A boolean array that inidicates whether or not an axis is a slicer axis
-	 */
-	private void setIsSlicerAxis(boolean[] isSlicerAxis) {
-		this.isSlicerAxis = isSlicerAxis;
-	}
-
-
-	/**
-	 *	Return the Mdx query string that was used to build the data cache
-	 *
- 	 * @return Returns the Mdx query string that was used to build the data cache.
-	 */
-	public String getMdxQuery() {
-		return mdxQuery;
-	}
-	/**
-	 *	Update the Mdx query that was used to build the data cache
-	 *
- 	 * @param mdxQuery The Mdx query that was used to build the data cache
-	 */
-	private void setMdxQuery(String mdxQuery) {
-		this.mdxQuery = mdxQuery;
-	}
 
 	/**
 	 * @return the pafMVS (null for PafUowCache)

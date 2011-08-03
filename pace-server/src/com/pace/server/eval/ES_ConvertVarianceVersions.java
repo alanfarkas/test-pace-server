@@ -18,17 +18,19 @@
  */
 package com.pace.server.eval;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
-import com.pace.base.app.*;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.VarRptgFlag;
+import com.pace.base.app.VersionDef;
+import com.pace.base.app.VersionFormula;
+import com.pace.base.app.VersionType;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafDataCache;

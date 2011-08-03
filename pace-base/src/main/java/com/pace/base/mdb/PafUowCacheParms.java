@@ -35,11 +35,9 @@ public class PafUowCacheParms {
 
 	private PafApplicationDef appDef = null;
 	private Set<String> lockedPeriods = null;
-	private boolean[] isSlicerAxis = null;
 	private int axisCount = 0;
 	private int[] axisSize = null;
 	private int[] dimCountByAxis = null;
-	private String mdxQuery = null;
 	private String[] dimensions = null;
 	private String[][] memberArray = null;
 	private String[] activeVersions;
@@ -102,31 +100,6 @@ public class PafUowCacheParms {
 		this.dimensions = dimensions;
 	}
 	
-	/**
-	 * @return Returns the isSlicerAxis.
-	 */
-	public boolean[] getIsSlicerAxis() {
-		return isSlicerAxis;
-	}
-	/**
-	 * @param isSlicerAxis The isSlicerAxis to set.
-	 */
-	public void setIsSlicerAxis(boolean[] isSlicerAxis) {
-		this.isSlicerAxis = isSlicerAxis;
-	}
-	
-	/**
-	 * @return Returns the mdx query.
-	 */
-	public String getMdxQuery() {
-		return mdxQuery;
-	}
-	/**
-	 * @param mdxQuery The mdx query to set.
-	 */
-	public void setMdxQuery(String mdxQuery) {
-		this.mdxQuery = mdxQuery;
-	}
 	
 	/**
 	 * @return Returns the member array.

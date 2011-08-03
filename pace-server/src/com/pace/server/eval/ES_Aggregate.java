@@ -190,7 +190,7 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
              		 filteredVersion.addAll(validRefVersions);
              	 }
 
-             	 // Add any filtered versions to aggregation filter, exit if no filtered versions were speficied.
+             	 // Add any filtered versions to aggregation filter, exit if no filtered versions were specified.
              	 if (filteredVersion.size() > 0) {
              		 aggFilter.put(versionDim, filteredVersion);
              	 } else {

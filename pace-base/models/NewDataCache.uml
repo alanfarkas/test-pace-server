@@ -1,0 +1,1756 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_qb8akM37EdqwVrslYOdUDA" name="NewDataCache">
+  <packagedElement xmi:type="uml:Package" xmi:id="_XW68IKwPEeClidTOV3Evwg" name="com">
+    <packagedElement xmi:type="uml:Package" xmi:id="_XW8KQKwPEeClidTOV3Evwg" name="pace">
+      <packagedElement xmi:type="uml:Package" xmi:id="_XW8KQawPEeClidTOV3Evwg" name="base">
+        <packagedElement xmi:type="uml:Package" xmi:id="_XYFZwKwPEeClidTOV3Evwg" name="mdb">
+          <packagedElement xmi:type="uml:Class" xmi:id="_XZS6sKwPEeClidTOV3Evwg" name="PafDataCache" clientDependency="_YQJqMKwPEeClidTOV3Evwg" isAbstract="true">
+            <ownedComment xmi:id="_XZw0wKwPEeClidTOV3Evwg">
+              <body>/** 
+ * Container for a subset of multidimensional data cells corresponding
+ * to a &quot;unit of work&quot;
+ * @version	x.xx
+ * @author Alan Farkas
+ */
+</body>
+            </ownedComment>
+            <ownedAttribute xmi:id="_YSB5gKwPEeClidTOV3Evwg" name="dataBlockIndexMap" visibility="private" type="_YRqtIKwPEeClidTOV3Evwg"/>
+            <ownedAttribute xmi:id="_YSaUAKwPEeClidTOV3Evwg" name="dataBlockPool" visibility="private" type="_YSOt0KwPEeClidTOV3Evwg"/>
+            <ownedAttribute xmi:id="_YSw5UKwPEeClidTOV3Evwg" name="blockSize" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              <defaultValue xmi:type="uml:LiteralInteger" xmi:id="_YSw5UawPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YTTE0KwPEeClidTOV3Evwg" name="axisCount" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              <defaultValue xmi:type="uml:LiteralInteger" xmi:id="_YTTE0awPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YTn08KwPEeClidTOV3Evwg" name="indexedDataBlockCount" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              <defaultValue xmi:type="uml:LiteralInteger" xmi:id="_YTn08awPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YUBdkKwPEeClidTOV3Evwg" name="axisSizes" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YUBdkawPEeClidTOV3Evwg" value="*"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YUBdkqwPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YUVmoKwPEeClidTOV3Evwg" name="indexedAxes" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YUVmoawPEeClidTOV3Evwg" value="*"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YUVmoqwPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YUpvsKwPEeClidTOV3Evwg" name="lockedPeriods" visibility="private" type="_YUf-sKwPEeClidTOV3Evwg"/>
+            <ownedAttribute xmi:id="_YVA8EKwPEeClidTOV3Evwg" name="activeVersions" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YVA8EawPEeClidTOV3Evwg" value="*"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YVA8EqwPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YVSo4KwPEeClidTOV3Evwg" name="allDimensions" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YVSo4awPEeClidTOV3Evwg" value="*"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YVSo4qwPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YVsRgKwPEeClidTOV3Evwg" name="indexedDimensions" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YVsRgawPEeClidTOV3Evwg" value="*"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YVsRgqwPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YV9XQKwPEeClidTOV3Evwg" name="memberArray" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YV9XQawPEeClidTOV3Evwg" value="*"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YV9XQqwPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YWPEEKwPEeClidTOV3Evwg" name="axisIndexMap" visibility="private" type="_YWGhMKwPEeClidTOV3Evwg"/>
+            <ownedAttribute xmi:id="_YWnekKwPEeClidTOV3Evwg" name="dimIndexMap" visibility="private" type="_YWGhMKwPEeClidTOV3Evwg"/>
+            <ownedAttribute xmi:id="_YW5LYKwPEeClidTOV3Evwg" name="memberIndexMap" visibility="private" type="_YWGhMKwPEeClidTOV3Evwg">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YW5LYawPEeClidTOV3Evwg" value="*"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YW5LYqwPEeClidTOV3Evwg"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YXOikKwPEeClidTOV3Evwg" name="changedCells" visibility="private" type="_YXCVUKwPEeClidTOV3Evwg"/>
+            <ownedAttribute xmi:id="_YXg2cKwPEeClidTOV3Evwg" name="appDef" visibility="private" type="_YXXsgKwPEeClidTOV3Evwg"/>
+            <ownedAttribute xmi:id="_YXyjQKwPEeClidTOV3Evwg" name="isDirty" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+              <defaultValue xmi:type="uml:LiteralBoolean" xmi:id="_YXyjQawPEeClidTOV3Evwg" value="true"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YYHTYKwPEeClidTOV3Evwg" name="NON_INDEXED_DIM_COUNT" visibility="private" isStatic="true" isReadOnly="true">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              <defaultValue xmi:type="uml:LiteralInteger" xmi:id="_YYHTYawPEeClidTOV3Evwg" value="2"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_YYZAMKwPEeClidTOV3Evwg" name="logger" visibility="private" isStatic="true" type="_YHtf4awPEeClidTOV3Evwg"/>
+            <ownedAttribute xmi:id="_YYvlgKwPEeClidTOV3Evwg" name="performanceLogger" visibility="private" isStatic="true" type="_YHtf4awPEeClidTOV3Evwg"/>
+            <ownedAttribute xmi:id="_YZArQKwPEeClidTOV3Evwg" name="DEFAULT_BLOCK_COUNT" visibility="package" isStatic="true" isReadOnly="true">
+              <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              <defaultValue xmi:type="uml:LiteralInteger" xmi:id="_YZArQawPEeClidTOV3Evwg" value="100"/>
+            </ownedAttribute>
+            <interfaceRealization xmi:id="_YQJqMKwPEeClidTOV3Evwg" name="IPafDataCache" supplier="_YQEKoKwPEeClidTOV3Evwg" client="_XZS6sKwPEeClidTOV3Evwg" contract="_YQEKoKwPEeClidTOV3Evwg"/>
+            <ownedOperation xmi:id="_YZWpgKwPEeClidTOV3Evwg" name="getColumnCount" visibility="public" isAbstract="true">
+              <ownedComment xmi:id="_YZfMYKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the number of columns in the data cache
+ * @return Returns the number of columns in the data cache.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YZWpgawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YZjd0KwPEeClidTOV3Evwg" name="getPafMVS" visibility="public" isAbstract="true">
+              <ownedComment xmi:id="_YZsAsKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the PafMVS
+ * @return Returns the PafMVS
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YZjd0awPEeClidTOV3Evwg" name="return" type="_YHuuBKwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YZsnwKwPEeClidTOV3Evwg" name="initDataCache" visibility="protected">
+              <ownedComment xmi:id="_YZ0jkKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Initialize data cache
+ */
+</body>
+              </ownedComment>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YZ1xsKwPEeClidTOV3Evwg" name="validateArray" visibility="protected">
+              <ownedComment xmi:id="_YZ-UkKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Simple Array Validation
+ * @param array Array to validate
+ * @param arrayName Array name
+ * @throws IllegalArgumentException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YZ1xsawPEeClidTOV3Evwg" name="array">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YZ1xsqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YZ1xs6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YZ1xtKwPEeClidTOV3Evwg" name="arrayName">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YZ-7oKwPEeClidTOV3Evwg" name="validateArray" visibility="protected">
+              <ownedComment xmi:id="_YaIsoKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Simple Array Validation
+ * @param array Array to validate
+ * @param arrayName Array name
+ * @throws IllegalArgumentException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YZ-7oawPEeClidTOV3Evwg" name="array">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YZ-7oqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YZ-7o6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YZ-7pKwPEeClidTOV3Evwg" name="arrayName">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YaJ6wKwPEeClidTOV3Evwg" name="validateArray" visibility="protected">
+              <ownedComment xmi:id="_YaYkQKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Simple Array Validation
+ * @param array Array to validate
+ * @param arrayName Array name
+ * @throws IllegalArgumentException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YaJ6wawPEeClidTOV3Evwg" name="array" type="_YaJTsKwPEeClidTOV3Evwg">
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YaJ6wqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YaJ6w6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YaJ6xKwPEeClidTOV3Evwg" name="arrayName">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YaZLUKwPEeClidTOV3Evwg" name="validateArrayNotEmpty" visibility="private">
+              <ownedComment xmi:id="_YahuMKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Valid that array is not empty or null
+ * @param array Array to validate
+ * @param arrayName Array name
+ * @throws IllegalArgumentException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YaZLUawPEeClidTOV3Evwg" name="array">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YaZLUqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YaZLU6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YaZLVKwPEeClidTOV3Evwg" name="arrayName">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YaiVQKwPEeClidTOV3Evwg" name="validateArrayNotEmpty" visibility="private">
+              <ownedComment xmi:id="_Yaq4IKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Valid that array is not empty or null
+ * @param array Array to validate
+ * @param arrayName Array name
+ * @throws IllegalArgumentException
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YaiVQawPEeClidTOV3Evwg" name="array">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YaiVQqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YaiVQ6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YaiVRKwPEeClidTOV3Evwg" name="arrayName">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YarfMKwPEeClidTOV3Evwg" name="validateArrayNotEmpty" visibility="private">
+              <ownedComment xmi:id="_YazbAKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Valid that array is not empty or null
+ * @param array Array to validate
+ * @param arrayName Array name
+ * @throws IllegalArgumentException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YarfMawPEeClidTOV3Evwg" name="array" type="_YaJTsKwPEeClidTOV3Evwg">
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YarfMqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YarfM6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YarfNKwPEeClidTOV3Evwg" name="arrayName">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Ya0pIKwPEeClidTOV3Evwg" name="validateObjectNotNull" visibility="private">
+              <ownedComment xmi:id="_Ya8k8KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Valid that object is not null
+ * @param object Array to validate
+ * @param objectName Array name
+ * @throws IllegalArgumentException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Ya0pIawPEeClidTOV3Evwg" name="object" type="_YaJTsKwPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_Ya0pIqwPEeClidTOV3Evwg" name="objectName">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Ya9MAKwPEeClidTOV3Evwg" name="createAxisIndexMap" visibility="protected">
+              <ownedComment xmi:id="_YbMckKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Create PafUowCache axis index map
+ * @return HashMap used for resolving dimension names to a specific axis index value.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Ya9MAawPEeClidTOV3Evwg" name="return" type="_YHsRwqwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YbNDoKwPEeClidTOV3Evwg" name="createIndexedAxes" visibility="protected">
+              <ownedComment xmi:id="_YbU_cKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Create indexed axis array
+ * @return An array containing the list of Indexed dimensions axes (excludes Measure and Time)
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YbNDoawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YbVmgKwPEeClidTOV3Evwg" name="createIndexedDimensions" visibility="protected">
+              <ownedComment xmi:id="_YbeJYKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Create indexed dimensions array
+ * @return An array containing the list of Indexed dimensions (excludes Measure and Time)
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YbVmgawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YbeJYawPEeClidTOV3Evwg" name="createDimIndexMap" visibility="protected">
+              <ownedComment xmi:id="_YbmsQKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Create PafUowCache dimension index map
+ * @return HashMap used for resolving dimension names to a specific dimension index value.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YbeJYqwPEeClidTOV3Evwg" name="return" type="_YHsRwqwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YbnTUKwPEeClidTOV3Evwg" name="createMemberIndexMap" visibility="protected">
+              <ownedComment xmi:id="_YbvPIKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Create PafUowCache member index map
+ * @return HashMap used for resolving member names to a specific index value
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YbnTUawPEeClidTOV3Evwg" name="return" type="_YHsRwqwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Ybv2MKwPEeClidTOV3Evwg" name="getDataBlockCount" visibility="public">
+              <ownedComment xmi:id="_Yb_GwKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the existing number of data blocks in the data cache
+ * @return The existing number of data blocks in the data cache
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Ybv2MawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yb_t0KwPEeClidTOV3Evwg" name="getMaxDataBlockCount" visibility="public">
+              <ownedComment xmi:id="_YcHpoKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the maximum number of member combinations across the Indexed
+ * Dimensions
+ * @return The maximum number of member combinations across the Indexed Dimensions
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yb_t0awPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YcIQsKwPEeClidTOV3Evwg" name="setDataBlockIndex" visibility="private">
+              <ownedComment xmi:id="_YcQzkKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param dataBlockIndex the dataBlockIndex to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YcIQsawPEeClidTOV3Evwg" name="dataBlockIndex" type="_YHs40qwPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YcRaoKwPEeClidTOV3Evwg" name="getDataBlockPool" visibility="protected">
+              <ownedComment xmi:id="_YcZWcKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @return the dataBlockPool
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YcRaoawPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YcZ9gKwPEeClidTOV3Evwg" name="setDataBlockPool" visibility="protected">
+              <ownedComment xmi:id="_YcigYKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param dataBlockPool the dataBlockPool to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YcZ9gawPEeClidTOV3Evwg" name="dataBlockPool" type="_YHs40awPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YcjHcKwPEeClidTOV3Evwg" name="getBlockSize" visibility="public">
+              <ownedComment xmi:id="_YcvUsKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @return the blockSize
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YcjHcawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Ycv7wKwPEeClidTOV3Evwg" name="setBlockSize" visibility="protected">
+              <ownedComment xmi:id="_Yc33kKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param blockSize the blockSize to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Ycv7wawPEeClidTOV3Evwg" name="blockSize">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yc4eoKwPEeClidTOV3Evwg" name="getDependentVersionDefs" visibility="public">
+              <ownedComment xmi:id="_YdBBgKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return an map of VersionDef objects for those data cache verions whose formulas 
+ * are dependent on any of the versions passed to this method 
+ * @param versions 
+ * @return An map of VersionDef objects for those versions whose formulas are dependent on any of the versions passed to this method
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yc4eoawPEeClidTOV3Evwg" name="versions">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yc4eoqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yc4eo6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yc4epKwPEeClidTOV3Evwg" name="return" type="_YHs40qwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YdCPoKwPEeClidTOV3Evwg" name="hasLockedPeriods" visibility="public">
+              <ownedComment xmi:id="_YdKygKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Determine if the Version and Year combination are locked
+ * @param version Selected member of version dimension
+ * @param year Selected member of year dimension
+ * @return true if Version and Year combination contains locked periods
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YdCPoawPEeClidTOV3Evwg" name="version">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YdCPoqwPEeClidTOV3Evwg" name="year">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YdCPo6wPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YdLZkKwPEeClidTOV3Evwg" name="getForwardPlannablePeriods" visibility="public">
+              <ownedComment xmi:id="_YdTVYKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Get the entire list of Forward Plannable periods in this data cache
+ * @return List of Forward Plannable periods
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YdLZkawPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YdUjgKwPEeClidTOV3Evwg" name="getForwardPlannablePeriods" visibility="public">
+              <ownedComment xmi:id="_YdgJsKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Get the list of Forward Plannable members from the supplied list of time members
+ * @param allPeriods All valid members of the time dimension
+ * @param lockedPeriods List of current locked periods
+ * @return List of Forward Plannable periods
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YdUjgawPEeClidTOV3Evwg" name="allPeriods">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YdUjgqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YdUjg6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YdUjhKwPEeClidTOV3Evwg" name="lockedPeriods" type="_YHs406wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YdUjhawPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YdhX0KwPEeClidTOV3Evwg" name="getOpenPeriods" visibility="public">
+              <ownedComment xmi:id="_Ydp6sKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Get the list open periods in this data cache based on the selected version and year
+ * @param version Selected member of version dimension
+ * @param year Selected member of year dimension
+ * @return List of open periods
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YdhX0awPEeClidTOV3Evwg" name="version">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YdhX0qwPEeClidTOV3Evwg" name="year">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YdhX06wPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YdrI0KwPEeClidTOV3Evwg" name="getOpenPeriods" visibility="public">
+              <ownedComment xmi:id="_YdzrsKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Get the list open periods based on the version and year
+ * @param version Selected member of version dimension
+ * @param year Selected member of year dimension
+ * @param timeMembers A valid members of the time dimension
+ * @param lockedPeriods List of current locked periods
+ * @return List of open periods
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YdrI0awPEeClidTOV3Evwg" name="version">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YdrI0qwPEeClidTOV3Evwg" name="year">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YdrI06wPEeClidTOV3Evwg" name="timeMembers">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YdrI1KwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YdrI1awPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YdrI1qwPEeClidTOV3Evwg" name="lockedPeriods" type="_YHs406wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YdrI16wPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yd0SwKwPEeClidTOV3Evwg" name="getActiveVersions" visibility="public">
+              <ownedComment xmi:id="_Yd8OkKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the active planning versions
+ * @return An array of active planning versions
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yd0SwawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yd81oKwPEeClidTOV3Evwg" name="setActiveVersions" visibility="protected">
+              <ownedComment xmi:id="_YeNUUKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Set the active planning versions
+ * @param activeVersions An array of active planning versions
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yd81oawPEeClidTOV3Evwg" name="activeVersions">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yd81oqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yd81o6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YeN7YKwPEeClidTOV3Evwg" name="getAllDimensions" visibility="public">
+              <ownedComment xmi:id="_YeWeQKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return an array containing the dimensions that are represented in the data cache
+ * @return Returns the dimension array.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YeN7YawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YeXFUKwPEeClidTOV3Evwg" name="setAllDimensions" visibility="protected">
+              <ownedComment xmi:id="_YefoMKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param allDimensions the allDimensions to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YeXFUawPEeClidTOV3Evwg" name="allDimensions">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YeXFUqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YeXFU6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YegPQKwPEeClidTOV3Evwg" name="getAppDef" visibility="public">
+              <ownedComment xmi:id="_YeoLEKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @return Returns the appDef.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YegPQawPEeClidTOV3Evwg" name="return" type="_YXXsgKwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YeoyIKwPEeClidTOV3Evwg" name="setAppDef" visibility="protected">
+              <ownedComment xmi:id="_Yewt8KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Set the application definition
+ * @param appDef
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YeoyIawPEeClidTOV3Evwg" name="appDef" type="_YXXsgKwPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YexVAKwPEeClidTOV3Evwg" name="getAxisCount" visibility="public">
+              <ownedComment xmi:id="_YfAlkKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the number of axes contained in the data cache
+ * @return Returns the number of axes contained in the data cache.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YexVAawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YfBzsKwPEeClidTOV3Evwg" name="setAxisCount" visibility="protected">
+              <ownedComment xmi:id="_YfJIcKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Set the number of axes contained in the data cache
+ * @param axisCount The number of axes contained in the data cache
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YfBzsawPEeClidTOV3Evwg" name="axisCount">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YfKWkKwPEeClidTOV3Evwg" name="getAxisIndex" visibility="public">
+              <ownedComment xmi:id="_YfS5cKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the axis number that corresponds to the 
+ * the supplied dimension name
+ * @param dimName Dimension name
+ * @return Returns the axis number of the supplied dimension name.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YfKWkawPEeClidTOV3Evwg" name="dimName">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YfKWkqwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YfTggKwPEeClidTOV3Evwg" name="setAxisIndexMap" visibility="protected">
+              <ownedComment xmi:id="_YfcDYKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param axisIndexMap the axisIndexMap to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YfTggawPEeClidTOV3Evwg" name="axisIndexMap" type="_YHs40qwPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YfdRgKwPEeClidTOV3Evwg" name="getAxisMembers" visibility="public">
+              <ownedComment xmi:id="_Yfl0YKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return an array containing the members in the specified axis
+ * @param axis Index axis
+ * @return Returns an array containing the members in the specified axis.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YfdRgawPEeClidTOV3Evwg" name="axis">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YfdRgqwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YfmbcKwPEeClidTOV3Evwg" name="getAxisSize" visibility="public">
+              <ownedComment xmi:id="_YfyBoKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the number of members in specified axis.
+ * @param axis Axis index
+ * @return Returns the number of members in the specified axis.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YfmbcawPEeClidTOV3Evwg" name="axis">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YfmbcqwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YfyosKwPEeClidTOV3Evwg" name="getAxisSizes" visibility="public">
+              <ownedComment xmi:id="_Yf7LkKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the array containing the number of members in each axis.
+ * @return Returns the array containing the number of members in each axis.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YfyosawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yf7yoKwPEeClidTOV3Evwg" name="setAxisSizes" visibility="protected">
+              <ownedComment xmi:id="_YgEVgKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Set the array containing the number of members in each axis.
+ * @param axisSizes Array containing the number of members in each axis.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yf7yoawPEeClidTOV3Evwg" name="axisSizes">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yf7yoqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yf7yo6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YgEVgawPEeClidTOV3Evwg" name="getCellCount" visibility="public">
+              <ownedComment xmi:id="_YgNfcKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the data cache cell count
+ * @return Returns the data cache cell count.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YgEVgqwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YgOGgawPEeClidTOV3Evwg" name="getCellValue" visibility="public">
+              <ownedComment xmi:id="_Ygbh4KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the cell value for the specified intersection coordinates
+ * @param members Array of dimension members that define a single cell intersection
+ * @return Returns the cell value.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YgOGgqwPEeClidTOV3Evwg" name="members">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YgOGg6wPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YgOGhKwPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YgOGhawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YgcI8KwPEeClidTOV3Evwg" name="getCellValue" visibility="public">
+              <ownedComment xmi:id="_YgkEwKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the cell value for the specified intersection. If the requested intersection
+ * is valid, but does not exist, then a zero value is returned.
+ * @param intersection Member intersection object that corresponds to data cache cell
+ * @return Returns the cell value
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YgcI8awPEeClidTOV3Evwg" name="intersection" type="_YHuG86wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YgcI8qwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Ygkr0KwPEeClidTOV3Evwg" name="getCellValue" visibility="public">
+              <ownedComment xmi:id="_YgsnoKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the cell value for the specified index
+ * @param nDimIndex Array of n-dimensional indexes that define a single cell intersection 
+ * @return Returns the cell value.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Ygkr0awPEeClidTOV3Evwg" name="nDimIndex">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Ygkr0qwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Ygkr06wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Ygkr1KwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Ygt1wKwPEeClidTOV3Evwg" name="setCellValue" visibility="public">
+              <ownedComment xmi:id="_Yg1xkKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Set the value for a specific data cache cell
+ * @param members Array of dimension members that define a single cell intersection
+ * @param value Value to put into cell
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Ygt1wawPEeClidTOV3Evwg" name="members">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Ygt1wqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Ygt1w6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Ygt1xKwPEeClidTOV3Evwg" name="value">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yg2_sKwPEeClidTOV3Evwg" name="setCellValue" visibility="public">
+              <ownedComment xmi:id="_Yg-UcKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Set the value for a specific data cache cell
+ * @param nDimIndex Array of n-dimensional indexes that define a single cell intersection 
+ * @param value Value to put into cell
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yg2_sawPEeClidTOV3Evwg" name="nDimIndex">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yg2_sqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yg2_s6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yg2_tKwPEeClidTOV3Evwg" name="value">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yg_ikKwPEeClidTOV3Evwg" name="setCellValueAndTrackChanges" visibility="public">
+              <ownedComment xmi:id="_YhQBQKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Set the value for a specific data cache cell and track any changed cells
+ * @param cellIndex Data cache cell index
+ * @param cellValue Value to put into cell
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yg_ikawPEeClidTOV3Evwg" name="cellIndex">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yg_ikqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yg_ik6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yg_ilKwPEeClidTOV3Evwg" name="cellValue">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YhRPYKwPEeClidTOV3Evwg" name="setCellValue" visibility="public">
+              <ownedComment xmi:id="_YhZLMKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Set the value for a specific data cache cell
+ * @param intersection Cell intersection
+ * @param value Value to put into cell
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YhRPYawPEeClidTOV3Evwg" name="intersection" type="_YHuG86wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YhRPYqwPEeClidTOV3Evwg" name="value">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YhaZUawPEeClidTOV3Evwg" name="addDataBlock" visibility="public">
+              <ownedComment xmi:id="_YhjjQKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Add a new data block to the data cache
+ * @param key Data block key
+ * @return DataBlockResponse
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YhaZUqwPEeClidTOV3Evwg" name="key" type="_YHuG86wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YhaZU6wPEeClidTOV3Evwg" name="return" type="_YhaZUKwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YhkKUKwPEeClidTOV3Evwg" name="findDataBlock" visibility="private">
+              <ownedComment xmi:id="_YhtUQKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the data block corresponding to the specified intersection.
+ * Additional information is also returned.
+ * @param intersection Data block key
+ * @return DataBlockResponse
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YhkKUawPEeClidTOV3Evwg" name="dataBlockKey" type="_YHuG86wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YhkKUqwPEeClidTOV3Evwg" name="return" type="_YhaZUKwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YhuiYKwPEeClidTOV3Evwg" name="updateDataBlock" visibility="private">
+              <ownedComment xmi:id="_Yh3FQKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Update the contents of the specified data block
+ * @param dataBlockResp Data Block Response Object
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YhuiYawPEeClidTOV3Evwg" name="dataBlockResp" type="_YhaZUKwPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YiAPMKwPEeClidTOV3Evwg" name="updateDataBlock" visibility="private">
+              <ownedComment xmi:id="_YiILAKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Update the contents of the specified data block
+ * @param dataBlockIndex Data Block Index
+ * @param dataBlock Data Block
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YiAPMawPEeClidTOV3Evwg" name="dataBlockIndex" type="_YHuG86wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YiAPMqwPEeClidTOV3Evwg" name="dataBlock">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YiAPM6wPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YiAPNKwPEeClidTOV3Evwg"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YiJZIKwPEeClidTOV3Evwg" name="createCellAddress" visibility="private">
+              <ownedComment xmi:id="_YiRU8KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the cell address for the specified intersection
+ * @param intersection Cell intersection 
+ * @return DataCacheCellAddress
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YiJZIawPEeClidTOV3Evwg" name="intersection" type="_YHuG86wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YiJZIqwPEeClidTOV3Evwg" name="return" type="_YiIyEKwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YiR8AKwPEeClidTOV3Evwg" name="getCurrentYear" visibility="public">
+              <ownedComment xmi:id="_YiZQwKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @return Returns the current year.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YiR8AawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yiae4awPEeClidTOV3Evwg" name="getDataCellIterator" visibility="public">
+              <ownedComment xmi:id="_Yijo0KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns an iterator object designed to iterate through all data cells
+ * @return An iterator object designed to iterate through all data cells
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yiae4qwPEeClidTOV3Evwg" name="return" type="_Yiae4KwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YikP4KwPEeClidTOV3Evwg" name="getDataCellIterator" visibility="public">
+              <ownedComment xmi:id="_YiwdIKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns an iterator object designed to iterate through all data cells
+ * @param memberFilters List of member by dimension to filter iterator on
+ * @return An iterator object designed to iterate through all data cells
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YikP4awPEeClidTOV3Evwg" name="memberFilters" type="_YHs40qwPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YikP4qwPEeClidTOV3Evwg" name="return" type="_Yiae4KwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YixrQKwPEeClidTOV3Evwg" name="createIntersection" visibility="private">
+              <ownedComment xmi:id="_Yi5nEKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Convert an n-dimensional index to an intersection object
+ * @param index N-dimensional cell index
+ * @return DataCell index (int)
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YixrQawPEeClidTOV3Evwg" name="index">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YixrQqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YixrQ6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YixrRKwPEeClidTOV3Evwg" name="return" type="_YHuG86wPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yi7cQKwPEeClidTOV3Evwg" name="updateCellIndex" visibility="public">
+              <ownedComment xmi:id="_YjD_IKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Enter dimension member indexes into appropriate elements of the 
+ * data cache cell index, based on the dimension order found in the 
+ * data cache.
+ * @param cellIndex Data cache cell index
+ * @param dimIndexes Array of pointers to each data cache dimension that is to be updated
+ * @param memberIndexes Array of member indexes that correspond to each dimension in dimIndexes array
+ * @return Updated data cache index
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yi7cQawPEeClidTOV3Evwg" name="cellIndex">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yi7cQqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yi7cQ6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yi7cRKwPEeClidTOV3Evwg" name="dimIndexes">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yi7cRawPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yi7cRqwPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yi7cR6wPEeClidTOV3Evwg" name="memberIndexes">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yi7cSKwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yi7cSawPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yi7cSqwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YjEmMKwPEeClidTOV3Evwg" name="setDimIndexMap" visibility="private">
+              <ownedComment xmi:id="_YjMiAKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param dimIndexMap the dimIndexMap to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YjEmMawPEeClidTOV3Evwg" name="dimIndexMap" type="_YHs40qwPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YjNwIKwPEeClidTOV3Evwg" name="setIndexedAxes" visibility="private">
+              <ownedComment xmi:id="_YjVr8KwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param indexedAxes the indexedAxes to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YjNwIawPEeClidTOV3Evwg" name="indexedAxes">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YjNwIqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YjNwI6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YjW6EKwPEeClidTOV3Evwg" name="setIndexedDimensions" visibility="private">
+              <ownedComment xmi:id="_YjjHUKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param indexedDimensions the indexedDimensions to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YjW6EawPEeClidTOV3Evwg" name="indexedDimensions">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YjW6EqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YjW6E6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YjjuYKwPEeClidTOV3Evwg" name="getLockedPeriods" visibility="public">
+              <ownedComment xmi:id="_Yjs4UKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @return Returns the lockedPeriods.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YjjuYawPEeClidTOV3Evwg" name="return" type="_YHs406wPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YjuGcKwPEeClidTOV3Evwg" name="setLockedPeriods" visibility="public">
+              <ownedComment xmi:id="_Yj2pUKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param lockedPeriods the lockedPeriods to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YjuGcawPEeClidTOV3Evwg" name="lockedPeriods" type="_YHs406wPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yj3QYKwPEeClidTOV3Evwg" name="getMeasureAxis" visibility="public">
+              <ownedComment xmi:id="_Yj_zQKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the axis number corresponding to the Measure dimension
+ * @return Axis number corresponding to the Measure dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yj3QYawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YkBBYawPEeClidTOV3Evwg" name="getMeasureDef" visibility="public">
+              <ownedComment xmi:id="_YkQ5AKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the measureDef object for the specified measure
+ * @param measure measure dimension member
+ * @return the measureDef object for the specified measure
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YkBBYqwPEeClidTOV3Evwg" name="measure">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YkBBY6wPEeClidTOV3Evwg" name="return" type="_YkBBYKwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YkRgEKwPEeClidTOV3Evwg" name="getMeasureDim" visibility="public">
+              <ownedComment xmi:id="_YkZb4KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the name of the Measure dimension
+ * @return Name of the Measure dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YkRgEawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YkaC8KwPEeClidTOV3Evwg" name="getMeasureSize" visibility="public">
+              <ownedComment xmi:id="_Ykh-wKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the number of members in the Measure dimension
+ * @return The number of members in the Measure dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YkaC8awPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YkjM4awPEeClidTOV3Evwg" name="getMeasureType" visibility="public">
+              <ownedComment xmi:id="_YkqhoKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the measure type for the specified measure
+ * @param measure Measure dimension member
+ * @return the measure type for the specified measure
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YkjM4qwPEeClidTOV3Evwg" name="measure">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YkjM46wPEeClidTOV3Evwg" name="return" type="_YkjM4KwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YkrIsKwPEeClidTOV3Evwg" name="getMemberArray" visibility="public">
+              <ownedComment xmi:id="_YkzEgKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return an array containing the members for each data cache axis
+ * @return Returns the memberArray.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YkrIsawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yk0SoKwPEeClidTOV3Evwg" name="setMemberArray" visibility="public">
+              <ownedComment xmi:id="_YlDjMKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param memberArray the memberArray to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yk0SoawPEeClidTOV3Evwg" name="memberArray">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yk0SoqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yk0So6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YlExUKwPEeClidTOV3Evwg" name="setMemberIndexMap" visibility="protected">
+              <ownedComment xmi:id="_YlMtIKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param memberIndexMap the memberIndexMap to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YlExUawPEeClidTOV3Evwg" name="memberIndexMap" type="_YHs40qwPEeClidTOV3Evwg">
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YlExUqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YlExU6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YlNUMKwPEeClidTOV3Evwg" name="getPlanTypeAxis" visibility="public">
+              <ownedComment xmi:id="_YlVQAKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the axis number corresponding to the PlanType dimension
+ * @return Axis number corresponding to the PlanType dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YlNUMawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YlV3EKwPEeClidTOV3Evwg" name="getPlanTypeDim" visibility="public">
+              <ownedComment xmi:id="_Yldy4KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the name of the PlanType dimension
+ * @return Name of the PlanType dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YlV3EawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YleZ8KwPEeClidTOV3Evwg" name="getTimeAxis" visibility="public">
+              <ownedComment xmi:id="_YloyAKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the axis number corresponding to the Time dimension
+ * @return Axis number corresponding to the Time dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YleZ8awPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YlpZEKwPEeClidTOV3Evwg" name="getTimeDim" visibility="public">
+              <ownedComment xmi:id="_Ylx78KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the name of the Time dimension
+ * @return Name of the Time dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YlpZEawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YlyjAKwPEeClidTOV3Evwg" name="getTimeSize" visibility="public">
+              <ownedComment xmi:id="_Yl6e0KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the number of members in the Time dimension
+ * @return The number of members in the Time dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YlyjAawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yl7F4KwPEeClidTOV3Evwg" name="getVersionAxis" visibility="public">
+              <ownedComment xmi:id="_YmDBsKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the axis number corresponding to the Version dimension
+ * @return Axis number corresponding to the Version dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yl7F4awPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YmE24KwPEeClidTOV3Evwg" name="getVersionDef" visibility="public">
+              <ownedComment xmi:id="_YmMysKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the versionDef object for the specified version
+ * @param version Version dimension member
+ * @return the versionDef object for the specified version
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YmE24awPEeClidTOV3Evwg" name="version">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YmE24qwPEeClidTOV3Evwg" name="return" type="_YmEP0KwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YmNZwKwPEeClidTOV3Evwg" name="getVersionDefs" visibility="public">
+              <ownedComment xmi:id="_YmXx0KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the versionDefs catalog from the application definition object
+ * for those versions that exist in this data cache
+ * @return the versionDefs catalog from the application definition object
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YmNZwawPEeClidTOV3Evwg" name="return" type="_YHs40qwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YmY_8KwPEeClidTOV3Evwg" name="getDerivedVersionDefs" visibility="public">
+              <ownedComment xmi:id="_YmgUsKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the list of versionDef objects for the derived versions that exist 
+ * in this data cache
+ * @return List of versionDef objects
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YmY_8awPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Ymhi0KwPEeClidTOV3Evwg" name="getVarianceVersionDefs" visibility="public">
+              <ownedComment xmi:id="_Ymo3kKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the list of versionDef objects for the variance versions that exist 
+ * in this data cache
+ * @return List of versionDef objects
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Ymhi0awPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YmpeoKwPEeClidTOV3Evwg" name="getVersionDim" visibility="public">
+              <ownedComment xmi:id="_YmyBgKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the name of the Version dimension
+ * @return Name of the Version dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YmpeoawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YmyokKwPEeClidTOV3Evwg" name="getVersions" visibility="public">
+              <ownedComment xmi:id="_Ym6kYKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the entire list of versions in the PafDataCache 
+ * @return The entire list of versions with the PafDataCache
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YmyokawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Ym9nsKwPEeClidTOV3Evwg" name="getVersionsByType" visibility="public">
+              <ownedComment xmi:id="_YnFjgKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the list of Versions with the specified VersionType
+ * @param versionType The Version Type to match
+ * @return The list of Versions with the specified VersionType
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Ym9nsawPEeClidTOV3Evwg" name="versionType" type="_Ym7LcKwPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_Ym9nsqwPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YnGKkKwPEeClidTOV3Evwg" name="getBaseVersions" visibility="public">
+              <ownedComment xmi:id="_YnOtcKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return list of base versions
+ * @return List&lt;String>
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YnGKkawPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YnPUgKwPEeClidTOV3Evwg" name="getVersionSize" visibility="public">
+              <ownedComment xmi:id="_YnXQUKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the number of members in the Version dimension
+ * @return The number of members in the Version dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YnPUgawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YnYecKwPEeClidTOV3Evwg" name="getVersionType" visibility="public">
+              <ownedComment xmi:id="_YnfzMKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the version type for the specified version
+ * @param version Version dimension member
+ * @return the version type for the specified version
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YnYecawPEeClidTOV3Evwg" name="version">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YnYecqwPEeClidTOV3Evwg" name="return" type="_Ym7LcKwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YngaQKwPEeClidTOV3Evwg" name="getYearAxis" visibility="public">
+              <ownedComment xmi:id="_YnqyUKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the axis number corresponding to the Year dimension
+ * @return Axis number corresponding to the Year dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YngaQawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YnrZYKwPEeClidTOV3Evwg" name="getYearDim" visibility="public">
+              <ownedComment xmi:id="_Ynz8QKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Returns the name of the Year dimension
+ * @return Name of the Year dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YnrZYawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yn0jUKwPEeClidTOV3Evwg" name="getYearSize" visibility="public">
+              <ownedComment xmi:id="_Yn8fIKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the number of members in the Year dimension
+ * @return The number of members in the Year dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yn0jUawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yn-UUKwPEeClidTOV3Evwg" name="addChangedCell" visibility="public">
+              <ownedComment xmi:id="_YoG3MKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Add data cache cell to the list of changed cells
+ * @param cellIndex Data cache cell index
+ * @param cellValue Changed cell value
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yn-UUawPEeClidTOV3Evwg" name="cellIndex">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yn-UUqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yn-UU6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yn-UVKwPEeClidTOV3Evwg" name="cellValue">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YoHeQKwPEeClidTOV3Evwg" name="getChangedCells" visibility="public">
+              <ownedComment xmi:id="_YoQBIKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @return Returns the list of changed data cache cells.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YoHeQawPEeClidTOV3Evwg" name="return" type="_YHs40awPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YoSdYKwPEeClidTOV3Evwg" name="initChangedCells" visibility="public">
+              <ownedComment xmi:id="_YoaZMKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Initialize the list of changed cells
+ */
+</body>
+              </ownedComment>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YobnUKwPEeClidTOV3Evwg" name="loadCacheCells" visibility="public">
+              <ownedComment xmi:id="_Yoi8EKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Load in cells from another data cache. This is a convenience method for
+ * loadCacheCells(sourceCache, memberFilter) where memberFilter is set to null.
+ * @param sourceCache Source data cache
+ * @return PafDataCache
+ * @throws PafException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YobnUawPEeClidTOV3Evwg" name="sourceCache" type="_XZS6sKwPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YokxQKwPEeClidTOV3Evwg" name="loadCacheCells" visibility="public">
+              <ownedComment xmi:id="_YostEKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Load in cells from another data cache using the supplied member filter
+ * @param sourceCache Source data cache
+ * @param memberFilter Member filter by dimension
+ * @return PafDataCache
+ * @throws PafException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YokxQawPEeClidTOV3Evwg" name="sourceCache" type="_XZS6sKwPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YokxQqwPEeClidTOV3Evwg" name="memberFilter" type="_YHs40qwPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YouiQKwPEeClidTOV3Evwg" name="getDataSlice" visibility="public">
+              <ownedComment xmi:id="_Yo3FIKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Get data &quot;slice&quot; using dimensional and member specifications
+ * defined in supplied parameter object
+ * @param parms Object containing required PafDataSlice parameters
+ * @return Returns &quot;Data Slice&quot; - a subset of cells in the UowCache
+ * @throws PafException
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YouiQawPEeClidTOV3Evwg" name="parms" type="_YotUIKwPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YouiQqwPEeClidTOV3Evwg" name="return" type="_YHuuAKwPEeClidTOV3Evwg" direction="return"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yo4TQKwPEeClidTOV3Evwg" name="validateDataSliceParms" visibility="private">
+              <ownedComment xmi:id="_YpCEQKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Validate data slice parameters
+ * @param parms PafDataSlice parameter object
+ * @return True if page dimensions are found among data slice parameters
+ * @throws PafException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yo4TQawPEeClidTOV3Evwg" name="parms" type="_YotUIKwPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_Yo4TQqwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YpEggKwPEeClidTOV3Evwg" name="update" visibility="public">
+              <ownedComment xmi:id="_YpL1QKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Update the data cache with the contents of the data slice
+ * @param pafDataSlice Paf Data Slice
+ * @param parms Object containing required PafDataSlice parameters
+ * @throws PafException
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YpEggawPEeClidTOV3Evwg" name="pafDataSlice" type="_YHuuAKwPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YpEggqwPEeClidTOV3Evwg" name="parms" type="_YotUIKwPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YpO4kKwPEeClidTOV3Evwg" name="updateCellIndex" visibility="protected">
+              <ownedComment xmi:id="_YpW0YKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Enter dimensional headers into appropriate elements of the 
+ * data cache cell index, based on the dimension order found in the 
+ * data cache
+ * @param cellIndex Data cache cell index
+ * @param dimIndexes Array of pointers to each data cache dimension
+ * @param memberNames Array of members that correspond to each dimension in dimIndexes array
+ * @return Data cache cell index
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YpO4kawPEeClidTOV3Evwg" name="cellIndex">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YpO4kqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YpO4k6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YpO4lKwPEeClidTOV3Evwg" name="dimIndexes">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YpO4lawPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YpO4lqwPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YpO4l6wPEeClidTOV3Evwg" name="memberNames">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YpO4mKwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YpO4mawPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YpO4mqwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YpYCgKwPEeClidTOV3Evwg" name="getDimension" visibility="public">
+              <ownedComment xmi:id="_YpglYKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the dimension for the specified axis
+ * @param axis Axis index
+ * @return Returns the dimension name.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YpYpkKwPEeClidTOV3Evwg" name="axis">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YpYpkawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YphzgKwPEeClidTOV3Evwg" name="getDimIndexes" visibility="protected">
+              <ownedComment xmi:id="_YpsLkKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return corresponding data cache axis indexes 
+ * for supplied array of dimension names
+ * @param dimNames Array of dimension names
+ * @return Returns array of data cache axis indexes
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YphzgawPEeClidTOV3Evwg" name="dimNames">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YphzgqwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yphzg6wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YphzhKwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YpuAwKwPEeClidTOV3Evwg" name="getDimMember" visibility="public">
+              <ownedComment xmi:id="_Yp18kKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return the dimension member for the corresponding axis and member index
+ * @param axis Axis index
+ * @param memberIndex Dimension member index
+ * @return Returns the dimension member for the corresponding axis and member index.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YpuAwawPEeClidTOV3Evwg" name="axis">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YpuAwqwPEeClidTOV3Evwg" name="memberIndex">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YpuAw6wPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yp3xwKwPEeClidTOV3Evwg" name="getDimMembers" visibility="public">
+              <ownedComment xmi:id="_Yp_tkKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return an array containing the members in the specified dimension name
+ * @param dimName Dimension name
+ * @return Returns an array containing the members in the specified axis.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yp3xwawPEeClidTOV3Evwg" name="dimName">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yp3xwqwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YqAUoKwPEeClidTOV3Evwg" name="getRowCount" visibility="public">
+              <ownedComment xmi:id="_YqIQcKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Return number of data cache rows
+ * @return Returns the number of data cache rows.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YqAUoawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YqKssKwPEeClidTOV3Evwg" name="getMemberIndex" visibility="public">
+              <ownedComment xmi:id="_YqSogKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Convert a member name to its corresponding index value
+ * @param axis Axis index
+ * @param member Dimension member
+ * @return Returns a dimension member index.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YqKssawPEeClidTOV3Evwg" name="member">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YqKssqwPEeClidTOV3Evwg" name="axis">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YqKss6wPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YqVr0KwPEeClidTOV3Evwg" name="membersToIndex" visibility="private">
+              <ownedComment xmi:id="_YqdnoKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Convert an array of member names to array of index values
+ * @param members Array of members that define a single cell intersection
+ * @return Returns a data cache cell index.
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YqVr0awPEeClidTOV3Evwg" name="members">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_YqVr0qwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_YqVr06wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YqVr1KwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yqfc0KwPEeClidTOV3Evwg" name="indexToMembers" visibility="public">
+              <ownedComment xmi:id="_YqnYoKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Convert a data cache cell index to an array of member names
+ * @param cellIndex Data cache cell index
+ * @return Returns Array of members that define a single cell intersection .
+ * @throws PafException 
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yqfc0awPEeClidTOV3Evwg" name="cellIndex">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+                <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Yqfc0qwPEeClidTOV3Evwg" value="*"/>
+                <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Yqfc06wPEeClidTOV3Evwg"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yqfc1KwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YqpN0KwPEeClidTOV3Evwg" name="isMember" visibility="public">
+              <ownedComment xmi:id="_YqxJoKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Determines if the specified member exists in the specified dimension
+ * @param dimension Dimension name
+ * @param member Dimension member name
+ * @return True if the member exists in the specified dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YqpN0awPEeClidTOV3Evwg" name="dimension">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YqpN0qwPEeClidTOV3Evwg" name="member">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_YqpN06wPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yq0M8KwPEeClidTOV3Evwg" name="isMemberIgnoresCase" visibility="public">
+              <ownedComment xmi:id="_Yq8v0KwPEeClidTOV3Evwg">
+                <body>/** 
+ * Determines if the specified member exists in the specified dimension,
+ * ignoring case.
+ * @param dimension Dimension name
+ * @param searchMember Dimension member name to search for
+ * @param foundMember Dimension member name found (could differ in case)
+ * @return True if the member exists in the specified dimension
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yq0M8awPEeClidTOV3Evwg" name="dimension">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yq0M8qwPEeClidTOV3Evwg" name="searchMember">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_Yq0M86wPEeClidTOV3Evwg" name="foundMember" type="_Yqzl4KwPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_Yq0M9KwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yq998KwPEeClidTOV3Evwg" name="isExistingIntersection" visibility="public">
+              <ownedComment xmi:id="_YrIWAKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Determines if the specified intersection exists in the data cache
+ * @param intersection Cell intersection
+ * @return True if the specified intersection exists in the data cache
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yq998awPEeClidTOV3Evwg" name="intersection" type="_YHuG86wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_Yq998qwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YrJkIKwPEeClidTOV3Evwg" name="isValidIntersection" visibility="public">
+              <ownedComment xmi:id="_YrSuEKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Determines if the specified intersection is a valid data cache intersection. This
+ * does not mean that the intersection necessarily exists in the data cache.
+ * @param intersection Cell intersection
+ * @return True if the specified intersection is a valid data cache intersection
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YrJkIawPEeClidTOV3Evwg" name="intersection" type="_YHuG86wPEeClidTOV3Evwg"/>
+              <ownedParameter xmi:id="_YrJkIqwPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YrT8MKwPEeClidTOV3Evwg" name="validateMemberFilters" visibility="public">
+              <ownedComment xmi:id="_YrcfEKwPEeClidTOV3Evwg">
+                <body>/** 
+ * Validate member filters used for retrieving filtered data cache data
+ * @param memberFilters Map comprised of member lists for each filtered dimension
+ * @throws IllegalArgumentException
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YrT8MawPEeClidTOV3Evwg" name="memberFilters" type="_YHs40qwPEeClidTOV3Evwg"/>
+            </ownedOperation>
+            <ownedOperation xmi:id="_YrdtMKwPEeClidTOV3Evwg" name="isDirty" visibility="public">
+              <ownedComment xmi:id="_YrlB8KwPEeClidTOV3Evwg">
+                <body>/** 
+ * @return the isDirty
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_YrdtMawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yrm3IKwPEeClidTOV3Evwg" name="setDirty" visibility="public">
+              <ownedComment xmi:id="_YrxPMKwPEeClidTOV3Evwg">
+                <body>/** 
+ * @param isDirty the isDirty to set
+ */
+</body>
+              </ownedComment>
+              <ownedParameter xmi:id="_Yrm3IawPEeClidTOV3Evwg" name="isDirty">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#boolean"/>
+              </ownedParameter>
+            </ownedOperation>
+            <ownedOperation xmi:id="_Yrx2QKwPEeClidTOV3Evwg" name="toString" visibility="public">
+              <ownedParameter xmi:id="_Yrx2QawPEeClidTOV3Evwg" name="return" direction="return">
+                <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+              </ownedParameter>
+            </ownedOperation>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Interface" xmi:id="_YQEKoKwPEeClidTOV3Evwg" name="IPafDataCache"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:DataType" xmi:id="_YHtf4qwPEeClidTOV3Evwg" name="PafBaseConstants"/>
+        <packagedElement xmi:type="uml:DataType" xmi:id="_YHtf46wPEeClidTOV3Evwg" name="PafErrSeverity"/>
+        <packagedElement xmi:type="uml:DataType" xmi:id="_YHtf5KwPEeClidTOV3Evwg" name="PafException"/>
+        <packagedElement xmi:type="uml:Package" xmi:id="_YHtf5awPEeClidTOV3Evwg" name="app">
+          <packagedElement xmi:type="uml:DataType" xmi:id="_YHuG8KwPEeClidTOV3Evwg" name="*"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Package" xmi:id="_YHuG8awPEeClidTOV3Evwg" name="data">
+          <packagedElement xmi:type="uml:DataType" xmi:id="_YHuG8qwPEeClidTOV3Evwg" name="IPafDataCache"/>
+          <packagedElement xmi:type="uml:DataType" xmi:id="_YHuG86wPEeClidTOV3Evwg" name="Intersection"/>
+          <packagedElement xmi:type="uml:DataType" xmi:id="_YHuuAKwPEeClidTOV3Evwg" name="PafDataSlice"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Package" xmi:id="_YHuuAawPEeClidTOV3Evwg" name="utility">
+          <packagedElement xmi:type="uml:DataType" xmi:id="_YHuuAqwPEeClidTOV3Evwg" name="StringUtils"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Package" xmi:id="_YHuuA6wPEeClidTOV3Evwg" name="view">
+          <packagedElement xmi:type="uml:DataType" xmi:id="_YHuuBKwPEeClidTOV3Evwg" name="PafMVS"/>
+        </packagedElement>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Package" xmi:id="_YHqckKwPEeClidTOV3Evwg" name="java">
+    <packagedElement xmi:type="uml:Package" xmi:id="_YHqckawPEeClidTOV3Evwg" name="util">
+      <packagedElement xmi:type="uml:DataType" xmi:id="_YHsRwKwPEeClidTOV3Evwg" name="ArrayList"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="_YHsRwawPEeClidTOV3Evwg" name="Arrays"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="_YHsRwqwPEeClidTOV3Evwg" name="HashMap"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="_YHs40KwPEeClidTOV3Evwg" name="HashSet"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="_YHs40awPEeClidTOV3Evwg" name="List"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="_YHs40qwPEeClidTOV3Evwg" name="Map"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="_YHs406wPEeClidTOV3Evwg" name="Set"/>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Package" xmi:id="_YHs41KwPEeClidTOV3Evwg" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_YHs41awPEeClidTOV3Evwg" name="apache">
+      <packagedElement xmi:type="uml:Package" xmi:id="_YHtf4KwPEeClidTOV3Evwg" name="log4j">
+        <packagedElement xmi:type="uml:DataType" xmi:id="_YHtf4awPEeClidTOV3Evwg" name="Logger"/>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YRqtIKwPEeClidTOV3Evwg" name="Map&lt;Intersection,Integer>"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YSOt0KwPEeClidTOV3Evwg" name="List&lt;double[][]>"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YUf-sKwPEeClidTOV3Evwg" name="Set&lt;String>"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YWGhMKwPEeClidTOV3Evwg" name="Map&lt;String,Integer>"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YXCVUKwPEeClidTOV3Evwg" name="PafDataCacheCells"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YXXsgKwPEeClidTOV3Evwg" name="PafApplicationDef"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YaJTsKwPEeClidTOV3Evwg" name="Object"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YhaZUKwPEeClidTOV3Evwg" name="DataBlockResponse"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YiIyEKwPEeClidTOV3Evwg" name="DataCacheCellAddress"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_Yiae4KwPEeClidTOV3Evwg" name="PafIntersectionIterator"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YkBBYKwPEeClidTOV3Evwg" name="MeasureDef"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YkjM4KwPEeClidTOV3Evwg" name="MeasureType"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YmEP0KwPEeClidTOV3Evwg" name="VersionDef"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_Ym7LcKwPEeClidTOV3Evwg" name="VersionType"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_YotUIKwPEeClidTOV3Evwg" name="PafDataSliceParms"/>
+  <packagedElement xmi:type="uml:DataType" xmi:id="_Yqzl4KwPEeClidTOV3Evwg" name="StringBuffer"/>
+</uml:Model>
