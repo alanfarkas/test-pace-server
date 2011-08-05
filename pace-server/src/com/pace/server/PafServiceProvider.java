@@ -307,7 +307,14 @@ public class PafServiceProvider implements IPafService {
 			// block to debug load balancer cookies.
 			listCookies(clientId);
 			
-			// validate client version
+			// check for app service to have started.
+			if (appService == null) {
+				PafException pexFailedAppInit = new PafException("The Pace application failed to initialize.", PafErrSeverity.Fatal);
+				PafErrHandler.handleException(pexFailedAppInit);
+				throw pexFailedAppInit.getPafSoapException();
+			}
+
+			// validate client version			
 			if (!appService.isValidClient(pcInit.getClientVersion(), pcInit.getClientType())) {
 				// setup response with version mismatch
 				ack = new PafServerAck(null, PafServiceProvider.serverPlatform,

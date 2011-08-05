@@ -97,6 +97,13 @@ public class Rule {
         public String[] getTriggerMeasures() {
             return triggerMeasures;
         }
+        
+        /**
+         * @return boolean convenience method to check for trigger measures
+         */
+        public boolean hasTriggerMeasures() {
+        	return !(getTriggerMeasures() == null || getTriggerMeasures().length == 0);        	
+        }
 
         /**
          * @param triggerMeasures The triggerMeasures to set.

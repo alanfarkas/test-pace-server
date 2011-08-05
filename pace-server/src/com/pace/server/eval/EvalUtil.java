@@ -316,7 +316,11 @@ public class EvalUtil {
 
     public static boolean changeTriggersFormula(Intersection is, Rule rule, EvalState evalState) {
         
-        String[] termsToConsider;
+
+    	// if the intersection has already triggered a calculation within this rulegroup, it can't doublefire
+    	if (evalState.getConsumedByRulegroup().contains(is))
+    		return false;
+    	
         String measure = is.getCoordinate(evalState.getAppDef().getMdbDef().getMeasureDim());
         Formula formula = rule.getFormula();
         

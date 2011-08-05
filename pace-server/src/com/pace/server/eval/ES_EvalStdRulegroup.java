@@ -68,6 +68,9 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
 		String currentMeasure = evalState.getMeasureName();
 		
 		
+		// need to keep track of cells that triggered and calculated based upon the processing of a given rule
+		// if they are already processed by the time the recalc step fires they should "not" be considered.
+		
 
 
        
@@ -93,12 +96,21 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
         stepTime = System.currentTimeMillis();        
         
         // Now put on the stack any measure that needs to be calculated
+        // iterate through all intersections that have changed to this point
         for (Intersection is: chngSet) {
+        	// test if this intersection should cause the current rule to calculate
             if ( EvalUtil.changeTriggersFormula( is, evalState.getRule(), evalState) ) {
-                
+            	// if the intersection causes this rule to fire, determine the leading rule to use 
+            	
+            	// if the current formula has a recalc measure on the left, the leading rule is this rule.
+            	// is this step even possible, or at the least shouldn't it just exit ?
                 if (evalState.getMeasureType() == MeasureType.Recalc) { 
-                    leadingRule = evalState.getRule();
+                	return;
+//                	assert(false); // test to see if you ever enter here.
+//                	leadingRule = evalState.getRule();
                 }
+                
+                
                 else {
                     leadingRule = RuleMngr.findLeadingRule(evalState.getRuleGroup(), evalState, is);
                 }
@@ -125,6 +137,14 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                         
                         cellsToCalc.put(calcIntersection, leadingRule.getFormula());
                         
+                        // This intersection is going to cause a cell to be calculated so it is considered
+                        // consumed for certain downstream evaluations
+                        // The cell to calc is added later
+                        evalState.addConsumedByRulegroup(is);
+                        evalState.setStateChanged(true);                        
+
+                                                
+                        
                         // only lock the results of evaluation if the recalc component of the formula is changed or locked
                         // or if the "lock/allocate override" flag is set
                         
@@ -133,7 +153,7 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                             if (measFunc != null) {
                                 calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
                             }
-                        	cellsToLock.add(calcIntersection);
+                        	cellsToLock.add(calcIntersection);                  	
                         	continue;
                         }
                         
@@ -184,7 +204,7 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
         }
         if (logger.isDebugEnabled())    
         	logger.debug(LogUtil.timedStep("Identified " + cellsToCalc.size() + " cells to calculate", stepTime));
-        
+               
         stepTime = System.currentTimeMillis();
 
         
@@ -226,11 +246,19 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
         if (logger.isDebugEnabled())
         	logger.debug(LogUtil.timedStep("Calculated " + cellsToCalc.size() + " cells", stepTime));
 
+        //place all triggering intersections into this bucket to indicate they have been processed by this rule
+        
+        
         if (newChngCells.size() > 0) {
 
             evalState.getCurrentLockedCells().addAll(cellsToLock); 
             evalState.addAllAllocations(cellsToLock);
             evalState.addAllChangedCells(newChngCells);
+            
+            // If cells are calculated, don't allow them to trigger the recalc measure calculations that comes later.
+            // They changes required have already been absorbed by this calcultion.
+            evalState.addConsumedByRulegroup(newChngCells);
+
 
             evalState.setStateChanged(true);
         }

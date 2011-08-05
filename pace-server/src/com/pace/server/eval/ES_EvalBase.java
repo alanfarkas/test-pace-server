@@ -65,7 +65,7 @@ public abstract class ES_EvalBase implements IEvalStep {
         
         if ( evalState.isTimeSliceMode() ) {
         	// if time slice mode
-            if (rule.getTriggerMeasures() != null && rule.getTriggerMeasures().length > 0) {
+            if (rule.hasTriggerMeasures()) {
                 // easier scenario, must be current time period and correspond to trigger measures
                 // candidate list starts from current time period changes.
                 changeSet = evalState.getCurrentTimeBasedChanges();
@@ -117,12 +117,12 @@ public abstract class ES_EvalBase implements IEvalStep {
     		
     		
             // if no trigger measures, just parse the components of the expression
-            if (rule.getTriggerMeasures() == null || rule.getTriggerMeasures().length == 0 ) {      
-                termsToConsider = formula.getTermMeasures();
-            }
-            else {
+            if (rule.hasTriggerMeasures()) {  
                 termsToConsider = rule.getTriggerMeasures(); 
                 isTriggerMsrDriven = true;
+            }
+            else {
+                termsToConsider = formula.getTermMeasures();            	
             }
             
             termIndex = 0;

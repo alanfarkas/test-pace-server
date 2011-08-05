@@ -1647,7 +1647,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 			else {
 				currentSet.add(ruleGroup);
 			}
-			// three general types of processing, regular and perpetual
+			// two general types of processing, regular and perpetual
 			if ( ruleGroup.isPerpetual() ) {
 				processPerpetualRuleGroups( currentSet, uowEvalState, dsEvalState );
 			}
@@ -1725,6 +1725,10 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 					logger.info(Messages.getString("RuleBasedEvalStrategy.69")); //$NON-NLS-1$
 					buildAttribRecalcTargetMap(dsEvalState, rg,attributeRecalcChangesByTargetMeasure, attributeRecalcLocksByTargetMeasure);
 				}
+				
+				// Clear the consumedByRulegroup collection. This collection holds intersection used or modified during
+				// a rulegroup pass. It is used to filter evaluations from "double firing" in certain situations.
+				uowEvalState.clearConsumedByRulegroup();
 				
 				for (int r = rg.getRules().length-1; r >= 0 ; r--) {             
 

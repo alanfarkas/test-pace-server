@@ -69,11 +69,14 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private Set <Intersection> origLockedCells = new HashSet<Intersection>();
 	private Set <Intersection> origChangedCells = new HashSet<Intersection>();
 
+	
 	private Map <Intersection, Formula> protectedCellFormulas = new HashMap<Intersection, Formula>();
 	private RuleGroup ruleGroup;
 	private Rule rule;
 
-//	private HashSet <Intersection> allocations = new HashSet<Intersection>();
+	private Set <Intersection> consumedByRulegroup = new HashSet<Intersection>();
+	
+	//	private HashSet <Intersection> allocations = new HashSet<Intersection>();
 	private HashMap<String, Set<Intersection>> allocationsByMsr = new HashMap<String, Set<Intersection>>(SM_CHNG_LOAD);
 	private HashSet <Intersection> allocatedLockedCells = new HashSet<Intersection>();
 
@@ -1075,5 +1078,19 @@ public class EvalState implements IPafEvalState, Cloneable {
 
 		return evalState;
 	}
+
+	public Set<Intersection> getConsumedByRulegroup() {
+		return consumedByRulegroup;
+	}
+	public void addConsumedByRulegroup(Intersection is) {
+		consumedByRulegroup.add(is);
+	}
+	public void addConsumedByRulegroup(Collection<Intersection> c) {
+		consumedByRulegroup.addAll(c);
+	}
+	public void clearConsumedByRulegroup() {
+		consumedByRulegroup.clear();
+	}
+
 
 }
