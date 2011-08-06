@@ -140,15 +140,14 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                         // This intersection is going to cause a cell to be calculated so it is considered
                         // consumed for certain downstream evaluations
                         // The cell to calc is added later
-                        evalState.addConsumedByRulegroup(is);
-                        evalState.setStateChanged(true);                        
+                        // evalState.addConsumedByRulegroup(is);
+                        // evalState.setStateChanged(true);                        
 
                                                 
-                        
-                        // only lock the results of evaluation if the recalc component of the formula is changed or locked
-                        // or if the "lock/allocate override" flag is set
-                        
-                        // this is the override check and continue.
+                        // Look for reasons to lock the result.
+                        // 3 Reasons, LockUserEvaluationResult, LockSystemEvaluationResult and has a recalc component on the right hand side.
+                            
+                        // is LockSystemEvaluationResult set?
                         if ( evalState.getRule().isLockSystemEvaluationResult() ) {
                             if (measFunc != null) {
                                 calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
@@ -157,7 +156,21 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                         	continue;
                         }
                         
-                        // normal scenario, look for recalc component
+                        
+                        // is LockUserEvaluationResult set and the triggering change is user driven ?
+                        if (evalState.getRule().getLockUserEvaluationResult()){
+                            if (evalState.getOrigChangedCells().contains(is) || evalState.getOrigLockedCells().contains(is)) {
+                                if (measFunc != null) {
+                                    calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
+                                }
+                                if (calcIntersection != null) {
+                                    cellsToLock.add(calcIntersection);
+                                }
+                                continue;                                    
+                            }
+                        }
+                        
+                        // Does this formula have a recalc component, wich will require a lock to allocate.
                         int tCount = 0;
                         for (String term : leadingRule.getFormula().getTermMeasures()) {                      	
 
@@ -175,28 +188,12 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                                         calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
                                     }
                                     if (calcIntersection != null) {
-                                    	// instead of locking, treat as an original user change, TTN-695
-                                    	                                    	
+                                    	// instead of locking, treat as an original user change, TTN-695                                    	
                                         cellsToLock.add(calcIntersection);
                                     }
                                     break;
                                 }
-                            }
-                            
-                            // additional locking scenario, component is a user change
-                            else if (evalState.getRule().getLockUserEvaluationResult()){
-                                Intersection userChngComp = is.clone();
-                                userChngComp.setCoordinate(msrDim, term);
-                                if (evalState.getOrigChangedCells().contains(userChngComp) || evalState.getOrigLockedCells().contains(userChngComp)) {
-                                    if (measFunc != null) {
-                                        calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
-                                    }
-                                    if (calcIntersection != null) {
-                                        cellsToLock.add(calcIntersection);
-                                    }
-                                    break;                                    
-                                }
-                            }
+                            } 
                         }
                     }
                 }
@@ -257,7 +254,7 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
             
             // If cells are calculated, don't allow them to trigger the recalc measure calculations that comes later.
             // They changes required have already been absorbed by this calcultion.
-            evalState.addConsumedByRulegroup(newChngCells);
+//            evalState.addConsumedByRulegroup(newChngCells);
 
 
             evalState.setStateChanged(true);
