@@ -517,4 +517,8 @@ public class RuleMngr {
         return sb.toString();
     }
 
+	public static boolean isLeadRule(Intersection is, Rule rule, EvalState evalState) {
+		return (rule.equals(findLeadingRule(evalState.getRuleGroup(), evalState, is)));	
+	}
+
 }

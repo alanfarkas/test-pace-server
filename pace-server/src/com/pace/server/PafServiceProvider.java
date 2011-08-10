@@ -1532,7 +1532,7 @@ public class PafServiceProvider implements IPafService {
 						
 			if ( view != null ) {
 									
-				int sectionCount = view.getViewSections().length;;
+				int sectionCount = view.getViewSections().length;
 				
 				dataSlices = new PafDataSlice[sectionCount];
 				for (int i = 0; i < sectionCount; i++) {
@@ -1611,7 +1611,7 @@ public class PafServiceProvider implements IPafService {
 						
 			if ( view != null ) {
 
-				int sectionCount = view.getViewSections().length;;
+				int sectionCount = view.getViewSections().length;
 
 				dataSlices = new PafDataSlice[sectionCount];
 				for (int i = 0; i < sectionCount; i++) {

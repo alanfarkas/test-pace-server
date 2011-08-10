@@ -182,11 +182,12 @@ public class CellNoteCacheManagerTest extends TestCase {
 		assertEquals(cnc1.getAllNotes(axisSeq).length, simpleCellNotes.length);		
 		
 	}
+	
 	*/
 	
 public void testMulti() {
 
-	return;
+	return; 
 	/* THIS TEST IS TEMPORARILY BYPASSED. THIS TEST HAS NOT WORKED SINCE THE MIGRATION TO LINUX AND NEW PACKAGE NAMING
 		
 /*		final CountDownLatch latch = new CountDownLatch(2);
@@ -309,7 +310,7 @@ public void testMulti() {
 	
 	public void testTwoClientSim() {
 		
-		return;
+		return; 
 		
 /* THIS TEST IS TEMPORARILY BYPASSED. THIS TEST HAS NOT WORKED SINCE THE MIGRATION TO LINUX AND NEW PACKAGE NAMING
 

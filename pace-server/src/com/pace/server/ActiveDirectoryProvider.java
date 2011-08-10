@@ -421,7 +421,7 @@ final static String DC = "DC";
 						
 						if (domain.length() > 0)
 						{
-							domain.append(".");
+							domain.append('.');
 						}
 						domain.append(value);
 					}

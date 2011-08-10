@@ -105,9 +105,9 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
             	// if the current formula has a recalc measure on the left, the leading rule is this rule.
             	// is this step even possible, or at the least shouldn't it just exit ?
                 if (evalState.getMeasureType() == MeasureType.Recalc) { 
+                	assert(false); // test to see if you ever enter here.
+                	leadingRule = evalState.getRule();                	
                 	return;
-//                	assert(false); // test to see if you ever enter here.
-//                	leadingRule = evalState.getRule();
                 }
                 
                 
@@ -140,8 +140,8 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                         // This intersection is going to cause a cell to be calculated so it is considered
                         // consumed for certain downstream evaluations
                         // The cell to calc is added later
-                        // evalState.addConsumedByRulegroup(is);
-                        // evalState.setStateChanged(true);                        
+//                         evalState.addConsumedByRulegroup(is);
+//                         evalState.setStateChanged(true);                        
 
                                                 
                         // Look for reasons to lock the result.
@@ -181,9 +181,9 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                             if (measureCat.get(term).getType() == MeasureType.Recalc) {
                             	Intersection recalcComp = is.clone();
                                 recalcComp.setCoordinate(msrDim, term);
-//                                if (evalState.getCurrentLockedCells().contains(recalcComp) ||
-//                                        evalState.getCurrentChangedCells().contains(recalcComp)) {
-                                if (evalState.getOrigLockedCells().contains(recalcComp)) {
+                                if (evalState.getCurrentLockedCells().contains(recalcComp) ||
+                                        evalState.getCurrentChangedCells().contains(recalcComp)) {
+//                                if (evalState.getOrigLockedCells().contains(recalcComp)) {
                                 	if (measFunc != null) {
                                         calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
                                     }
@@ -254,7 +254,7 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
             
             // If cells are calculated, don't allow them to trigger the recalc measure calculations that comes later.
             // They changes required have already been absorbed by this calcultion.
-//            evalState.addConsumedByRulegroup(newChngCells);
+            // evalState.addConsumedByRulegroup(newChngCells);
 
 
             evalState.setStateChanged(true);

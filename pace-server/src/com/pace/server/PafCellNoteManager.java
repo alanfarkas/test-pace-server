@@ -244,7 +244,7 @@ public class PafCellNoteManager extends PafClientDbManager {
 				strBuff.append(dynamicColumnName);
 				
 				if ( ++dimensionCnt == dynamicColumnNames.length ) {
-					strBuff.append(" ");
+					strBuff.append(' ');
 				} else {
 					strBuff.append(", ");
 				}
@@ -279,7 +279,7 @@ public class PafCellNoteManager extends PafClientDbManager {
 				if ( ++dimensionCnt != dimensionNameSet.size()) {
 					strBuff.append(", ");
 				} else {
-					strBuff.append(" ");
+					strBuff.append(' ');
 				}
 				
 			}

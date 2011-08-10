@@ -96,14 +96,14 @@ public class ES_RecalcMeasures extends ES_EvalBase implements IEvalStep {
         	logger.debug(LogUtil.timedStep("Building intersections for calculated measure: " + evalState.getMeasureName(), stepTime));       
         
         stepTime = System.currentTimeMillis();
-        EvalUtil.calcIntersections(targets, measureDim, evalState.getRule().getFormula(), dataCache, evalState);
+        Set<Intersection> updatedIntersections = EvalUtil.calcIntersections(targets, measureDim, evalState.getRule().getFormula(), dataCache, evalState);
         
         if (logger.isDebugEnabled())
         	logger.debug(LogUtil.timedStep("Calculating " + targets.size() + " intersections", stepTime));   
         
         logEvalDetail(this, evalState, dataCache);
         
-        evalState.addAllChangedCells(targets);
+        evalState.addAllChangedCells(updatedIntersections);
 		
         if (logger.isDebugEnabled())
         	logger.debug(LogUtil.timedStep("Recalc measures calculation step", startTime));

@@ -163,7 +163,7 @@ public class PafDataService {
 		// Load data cache
 		//TODO Add attribute dims and associated members to work spec, pass in as seperate parm
 		//TODO Use UowCacheParms again, create a method "createDataCache()" to hold this exra processing
-		//TDO Add uow trees to Cache Parms
+		//TODO Add uow trees to Cache Parms
 		String[] attributeDims = getAttributeDimNames().toArray(new String[0]);
 		PafUowCache dataCache = new PafUowCache(clientState, attributeDims, lockedTimeSet);
 		List<String>loadedVersions = mdbData.updateUowCache(dataCache, mdbDataSpecByVersion);
@@ -1641,7 +1641,7 @@ public class PafDataService {
 				else
 				{
 					// If measures dimension, pull root name from "measure root" property
-					String root = dim;;
+					String root = dim;
 					if (dim.equals(mdbDef.getMeasureDim())) {
 						root = mdbDef.getMeasureRoot();
 					}
@@ -3902,7 +3902,7 @@ public class PafDataService {
 		Map<String, Application> ApplicationMap = new HashMap<String, Application>();
 		
 		//get list of apps
-		List<Application> ApplicationList = s.createQuery("from Application").list();;
+		List<Application> ApplicationList = s.createQuery("from Application").list();
 		
 		if ( ApplicationList != null ) {
 		

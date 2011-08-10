@@ -51,6 +51,7 @@ import com.pace.base.utility.Odometer;
 import com.pace.base.utility.TimeBalance;
 import com.pace.server.PafDataService;
 import com.pace.server.PafMetaData;
+import com.pace.server.RuleMngr;
 
 
 /**
@@ -255,10 +256,15 @@ public class EvalUtil {
             evalFormula(formula, axis, target, dataCache, evalState);
         }  
     }
-    public static void calcIntersections(Set<Intersection> targets, String axis, Formula formula, PafDataCache dataCache, EvalState evalState) throws PafException {
-        for (Intersection target : targets) {
+    public static Set<Intersection> calcIntersections(Set<Intersection> targets, String axis, Formula formula, PafDataCache dataCache, EvalState evalState) throws PafException {
+    	Set<Intersection> changed = new HashSet<Intersection>(targets.size() );
+    	double origValue;
+    	for (Intersection target : targets) {
+    		origValue = dataCache.getCellValue(target);
             evalFormula(formula, axis, target, dataCache, evalState);
+            if (origValue != dataCache.getCellValue(target)) changed.add(target);
         }  
+    	return changed;
     }    
     
 
@@ -318,8 +324,8 @@ public class EvalUtil {
         
 
     	// if the intersection has already triggered a calculation within this rulegroup, it can't doublefire
-    	if (evalState.getConsumedByRulegroup().contains(is))
-    		return false;
+//    	if (evalState.getConsumedByRulegroup().contains(is))
+//    		return false;
     	
         String measure = is.getCoordinate(evalState.getAppDef().getMdbDef().getMeasureDim());
         Formula formula = rule.getFormula();
@@ -327,7 +333,7 @@ public class EvalUtil {
         // if no trigger measures, just parse the components of the expression
         // in case of function term, delegate to implementing function
 
-        if (rule.getTriggerMeasures() == null || rule.getTriggerMeasures().length == 0 ) { 
+        if ( !rule.hasTriggerMeasures() ) { 
         	// walk each term checking if it's a function of measure
             int termIndex = 0;        	
         	for (boolean isFunctionTerm : formula.getFunctionTermFlags()  ) {
@@ -336,9 +342,11 @@ public class EvalUtil {
         			if (formula.extractFunctionTerms()[termIndex].changeTriggersFormula(is, evalState))
         				return true;
         		}
-        		// not a function term so do a straight check
+        		// not a function term so do a straight check.
+        		// This logic is refined for recalc triggering. Recalcs shouldn't be done
+        		// unless a combination of changes make it the lead rule in the calculation. 
         		else if (formula.getTermMeasures()[termIndex].equalsIgnoreCase(measure))  {
-        			return true;
+        					return true;
         		}
         	// no trigger, onward to next term
         	termIndex++;	
@@ -356,8 +364,7 @@ public class EvalUtil {
         // all the way through, nothing tripped, doesn't trigger.
         return false;
     }
-    
-    
+
     
     
     public static boolean isLevel0(Intersection is, EvalState evalState) {

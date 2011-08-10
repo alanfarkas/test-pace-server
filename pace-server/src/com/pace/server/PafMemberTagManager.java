@@ -462,7 +462,7 @@ public class PafMemberTagManager extends PafClientDbManager {
 		strBuff.append("select distinct coord.memberTagData.id");
 		strBuff.append(" from MemberTagCoord coord");
 		strBuff.append(" where coord.memberTagId.application.name = :appname ");
-		strBuff.append(")");
+		strBuff.append(')');
 		query = strBuff.toString();
 
 		// Execute hibernate query
@@ -507,7 +507,7 @@ public class PafMemberTagManager extends PafClientDbManager {
 		strBuff.append(" from MemberTagCoord coord");
 		strBuff.append(" where coord.memberTagId.application.name = :appname ");
 		strBuff.append(" and coord.memberTagId.memberTagName = :tagname ");
-		strBuff.append(")");
+		strBuff.append(')');
 		query = strBuff.toString();
 
 		// Execute hibernate query
