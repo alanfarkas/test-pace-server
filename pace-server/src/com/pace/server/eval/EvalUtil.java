@@ -256,7 +256,13 @@ public class EvalUtil {
             evalFormula(formula, axis, target, dataCache, evalState);
         }  
     }
-    public static Set<Intersection> calcIntersections(Set<Intersection> targets, String axis, Formula formula, PafDataCache dataCache, EvalState evalState) throws PafException {
+    public static void calcIntersections(Set<Intersection> targets, String axis, Formula formula, PafDataCache dataCache, EvalState evalState) throws PafException {
+    	for (Intersection target : targets) {
+            evalFormula(formula, axis, target, dataCache, evalState);
+        }  
+    }    
+    
+    public static Set<Intersection> calcAndDiffIntersections(Set<Intersection> targets, String axis, Formula formula, PafDataCache dataCache, EvalState evalState) throws PafException {
     	Set<Intersection> changed = new HashSet<Intersection>(targets.size() );
     	double origValue;
     	for (Intersection target : targets) {
@@ -267,7 +273,6 @@ public class EvalUtil {
     	return changed;
     }    
     
-
     public static Intersection inverseTranslocateIntersection(Intersection source, IPafFunction function, EvalState evalState) {
         Intersection newIs = source.clone();
 
