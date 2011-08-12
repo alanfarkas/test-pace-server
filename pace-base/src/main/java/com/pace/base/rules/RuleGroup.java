@@ -82,7 +82,8 @@ public class RuleGroup implements Cloneable {
 	
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (Rule r : rules) sb.append(r.toString() + "\n");
+        for (Rule r : rules) sb.append(r.toString() + " | ");
+        sb.setLength(sb.length()-3);
         return sb.toString();
     }
 

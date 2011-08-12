@@ -1632,7 +1632,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		// Only process rule groups that haven't already been processed
 		if (!processedRuleGroups.contains(ruleGroup)) {
 
-			logger.info(Messages.getString("RuleBasedEvalStrategy.65") + ruleGroup.toString() ); //$NON-NLS-1$
+//			logger.info(Messages.getString("RuleBasedEvalStrategy.65") + ruleGroup.toString() ); //$NON-NLS-1$
 
 			if (PafMetaData.getServerSettings().isChangedCellLogging())
 				logger.debug(Messages.getString("RuleBasedEvalStrategy.66") + java.util.Arrays.toString(uowEvalState.getCurrentChangedCells().toArray(new Intersection[0]))); //$NON-NLS-1$
