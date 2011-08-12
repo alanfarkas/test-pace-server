@@ -640,6 +640,32 @@ public class ZipPaceProjectTest extends TestCase {
 		loadUpgradeAndTestProject("./test_files/TestProject.paf");
 		
 	}	
+	
+	public void testProjectUpgradeOddTestProjectToCurrent(){
+		
+		//loadUpgradeAndTestProject("./test_files/OddProjectFromJim.paf");
+		
+		String path = "./test_files/OddProjectFromJim.paf";
+		
+		//convert project
+		PaceProject tempPaceProject = null;
+		
+		try {
+			tempPaceProject = new ZipPaceProject(path, null, true);
+		} catch (InvalidPaceProjectInputException e) {
+			assertTrue(tempPaceProject.getProjectErrorList().size() > 0);
+		} catch (PaceProjectCreationException e) {
+			 assertTrue(e.getProjectCreationErrorMap().size() > 0);
+		}
+		
+	}	
+	
+	public void testProjectUpgradeKatzToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/katz.paf");
+		
+	}	
+	
 	public void loadUpgradeAndTestProject(String path){
 		
 		//convert project

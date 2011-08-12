@@ -505,6 +505,12 @@ public class XMLPaceProjectTest extends TestCase {
 		loadUpgradeAndTestProject("./test_files/TestProject.paf");
 		
 	}	
+	public void testProjectUpgradeKatzToCurrent(){
+		
+		loadUpgradeAndTestProject("./test_files/katz.paf");
+		
+	}	
+
 	public void loadUpgradeAndTestProject(String path){
 		
 		File tempDir = FileUtils.createTempDirectory();

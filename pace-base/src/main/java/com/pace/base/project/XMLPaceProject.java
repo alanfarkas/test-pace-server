@@ -372,6 +372,13 @@ public class XMLPaceProject extends PaceProject {
 	@Override
 	protected void readNumericFormats() throws PaceProjectReadException {
 		
+		//if auto convert project, try to convert gen formats to hier formats
+		if ( upgradeProject ) {
+
+			new PafStringCaseInsensitiveComparatorMigrationAction(new String[] {PafBaseConstants.FN_NumericFormatsMetaData }, this.getProjectInputDir()).run();
+
+		}
+		
 		PafXStreamElementItem<Map<String, PafNumberFormat>> pafXStreamElementItem = new PafXStreamElementItem<Map<String, PafNumberFormat>>(getProjectInput() + PafBaseConstants.FN_NumericFormatsMetaData);
 		
 		Map<String, PafNumberFormat> objectMap = pafXStreamElementItem.read();
