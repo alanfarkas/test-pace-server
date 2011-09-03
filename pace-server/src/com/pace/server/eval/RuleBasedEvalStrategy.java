@@ -38,6 +38,7 @@ import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.VersionType;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.funcs.F_CrossDim;
@@ -240,8 +241,28 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		//Load rounding rules
 		logger.info(Messages.getString("RuleBasedEvalStrategy.21")); //$NON-NLS-1$
 		
-		// TTN-820 Disable rounding if the file with rounding rules does not exist
-		HashMap<String, RoundingRule> roundingRules = EvalUtil.loadRoundingRules(uowEvalState);
+
+
+		// TODO so doesn't belong here. These needs to be moved into application loading code.
+		List<RoundingRule> rRules = PafMetaData.getPaceProject().getRoundingRules();
+		Map<String, RoundingRule> roundingRules = null;
+
+		// TTN-820 Disable rounding if the file with rounding rules does not exist		
+		// Set it to null and return null if the file does not exist
+		// so that the calling method is aware of the missing file
+		// Instantiate the map only if the file actually exists
+
+		if(rRules != null)
+		{
+			roundingRules = new HashMap<String, RoundingRule>();
+			for (RoundingRule rRule : rRules) {
+
+				if (rRule.getMemberList().get(0).getDimension().equalsIgnoreCase(uowEvalState.getAppDef().
+						getMdbDef().getMeasureDim())){
+					roundingRules.put(rRule.getMemberList().get(0).getMember(), rRule);
+				}
+			}
+		}
 		
 		if (roundingRules == null){
 			uowEvalState.getAppDef().getAppSettings().setEnableRounding(false);
@@ -382,8 +403,9 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 			logger.info(Messages.getString("RuleBasedEvalStrategy.35")); //$NON-NLS-1$
 
 			// TTN-820 Disable rounding if the file with rounding rules does not exist
-			HashMap<String, RoundingRule> roundingRules = EvalUtil.loadRoundingRules(uowEvalState);
+			Map<String, RoundingRule> roundingRules = uowEvalState.getRoundingRules();
 
+			
 			if (roundingRules == null){
 				uowEvalState.getAppDef().getAppSettings().setEnableRounding(false);
 				dsEvalState.getAppDef().getAppSettings().setEnableRounding(false);
@@ -924,7 +946,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 					// If newly calculated cell was protected, shift protection to original
 					// recalc intersection.
-					Set protectedCells = dsEvalState.getCurrentProtectedCells();
+					Set<Intersection> protectedCells = dsEvalState.getCurrentProtectedCells();
 					if (protectedCells.contains(targetMeasureIs)) {
 						dsEvalState.getCurrentProtectedCells().add(recalcCell);
 						dsEvalState.removeProtectedCell(targetMeasureIs);						
@@ -1280,9 +1302,6 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		// quickly consider only relevant intersections, and the master loop will skip 
 		// over empty lists
 
-		Map<String, Set<Intersection>> attributeRecalcChangesByTargetMeasure = new HashMap<String, Set<Intersection>>();
-		Map<String, Set<Intersection>> attributeRecalcLocksByTargetMeasure = new HashMap<String, Set<Intersection>>();
-		PafDataCache uowCache = uowEvalState.getDataCache();
 
 		List<String> timePeriods = uowEvalState.getTimePeriodList();
 		uowEvalState.setTimeSliceMode(true);
@@ -1405,8 +1424,6 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 // *** THIS CODE IS NOT BEING USED RIGHT NOW - THIS IS A COPY OF 'processPerpetualRuleGroups' 
 // WITH SOME PENDING CHANGES FOR CONTRIBUTION %
 //
-		Map<String, Set<Intersection>> attributeRecalcChangesByTargetMeasure = new HashMap<String, Set<Intersection>>();
-		Map<String, Set<Intersection>> attributeRecalcLocksByTargetMeasure = new HashMap<String, Set<Intersection>>();
 		PafDataCache dsCache = dsEvalState.getDataCache();
 		PafDataCache uowCache = uowEvalState.getDataCache();
 		MdbDef mdbDef = uowEvalState.getAppDef().getMdbDef();

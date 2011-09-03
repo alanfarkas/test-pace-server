@@ -68,7 +68,7 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
         
         // don't bother if not a default evaluation and no changes exist for the current measure
         if ( !evalState.isDefaultEvalStep() ) {
-        	Set chngSet = evalState.getChangedCellsByMsr().get(evalState.getMeasureName());
+        	Set<Intersection> chngSet = evalState.getChangedCellsByMsr().get(evalState.getMeasureName());
         	if (chngSet == null || chngSet.size() == 0) return;
         }
         

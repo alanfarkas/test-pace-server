@@ -29,12 +29,12 @@ import com.pace.base.PafException;
 import com.pace.base.SortOrder;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.VersionType;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.EvalState;
-import com.pace.base.utility.LogUtil;
 
 /**
  * Performs one step in an evaluation strategy.
@@ -47,7 +47,8 @@ import com.pace.base.utility.LogUtil;
  */
 public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep {
     
-    private static Logger logger = Logger.getLogger(ES_AllocateUpperLevel.class);
+    @SuppressWarnings("unused")
+	private static final Logger logger = Logger.getLogger(ES_AllocateUpperLevel.class);
 
     
     public void performEvaluation(EvalState evalState) throws PafException {
@@ -188,13 +189,13 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
     	// initial check, don't allocate any intersection that is "elapsed" during forward plannable sessions
         // if current plan is forward plannable, also don't allow
         // allocation into any intersections containing protected time periods
-        Set lockedTimePeriods = null;
+        Set<String> lockedTimePeriods = null;
 
         if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
             lockedTimePeriods = evalState.getClientState().getLockedPeriods();
         }
         if (lockedTimePeriods == null)
-            lockedTimePeriods = new HashSet(0);  
+            lockedTimePeriods = new HashSet<String>(0);  
         
         // dump out if current intersection is in an elapsed period
         if (lockedTimePeriods.contains(intersection.getCoordinate(timeDim))) return dataCache;

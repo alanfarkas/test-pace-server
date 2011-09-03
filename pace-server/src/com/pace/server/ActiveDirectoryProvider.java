@@ -39,7 +39,7 @@ final static String DC = "DC";
 		PafLDAPSettings ldapSettings = serverSettings.getLdapSettings();
 		LdapContext ctx = null;
 		
-		Hashtable env = new Hashtable();
+		Hashtable<String, String> env = new Hashtable<String, String>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 		env.put(Context.SECURITY_AUTHENTICATION, ldapSettings.getSecurityAuthentication().toLowerCase());
 		env.put(Context.SECURITY_PRINCIPAL, securityPrincipal);

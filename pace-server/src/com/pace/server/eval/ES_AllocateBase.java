@@ -23,11 +23,11 @@ import java.util.*;
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.state.EvalState;
 import com.pace.server.PafDataService;
-import com.pace.server.PafMetaData;
 
 /**
  * Performs one step in an evaluation strategy.
@@ -41,7 +41,8 @@ import com.pace.server.PafMetaData;
  */
 public abstract class ES_AllocateBase extends ES_EvalBase implements IEvalStep {
     
-    private static Logger logger = Logger.getLogger(ES_AllocateBase.class);
+    @SuppressWarnings("unused")
+	private static Logger logger = Logger.getLogger(ES_AllocateBase.class);
     protected PafDataService dataService = PafDataService.getInstance();
     // TODO Remove processedIntersections as used here. Currently serving two purposes:
     // Holding the result of allocations, which are by definition level 0 and potentially could

@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import com.pace.base.PafException;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.IPafFunction;
 import com.pace.base.mdb.PafDataCache;

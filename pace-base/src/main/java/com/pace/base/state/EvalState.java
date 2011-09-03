@@ -829,7 +829,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 	}
 
 	//pmack
-	public void setRoundingRules(HashMap<String, RoundingRule> rRules) {
+	public void setRoundingRules(Map<String, RoundingRule> rRules) {
 		roundingRules = rRules;
 	}
 

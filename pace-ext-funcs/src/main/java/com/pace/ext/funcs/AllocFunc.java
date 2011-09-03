@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.app.VersionType;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.IntersectionUtil;
@@ -20,17 +21,18 @@ import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.IPafEvalState;
+import com.pace.base.data.EvalUtil;
 
 /**
  * "Allocation" Custom Function - 
  * 
  * The calling signature of this function is '@ALLOC(, [msrAllocTargets*] )'.
- * This function can be used against weeks or days, or any other Time dimension level.
  * 
  * @version	2.8.2.0
  * @author JWatkins
  *
  */
+
 public class AllocFunc extends AbstractFunction {
 
    	private static int MEASURE_ARGS = 1, REQUIRED_ARGS = 1; //, MAX_ARGS = 4;
@@ -265,6 +267,156 @@ public class AllocFunc extends AbstractFunction {
         
     }
     
+    /**
+     * @param intersection
+     * @param evalState
+     * @param dataCache
+     * @return
+     * @throws PafException
+     */
+    public PafDataCache allocateChange(Intersection intersection, EvalState evalState, PafDataCache dataCache) throws PafException {
 
+    	double allocTotal = dataCache.getCellValue(intersection);
+//  	if (logger.isDebugEnabled()) logger.debug("Allocating change for :" + intersection.toString() + " = " + allocTotal);
+
+    	// useful values
+    	String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
+        String currentYear = evalState.getAppDef().getCurrentYear(); 
+        String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
+    	
+    	long stepTime = System.currentTimeMillis();
+
+    	// initial check, don't allocate any intersection that is "elapsed" during forward plannable sessions
+        // if current plan is forward plannable, also don't allow
+        // allocation into any intersections containing protected time periods
+        Set lockedTimePeriods = null;
+
+        if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
+            lockedTimePeriods = evalState.getClientState().getLockedPeriods();
+        }
+        if (lockedTimePeriods == null)
+            lockedTimePeriods = new HashSet(0);  
+        
+        // dump out if current intersection is in an elapsed period
+        if (lockedTimePeriods.contains(intersection.getCoordinate(timeDim))) return dataCache;
+    	
+        
+    	List<Intersection> targetList = EvalUtil.buildFloorIntersections(intersection, evalState);
+    	if (targetList.size() == 0) return dataCache;
+    	if (targetList.size() == 1 && targetList.get(0).equals(intersection)) {
+    		return dataCache;
+    	}
+
+    	Set<Intersection> targets = new HashSet<Intersection>(targetList.size() * 2);
+        targets.addAll(targetList);
+        
+        // total locked cells under intersection
+        stepTime = System.currentTimeMillis();    
+        
+
+        
+        double lockedTotal = 0;
+        Set<Intersection> lockedTargets = new HashSet<Intersection>(evalState.getLoadFactor());
+        
+        // add up all locked cell values
+        for (Intersection target : targets) {
+            if (evalState.getCurrentLockedCells().contains(target) || 
+                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
+                            target.getCoordinate(yearDim).equals(currentYear))  ) {
+                lockedTotal += dataCache.getCellValue(target);
+                lockedTargets.add(target);              
+            }
+        }
+
+        double allocAvailable = 0;
+        
+        // normal routine, remove locked intersections from available allocation targets
+        if (targets.size() != lockedTargets.size() || evalState.isRoundingResourcePass() ) {
+            targets.removeAll(lockedTargets);
+            allocAvailable = allocTotal - lockedTotal;                    
+        }
+        else { // all targets locked so special case
+        	// if some of the locks are original user changes
+            ArrayList<Intersection> userLockedTargets = new ArrayList<Intersection>(evalState.getLoadFactor());
+            ArrayList<Intersection> elapsedTargets = new ArrayList<Intersection>(evalState.getLoadFactor());
+            double userLockedTotal = 0;
+            double elapsedTotal = 0;
+            for (Intersection target : targets) {
+            
+//              if (evalState.getOrigLockedCells().contains(target) ||
+//            		  (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
+//                        target.getCoordinate(yearDim).equals(currentYear))
+//            		  
+//              ) { 
+//            	userLockedTotal += dataCache.getCellValue(target.getCoordinates());
+//                userLockedTargets.add(target);              
+//            }            	
+//            	
+
+                // total elapsed period locks and add them to a specific collection
+                if (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
+                                target.getCoordinate(yearDim).equals(currentYear) ) {
+                	elapsedTotal += dataCache.getCellValue(target);
+                	elapsedTargets.add(target);              
+                }  
+            	
+            	// total user locks and add them to a specific collection. These are user locks "only"
+            	// and don't include elapsed period locks
+                if (
+                		(evalState.getOrigLockedCells().contains(target) || evalState.getOrigChangedCells().contains(target)) // user change true
+                		&&
+                		(!elapsedTargets.contains(target)) // not already counted as an elapsed period
+                ) {
+                	userLockedTotal += dataCache.getCellValue(target);
+                    userLockedTargets.add(target);              
+                }
+            }
+            
+            // always remove elapsed periods from the allocation
+            targets.removeAll(elapsedTargets);
+            allocAvailable = allocTotal - elapsedTotal;
+            
+            
+            if (targets.size() != userLockedTargets.size()) {
+            	// some targets are user locks so remove them and allocate into rest
+            	targets.removeAll(userLockedTargets);
+                allocAvailable -= userLockedTotal; 
+            }
+//            else { // all potential targets are user locks, so allocate evenly into them
+//            	allocAvailable = allocAvailable;
+//            }
+        }
+        
+        // if no quantity to allocate, dump out.
+//        if (allocAvailable == 0) return dataCache;
+            
+            
+        double origTargetSum = 0;        
+        for (Intersection target : targets ) {
+            origTargetSum += dataCache.getCellValue(target);
+        }
+        
+        // begin timing allocation step
+        stepTime = System.currentTimeMillis();
+//		logger.info("Allocating intersection: " + intersection);
+//		logger.info("Allocating into " + targets.size() + " targets" );          
+        
+    	if (origTargetSum == 0 && 
+    			evalState.getRule().getBaseAllocateMeasure() != null
+    					&& !evalState.getRule().getBaseAllocateMeasure().equals("")) {
+			// in this case, perform the exact same logic as the normal allocation step, however, use the "shape"
+			// from base measure to determine the allocation percentages.
+//			allocateToTargets(targets, evalState.getRule().getBaseAllocateMeasure(), allocAvailable, dataCache, evalState);    				
+    		}
+    	else {		
+			// normal allocation to open targets
+			allocateToTargets(targets, allocAvailable, origTargetSum, dataCache, evalState);	
+    		}
+
+
+//     logger.info(LogUtil.timedStep("Allocation completed ", stepTime));                
+  
+        return dataCache;
+    } 
 	
 }

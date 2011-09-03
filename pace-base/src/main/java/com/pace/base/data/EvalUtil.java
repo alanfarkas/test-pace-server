@@ -16,7 +16,7 @@
  xx/xx/xx		xxxxxxxx		x.xx			..............
  * 
  */
-package com.pace.server.eval;
+package com.pace.base.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,8 +37,6 @@ import com.pace.base.SortOrder;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafApplicationDef;
-import com.pace.base.data.Intersection;
-import com.pace.base.data.MemberTreeSet;
 import com.pace.base.funcs.*;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -49,9 +47,9 @@ import com.pace.base.rules.Rule;
 import com.pace.base.state.EvalState;
 import com.pace.base.utility.Odometer;
 import com.pace.base.utility.TimeBalance;
-import com.pace.server.PafDataService;
-import com.pace.server.PafMetaData;
-import com.pace.server.RuleMngr;
+import com.pace.base.data.DimSortComparator;
+import com.pace.base.data.GenSortComparator;
+import com.pace.base.data.IFormulaEvalEngine;
 
 
 /**
@@ -109,7 +107,8 @@ public class EvalUtil {
      * @return sorted Array of Intersections based up an axis
      */
     @SuppressWarnings("unchecked")
-	protected static Intersection[] sortIntersectionsByAxis(Intersection[] changedCells, Map<String, HashMap<String, Integer>> memberIndexLists, 
+	public
+	static Intersection[] sortIntersectionsByAxis(Intersection[] changedCells, Map<String, HashMap<String, Integer>> memberIndexLists, 
     		String axis[], SortOrder sortOrder) {
         List<Intersection> intersections = Arrays.asList(changedCells);
 //        Collections.sort(intersections, new DimSortComparator(PafDataService.getInstance().getMemberIndexLists(), axis, sortOrder));
@@ -177,7 +176,7 @@ public class EvalUtil {
     
     
 
-    protected static void evalFormula(Formula formula, String axis,  Intersection srcIs, Intersection targetIs,  PafDataCache dataCache, EvalState evalState) throws PafException {
+    public static void evalFormula(Formula formula, String axis,  Intersection srcIs, Intersection targetIs,  PafDataCache dataCache, EvalState evalState) throws PafException {
 
     	// get formula terms
     	String[] terms = formula.getExpressionTerms();
@@ -247,7 +246,7 @@ public class EvalUtil {
     	}
 
     
-    protected static void evalFormula(Formula formula, String axis, Intersection calcIs, PafDataCache dataCache, EvalState evalState) throws PafException {
+    public static void evalFormula(Formula formula, String axis, Intersection calcIs, PafDataCache dataCache, EvalState evalState) throws PafException {
         evalFormula(formula, axis, calcIs, calcIs, dataCache, evalState);        
     }
     
@@ -540,29 +539,29 @@ public class EvalUtil {
     
     //pmack
     //pmack
-    public static HashMap<String, RoundingRule> loadRoundingRules(EvalState evalState)
-    {
-        List<RoundingRule> rRules = PafMetaData.getPaceProject().getRoundingRules();
-        
-        // TTN-820 Set it to null and return null if the file does not exist
-        // so that the calling method is aware of the missing file
-        // Instantiate the map only if the file actually exists
-        
-        HashMap<String, RoundingRule> roundingRules = null;
-        
-        if(/*!rRules.equals(null)*/ rRules != null)
-        {
-        	roundingRules = new HashMap<String, RoundingRule>();
-        	for (RoundingRule rRule : rRules) {
-        		
-        		if (rRule.getMemberList().get(0).getDimension().equalsIgnoreCase(evalState.getAppDef().
-        				getMdbDef().getMeasureDim())){
-        			roundingRules.put(rRule.getMemberList().get(0).getMember(), rRule);
-        		}
-        	}
-        }
-        
-        return roundingRules;
-    }
+//    public static HashMap<String, RoundingRule> loadRoundingRules(EvalState evalState)
+//    {
+//        List<RoundingRule> rRules = PafMetaData.getPaceProject().getRoundingRules();
+//        
+//        // TTN-820 Set it to null and return null if the file does not exist
+//        // so that the calling method is aware of the missing file
+//        // Instantiate the map only if the file actually exists
+//        
+//        HashMap<String, RoundingRule> roundingRules = null;
+//        
+//        if(/*!rRules.equals(null)*/ rRules != null)
+//        {
+//        	roundingRules = new HashMap<String, RoundingRule>();
+//        	for (RoundingRule rRule : rRules) {
+//        		
+//        		if (rRule.getMemberList().get(0).getDimension().equalsIgnoreCase(evalState.getAppDef().
+//        				getMdbDef().getMeasureDim())){
+//        			roundingRules.put(rRule.getMemberList().get(0).getMember(), rRule);
+//        		}
+//        	}
+//        }
+//        
+//        return roundingRules;
+//    }
 }
 

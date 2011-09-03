@@ -33,6 +33,7 @@ import org.apache.log4j.Logger;
 import com.pace.base.PafException;
 import com.pace.base.SortOrder;
 import com.pace.base.app.*;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafDataCache;
@@ -59,7 +60,8 @@ import com.pace.base.view.PafViewSection;
  */
 public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 
-	private static Logger logger = Logger.getLogger(ES_AllocateRatios.class);
+	@SuppressWarnings("unused")
+	private static final Logger logger = Logger.getLogger(ES_AllocateRatios.class);
 	private Set<Intersection> tempAllocLocks;
 
 
@@ -102,13 +104,13 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		String timeName;
 		
 		
-        Set lockedTimePeriods = null;
+        Set<String> lockedTimePeriods = null;
 
         if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
             lockedTimePeriods = evalState.getClientState().getLockedPeriods();
         }
         if (lockedTimePeriods == null)
-            lockedTimePeriods = new HashSet(0);  
+            lockedTimePeriods = new HashSet<String>(0);  
 		
 		
 		
@@ -294,7 +296,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 
 			// convenience variable to hold client tree for current dimension
 		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
-			PafDimTree dimTree = uowTrees.getTree(dim);
+		PafDimTree dimTree = uowTrees.getTree(dim);
 		String baseDim = null;
 		Set<String> assocAttrDims = null, baseDims = dataService.getBaseDimNames();
 		boolean isBaseDim = false;
@@ -494,13 +496,13 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		double allocAvailable = dataCache.getCellValue(intersection);
 
 
-        Set lockedTimePeriods = null;
+        Set<String> lockedTimePeriods = null;
 
         if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
             lockedTimePeriods = evalState.getClientState().getLockedPeriods();
         }
         if (lockedTimePeriods == null)
-            lockedTimePeriods = new HashSet(0);  
+            lockedTimePeriods = new HashSet<String>(0);  
 		
 		
 		// total up locked and unlocked targets

@@ -16,14 +16,13 @@
  xx/xx/xx		xxxxxxxx		x.xx			..............
  * 
  */
-package com.pace.server.eval;
+package com.pace.base.data;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.pace.base.SortOrder;
-import com.pace.base.data.Intersection;
 
 /**
  * This sorts a collection of Intersection objects
@@ -34,13 +33,13 @@ import com.pace.base.data.Intersection;
  * @author jim
  *
  */
-public class GenSortComparator implements Comparator {
+public class DimSortComparator implements Comparator {
     
     private Map<String, HashMap<String, Integer>> memberSeqs;
     private String[] axisSequence;
     private SortOrder sortOrder;
     
-    public GenSortComparator(Map <String, HashMap<String, Integer>>memberSequences, String[] axisSequence, SortOrder sortOrder) {
+    public DimSortComparator(Map <String, HashMap<String, Integer>>memberSequences, String[] axisSequence, SortOrder sortOrder) {
         memberSeqs = memberSequences;
         this.axisSequence = axisSequence;
         this.sortOrder = sortOrder;

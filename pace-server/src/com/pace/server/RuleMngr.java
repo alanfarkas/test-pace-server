@@ -36,6 +36,7 @@ import com.pace.base.app.MeasureFunctionFactory;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.VersionDef;
 import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafDimMember;
@@ -46,7 +47,6 @@ import com.pace.base.rules.RuleGroup;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.state.EvalState;
 import com.pace.base.utility.TimeBalance;
-import com.pace.server.eval.EvalUtil;
 
 /**
  * Class_description_goes_here

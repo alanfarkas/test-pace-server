@@ -18,6 +18,7 @@
  */
 package com.pace.server.eval;
 
+import com.pace.base.data.IFormulaEvalEngine;
 import com.pace.base.rules.Formula;
 
 /**

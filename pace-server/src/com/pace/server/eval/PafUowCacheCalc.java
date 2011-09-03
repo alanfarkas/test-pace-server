@@ -30,7 +30,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;

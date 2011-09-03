@@ -1200,7 +1200,6 @@ public class PafDataService {
 		String timeDim = clientState.getMdbDef().getTimeDim();
 		String versionDim = clientState.getMdbDef().getVersionDim();
 		String[] uowPeriods = uowCache.getDimMembers(timeDim);
-		String[] dimensionOrder = viewSection.getDimensionsPriority();
 		Set<String>[] dimensionMembers = null;
 		PafApplicationDef appDef = clientState.getApp();       	
 		Map<String, MeasureDef> measureDefs = appDef.getMeasureDefs();
@@ -1212,6 +1211,7 @@ public class PafDataService {
 		UnitOfWork sliceCacheParms = null;
 		EvalState evalState = null;
 		boolean hasAttributes;
+		String[] dimensionOrder;
 
 		logger.info("Building Data Slice Cache Spec...");
 
@@ -1230,6 +1230,7 @@ public class PafDataService {
 			IllegalArgumentException iae = new IllegalArgumentException(errMsg);
 			throw (iae);
 		} else {
+			dimensionOrder = viewSection.getDimensionsPriority();
 			hasAttributes = viewSection.hasAttributes();
 		}
 
@@ -2218,7 +2219,7 @@ public class PafDataService {
 
 		try {
 
-			Constructor C = Class.forName(connectionProps.getDataServiceProvider()).getConstructor(new Class[] {Properties.class} );
+			Constructor<?> C = Class.forName(connectionProps.getDataServiceProvider()).getConstructor(new Class[] {Properties.class} );
 
 			dataProvider = (IMdbData) C.newInstance(new Object[] { connectionProps.getProperties() } );
 
@@ -4045,7 +4046,7 @@ public class PafDataService {
 		if ( mdbProps != null && mdbProps.getBaseDims() != null) {
 		
 			//get list of base dims
-			List<String> dimensions = new ArrayList(Arrays.asList(mdbProps.getBaseDims()));
+			List<String> dimensions = new ArrayList<String>(Arrays.asList(mdbProps.getBaseDims()));
 			
 			//if cached attributes dims exists, add them to dim list
 			if ( mdbProps.getCachedAttributeDims() != null ) {
