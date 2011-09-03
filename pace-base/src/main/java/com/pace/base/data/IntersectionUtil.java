@@ -122,4 +122,20 @@ public class IntersectionUtil {
         return buildIntersections(memberListMap, is.getDimensions());
     }
 	
+    public static double Round(double value, int places)
+    {
+    	try
+    	{
+    		value = roundDouble(value, places);
+    	}
+        catch (Exception ex) {
+        }
+        
+    	return value;
+    }
+    
+    private static double roundDouble(double d, int places) {
+        return Math.round(d * Math.pow(10, (double) places)) / Math.pow(10,(double) places);
+    }
+    
 }
