@@ -12,19 +12,17 @@ import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
-import com.pace.base.app.PafDimSpec;
 import com.pace.base.app.Season;
 import com.pace.base.comm.ClientInitRequest;
 import com.pace.base.comm.PafPlannerConfig;
-import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.testCommonParms;
 import com.pace.base.state.PafClientState;
-import com.pace.base.utility.StringUtils;
 
 public class PafDataServiceTest extends TestCase {
 
-	private static Logger logger = Logger.getLogger(PafDataServiceTest.class);
+	@SuppressWarnings("unused")
+	private static final Logger logger = Logger.getLogger(PafDataServiceTest.class);
 	PafDataService pds = PafDataService.getInstance();
 	PafAppService appService = PafAppService.getInstance();
 	PafApplicationDef appDef = appService.getApplications().get(0);

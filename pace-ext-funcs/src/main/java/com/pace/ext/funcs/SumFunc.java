@@ -22,10 +22,11 @@ import com.pace.base.state.EvalState;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * "Allocation" Custom Function - 
+ * "Sum" Custom Function - 
  * 
- * The calling signature of this function is '@ALLOC(, [msrAllocTargets*] )'.
- * This function can be used against weeks or days, or any other Time dimension level.
+ * The calling signature of this function is '@SUM(msrTotal, [msrsToExclude*] )'.
+ * This function aggregates all the children of the measure specified in the 1st parameter
+ * into the msrTotal. An optional list of measures to exlcude can be added.
  * 
  * @version	2.8.2.0
  * @author JWatkins

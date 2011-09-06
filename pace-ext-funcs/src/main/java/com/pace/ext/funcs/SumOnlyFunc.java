@@ -22,20 +22,20 @@ import com.pace.base.state.EvalState;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * "Allocation" Custom Function - 
+ * "SumOnly" Custom Function - 
  * 
- * The calling signature of this function is '@ALLOC(, [msrAllocTargets*] )'.
- * This function can be used against weeks or days, or any other Time dimension level.
+ * The calling signature of this function is '@SUMONLY(msrTotal, [msrComponents+] )'.
+ * This function aggregates all the measures listed after the 1st parameters into the msrTotal
  * 
  * @version	2.8.2.0
  * @author JWatkins
  *
  */
-public class SumOnlyFunc extends AbstractFunction {
+public class SumOnlyFunc extends SumFunc {
 
    	private static int MEASURE_ARGS = 1, REQUIRED_ARGS = 1; //, MAX_ARGS = 4;
    	
-  	private String msrToAlloc = null;
+  	private String msrToSum = null;
 	
 	private boolean hasRestrictedTargets;
 	private List<String> targetMsrs;
@@ -129,7 +129,7 @@ public class SumOnlyFunc extends AbstractFunction {
     	}
    	
     	// Get required arguments
-    	msrToAlloc = this.measureName;
+    	msrToSum = this.measureName;
 
     	
     	// Check for optional parameters - if any other parameters 
@@ -163,7 +163,7 @@ public class SumOnlyFunc extends AbstractFunction {
      	validateParms(evalState);
     	   					
 		// Add in alloc measure
-     	Set<Intersection> allocIsxs = changedCellsByMsr.get(msrToAlloc);
+     	Set<Intersection> allocIsxs = changedCellsByMsr.get(msrToSum);
      	if (allocIsxs == null) {
      		triggerIntersections = new HashSet<Intersection>(0);
      	}
@@ -187,7 +187,7 @@ public class SumOnlyFunc extends AbstractFunction {
 
     	String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();
 		String measure = is.getCoordinate(measureDim);	
-		if (measure.equals(msrToAlloc))	
+		if (measure.equals(msrToSum))	
 			return true;
 		else
 			return false;
@@ -206,7 +206,7 @@ public class SumOnlyFunc extends AbstractFunction {
     	   	
     	// Add all parameters
     	Set<String> memberList = new HashSet<String>();
-    	memberList.add(msrToAlloc);
+    	memberList.add(msrToSum);
     	memberList.addAll(targetMsrs);
     	dependencyMap.put(measureDim, memberList);
     	

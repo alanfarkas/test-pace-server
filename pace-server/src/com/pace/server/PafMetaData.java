@@ -73,8 +73,7 @@ public class PafMetaData {
 	private static ApplicationContext appContext = null;
 	
 	private static ServerSettings serverSettings = null;
-	
-	private static PafLDAPSettings ldapSettings = null;
+
 	
 	private static String paceHome = null;
 	
@@ -154,10 +153,7 @@ public class PafMetaData {
             	temp.put(key.toLowerCase(), serverSettings.getLdapSettings().getNetBiosNames().get(key));
             }
             serverSettings.getLdapSettings().setNetBiosNames(temp);
-                        
-//            ldapSettings = (PafLDAPSettings) appContext.getBean("ldapSettings");
-//            serverSettings.setLdapSettings(ldapSettings);
-            
+                               
            
         } catch (Throwable ex) {
             PafErrHandler.handleException(new PafException(

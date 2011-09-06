@@ -18,16 +18,16 @@ import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * "Allocation" Custom Function - 
+ * "AllocOnly" Custom Function - 
  * 
- * The calling signature of this function is '@ALLOC(, [msrAllocTargets*] )'.
- * This function can be used against weeks or days, or any other Time dimension level.
+ * The calling signature of this function is '@ALLOCONLY(msrToAllocate, [msrAllocTargets+] )'.
+ * This function allocates the initial measure into the measures specified in the subsequent parameters
  * 
  * @version	2.8.2.0
  * @author JWatkins
  *
  */
-public class AllocOnlyFunc extends AbstractFunction {
+public class AllocOnlyFunc extends AllocFunc {
 
    	private static int MEASURE_ARGS = 1, REQUIRED_ARGS = 1; //, MAX_ARGS = 4;
    	

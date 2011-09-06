@@ -125,7 +125,7 @@ final static String DC = "DC";
 	public PafUserDef getUser(LdapContext ctx, ServerSettings serverSettings, String userName, String domain){
 		PafLDAPSettings ldapSettings = serverSettings.getLdapSettings();
 		PafUserDef userDef = null;
-		NamingEnumeration answer = null;
+		NamingEnumeration<SearchResult> answer = null;
 		
 		try{		
 			//Create the search controls 		
@@ -224,7 +224,7 @@ final static String DC = "DC";
 	private PafUserDef getUser2(LdapContext ctx, ServerSettings serverSettings, String userPrincipalName){
 		PafLDAPSettings ldapSettings = serverSettings.getLdapSettings();
 		PafUserDef userDef = null;
-		NamingEnumeration answer = null;
+		NamingEnumeration<SearchResult> answer = null;
 		
 		try{		
 			//Create the search controls 		
@@ -358,7 +358,7 @@ final static String DC = "DC";
 	public Map<String, TreeSet<String>> getSecurityGroups(LdapContext ctx, ServerSettings serverSettings){
 		PafLDAPSettings ldapSettings = serverSettings.getLdapSettings();
 		Map<String, TreeSet<String>> securityGroups = new HashMap<String, TreeSet<String>>();
-		NamingEnumeration answer = null;
+		NamingEnumeration<SearchResult> answer = null;
 
 		try{
 			//Create the search controls 		
@@ -476,8 +476,8 @@ final static String DC = "DC";
 	public TreeSet<PafSecurityDomainUserNames> getUserNamesforSecurityGroups(LdapContext ctx, ServerSettings serverSettings, Map<String, List<String>> paceGroups){
 		PafLDAPSettings ldapSettings = serverSettings.getLdapSettings();
 		TreeSet<PafSecurityDomainUserNames> securityDomain = new TreeSet<PafSecurityDomainUserNames>();
-		NamingEnumeration answer = null;
-		NamingEnumeration answer2 = null;
+		NamingEnumeration<?> answer = null;
+		NamingEnumeration<?> answer2 = null;
 		
 		try{		
 			//Create the search controls 		
@@ -596,7 +596,7 @@ final static String DC = "DC";
 					
 						//Get a list of users
 						Attribute user = attrs.get("member");
-						for (NamingEnumeration e = user.getAll();e.hasMore();) {
+						for (NamingEnumeration<?> e = user.getAll();e.hasMore();) {
 							
 						    //Parse the DistinguishedName and extract the User and Domain
 							keyMap = parseDistinguishedName(e.next().toString());
@@ -704,7 +704,7 @@ final static String DC = "DC";
 	public PafUserDef authenticateUser (LdapContext ctx, ServerSettings serverSettings, String securityPrincipal, String sid){
 		PafLDAPSettings ldapSettings = serverSettings.getLdapSettings();
 		PafUserDef userDef = null;
-		NamingEnumeration answer = null;
+		NamingEnumeration<?> answer = null;
 	
 		try{		
 			//Create the search controls 		
@@ -855,7 +855,7 @@ final static String DC = "DC";
 	
 	public Map<String, List<String>> validateUsers(LdapContext ctx, ServerSettings serverSettings, Map<String, List<String>> users){
 		PafLDAPSettings ldapSettings = serverSettings.getLdapSettings();
-		NamingEnumeration answer = null;
+		NamingEnumeration<?> answer = null;
 		
 		try{
 			//get Domain attributes

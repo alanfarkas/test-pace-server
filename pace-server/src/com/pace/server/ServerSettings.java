@@ -250,7 +250,13 @@ public class ServerSettings {
 	public void setAutoConvertProject(boolean autoConvertProject) {
 		this.autoConvertProject = autoConvertProject;
 	}
-//	/**
+public void setEnableRounding(boolean enableRounding) {
+		this.enableRounding = enableRounding;
+	}
+	public boolean isEnableRounding() {
+		return enableRounding;
+	}
+	//	/**
 //	 * @return Returns the enableRounding.
 //	 */
 //	public boolean isEnableRounding() {
