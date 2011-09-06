@@ -506,7 +506,7 @@ public class PafDataServiceTest extends TestCase {
 	}
 
 	*//**
-	 * Test method for {@link com.pace.base.mdb.PafBaseTree#getAttributeIntersections(java.lang.String, java.lang.String[])}.
+	 * Test method for {@link com.pace.base.mdb.PafBaseTree#getAttributeCombinations(java.lang.String, java.lang.String[])}.
 	 *//*
 	public void testGetValidAttributeMembers1() {
 		

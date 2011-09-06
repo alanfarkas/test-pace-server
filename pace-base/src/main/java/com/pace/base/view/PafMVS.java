@@ -34,9 +34,9 @@ public class PafMVS {
 
 	private PafView view = null;
 	private PafViewSection viewSection = null;
-	private PafDataCache dataSliceCache = null;
+	private PafDataCache dataCache = null;
 	private PafDataSliceParms dataSliceParms = null;
-	private UnitOfWork dataSliceCacheParms = null;
+	private boolean isInitializedForAttrEval = false;
 	
 	/**
 	 * @param view Paf View object
@@ -82,16 +82,30 @@ public class PafMVS {
 	}
 
 	/**
-	 * @return the dataSliceCache
+	 * @return the dataCache
 	 */
-	public PafDataCache getDataSliceCache() {
-		return dataSliceCache;
+	public PafDataCache getDataCache() {
+		return dataCache;
 	}
 	/**
-	 * @param dsCache the dataSliceCache to set
+	 * @param dataCache the dataCache to set
 	 */
-	public void setDataSliceCache(PafDataCache dsCache) {
-		this.dataSliceCache = dsCache;
+	public void setDataCache(PafDataCache dataCache) {
+		this.dataCache = dataCache;
+	}
+
+	/**
+	 * @param isInitializedForAttrEval the isInitializedForAttrEval to set
+	 */
+	public void setInitializedForAttrEval(boolean isInitializedForAttrEval) {
+		this.isInitializedForAttrEval = isInitializedForAttrEval;
+	}
+
+	/**
+	 * @return the isInitializedForAttrEval
+	 */
+	public boolean isInitializedForAttrEval() {
+		return isInitializedForAttrEval;
 	}
 
 	/**
@@ -122,19 +136,6 @@ public class PafMVS {
 		this.viewSection = viewSection;
 	}
 
-	/**
-	 * @return the dataSliceCacheParms
-	 */
-	public UnitOfWork getDataSliceCacheParms() {
-		return dataSliceCacheParms;
-	}
-
-	/**
-	 * @param sliceCacheParms the dataSliceCacheParms to set
-	 */
-	public void setDataSliceCacheParms(UnitOfWork sliceCacheParms) {
-		this.dataSliceCacheParms = sliceCacheParms;
-	}
 
 }
 

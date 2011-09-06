@@ -59,8 +59,9 @@ import com.pace.base.state.PafClientState;
 import com.pace.base.state.SliceState;
 import com.pace.base.utility.*;
 import com.pace.base.view.*;
+import com.pace.server.eval.DcTrackChangeOpt;
 import com.pace.server.eval.IEvalStrategy;
-import com.pace.server.eval.PafDataSliceCacheCalc;
+import com.pace.server.eval.PafDataCacheCalc;
 import com.pace.server.eval.RuleBasedEvalStrategy;
 
 
@@ -75,9 +76,10 @@ import com.pace.server.eval.RuleBasedEvalStrategy;
 
 public class PafDataService {
 	private static Logger logger = Logger.getLogger(PafDataService.class);
+	private static Logger evalPerfLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_EVAL);
 
 	private static PafDataService _instance = null;
-	private ConcurrentHashMap <String, PafUowCache> uowCache = new ConcurrentHashMap <String, PafUowCache>();
+	private ConcurrentHashMap <String, PafDataCache> uowCache = new ConcurrentHashMap <String, PafDataCache>();
 	private Map <String, PafBaseTree> baseTrees = new HashMap<String, PafBaseTree>();
 	private Map <String, PafAttributeTree> attributeTrees = new HashMap<String, PafAttributeTree>();
 //	private HashMap<String, HashMap<String, Integer>> memberIndexLists = new HashMap<String, HashMap<String, Integer>>();
@@ -161,13 +163,10 @@ public class PafDataService {
 		Map<String, Map<Integer, List<String>>> mdbDataSpecByVersion = buildUowLoadDataSpec(uow, clientState);
 		
 		// Load data cache
-		//TODO Add attribute dims and associated members to work spec, pass in as seperate parm
-		//TODO Use UowCacheParms again, create a method "createDataCache()" to hold this exra processing
-		//TODO Add uow trees to Cache Parms
-		String[] attributeDims = getAttributeDimNames().toArray(new String[0]);
-		PafUowCache dataCache = new PafUowCache(clientState, attributeDims, lockedTimeSet);
-		List<String>loadedVersions = mdbData.updateUowCache(dataCache, mdbDataSpecByVersion);
-		logger.info("UOW intialized with version(s): " + StringUtils.listToString(loadedVersions));
+		logger.info("Building the unit of work...");
+		PafDataCache dataCache = new PafDataCache(clientState, lockedTimeSet);
+		List<String>loadedVersions = mdbData.updateDataCache(dataCache, mdbDataSpecByVersion);
+		logger.info("UOW intialized with version(s): " + StringUtils.arrayListToString(loadedVersions));
 		uowCache.put(clientId, dataCache);           
 
 		logger.info("Data cache loaded, cached object count: " + uowCache.size());
@@ -177,7 +176,7 @@ public class PafDataService {
 
 	/**
 	 * 	Determine which data intersections need to be extracted from the multidimensional
-	 * 	database when initiallyloading the unit of work.
+	 * 	database when initially loading the unit of work.
 	 * 
 	 * @param expandedUowSpec Expanded UOW specification
 	 * @param clientState Client State
@@ -216,7 +215,7 @@ public class PafDataService {
     	// Add a data spec entry for each version being extracted that selects all uow
     	// intersectons for that version
 		for (String version : extractedVersions) {
-			Map<Integer, List<String>> mdbDataSpec = expandedUowSpec.getUowMap();
+			Map<Integer, List<String>> mdbDataSpec = expandedUowSpec.buildUowMap();
 			mdbDataSpec.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
 			mdbDataSpecByVersion.put(version, mdbDataSpec);
 		}
@@ -248,7 +247,7 @@ public class PafDataService {
 
 		// Get uow cache for current client session
 		logger.info("Updating uow cache for client: " + clientId);
-		PafUowCache cache = uowCache.get(clientId);         
+		PafDataCache cache = uowCache.get(clientId);         
 		if (cache == null) {
 			throw new IllegalArgumentException("Uow cache not found for client: [" + clientId + "]");
 		}
@@ -299,7 +298,7 @@ public class PafDataService {
 		// Load mdb data for the required intersections. Any refreshed versions not in the data spec
 		// will be loaded as needed during view rendering or evaluation.
 		updatedVersions = mdbData.refreshDataCache(cache, mdbDataSpec, validatedVersionFilter);
-		logger.info("Data cache updated for versions: " + StringUtils.listToString(updatedVersions));
+		logger.info("Data cache updated for versions: " + StringUtils.arrayListToString(updatedVersions));
 		logger.info("Cached object count: " + uowCache.size());
 
 		return updatedVersions;
@@ -309,12 +308,12 @@ public class PafDataService {
 	 *	Update the uow cache from the mdb for the specified versions
 	 *
 	 * @param clientState Client State	
-	 * @param dataCache Uow cache
+	 * @param dataCache Data cache
 	 * @param versionFilter List of versions to update
 	 * 
 	 * @throws PafException 
 	 */
-	public void updateUowCache(PafClientState clientState, PafUowCache dataCache, List<String> versionFilter) throws PafException {
+	public void updateDataCacheFromMdb(PafClientState clientState, PafDataCache dataCache, List<String> versionFilter) throws PafException {
 
 		// Get mdb data provider corresponding to application data source id
 		String dsId = clientState.getApp().getMdbDef().getDataSourceId();
@@ -323,41 +322,106 @@ public class PafDataService {
 
 		// Refresh filtered versions
 		List<String> updatedVersions = mdbData.updateDataCache(dataCache, clientState.getUnitOfWork(), versionFilter);
-		logger.info("Data cache updated for versions: " + StringUtils.listToString(updatedVersions));
+		logger.info("Data cache updated for versions: " + StringUtils.arrayListToString(updatedVersions));
 		
 	}
 
+	
 	/**
-	 * Create an ordered list of year members
+	 * 	Update the data cache with the contents of the data slice
 	 * 
+	 * @param dataCache Data Cache
+	 * @param pafDataSlice Paf Data Slice
+	 * @param parms Object containing required PafDataSlice parameters
+	 * @param dimSequence Dimension sequence for data cache intersections associated with the corresponding view section
 	 * 
-	 * @return list of year members
+	 * @throws PafException
 	 */
-	/*
-	private List<String> getListofYearMembers(String yearDim) {
+	public void updateDataCacheFromSlice(PafDataCache dataCache, PafDataSlice pafDataSlice, PafDataSliceParms parms) throws PafException {
 
-		PafBaseTree yearTree = PafDataService.getInstance().getBaseTree(yearDim);
+		boolean hasPageDimensions = false;
+		int cols = 0, rows = 0;
+		double[] dataSlice = null;
+		String[] rowDims = parms.getRowDimensions(), colDims = parms.getColDimensions();
+		String[][] rowTuples = parms.getRowTuples(), colTuples = parms.getColTuples();
+		String [] attributeDims = parms.getAttributeDims();
+		boolean hasAttributes = false;
 
-		List<PafDimMember> yearTreeList = yearTree.getMembersAtLevel(yearTree
-				.getRootNode().getKey(), (short) 0);
-
-		List<String> yearTreeStrList = null;
-
-		if (yearTreeList != null) {
-
-			yearTreeStrList = new ArrayList<String>(yearTreeList.size());
-
-			for (PafDimMember member : yearTreeList) {
-				yearTreeStrList.add(member.getKey());
+		// Had to move this method over from the PafDataCache object so I could get access
+		// to the "isValidAttributeIntersection()" method (AF - 8/23/2011)
+		//TODO If possible, move this this method and all the attribute validation methods to PafDataCache
+		// --- Might not be possible because of data filtering calls in PafServiceProvider.startPlanSession()
+		
+		try {
+			// Validate data slice parms
+			logger.info("Validating PafDataSlice parameters...");
+			hasPageDimensions = dataCache.validateDataSliceParms(parms);
+			if (attributeDims != null && attributeDims.length > 0) {
+				hasAttributes = true;
 			}
 
-		}
+			// Getting data slice array 
+			logger.info("Getting data slice array");
+			cols = pafDataSlice.getColumnCount();
+			dataSlice = pafDataSlice.getData();
+			rows = pafDataSlice.getRowCount();
 
-		return yearTreeStrList;
+			// Create reusable cell intersection that will to access
+			// data cache data. This intersection will get updated as
+			// we iterate through all the tuple members
+			Intersection cellIs = new Intersection(parms.getDimSequence());
+			
+			// Enter page headers into appropriate elements of the data  
+			// cache cell intersection 
+			if (hasPageDimensions) {
+				logger.debug("Entering page headers into cell intersection");
+				for (int i = 0; i < parms.getPageDimensions().length; i++) {
+					cellIs.setCoordinate(parms.getPageDimensions()[i], parms.getPageMembers()[i]);
+				}
+			}
+
+			// Load data slice. Start by cycling through row tuples
+			logger.info("Updating data cache with data slice - rows: " + rows + " columns: " + cols + " cells: " + dataSlice.length);  	
+			int sliceIndex = 0;
+			for (String[] rowTuple:rowTuples) {
+
+				// Updated the cell intersection with the current row header members
+				for (int i = 0; i < rowDims.length; i++) {
+					cellIs.setCoordinate(rowDims[i], rowTuple[i]);
+				}
+
+				// Cycle through column tuples
+				for (String[] colTuple:colTuples) {
+
+					// Update the cell intersection with the current column header
+					// members 
+					for (int i = 0; i < colDims.length; i++) {
+						cellIs.setCoordinate(colDims[i], colTuple[i]);
+					}
+
+					// Copy current data slice cell to data cache, skipping any
+					// invalid attribute intersections
+					if (!hasAttributes || isValidAttributeIntersection(cellIs, attributeDims)) {
+						dataCache.setCellValue(cellIs, dataSlice[sliceIndex]);
+					}
+					sliceIndex++;
+				}
+			}
+
+		} catch (PafException pfe) {
+			// throw Paf Exception
+			throw pfe;
+		} catch (Exception ex) {
+			// throw Paf Exception
+			String errMsg = ex.getMessage();
+			logger.error(errMsg);
+			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
+			throw pfe;
 	}
-	 */
 
-		
+	}
+
+
 
 	/**
 	 *	Expand out the members in a unit of work using the base trees
@@ -383,10 +447,8 @@ public class PafDataService {
 				members.addAll(Arrays.asList(expandExpression(term, true, dim, null)));
 			}
 			// Special logic for version dimension - filter out version dimension root
-			// and any derived versions
 			if (dim.equalsIgnoreCase(versionDim)) {
 				members.remove(versionDim);
-				members.removeAll(clientState.getApp().getDerivedVersions());     	
 			}
 			expandedUow.put(axis++, members);
 		}
@@ -743,12 +805,12 @@ public class PafDataService {
 
 
 	/**
-	 *	Get uow cache for select client state id                                                                          
+	 *	Get data cache for select client state id                                                                          
 	 *
 	 * @param clientId Client state id                                                                                                                                
-	 * @return PafUowCache
+	 * @return PafDataCache
 	 */
-	public PafUowCache getUowCache(String clientId) {
+	public PafDataCache getDataCache(String clientId) {
 		logger.info("Getting data cache for client: " + clientId);    
 		logger.info("Current cached object count: " + uowCache.size());
 		return uowCache.get(clientId);
@@ -828,7 +890,6 @@ public class PafDataService {
 		long startTime = 0;
 		PafDataSlice dataSlice = null;
 		PafDataSliceParms sliceParms = null;
-		UnitOfWork sliceCacheSpec = null;
 		PafMVS pafMVS = null;
 
 		// If view section is empty, then send back dummy data slice
@@ -837,14 +898,12 @@ public class PafDataService {
 			return dataSlice;
 		}
 
-		// Get data cache and app def
+		// Get data cache
 		String clientId = clientState.getClientId();
-		PafDataCache uowCache = getUowCache(clientId);
-		PafApplicationDef appDef = clientState.getApp();
-		String versionDim = appDef.getMdbDef().getVersionDim();
+		PafDataCache dataCache = getDataCache(clientId);
 
 		// Check if data cache is initialized
-		if (uowCache == null) {
+		if (dataCache == null) {
 			String errMsg = "No uow cache initialized for client: " + clientId;
 			logger.fatal(errMsg);
 			throw new PafException(errMsg, PafErrSeverity.Fatal);
@@ -867,35 +926,25 @@ public class PafDataService {
 			throw new PafException(errMsg, PafErrSeverity.Fatal);
 		}
 		
+		// Add data cache to MVS & add MVS to Data Cache
+		pafMVS.setDataCache(dataCache);
+		dataCache.setPafMVS(pafMVS);
+		
 		// Build data slice parameters
 		sliceParms = buildDataSliceParms(viewSection);
 		pafMVS.setDataSliceParms(sliceParms);
 
-		// Build data slice cache spec
-		sliceCacheSpec = buildDataSliceCacheSpec(sliceParms, viewSection, uowCache, clientState);
-		pafMVS.setDataSliceCacheParms(sliceCacheSpec);
- 
-		
 		// Populate data cache with supporting reference data
-		loadViewReferenceData(uowCache, sliceCacheSpec, clientState, viewSection.hasAttributes());
+		UnitOfWork uowSpec = sliceParms.buildUowSpec(viewSection.getDimensionsPriority());
+		loadMdbViewData(dataCache, uowSpec, clientState, viewSection.hasAttributes());
 		
 		
-		// Build data slice cache
-		logger.debug("Building the data slice cache...");
-		PafDataSliceCacheParms sliceCacheParms = new PafDataSliceCacheParms();
-		sliceCacheParms.setDataSliceCacheSpec(sliceCacheSpec);
-		sliceCacheParms.setPafMVS(pafMVS);
-		sliceCacheParms.setUowCache(uowCache);
-		PafDataCache dsCache = new PafDataSliceCache(sliceCacheParms);
-		pafMVS.setDataSliceCache(dsCache);
-
-		// Calculate attribute intersections in base versions
+		// Calculate base version intersections on attribute view
 		if (viewSection.hasAttributes()) {
 
 			// Ensure that all selected attribute dimensions for a given
 			// base dimension are mapped to the same level
-			Set<String> viewAttributes = new HashSet<String>();
-			viewAttributes.addAll(Arrays.asList(viewSection.getAttributeDims()));
+			Set<String> viewAttributes = new HashSet<String>(Arrays.asList(viewSection.getAttributeDims()));
 			for (String baseDimName:getBaseDimNames()) {
 
 				// Get attributes for current base dimension that appear in view section
@@ -920,24 +969,24 @@ public class PafDataService {
 
 			}
 
-			// Compute attribute intersections (on non-calculated versions only)
+			// Compute attribute intersections on non-derived versions only. Also, 
+			// include any off-screen versions that are needed to calculate any
+			// derived version on the view. 
+			//TODO Optimize this by only calculating reference versions when the view is initially displayed, unless reference data has been refreshed. 
 			stepDesc = "Attribute aggregation and recalc";
 			startTime = System.currentTimeMillis();
-			Map<String, List<String>> versionFilter = new HashMap<String, List<String>>();
-			List<String> baseVersions = dsCache.getBaseVersions();
-			versionFilter.put(versionDim, baseVersions);
-			dsCache = PafDataSliceCacheCalc.calcAllAttributeIntersections((PafDataSliceCache) dsCache, uowCache, clientState, versionFilter);
+			dataCache = PafDataCacheCalc.calcAttributeIntersections(dataCache, clientState, sliceParms, null, DcTrackChangeOpt.NONE);
 			logger.info(LogUtil.timedStep(stepDesc, startTime));				
 		}
 
-		// Calculate any derived versions in data slice cache
+		// Calculate any derived versions on the view
 		stepDesc = "Version dim calculation";
 		startTime = System.currentTimeMillis();
-		dsCache = PafDataSliceCacheCalc.calcVersionDim(dsCache, memberTrees);
+		dataCache = PafDataCacheCalc.calcVersionDim(dataCache, uowSpec.buildMemberFilter(), memberTrees);
 		logger.info(LogUtil.timedStep(stepDesc, startTime));
 
 		// Get data slice corresponding to this view section
-		dataSlice = dsCache.getDataSlice(sliceParms);
+		dataSlice = dataCache.getDataSlice(sliceParms, viewSection.getDimensionsPriority());
 
 		if (compressData == true){
 			// compress slice for return.
@@ -954,16 +1003,17 @@ public class PafDataService {
 	}
 
 	/**
-	 * 	Load mdb reference data intersections required to support the rendering of 
+	 * 	Load mdb data intersections required to support the rendering of 
 	 *  the current view
 	 * 
 	 * @param dataCache Data cache
-	 * @param viewMemberSpec View member specification per dimesion
+	 * @param viewMemberSpec View member specification per dimension
+	 * @param clientState Client state object
 	 * @param isAttributeView If true, indicates the current view is an attribute view
 	 * 
 	 * @throws PafException 
 	 */
-	private void loadViewReferenceData(PafDataCache dataCache, UnitOfWork viewMemberSpec, PafClientState clientState, Boolean isAttributeView) throws PafException {
+	private void loadMdbViewData(PafDataCache dataCache, UnitOfWork viewMemberSpec, PafClientState clientState, Boolean isAttributeView) throws PafException {
 	
 		PafApplicationDef pafApp = clientState.getApp();
 		MdbDef mdbDef = pafApp.getMdbDef();
@@ -971,7 +1021,6 @@ public class PafDataService {
 		int versionAxis = dataCache.getVersionAxis();
 		UnitOfWork refDataSpec = null;
 		Map<String, Map<Integer, List<String>>> dataSpecByVersion = new HashMap<String, Map<Integer, List<String>>>();
-
 
 		// As a safeguard, filter out any versions not defined to the data cache. This
 		// prevents the attempted loading of a version the user doesn't have security 
@@ -1044,7 +1093,7 @@ public class PafDataService {
 		for (String version : referenceVersions) {
 			
 			// Clone data specification for current version
-			Map <Integer, List<String>> dataSpecAsMap = refDataSpec.getUowMap();
+			Map <Integer, List<String>> dataSpecAsMap = refDataSpec.buildUowMap();
 			dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
 			
 			// Add filtered version-specific data spec to master map
@@ -1053,7 +1102,7 @@ public class PafDataService {
 		
 		
 	
-		// Contribtion % versions - Populate all UOW intersections for any base reference
+		// Contribution % versions - Populate all UOW intersections for any base reference
 		// versions (on or off the view) that meets one of the following criteria:
 		//
 		// 	1. Base reference version is used in the compare intersection spec of any 
@@ -1070,14 +1119,14 @@ public class PafDataService {
 		// While this logic could be better optimized to pull in only the required 
 		// intersections, it doesn't seem worth the effort at this point, due to the 
 		// complex logic required and the chance of introducing calculation errors. However,
-		// this may have to be revisited in the future if additional data load optimations 
+		// this may have to be revisited in the future if additional data load optimizations 
 		// are required.
 		for (String contribPctVersion : contribPctVersions) {
 			
 			// Get the formula's base version and optional comparison version
 			VersionDef versionDef = pafApp.getVersionDef(contribPctVersion);
 			String baseVersion = versionDef.getVersionFormula().getBaseVersion();
-			String compareVersion = "";
+			String compareVersion = null;
 			PafDimSpec[] compareIsSpec = versionDef.getVersionFormula().getCompareIsSpec();
 			for (PafDimSpec crossDimSpec : compareIsSpec) {
 				if (crossDimSpec.getDimension().equals(versionDim)) {
@@ -1086,13 +1135,15 @@ public class PafDataService {
 				}
 			}
 			
-			// Select any version that meets the selection criteria
+			// Select any reference version that is specified in either the 
+			// base or comparison version.
 			Set<String> selectedVersions = new HashSet<String>();
 			if (referenceVersions.contains(compareVersion)) {
 				selectedVersions.add(compareVersion);
 			}
-			if (referenceVersions.contains(baseVersion) && !baseVersion.equals(compareVersion)) {
-				selectedVersions.add(compareVersion);
+//			if (referenceVersions.contains(baseVersion) && !baseVersion.equals(compareVersion)) {
+			if (referenceVersions.contains(baseVersion)) {
+				selectedVersions.add(baseVersion);
 			}
 			
 			// Select all UOW intersections for any of the selected reference versions
@@ -1100,7 +1151,7 @@ public class PafDataService {
 			for (String version : selectedVersions) {
 				
 				// Clone data specification for current version
-				Map <Integer, List<String>> dataSpecAsMap = refDataSpec.getUowMap();
+				Map <Integer, List<String>> dataSpecAsMap = refDataSpec.buildUowMap();
 				dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
 				
 				// Add filtered version-specific data spec to master map
@@ -1111,11 +1162,11 @@ public class PafDataService {
 		
 		
 		
-		// Update view reference data using data speficification map
+		// Update view reference data using data specification map
 		String dsId = mdbDef.getDataSourceId();
 		IPafConnectionProps connProps = clientState.getDataSources().get(dsId);
 		IMdbData mdbData = this.getMdbDataProvider(connProps);
-		mdbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+		mdbData.updateDataCache(dataCache, dataSpecByVersion);
 
 		
 	}
@@ -1175,324 +1226,12 @@ public class PafDataService {
 		sliceParms.setPageDimensions( pageAxis );      
 		sliceParms.setPageMembers( pageMembers );
 
+		sliceParms.setAttributeDims(section.getAttributeDims());
+		sliceParms.setDimSequence(section.getDimensionsPriority());
+		
 		// Return data slice parms
 		logger.info("Returning Completed Data Slice Parms");    
 		return sliceParms;
-	}
-
-	/**
-	 * Build the dimension member specs for generating a data slice cache
-	 * 
-	 * @param sliceParms DataSliceParms
-	 * @param viewSection View section
-	 * @param uowCache Unit of work cache
-	 * @param clientState Client state object
-	 * 
-	 * @return UnitOfWork
-	 * @throws PafException 
-	 */
-	@SuppressWarnings("unchecked")
-	protected UnitOfWork buildDataSliceCacheSpec(final PafDataSliceParms sliceParms, final PafViewSection viewSection,
-			final PafDataCache uowCache, PafClientState clientState) throws PafException {
-
-		int dimCount = 0;
-		String measureDim = clientState.getMdbDef().getMeasureDim();
-		String timeDim = clientState.getMdbDef().getTimeDim();
-		String versionDim = clientState.getMdbDef().getVersionDim();
-		String[] uowPeriods = uowCache.getDimMembers(timeDim);
-		Set<String>[] dimensionMembers = null;
-		PafApplicationDef appDef = clientState.getApp();       	
-		Map<String, MeasureDef> measureDefs = appDef.getMeasureDefs();
-		Map<String, Integer> dimIndexMap = new HashMap<String,Integer>();
-		Map<String, Set<String>> mbrDependencyMap = new HashMap<String, Set<String>>();
-		Map<String, Set<String>> crossDimIsMap = new HashMap<String,Set<String>>();
-		MemberTreeSet uowTrees = clientState.getUowTrees();
-		RuleSet currentRuleset = clientState.getCurrentMsrRuleset();
-		UnitOfWork sliceCacheParms = null;
-		EvalState evalState = null;
-		boolean hasAttributes;
-		String[] dimensionOrder;
-
-		logger.info("Building Data Slice Cache Spec...");
-
-		// Check for null data slice parms
-		if (sliceParms == null) {
-			String errMsg = "Data slice parms object is null";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);
-			throw (iae);
-		}
-
-		// Check for null viewSection
-		if (viewSection == null) {
-			String errMsg = "View section is null";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);
-			throw (iae);
-		} else {
-			dimensionOrder = viewSection.getDimensionsPriority();
-			hasAttributes = viewSection.hasAttributes();
-		}
-
-		// Get member dependency map (Attribute View Only) (TTN-1269)
-		if (hasAttributes) {
-
-			// Initialize eval state
-			evalState = new EvalState(clientState);
-			evalState.setAxisPriority(dimensionOrder);
-			evalState.setCurrentTimeSlice(sliceParms.getMembers(timeDim)[0]);
-
-//			//CLONE A TON OF INTERSECTIONS FOR EACH DIMENSION MEMBER
-//			Intersection attrIs = new Intersection(dimensionOrder);
-//			for (String isDim : dimensionOrder) {
-//				attrIs.setCoordinate(isDim, sliceParms.getMembers(isDim)[0]);
-//			}
-//			for (String dim : dimensionOrder) {
-//				String[] members = null;
-//				if (getBaseDimNames().contains(dim)) {
-//					members = uowCache.getDimMembers(dim);
-//				} else {
-//					members = clientState.getUowTrees().getTree(dim).getMemberKeys();
-//				}
-//				for (String member : members) {
-//					Intersection memberIs = attrIs.clone();
-//					memberIs.setCoordinate(dim, member);
-//					evalState.addChangedCell(memberIs);
-//				}
-//			}
-
-			// Get the dependent members required by any recalc rule
-			// in any rule set.
-			List<String> dsMeasures = Arrays.asList(sliceParms.getMembers(measureDim));
-			List<String> recalcMeasures = new ArrayList<String>();
-			for (String measure:dsMeasures) {
-				if (measureDefs.get(measure).getType() == MeasureType.Recalc) {
-					recalcMeasures.add(measure);
-				}
-			}
-			for (RuleSet ruleSet : clientState.getMsrRuleSets()) {
-				Map<String, Set<String>> ruleSetImpactMap = ruleSet.calcImpactMemberMap(recalcMeasures, measureDefs, evalState);
-				mbrDependencyMap = CollectionsUtil.mergeMaps(mbrDependencyMap, ruleSetImpactMap);
-			}
-
-		}
-		
-		// Set member list of each dimension in data slice cache. Some dimensions
-		// have different logic for attribute and non-attribute views.
-//		String[] dimensionOrder = viewSection.getDimensionsPriority();
-		dimCount = dimensionOrder.length;
-		dimensionMembers = new Set[dimCount];
-		for (int dimInx = 0; dimInx < dimCount; dimInx++) {
-
-			// Initialize dimension meta-data
-			String dimension = dimensionOrder[dimInx];
-			dimIndexMap.put(dimension, dimInx);
-			Set<String> dsMembers = null;
-
-			if (dimension.equalsIgnoreCase(measureDim)) {
-
-				// Measures dimension
-				if (hasAttributes) {
-					
-					// Attribute view - pull in all displayed measures plus all
-					// component measures required for recalculation and custom function
-					// calculations.
-					dsMembers = new HashSet<String>(Arrays.asList(sliceParms.getMembers(dimension)));
-					dsMembers.addAll(mbrDependencyMap.get(dimension));
-//					List<String> dsMeasures = Arrays.asList(sliceParms.getMembers(dimension));
-//					List<String> recalcMeasures = new ArrayList<String>();
-//					for (String measure:dsMeasures) {
-//						if (measureDefs.get(measure).getType() == MeasureType.Recalc) {
-//							recalcMeasures.add(measure);
-//						}
-//					}
-//					
-//					// Create dummy eval state that can be fed into the 'getTriggers' method
-//					// for any encountered custom function. Eval state will be initialized
-//					// with a set of changed intersections, one for each uow measure.
-//					EvalState evalState = new EvalState(clientState);
-//					Intersection attrIs = new Intersection(dimensionOrder);
-//					for (String isDim : dimensionOrder) {
-//						attrIs.setCoordinate(isDim, sliceParms.getMembers(isDim)[0]);
-//					}
-//					for (String measure : uowMeasures) {
-//						Intersection measIs = attrIs.clone();
-//						measIs.setCoordinate(measureDim, measure);
-//						evalState.addChangedCell(measIs);
-//					}
-//					evalState.setCurrentTimeSlice(sliceParms.getMembers(timeDim)[0]);
-//					
-//					// Get the dependent measures required by ALL rule sets
-//					Set<String> requiredMeasures = new HashSet<String>();
-//					for (RuleSet ruleSet : clientState.getMsrRuleSets()) {
-//						requiredMeasures.addAll(ruleSet.calcMsrDeps(recalcMeasures, measureDefs, evalState));
-//					}
-//					
-//					requiredMeasures.addAll(dsMeasures);
-//					dsMembers = requiredMeasures;
-					
-				} else {
-					// Non-attribute view - just pull in measures displayed in view section
-					dsMembers = new HashSet<String>(Arrays.asList(sliceParms.getMembers(dimension)));
-				}
-				
-			} else if (dimension.equalsIgnoreCase(timeDim)) {
-
-				// Time dimension
-				if (hasAttributes) {
-					// on attribute views, the only time members needed are those explicitly mentioned on the view
-					// unless the view also includes a perpetual recalc measure, in which case potentially all time 
-					// periods will be needed to properly calculate an attribute value
-
-
-					// get measures in this rule set that are perpetual recalcs
-					Set <String> perpRecalcMsrs = currentRuleset.resolvePerpRecalcMsrs(measureDefs);
-					boolean allTimePeriods = false;
-
-					// if any measures on the current view are perpetual recalcs pull all time periods
-					for (String msr : sliceParms.getMembers(measureDim)) {
-						if (perpRecalcMsrs.contains(msr)) {
-							allTimePeriods = true;
-							break;
-						}
-					}
-
-					if (allTimePeriods) {
-						// get all possible time periods in the uow cache
-						dsMembers = new HashSet<String>(Arrays.asList(uowPeriods));
-					}
-					else {
-						// only time periods explicitly mentioned on the slice plus
-						// recalc rules dependent members
-						dsMembers = new HashSet<String>(Arrays.asList(sliceParms.getMembers(dimension)));        				
-						dsMembers.addAll(mbrDependencyMap.get(dimension));
-					}
-
-
-				} else {
-					// No attributes on view - just pull in periods displayed in view section
-					dsMembers = new HashSet<String>(Arrays.asList(sliceParms.getMembers(dimension)));
-				}
-				
-			} else if (dimension.equalsIgnoreCase(versionDim)) {
-
-				// Version dimension
-				
-				// ----- Select all displayed versions 
-				Set<String> versions = new HashSet<String>();
-				versions.addAll(Arrays.asList(sliceParms.getMembers(dimension)));
-
-				// ----- Attribute view - add in dependent versions from recalc rules
-				if (hasAttributes) {
-					versions.addAll(mbrDependencyMap.get(dimension));
-				}
-				
-				// ----- Plus any associated derived versions
-				Set<String> componentVersions = new HashSet<String>();
-				for (String version:versions) {
-					VersionDef versionDef = appDef.getVersionDef(version);
-					if (versionDef == null) {
-						String errMsg = "Unable to find version definition for: [" + version + "].";
-						logger.error(errMsg);
-						throw new IllegalArgumentException(errMsg);
-					}
-					if (PafBaseConstants.DERIVED_VERSION_TYPE_LIST.contains(versionDef.getType())) {
-
-						// Add dependent versions for derived versions. Logic is dependent
-						// on the version type.
-						VersionFormula versionFormula = versionDef.getVersionFormula();
-						componentVersions.add(versionFormula.getBaseVersion());
-
-						if (versionDef.getType() == VersionType.Variance) {
-							// Variance version - add comparison version
-							componentVersions.add(versionFormula.getCompareVersion());
-
-						} else if (versionDef.getType() == VersionType.ContribPct) {
-							// Contribution percent - Add all comparison intersection specs 
-							// to a collection that will later be used to determine which 
-							// off-view members need to be added to the data slice cache to 
-							// support cross dim calculations.
-							PafDimSpec[] compareIsSpec = versionFormula.getCompareIsSpec();							
-							for (PafDimSpec compareMemberSpec:compareIsSpec) {
-								String dim = compareMemberSpec.getDimension();
-								String memberSpec = compareMemberSpec.getExpressionList()[0];
-								//Add entry to cross dim member map
-								if (!crossDimIsMap.containsKey(dim)) {
-									crossDimIsMap.put(dim, new HashSet<String>());
-								}
-								Set<String> dimMembers = crossDimIsMap.get(dim);
-								dimMembers.add(memberSpec);
-							}
-						}		
-					}
-				}    
-				versions.addAll(componentVersions);
-								
-				// Assign versions
-				dsMembers = versions;
-				
-			} else {
-				
-				// Remaining dimensions - select all dimension members on view.
-				dsMembers = new HashSet<String>(Arrays.asList(sliceParms.getMembers(dimension)));
-				
-				// On attribute view - add any dependent members in recalc rules
-				if (hasAttributes) {
-					dsMembers.addAll(mbrDependencyMap.get(dimension));
-				}
-			}
-
-
-			// Set member list for current dimension
-			dimensionMembers[dimInx]= dsMembers;
-		}
-
-		
-		// Add any additional members required by off-view cross-dimensional references
-		for (String dim:crossDimIsMap.keySet()) {
-			int dimInx = dimIndexMap.get(dim);
-			Set<String> memberSpecs = crossDimIsMap.get(dim);
-			Set<String> memberSet = dimensionMembers[dimInx];
-			for (String expression:memberSpecs) {
-				if (expression.equalsIgnoreCase(PafBaseConstants.VF_TOKEN_PARENT)) {
-					// Parent token - add in ancestors of each dimension member.
-					// Just parents results in missing members when calculating
-					// contribution % members.
-					PafDimTree dimTree = uowTrees.getTree(dim);
-					String root = dimTree.getRootNode().getKey();
-					Set<String> ancestors = new HashSet<String>();
-					for (String member:memberSet) {
-						if (!member.equalsIgnoreCase(root)) {
-							List<PafDimMember> ancestorMembers = dimTree.getAncestors(member);
-							for (PafDimMember ancestorMember : ancestorMembers) {
-								ancestors.add(ancestorMember.getKey());								
-							}
-						}
-					}
-					memberSet.addAll(ancestors);
-				} else if (expression.equalsIgnoreCase(PafBaseConstants.VF_TOKEN_UOWROOT)) {
-					// Uowroot token - add root of tree to dimension member set
-					PafDimTree dimTree = uowTrees.getTree(dim);
-					String root = dimTree.getRootNode().getKey();
-					memberSet.add(root);
-				} else {
-					// Member name - add member to dimension member set
-					memberSet.add(expression);
-				}
-				
-			}
-		}
-		
-		// Convert array of members sets to 2-dimensional string array, 
-		// as required by the UnitOfWork constructor
-		String[][] dimensionMemberArray = new String[dimCount][];
-		for (int i = 0; i < dimCount; i++) {
-			dimensionMemberArray[i] = dimensionMembers[i].toArray(new String[0]);
-		}
-		
-		// Return data slice cache parms
-		sliceCacheParms = new UnitOfWork(dimensionOrder, dimensionMemberArray);
-		return sliceCacheParms;
 	}
 
 
@@ -1505,13 +1244,14 @@ public class PafDataService {
 		logger.info("Clearing dimension tree cache.");
 
 		Session session = PafMetaData.currentPafDBSession();
-
+		
 		Transaction tx = null;
 
 		try {
 
 			tx = session.beginTransaction();
 
+			@SuppressWarnings("unchecked")
 			List<PafBaseTree> trees = session.createQuery("from PafBaseTree").list();
 
 			logger.info("Trees enumerated");
@@ -1637,7 +1377,7 @@ public class PafDataService {
 							logger.warn(errMsg);
 						}
 					}
-
+					
 				}
 				else
 				{
@@ -2715,7 +2455,7 @@ public class PafDataService {
 							}
 							
 							// Skip any invalid attribute intersections
-							if (isInvalidAttributeIntersection(baseDim, baseMember, attrDims, attrIs)) {
+							if (isInvalidAttributeCombo(baseDim, baseMember, attrDims, attrIs)) {
 								validTupleExpansion = false;
 								break;
 							}
@@ -3111,13 +2851,14 @@ public class PafDataService {
 		return baseTree;
 	}
 
+
 	/**
-	 *	Return the valid attribute member intersections for the specified
+	 *	Return the valid attribute member combinations for the specified
 	 *  base dimension, base member, and attribute dimension(s). If all attributes
 	 *  aren't mapped to the same base member level, then an empty set is 
 	 *  returned.
 	 * 
-	 *  This is a convenience method for getAttributeIntersections(baseDimName,
+	 *  This is a convenience method for getAttributeCombinations(baseDimName,
 	 *  baseMemberName, attrDimNames, uowTrees), where uowTrees has been set
 	 *  to null.
 	 *  
@@ -3127,15 +2868,15 @@ public class PafDataService {
 	 *
 	 * @return Set<Intersection>
 	 */
-	public Set<Intersection> getAttributeIntersections(final String baseDimName, final String baseMemberName, 
+	public Set<Intersection> getAttributeCombos(final String baseDimName, final String baseMemberName, 
 			final String[] attrDimNames)  {
 		
-		return getAttributeIntersections(baseDimName, baseMemberName, attrDimNames, null);
+		return getAttributeCombos(baseDimName, baseMemberName, attrDimNames, null);
 
 	}
 	
 	/**
-	 *	Return the valid attribute member intersections for the specified
+	 *	Return the valid attribute member combinations for the specified
 	 *  base dimension, base member, and attribute dimension(s). If no uow
 	 *  cache trees are supplied, then all members found in the full dimension
 	 *  trees are potentially valid. 
@@ -3151,10 +2892,10 @@ public class PafDataService {
 	 * @return Set<Intersection>
 	 */
 	@SuppressWarnings("unchecked")
-	public Set<Intersection> getAttributeIntersections(final String baseDimName, final String baseMemberName, 
+	public Set<Intersection> getAttributeCombos(final String baseDimName, final String baseMemberName, 
 			final String[] attrDimNames, MemberTreeSet uowTrees)  {
 
-		Set<Intersection> attrIntersections = new HashSet<Intersection>();
+		Set<Intersection> attrCombos = new HashSet<Intersection>();
 		PafBaseTree baseTree = null;
 
 		// Throw exception, if attribute dim names is null or the array is empty
@@ -3174,7 +2915,7 @@ public class PafDataService {
 		} else {
 			baseTree = (PafBaseTree) uowTrees.getTree(baseDimName);
 		}
-		level0AttrCombinations = baseTree.getAttributeIntersections(baseMemberName, attrDimNames);
+		level0AttrCombinations = baseTree.getAttributeCombinations(baseMemberName, attrDimNames);
 
 		// Cycle through each level 0 attribute intersection and generate all valid member 
 		// combinations of these level 0 attributes and their ancestor members.
@@ -3195,24 +2936,24 @@ public class PafDataService {
 				}
 			}
 
-			// Use the odomoter to generate all the possible attribute member combinations and
+			// Use the odometer to generate all the possible attribute member combinations and
 			// add them to the intersection collection.
 			Odometer isIterator = new Odometer(memberLists);
 			while (isIterator.hasNext()) {
 				List<String> isList = isIterator.nextValue();
 				Intersection is = new Intersection(attrDimNames, isList.toArray(new String[0]));
-				attrIntersections.add(is);
+				attrCombos.add(is);
 			}
 
 		}
 
-		// Return the set of valid attribute intersections
-		return attrIntersections;
+		// Return the set of valid attribute combinations
+		return attrCombos;
 	}
 
 
 	/**
-	 *	Return the invalid attribute member intersections for the specified
+	 *	Return the invalid attribute member combinations for the specified
 	 *  base tree, base member, and attribute dimension(s)
 	 * 
 	 * @param baseDimName Base dimension name
@@ -3222,11 +2963,11 @@ public class PafDataService {
 	 * @return Set<Intersection>
 	 */
 	@SuppressWarnings("unchecked")
-	public Set<Intersection> getInvalidAttributeIntersections(String baseDimName, String baseMemberName, String[] attrDimNames)  {
+	public Set<Intersection> getInvalidAttributeCombos(String baseDimName, String baseMemberName, String[] attrDimNames)  {
 
 		int attrIndex = 0;
-		Set<Intersection> invalidAttrIntersections = null;
-		Set<Intersection> validAttrIntersections = null;
+		Set<Intersection> invalidAttrCombos = null;
+		Set<Intersection> validAttrCombos = null;
 		List<String>[] allAttrMembers = null;
 		PafBaseTree baseTree = null;
 
@@ -3261,7 +3002,7 @@ public class PafDataService {
 		for (List<String> members:allAttrMembers) {
 			intersectionCount *= members.size();
 		}
-		invalidAttrIntersections = new HashSet<Intersection>(intersectionCount);
+		invalidAttrCombos = new HashSet<Intersection>(intersectionCount);
 		Odometer isIterator = new Odometer(allAttrMembers);
 		List<String> isList = null;
 		while (isIterator.hasNext()) {
@@ -3273,15 +3014,15 @@ public class PafDataService {
 			Intersection is = new Intersection(attrDimNames, isList.toArray(new String[0]));
 
 			// Add intersection to intersection collection
-			invalidAttrIntersections.add(is);
+			invalidAttrCombos.add(is);
 		}
 
 		// Remove valid intersections
-		validAttrIntersections = getAttributeIntersections(baseDimName, baseMemberName, attrDimNames);
-		invalidAttrIntersections.removeAll(validAttrIntersections);
+		validAttrCombos = getAttributeCombos(baseDimName, baseMemberName, attrDimNames);
+		invalidAttrCombos.removeAll(validAttrCombos);
 
 		// Return invalid intersections
-		return invalidAttrIntersections;
+		return invalidAttrCombos;
 	}
 
 	/**
@@ -3294,9 +3035,9 @@ public class PafDataService {
 	 * @param attrIs Attribute member intersection
 	 * @param attrISSet Attribute Intersection Set
 	 * 
-	 * @return True if the attribute intersection is valid
+	 * @return True if the attribute combination is valid
 	 */
-	public boolean isValidAttributeIntersection(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrIs,
+	public boolean isValidAttributeCombo(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrIs,
 			Set<Intersection> attrISSet) {
 
 		boolean isValid = false;
@@ -3312,6 +3053,43 @@ public class PafDataService {
 	}
 
 	/**
+	 * Determines if the specified attribute intersection is valid
+	 * 
+	 * @param attrIs Attribute intersection
+	 * @param attrDimNames Attribute dimension names
+	 * 
+	 * @return True if the intersection represents a valid attribute intersection
+	 */
+	public boolean isValidAttributeIntersection(Intersection attrIs, String[] attrDimNames) {
+		
+		boolean isValid = true;
+		
+		// Select each base dimension with attributes and verify each 
+		// corresponding attribute combination
+		final List<String> attrDimList = Arrays.asList(attrDimNames);
+		final Set<String> baseDimNames = getBaseDimNamesWithAttributes();
+		validation:
+			for (String baseDimName : baseDimNames) {
+
+				PafBaseTree baseTree = baseTrees.get(baseDimName);
+				Set<String> assocAttrDimSet =  new HashSet<String>(baseTree.getAttributeDimNames());
+				assocAttrDimSet.retainAll(attrDimList);
+				if (!assocAttrDimSet.isEmpty()) {
+					String baseMemberName = attrIs.getCoordinate(baseDimName);
+					String[] assocAttrDims = assocAttrDimSet.toArray(new String[0]);
+					String[] attrCombo = attrIs.getCoordinates(assocAttrDims);
+					if (!isValidAttributeCombo(baseDimName, baseMemberName,
+							assocAttrDims, attrCombo)) {
+						isValid = false;
+						break validation;
+					}
+				}
+			}
+
+		return isValid;
+	}
+
+	/**
 	 *	Determine if the specified attribute member combination is valid
 	 *	for the specified base member and attribute dimensions
 	 *
@@ -3322,12 +3100,12 @@ public class PafDataService {
 	 * @param baseDimName Base dimension name
 	 * @param baseMemberName Base member name
 	 * @param attrDimNames Attribute dimension names
-	 * @param attrIs Attribute member intersection
+	 * @param attrCombo Attribute member combination
 	 * 
-	 * @return True if the attribute intersection is valid
+	 * @return True if the attribute combination is valid
 	 */
-	public boolean isValidAttributeIntersection(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrIs) {
-		return isValidAttributeIntersection(baseDimName, baseMemberName, null, attrDimNames, attrIs);
+	public boolean isValidAttributeCombo(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrCombo) {
+		return isValidAttributeCombo(baseDimName, baseMemberName, null, attrDimNames, attrCombo);
 	}
 
 	/**
@@ -3339,20 +3117,20 @@ public class PafDataService {
 	 * @param baseMemberName Base member name
 	 * @param uowTrees Collection of uow cache trees
 	 * @param attrDimNames Attribute dimension names
-	 * @param attrIs Attribute member intersection
+	 * @param attrCombo Attribute member intersection
 	 * 
-	 * @return True if the attribute intersection is valid
+	 * @return True if the attribute combination is valid
 	 */
-	public boolean isValidAttributeIntersection(String baseDimName, String baseMemberName, MemberTreeSet uowTrees, 
-			String[] attrDimNames, String[] attrIs) {
+	public boolean isValidAttributeCombo(String baseDimName, String baseMemberName, MemberTreeSet uowTrees, 
+			String[] attrDimNames, String[] attrCombo) {
 
 		boolean isValid = false;
 
 		// Create custom intersection object
-		Intersection intersection = new Intersection(attrDimNames, attrIs);
+		Intersection intersection = new Intersection(attrDimNames, attrCombo);
 
 		// Get set of valid intersection objects
-		Set<Intersection> intersections = getAttributeIntersections(baseDimName, baseMemberName, attrDimNames, uowTrees);
+		Set<Intersection> intersections = getAttributeCombos(baseDimName, baseMemberName, attrDimNames, uowTrees);
 
 		// Validate intersection
 		if (intersections.contains(intersection)) {
@@ -3361,6 +3139,18 @@ public class PafDataService {
 		return isValid;
 	}
 
+	
+	/**
+	 * @param attrIs Attribute intersection
+	 * @param attrDimNames Attribute dimension names
+	 * 
+	 * @return True if the the attribute intersection is invalid
+	 */
+	public boolean isInvalidAttributeIntersection(Intersection attrIs, String[] attrDimNames) {
+		return !isValidAttributeIntersection(attrIs, attrDimNames);
+	}
+
+	
 	/**
 	 *	Determine if the specified attribute member combination is invalid
 	 *	for the specified base member and attribute dimensions
@@ -3368,12 +3158,12 @@ public class PafDataService {
 	 * @param baseDimName Base dimension name
 	 * @param baseMemberName Base member name
 	 * @param attrDimNames Attribute dimension names
-	 * @param attrIs Attribute member intersection
+	 * @param attrCombo Attribute member combination
 	 * 
-	 * @return True if the attribute intersection is invalid
+	 * @return True if the attribute combination is invalid
 	 */
-	public boolean isInvalidAttributeIntersection(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrIs) {
-		return !isValidAttributeIntersection(baseDimName, baseMemberName, attrDimNames, attrIs);
+	public boolean isInvalidAttributeCombo(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrCombo) {
+		return !isValidAttributeCombo(baseDimName, baseMemberName, attrDimNames, attrCombo);
 	}
 
 	/**
@@ -3472,6 +3262,19 @@ public class PafDataService {
 	}
 
 	/**
+	 *	Return set of names of any base dimensions that have not been
+	 *  assigned any attribute dimensions
+	 *
+	 * @return Set<String>
+	 */
+	public Set<String> getBaseDimNamesWithoutAttributes() {
+		
+		Set<String> baseDimsWithoutAttrs = new HashSet<String>(getBaseDimNames());
+		baseDimsWithoutAttrs.removeAll(getBaseDimNamesWithAttributes());
+		return baseDimsWithoutAttrs;
+	}
+
+	/**
 	 *	Return set of base members corresponding to specified attribute dimension and member
 	 *
 	 * @param attrDimName Attribute dimension name
@@ -3532,6 +3335,7 @@ public class PafDataService {
 		return getBaseTrees().get(dimension);
 	}
 
+
 	/**
 	 *	Return collection of base dimension trees that have been 
 	 *  assigned one or more attribute dimensions
@@ -3556,9 +3360,8 @@ public class PafDataService {
 		return baseDimTrees;
 	}
 
-
 	/**
-	 *	Evaluate the default ruleset if warranted by the client state paf
+	 *	Evaluate the default rule set if warranted by the client state paf
 	 *  planner configuration settings.
 	 *
 	 * @param clientState Client state object
@@ -3583,7 +3386,7 @@ public class PafDataService {
 		// Initialization
 		logger.info("Executing Default Strategy");
 		RuleBasedEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
-		PafUowCache cache = getUowCache(clientState.getClientId());
+		PafDataCache cache = getDataCache(clientState.getClientId());
 		EvalState evalState = new EvalState(clientState, cache);
 		evalState.setMeasureRuleSet(clientState.getDefaultMsrRuleset());
 
@@ -3607,19 +3410,20 @@ public class PafDataService {
 	 *
 	 * @param evalRequest Evaluation request object
 	 * @param clientState Client state object
-	 * @param dsCache
+	 * @param dataCache
 	 * @param sliceParms
 	 * @return void
 	 * @throws PafException
 	 */
-	public void evaluateView(EvaluateViewRequest evalRequest, PafClientState clientState, PafDataCache dsCache, PafDataSliceParms sliceParms) throws PafException {
+	public void evaluateView(EvaluateViewRequest evalRequest, PafClientState clientState, PafDataCache dataCache, PafDataSliceParms sliceParms) throws PafException {
 
 		PafView currentView = clientState.getView(evalRequest.getViewName());
 		logger.info("Evaluating view: " + currentView.getName() + " for client " + evalRequest.getClientId() + " using measure set " + evalRequest.getMeasureSetKey());
 		PafDataSlice newSlice = evalRequest.getDataSlice();
-		PafMVS pafMVS = clientState.getMVS(PafMVS.generateKey(currentView, currentView.getViewSections()[0]));
+		PafMVS pafMVS = dataCache.getPafMVS();
 		PafApplicationDef appDef = clientState.getApp();
 		PafViewSection currentViewSection = pafMVS.getViewSection();
+		String measureDim = appDef.getMdbDef().getMeasureDim();
 		String versionDim = appDef.getMdbDef().getVersionDim();
 		boolean hasAttributes = currentViewSection.hasAttributes();
 
@@ -3628,18 +3432,42 @@ public class PafDataService {
 			newSlice.uncompressData();
 		}
 
-		logger.info("Updating data slice cache with new slice\n" + sliceParms.toString() );
-		dsCache.update(newSlice, sliceParms);
+		// Calculate attribute intersections for off-screen measures. This 
+		// step is only needed during the first evaluation pass for a each
+		// view, and after the data cache has been refreshed.
+		if (hasAttributes && !pafMVS.isInitializedForAttrEval()) {
 
-		logger.info("Executing Strategy");
+			// Create member filter containing list of off-screen measures
+			Map<String, List<String>> memberFilter = new HashMap<String, List<String>>();
+			List<String> measureList = new ArrayList<String>(Arrays.asList(dataCache.getDimMembers(measureDim)));
+			measureList.removeAll(Arrays.asList(sliceParms.getMembers(measureDim)));
+			memberFilter.put(measureDim, measureList);
+
+			// Calculate attribute intersections
+			long attrInitStart = System.currentTimeMillis();
+			PafDataCacheCalc.calcAttributeIntersections(dataCache, clientState, sliceParms,
+					memberFilter, DcTrackChangeOpt.NONE);
+			pafMVS.setInitializedForAttrEval(true);
+			String logMsg = LogUtil.timedStep("Attribute Eval Initialization", attrInitStart);
+			evalPerfLogger.info(logMsg);
+		}
+		
+		logger.info("Updating data cache with client data\n" + sliceParms.toString() );
+		updateDataCacheFromSlice(dataCache, newSlice, sliceParms);
+
 		IEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
 
+		// Create evaluation state object (holds and tracks information that
+		// is key to the evaluation process)
 		SliceState sliceState = new SliceState(evalRequest);
 		sliceState.setDataSliceParms(sliceParms);
-		EvalState evalState = new EvalState(sliceState, clientState, dsCache);
+		EvalState evalState = new EvalState(sliceState, clientState, dataCache);
+		evalState.setAxisPriority(currentViewSection.getDimensionCalcSequence());
+		evalState.setDimSequence(currentViewSection.getDimensionsPriority());
+		evalState.setAttributeEval(hasAttributes);
 
-		// Set the measure rule set. If a measure rulset name is specified,
-		// use that ruleset, else just use the default rule set.
+		// Set the measure rule set. If a measure rule set name is specified,
+		// use that rule set, else just use the default rule set.
 		RuleSet measureRuleset;
 		if (evalRequest.getRuleSetName() == null || evalRequest.getRuleSetName().trim().equals("")) {
 			measureRuleset = clientState.getDefaultMsrRuleset();
@@ -3659,72 +3487,15 @@ public class PafDataService {
 			}
 		}
 		
-		// Perform the appropriate evaluation strategy depending on whether or not
-		// the view section contains attributes.
-		if (!hasAttributes) {
-			// Regular evaluation strategy
-			dsCache = evalStrategy.executeStrategy(evalState);
-		} else {
-			// Attribute evaluation strategy
-			evalState.setAxisPriority(currentViewSection.getDimensionCalcSequence());
-			dsCache = evalStrategy.executeAttributeStrategy(evalState);
-		}
+		
+		// Perform evaluation strategy
+		logger.info("Executing Strategy");
+		dataCache = evalStrategy.executeStrategy(evalState);
 
 		logger.info("Evaluation Complete");
 		
 	}
 	
-	/**
-	 *	Evaluate view cell changes
-	 *
-	 * @param evalRequest Evaluation request object
-	 * @param clientState Client state object
-	 *
-	 * @return PafDataSlice
-	 * @throws PafException
-	 */
-	public PafDataSlice evaluateView(EvaluateViewRequest evalRequest, PafClientState clientState) throws PafException {
-		PafView currentView = clientState.getView(evalRequest.getViewName());
-		PafMVS pafMVS = clientState.getMVS(PafMVS.generateKey(currentView, currentView.getViewSections()[0]));
-		PafDataCache dsCache = pafMVS.getDataSliceCache();
-		PafDataSliceParms sliceParms = pafMVS.getDataSliceParms();
-		
-		evaluateView(evalRequest, clientState, dsCache, sliceParms);
-		
-		//Return updated data slice
-		PafDataSlice dataSlice = getDataSlice(dsCache, sliceParms);
-
-		return dataSlice;
-	}
-	
-	/**
-	 *	Returns Data Slice
-	 *
-	 * @param dsCache
-	 * @param sliceParms
-	 * @return PafDataSlice
-	 * @throws PafException
-	 */
-	public PafDataSlice getDataSlice(PafDataCache dsCache, PafDataSliceParms sliceParms)throws PafException{
-//		Return updated data slice
-		//FIXME (AF) Only repull/non-reference intersections (UpdatedDataSlice(dataSlice, sliceParms, filter)(slight performance enhancement)
-		PafDataSlice dataSlice = dsCache.getDataSlice(sliceParms);
-
-		// compress slice for return.
-		try {
-			//if the data array is null set it to null.  The client checks for the null.
-			if (dataSlice.getData().length == 0){
-				dataSlice.setData(null);
-			}else{ 
-				dataSlice.compressData();
-			}
-		}
-		catch (IOException iox) {
-			throw new PafException(iox.getLocalizedMessage(), PafErrSeverity.Error);
-		}
-		
-		return dataSlice;
-	}
 
 	/**
 	 *	Save updated uow cache to mdb
@@ -3779,7 +3550,7 @@ public class PafDataService {
 
 			try {
 				if ( tx != null ) {
-					//rollback if runtime exception occurred
+					//roll back if runtime exception occurred
 					tx.rollback();
 				}
 				
@@ -4189,17 +3960,17 @@ public class PafDataService {
 	public String[] getValidAttributeMembers(String requestedAttrDim, String selBaseDim, String selBaseMember, PafDimSpec[] selAttrSpecs) {
 
 		// Validate parameters
-		if (requestedAttrDim == null || requestedAttrDim == "") {
+		if (requestedAttrDim == null || requestedAttrDim.equals("")) {
 			String errMsg = "Unable to get valid attribute members - reqAttriDim is null or blank";
 			logger.info(errMsg);
 			throw new IllegalArgumentException(errMsg);
 		}
-		if (selBaseDim == null || selBaseDim == "") {
+		if (selBaseDim == null || selBaseDim.equals("")) {
 			String errMsg = "Unable to get valid attribute members - selBaseDim is null or blank";
 			logger.info(errMsg);
 			throw new IllegalArgumentException(errMsg);
 		}
-		if (selBaseMember == null || selBaseMember == "") {
+		if (selBaseMember == null || selBaseMember.equals("")) {
 			String errMsg = "Unable to get valid attribute members - selBaseMember is null or blank";
 			logger.info(errMsg);
 			throw new IllegalArgumentException(errMsg);
@@ -4211,7 +3982,7 @@ public class PafDataService {
 			// Get set of  all valid attribute intersections
 			String allAttrDims[] = new String[1];
 			allAttrDims[0] = requestedAttrDim;
-			Set<Intersection> validAttrIntersections = getAttributeIntersections(selBaseDim, selBaseMember, allAttrDims);
+			Set<Intersection> validAttrIntersections = getAttributeCombos(selBaseDim, selBaseMember, allAttrDims);
 
 			// Return set of valid attributes
 			Set<String> validAttrSet = new HashSet<String>();
@@ -4239,7 +4010,7 @@ public class PafDataService {
 		}
 		
 		// Get the set of valid attribute member intersections for the selected base member
-		Set<Intersection> validAttrIntersections = getAttributeIntersections(selBaseDim, selBaseMember, allAttrDims);
+		Set<Intersection> validAttrIntersections = getAttributeCombos(selBaseDim, selBaseMember, allAttrDims);
 
 		// Remove any intersections for unselected attributes
 		Set<Intersection> invalidLevel0AttrIntersections = new HashSet<Intersection>();
@@ -4276,15 +4047,8 @@ public class PafDataService {
 		return validAttributeMembers;
 	}
 
-		
 
 
-	
-	
-	
-	
-	
-	
-	
+
 
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        

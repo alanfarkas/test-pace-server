@@ -30,10 +30,11 @@ import org.apache.log4j.Logger;
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.UnitOfWork;
-import com.pace.base.mdb.PafIntersectionIterator;
-import com.pace.base.mdb.PafUowCache;
+import com.pace.base.data.Intersection;
+import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.testCommonParms;
 import com.pace.base.state.PafClientState;
+import com.pace.base.utility.Odometer;
 
 
 /*
@@ -45,16 +46,16 @@ import com.pace.base.state.PafClientState;
  */
 public class EsbDataTest extends TestCase {
 	
-	@SuppressWarnings("unused")
 	private PafApplicationDef appDef = testCommonParms.getAppDef();
 	private Properties props = testCommonParms.getConnectionProps();
 	@SuppressWarnings("unused")
 	private String[] activeVersions = testCommonParms.getActiveVersions();
-	@SuppressWarnings("unused")
 	PafClientState clientState = testCommonParms.getClientState();
+	@SuppressWarnings("unused")
 	private Set<String> lockedPeriods = testCommonParms.getLockedPeriods();
 	private UnitOfWork uowSpec = testCommonParms.getUowSpec();
-	private Map<String, Map<Integer, List<String>>> dataSpecByVersion = testCommonParms.getDataSpecByVersion(uowSpec.getUowMap(), appDef);
+	private Map<String, Map<Integer, List<String>>> dataSpecByVersion = testCommonParms.getDataSpecByVersion(uowSpec.buildUowMap(), appDef);
+	@SuppressWarnings("unused")
 	private String[] uowDims = testCommonParms.getUowDims();
 	private static Logger logger = Logger.getLogger(EsbDataTest.class);
 	
@@ -127,27 +128,30 @@ public class EsbDataTest extends TestCase {
 		boolean isSuccess = true;
 		
 		EsbData esbData = null;
-		PafUowCache dataCache = null;
+		PafDataCache dataCache = null;
 		
 		logger.info("***************************************************");
 		logger.info(this.getName() +  "Test Started");
 		try {
-			dataCache = new PafUowCache(clientState);
+			dataCache = new PafDataCache(clientState);
 			esbData = new EsbData(props);		
-			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+			esbData.updateDataCache(dataCache, dataSpecByVersion);
 			
 			//logger.info("Displaying existing data...\n" + dataCache.toString());
 			
 			// Update data cache
-			PafIntersectionIterator dcIterator = dataCache.getDataCellIterator();
+			String[] dims = dataCache.getBaseDimensions();
+			Odometer dcIterator = dataCache.getCellIterator(dims);
 			while (dcIterator.hasNext()) {
-				int[] index = dcIterator.getNext();
-				double cellValue = dataCache.getCellValue(index);
-				dataCache.setCellValue(index, cellValue * -1);
+				@SuppressWarnings("unchecked")
+				List<String> coords = dcIterator.nextValue();
+				Intersection cell = new Intersection(dims, coords);
+				double cellValue = dataCache.getCellValue(cell);
+				dataCache.setCellValue(cell, cellValue * -1);
 			}
 			
 			// Display pending updates
-			//logger.info("Pending updates...\n" + pafDataCache.toString());
+			//logger.info("Pending updates...\n" + dataCache.toString());
 			
 			// Sending updated data To Essbase
 			logger.info("Sending updated data to Essbase");
@@ -206,7 +210,7 @@ public class EsbDataTest extends TestCase {
 		String mdxSelect = null;
 		
 		EsbData esbData = null;
-		PafUowCache dataCache = null;
+		PafDataCache dataCache = null;
 		
 			
 		logger.info("***************************************************");
@@ -216,16 +220,19 @@ public class EsbDataTest extends TestCase {
 			esbData = new EsbData(props);
 			
 			// Retrieve data from Essbase - Displaying existing data
-			dataCache = new PafUowCache(clientState);
-			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+			dataCache = new PafDataCache(clientState);
+			esbData.updateDataCache(dataCache, dataSpecByVersion);
 			logger.info("Displaying existing data...\n" + dataCache.toString());
 			
 			// Update data cache
-			PafIntersectionIterator dcIterator = dataCache.getDataCellIterator();
+			String[] dims = dataCache.getBaseDimensions();
+			Odometer dcIterator = dataCache.getCellIterator(dims);
 			while (dcIterator.hasNext()) {
-				int[] index = dcIterator.getNext();
-				double cellValue = dataCache.getCellValue(index);
-				dataCache.setCellValue(index, cellValue * -1);
+				@SuppressWarnings("unchecked")
+				List<String> coords = dcIterator.nextValue();
+				Intersection cell = new Intersection(dims, coords);
+				double cellValue = dataCache.getCellValue(cell);
+				dataCache.setCellValue(cell, cellValue * -1);
 			}
 			
 			// Display pending updates
@@ -237,7 +244,7 @@ public class EsbDataTest extends TestCase {
 			
 			// Retrieve data from Essbase - Verify sent data
 			logger.info("Getting updated data from Essbase");
-			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);			
+			esbData.updateDataCache(dataCache, dataSpecByVersion);			
 			logger.info("Displaying updated data...\n" + dataCache.toString());
 			
 		} catch (PafException pfe) {
@@ -287,7 +294,7 @@ public class EsbDataTest extends TestCase {
 		String mdxSelect = null;
 		
 		EsbData esbData = null;
-		PafUowCache dataCache = null;
+		PafDataCache dataCache = null;
 					
 		logger.info("***************************************************");
 		logger.info(this.getName() +  "Test Started");
@@ -296,16 +303,19 @@ public class EsbDataTest extends TestCase {
 			esbData = new EsbData(props);
 			
 			// Retrieve data from Essbase - Displaying existing data
-			dataCache = new PafUowCache(clientState);
-			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+			dataCache = new PafDataCache(clientState);
+			esbData.updateDataCache(dataCache, dataSpecByVersion);
 			logger.info("Displaying existing data...\n" + dataCache.toString());
 			
 			// Update data cache
-			PafIntersectionIterator dcIterator = dataCache.getDataCellIterator();
+			String[] dims = dataCache.getBaseDimensions();
+			Odometer dcIterator = dataCache.getCellIterator(dims);
 			while (dcIterator.hasNext()) {
-				int[] index = dcIterator.getNext();
-				double cellValue = dataCache.getCellValue(index);
-				dataCache.setCellValue(index, cellValue * -1);
+				@SuppressWarnings("unchecked")
+				List<String> coords = dcIterator.nextValue();
+				Intersection cell = new Intersection(dims, coords);
+				double cellValue = dataCache.getCellValue(cell);
+				dataCache.setCellValue(cell, cellValue * -1);
 			}
 			
 			// Display pending updates
@@ -317,7 +327,7 @@ public class EsbDataTest extends TestCase {
 			
 			// Retrieve data from Essbase - Verify sent data
 			logger.info("Getting updated data from Essbase");
-			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+			esbData.updateDataCache(dataCache, dataSpecByVersion);
 			logger.info("Displaying updated data...\n" + dataCache.toString());
 			
 		} catch (PafException pfe) {

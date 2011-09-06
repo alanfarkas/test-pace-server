@@ -34,7 +34,6 @@ import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDataCache;
-import com.pace.base.mdb.PafUowCache;
 import com.pace.base.mdb.testCommonParms;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
@@ -55,7 +54,7 @@ public class IWOSFuncTest extends TestCase {
 	private PafApplicationDef appDef = testCommonParms.getAppDef();
 	private Properties props = testCommonParms.getConnectionProps();
 	private UnitOfWork uowSpec = testCommonParms.getUowSpec();
-	private Map<String, Map<Integer, List<String>>> dataSpecByVersion = testCommonParms.getDataSpecByVersion(uowSpec.getUowMap(), appDef);
+	private Map<String, Map<Integer, List<String>>> dataSpecByVersion = testCommonParms.getDataSpecByVersion(uowSpec.buildUowMap(), appDef);
 	private String[] uowDims = testCommonParms.getUowDims();
 	private PafClientState clientState = testCommonParms.getClientState();
 	private static Logger logger = Logger.getLogger(IWOSFuncTest.class);
@@ -85,8 +84,8 @@ public class IWOSFuncTest extends TestCase {
 			// Get data
 			logger.info("Getting essbase data");
 			EsbData esbData = new EsbData(props);	
-			dataCache = new PafUowCache(clientState);
-			esbData.updateUowCache((PafUowCache) dataCache, dataSpecByVersion);
+			dataCache = new PafDataCache(clientState);
+			esbData.updateDataCache(dataCache, dataSpecByVersion);
 			measureDim = dataCache.getMeasureDim();
 			timeDim = dataCache.getTimeDim();
 			
@@ -96,7 +95,7 @@ public class IWOSFuncTest extends TestCase {
 //			String[] dims = {"Version", "PlanType", timeDim, "Product", measureDim, "Location", "Years"};
 //			sourceIs = new Intersection(dims, mbrs);
 //			String[] mbrs = {"WP", "ClassChn", "WK05", "DPT110", "FWOS", "Store1", "FY2005"};
-			String[] dims = dataCache.getAllDimensions();
+			String[] dims = dataCache.getBaseDimensions();
 			sourceIs = new Intersection(dims);
 			sourceIs.setCoordinate("Years", "FY2006");
 			sourceIs.setCoordinate("PlanType", "ClassChn");

@@ -92,7 +92,6 @@ public class F_PrevCum extends AbstractFunction {
 		return sum;
 	}
 
-	@SuppressWarnings("unused")
 	@Override
 	public Set<Intersection> getTriggerIntersections(IPafEvalState evalState) throws PafException {
         // this function forces the recalculation of all subsequent intersections involving

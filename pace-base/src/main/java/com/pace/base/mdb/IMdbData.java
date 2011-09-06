@@ -34,22 +34,7 @@ import com.pace.base.state.PafClientState;
  * @author Alan Farkas
  *
  */
-/**
- * @author ADG
- *
- */
-/**
- * @author ADG
- *
- */
-/**
- * @author Alan
- *
- */
-/**
- * @author Alan
- *
- */
+
 public interface IMdbData {
 
 
@@ -58,16 +43,16 @@ public interface IMdbData {
 	 *	specified version will be completely cleared and reloaded for across
 	 *	all unit of work intersections.
 	 *
-	 *  No data will be refreshed if the vesion filter is empty.
+	 *  No data will be refreshed if the version filter is empty.
 	 *  
-	 * @param uowCache Uow cache
+	 * @param dataCache Data cache
 	 * @param mdbDataSpec Specifies the intersections to retrieve for each version
 	 * @param versionFilter List of versions to refresh
 	 * 	  
 	 * @return List of updated versions
 	 * @throws PafException 
 	 */ 
-	public abstract List<String> refreshDataCache(PafUowCache uowCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException;
+	public abstract List<String> refreshDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException;
 
 
 	/** 
@@ -78,16 +63,16 @@ public interface IMdbData {
 	 *  calling this method.
 	 *
 	 *
-	 *  No data will be refreshed if the vesion filter is empty.
+	 *  No data will be refreshed if the version filter is empty.
 	 *  
-	 * @param uowCache Uow cache
+	 * @param dataCache Data cache
 	 * @param expandedUow Expanded unit of work specification
 	 * @param versionFilter List of versions to refresh
 	 * 	  
 	 * @return List of updated versions
 	 * @throws PafException 
 	 */ 
-	public abstract List<String> updateDataCache(PafUowCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException;
+	public abstract List<String> updateDataCache(PafDataCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException;
 	
 
 	/** 
@@ -99,24 +84,25 @@ public interface IMdbData {
 	 *
 	 *  No data will be loaded if the data specification is empty.
 	 *  
-	 * @param uowCache Uow cache
+	 * @param dataCache Data cache
 	 * @param mdbDataSpec Specifies the intersections to retrieve for each version
 	 * 
 	 * @return List of updated versions
 	 * @throws PafException 
 	 */
-    public abstract List<String> updateUowCache(PafUowCache uowCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException;
+    public abstract List<String> updateDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException;
 
 	
 	/**
      *	Send data back to Essbase
      *
-	 * @param uowCache PafUowCache Object - Updated data and associated meta-data
+	 * @param dataCache Data cache - Updated data and associated meta-data
      * @param clientState Client State Object
      * 
 	 * @throws PafException
      */
-    public abstract void sendData(PafUowCache uowCache, PafClientState clientState) throws PafException;
+    public abstract void sendData(PafDataCache dataCache, PafClientState clientState) throws PafException;
+    
     
     /**
      *	Get Filtered meta-data from Essbase

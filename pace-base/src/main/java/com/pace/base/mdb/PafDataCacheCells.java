@@ -21,6 +21,8 @@ package com.pace.base.mdb;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pace.base.data.Intersection;
+
 //import org.apache.log4j.Logger;
 
 /**
@@ -41,11 +43,11 @@ public class PafDataCacheCells {
 	/**
 	 *	Add cell to list of cells
 	 *
-	 * @param cellIndex
+	 * @param cellIntersection
 	 * @param cellValue
 	 */
-	public void add(int[] cellIndex, double cellValue) {
-		PafDataCacheCell cell = new PafDataCacheCell(cellIndex, cellValue);
+	public void add(Intersection cellIntersection, double cellValue) {
+		PafDataCacheCell cell = new PafDataCacheCell(cellIntersection, cellValue);
 		cells.add(cell);
 	}
 		

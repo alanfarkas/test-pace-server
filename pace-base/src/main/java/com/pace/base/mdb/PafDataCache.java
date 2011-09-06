@@ -42,7 +42,9 @@ import com.pace.base.app.VersionFormula;
 import com.pace.base.app.VersionType;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
+import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
 import com.pace.base.utility.Odometer;
 import com.pace.base.utility.StringUtils;
@@ -56,36 +58,151 @@ import com.pace.base.view.PafMVS;
  * @author Alan Farkas
  *
  */
-public abstract class PafDataCache implements IPafDataCache {
+public class PafDataCache implements IPafDataCache {
 
 	private Map<Intersection, Integer> dataBlockIndexMap = null; // Maps data block key to an item in the data block pool
-	private List<double[][]> dataBlockPool = null;	// [Measure][Time]
-	private LinkedList<Integer> deletedBlockIndexes = null;	// Surrogate keys of deleted blocks (Linked list for performance reasons)
+	private List<double[][]> dataBlockPool = null;				// [Measure][Time]
+	private LinkedList<Integer> deletedBlockIndexes = null;		// Surrogate keys of deleted blocks (Linked list for performance reasons)
 	private Map<String, Set<Intersection>> dataBlocksByVersion = null;	// Data block keys organized by version
 	private Map<Intersection, Set<Intersection>> aliasKeyLookup = null; // Identifies any alias keys for a given data block
-	private int blockSize = 0;	// Number of cells in a data block
-	private int axisCount = 0, dataBlockCount = 0;
-	private int[] axisSizes = null;
-	private int[] indexedCoreAxes = null; // The core dimension axes that comprise that data block key
-	private int[][] indexedIsElements = null; // Indexed intersection elements organized by cell intersection size
-	private String[] allDimensions = null; 	// Valid intersection dimensions
-	private String[] coreDimensions = null;	// The required cell intersection dimensions
-	private String[] indexedCoreDims = null;	// The The core dimensions that comprise that data block key
-	private String[] attributeDims = null;	// Valid attribute dimensions
-	private String[] baseDimensions = null; // Valid base dimensions
-	private List<List<String>> memberArray = null;
-	private Map<String, Integer> axisIndexMap = null;
-	private List<Map<String, Integer>> memberIndexMap = null;
-	private String[] planVersions = null; // Plan version 
-	private Set<String> lockedPeriods = null;	// Locked planning periods
-	private PafDataCacheCells changedCells = new PafDataCacheCells(); //TODO Change this to <List> changedCells = new ArrayList<Intersection>()
-	//private List<Intersection> changedCells = new ArrayList<Intersection>();
+//	private Map<Intersection, Intersection> baseKeyLookup = null; 		// Identifies the primary key for any alias key
+	private int axisCount = 0;						// Total number of defined dimensions (size of allDimensions)
+	private int blockSize = 0;						// Number of cells in a data block
+	private int dataBlockCount = 0;					// Number of existing data blocks
+	private int[] axisSizes = null;					// # of members in each axis
+	private int[] coreKeyAxes = null; 				// The core dimension axes that comprise that data block key
+	private int[][] keyIndexesByIsSize = null;		// Optimization tool - an array that will be used to isolate
+													//		the intersection coordinates that comprise the data 
+													//		block key for each potential intersection size
+	private String[] coreKeyDims = null;			// The core dimensions that comprise that data block key
+													//		(all dimensions except Measures and Time)
+	private String[] attributeDims = null;			// Valid attribute dimensions
+	private String[] baseDimensions = null; 		// Valid base dimensions
+	private List<String> allDimensions = null; 		// Valid intersection dimensions
+	private Set<String> coreDimensions = null;		// The required cell intersection dimensions (base dimensions)
+	private Set<String> nonCoreDims = null;			// The optional cell intersection dimensions (attribute dimensions)
+	private String[][] memberCatalog = null;		// Defined members by dimension axis
+	private Map<String, Integer> axisIndexMap = null;			// Resolves dimension name to an axis
+	private Map<String, Integer>[] memberIndexMap = null;		// Resolves member name to an index (currently only
+																// 		used to lookup Measures and Time dimension members)
+	private String[] planVersions = null; 			// Plan version 
+	private Set<String> lockedPeriods = null;		// Locked planning periods
+	private PafDataCacheCells changedCells = new PafDataCacheCells();		// Optionally tracks changed cells
 	private PafApplicationDef appDef = null;
-	private boolean isDirty = true;	// Inidicates that the data cache has been updated
+	private PafMVS pafMVS = null;
+	private MemberTreeSet dimTrees = null;
+	private boolean isDirty = true;					// Indicates that the data cache has been updated
 	private final static int NON_KEY_DIM_COUNT = 2;	// Measure and Time Dimension
+
+	// Lazy-loaded collection of component base member names, indexed by base member intersection
+	private Map<Intersection, List<String>> componentBaseMemberMap = new HashMap<Intersection, List<String>>();
+
+	// Loggers
 	private static Logger logger = Logger.getLogger(PafDataCache.class);
 	private static Logger performanceLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_DC);
 	
+	
+
+	/**
+	 * @param clientState Client State
+	 * @param lockedPeriods Set of locked periods
+	 */
+	public PafDataCache(PafClientState clientState, Set<String> lockedPeriods) {
+		this.lockedPeriods = lockedPeriods;
+		initDataCache(clientState);		
+	}
+
+			
+	/**
+	 * Convenience constructor for testing purposes
+	 * 
+	 * @param clientState Client State
+	 */
+	public PafDataCache(PafClientState clientState) {
+		this(clientState, new HashSet<String>());
+	}
+	
+	
+	/**
+	 *	Initialize data cache
+	 *
+	 * @param clientState Client state
+	 *
+	 */
+	private void initDataCache(PafClientState clientState) {
+
+		logger.debug("Creating instance of PafDataCache");
+		long startTime = System.currentTimeMillis();
+		
+		// Get needed client state properties
+		appDef = clientState.getApp();
+		String versionDim = getVersionDim();
+		planVersions = new String[]{clientState.getPlanningVersion().getName()};
+		UnitOfWork expandedUowSpec = clientState.getUnitOfWork();
+		dimTrees = clientState.getUowTrees();
+
+		// Set dimension properties
+		String[] uowDims = expandedUowSpec.getDimensions();
+		attributeDims = dimTrees.getAttributeDimensions().toArray(new String[0]);
+		baseDimensions = uowDims;
+		coreDimensions = new HashSet<String>(Arrays.asList(uowDims));
+		nonCoreDims = new HashSet<String>(Arrays.asList(attributeDims));
+		allDimensions = new ArrayList<String>(Arrays.asList(baseDimensions));
+		allDimensions.addAll(Arrays.asList(attributeDims));
+		axisCount = allDimensions.size();
+	
+		// Add all dimensions members to member catalog. For proper member aggregation,
+		// the members will be added in POST ORDER so that all children are calculated
+		// before their parents.
+		axisSizes = new int[axisCount];
+		memberCatalog = new String[(axisCount)][];
+		for (int axis = 0; axis < axisCount; axis++) {
+			String dim = allDimensions.get(axis);
+			PafDimTree dimTree = dimTrees.getTree(dim);
+			String[]members;
+			if (!dim.equals(versionDim)) {
+				// Pull all dimensions, except Version, from dim trees
+				members = dimTree.getMemberNames(TreeTraversalOrder.POST_ORDER).toArray(new String[0]);
+			} else {
+				// Version dim is flat, so just pull members from uow definition
+				members = expandedUowSpec.getDimMembers(versionDim);
+			}
+			memberCatalog[axis] = members;
+			axisSizes[axis] = members.length;
+		}
+
+		// Create axisIndexMap
+		axisIndexMap = createAxisIndexMap();
+
+		// Create memberIndexMap
+		memberIndexMap = createMemberIndexMap();
+
+		// Create keyIndexes Array
+		createKeyIndexArrays();
+		
+		// Initialize data block index and data block pool. To minimize the
+		// the time it takes to initially populate the data cache, the index
+		// and pool are pre-allocated to hold all initially defined blocks.
+		blockSize = getMeasureSize() * getTimeSize();
+		int initialBlockCount = getMaxCoreDataBlockCount();
+		dataBlockIndexMap = new HashMap<Intersection, Integer>(initialBlockCount);
+		dataBlockPool = new ArrayList<double[][]>(initialBlockCount);
+		
+		// Initialize various data block housekeeping objects
+		dataBlocksByVersion = new HashMap<String, Set<Intersection>>(getVersionSize());
+		aliasKeyLookup = new HashMap<Intersection, Set<Intersection>>();
+		deletedBlockIndexes = new LinkedList<Integer>();
+
+		// Initialize data block list
+		long maxCellCount = initialBlockCount * getBlockSize();
+		String stepDesc = "Data Cache intialized with a potential base intersection count of : [" 
+			+ StringUtils.commaFormat(maxCellCount) + "] ";
+		logger.info(stepDesc);
+		String logMsg = LogUtil.timedStep(stepDesc, startTime);
+		performanceLogger.info(logMsg);
+
+	}
+
 
 	/**
 	 *	Return the number of columns in the data cache
@@ -98,169 +215,30 @@ public abstract class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 * @return the dimTrees
+	 */
+	public MemberTreeSet getDimTrees() {
+		return dimTrees;
+	}
+
+
+	/**
 	 *	Return the PafMVS
 	 *
 	 * @return Returns the PafMVS
 	 */
-	public abstract PafMVS getPafMVS();
-
-
-	/**
-	 *	Initialize data cache
-	 *
-	 */
-	protected void initDataCache() {
-
-		int initialBlockCount = 0;
-		long initDcStartTime = System.currentTimeMillis();
-		
-		// Create axisIndexMap
-		setAxisIndexMap(createAxisIndexMap());
-
-		// Set baseDimension array to the list of initial dimensions, which will 
-		// all be base dimensions. Attribute dimensions will optionally be added
-		// later as need on a particular view.
-		setBaseDimensions(getAllDimensions());
-		
-		// Create indexedDimension arrays
-		//setCoreDimensions(createIndexedDimensions());
-		//setCoreDimensions(allDimensions); //TODO Fix this - might be passed in
-		setIndexedIsElements(createIndexedIsElements());
-
-		// Create memberIndexMap
-		setMemberIndexMap(createMemberIndexMap());
-
-		// Create keyIndexes Array
-		// Initialize data block index and data block pool. To minimize the
-		// the time it takes to initially populate the data cache, the index
-		// and pool are pre-allocated to hold all initially defined blocks.
-		setBlockSize(getMeasureSize() * getTimeSize());
-		initialBlockCount = getMaxCoreDataBlockCount();
-		setDataBlockIndex(new HashMap<Intersection, Integer>(initialBlockCount));
-		setDataBlockPool(new ArrayList<double[][]>(initialBlockCount));
-		
-		// Initialize various data block housekeeping objects
-		dataBlocksByVersion = new HashMap<String, Set<Intersection>>(getVersionSize());
-		aliasKeyLookup = new HashMap<Intersection, Set<Intersection>>();
-		deletedBlockIndexes = new LinkedList<Integer>();
-
-		// Initialize data block list
-		performanceLogger.info("Initializing Data Cache...");
-		long maxCellCount = initialBlockCount * getBlockSize();
-		String stepDesc = "Data Cache intialized with a potential base intersection count of : [" 
-			+ StringUtils.decimalFormat(maxCellCount, "#,###,###,###,###") + "] ";
-		logger.info(stepDesc);
-		String logMsg = LogUtil.timedStep(stepDesc, initDcStartTime);
-		performanceLogger.info(logMsg);
-
+	public PafMVS getPafMVS() {
+		return pafMVS;
 	}
 
 	/**
-	 *	Simple Array Validation
-	 *
-	 * @param array Array to validate
-	 * @param arrayName Array name
-	 * 
-	 * @throws IllegalArgumentException 
+	 * @param pafMVS the pafMVS to set
 	 */
-	protected void validateArray(boolean[] array, String arrayName) throws IllegalArgumentException {
-
-		// Validate that the array contains data 
-		validateArrayNotEmpty(array, arrayName);
-
-		// Validate that the array is the proper size
-		if (array.length != axisCount) {
-			// array length does not match axisCount
-			String errMsg = "PafUowCache parms error - [" + arrayName + "] array length does not match axisCount";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
-	}
-
-	/**
-	 *	Simple Array Validation
-	 *
-	 * @param array Array to validate
-	 * @param arrayName Array name
-	 * @throws IllegalArgumentException 
-	 */
-	protected void validateArray(int[] array, String arrayName) throws IllegalArgumentException {
-
-		// Validate that the array contains data 
-		validateArrayNotEmpty(array, arrayName);
-
-		// Validate that the array is the proper size
-		if (array.length != axisCount) {
-			// array length does not match axisCount
-			String errMsg = "PafUowCache parms error - [" + arrayName + "] array length does not match axisCount";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
-	}
-
-	/**
-	 *	Simple Array Validation
-	 *
-	 * @param array Array to validate
-	 * @param arrayName Array name
-	 * 
-	 * @throws IllegalArgumentException 
-	 */
-	protected void validateArray(Object[] array, String arrayName) throws IllegalArgumentException {
-
-		// Validate that the array contains data
-		validateArrayNotEmpty(array, arrayName);
-
-		// Validate that the array is the proper size
-		if (array.length != axisCount) {
-			// array length does not match axisCount
-			String errMsg = "PafUowCache parms error - [" + arrayName + "] array length does not match axisCount";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
+	public void setPafMVS(PafMVS pafMVS) {
+		this.pafMVS = pafMVS;
 	}
 
 
-	/**
-	 *	Valid that array is not empty or null
-	 *
-	 * @param array Array to validate
-	 * @param arrayName Array name
-	 * @throws IllegalArgumentException 
-	 */
-	private void validateArrayNotEmpty(boolean[] array, String arrayName) throws IllegalArgumentException {
-
-		// Validate that the array contains data and is the proper size
-		if (array == null || array.length == 0) {
-			// Empty or null array
-			String errMsg = "PafUowCache parms error - empty or null [" + arrayName + "] array";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
-	}
-
-	/**
-	 *	Valid that array is not empty or null
-	 *
-	 * @param array Array to validate
-	 * @param arrayName Array name
-	 * @throws IllegalArgumentException
-	 */
-	private void validateArrayNotEmpty(int[] array, String arrayName) throws IllegalArgumentException {
-
-		// Validate that the array contains data and is the proper size
-		if (array == null || array.length == 0) {
-			// Empty or null array
-			String errMsg = "PafUowCache parms error - empty or null [" + arrayName + "] array";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
-	}
 
 	/**
 	 *	Valid that array is not empty or null
@@ -274,49 +252,29 @@ public abstract class PafDataCache implements IPafDataCache {
 		// Validate that the array contains data and is the proper size
 		if (array == null || array.length == 0) {
 			// Empty or null array
-			String errMsg = "PafUowCache parms error - empty or null [" + arrayName + "] array";
+			String errMsg = "Parms error - empty or null [" + arrayName + "] array";
 			logger.error(errMsg);
 			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
 			throw iae; 
 		}
 	}
 
-
-	/**
-	 *	Valid that object is not null
-	 *
-	 * @param object Array to validate
-	 * @param objectName Array name
-	 * @throws IllegalArgumentException 
-	 */
-	@SuppressWarnings("unused")
-	private void validateObjectNotNull(Object object, String objectName) throws IllegalArgumentException {
-
-		// Validate that object is not null
-		if (object == null) {
-			// Empty object
-			String errMsg = "PafUowCache parms error - [" + objectName + "] object is null";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
-	}
 
 	/**
 	 *	Create PafUowCache axis index map
 	 *
 	 * @return HashMap used for resolving dimension names to a specific axis index value.
 	 */
-	protected HashMap<String, Integer> createAxisIndexMap() {
+	private Map<String, Integer> createAxisIndexMap() {
 
-		HashMap <String, Integer> axisIndexMap = null;
+		Map <String, Integer> axisIndexMap = null;
 
 		// Fill the axisIndexMap, which is used to resolve dimension
 		// names to a specific axis index.
 		logger.debug("Creating axisIndexMap ...");
 		axisIndexMap = new HashMap<String, Integer>();
 		for (int i = 0; i < axisCount; i++) {
-			axisIndexMap.put(allDimensions[i], i);
+			axisIndexMap.put(allDimensions.get(i), i);
 		}
 		return axisIndexMap;
 	}
@@ -327,7 +285,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	 *
 	 * @return An array containing the indexed intersection elements by intersection section size
 	 */
-	protected int[][] createIndexedIsElements() {
+	private void createKeyIndexArrays() {
 
 		int measureAxis = getMeasureAxis(), timeAxis = getTimeAxis();
 
@@ -337,90 +295,63 @@ public abstract class PafDataCache implements IPafDataCache {
 		// all dimensions except Measure and Time, which are not included as 
 		// they each are represented within the data block itself.
 		logger.debug("Creating indexedAxis array...");
-		int minIsSize = coreDimensions.length;
-		int maxIsSize = allDimensions.length;
-		int[][] indexedIsElements = new int[maxIsSize + 1][];
+		int minIsSize = coreDimensions.size();
+		int maxIsSize = allDimensions.size();
+		keyIndexesByIsSize = new int[maxIsSize + 1][];
 
-		indexedCoreAxes = new int[minIsSize - NON_KEY_DIM_COUNT];
-		indexedCoreDims = new String[indexedCoreAxes.length];
+		coreKeyAxes = new int[minIsSize - NON_KEY_DIM_COUNT];
+		coreKeyDims = new String[coreKeyAxes.length];
 		int i = 0;
 		for (int axisIndex = 0; axisIndex < minIsSize; axisIndex++) {
 			if (axisIndex != measureAxis && axisIndex != timeAxis) {
-				indexedCoreAxes[i] = axisIndex;
-				indexedCoreDims[i] = getDimension(axisIndex); 
+				coreKeyAxes[i] = axisIndex;
+				coreKeyDims[i] = getDimension(axisIndex); 
 				i++;
 			}
 		}
-		indexedIsElements[minIsSize] = indexedCoreAxes;
 
+		// Create an array that will be used to isolate the intersection coordinates
+		// that comprise the data block key for each intersection size
+		//
+		// 	Example:  	
+		//	Intersection Size		indexedAxes
+		//			  		7		[1][3][4][5][6]
+		//			  		8		[1][3][4][5][6][7]
+		//			  		9		[1][3][4][5][6][7][8]
+		//
+		keyIndexesByIsSize[minIsSize] = coreKeyAxes;
 		for (int element = minIsSize + 1; element <= maxIsSize; element++) {
-			int[] prevIndexedAxes = indexedIsElements[element - 1];
-			int[] indexedAxes = new int[element];
+			int[] prevIndexedAxes = keyIndexesByIsSize[element - 1];
+			int[] indexedAxes = new int[element - NON_KEY_DIM_COUNT];
 			System.arraycopy(prevIndexedAxes, 0, indexedAxes, 0, prevIndexedAxes.length);
-			indexedAxes[prevIndexedAxes.length + 1] = element;
-			indexedIsElements[element] = indexedAxes;
+			indexedAxes[indexedAxes.length - 1] = element - 1;
+			keyIndexesByIsSize[element] = indexedAxes;
 		}
-		return indexedIsElements;
 	}
 
 	/**
-	 *	Create indexed dimensions array
+	 *	Create member index map
 	 *
-	 * @return An array containing the list of Indexed dimensions (excludes Measure and Time)
 	 */
-	protected String[] createIndexedDimensions() {
+	@SuppressWarnings("unchecked")
+	private Map<String, Integer>[] createMemberIndexMap() {
 
-		int dimCount = 0, dimIndex = 0;
-		String measureDim = getMeasureDim(), timeDim = getTimeDim();
-		String[] indexedDimensions = null;
-
-		
-		// Fill the indexedDimensions array, which contains the list of all
-		// UOW dimensions that comprise the data block index. This would be 
-		// all dimensions except Measure and Time, which are not included as 
-		// they each are represented within the data block itself.
-		logger.debug("Creating indexedDimensions array...");
-		dimCount = getAllDimensions().length - NON_KEY_DIM_COUNT;
-		indexedDimensions = new String[dimCount];
-		for (int axisIndex = 0; axisIndex < axisCount; axisIndex++) {
-			String dimension = getDimension(axisIndex);
-			if (!dimension.equalsIgnoreCase(measureDim) && !dimension.equalsIgnoreCase(timeDim)) {
-				// Check for index out of bounds condition
-				if (dimIndex >= dimCount) {
-					String errMsg = "PafDataCache init error - index out of bounds error when creating the Indexed Dimensions array. Possible issue with the naming of the Time or Measure dimension.";
-					logger.error(errMsg);
-					throw new  ArrayIndexOutOfBoundsException(errMsg);
-				}
-				indexedDimensions[dimIndex++] = dimension;
-			}
-		}
-		return indexedDimensions;
-	}
-
-
-	/**
-	 *	Create PafUowCache member index map
-	 *
-	 * @return HashMap used for resolving member names to a specific index value
-	 */
-	protected ArrayList<Map<String, Integer>> createMemberIndexMap() {
-
-		ArrayList<Map<String, Integer>> memberIndex = null;
+		Map<String, Integer>[] memberIndexMap = null;
 
 		// Fill the memberIndexMap array, which is used to resolve member
 		// names to a specific index.
 		logger.debug("Filling memberIndexMap array...");
-		memberIndex = new ArrayList<Map<String, Integer>>(axisCount);
+		memberIndexMap = new Map[axisCount];
 
 		for (int i = 0; i < axisCount; i++) {
-			HashMap <String, Integer> axisIndex = new HashMap <String, Integer> (memberArray.get(i).size());
+			HashMap <String, Integer> memberIndex = new HashMap <String, Integer> (memberCatalog[i].length);
 			for (int j = 0; j < axisSizes[i]; j++) {
-				axisIndex.put(memberArray.get(i).get(j), j);
+				memberIndex.put(memberCatalog[i][j], j);
 			}
-			memberIndex.add(axisIndex);
+			memberIndexMap[i] = memberIndex;
 			logger.debug("Member index for Axis [" + i + "] populated");
 		}
-		return memberIndex;
+		return memberIndexMap;
 	}
 
 
@@ -448,35 +379,11 @@ public abstract class PafDataCache implements IPafDataCache {
 
 		// Multiply the number of members in each core dimension by
 		// each other.
-		for (int axisIndex = 0; axisIndex < indexedCoreAxes.length; axisIndex++) {
+		for (int axisIndex = 0; axisIndex < coreKeyAxes.length; axisIndex++) {
 			memberCombinations = memberCombinations * getAxisSize(axisIndex);
 		}
 
 		return memberCombinations;
-	}
-
-
-	/**
-	 * @param dataBlockIndex the dataBlockIndex to set
-	 */
-	private void setDataBlockIndex(Map<Intersection, Integer> dataBlockIndex) {
-		this.dataBlockIndexMap = dataBlockIndex;
-	}
-
-
-	/**
-	 * @return the dataBlockPool
-	 */
-	protected List<double[][]> getDataBlockPool() {
-		return dataBlockPool;
-	}
-
-
-	/**
-	 * @param dataBlockPool the dataBlockPool to set
-	 */
-	protected void setDataBlockPool(List<double[][]> dataBlockPool) {
-		this.dataBlockPool = dataBlockPool;
 	}
 
 
@@ -489,33 +396,65 @@ public abstract class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * @param blockSize the blockSize to set
+	 *	Return a list of versions that are components for any of the
+	 *  specified derived versions
+	 *  
+	 * @param derivedVersions List of derived versions to inspect
+	 * @return List of component versions
 	 */
-	protected void setBlockSize(int blockSize) {
-		this.blockSize = blockSize;
+	public List<String> getComponentVersions(List<String> derivedVersions) {
+
+		Set<String> componentVersions = new HashSet<String>();
+
+
+		// Cycle through each derived version and look for component members
+		for (String derivedVersion : derivedVersions) {
+			
+			VersionDef versionDef = getVersionDef(derivedVersion);
+			
+				// Get base version
+				VersionFormula versionFormula = versionDef.getVersionFormula();
+				String baseVersion = versionFormula.getBaseVersion();
+				componentVersions.add(baseVersion);
+				
+				// Determine the comparison version
+				String compareVersion = null;
+				if (versionDef.getType() == VersionType.Variance) {
+					// Variance version - use compare version property
+					compareVersion = versionFormula.getCompareVersion(); 
+				} else if (versionDef.getType() == VersionType.ContribPct) {
+					// Contribution percent - search for possible compare version
+					for (PafDimSpec compareMemberSpec:versionFormula.getCompareIsSpec()) {
+						String dim = compareMemberSpec.getDimension();
+						if (dim.equalsIgnoreCase(getVersionDim())) {
+							compareVersion = compareMemberSpec.getExpressionList()[0];
+						}
+					}
+				}
+				componentVersions.add(compareVersion);
+			}
+
+	
+		return new ArrayList<String>(componentVersions);
 	}
 
-
 	/**
-	 *	Return an map of VersionDef objects for those data cache verions whose formulas 
-	 *  are dependent on any of the versions passed to this method 
+	 *	Return a list of versions for those data cache versions whose formulas 
+	 *  are dependent on any of the base versions passed to this method 
 	 *  
-	 *
-	 * @param versions 
-	 * 
-	 * @return An map of VersionDef objects for those versions whose formulas are dependent on any of the versions passed to this method
+	 * @param versions List of versions whose dependencies will be checked
+	 * @return List of dependent versions
 	 */
-	public Map<String, VersionFormula> getDependentVersionDefs(String[] versions) {
+	public List<String> getDependentVersions(List<String> versions) {
 
-		Map<String, VersionFormula> dependentVersions = new HashMap<String, VersionFormula>();
-		List<VersionDef> derivedVersionDefs = null;
+		List<String> dependentVersions = new ArrayList<String>();
 
 		// Get list of versionDef objects for all derived versions
-		derivedVersionDefs = getDerivedVersionDefs();
+		List<VersionDef>derivedVersionDefs = getDerivedVersionDefs();
 		
 		// Cycle through each version and check for dependent formulas
-		for (String version:versions) {
-			for (VersionDef versionDef:derivedVersionDefs) {
+		for (String version : versions) {
+			for (VersionDef versionDef : derivedVersionDefs) {
 
 				// Get formula components
 				String derivedVersion = versionDef.getName();
@@ -537,10 +476,10 @@ public abstract class PafDataCache implements IPafDataCache {
 					}
 				}
 				
-				// Add version formula if it is dependant of the selected versions 
+				// Add dependent version if it is a dependent of one of the selected versions 
 				if (version.equalsIgnoreCase(baseVersion) || 
 						(compareVersion != null && version.equalsIgnoreCase(compareVersion))) {
-					dependentVersions.put(derivedVersion, versionFormula);
+					dependentVersions.add(derivedVersion);
 				}
 			}
 
@@ -637,7 +576,7 @@ public abstract class PafDataCache implements IPafDataCache {
 
 		List<String> openPeriods = null;
 
-		// Does the selected Version Type and Year comination have locked periods?
+		// Does the selected Version Type and Year combination have locked periods?
 		if (hasLockedPeriods(version, year)) {
 			// Yes - Just return list of Forward Plannable members
 			openPeriods = getForwardPlannablePeriods(timeMembers, lockedPeriods);
@@ -657,30 +596,14 @@ public abstract class PafDataCache implements IPafDataCache {
 	public String[] getPlanVersions() {
 		return planVersions;
 	}
-	/**
-	 *	Set the active planning versions
-	 *
-	 * @param planVersions An array of active planning versions
-	 * 
-	 */
-	protected void setPlanVersions(String[] planVersions) {
-		this.planVersions = planVersions;
-	}
 
-	
 	/**
 	 * Return an array containing the dimensions that are represented in the data cache
 	 * 
 	 * @return Returns the dimension array.
 	 */
 	public String[] getAllDimensions() {
-		return allDimensions;
-	}
-	/**
-	 * @param allDimensions the allDimensions to set
-	 */
-	protected void setAllDimensions(String[] allDimensions) {
-		this.allDimensions = allDimensions;
+		return allDimensions.toArray(new String[0]);
 	}
 
 	/**
@@ -688,14 +611,6 @@ public abstract class PafDataCache implements IPafDataCache {
 	 */
 	public PafApplicationDef getAppDef() {
 		return appDef;
-	}
-	/**
-	 *	Set the application definition
-	 *
-	 * @param appDef
-	 */
-	protected void setAppDef(PafApplicationDef appDef) {
-		this.appDef = appDef;
 	}
 
 	/**
@@ -705,14 +620,6 @@ public abstract class PafDataCache implements IPafDataCache {
 	 */
 	public int getAxisCount() {
 		return axisCount;
-	}
-	/**
-	 *	Set the number of axes contained in the data cache
-	 *
-	 * @param axisCount The number of axes contained in the data cache
-	 */
-	protected void setAxisCount(int axisCount) {
-		this.axisCount = axisCount;
 	}
 
 	/**
@@ -740,12 +647,6 @@ public abstract class PafDataCache implements IPafDataCache {
 		return index;
 	}
 
-	/**
-	 * @param axisIndexMap the axisIndexMap to set
-	 */
-	protected void setAxisIndexMap(Map<String, Integer> axisIndexMap) {
-		this.axisIndexMap = axisIndexMap;
-	}
 
 	/**
 	 *	Return an array containing the members in the specified axis
@@ -754,7 +655,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @return Returns an array containing the members in the specified axis.
 	 */
 	public String[] getAxisMembers(int axis) {
-		return memberArray.get(axis).toArray(new String[0]);
+		return memberCatalog[axis];
 	}
 
 	/**
@@ -786,15 +687,6 @@ public abstract class PafDataCache implements IPafDataCache {
 	public int[] getAxisSizes() {
 		return axisSizes;
 	}
-	/**
-	 *	Set the array containing the number of members in each axis.
-	 *
-	 * @param axisSizes Array containing the number of members in each axis.
-	 */
-	protected void setAxisSizes(int[] axisSizes) {
-		this.axisSizes = axisSizes;
-	}
-
 
 	/**
 	 * @return the attributeDims
@@ -805,26 +697,17 @@ public abstract class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * @param attributeDims the attributeDims to set
-	 */
-	protected void setAttributeDims(String[] attributeDims) {
-		this.attributeDims = attributeDims;
-	}
-
-
-	/**
 	 * @return the baseDimensions
 	 */
 	public String[] getBaseDimensions() {
 		return baseDimensions;
 	}
 
-
 	/**
-	 * @param baseDimensions the baseDimensions to set
+	 * @return the base dimension count
 	 */
-	protected void setBaseDimensions(String[] baseDimensions) {
-		this.baseDimensions = baseDimensions;
+	public int getBaseDimCount() {
+		return baseDimensions.length;
 	}
 
 
@@ -837,17 +720,92 @@ public abstract class PafDataCache implements IPafDataCache {
 		return getDataBlockCount() * blockSize;
 	}
 
-	
 
 	/**
-	 *	Return the cell value for the specified intersection coordinates
+	 * 	Returns an iterator that will iterate through all valid
+	 * 	intersections comprising the specified dimensions. The 
+	 * 	order of the supplied dimensions will determine the 
+	 *  dimension order of the intersection coordinates generated 
+	 *  by the iterator.
+	 *  
+	 * @param dimensions Dimensions to iterate through. 
+	 * @return Odometer
+	 */
+	public Odometer getCellIterator(String[] dimensions) {
+		return getCellIterator(dimensions, null);
+	}
+	
+	/**
+	 * 	Returns an iterator that will iterate through all valid
+	 * 	intersections comprising the specified dimensions. The 
+	 * 	order of the supplied dimensions will determine the 
+	 *  dimension order of the intersection coordinates generated 
+	 *  by the iterator.
+	 *  
+	 *  An optional member filter can be used to select specific members
+	 *  to iterate through.
+	 * 
+	 * @param dimensions Dimensions to iterate through. 
+	 * @param memberFilter Map containing a list for each filtered dimension
+	 * 
+	 * @return Odometer
+	 */
+	public Odometer getCellIterator(String[] dimensions, Map<String, List<String>> memberFilter) {
+		
+		// The Odometer requires member lists for each iterated dimension. So, a 
+		// member filter will be created if it's not already supplied and any
+		// missing dimensions will be added.
+		if (memberFilter == null) {
+			memberFilter = new HashMap<String, List<String>>();
+		}
+		memberFilter = addMissingDimsToMemberFilter(memberFilter, dimensions);
+		
+		Odometer cellIterator = new Odometer(memberFilter, dimensions);
+		return cellIterator;
+	}
+	
+	/**
+	 * 	Add any missing dimensions to member filter. All dimension members defined 
+	 *  in the data cache will be added for any missing dimensions. 
+	 * 
+	 * @param memberFilter Map containing member lists by dimension
+	 * @param dimensions List of dimensions that the map should contain. represented in filter
+	 */
+	private Map<String, List<String>> addMissingDimsToMemberFilter(Map<String, List<String>> memberFilter, String[] dimensions) {
+		
+		Map<String, List<String>> updatedMemberFilter =  new HashMap<String, List<String>>(memberFilter);
+		for (String dimension : dimensions) {
+			if (!updatedMemberFilter.containsKey(dimension)) {
+				updatedMemberFilter.put(dimension, new ArrayList<String>(Arrays.asList(getDimMembers(dimension))));
+			}
+		} 
+		
+		return updatedMemberFilter;
+	}
+
+	/**
+	 *	Return the cell value for the specified non-attribute intersection coordinates
 	 *
-	 * @param members Array of dimension members that define a single cell intersection
+	 * @param coords Array of dimension members that define a non-attribute intersection
 	 * @return Returns the cell value.
 	 */
-	public double getCellValue(String[] members) {
+	public double getBaseCellValue(String[] coords) {
 
-		Intersection intersection = new Intersection(getAllDimensions(), members);
+		Intersection intersection = new Intersection(getBaseDimensions(), coords);
+		return getCellValue(intersection);
+	}
+
+	/**
+	 *	Return the intersection cell value for the specified intersection coordinates
+	 *
+	 * @param dimensions Array of dimension names that define the cell intersection dimensionality
+	 * @param coords Array of dimension members that define the cell intersection
+	 * 
+	 * @return Returns the cell value.
+	 */
+	public double getCellValue(String[] dimensions, String[] coords) {
+
+		Intersection intersection = new Intersection(dimensions, coords);
 		return getCellValue(intersection);
 	}
 
@@ -862,7 +820,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	public double getCellValue(Intersection intersection)  {
 
 		// Get the cell address of the specified intersection
-		DataCacheCellAddress cellAddress = calculateCellAddress(intersection);
+		DataCacheCellAddress cellAddress = generateCellAddress(intersection);
 
 		// Return cell value
 		double[][] dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
@@ -872,69 +830,60 @@ public abstract class PafDataCache implements IPafDataCache {
 		} else {
 			// Intersection does not exist
 			if (isValidIntersection(intersection)) {
-				// Valid intersection - return 0
+				// Valid intersection, but does not exist - return 0
 				return 0;
 			} else {
 				// Invalid intersection - throw error
-				String errMsg = "Data Cache error - Unable to get data cache cell value for invalid intersection ["
-					+ StringUtils.arrayToString(intersection.getCoordinates()) + "]";
+				String errMsg = "Data Cache error - Unable to get data cache cell value for invalid intersection: "
+					+ StringUtils.arrayToString(intersection.getCoordinates());
 				throw new IllegalArgumentException(errMsg);
 			}
 		}
 
 	}
 
-	/**
-	 *	Return the cell value for the specified index
-	 *
-	 * @param nDimIndex Array of n-dimensional indexes that define a single cell intersection 
-	 * @return Returns the cell value.
-	 */
-	public double getCellValue(int[] nDimIndex) {
-
-		Intersection intersection = createIntersection(nDimIndex);    	
-		return getCellValue(intersection);
-	}
-
 	
 	/**
-	 *	Set the value for a specific data cache cell
+	 *	Set the value for a specific base intersection cell
 	 *
-	 * @param members Array of dimension members that define a single cell intersection
+	 * @param coords Array of dimension members that define a single base intersection
 	 * @param value Value to put into cell
 	 */
-	public void setCellValue(String[] members, double value) {
+	public void setBaseCellValue(String[] coords, double value) {
 
-		int index[] = membersToIndex(members);
-		setCellValue(index, value);
+		Intersection intersection = new Intersection(getBaseDimensions(), coords);
+		setCellValue(intersection, value);
 	}
 
 	/**
-	 *	Set the value for a specific data cache cell
+	 *	Return the intersection cell value for the specified intersection coordinates
 	 *
-	 * @param nDimIndex Array of n-dimensional indexes that define a single cell intersection 
+	 * @param dimensions Array of dimension names that define the cell intersection dimensionality
+	 * @param coords Array of dimension members that define the cell intersection
 	 * @param value Value to put into cell
+	 * 
+	 * @return Returns the cell value.
 	 */
-	public void setCellValue(int[] nDimIndex, double value) {
+	public void setCellValue(String[] dimensions, String[] coords, double value) {
 
-		Intersection intersection = createIntersection(nDimIndex);
+		Intersection intersection = new Intersection(dimensions, coords);
 		setCellValue(intersection, value);
 	}
 
 	/**
 	 *	Set the value for a specific data cache cell and track any changed cells
 	 *
-	 * @param cellIndex Data cache cell index
-	 * @param cellValue Value to put into cell
+	 * @param intersection Cell intersection
+	 * @param value Value to put into cell
 	 */
-	public void setCellValueAndTrackChanges(int[] cellIndex, double cellValue) {
+	public void setCellValueAndTrackChanges(Intersection intersection, double value) {
 
-		double oldCellValue = getCellValue(cellIndex);
-		setCellValue(cellIndex, cellValue);
-		if (Math.abs(cellValue - oldCellValue) > PafBaseConstants.DC_TRACK_CHANGES_THRESHHOLD) {
-			int[] changedCellIndex = new int[axisCount];
-			System.arraycopy(cellIndex, 0, changedCellIndex, 0, axisCount);
-			addChangedCell(changedCellIndex, cellValue);
+		double oldCellValue = getCellValue(intersection);
+		setCellValue(intersection, value);
+		if (Math.abs(value - oldCellValue) > PafBaseConstants.DC_TRACK_CHANGES_THRESHHOLD) {
+			// Clone intersection before adding to collection as the calling method
+			// may reuse this intersection object to point to a different intersection
+			addChangedCell(intersection.clone(), value);
 		}
 	}
 
@@ -946,30 +895,8 @@ public abstract class PafDataCache implements IPafDataCache {
 	 */
 	public void setCellValue(Intersection intersection, double value) {
 		
-		DataBlockResponse dataBlockResp = null;
-		double[][] dataBlock = null;
-
-		// Validate intersection
-		if (!isValidIntersection(intersection)) {
-			// Invalid intersection - throw error
-			String errMsg = "Data Cache error - Unable to set data cache cell value for invalid intersection ["
-				+ StringUtils.arrayToString(intersection.getCoordinates()) + "]";
-			throw new IllegalArgumentException(errMsg);
-		}
-		
-		// Get the cell address of the specified intersection
-		DataCacheCellAddress cellAddress = calculateCellAddress(intersection);
-		
-		// Get the corresponding data block
-		Intersection dataBlockKey = cellAddress.getDataBlockKey();
-		dataBlockResp = getDataBlock(dataBlockKey);
-		dataBlock = dataBlockResp.getDataBlock();
-
-		// Create data block if it doesn't already exist
-		if (dataBlock == null) {
-			dataBlockResp = addDataBlock(dataBlockKey);
-			dataBlock = dataBlockResp.getDataBlock();
-		}
+		// Add intersection if it doesn't already exist
+		DataCacheCellAddress cellAddress = addCell(intersection);
 		
 		// Round updated cell value to a predefined number of digits to mask any potential precision errors
 		long longValue = (long) value;
@@ -979,6 +906,7 @@ public abstract class PafDataCache implements IPafDataCache {
 		double roundedValue = longValue + roundedMantissa;
 		
 		// Update cell value
+		double[][] dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
 		dataBlock[cellAddress.getCoordX()][cellAddress.getCoordY()] = roundedValue;
 
 		// Set dirty flag to indicate that data cache was updated
@@ -987,17 +915,55 @@ public abstract class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 *	Add a new cell intersection to the data cache
+	 *
+	 * @param intersection Cell intersection
+	 * @return DataCacheCellAddress Cell's internal address
+	 */
+	public DataCacheCellAddress addCell(Intersection intersection) {
+		
+		// Validate intersection
+		if (!isValidIntersection(intersection)) {
+			// Invalid intersection - throw error
+			String errMsg = "Data Cache error - Unable to set data cache cell value for invalid intersection ["
+				+ StringUtils.arrayToString(intersection.getCoordinates()) + "]";
+			throw new IllegalArgumentException(errMsg);
+		}
+		
+		// Get the cell address of the specified intersection
+		DataCacheCellAddress cellAddress = generateCellAddress(intersection);
+		
+		// Add data block if it doesn't already exist
+		addDataBlock(cellAddress.getDataBlockKey());
+		
+		// Return cell address
+		return cellAddress;
+	}
+	
+	
+	/**
 	 *	Add a new data block to the data cache.
 	 *
 	 * @param key Data block key
-	 * @return DataBlockResponse
-	
+	 * @return DataBlockResponse Data block response
 	 */
-	protected DataBlockResponse addDataBlock(Intersection key) {
+	private DataBlockResponse addDataBlock(Intersection key) {
 
-		int surrogateKey = 0;		
-
-		// Ensure that intersection being added is valid
+		int surrogateKey = 0;
+		double[][] dataBlock = null;
+		DataBlockResponse dataBlockResp = null;
+		
+		
+		// If the data block already exists, jut return its
+		// information
+		dataBlockResp = getDataBlock(key);
+		dataBlock = dataBlockResp.getDataBlock();
+		if (dataBlock != null) {
+			return dataBlockResp;
+		}
+		
+		
+		// Ensure that data block being added is valid
 		if (!isValidDataBlock(key)) {
 			String msg = "An attempt was made to add the invalid data block: "
 				+ key.toString() + " to the data cache.";
@@ -1005,10 +971,10 @@ public abstract class PafDataCache implements IPafDataCache {
 		}
 		
 		// If alias data block key, add key to index. Also check for
-		// correpsonding primary data block. If the primary ddata
+		// corresponding primary data block. If the primary data
 		// block doesn't already exists, then create it.  
 		if (isAliasDataBlockKey(key)) {
-			Intersection primaryKey = calculatePrimaryKey(key);
+			Intersection primaryKey = generatePrimaryKey(key);
 			DataBlockResponse aliasDataBlockResp =  getDataBlock(primaryKey);
 			if (aliasDataBlockResp.getDataBlock() == null) {
 				aliasDataBlockResp = addDataBlock(primaryKey);
@@ -1033,15 +999,7 @@ public abstract class PafDataCache implements IPafDataCache {
 		dataBlockCount++;
 		
 		// Create new data block and add it to data block pool
-		//TODO Check for alias intersections - if adding, create base intersection first
-		// if it doesn't exist, else find it.
-		// addDimension(dimension, dimensionType)
-		// addMember(dimension, member) (should call add dimension)
-		// --- addDimension & addMember should be called first before the blocks are even added,
-		// ----- by logic that's repsonsible for making sure that only members/dimensions that 
-		// ----- exist in the UOW are defined in the UOW. so that addDataBlock can be a gatekeeper
-		// ----- and ensure that only the valid member intersections get created.
-		double[][] dataBlock = new double[getMeasureSize()][getTimeSize()];
+		dataBlock = new double[getMeasureSize()][getTimeSize()];
 		dataBlockPool.add(dataBlock);
 		
 		// Add data block key to lookup collections
@@ -1049,7 +1007,7 @@ public abstract class PafDataCache implements IPafDataCache {
 		addDataBlockKey(key);
 		
 		// Return data block response
-		DataBlockResponse dataBlockResp = new DataBlockResponse();
+		dataBlockResp = new DataBlockResponse();
 		dataBlockResp.setSurrogateKey(surrogateKey);
 		dataBlockResp.setDataBlock(dataBlock);
 		return dataBlockResp;
@@ -1075,22 +1033,40 @@ public abstract class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * Convert an alias data block key to its corresonding primary 
+	 * Convert an alias data block key to its corresponding primary 
 	 * data block key
 	 *  
 	 * @param aliasKey Alias data block key
 	 * @return Primary data block key.
 	 */
-	private Intersection calculatePrimaryKey(Intersection aliasKey) {
+	private Intersection generatePrimaryKey(Intersection aliasKey) {
 		
 		// Strip off non-core dimension elements. The non-core
-		// dimension elements will aways appear after the core
+		// dimension elements will always appear after the core
 		// dimension elements.
-		Intersection primaryKey = aliasKey.createSubIntersection(coreDimensions.length);
+		Intersection primaryKey = aliasKey.createSubIntersection(coreKeyDims.length);
 		return primaryKey;
 	}
 
 
+	/**
+	 * Builds the primary intersection corresponding to the specified alias 
+	 * intersection
+	 * 
+	 * @param aliasIs Alias intersection
+	 * @return Corresponding primary intersection
+	 */
+	public Intersection generatePrimaryIntersection(Intersection aliasIs) {
+		
+		// Convert the alias intersection into its corresponding primary
+		// intersection by striping off the non-core dimension elements. 
+		// The non-core dimension elements will always appear after the 
+		// core dimension elements.
+		Intersection primaryIs = aliasIs.createSubIntersection(coreDimensions.size());
+		return primaryIs;
+	}
+
+	
 	/**
 	 *  Add data block key to lookup collections
 	 *  
@@ -1117,7 +1093,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	 *
 	 * @param key Data block key	
 	 */
-	protected void deleteDataBlock(Intersection key) {
+	private void deleteDataBlock(Intersection key) {
 		
 		// Retrieve the data block being deleted
 		DataBlockResponse dataBlockResp = getDataBlock(key);
@@ -1185,6 +1161,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	/**
 	 * Returns true if the data block key is not the primary
 	 * key
+	 * 
 	 * @param Returns true if the data block key is not the
 	 * @return
 	 */
@@ -1192,42 +1169,117 @@ public abstract class PafDataCache implements IPafDataCache {
 		return !isPrimaryDataBlockKey(dataBlockKey);
 	}
 
-
 	/**
-	 * Returns true if the data block key is only comprised of
-	 * primary data cache dimensions. (not exactly true ---
-	 * NEED TO CONSIDER ATTRIBUTE INTERSECTIONS THAT DON'T
-	 * DIRECTLY MAP TO A BASE INTERSECTION
+	 * Returns true if the intersection in an alias of a base intersection
 	 * 
-	 * If the data cache holds a unit of work, then a key
-	 * comprised of only base dimensions would return true.
-	 * Conversely, a key containing any attribute dimensions 
-	 * would return false.
-	 * 
-	 * @param dataBlockKey Data block key
-	 * @return boolean
+	 * @param intersection Cell intersection
+	 * @return True if the intersection is an alias of a base  intersection 
 	 */
-	private boolean isPrimaryDataBlockKey(Intersection dataBlockKey) {
-		
-		// Simple and fast check. Assume that a key is primrary
-		// if it contains the extact number of data cache core 
-		// dimensions.  
-		String[] dataBlockKeyDims = dataBlockKey.getDimensions();
-		if (dataBlockKeyDims.length == coreDimensions.length - NON_KEY_DIM_COUNT) {
-			return true;
-		} else {
-			// TODO - Need to check if alias key corresponds
-			// to a primary key (only level 0 attributes and assoicate
-			// base members) 
-			// or is a primary key comrpised of attributes
-			// (at least one aggregate attribute dim member
-			// or an aggregate member in one or mroe associated base 
-			// dimensions.  --- NEED TREES (Argh...) - pass in client 
-			// state to data cache?
-			return false;
-		}
+	public boolean isAliasIntersection(Intersection intersection) {
+		return !isPrimaryIntersection(intersection);
 	}
 
+	/**
+	 * Returns true if the intersection in an attribute intersection
+	 * 
+	 * @param intersection Cell intersection
+	 * @return True if the intersection is an attribute intersection 
+	 */
+	public boolean isAttributeIntersection(Intersection intersection) {
+		
+		boolean isAttributeIs = false;
+		
+		// Simple check - an intersection is an attribute intersection,
+		// if it contains any non-core dimensions
+		if (intersection.getSize() > this.coreDimensions.size()) {
+			isAttributeIs = true;
+		}
+		return isAttributeIs;
+	}
+
+
+	/**
+	 * Returns true if the data block key maps directly
+	 * to a unique data block in the data cache. 
+	 * 
+	 * A key is considered to be a primary key if it meets one
+	 * of the following two conditions:
+	 * 
+	 * 1) Comprised of only core key dimensions
+	 * 2) Does not map directly to a base member intersection -
+	 *    Specifically, the key contains at least one non-level 0
+	 *    attribute member or an attribute member with an 
+	 *    associated non-level 0 base member.
+	 * 
+	 * @param key Data block key
+	 * @return boolean
+	 */
+	private boolean isPrimaryDataBlockKey(Intersection key) {
+		
+		final int coreKeyDimCount = coreKeyDims.length;
+		final int dataBlockKeySize = key.getSize();
+		boolean isPrimaryKey = true;
+
+		// Check if the key contains any attribute dimension
+		// coordinates.
+		if (dataBlockKeySize != coreKeyDimCount) {
+
+			// The key does contain one or more attribute dimension coordinates, 
+			// which need to be analyzed. These attribute dimension coordinates, 
+			// when they exist, always appear after all the core key dimension 
+			// coordinates.
+			isPrimaryKey = false;
+			validation:
+				for (int index = coreKeyDimCount; index < dataBlockKeySize; index++) {
+
+					String attrDim = key.getDimensions()[index];
+					String attrMember = key.getCoordinate(attrDim);
+
+					// Check level of attribute coordinate member - if not at level 0,
+					// then this is a primary key
+					PafAttributeTree attrDimTree = (PafAttributeTree) dimTrees.getTree(attrDim);
+					int attrMbrLevel = attrDimTree.getMember(attrMember).getMemberProps().getLevelNumber();
+					if (attrMbrLevel > 0) {
+						isPrimaryKey = true;
+						break validation;
+					}
+
+					// Check level of associated base member - if above attribute mapping level,
+					// then this is a primary key
+					String assocBaseDim = attrDimTree.getBaseDimName();
+					PafBaseTree baseDimTree = (PafBaseTree) dimTrees.getTree(assocBaseDim);
+					String baseMember = key.getCoordinate(assocBaseDim);
+					int baseMbrLevel = baseDimTree.getMember(baseMember).getMemberProps().getLevelNumber();
+					if (baseMbrLevel > baseDimTree.getAttributeMappingLevel(attrDim)) {
+						isPrimaryKey = true;
+						break validation;
+					}
+				}
+		}
+
+
+		// Return status
+		return isPrimaryKey;
+	}
+
+
+	/**
+	 * Returns true if the intersection is not alias of a base intersection
+	 * 
+	 * @param intersection Cell intersection
+	 * @return True if the intersection is not an alias of a base  intersection 
+	 */
+	public boolean isPrimaryIntersection(Intersection intersection) {
+	
+		// Get the data block key of the specified intersection
+		Intersection dataBlockKey = generateCellAddress(intersection).getDataBlockKey();
+		
+		// The intersection is a primary intersection if its corresponding
+		// data block key is a primary key
+		return isPrimaryDataBlockKey(dataBlockKey);
+	}
+
+	
 
 	/**
 	 *  Remove data blocks for the specified versions. If the version
@@ -1236,13 +1288,15 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @param versionFilter Specifies the versions to clear
 	 */
 	public int clearVersionData(List<String> versionFilter) {
-	
+
+		long startTime = System.currentTimeMillis();
 		int deletedBlockCount = 0;
 		if (versionFilter != null && !versionFilter.isEmpty()) {
 			for (String version : versionFilter) {
-				List<Intersection> dataBlockKeys = new ArrayList<Intersection>(dataBlocksByVersion.get(version));
-				if (dataBlockKeys != null) {
-					for (Intersection key: dataBlockKeys) {
+				List<Intersection> dataBlockKeys = null;
+				if (dataBlocksByVersion.get(version) !=null ) {
+					dataBlockKeys = new ArrayList<Intersection>(dataBlocksByVersion.get(version));
+					for (Intersection key : dataBlockKeys) {
 						deleteDataBlock(key);
 						deletedBlockCount++;
 					}
@@ -1250,8 +1304,12 @@ public abstract class PafDataCache implements IPafDataCache {
 			}
 		}
 		
-		logger.info(StringUtils.commaFormat(deletedBlockCount) + " data block(s) removed from data cache across versions: " 
-				+  StringUtils.listToString(versionFilter));
+		String stepDesc = StringUtils.commaFormat(deletedBlockCount) 
+				+ " data block(s) removed from the data cache while initializing the following version(s): " 
+				+  StringUtils.arrayListToString(versionFilter);
+		logger.info(stepDesc);
+		stepDesc = "Removal of " + StringUtils.commaFormat(deletedBlockCount) + " data block(s)";
+		performanceLogger.info(LogUtil.timedStep(stepDesc, startTime));
 		return deletedBlockCount;
 		
 	}
@@ -1298,7 +1356,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * 
 	 * @param dataBlockResp Data Block Response Object
 	 */
-	protected void updateDataBlock(DataBlockResponse dataBlockResp) {
+	private void updateDataBlock(DataBlockResponse dataBlockResp) {
 		dataBlockPool.set(dataBlockResp.getSurrogateKey(), dataBlockResp.getDataBlock());
 	}
 
@@ -1309,7 +1367,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @param dataBlockKey Data Block Key
 	 * @param dataBlock Data Block
 	 */
-	protected void updateDataBlock(Intersection dataBlockKey, double[][] dataBlock) {
+	private void updateDataBlock(Intersection dataBlockKey, double[][] dataBlock) {
 		
 		Integer  surrogateKey = dataBlockIndexMap.get(dataBlockKey);	
 		dataBlockPool.set(surrogateKey, dataBlock);
@@ -1323,7 +1381,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @param intersection Cell intersection 
 	 * @return DataCacheCellAddress
 	 */
-	private DataCacheCellAddress calculateCellAddress(Intersection intersection) {
+	private DataCacheCellAddress generateCellAddress(Intersection intersection) {
 		
 		int measureAxis = getMeasureAxis();
 		int timeAxis = getTimeAxis();
@@ -1331,8 +1389,7 @@ public abstract class PafDataCache implements IPafDataCache {
 
 		
 		// Convert intersection to data block key
-		//TODO - add logic to convert other types of intersections (Attribute, synthetic)
-		Intersection dataBlockKey = calculateDataBlockKey(intersection);
+		Intersection dataBlockKey = generateDataBlockKey(intersection);
 		cellAddress.setDataBlockKey(dataBlockKey);
 		
 		// Set x and y coordinates (measure, time)
@@ -1352,18 +1409,18 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @param intersection Cell Intersection
 	 * @return Intersection
 	 */
-	private Intersection calculateDataBlockKey(Intersection intersection) {
+	private Intersection generateDataBlockKey(Intersection intersection) {
 		
 		Intersection dataBlockKey = null;
 		
 		// The data block key is calculated by taking the intersection
-		// and removing the elements that corresond to the non-indexed
+		// and removing the elements that correspond to the non-key
 		// dimensions. 
 		//
-		// To reduce overhead, this method access a pre-built array that
-		// contains the desired intersection elements for each
+		// To reduce overhead, this method accesses a pre-built array 
+		// that contains the desired intersection elements for each
 		// given intersection size.  
-		int[] keyDimIndexes = indexedIsElements[intersection.getSize()];
+		int[] keyDimIndexes = keyIndexesByIsSize[intersection.getSize()];
 		dataBlockKey = intersection.createSubIntersection(keyDimIndexes);
 		return dataBlockKey;
 	}
@@ -1393,13 +1450,13 @@ public abstract class PafDataCache implements IPafDataCache {
 		// Generate all the data block keys represented by the member specifications. Since
 		// reference data is loaded an entire block at a time, we only need to filter at the
 		// data block level instead of the individual intersection level
-		int indexedAxisCount = indexedCoreAxes.length;
+		int indexedAxisCount = coreKeyAxes.length;
 		@SuppressWarnings("unchecked")
 		List<String>[] memberLists = new ArrayList[indexedAxisCount]; 
 		for (int i = 0; i < indexedAxisCount; i++) {
 			
 			// Get the next indexed core dimension axis
-			int axis = indexedCoreAxes[i];
+			int axis = coreKeyAxes[i];
 			
 			// Get the list of members for the current axis. If there's
 			// no entry in the member spec then select all defined axis
@@ -1417,7 +1474,7 @@ public abstract class PafDataCache implements IPafDataCache {
 		List<Intersection> requiredKeys = new ArrayList<Intersection>();
 		while (dataBlockIterator.hasNext()) { 
 			@SuppressWarnings("unchecked")
-			Intersection dataBlockKey = new Intersection(indexedCoreDims, (String[])dataBlockIterator.nextValue().toArray(new String[0]));
+			Intersection dataBlockKey = new Intersection(coreKeyDims, (String[])dataBlockIterator.nextValue().toArray(new String[0]));
 			if (!isExistingDataBlock(dataBlockKey)) {
 				requiredKeys.add(dataBlockKey);
 			}
@@ -1431,17 +1488,17 @@ public abstract class PafDataCache implements IPafDataCache {
 			// Iterate through the required data block keys and compile a
 			// unique list of required members by dimension. 
 			Map<String, Set<String>> memberSets = new HashMap<String, Set<String>>();
-			for (String dim : indexedCoreDims) {
+			for (String dim : coreKeyDims) {
 				memberSets.put(dim, new HashSet<String>());
 			}
 			for (Intersection dataBlockKey : requiredKeys) {
-				for (String dim : indexedCoreDims) {
+				for (String dim : coreKeyDims) {
 					memberSets.get(dim).add(dataBlockKey.getCoordinate(dim));
 				}
 			}
 			// Build a revised member specification map that represents the
 			// minimal superset of all the required data block keys 
-			for (String dim : indexedCoreDims) {
+			for (String dim : coreKeyDims) {
 				filteredRefDataSpec.put(this.getAxisIndex(dim),
 						new ArrayList<String>(memberSets.get(dim)));
 			}
@@ -1467,11 +1524,12 @@ public abstract class PafDataCache implements IPafDataCache {
 	 */
 	public UnitOfWork getUowSpec() {
 		
-		String[][] members = new String[axisCount][];
-		for (int i = 0; i < axisCount; i++) {
-			members[i] = memberArray.get(i).toArray(new String[0]);
+		int baseDimCount = baseDimensions.length;
+		String[][] members = new String[baseDimCount][];
+		for (int i = 0; i < baseDimCount; i++) {
+			members[i] = memberCatalog[i];
 		}
-		UnitOfWork unitOfWork = new UnitOfWork(allDimensions, members);
+		UnitOfWork unitOfWork = new UnitOfWork(baseDimensions, members);
 		
 		return unitOfWork;
 	}
@@ -1483,111 +1541,12 @@ public abstract class PafDataCache implements IPafDataCache {
 		return appDef.getCurrentYear();
 	}
 
-	/**
-	 * Returns an iterator object designed to iterate through all data cells
-	 *
-	 * @return An iterator object designed to iterate through all data cells
-	 */
-	public PafIntersectionIterator getDataCellIterator() {
-		return getDataCellIterator(null);
-	}
-
-	/**
-	 * Returns an iterator object designed to iterate through all data cells
-	 *
-	 * @param memberFilters List of member by dimension to filter iterator on
-	 * @return An iterator object designed to iterate through all data cells
-	 */
-	public PafIntersectionIterator getDataCellIterator(Map <String, List<String>> memberFilters) {
-
-		int[] axes = new int[axisCount];
-		PafIntersectionIterator cellIterator = null;
-
-		// Get a list of all axis. This will be used as parameter for the 
-		// PafIntersectionIterator.
-		for (int i = 0; i < axisCount; i++) {
-			axes[i] = i;
-		}
-
-		// Get a data cell iterator object
-		cellIterator = new PafIntersectionIterator(axes, this, memberFilters);
-		return cellIterator;
-	}
-
-	
-	/**
-	 *	Convert an n-dimensional index to an intersection object
-	 *
-	 * @param index N-dimensional cell index
-	 * @return DataCell index (int)
-	 */
-	private Intersection createIntersection(int[] index) {
-
-		// Convert cell index to intersection object
-		String members[] = new String[index.length];
-		for (int axis = 0; axis < index.length; axis++) {
-			members[axis] = this.getDimMember(axis, index[axis]);
-		}
-		Intersection intersection = new Intersection(getAllDimensions(), members);
-		
-		
-		// Return intersection
-		return intersection;
-	}
-
-	/**
-	 *	Enter dimension member indexes into appropriate elements of the 
-	 *	data cache cell index, based on the dimension order found in the 
-	 *	data cache.
-	 *
-	 * @param cellIndex Data cache cell index
-	 * @param dimIndexes Array of pointers to each data cache dimension that is to be updated
-	 * @param memberIndexes Array of member indexes that correspond to each dimension in dimIndexes array
-	 * @return Updated data cache index
-	 */
-	public int[] updateCellIndex(int[] cellIndex, int[] dimIndexes, int[] memberIndexes) {
-
-		for (int i = 0; i < dimIndexes.length; i++) {
-			cellIndex[dimIndexes[i]] = memberIndexes[i];
-		}
-		return cellIndex;
-	}
-
-
-	
-	/**
-	 * @return the indexedIsElements
-	 */
-	private int[][] getIndexedIsElements() {
-		return indexedIsElements;
-	}
-
-	/**
-	 * @param indexedAxes the indexedAxes to set
-	 */
-	private void setIndexedIsElements(int[][] indexedIsElements) {
-		this.indexedIsElements = indexedIsElements;
-	}
-
-
-	/**
-	 * @param coreDimensions the coreDimensions to set
-	 */
-	protected void setCoreDimensions(String[] coreDimensions) {
-		this.coreDimensions = coreDimensions;
-	}
 	
 	/**
 	 * @return Returns the lockedPeriods.
 	 */
 	public Set<String> getLockedPeriods() {
 		return lockedPeriods;
-	}
-	/**
-	 * @param lockedPeriods the lockedPeriods to set
-	 */
-	public void setLockedPeriods(Set<String> lockedPeriods) {
-		this.lockedPeriods = lockedPeriods;
 	}
 
 	/**
@@ -1652,36 +1611,6 @@ public abstract class PafDataCache implements IPafDataCache {
 		return getMeasureDef(measure).getType();	
 	}
 
-	/**
-	 * 	Return an array containing the members for each data cache axis
-	 * 
-	 * @return Returns the memberArray.
-	 */
-	public List<List<String>> getMemberArray() {
-		return memberArray;
-	}
-	/**
-	 * @param memberArray the memberArray to set
-	 */
-	public void setMemberArray(String[][] memberArray) {
-		
-		// Convert 2D string array to arrayList of arrayLists. This is kind of a 
-		// kludge, but this was done to reduce impact on the code that does the inital
-		// load of the UOW from Essbase.
-		List<List<String>> memberArrayList = new ArrayList<List<String>>(memberArray.length);
-		for (String[] dimMembers : memberArray) {
-			List<String> memberList = new ArrayList<String>(Arrays.asList(dimMembers));
-			memberArrayList.add(memberList);
-		}
-		this.memberArray = memberArrayList;
-	}
-
-	/**
-	 * @param memberIndexMap the memberIndexMap to set
-	 */
-	protected void setMemberIndexMap(ArrayList<Map<String, Integer>> memberIndexMap) {
-		this.memberIndexMap = memberIndexMap;
-	}
 
 	/**
 	 *	Returns the axis number corresponding to the PlanType dimension
@@ -1870,12 +1799,26 @@ public abstract class PafDataCache implements IPafDataCache {
 		// base versions (ForwardPlannable, NonPlannable, or Plannable)
 		for(String version:getVersions())  {
 			VersionType versionType = getVersionType(version);
-			if (PafBaseConstants.BASE_VERSION_TYPE_LIST.contains(versionType) 
-					|| versionType == VersionType.Plannable) {
+			if (PafBaseConstants.BASE_VERSION_TYPE_LIST.contains(versionType)) {
 				baseVersions.add(version);
 			}
 		}
 		return baseVersions;
+	}
+
+	/**
+	 *	Return list of derived versions
+	 *
+	 * @return List<String>
+	 */
+	public List<String> getDerivedVersions() {
+
+		// Get the list of derived versions that are defined to the data cache
+		List<String> derivedVersions = new ArrayList<String>(appDef.getDerivedVersions());
+		List<String> dataCacheVersions = new ArrayList<String>(Arrays.asList(getVersions()));
+		derivedVersions.retainAll(dataCacheVersions);
+
+		return derivedVersions;
 	}
 
 	/**
@@ -1943,11 +1886,11 @@ public abstract class PafDataCache implements IPafDataCache {
 	/**
 	 *	Add data cache cell to the list of changed cells
 	 *
-	 * @param cellIndex Data cache cell index
+	 * @param cellIntersection Data cache cell intersection
 	 * @param cellValue Changed cell value
 	 */
-	public void addChangedCell(int[] cellIndex, double cellValue) {
-		changedCells.add(cellIndex, cellValue);		
+	public void addChangedCell(Intersection cellIntersection, double cellValue) {
+		changedCells.add(cellIntersection, cellValue);		
 	}
 
 	/**
@@ -1990,12 +1933,13 @@ public abstract class PafDataCache implements IPafDataCache {
 	 */
 	public void loadCacheCells(final PafDataCache sourceCache, final Map<String, List<String>> memberFilter) throws PafException  {
 
+		String[] dimensions = getAllDimensions();
 		Map<String, List<String>> generatedMemberFilter = new HashMap<String, List<String>>();
 
 		// By default a filter will be created for each dimension, consisting of the common members
 		// between both data caches. However, any supplied filters for a given dimension will take 
 		// precedence.
-		for (String dimension:getAllDimensions()) {
+		for (String dimension : dimensions) {
 			// Use dimensionality of all dsCache dimensions, except the version dimension
 			if (memberFilter != null && memberFilter.containsKey(dimension)) {
 				
@@ -2035,15 +1979,15 @@ public abstract class PafDataCache implements IPafDataCache {
 		}
 
 		// Iterate through all cell intersections represented by the member filter
-		PafIntersectionIterator cacheIterator = getDataCellIterator(generatedMemberFilter );
+		Odometer cacheIterator = new Odometer(generatedMemberFilter, dimensions);
 		while(cacheIterator.hasNext()) {
 
 			// Copy source intersection to this data cache
-			int[] cacheIndex = cacheIterator.getNext();
-			String[] sourceCacheIndex;
-			sourceCacheIndex = indexToMembers(cacheIndex);
+			@SuppressWarnings("unchecked")
+			ArrayList<String> coords = cacheIterator.nextValue();
+			Intersection intersection = new Intersection(dimensions, coords);
 //			try {
-				setCellValue(cacheIndex, sourceCache.getCellValue(sourceCacheIndex));
+				setCellValue(intersection, sourceCache.getCellValue(intersection));
 //			} catch (PafException pfe) {
 //				// Problem encountered with source cache index
 //				String errMsg = "Unable to load data into DESTINATION data cache - requested member don't exist in SOURCE data cache.";
@@ -2055,70 +1999,84 @@ public abstract class PafDataCache implements IPafDataCache {
 	}
 
 	/**
-	 * 	Get data "slice" using dimensional and member specifications
-	 *  defined in supplied parameter object
+	 * 	Get "data slice" using dimensional and member specifications
+	 *  defined in supplied parameter object. The "data slice"
+	 *  contains all of the cell values that are needed to populate
+	 *  a client view section. Meta-data is passed down to the client 
+	 *  via other objects and processes outside of this method.
 	 *
 	 * @param parms Object containing required PafDataSlice parameters
+	 * @param dimSequence Dimension sequence for data cache intersections associated with the corresponding view section
 	 * 
 	 * @return Returns "Data Slice" - a subset of cells in the UowCache
 	 * @throws PafException
 	 */
-	public PafDataSlice getDataSlice(PafDataSliceParms parms) throws PafException {
+	public PafDataSlice getDataSlice(PafDataSliceParms parms, String[] dimSequence) throws PafException {
 
 		boolean hasPageDimensions = false;
 		int cellCount = 0, cols = 0, rows = 0, sliceIndex = 0;
-		int colDimIndexes[] = null, pageDimIndexes[] = null, rowDimIndexes[] = null;
 		double[] dataSlice = null;
-		String[] cellIndex = new String[axisCount];
-		String[][] colTuples = parms.getColTuples();
+		String[] rowDims = parms.getRowDimensions();
+		String[] colDims = parms.getColDimensions();
 		String[][] rowTuples = parms.getRowTuples();
+		String[][] colTuples = parms.getColTuples();
 		PafDataSlice pafDataSlice = null;
 
 		try {
 			// Validate data slice parms
-			logger.info("Validating PafDataSlice parameters...");
+			logger.debug("Validating PafDataSlice parameters...");
 			hasPageDimensions = validateDataSliceParms(parms);
 
 			// Creating new data slice array 
-			logger.info("Creating new data slice array");
+			logger.debug("Creating new data slice array");
 			cols = colTuples.length;
 			rows = rowTuples.length;
 			cellCount = rows * cols;
 			dataSlice = new double[cellCount];
 
-			// Enter page headers into appropriate elements of the data cell 
-			// index, based on the dimension order found in the data cache
+			// Create reusable cell intersection that will to access
+			// data cache data. This intersection will get updated as
+			// we iterate through all the tuple members
+			Intersection cellIs = new Intersection(dimSequence);
+			
+			// Enter page headers into appropriate elements of the data 
+			// cache cell intersection
 			if (hasPageDimensions) {
-				logger.debug("Entering page headers into data cache index");
-				pageDimIndexes = getDimIndexes(parms.getPageDimensions());
-				cellIndex = updateCellIndex(cellIndex, pageDimIndexes, parms.getPageMembers());
+				logger.debug("Entering page headers into cell intersection");
+				for (int i = 0; i < parms.getPageDimensions().length; i++) {
+					cellIs.setCoordinate(parms.getPageDimensions()[i], parms.getPageMembers()[i]);
+				}
 			}
-
-			// Create array of row dimension indexes
-			logger.debug("Creating array of row header indexes");
-			rowDimIndexes = getDimIndexes(parms.getRowDimensions());
-
-			// Create array of column dimension indexes
-			logger.debug("Creating array of col header indexes");
-			colDimIndexes = getDimIndexes(parms.getColDimensions());
 
 			// Load data slice. Start by cycling through row tuples
 			logger.info("Getting data slice - [" + StringUtils.commaFormat(rows)  
 					+ "] rows  X  [" + cols + "] columns  =  [" 
-					+ StringUtils.commaFormat(cellCount) + "] total cells");  	
+					+ StringUtils.commaFormat(cellCount) + "] total cells");  
 			for (String[] rowTuple:rowTuples) {
-				// Updated the cell index with the current row header information.
-				cellIndex = updateCellIndex(cellIndex, rowDimIndexes, rowTuple);
+	
+				// Updated the cell intersection with the current row header members
+				for (int i = 0; i < rowDims.length; i++) {
+					cellIs.setCoordinate(rowDims[i], rowTuple[i]);
+				}
 
 				// Cycle through column tuples
 				for (String[] colTuple:colTuples) {
 
-					// Update the cell index with the current column header information 
-					// index, based on the dimension order found in the data cache
-					cellIndex = updateCellIndex(cellIndex, colDimIndexes, colTuple);
-
+					// Update the cell intersection with the current column header
+					// members 
+					for (int i = 0; i < colDims.length; i++) {
+						cellIs.setCoordinate(colDims[i], colTuple[i]);
+					}
+	
 					// Copy selected cell to data slice
-					dataSlice[sliceIndex++] = getCellValue(cellIndex);
+					try {
+						dataSlice[sliceIndex++] = getCellValue(cellIs);
+					} catch (IllegalArgumentException iae) {
+						String errMsg = "Data retrieval error - the view references an intersection: "
+							+ StringUtils.arrayToString(cellIs.getCoordinates()) 
+							+ " that is outside the current unit of work";
+						throw new IllegalArgumentException(errMsg);
+					}
 				}
 			}
 
@@ -2149,11 +2107,12 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @return True if page dimensions are found among data slice parameters
 	 * @throws PafException 
 	 */
-	private boolean validateDataSliceParms(PafDataSliceParms parms) throws PafException {
+	public boolean validateDataSliceParms(PafDataSliceParms parms) throws PafException {
 
 		boolean hasPageDimensions;
 		boolean[] dimensionFlags = null;
-		int dimCount = allDimensions.length;
+		String[] viewDims = pafMVS.getViewSection().getDimensionsPriority();
+		int coreDimCount = coreDimensions.size(), viewDimCount = viewDims.length;
 		String[] pageDimensions = parms.getPageDimensions();
 		String[] colDimensions = parms.getColDimensions();
 		String[] rowDimensions = parms.getRowDimensions();
@@ -2186,15 +2145,15 @@ public abstract class PafDataCache implements IPafDataCache {
 			parmsDimCount = colDimensions.length + rowDimensions.length;
 		}
 		
-		if (parmsDimCount != dimCount) {
+		if (parmsDimCount != viewDimCount) {
 			// Incorrect number of dimensions specified
 			String errMsg;
-			if (parmsDimCount >= dimCount) {
+			if (parmsDimCount >= viewDimCount) {
 				String missingparmDims = " ";
 
-				List<String> allDimensionsList = Arrays.asList(allDimensions);
+				List<String> viewDimList = Arrays.asList(viewDims);
 				for(String dim : parms.getAllDimensions()){
-					if (! allDimensionsList.contains(dim)){
+					if (! viewDimList.contains(dim)){
 						missingparmDims += dim + ", ";
 					}
 				}
@@ -2202,24 +2161,26 @@ public abstract class PafDataCache implements IPafDataCache {
 				errMsg = "The view definition has more dimensions than the server expects.  The extra view dimensions are: " + missingparmDims;
 			}else{
 				errMsg = parmsDimCount + " dimensions specified in data slice parms, but data cache has "
-				+ dimCount + " dimensions specified"; 
+				+ viewDimCount + " dimensions specified"; 
 			}
 			logger.error(errMsg);
 			PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
 			throw pfe; 				
 		}
 
-		// Check that all dimensions are valid and accounted for 
-		logger.debug("Validating that all dimensions are valid and accounted for....");
-		dimensionFlags = new boolean[dimCount];
-		for (int i = 0; i < dimCount; i++) {
+		// Check that all dimensions are valid and all core dimensions are accounted for 
+		logger.debug("Validating that all dimensions are valid and all core dimensions are accounted for....");
+		dimensionFlags = new boolean[coreDimCount];
+		for (int i = 0; i < coreDimCount; i++) {
 			dimensionFlags[i] = false;
 		}
 		if (hasPageDimensions) {
 			for (String dimension:pageDimensions) {
 				if (axisIndexMap.containsKey(dimension)) {
-					// Indicate that dimension was found
-					dimensionFlags[axisIndexMap.get(dimension)] = true;
+					// Indicate that dimension was found (if it's a core dimension)
+					if (coreDimensions.contains(dimension)) {
+						dimensionFlags[axisIndexMap.get(dimension)] = true;
+					}
 				} else {
 					// Unknown page dimension
 					String errMsg = "Unknown page dimension [" + dimension 
@@ -2232,8 +2193,10 @@ public abstract class PafDataCache implements IPafDataCache {
 		}
 		for (String dimension:colDimensions) {
 			if (axisIndexMap.containsKey(dimension)) {
-				// Indicate that dimension was found
-				dimensionFlags[axisIndexMap.get(dimension)] = true;
+				// Indicate that dimension was found (if it's a core dimension)
+				if (coreDimensions.contains(dimension)) {
+					dimensionFlags[axisIndexMap.get(dimension)] = true;
+				}
 			} else {
 				// Unknown column dimension
 				String errMsg = "Unknown column dimension [" + dimension 
@@ -2245,22 +2208,24 @@ public abstract class PafDataCache implements IPafDataCache {
 		}
 		for (String dimension:rowDimensions) {
 			if (axisIndexMap.containsKey(dimension)) {
-				// Indicate that dimension was found
-				dimensionFlags[axisIndexMap.get(dimension)] = true;
+				// Indicate that dimension was found (if it's a core dimension)
+				if (coreDimensions.contains(dimension)) {
+					dimensionFlags[axisIndexMap.get(dimension)] = true;
+				}
 			} else {
 				// Unknown row dimension
 				String errMsg = "Unknown row dimension [" + dimension 
-				+ "] found in paf data slice parms";
+						+ "] found in paf data slice parms";
 				logger.error(errMsg);
 				PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
 				throw pfe; 				
 			}
 		}
-		for (int i = 0; i < dimCount; i++) {
-			if (dimensionFlags[i] == false) {
+		for (int i = 0; i < coreDimCount; i++) {
+			if (!dimensionFlags[i]) {
 				// Unknown row dimension
-				String errMsg = "Dimension [" + allDimensions[i] 
-				                                              + "] was not specified in the data slice parms";
+				String errMsg = "Dimension [" + allDimensions.get(i) 
+						+ "] was not specified in the data slice parms";
 				logger.error(errMsg);
 				PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
 				throw pfe; 								
@@ -2298,102 +2263,6 @@ public abstract class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * 	Update the data cache with the contents of the data slice
-	 *
-	 * @param pafDataSlice Paf Data Slice
-	 * @param parms Object containing required PafDataSlice parameters
-	 * 
-	 * @throws PafException
-	 */
-	public void update(PafDataSlice pafDataSlice, PafDataSliceParms parms) throws PafException {
-
-		boolean hasPageDimensions = false;
-		int cols = 0, rows = 0, sliceIndex = 0;
-		int colDimIndexes[] = null, pageDimIndexes[] = null, rowDimIndexes[] = null;
-		double[] dataSlice = null;
-		String[] cacheIndex = new String[axisCount];
-		String[][] colTuples = parms.getColTuples();
-		String[][] rowTuples = parms.getRowTuples();
-
-		try {
-			// Validate data slice parms
-			logger.info("Validating PafDataSlice parameters...");
-			hasPageDimensions = validateDataSliceParms(parms);
-
-			// Getting data slice array 
-			logger.info("Getting data slice array");
-			cols = pafDataSlice.getColumnCount();
-			dataSlice = pafDataSlice.getData();
-			rows = pafDataSlice.getRowCount();
-
-			// Enter page headers into appropriate elements of the data cache 
-			// index, based on the dimension order found in the data cache
-			if (hasPageDimensions) {
-				logger.debug("Entering page headers into data cell index");
-				pageDimIndexes = getDimIndexes(parms.getPageDimensions());
-				cacheIndex = updateCellIndex(cacheIndex, pageDimIndexes, parms.getPageMembers());
-			}
-
-			// Create array of row dimension indexes
-			logger.debug("Creating array of row header indexes");
-			rowDimIndexes = getDimIndexes(parms.getRowDimensions());
-
-			// Create array of column dimension indexes
-			logger.debug("Creating array of col header indexes");
-			colDimIndexes = getDimIndexes(parms.getColDimensions());
-
-			// Load data slice. Start by cycling through row tuples
-			logger.info("Updating data cache with data slice - rows: " + rows + " columns: " + cols + " cells: " + dataSlice.length);  	
-			for (String[] rowTuple:rowTuples) {
-				// Enter row headers into appropriate elements of the data cache
-				// index, based on the dimension order found in the data cache
-				cacheIndex = updateCellIndex(cacheIndex, rowDimIndexes, rowTuple);
-
-				// Cycle through column tuples
-				for (String[] colTuple:colTuples) {
-
-					// Enter column headers into appropriate elements of the data cache 
-					// index, based on the dimension order found in the data cache
-					cacheIndex = updateCellIndex(cacheIndex, colDimIndexes, colTuple);
-
-					// Copy selected data slice cell to data cache
-					setCellValue(cacheIndex, dataSlice[sliceIndex++]);
-				}
-			}
-
-		} catch (PafException pfe) {
-			// throw Paf Exception
-			throw pfe;
-		} catch (Exception ex) {
-			// throw Paf Exception
-			String errMsg = ex.getMessage();
-			logger.error(errMsg);
-			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
-			throw pfe;
-		}
-
-	}
-
-	/**
-	 *	Enter dimensional headers into appropriate elements of the 
-	 *	data cache cell index, based on the dimension order found in the 
-	 *	data cache
-	 *
-	 * @param cellIndex Data cache cell index
-	 * @param dimIndexes Array of pointers to each data cache dimension
-	 * @param memberNames Array of members that correspond to each dimension in dimIndexes array
-	 * 
-	 * @return Data cache cell index
-	 */
-	protected String[] updateCellIndex(String[] cellIndex, int[] dimIndexes, String[] memberNames) {
-
-		for (int i = 0; i < dimIndexes.length; i++) {
-			cellIndex[dimIndexes[i]] = memberNames[i];
-		}
-		return cellIndex;
-	}
-
-	/**
 	 * Return the dimension for the specified axis
 	 * 
 	 * @param axis Axis index
@@ -2410,7 +2279,7 @@ public abstract class PafDataCache implements IPafDataCache {
 			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
 			throw iae;          			
 		}
-		return allDimensions[axis];
+		return allDimensions.get(axis);
 	}
 
 
@@ -2421,7 +2290,7 @@ public abstract class PafDataCache implements IPafDataCache {
 	 * @param dimNames Array of dimension names
 	 * @return Returns array of data cache axis indexes
 	 */
-	protected int[] getDimIndexes(String[] dimNames) {
+	public int[] getDimIndexes(String[] dimNames) {
 
 		int[] dimIndexes = new int[dimNames.length];
 		for (int i = 0; i < dimNames.length; i++) {
@@ -2487,12 +2356,12 @@ public abstract class PafDataCache implements IPafDataCache {
 		}
 
 		// Compute member index
-		if (memberIndexMap.get(axis).containsKey(member)) {
-			memberIndex = memberIndexMap.get(axis).get(member);
+		if (memberIndexMap[axis].containsKey(member)) {
+			memberIndex = memberIndexMap[axis].get(member);
 		} else { 
 			// Member not found
 			String errMsg = "Member to index conversion error - member ["
-				+ member + "] not found in axis [" + axis + "] (dimension [" + allDimensions[axis]  + "])";
+				+ member + "] not found in axis [" + axis + "] (dimension [" + allDimensions.get(axis)  + "])";
 			logger.error(errMsg);
 			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
 			throw iae;          			
@@ -2501,87 +2370,6 @@ public abstract class PafDataCache implements IPafDataCache {
 		return memberIndex;
 	}
 
-	/**
-	 *	Convert an array of member names to array of index values
-	 *
-	 * @param members Array of members that define a single cell intersection
-	 * @return Returns a data cache cell index.
-	 */
-	private int[] membersToIndex(String[] members) {
-
-		int[] cellIndex = null;
-		String member = null;
-
-		// Validate the the members array is not null
-		if (members == null) {
-			String errMsg = "Member array to index conversion error - member array is null";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
-
-		// Validate that the array is the proper size
-		if (members.length != axisCount) {
-			// array length does not match axisCount
-			String errMsg = "Member array to index conversion error - member array length ["  
-				+ members.length + "] - does not match axisCount [" + axisCount + "]";
-			logger.error(errMsg);
-			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-			throw iae; 
-		}
-
-		// Compute cell index
-		cellIndex = new int[axisCount];
-		for (int i = 0; i < axisCount; i++) {
-			member = members[i];
-			if (member == null) {
-				String errMsg = "Member array to index conversion error - member corresponding to [" + 
-				allDimensions[i] + "] dimension (axis [" + i + "]) is null";
-				logger.error(errMsg);
-				IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
-				throw iae;          			
-			}
-			cellIndex[i] = getMemberIndex(member, i);
-		}
-
-		return cellIndex;
-	}
-
-
-	/**
-	 *	Convert a data cache cell index to an array of member names
-	 *
-	 * @param cellIndex Data cache cell index
-	 * 
-	 * @return Returns Array of members that define a single cell intersection .
-	 * @throws PafException 
-	 */
-	public String[] indexToMembers(int[] cellIndex) throws PafException {
-
-		int index = 0;
-		String[] members = null;
-
-		try {
-			// Validate cellIndex array
-			validateArray(cellIndex, "cellIndex");
-
-			// Create member array
-			members = new String[axisCount];
-			for (int i = 0; i < axisCount; i++) {
-				index = cellIndex[i];
-				members[i] = getDimMember(i, index);
-			}
-
-		} catch (Exception ex) {
-			// throw Paf Exception
-			String errMsg = ex.getMessage();
-			logger.error(errMsg);
-			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
-			throw pfe;
-		}
-
-		return members;
-	}
 
 
 	/**
@@ -2600,7 +2388,7 @@ public abstract class PafDataCache implements IPafDataCache {
 		int axis = getAxisIndex(dimension);
 
 		// Look for member
-		Map<String, Integer> memberMap = memberIndexMap.get(axis);
+		Map<String, Integer> memberMap = memberIndexMap[axis];
 		if (memberMap.containsKey(member)) {
 			isFound = true;
 		}
@@ -2675,10 +2463,13 @@ public abstract class PafDataCache implements IPafDataCache {
 
 		boolean isFound = false;
 
-		// Get the data block key (this step also validates the measure and time members)
-		DataCacheCellAddress cellAddress = calculateCellAddress(intersection);
+		// An intersection exists if its coordinates are valid and
+		// its corresponding data block exists.
 		
-		// Look for intersection
+		// Get the data block key (this step also validates the measure and time members)
+		DataCacheCellAddress cellAddress = generateCellAddress(intersection);
+		
+		// Look for corresponding data block
 		if (dataBlockIndexMap.containsKey(cellAddress.getDataBlockKey())) {
 			isFound = true;
 		}
@@ -2697,30 +2488,29 @@ public abstract class PafDataCache implements IPafDataCache {
 	 */
 	public boolean isValidDataBlock(Intersection key) {
 
-		int[] indexedAxes = getIndexedIsElements()[key.getSize() + NON_KEY_DIM_COUNT];
+		int minKeyDims = coreDimensions.size() - NON_KEY_DIM_COUNT;
+		int maxKeyDims = allDimensions.size() - NON_KEY_DIM_COUNT;
+
 		
-		// Assume that intersection is not null
-		//TODO Modify this logic to account for attribute intersections and virtual time dimension intersections
+		// Key can't be null
+		if (key == null) {
+			return false;
+		}
 		
 		// Check data block key size. The data block key must be big enough
 		// all core data cache key dimensions, but can't be bigger than the 
 		// number allowable key dimensions.
-		int minKeyDims = coreDimensions.length - NON_KEY_DIM_COUNT;
-		int maxKeyDims = allDimensions.length - NON_KEY_DIM_COUNT;
 		int keyDimCount = key.getDimensions().length;
 		if (keyDimCount < minKeyDims || keyDimCount > maxKeyDims ) {
 			return false;
 		}
 		
-		//TODO first check core dimensions in sequence by position, then check each
-		// additional dim to make sure they exist are in ordered in ascending
-		// axis order.
-		// Cycle through each data block index axis
-		int axisCount = indexedAxes.length;
-		for (int i = 0; i < axisCount; i++) {
+		// Core key validation (check the required key dimensions and
+		// coordinates)
+		for (int i = 0; i < minKeyDims; i++) {
 			
 			// Lookup the axis number
-			int axis = indexedAxes[i];
+			int axis = coreKeyAxes[i];
 			
 			// Validate dimension name and dimension order
 			String dim = key.getDimensions()[i];
@@ -2728,13 +2518,32 @@ public abstract class PafDataCache implements IPafDataCache {
 				return false;
 			}
 			
-			//Validate member name
+			// Validate member name
 			String member = key.getCoordinate(dim);
 			if (!this.isMember(dim, member)) {
 				return false;
 			}
 		}
 
+		
+		// Check any remaining key dimensions to ensure that they are valid
+		// dimensions and that each corresponding coordinate is mapped to a
+		// valid member
+		for (int i = minKeyDims; i < keyDimCount; i++) {
+
+			// Validate dimension name and dimension order
+			String dim = key.getDimensions()[i];
+			if (!nonCoreDims.contains(dim)) {
+				return false;
+			}
+			
+			// Validate member name
+			String member = key.getCoordinate(dim);
+			if (!this.isMember(dim, member)) {
+				return false;
+			}
+						
+		}
 
 		// Return status
 		return true;
@@ -2743,6 +2552,8 @@ public abstract class PafDataCache implements IPafDataCache {
 	/**
 	 *	Determines if the specified intersection is a valid data cache intersection. This
 	 *  does not necessarily mean that the intersection exists in the data cache.
+	 *  
+	 *  This method does not check for attribute intersection validity
 	 *
 	 * @param intersection Cell intersection
 	 * @return True if the specified intersection is a valid data cache intersection
@@ -2755,16 +2566,12 @@ public abstract class PafDataCache implements IPafDataCache {
 		// all core data cache dimensions, but can't be bigger than the number
 		// of allowable dimensions.
 		int isDimCount = intersection.getDimensions().length;
-		if (isDimCount < coreDimensions.length || isDimCount > allDimensions.length ) {
+		if (isDimCount < coreDimensions.size() || isDimCount > allDimensions.size()) {
 			return false;
 		}
 		
-		//TODO Modify this logic to account for attribute intersections and virtual time dimension intersections
-		//TODO first check core dimensions in sequence by position, then check each
-		// additional dim to make sure they exist are in ordered in ascending
-		// axis order.
-		// Cycle through each data cache axis
-		for (int axis = 0; axis < axisCount; axis++) {
+		// Check core dimensions in sequence by position
+		for (int axis = 0; axis < coreDimensions.size(); axis++) {
 			
 			// Validate dimension name and dimension order
 			String dim = intersection.getDimensions()[axis];
@@ -2779,6 +2586,25 @@ public abstract class PafDataCache implements IPafDataCache {
 			}
 		}
 
+		// Check remaining dimensions to ensure that they are valid 
+		// and that each corresponding coordinate is mapped to a valid
+		// member
+		for (int i = coreDimensions.size(); i < isDimCount; i++) {
+
+			// Validate dimension name and dimension order
+			String dim = intersection.getDimensions()[i];
+			if (!nonCoreDims.contains(dim)) {
+				return false;
+			}
+			
+			// Validate member name
+			String member = intersection.getCoordinate(dim);
+			if (!this.isMember(dim, member)) {
+				return false;
+			}
+						
+		}
+
 
 		// Return status
 		return true;
@@ -2786,17 +2612,17 @@ public abstract class PafDataCache implements IPafDataCache {
 
 	
 	/**
-	 *	Validate member filters used for retrieving filtered data cache data
+	 *	Validate member filter used for retrieving filtered data cache data
 	 *
-	 * @param memberFilters Map comprised of member lists for each filtered dimension
+	 * @param memberFilter Map comprised of member lists for each filtered dimension
 	 * @throws IllegalArgumentException
 	 */
-	public void validateMemberFilters(Map<String, List<String>> memberFilters) {
-		for (String dimension:memberFilters.keySet()) {
-			List<String> members = memberFilters.get(dimension);
-			if (members.size() == 0) {
+	public void validateMemberFilter(Map<String, List<String>> memberFilter) {
+		for (String dimension:memberFilter.keySet()) {
+			List<String> members = memberFilter.get(dimension);
+			if (members == null || members.size() == 0) {
 				// Empty member list - throw IllegalArgumentException
-				String errMsg = "Member filter error - empty member list specifed on filtered dimension: ["
+				String errMsg = "Member filter error - null or empty member list specifed on filtered dimension: ["
 					+ dimension + "]";
 				logger.error(errMsg);
 				throw (new IllegalArgumentException(errMsg));
@@ -2821,6 +2647,45 @@ public abstract class PafDataCache implements IPafDataCache {
 	}
 
 
+	/**
+	 * @return the componentBaseMemberMap
+	 */
+	public Map<Intersection, List<String>> getComponentBaseMemberMap() {
+		return componentBaseMemberMap;
+	}
+
+	/**
+	 *	Get component base members for the specified intersection
+	 *
+	 * @param baseMemberIs Base member intersection
+	 * @return List<String>
+	 */
+	public List<String> getComponentBaseMembers(Intersection baseMemberIs) {
+
+		List<String> componentMembers = null;
+		if (componentBaseMemberMap.containsKey(baseMemberIs)) {
+			componentMembers = componentBaseMemberMap.get(baseMemberIs);
+		} else {
+			componentMembers = new ArrayList<String>();
+		}
+		return componentMembers;
+	}
+
+
+	/**
+	 *	Add component members for the specified base member intersection
+	 *
+	 * @param baseMemberIs Base member intersection
+	 * @param componentMembers Component base members
+	 */
+	public void addComponentBaseMembers(Intersection baseMemberIs, List<String> componentMembers) {
+
+		// Add new collection
+		componentBaseMemberMap.put(baseMemberIs, componentMembers);
+
+	}
+
+	
 	/*
 	 *	Represent the DataCache as a 2-dimensional array of data cells
 	 *
@@ -2843,8 +2708,6 @@ public abstract class PafDataCache implements IPafDataCache {
 		}
 		return stringBuffer.toString();
 	}
-
-
 
 
 }

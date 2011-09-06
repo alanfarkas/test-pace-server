@@ -30,6 +30,7 @@ import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.IntersectionUtil;
 import com.pace.base.funcs.IPafFunction;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -239,7 +240,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
         for (PafDimMember m : prevMembers) {
             isCopy = calcIntersection.clone();
             isCopy.setCoordinate(timeDim, m.getKey());
-            locks.addAll(EvalUtil.buildFloorIntersections(isCopy, evalState));
+            locks.addAll(IntersectionUtil.buildFloorIntersections(isCopy, evalState));
         }
                 
         return locks;

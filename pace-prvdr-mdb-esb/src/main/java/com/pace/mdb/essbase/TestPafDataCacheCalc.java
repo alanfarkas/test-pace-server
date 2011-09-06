@@ -88,7 +88,7 @@ public class TestPafDataCacheCalc extends TestCase {
 			
 		IMdbData esbData = null;
 		IMdbMetaData esbMetaData = null;
-		PafUowCache pafUowCache = null;
+		PafDataCache pafDataCache = null;
 		@SuppressWarnings("unused")
 		PafBaseTree pafBaseTree = null;
 
@@ -100,8 +100,8 @@ public class TestPafDataCacheCalc extends TestCase {
 			
 			// Get data
 //			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafUowCache.getCellCount() + "] cells, [" + pafUowCache.getRowCount()
-					+ "] rows, and [" + pafUowCache.getColumnCount() + "] columns...");
+			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
 			
 			// Create new EsbMetaData object
 			esbMetaData = new EsbMetaData(props);
@@ -119,7 +119,7 @@ public class TestPafDataCacheCalc extends TestCase {
 //			logger.info("Aggregated data..." + pafDataCache.toString());
 			
 			// Send updated data cache back to Essbase 
-			esbData.sendData(pafUowCache, testCommonParms.getClientState());
+			esbData.sendData(pafDataCache, testCommonParms.getClientState());
 			
 		} catch (PafException pfe) {
 			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
@@ -172,7 +172,7 @@ public class TestPafDataCacheCalc extends TestCase {
 		
 		IMdbData esbData = null;
 		IMdbMetaData esbMetaData = null;
-		PafUowCache pafUowCache = null;
+		PafDataCache pafDataCache = null;
 		@SuppressWarnings("unused")
 		PafBaseTree pafBaseTree = null;
 
@@ -184,8 +184,8 @@ public class TestPafDataCacheCalc extends TestCase {
 			
 			// Get data
 ///			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafUowCache.getCellCount() + "] cells, [" + pafUowCache.getRowCount()
-					+ "] rows, and [" + pafUowCache.getColumnCount() + "] columns...");
+			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
 			
 			// Create new EsbMetaData object
 			esbMetaData = new EsbMetaData(props);
@@ -203,7 +203,7 @@ public class TestPafDataCacheCalc extends TestCase {
 //			logger.info("Aggregated data..." + pafDataCache.toString());
 			
 			// Send updated data cache back to Essbase 
-			esbData.sendData(pafUowCache, testCommonParms.getClientState());
+			esbData.sendData(pafDataCache, testCommonParms.getClientState());
 			
 		} catch (PafException pfe) {
 			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
@@ -256,7 +256,7 @@ public class TestPafDataCacheCalc extends TestCase {
 		
 		IMdbData esbData = null;
 		IMdbMetaData esbMetaData = null;
-		PafUowCache pafUowCache = null;
+		PafDataCache pafDataCache = null;
 		@SuppressWarnings("unused")
 		PafBaseTree pafBaseTree = null;
 
@@ -268,8 +268,8 @@ public class TestPafDataCacheCalc extends TestCase {
 			
 			// Get data
 //			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafUowCache.getCellCount() + "] cells, [" + pafUowCache.getRowCount()
-					+ "] rows, and [" + pafUowCache.getColumnCount() + "] columns...");
+			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
 			
 			// Create new EsbMetaData object
 			esbMetaData = new EsbMetaData(props);
@@ -278,7 +278,7 @@ public class TestPafDataCacheCalc extends TestCase {
 			pafBaseTree = esbMetaData.getBaseDimension(aggBranch);
 			
 			// Display initial data
-//			logger.info("Intial data..." + pafDataCache.toString());
+//			logger.info("Initial data..." + pafDataCache.toString());
 			
 			// Aggregate data
 //			PafUowCacheCalc.aggDimension(aggDimName, pafUowCache, pafBaseTree, emptyMemberFilters);
@@ -287,7 +287,7 @@ public class TestPafDataCacheCalc extends TestCase {
 //			logger.info("Aggregated data..." + pafDataCache.toString());
 			
 			// Send updated data cache back to Essbase 
-			esbData.sendData(pafUowCache, testCommonParms.getClientState());
+			esbData.sendData(pafDataCache, testCommonParms.getClientState());
 			
 		} catch (PafException pfe) {
 			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
@@ -363,7 +363,7 @@ public class TestPafDataCacheCalc extends TestCase {
 		
 		IMdbData esbData = null;
 		IMdbMetaData esbMetaData = null;
-		PafUowCache pafUowCache = null;
+		PafDataCache pafDataCache = null;
 //		PafBaseTree pafBaseTree = null;
 
 		logger.info("***************************************************");
@@ -374,8 +374,8 @@ public class TestPafDataCacheCalc extends TestCase {
 			
 			// Get data
 //			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafUowCache.getCellCount() + "] cells, [" + pafUowCache.getRowCount()
-					+ "] rows, and [" + pafUowCache.getColumnCount() + "] columns...");
+			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
 			
 			// Create new EsbMetaData object
 			esbMetaData = new EsbMetaData(props);
@@ -393,7 +393,7 @@ public class TestPafDataCacheCalc extends TestCase {
 			//logger.info("Aggregated data..." + pafDataCache.toString());
 			
 			// Send updated data cache back to Essbase 
-			esbData.sendData(pafUowCache, testCommonParms.getClientState());
+			esbData.sendData(pafDataCache, testCommonParms.getClientState());
 			
 //		} catch (PafException pfe) {
 //			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
@@ -440,7 +440,7 @@ public class TestPafDataCacheCalc extends TestCase {
 		boolean isSuccess = true;	
 		IMdbData esbData = null;
 		IMdbMetaData esbMetaData = null;
-		PafUowCache pafUowCache = null;
+		PafDataCache pafDataCache = null;
 		logger.info("***************************************************");
 		logger.info(this.getName() +  " - Test Started");
 		try {
@@ -449,8 +449,8 @@ public class TestPafDataCacheCalc extends TestCase {
 			
 			// Get data
 //			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafUowCache.getCellCount() + "] cells, [" + pafUowCache.getRowCount()
-					+ "] rows, and [" + pafUowCache.getColumnCount() + "] columns...");
+			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
 			
 			// Create new EsbMetaData object
 			esbMetaData = new EsbMetaData(props);
@@ -465,7 +465,7 @@ public class TestPafDataCacheCalc extends TestCase {
 //			logger.info("Aggregated data..." + pafDataCache.toString());
 			
 			// Send updated data cache back to Essbase 
-			esbData.sendData(pafUowCache, testCommonParms.getClientState());
+			esbData.sendData(pafDataCache, testCommonParms.getClientState());
 			
 		} catch (PafException pfe) {
 			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
@@ -515,7 +515,7 @@ public class TestPafDataCacheCalc extends TestCase {
 		IMdbMetaData esbMetaData = null;
 		List<String> members = new ArrayList<String>();
 		Map<String, List<String>> versionFilter = new HashMap<String, List<String>>();
-		PafUowCache pafUowCache = null;
+		PafDataCache pafDataCache = null;
 		logger.info("***************************************************");
 		logger.info(this.getName() +  " - Test Started");
 		try {
@@ -524,8 +524,8 @@ public class TestPafDataCacheCalc extends TestCase {
 			
 			// Get data
 //			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafUowCache.getCellCount() + "] cells, [" + pafUowCache.getRowCount()
-					+ "] rows, and [" + pafUowCache.getColumnCount() + "] columns...");
+			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
 			
 			// Create new EsbMetaData object
 			esbMetaData = new EsbMetaData(props);
@@ -536,7 +536,7 @@ public class TestPafDataCacheCalc extends TestCase {
 			// Create filter on Version dimension
 			members.add("WP_vs_LY");
 			members.add("WP_vs_LY_%");
-			versionFilter.put(pafUowCache.getVersionDim(), members);
+			versionFilter.put(pafDataCache.getVersionDim(), members);
 			
 			// Calculate data
 //			PafUowCacheCalc.calcVersionDim(pafDataCache, versionFilter);
@@ -545,7 +545,7 @@ public class TestPafDataCacheCalc extends TestCase {
 //			logger.info("Aggregated data..." + pafDataCache.toString());
 			
 			// Send updated data cache back to Essbase 
-			esbData.sendData(pafUowCache, testCommonParms.getClientState());
+			esbData.sendData(pafDataCache, testCommonParms.getClientState());
 			
 		} catch (PafException pfe) {
 			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
@@ -598,7 +598,7 @@ public class TestPafDataCacheCalc extends TestCase {
 		List<String> members = new ArrayList<String>();
 		@SuppressWarnings("unused")
 		Map<String, List<String>> versionFilter = emptyMemberFilters;
-		PafUowCache pafUowCache = null;
+		PafDataCache dataCache = null;
 		logger.info("***************************************************");
 		logger.info(this.getName() +  " - Test Started");
 		try {
@@ -607,8 +607,8 @@ public class TestPafDataCacheCalc extends TestCase {
 			
 			// Get data
 //			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafUowCache.getCellCount() + "] cells, [" + pafUowCache.getRowCount()
-					+ "] rows, and [" + pafUowCache.getColumnCount() + "] columns...");
+			logger.info("Data cache retrieved with [" + dataCache.getCellCount() + "] cells, [" + dataCache.getRowCount()
+					+ "] rows, and [" + dataCache.getColumnCount() + "] columns...");
 			
 			// Create new EsbMetaData object
 			esbMetaData = new EsbMetaData(props);
@@ -670,7 +670,7 @@ public class TestPafDataCacheCalc extends TestCase {
 		IMdbMetaData esbMetaData = null;
 		List<String> members = new ArrayList<String>(), members2 = new ArrayList<String>();
 		Map<String, List<String>> memberFilters = new HashMap<String, List<String>>();
-		PafUowCache pafUowCache = null;
+		PafDataCache pafDataCache = null;
 		logger.info("***************************************************");
 		logger.info(this.getName() +  " - Test Started");
 		try {
@@ -679,23 +679,23 @@ public class TestPafDataCacheCalc extends TestCase {
 			
 			// Get data
 //			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafUowCache.getCellCount() + "] cells, [" + pafUowCache.getRowCount()
-					+ "] rows, and [" + pafUowCache.getColumnCount() + "] columns...");
+			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
 			
 			// Create new EsbMetaData object
 			esbMetaData = new EsbMetaData(props);
 
 			// Display initial data
-//			logger.info("Intial data..." + pafDataCache.toString());
+//			logger.info("Initial data..." + pafDataCache.toString());
 			
 			// Create filter for variance calc
 			members.add("WP_vs_LY");
 			members.add("WP_vs_LY_%");
-			memberFilters.put(pafUowCache.getVersionDim(), members);
+			memberFilters.put(pafDataCache.getVersionDim(), members);
 			members2.add("WK01");
 			members2.add("WK02");
 			members2.add("WK03");
-			memberFilters.put(pafUowCache.getTimeDim(), members2);
+			memberFilters.put(pafDataCache.getTimeDim(), members2);
 			
 			// Calculate data
 //			PafUowCacheCalc.calcVersionDim(pafDataCache, memberFilters);
@@ -704,7 +704,7 @@ public class TestPafDataCacheCalc extends TestCase {
 //			logger.info("Aggregated data..." + pafDataCache.toString());
 			
 			// Send updated data cache back to Essbase 
-			esbData.sendData(pafUowCache, testCommonParms.getClientState());
+			esbData.sendData(pafDataCache, testCommonParms.getClientState());
 			
 		} catch (PafException pfe) {
 			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");

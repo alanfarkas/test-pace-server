@@ -21,16 +21,20 @@ package com.pace.server.eval;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
 import com.pace.base.SortOrder;
+import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.VersionType;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.IntersectionUtil;
+import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
@@ -76,7 +80,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         	// only perform work during 1st time period
         	if ( evalState.getCurrentTimeSlice().equals(evalState.getFirstTimeSlice())) {
 
-	            // calculate ancenstor list of 1st period
+	            // calculate ancestor list of 1st period
 	            PafDimTree timeTree = evalState.getTimeSubTree();
 	            List<PafDimMember> timeAncestors = timeTree.getAncestors(evalState.getCurrentTimeSlice());
 	            
@@ -104,7 +108,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 	            	// remove change from list
 	            	ancNames.remove(chngedTBFirst.getCoordinate(timeDim));
 	            	
-	            	// for each remaining timeperiod update the data value and put in changed cell stack
+	            	// for each remaining time period update the data value and put in changed cell stack
 	            	for (String name : ancNames) {
 		            	Intersection tmp = chngedTBFirst.clone();	            		
 	            		tmp.setCoordinate(timeDim, name);
@@ -180,10 +184,11 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 //  	if (logger.isDebugEnabled()) logger.debug("Allocating change for :" + intersection.toString() + " = " + allocTotal);
 
     	// useful values
+    	String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();
     	String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
         String currentYear = evalState.getAppDef().getCurrentYear(); 
         String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
-    	
+     	
     	long stepTime = System.currentTimeMillis();
 
     	// initial check, don't allocate any intersection that is "elapsed" during forward plannable sessions
@@ -201,7 +206,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         if (lockedTimePeriods.contains(intersection.getCoordinate(timeDim))) return dataCache;
     	
         
-    	List<Intersection> targetList = EvalUtil.buildFloorIntersections(intersection, evalState);
+    	List<Intersection> targetList = IntersectionUtil.buildFloorIntersections(intersection, evalState);
     	if (targetList.size() == 0) return dataCache;
     	if (targetList.size() == 1 && targetList.get(0).equals(intersection)) {
     		return dataCache;

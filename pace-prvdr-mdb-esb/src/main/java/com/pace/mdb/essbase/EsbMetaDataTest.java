@@ -73,7 +73,7 @@ public class EsbMetaDataTest extends TestCase {
 				int generation = pafBaseTree.getMember(member).getMemberProps().getGenerationNumber();
 			    // indentation routine
 				for (int i = 0; i < generation; i++)
-			        System.out.print("\t");
+			        System.out.print('\t');
 				logger.info (member);
 			}
 
@@ -152,7 +152,7 @@ public class EsbMetaDataTest extends TestCase {
 				int generation = pafBaseTree.getMember(member).getMemberProps().getGenerationNumber();
 			    // indentation routine
 				for (int i = 0; i < generation; i++)
-			        System.out.print("\t");
+			        System.out.print('\t');
 				logger.info (member);
 			}
 

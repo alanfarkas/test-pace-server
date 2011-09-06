@@ -498,7 +498,7 @@ public class PafDimTreeTest1 extends TestCase {
 			for (PafDimMember member:members){
 				int generation = member.getMemberProps().getGenerationNumber();
 				for (int i = 0; i < generation; i++)
-					System.out.print("\t");
+					System.out.print('\t');
 				logger.info(member.getKey());
 			}
 			
@@ -1179,7 +1179,7 @@ public class PafDimTreeTest1 extends TestCase {
 			logger.info("-- Getting peer #" + index + " of member: [" + member + "]");
 			logger.info("-- Wrap is set to: " + wrap);
 			PafDimMember peerMbr = pafBaseTree.getPeer(member, index, wrap);
-			if (peer != null) {
+			if (peerMbr != null) {
 				peer = peerMbr.getKey();
 			} else {
 				peer = "NULL";
@@ -1335,7 +1335,7 @@ public class PafDimTreeTest1 extends TestCase {
 			logger.info("-- Getting peer #" + index + " of member: [" + member + "]");
 			logger.info("-- Wrap is set to: " + wrap);
 			PafDimMember peerMbr = pafBaseTree.getPeer(member, index, wrap);
-			if (peer != null) {
+			if (peerMbr != null) {
 				peer = peerMbr.getKey();
 			} else {
 				peer = "NULL";

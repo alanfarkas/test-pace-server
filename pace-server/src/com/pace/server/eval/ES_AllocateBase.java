@@ -125,68 +125,84 @@ public abstract class ES_AllocateBase extends ES_EvalBase implements IEvalStep {
         int places = 0;
         
         String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
-
-        // find index of measure dimension in axis
-        int msrIndex = dataCache.getAxisIndex(msrDim);
-        String[] baseCoords;
         String targetMsr;
         
-        // save off original measure from 1st target
+        // Save off original measure from 1st target
         if (targets.size() > 0)
         	targetMsr = targets.iterator().next().getCoordinate(msrDim);
-        else //just return if no targets, no work to do
+        else //Just return if no targets, no work to do
         	return;
         
 
-        // recalculate origTargetSum over base measure intersections
-        for (Intersection target : targets ) {
-        	baseCoords = target.getCoordinates();
-        	baseCoords[msrIndex] = baseMeasure;
-            baseTargetSum += dataCache.getCellValue(baseCoords);
+    	// Calculate the sum of the base measure intersections that will comprise
+        // the allocation "shape". This requires the conversion of each target 
+        // intersection into it's corresponding base measure intersection by
+        // replacing the target measure coordinate with the base measure
+        // coordinate.
+        //
+        // A better way would have been to just clone base intersections from the 
+        // original target intersections. However, this would add a lot of overhead
+        // to the process.
+        //
+    	// Each base intersection will be converted back to a target intersection 
+        // in the next step, before each allocated value is written to the data
+        // cache.
+       for (Intersection baseIs : targets ) {
+         	baseIs.setCoordinate(msrDim, baseMeasure);
+            baseTargetSum += dataCache.getCellValue(baseIs);
         }
         
-//        if (logger.isDebugEnabled()) logger.debug("Original total of unlocked base measure targets: " + baseTargetSum);  
+//      if (logger.isDebugEnabled()) logger.debug("Original total of unlocked base measure targets: " + baseTargetSum);  
         
-        // allocate into each target intersection, using the shape of the 
-        for (Intersection target : targets ) {
+       
+        // Allocate into each target intersection, using the shape of the base measure.
+        for (Intersection intersection : targets ) {
 
-        	// target coordinates have already been shifted by the 
-        	// addition operation above.
-        	baseCoords = target.getCoordinates();     	
-        	
-            baseValue = dataCache.getCellValue(baseCoords);
+        	// At this point, the "target" intersection is really a base measure intersection,
+        	// having been converted in the previous step (base measure intersection sum
+        	// calculation). 
+            baseValue = dataCache.getCellValue(intersection);
             if (baseTargetSum == 0) {
+            	// If the base measure shape total is zero, then do an even spread across
+            	// the target intersections.
                 allocValue = allocAvailable / targets.size();
             }
             else {
+            	// Else allocate a new value according to the shape of the base measure
                 allocValue = ((baseValue / baseTargetSum) * (allocAvailable));
             }
             
-    		if (evalState.getAppDef().getAppSettings() != null && evalState.getAppDef().getAppSettings().isEnableRounding())
+            // Convert base measure intersection back into the original target 
+            // intersection.
+            intersection.setCoordinate(msrDim, targetMsr);
+
+            // Round the allocated value, if rounding is enabled on the target measure.
+            // Then add the target intersection to the allocated locked cells collection, 
+            // to preserve the target intersection's value and protect it from 
+            // subsequent allocations.
+            if (evalState.getAppDef().getAppSettings() != null && evalState.getAppDef().getAppSettings().isEnableRounding())
     		{
 	    		if (evalState.getRoundingRules().containsKey(targetMsr)){
 	    			places = evalState.getRoundingRules().get(targetMsr).getDigits();
 	    			allocValue = EvalUtil.Round(allocValue, places);
-	    			evalState.getAllocatedLockedCells().add(target);
+	    			evalState.getAllocatedLockedCells().add(intersection);
 	    		}
     		}
             	
-            // put target msr coordinate back to original measure for assignment
-            target.setCoordinate(msrDim, targetMsr);
-            
-            dataCache.setCellValue(target, allocValue);
+            // Write allocated amount (possibly rounded) out to the data cache.
+            dataCache.setCellValue(intersection, allocValue);
             
 //            if (logger.isDebugEnabled()) logger.debug("Allocating " + target.toString() + " new value: " + allocValue);
             
-            // add cells to locks
-           	evalState.getCurrentLockedCells().add(target);
+            // Add allocated intersection to locks
+           	evalState.getCurrentLockedCells().add(intersection);
             
-            // add to changed cell list
-			evalState.addChangedCell(target);
+            // Add allocated intersection to changed cell list
+			evalState.addChangedCell(intersection);
            
         }  
         
-        // default is to lock the results of allocation, but can be overriden,
+        // default is to lock the results of allocation, but can be overridden,
 		// however unlocking can only occur at the end of the overall allocation pass
         if (!evalState.getRule().isLockAllocation())
         	unlockIntersections.addAll(targets);        

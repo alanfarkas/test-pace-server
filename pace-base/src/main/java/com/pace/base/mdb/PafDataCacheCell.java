@@ -18,8 +18,10 @@
  */
 package com.pace.base.mdb;
 
+import com.pace.base.data.Intersection;
+
 /**
- * Representation of a data cache cell
+ * Representation of a data cache cell used to track changes
  *
  * @version	x.xx
  * @author AFarkas
@@ -27,30 +29,30 @@ package com.pace.base.mdb;
  */
 public class PafDataCacheCell {
 	
-	int[] cellIndex = null;
+	Intersection cellIntersection = null;
 	double cellValue = 0;
 
 	/**
-	 * @param cellIndex Data cache cell index
+	 * @param cellIntersection Data cache cell intersection
 	 * @param cellValue Data cache cell value
 	 */
-	public PafDataCacheCell(int[] cellIndex, double cellValue) {
-		this.cellIndex = cellIndex;
+	public PafDataCacheCell(Intersection cellIntersection, double cellValue) {
+		this.cellIntersection = cellIntersection;
 		this.cellValue = cellValue;	
 	}
 
 	/**
-	 * @return Returns the cellIndex.
+	 * @return Returns the cellIntersection.
 	 */
-	public int[] getCellIndex() {
-		return cellIndex;
+	public Intersection getCellIntersection() {
+		return cellIntersection;
 	}
 
 	/**
-	 * @param cellIndex The cellIndex to set.
+	 * @param cellIntersection The cellIntersection to set.
 	 */
-	public void setCellIndex(int[] cellIndex) {
-		this.cellIndex = cellIndex;
+	public void setCellIntersection(Intersection cellIntersection) {
+		this.cellIntersection = cellIntersection;
 	}
 
 	/**
@@ -65,6 +67,19 @@ public class PafDataCacheCell {
 	 */
 	public void setCellValue(double cellValue) {
 		this.cellValue = cellValue;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		
+		if (cellIntersection != null) {
+			return cellIntersection.toString() + " - " + cellValue;
+		} else {
+			return "[not initialized]";
+		}
 	}
 
 }

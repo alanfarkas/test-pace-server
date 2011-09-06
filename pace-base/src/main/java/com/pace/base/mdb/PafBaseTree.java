@@ -245,7 +245,7 @@ public class PafBaseTree extends PafDimTree {
      */
     public Set<String> getAttributeDimNames() {
 
-    	Set<String> attrDimNames = new HashSet<String>();;
+    	Set<String> attrDimNames = new HashSet<String>();
 
     	// Get set of associated attributes assigned to base dimension;
     	if (!getAttributeDimInfo().isEmpty()) {
@@ -257,7 +257,7 @@ public class PafBaseTree extends PafDimTree {
     }
 
    /**
-     *	Return level in base tree to which the specified atribute had been assigned
+     *	Return level in base tree to which the specified attribute dimension has been assigned
      *
      * @param attrDimName Attribute dimension name
      * @return int
@@ -298,7 +298,7 @@ public class PafBaseTree extends PafDimTree {
 		PafBaseMember baseMember = null;
 		PafBaseMemberProps memberProps = null;
 
-		// Get the level in the base tree to which the specified atribute had been assigned
+		// Get the level in the base tree to which the specified attribute had been assigned
 		int attrLevel = getAttributeMappingLevel(attrDimName);
 
 		// Retrieve base member and get level number
@@ -338,7 +338,7 @@ public class PafBaseTree extends PafDimTree {
     }
 
 	/**
-     *	Return the valid level 0 attribute member intersections for the specified 
+     *	Return the valid level 0 attribute member combinations for the specified 
      *  level-0 or upper-level Base Member and specified Attribute Dimensions 
 	 *
      * @param baseMemberName Base member name
@@ -346,19 +346,19 @@ public class PafBaseTree extends PafDimTree {
      * 
 	 * @return Set<Intersection>
 	 */
-	public Set<Intersection> getAttributeIntersections(final String baseMemberName, final String[] attrDimNames) {
+	public Set<Intersection> getAttributeCombinations(final String baseMemberName, final String[] attrDimNames) {
 
 		Set<Intersection> emptySet = new HashSet<Intersection>();
 		
 		// Throw exception, if attribute dim names is null or the array is empty
 		if ( attrDimNames == null || attrDimNames.length == 0 ) {
-			String errMsg = "getAttributeIntersections error - attribute dim names are null or empty";
+			String errMsg = "getAttributeCombinations error - attribute dim names are null or empty";
 			logger.error(errMsg);
 			throw new IllegalArgumentException(errMsg);
 		}
 		
 		int attrDimCount = attrDimNames.length;
-     	Set<Intersection> attrIntersections = new HashSet<Intersection>();
+     	Set<Intersection> attrCombinations = new HashSet<Intersection>();
 
 		// Check if all attributes are mapped to the same base tree level
 		Integer mappingLevel = null;
@@ -404,11 +404,11 @@ public class PafBaseTree extends PafDimTree {
 					attributes[i] = attribute.toArray(new String[0])[0];
 				}
 				Intersection attrCombo = new Intersection(attrDimNames, attributes);
-				attrIntersections.add(attrCombo);
+				attrCombinations.add(attrCombo);
 			}
 		
     	// Return valid attribute combinations
-		return attrIntersections;
+		return attrCombinations;
 	}
 
 	/**

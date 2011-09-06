@@ -33,7 +33,6 @@ import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionType;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.rules.Formula;
 import com.pace.base.state.EvalState;
@@ -54,27 +53,24 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 	/**
 	 *  Evaluate contribution percent version changes
 	 *
-	 * @param uowEvalState Uow eval state
-	 * @param dsEvalState Data slice eval state
+	 * @param evalState Evaluation state
 	 * @param aggregate 
 	 * @param allocateUpper 
 	 * 
 	 * @throws PafException
 	 */
-	public void performEvaluation(EvalState uowEvalState, EvalState dsEvalState, ES_AllocateUpperLevel allocateUpper, ES_Aggregate aggregate) throws PafException {
+	public void performEvaluation(EvalState evalState, ES_AllocateUpperLevel allocateUpper, ES_Aggregate aggregate) throws PafException {
 
-		String currentMeasure = uowEvalState.getMeasureName();
+		String currentMeasure = evalState.getMeasureName();
 		String currentPeriod = null;
-		String measureDim = uowEvalState.getMsrDim();
-		String timeDim = uowEvalState.getTimeDim();
-		String versionDim = uowEvalState.getVersionDim();
-		PafApplicationDef appDef = uowEvalState.getAppDef();
-		PafDataCache dsCache = dsEvalState.getDataCache();
-		PafDataCache uowCache = uowEvalState.getDataCache();
-		MemberTreeSet memberTrees = uowEvalState.getDataCacheTrees();
-		Map<String, Set<Intersection>> changedContribPctCellsByTime = dsEvalState.getChangedContribPctCellsByTime();
+		String measureDim = evalState.getMsrDim();
+		String timeDim = evalState.getTimeDim();
+		String versionDim = evalState.getVersionDim();
+		PafApplicationDef appDef = evalState.getAppDef();
+		PafDataCache dataCache = evalState.getDataCache();
+		Map<String, Set<Intersection>> changedContribPctCellsByTime = evalState.getChangedContribPctCellsByTime();
 		Map<Intersection, Set<Intersection>> changedContribPctCellsByTarget = new HashMap <Intersection, Set<Intersection>>();
-		Set<Intersection> changedContribPctCells = dsEvalState.getChangedContribPctCellsByMsr().get(currentMeasure);
+		Set<Intersection> changedContribPctCells = evalState.getChangedContribPctCellsByMsr().get(currentMeasure);
 		
 		// Exit if there are no changes to perform
 		if (changedContribPctCells == null || changedContribPctCells.isEmpty()) {
@@ -83,9 +79,9 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		
 
 		// If time slice mode, filter out any intersections not belonging to the current time slice
-		if (dsEvalState.isTimeSliceMode()) {
+		if (evalState.isTimeSliceMode()) {
 			changedContribPctCells = new HashSet<Intersection>(changedContribPctCells);
-			currentPeriod = dsEvalState.getCurrentTimeSlice();
+			currentPeriod = evalState.getCurrentTimeSlice();
 			Set<Intersection> changedContribPctCellsCurrPeriod = changedContribPctCellsByTime.get(currentPeriod);
 			if (changedContribPctCellsCurrPeriod == null) {
 				changedContribPctCellsCurrPeriod = new HashSet<Intersection>();
@@ -106,12 +102,12 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		List<String> measureFilter = new ArrayList<String>();
 		measureFilter.add(currentMeasure);
 		dsCacheMemberFilter.put(measureDim, measureFilter);
-		dsCacheMemberFilter.put(versionDim, Arrays.asList(dsCache.getPlanVersions()));
+		dsCacheMemberFilter.put(versionDim, Arrays.asList(dataCache.getPlanVersions()));
 		List<String> periodList = null;
-		if (dsEvalState.isTimeSliceMode()) {
+		if (evalState.isTimeSliceMode()) {
 			periodList = Arrays.asList(new String[]{currentPeriod});
 		} else {
-			periodList = dsCache.getForwardPlannablePeriods();
+			periodList = dataCache.getForwardPlannablePeriods();
 		}
 		dsCacheMemberFilter.put(timeDim, periodList);
 		
@@ -120,7 +116,7 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		// The base intersection flexes in response to the corresponding contribution % change.
 		for (Intersection changedCell : changedContribPctCells) {
 			
-			Intersection targetIs = buildTargetIs(changedCell, uowEvalState);
+			Intersection targetIs = buildTargetIs(changedCell, evalState);
 			
 			// Add base version intersection and corresponding changed cells to collection
 			if (!changedContribPctCellsByTarget.containsKey(targetIs)) {
@@ -130,9 +126,9 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		}
 		
 		// Sort contribution percent changed cells in target intersection order 
-		String[] axisSeq = dsEvalState.getAxisPriority();
+		String[] axisSeq = evalState.getAxisPriority();
 		Intersection[] orderedTargetIntersections = EvalUtil.sortIntersectionsByAxis(changedContribPctCellsByTarget.keySet().toArray(new Intersection[0]), 
-				uowEvalState.getClientState().getMemberIndexLists(), axisSeq, SortOrder.Descending);            
+				evalState.getClientState().getMemberIndexLists(), axisSeq, SortOrder.Descending);            
 
 		// Process contribution % changes in base intersection order 
 		for (Intersection targetIntersection : orderedTargetIntersections) {
@@ -145,67 +141,34 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 				// Formula preparation
 				String version = changedCell.getCoordinate(versionDim);
 				VersionDef vd = appDef.getVersionDef(version);
-		    	String formulaString = vd.getBaseFormulaString();
+				String formulaString = vd.getBaseFormulaString();
 				Formula f = new Formula(formulaString);
-		    	f.parse(appDef.getMeasureFunctionFactory());
+				f.parse(appDef.getMeasureFunctionFactory());
 
 				// Get basis intersection (divisor in contribution % formula)
-				Intersection basisIntersection = PafDataSliceCacheCalc.buildContribPctBasisIs(changedCell, uowEvalState);
-				
-				// Attribute evaluation?
-				if (uowEvalState.isAttributeEval()) {
-					
-					// Lock basis intersection 
-					dsEvalState.addUserChanges(basisIntersection);
+				Intersection basisIntersection = PafDataCacheCalc.buildContribPctBasisIs(changedCell, evalState);
 
-					// Evaluate change in data slice cache and allocate down to floor of uow cache.
-					// The basis intersection will be allocated over target changes.
-					EvalUtil.evalFormula(f, versionDim, targetIntersection, dsCache, dsEvalState);
-					dsEvalState.addUserChanges(targetIntersection);
-					PafDataSliceCacheCalc.allocateAttributeCells(dsEvalState, uowEvalState, memberTrees);
-					
-				} else {
-				// Regular evaluation
-					
-					// Lock basis intersection
-					uowEvalState.addAllocation(basisIntersection);
-					uowEvalState.getCurrentLockedCells().add(basisIntersection);
-					uowEvalState.getOrigLockedCells().add(basisIntersection);
+				// Lock basis intersection
+				evalState.addAllocation(basisIntersection);
+				evalState.getCurrentLockedCells().add(basisIntersection);
+				evalState.getOrigLockedCells().add(basisIntersection);
 
-					// Evaluate change in data slice cache and copy to uow cache
-					EvalUtil.evalFormula(f, versionDim, targetIntersection, dsCache, dsEvalState);
-					double newBaseValue = dsCache.getCellValue(targetIntersection);
-					uowCache.setCellValue(targetIntersection, newBaseValue);
-					uowEvalState.addUserChanges(targetIntersection);
-					
-				}
-				
+				// Evaluate change in data slice cache and copy to uow cache
+				EvalUtil.evalFormula(f, versionDim, targetIntersection, dataCache, evalState);
+				double newBaseValue = dataCache.getCellValue(targetIntersection);
+				dataCache.setCellValue(targetIntersection, newBaseValue);
+				evalState.addUserChanges(targetIntersection);
+
 				// Allocate and aggregate uow cache changes
-				allocateUpper.performEvaluation(uowEvalState);
-				aggregate.performEvaluation(uowEvalState);
-				
-				
-				// Update data slice cache with updates in uow cache
-				if (uowCache.isDirty()) {
-					if (uowEvalState.isAttributeEval()) {
-						// Attribute view - update attribute intersections (aggregate changed base intersections)
-						dsCache = PafDataSliceCacheCalc.calcAllAttributeIntersections(dsEvalState, uowCache, uowEvalState.getClientState(), dsCacheMemberFilter);
-					} else {
-						// Non-attribute view - update 
-						dsCache.loadCacheCells(uowCache, dsCacheMemberFilter);
-					}
-
-					// Clear dirty flag
-					uowCache.setDirty(false);
-				}
-			
+				allocateUpper.performEvaluation(evalState);
+				aggregate.performEvaluation(evalState);
 
 			} // Next changedCell
 
 		} // Next baseIntersection
 		
 		// Remove processed contribution percent intersections
-		dsEvalState.removeAllChangedContribPctCells(changedContribPctCells);
+		evalState.removeAllChangedContribPctCells(changedContribPctCells);
 		
 	}
 

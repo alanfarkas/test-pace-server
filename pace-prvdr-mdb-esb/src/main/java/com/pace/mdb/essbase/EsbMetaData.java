@@ -299,7 +299,7 @@ public class EsbMetaData implements IMdbMetaData {
 		IEssCubeOutline essCubeOutline = null;
 		PafBaseMember baseRoot = null;
 		PafBaseTree baseTree = null;
-		Map<Integer, List<IEssMember>> genMap = null;;
+		Map<Integer, List<IEssMember>> genMap = null;
 
 		
 		logger.info("Getting dimension for branch: [" + branch + "] down to level: " + toLevel);
@@ -741,7 +741,7 @@ public class EsbMetaData implements IMdbMetaData {
 				
 				try{
 					Boolean independentCheck = (Boolean) isIndependentDim.invoke(root);
-					if(independentCheck == true){
+					if(independentCheck){
 						return true;
 					}
 				}catch(InvocationTargetException ex){
@@ -759,7 +759,7 @@ public class EsbMetaData implements IMdbMetaData {
 
 				try{
 					Boolean independentCheck = (Boolean) isIndependentDim.invoke(root);
-					if(independentCheck == true){
+					if(independentCheck){
 						return true;
 					}
 				}catch(InvocationTargetException ex){

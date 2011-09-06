@@ -22,7 +22,7 @@ import java.util.Arrays;
 //import com.pace.base.mdb.essbase.*;
 
 /**
- * Multi-dimensional database definition (soap complient)
+ * Multidimensional database definition (soap compliment)
  *
  * @version	x.xx
  * @author AFarkas

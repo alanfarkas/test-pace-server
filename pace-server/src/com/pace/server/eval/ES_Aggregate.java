@@ -61,6 +61,7 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 		PafDataCache dataCache = evalState.getDataCache();
 		PafClientState clientState = evalState.getClientState();
 		PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
+		String measureDim = dataCache.getMeasureDim();
 		String versionDim = dataCache.getVersionDim();
 
         // opt out if flag set for this rule
@@ -104,12 +105,7 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             Set<String> lockedPeriods = dataCache.getLockedPeriods();
                         
             /* if locked periods exists, then we need to include the open periods on the
-             * time filter.  The aggFilter kind of works opposite of how a filter should work. 
-             * The aggFilter is a map of <dimName, List<String>>, where the List<String> is a list
-             * of members to be included from the result set rather then excluded.  So if I had
-             * a List of { WK11, WK12 } in a set of { WK09, WK10, WK11, WK12 } after the was applied,
-             * only WK11 and WK12 would be available.
-             * 
+             * time filter.   
              */
             if ( lockedPeriods != null && lockedPeriods.size() > 0 ) {
             
@@ -201,35 +197,32 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
              }
 
 
-             // Aggregate all hierarchical dimensions
+             
+              // Perform aggregation of base intersections
+             //-- Aggregate all hierarchical dimensions
              for (String s : hierDims) {
-            	 aggregateDimension(evalState, dataCache, s, aggFilter, TimeBalance.None);
-             }            
-
-             // Aggregate time dimension
-             aggregateDimension(evalState, dataCache, timeDim, aggFilter, tb);
-
-             // convert and store changed cells as intersections, keyed by measure
-             List<PafDataCacheCell> dccChangedCells = dataCache.getChangedCells();
-
-             Intersection is;
-
-             for (PafDataCacheCell cell : dccChangedCells) {
-            	 is = new Intersection(dataCache.getAllDimensions(), dataCache.indexToMembers(cell.getCellIndex()));
-            	 evalState.addChangedCell(is);
+            	 aggregateDimension(evalState, dataCache, s, aggFilter, DcTrackChangeOpt.APPEND);
              }
+             //-- Aggregate time dimension
+             aggregateDimension(evalState, dataCache, timeDim, aggFilter, DcTrackChangeOpt.APPEND);
 
+             
+             // Store changed cells as intersections, keyed by measure
+             List<PafDataCacheCell> dccChangedCells = dataCache.getChangedCells();
+             for (PafDataCacheCell cell : dccChangedCells) {
+            	 evalState.addChangedCell(cell.getCellIntersection());
+             }
              dataCache.initChangedCells();
 		}
+		
 		logEvalDetail(this, evalState, dataCache);
-
 		logger.debug(Messages.getString("ES_Aggregate.0") + (System.currentTimeMillis() - startTime) + Messages.getString("ES_Aggregate.1")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private void aggregateDimension(EvalState evalState, PafDataCache dataCache, String dim, Map<String, List<String>> aggFilter, @SuppressWarnings("unused") //$NON-NLS-1$
-			TimeBalance tb) throws PafException {
+	private void aggregateDimension(EvalState evalState, PafDataCache dataCache, String dim, Map<String, List<String>> aggFilter, 
+			DcTrackChangeOpt trackChanges) throws PafException {
 
-		PafUowCacheCalc.aggDimension(dim, dataCache, evalState.getDataCacheTrees().getTree(dim), aggFilter, true); //, tb);
+		PafDataCacheCalc.aggDimension(dim, dataCache, evalState.getDataCacheTrees().getTree(dim), aggFilter, trackChanges);
 	}
 
 }

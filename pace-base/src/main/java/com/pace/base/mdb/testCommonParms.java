@@ -41,10 +41,14 @@ import com.pace.base.PafException;
 import com.pace.base.app.*;
 import com.pace.base.comm.ClientInitRequest;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.MemberTreeSet;
 import com.pace.base.state.IPafClientState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.PafXStream;
 import com.pace.base.utility.StringUtils;
+import com.pace.base.view.PafMVS;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewSection;
 
 /**
  * Provide common parameters to unit tests
@@ -62,6 +66,7 @@ import com.pace.base.utility.StringUtils;
  */
 public abstract class testCommonParms {
 
+	private static final String fileSep = System.getProperty("file.separator");
 	private static final Logger logger = Logger.getLogger(testCommonParms.class);
 	
 	public static void main(String args[]) throws PafException {
@@ -345,9 +350,9 @@ public abstract class testCommonParms {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Set getLockedPeriods() {
+	public static Set<String> getLockedPeriods() {
 
-		Set lockedPeriods = new HashSet<String>();
+		Set<String> lockedPeriods = new HashSet<String>();
 		
 		lockedPeriods.add("WK01");
 		lockedPeriods.add("WK02");
@@ -686,13 +691,15 @@ public abstract class testCommonParms {
 	public static PafClientState getClientState() {
 		String clientId = "666";
 		ClientInitRequest pcInit = new ClientInitRequest();
-		String paceHome = "C:" + File.pathSeparator + "Program Files" + File.pathSeparator + "Pace" + File.pathSeparator + "PafServer";
-		String transferDirPath = paceHome + File.pathSeparator + PafBaseConstants.DN_TransferFldr;
+		//String paceHome = "C:" + File.pathSeparator + "Program Files" + File.pathSeparator + "Pace" + File.pathSeparator + "PafServer";
+		String paceHome = System.getenv(PafBaseConstants.PACE_SERVER_HOME_ENV);
+		String transferDirPath = paceHome + fileSep + PafBaseConstants.DN_TransferFldr;
 		boolean debugMode = true;
 		
 		PafClientState clientState = new PafClientState(clientId, pcInit, paceHome, transferDirPath, debugMode);
 		clientState.setApp(getAppDef());
 		clientState.setUnitOfWork(getUowSpec());
+		clientState.setUowTrees(getUowTrees());
 		Season season = new Season();
 		season.setId("Fall - Plan - 2006");
 		season.setOpen(true);
@@ -701,6 +708,11 @@ public abstract class testCommonParms {
 		season.setTimePeriod("@IDESCENDENTS(S01)");
 		clientState.setPlanSeason(season);
 		return clientState;
+	}
+
+	private static MemberTreeSet getUowTrees() {
+		MemberTreeSet dimTree = new MemberTreeSet();
+		return dimTree;
 	}
 
 	/**
@@ -759,6 +771,27 @@ public abstract class testCommonParms {
 		}
 		UnitOfWork uowSpec = new UnitOfWork(allDims, memberArray);
 		return uowSpec;
+	}
+
+	public static PafMVS getPafMVS() {
+		
+		PafMVS pafMVS = new PafMVS(getView(), getViewSection());
+		return pafMVS;
+	}
+
+	private static PafView getView() {
+		PafView pafView = new PafView();
+		pafView.setName("View1");
+		pafView.setViewSections(new PafViewSection[] {getViewSection()});
+		return pafView;
+	}
+
+	private static PafViewSection getViewSection() {
+		PafViewSection vs = new PafViewSection();
+		vs.setName("ViewSection1");
+		vs.setDimensionCalcSequence(getAppDef().getMdbDef().getAxisPriority());
+		vs.setDimensionsPriority(getAppDef().getMdbDef().getAllDims());
+		return vs;
 	}
 
 }

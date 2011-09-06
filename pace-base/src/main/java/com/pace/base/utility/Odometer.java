@@ -21,6 +21,7 @@ package com.pace.base.utility;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -31,9 +32,25 @@ import java.util.NoSuchElementException;
  *
  */
 public class Odometer {
-    ListIterator[] iterators;
+	ListIterator<Object>[] iterators;
     Object[] items;
-    public Odometer(List[] lists) {
+    
+    
+ 	/**
+ 	 * 	Create odometer using a map and a key array that implies the order
+ 	 * 	of elements within the odometer
+ 	 * 
+ 	 * @param memberMap Map of element lists
+ 	 * @param keyArray Array that specifies the order of the element lists within the odometer
+ 	 */
+ 	@SuppressWarnings("unchecked")
+	public <T, K> Odometer(Map<K, List<T>> memberMap, K[] keyArray) {
+		this((List<Object>[]) CollectionsUtil.convertToArrayOfLists(memberMap, keyArray));
+	}
+
+    
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Odometer(List[] lists) {
         iterators = new ListIterator[lists.length];
         items = new Object[lists.length];
         
@@ -49,11 +66,16 @@ public class Odometer {
         
     }
     
-    public void reset() {
+
+	public void reset() {
         for (int i = 0; i < iterators.length; i++) {
             reset(i);
-        }        
-    }
+        }  
+        
+        // decrement lowest level pointer so hasNext works naturally
+        iterators[0].previous();
+        items[0] = null;
+   }
     
     public boolean hasNext() {
         for (int i = 0; i < iterators.length; i++) {
@@ -83,14 +105,16 @@ public class Odometer {
         }
     }
     
-    public ArrayList nextValue() {
+ 	@SuppressWarnings("rawtypes")
+	public ArrayList nextValue() {
         increment();
         return getValue();
     }
     
     
-    public ArrayList getValue() {
-        ArrayList itemValues = new ArrayList(iterators.length);
+ 	@SuppressWarnings("rawtypes")
+	public ArrayList getValue() {
+        ArrayList<Object> itemValues = new ArrayList<Object>(iterators.length);
         for (int i = 0; i < items.length; i++) {
             itemValues.add(items[i]);
         }

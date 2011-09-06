@@ -361,6 +361,7 @@ public class RuleMngr {
         			//see if the intersection was originally locked by the user, 
         			//if so then remove the lock so evaluation can flow into that cell -
         			// unless this is an attribute evaluation
+        			//TODO Determine if check on attribute eval is still needed
         			if(evalState.getOrigLockedCells().contains(temp) && !evalState.isAttributeEval()){
         				evalState.getCurrentLockedCells().remove(firstInx);
         				break;

@@ -570,7 +570,7 @@ public class PafViewService {
 			for (VersionDef derivedVersionDef : derivedVersions ) {
 									
 				//get the version formula so we can get the base version name
-				VersionFormula versionFormula = (VersionFormula) derivedVersionDef.getVersionFormula();
+				VersionFormula versionFormula = derivedVersionDef.getVersionFormula();
 				
 				//if the version formula exist and a base version name exist
 				if ( versionFormula != null && versionFormula.getBaseVersion() != null ) {
@@ -1776,10 +1776,9 @@ public class PafViewService {
 
 	/**
 	 *  
+	 *  Lock non-plannable view section measure intersections
 	 * 
-	 * @param Complex
-	 *            view section array
-	 * 
+	 * @param sections View section array
 	 * @return Complex view section array
 	 */
 	
@@ -1789,15 +1788,12 @@ public class PafViewService {
 		MdbDef mdbDef = pafApp.getMdbDef();
 
 		// get all dimensions in order
-		//pmack
 		String[] serverDimensionOrder;
-//		String[] serverDimensionOrder = mdbDef.getAllDims();
 
 		// for each section, see if measure is not plannable and if not, lock
 		for (PafViewSection section : sections) {
 			
 			//get all dimensions in order
-			//pmack
 			serverDimensionOrder = section.getDimensionsPriority();
 
 			// get measures axis
@@ -1869,30 +1865,19 @@ public class PafViewService {
 
 					// populate member order
 					String[] coordMemberOrder = new String[serverDimensionOrder.length];
-
 					int coordMemberIndex = 0;
-
 					for (String dimension : serverDimensionOrder) {
-
-						coordMemberOrder[coordMemberIndex++] = mappedDimsWithMembers
-								.get(dimension);
-
+						coordMemberOrder[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
 					}
 
 					// by default, measure is plannable
 					boolean measurePlannable = true;
-
 					if (measureMember != null
-							&& measuresPlannableCache
-									.containsKey(measureMember)) {
-
-						measurePlannable = measuresPlannableCache
-								.get(measureMember);
-						
-
+							&& measuresPlannableCache.containsKey(measureMember)) {
+						measurePlannable = measuresPlannableCache.get(measureMember);
 					}
 					
-					// if measure is not plannable lock cell and interseciton
+					// if measure is not plannable lock cell and intersection
 					if ( !measurePlannable ) {
 
 						// add to not plannable list
@@ -3007,8 +2992,8 @@ public class PafViewService {
 		
 		if (sections != null) {
 			List<String> attributeDims;
-			List<String> dimensionPriority;
-			List<String> dimensionSequence;
+			List<String> dimensionOrder;
+			List<String> axisPriority;
 			int baseDimIndexAxisPriority;
 			int baseDimIndexAxisSequence;
 			boolean hasAttributes;
@@ -3016,8 +3001,8 @@ public class PafViewService {
 		
 			for (PafViewSection section : sections) {
 				attributeDims = new ArrayList<String>();
-				dimensionPriority = new ArrayList<String>();
-				dimensionSequence = new ArrayList<String>();
+				dimensionOrder = new ArrayList<String>();
+				axisPriority = new ArrayList<String>();
 				hasAttributes = false;
 				
 				for (String dimName : section.getDimensions()){
@@ -3040,30 +3025,25 @@ public class PafViewService {
 					
 					//Get the list of base dimension names used in the View Section:
 					//dimensionPriority = java.util.Arrays.asList(clientState.getUnitOfWork().getDimensions());
-
-					for(String baseDim : clientState.getUnitOfWork().getDimensions()){
-						dimensionPriority.add(baseDim);
-					}
-					
-					for(String attributeDim: clientState.getApp().getMdbDef().getAxisPriority()){
-						dimensionSequence.add(attributeDim);
-					}
+					dimensionOrder = new ArrayList<String>(Arrays.asList(clientState.getUnitOfWork().getDimensions()));					
+					axisPriority = new ArrayList<String>(Arrays.asList(clientState.getApp().getMdbDef().getAxisPriority()));					
 
 					//Attributes are added directly before the base dim in alpha order
 					for(String attDimName : attributeDims){
 						String baseDim = pafDataService.getAttributeTree(attDimName).getBaseDimName();
 						
-						baseDimIndexAxisPriority = dimensionPriority.indexOf(baseDim);
-						dimensionPriority.add(baseDimIndexAxisPriority, attDimName);
+						baseDimIndexAxisPriority = dimensionOrder.indexOf(baseDim);
+						dimensionOrder.add(attDimName);
 						
-						baseDimIndexAxisSequence = dimensionSequence.indexOf(baseDim);
-						dimensionSequence.add(baseDimIndexAxisSequence, attDimName);
+						baseDimIndexAxisSequence = axisPriority.indexOf(baseDim);
+						axisPriority.add(baseDimIndexAxisSequence, attDimName);
 					}
-					section.setDimensionsPriority(dimensionPriority.toArray(new String[0]));
-					section.setDimensionCalcSequence(dimensionSequence.toArray(new String[0]));
+					section.setDimensionsPriority(dimensionOrder.toArray(new String[0]));
+					section.setDimensionCalcSequence(axisPriority.toArray(new String[0]));
 
 				} else {
 					section.setDimensionsPriority(clientState.getUnitOfWork().getDimensions());
+					section.setDimensionCalcSequence(clientState.getApp().getMdbDef().getAxisPriority());
 				}
 
 				//Set the has attributes flag for the View Section
@@ -4018,7 +3998,7 @@ public class PafViewService {
 		//invalid, then the entire view section is invalid.
 		else if(baseDimAxis.getValue() == PafAxis.PAGE && primaryAttrAxis == PafAxis.PAGE){
 			if(!attrPageDimNames.isEmpty()){
-				if (!dataService.isValidAttributeIntersection(baseDim, baseDimName, uowTrees, 
+				if (!dataService.isValidAttributeCombo(baseDim, baseDimName, uowTrees, 
 						attrPageDimNames.toArray(new String[0]),
 						attrPageMembersInTuple.toArray(new String[0]))){
 					viewSection.setRowTuples(new ViewTuple[0]);
@@ -4071,7 +4051,7 @@ public class PafViewService {
 		
 		if (baseDimAxis.getValue() == PafAxis.PAGE){
 			//Get the list of attribute intersections
-			attributeIntersections = dataService.getAttributeIntersections(baseDimName, baseMemberName, attrDimNames.toArray(new String[0]), uowTrees);
+			attributeIntersections = dataService.getAttributeCombos(baseDimName, baseMemberName, attrDimNames.toArray(new String[0]), uowTrees);
 		}
 
 		//Get each view tuple
@@ -4104,11 +4084,11 @@ public class PafViewService {
 				baseMemberName = tuple.getMemberDefs()[baseDimIndex];
 				
 				//Get the list of attribute intersections
-				attributeIntersections = dataService.getAttributeIntersections(baseDimName, baseMemberName, attrDimNames.toArray(new String[0]), uowTrees);
+				attributeIntersections = dataService.getAttributeCombos(baseDimName, baseMemberName, attrDimNames.toArray(new String[0]), uowTrees);
 			}
 
 			//Is the attribute intersection valid?
-			if (dataService.isValidAttributeIntersection(baseDimName, baseMemberName, 
+			if (dataService.isValidAttributeCombo(baseDimName, baseMemberName, 
 					attrDimNames.toArray(new String[0]),
 					attrMembers.toArray(new String[0]), attributeIntersections)){
 				filteredTuples.add(tuple);
@@ -4240,7 +4220,7 @@ public class PafViewService {
 			
 			if (baseDimAxis.getValue() == PafAxis.PAGE){
 				//Get the list of attribute intersections
-				attributeIntersections = dataService.getAttributeIntersections(baseDim, baseDimName, attrDimNames.toArray(new String[0]), uowTrees);
+				attributeIntersections = dataService.getAttributeCombos(baseDim, baseDimName, attrDimNames.toArray(new String[0]), uowTrees);
 			}
 			
 			//Get each view tuple
@@ -4269,7 +4249,7 @@ public class PafViewService {
 					baseDimName = rowTuple.getMemberDefs()[baseDimIndex];
 					
 					//Get the list of attribute intersections
-					attributeIntersections = dataService.getAttributeIntersections(baseDim, baseDimName, attrDimNames.toArray(new String[0]), uowTrees);
+					attributeIntersections = dataService.getAttributeCombos(baseDim, baseDimName, attrDimNames.toArray(new String[0]), uowTrees);
 				}
 				
 				rowMembers = getTupleMemberDefs(rowTuple);
@@ -4308,7 +4288,7 @@ public class PafViewService {
 						baseDimName = colTuple.getMemberDefs()[baseDimIndex];
 						
 						//Get the list of attribute intersections
-						attributeIntersections = dataService.getAttributeIntersections(baseDim, baseDimName, attrDimNames.toArray(new String[0]), uowTrees);
+						attributeIntersections = dataService.getAttributeCombos(baseDim, baseDimName, attrDimNames.toArray(new String[0]), uowTrees);
 					}
 					
 					colMembers = getTupleMemberDefs(colTuple);
@@ -4330,7 +4310,7 @@ public class PafViewService {
 						coordMemberOrder[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
 					}
 					
-					//Get the list of attibute member names:
+					//Get the list of attribute member names:
 					attrMembers = new ArrayList<String>();
 
 					//Page members
@@ -4347,7 +4327,7 @@ public class PafViewService {
 					}
 
 					//Is the attribute intersection valid?
-					if (!dataService.isValidAttributeIntersection(baseDim, baseDimName, 
+					if (!dataService.isValidAttributeCombo(baseDim, baseDimName, 
 							attrDimNames.toArray(new String[0]),
 							attrMembers.toArray(new String[0]), attributeIntersections)){
 

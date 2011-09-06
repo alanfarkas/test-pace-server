@@ -71,7 +71,6 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 //		long stepTime;
 		boolean isBaseDim = true;
 		String currMemberName = null;
-		Set<String>viewAttributes = new HashSet<String>();
 		
 		String[] axisSeq = evalState.getAxisPriority();
 		SortedMap<Integer, List<String>> genTree = null;
@@ -84,13 +83,6 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		String msrDim = evalState.getMsrDim();
 		String timeDim = evalState.getTimeDim();
 
-
-		// Initialization
-		if (evalState.isAttributeEval()) {
-			// Attribute view
-			PafViewSection viewSection = pafMVS.getViewSection();
-			viewAttributes.addAll(Arrays.asList(viewSection.getAttributeDims()));
-		}
 
 
 		// Sort locked intersections resulting from user locks and cell changes
@@ -294,130 +286,14 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 	 */
 	public boolean checkTreeForRatioAllocation(String dim, Intersection is, Map<Integer, List<String>> genlvlTree,  EvalState evalState, PafDataCache dataCache ) throws PafException {
 
-			// convenience variable to hold client tree for current dimension
+		// convenience variable to hold client tree for current dimension
 		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
 		PafDimTree dimTree = uowTrees.getTree(dim);
 		String baseDim = null;
 		Set<String> assocAttrDims = null, baseDims = dataService.getBaseDimNames();
 		boolean isBaseDim = false;
 		Set<String>viewAttributes = new HashSet<String>();
-		
-			// set dimensional convenience variables 
-			if (evalState.isAttributeEval()) {
-				// attribute view
-				if (baseDims.contains(dim)) {
-					// base dimension
-					baseDim = dim;
-					isBaseDim = true;
-				} else {
-					// attribute dimension
-					baseDim = dataService.getAttributeTree(dim).getBaseDimName();
-					isBaseDim = false;
-				}
 
-				// Set associated attribute dimensions for current base dimension
-				assocAttrDims = new HashSet<String>(dataService.getBaseTree(baseDim).getAttributeDimNames());
-				assocAttrDims.retainAll(viewAttributes);
-			} else {
-				// regular view / base dimension
-				isBaseDim = true;
-		}		
-		
-		
-		
-		boolean isRatioAllocation = false;		
-				Intersection isTest = is.clone();
-					// examine each generation starting below the current intersection looking for an entire generation that is locked.
-					// all dimensionality is considered identical to the parent change, except for the dimension currently examined.
-		for ( int genlvl : genlvlTree.keySet() ) {
-
-						// inspect each member at the current generation
-			isRatioAllocation = true;
-			List<String> mbrNames = genlvlTree.get(genlvl);
-			for (String mbrName:mbrNames) {
-
-							// create test intersection
-				isTest.setCoordinate(dim, mbrName);
-
-							// attribute view special processing
-							if (evalState.isAttributeEval()) {
-
-								// if current dimension is either an attribute dimension or a base dimension with at least
-								// one attribute dimension on the view, skip any invalid attribute member intersections for 
-								// the current dimension, since they aren't updatable. 
-								if (!assocAttrDims.isEmpty()) {
-
-									// get set of all valid attribute intersections for intersection represented
-									// by generation member for upcoming test.
-									String baseMember = isTest.getCoordinate(baseDim);
-									Set<Intersection> validAttrIntersections = dataService.getAttributeIntersections(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);
-
-									// create intersection containing associated attribute dimensions of selected 
-									// base member.
-									Intersection attrIs = new Intersection(assocAttrDims.toArray(new String[0]));
-									for (String attrDim:attrIs.getDimensions()) {
-										attrIs.setCoordinate(attrDim, isTest.getCoordinate(attrDim));
-									}
-
-									// skip ratio allocation if member being tested doesn't exist in data cache
-									// but represents a valid attribute intersection on the selected generation.
-						if (!dataCache.isMember(dim, mbrName) && validAttrIntersections.contains(attrIs)) {
-										isRatioAllocation = false;
-										break;
-									}        					
-
-									// if current gen member intersection is invalid then skip lock test
-									if (!validAttrIntersections.contains(attrIs)) {
-										continue;
-									}
-								}
-							}
-
-							// as soon as an intersection at this generation is found that ISN'T 
-							// either changed or a locked period - exit loop
-							if (!evalState.getOrigLockedCells().contains(isTest)) {
-								isRatioAllocation = false;
-								break;
-							}
-			}
-			if (isRatioAllocation) {
-				performRatioAllocation(dim, is, mbrNames, evalState, dataCache );
-			}		
-		}		
-
-		return isRatioAllocation;
-		
-						}
-	
-	
-
-	
-	
-	/**
-	 *  Performs a ratio allocation over a specific set of targets. Generates a list of valid target intersections
-	 *  and then calls helper method to do the math.
-	 *
-	 * @param dim	dimension being operated on
-	 * @param intersection
-	 * @param evalState 
-	 * @param dataCache 
-	 * @param tb 
-	 * 
-	 * @return PafUowCache
-	 * @throws PafException 
-	 */
-	public PafDataCache performRatioAllocation(String dim, Intersection is, List<String> targetNames,  EvalState evalState, PafDataCache dataCache) throws PafException {
-
-		// This recreates a lot of convenience variables, unfortunately
-		// However I didn't want to increase the signature by 4 variables and this step occurs rarely
-		// Ideally these could be moved to the class level (but that has multithreading implications) or
-		// into the evalState
-		
-		Set<String> assocAttrDims = null, baseDims = dataService.getBaseDimNames(), viewAttributes = new HashSet<String>();
-		boolean isBaseDim = true;
-		String baseDim = null;
-		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
-		
 		// set dimensional convenience variables 
 		if (evalState.isAttributeEval()) {
 			// attribute view
@@ -437,42 +313,153 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		} else {
 			// regular view / base dimension
 			isBaseDim = true;
-		}
-		
-		
-							// generate target is list - exclude any invalid attribute intersections
-							List<Intersection> allocTargets = new ArrayList<Intersection>();
-							Intersection isTarget;
-		for (String mbrName : targetNames) {
-								isTarget = is.clone();
-								isTarget.setCoordinate(dim, mbrName);
-								// add target to list if regular view or allocation dimension has not associated attributes on view
-								//	 or if target is a valid attribute intersection
-								if (!evalState.isAttributeEval() || assocAttrDims.isEmpty()) {
-									// regular view or allocation across base dimension without associated attributes - add target to list
-									allocTargets.add(isTarget);     							
-								} else {
-									// create intersection containing just the associated attribute values
-									// of the current target intersection
-									Intersection attrIs = new Intersection(assocAttrDims.toArray(new String[0]));
-									for (String attrDim:attrIs.getDimensions()) {
-										attrIs.setCoordinate(attrDim, isTarget.getCoordinate(attrDim));
-									}
-									
-									// if attribute intersection is valid - add target to list
-									String baseMember = isTarget.getCoordinate(baseDim);
+		}		
 
-									Set<Intersection> validAttrIntersections = dataService.getAttributeIntersections(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);									
-									if (validAttrIntersections.contains(attrIs)) {
-										allocTargets.add(isTarget);
-									}
-								}
+
+
+		boolean isRatioAllocation = false;		
+		Intersection isTest = is.clone();
+		// examine each generation starting below the current intersection looking for an entire generation that is locked.
+		// all dimensionality is considered identical to the parent change, except for the dimension currently examined.
+		for ( int genlvl : genlvlTree.keySet() ) {
+
+			// inspect each member at the current generation
+			isRatioAllocation = true;
+			List<String> mbrNames = genlvlTree.get(genlvl);
+			for (String mbrName:mbrNames) {
+
+				// create test intersection
+				isTest.setCoordinate(dim, mbrName);
+
+				// attribute view special processing
+				if (evalState.isAttributeEval()) {
+
+					// if current dimension is either an attribute dimension or a base dimension with at least
+					// one attribute dimension on the view, skip any invalid attribute member intersections for 
+					// the current dimension, since they aren't updatable. 
+					if (!assocAttrDims.isEmpty()) {
+
+						// get set of all valid attribute intersections for intersection represented
+						// by generation member for upcoming test.
+						String baseMember = isTest.getCoordinate(baseDim);
+						Set<Intersection> validAttrIntersections = dataService.getAttributeCombos(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);
+
+						// create intersection containing associated attribute dimensions of selected 
+						// base member.
+						Intersection attrIs = new Intersection(assocAttrDims.toArray(new String[0]));
+						for (String attrDim:attrIs.getDimensions()) {
+							attrIs.setCoordinate(attrDim, isTest.getCoordinate(attrDim));
 						}
-		return allocateRatioChange( is, allocTargets, evalState, dataCache );
+
+						// skip ratio allocation if member being tested doesn't exist in data cache
+						// but represents a valid attribute intersection on the selected generation.
+						if (!dataCache.isMember(dim, mbrName) && validAttrIntersections.contains(attrIs)) {
+							isRatioAllocation = false;
+							break;
+						}        					
+
+						// if current gen member intersection is invalid then skip lock test
+						if (!validAttrIntersections.contains(attrIs)) {
+							continue;
+						}
 					}
+				}
+
+				// as soon as an intersection at this generation is found that ISN'T 
+				// either changed or a locked period - exit loop
+				if (!evalState.getOrigLockedCells().contains(isTest)) {
+					isRatioAllocation = false;
+					break;
+				}
+			}
+			if (isRatioAllocation) {
+				performRatioAllocation(dim, is, mbrNames, evalState, dataCache );
+			}		
+		}		
+
+		return isRatioAllocation;
+
+	}
+
+
+
+
 	
-	
-	
+	/**
+	 *  Performs a ratio allocation over a specific set of targets. Generates a list of valid target intersections
+	 *  and then calls helper method to do the math.
+	 *
+	 * @param dim	dimension being operated on
+	 * @param intersection
+	 * @param evalState 
+	 * @param dataCache 
+	 * @param tb 
+	 * 
+	 * @return PafUowCache
+	 * @throws PafException 
+	 */
+	public PafDataCache performRatioAllocation(String dim, Intersection is, List<String> targetNames,  EvalState evalState, PafDataCache dataCache) throws PafException {
+
+		// This recreates a lot of convenience variables, unfortunately
+		// However I didn't want to increase the signature by 4 variables and this step occurs rarely
+		// Ideally these could be moved to the class level (but that has multi-threading implications) or
+		// into the evalState
+		
+		Set<String> assocAttrDims = null, baseDims = dataService.getBaseDimNames(), viewAttributes = new HashSet<String>();
+		String baseDim = null;
+		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
+
+		// set dimensional convenience variables 
+		if (evalState.isAttributeEval()) {
+			// attribute view
+			if (baseDims.contains(dim)) {
+				// base dimension
+				baseDim = dim;
+			} else {
+				// attribute dimension
+				baseDim = dataService.getAttributeTree(dim).getBaseDimName();
+			}
+
+			// Set associated attribute dimensions for current base dimension
+			assocAttrDims = new HashSet<String>(dataService.getBaseTree(baseDim).getAttributeDimNames());
+			assocAttrDims.retainAll(viewAttributes);
+		} else {
+		}
+
+
+		// generate target is list - exclude any invalid attribute intersections
+		List<Intersection> allocTargets = new ArrayList<Intersection>();
+		Intersection isTarget;
+		for (String mbrName : targetNames) {
+			isTarget = is.clone();
+			isTarget.setCoordinate(dim, mbrName);
+			// add target to list if regular view or allocation dimension has not associated attributes on view
+			//	 or if target is a valid attribute intersection
+			if (!evalState.isAttributeEval() || assocAttrDims.isEmpty()) {
+				// regular view or allocation across base dimension without associated attributes - add target to list
+				allocTargets.add(isTarget);     							
+			} else {
+				// create intersection containing just the associated attribute values
+				// of the current target intersection
+				Intersection attrIs = new Intersection(assocAttrDims.toArray(new String[0]));
+				for (String attrDim:attrIs.getDimensions()) {
+					attrIs.setCoordinate(attrDim, isTarget.getCoordinate(attrDim));
+				}
+
+				// if attribute intersection is valid - add target to list
+				String baseMember = isTarget.getCoordinate(baseDim);
+
+				Set<Intersection> validAttrIntersections = dataService.getAttributeCombos(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);									
+				if (validAttrIntersections.contains(attrIs)) {
+					allocTargets.add(isTarget);
+				}
+			}
+		}
+		return allocateRatioChange( is, allocTargets, evalState, dataCache );
+	}
+
+
+
 	/**
 	 *  Special purpose method to allocate a change in the case of a "ratio allocation". All targets are locked
 	 *  and basically performs a shape allocation.

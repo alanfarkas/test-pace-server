@@ -166,7 +166,7 @@ public class EsbConnMgr {
 		if (esbConnList!= null) {
 			Set<String> connectionKeys = esbConnList.keySet();
 			for (String connectionKey : connectionKeys) {
-				IPafConnection pafConnection = (IPafConnection) esbConnList.get(connectionKey);
+				IPafConnection pafConnection = esbConnList.get(connectionKey);
 				name = pafConnection.getClass().getSimpleName();
 				if (name.equals("EsbServerConn")) {
 					EsbServerConn esbServerConn = (EsbServerConn) pafConnection;

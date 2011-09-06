@@ -46,8 +46,55 @@ public class Intersection {
 		this.dimensions = dimensions;
 	}
 
+	public Intersection(String[] dimensions, List<String> coordinates) {
+		this(dimensions, coordinates.toArray(new String[0]));
+	}
+
+
+	/**
+	 * @param dimensions Intersection dimensions
+	 * @param coordinates Intersection coordinates
+	 * @param dimensionOrder Specifies the desired order of dimension coordinates in the new intersection
+	 */
+	public Intersection(List<String> dimensions, List<String> coordinates, List<String> dimensionOrder) {
+		
+		super();
+
+		// Re-order the coordinates in the desired order
+		String[] orderedCoords = new String[dimensionOrder.size()];
+		for (int i = 0; i < dimensionOrder.size(); i++) {
+			String orderedDim = dimensionOrder.get(i);
+			int index = dimensionOrder.indexOf(orderedDim);
+			if (index == -1) {
+				String errMsg = "Instantiation Error - Ordered Dimension [" + orderedDim + "] not found in Dimension list";
+				throw new IllegalArgumentException(errMsg);
+			} else {
+				orderedCoords[i] = coordinates.get(i);
+			}
+		}
+		
+		this.dimensions = dimensionOrder.toArray(new String[0]);
+		this.coordinates = orderedCoords;
+	}
+
+
 	public String[] getCoordinates() {
 		return coordinates;
+	}
+
+	/**
+	 * Return the coordinates for the specified intersections
+	 * 
+	 * @param dimensions Selected dimension names
+	 * @return String[]
+	 */
+	public String[] getCoordinates(String[] dimensions) {
+		
+		String[] coords = new String[dimensions.length];
+		for (int i = 0; i < dimensions.length; i++) {
+			coords[i] = this.getCoordinate(dimensions[i]);
+		}
+		return coords;
 	}
 
 	public void setCoordinates(String[] coordinates) {
@@ -99,11 +146,19 @@ public class Intersection {
 			return false;
 
 		Intersection inter = (Intersection) o;
+
+		// Compare # of dimensions - this check is necessary for attribute evaluation
+		if (inter.dimensions.length != this.dimensions.length) {
+			return false;
+		}
+		
+		// Check each coordinate
 		for (int i = 0; i < dimensions.length; i++) {
 			if (!this.dimensions[i].equals(inter.dimensions[i])
 					|| !this.coordinates[i].equals(inter.coordinates[i]))
 				return false;
 		}
+		
 		return true;
 	}
 
@@ -126,6 +181,7 @@ public class Intersection {
 
 	public Intersection() {
 	} // used only for cloning
+
 
 	public Intersection clone() {
 		Intersection i = new Intersection();
@@ -234,10 +290,8 @@ public class Intersection {
 		
 		
 		// Create sub intersection
-		for (int i = 0; i < dimCount; i++) {
-			dimensions[i] = getDimensions()[i];
-			coordinates[i] = getCoordinates()[i];
-		}
+		System.arraycopy(this.dimensions, 0, dimensions, 0, dimCount);
+		System.arraycopy(this.coordinates, 0, coordinates, 0, dimCount);
 		Intersection subIntersection = new Intersection(dimensions, coordinates);
 		
 		return subIntersection;

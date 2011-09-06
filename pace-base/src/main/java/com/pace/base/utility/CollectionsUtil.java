@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.pace.base.project.excel.PafExcelValueObject;
-
 /**
  * Class_description_goes_here
  *
@@ -61,6 +59,44 @@ public class CollectionsUtil {
 		}
 		
 		return mergedMap;
+		
+	}
+	
+	/**
+	 * 	Convert a map of lists to an array of lists. The key array specifies
+	 * 	the order of the lists within the new list array.
+	 * 
+	 * @param map Map to convert
+	 * @param keyArray Array of map keys that will be used to specify list order in the converted list array
+	 * 
+	 * @return List<T>[]
+	 */
+	public static <K, T> List<T>[] convertToArrayOfLists(Map<K, List<T>> map, K[] keyArray) {
+
+		// Make sure that map is not null
+		if (map == null) {
+			throw new NullPointerException("conversion error - map or key array cannot be null");
+		// Verify sizes are same
+		} else if (map.size() != keyArray.length ) {
+			throw new IllegalArgumentException("conversion error - map and key array are not equal in size.");
+		}
+    	
+    	// Create array
+		int mapSize = map.size();
+		@SuppressWarnings("unchecked")
+		List<T>[] arrayOfLists = new List[mapSize];
+
+		// Populate array from map
+		int i = 0;
+		for (K key : keyArray) {
+			List<T> list = map.get(key);
+			if (list == null) {
+				throw new IllegalArgumentException("conversion error - key array element not found in map");
+			}
+			arrayOfLists[i++] = list;
+		}
+		
+		return arrayOfLists;
 		
 	}
 	

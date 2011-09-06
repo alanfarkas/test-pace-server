@@ -35,7 +35,7 @@ import com.pace.base.utility.StringUtils;
  * @author AFarkas
  *
  */
-public class PafIntersectionIterator {
+public class PafIntersectionIteratorOLD {
 
 	private boolean[] hasFilter = null;
 	private int absoluteIndex = 0;
@@ -47,14 +47,14 @@ public class PafIntersectionIterator {
 	private boolean[] carryFlag = null;
 	private int[] memberIndexes = null;
 	private Map<Integer, int[]> filterMemberIndexes = new HashMap<Integer, int []>();
-	private static Logger logger = Logger.getLogger(PafIntersectionIterator.class);
+	private static Logger logger = Logger.getLogger(PafIntersectionIteratorOLD.class);
 	
 	
 	/**
 	 * @param dimIndexes Index corresponding to each dimension to iterate (a subset of all data cache dimensions)
 	 * @param dataCache Instance of Paf Data Cache
 	 */
-	public PafIntersectionIterator(int[] dimIndexes, PafDataCache dataCache) {	
+	public PafIntersectionIteratorOLD(int[] dimIndexes, PafDataCache dataCache) {	
 		this(dimIndexes, dataCache, null);		
 	}
 	
@@ -64,7 +64,7 @@ public class PafIntersectionIterator {
 	 * @param dataCache Instance of Paf Data Cache
 	 * @param memberFilters Map containing lists of members by dimension to filter on
 	 */
-	public PafIntersectionIterator(int[] dimIndexes, PafDataCache dataCache, Map<String, List<String>> memberFilters) {
+	public PafIntersectionIteratorOLD(int[] dimIndexes, PafDataCache dataCache, Map<String, List<String>> memberFilters) {
 		
 		logger.debug("Creating instance of: " + this.getClass().getSimpleName());
 		

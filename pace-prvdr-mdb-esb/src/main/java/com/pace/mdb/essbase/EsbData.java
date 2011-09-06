@@ -25,7 +25,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -49,9 +48,7 @@ import com.pace.base.app.PafDimSpec;
 import com.pace.base.app.UnitOfWork;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.IMdbData;
-import com.pace.base.mdb.PafIntersectionIterator;
-import com.pace.base.mdb.PafUowCache;
-import com.pace.base.mdb.PafUowCacheParms;
+import com.pace.base.mdb.PafDataCache;
 import com.pace.base.state.IPafClientState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
@@ -137,10 +134,10 @@ public class EsbData implements IMdbData{
 	 * @param clientState Client State
 	 * @param lockedPeriods List of locked reporting periods
 	 * 
-	 * @return PafUowCache - Result set and corresponding meta-data
+	 * @return PafDataCache - Result set and corresponding meta-data
 	 * @throws PafException
 	 */
-	public PafUowCache loadUowCache(Map<String, Map<Integer, List<String>>> dataSpecByVersion, String[] attributeDims, PafClientState clientState, Set<String> lockedPeriods) throws PafException {
+	public PafDataCache loadUowCache(Map<String, Map<Integer, List<String>>> dataSpecByVersion, String[] attributeDims, PafClientState clientState, Set<String> lockedPeriods) throws PafException {
 		
 		//TODO migrate this method to the data service (or data cache) since the logic here is not specific to the Essbase provider
 //		int axisCount = 0;
@@ -149,7 +146,7 @@ public class EsbData implements IMdbData{
 //		String[][] memberArray = null;
 		
 //		PafApplicationDef appDef = clientState.getApp();
-		PafUowCache dataCache = null;
+		PafDataCache dataCache = null;
 //		PafUowCacheParms dataCacheParms = null;
 		
 		
@@ -183,7 +180,6 @@ public class EsbData implements IMdbData{
 		// Load the data cache with the required Essbase data
 //		refreshDataCache(dataCache, dataSpecByVersion);
 
-		
 		logger.debug("Returning Paf Data Cache");
 		return dataCache;
 	}
@@ -193,26 +189,28 @@ public class EsbData implements IMdbData{
 	 *	Refresh the data cache across any version listed in the version filter.
 	 *
 	 * 	Any refreshed version will first be initialized before the data is refreshed
-	 *  from the mdb using the supplided data specification. Any refreshed versions not 
-	 *  referneced in the data spec will be loaded as needed during view rendering or 
-	 *  evaluation.
+	 *  from the mdb using the supplied data specification. Any refreshed versions not 
+	 *  referenced in the data specification will be loaded as needed during view 
+	 *  rendering or evaluation.
 	 * 
-	 *  No data will be refreshed if the vesion filter is empty.
+	 *  No data will be refreshed if the version filter is empty.
 	 *  
-	 * @param dataCache Uow cache
+	 * @param dataCache Data cache
 	 * @param mdbDataSpec Specifies the data intersections to reload from Essbase, by version
 	 * @param versionFilter List of versions to refresh
 	 * 	  
 	 * @return List of updated versions
 	 * @throws PafException 
 	 */ 
-	public List<String> refreshDataCache(PafUowCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException {
+	public List<String> refreshDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException {
 	
 		// Initialize refreshed versions
-		dataCache.clearVersionData(versionFilter);
+		List<String> clearedVersions = new ArrayList<String>(versionFilter);
+		clearedVersions.addAll(dataCache.getDependentVersions(versionFilter));
+		dataCache.clearVersionData(clearedVersions);
 
 		// Reload specified data intersections
-		return updateUowCache(dataCache, mdbDataSpec);
+		return updateDataCache(dataCache, mdbDataSpec);
 	}
 
 	/** 
@@ -222,16 +220,16 @@ public class EsbData implements IMdbData{
 	 *  Any versions that need to be completely refreshed should be cleared before 
 	 *  calling this method.
 	 *
-	 *  No data will be refreshed if the vesion filter is empty.
+	 *  No data will be refreshed if the version filter is empty.
 	 *  
-	 * @param dataCache Uow cache
+	 * @param dataCache Data cache
 	 * @param expandedUow Expanded unit of work specification
 	 * @param versionFilter List of versions to refresh
 	 * 	  
 	 * @return List of updated versions
 	 * @throws PafException 
 	 */ 
-	public List<String> updateDataCache(PafUowCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException {
+	public List<String> updateDataCache(PafDataCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException {
 	
 		// Exit if version filter is empty
 		if (versionFilter == null || versionFilter.isEmpty()) {
@@ -243,14 +241,14 @@ public class EsbData implements IMdbData{
 		int versionAxis = dataCache.getVersionAxis();
 		Map<String, Map<Integer, List<String>>> mdbDataSpec = new HashMap<String, Map<Integer, List<String>>>();
 		for (String version : versionFilter) {
-			Map<Integer, List<String>> expandedUowMap = expandedUow.getUowMap(); 
+			Map<Integer, List<String>> expandedUowMap = expandedUow.buildUowMap(); 
 			List<String> versionSpec = new ArrayList<String>(Arrays.asList(new String[]{version}));
 			expandedUowMap.put(versionAxis, versionSpec);
 			mdbDataSpec.put(version, expandedUowMap);
 		}
 		
 		// Update filtered versions
-		return updateUowCache(dataCache, mdbDataSpec);
+		return updateDataCache(dataCache, mdbDataSpec);
 	}
 
 	/** 
@@ -262,13 +260,13 @@ public class EsbData implements IMdbData{
 	 *
 	 *  No data will be loaded if the data specification is empty.
 	 *  
-	 * @param dataCache Uow cache
-	 * @param mdbDataSpec Specifies the intersections to retrieve from Essbse, by version
+	 * @param dataCache Data cache
+	 * @param mdbDataSpec Specifies the intersections to retrieve from Essbase, by version
 	 * 
 	 * @return List of refreshed versions
 	 * @throws PafException
 	 */
-    public List<String> updateUowCache(PafUowCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException {
+    public List<String> updateDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException {
 
     	int mdxCellCount = 0;
 		long loadDcStartTime = System.currentTimeMillis();
@@ -281,7 +279,7 @@ public class EsbData implements IMdbData{
 
 		// Exit if no data has been specified
 		if (mdbDataSpec == null || mdbDataSpec.size() == 0) {
-			logger.debug("UpdateDataCache() - empty data spec - no data loaded");
+			logger.debug("UpdateDataCache() - empty data spec - no data was updated");
 			return new ArrayList<String>();
 		}
 		
@@ -309,8 +307,8 @@ public class EsbData implements IMdbData{
 			Map<Integer, List<String>> memberMap = mdbDataSpec.get(version);
 			Map<Integer, List<String>> filteredMemberMap = dataCache.getFilteredRefDataSpec(memberMap);
 			if (filteredMemberMap.isEmpty()) {
-				logMsg = "UpdateDataCache() - all requested data already exists - no data updated";
-				logger.debug(logMsg);
+				logMsg = "UpdateDataCache() - all requested data is already loaded - no data update is required";
+				logger.info(logMsg);
 				performanceLogger.info(logMsg);
 				continue;
 			}
@@ -353,9 +351,9 @@ public class EsbData implements IMdbData{
 	 * @return Number of retrieved cells
 	 * @throws PafException 
 	 */
-	private int loadCubeData(EsbCubeView esbCubeView, String mdxQuery, PafUowCache dataCache) throws PafException {
+	private int loadCubeData(EsbCubeView esbCubeView, String mdxQuery, PafDataCache dataCache) throws PafException {
 		
-		int axisCount = dataCache.getAxisCount(), retrievedCellCount = 0;
+		int baseDimCount = dataCache.getBaseDimCount(), retrievedCellCount = 0;
 		String dimensions[] = dataCache.getBaseDimensions();
 		String logMsg = null;
 		PafApplicationDef appDef = dataCache.getAppDef();
@@ -381,7 +379,7 @@ public class EsbData implements IMdbData{
 			retrievedCellCount = essMdDataSet.getCellCount();
 			logMsg = LogUtil.timedStep("Essbase data query", qryStartTime);
 			performanceLogger.info(logMsg);
-			logMsg = "Essbase data query returned " + StringUtils.decimalFormat(retrievedCellCount, "###,###,###") + " cells";
+			logMsg = "Essbase data query returned " + StringUtils.commaFormat(retrievedCellCount) + " cells";
 			logger.debug(logMsg);
 			performanceLogger.info(logMsg);
 
@@ -394,8 +392,8 @@ public class EsbData implements IMdbData{
 			long dcLoadStartTime = System.currentTimeMillis();
 			axes = essMdDataSet.getAllAxes();
 			@SuppressWarnings("unchecked")
-			List<String>[] memberLists = new ArrayList[axisCount]; 
-			for (int i = 0; i < axisCount; i++) {
+			List<String>[] memberLists = new ArrayList[baseDimCount]; 
+			for (int i = 0; i < baseDimCount; i++) {
 				int memberCount = axes[i].getTupleCount();
 				ArrayList<String> memberList  = new ArrayList<String>(memberCount);
 				for (int j = 0; j < memberCount; j++) {
@@ -478,7 +476,7 @@ public class EsbData implements IMdbData{
 			
 			// Includes the optional keywords Non Empty before the set specification in each axis in order to suppress 
 			// slices that contain entirely #MISSING values.
-			if(isNonEmptyFlagUsed == true)
+			if(isNonEmptyFlagUsed)
 			{
 				sb.append(" Non Empty ");
 			}
@@ -498,51 +496,45 @@ public class EsbData implements IMdbData{
 	/**
 	 *	Send data back to Essbase
 	 *
-	 * @param dataCache PafUowCache Object - Updated data and associated meta-data
+	 * @param dataCache Data cache - Updated data and associated meta-data
 	 * @param clientState Client state object
 
 	 * @throws PafException
 	 */
-	public void sendData(PafUowCache dataCache, PafClientState clientState) throws PafException {
+	public void sendData(PafDataCache dataCache, PafClientState clientState) throws PafException {
 		
 		final String dataFilePath = clientState.getTransferDirPath();
 		final String dataFilePrefix = "esb";
-		final String fieldDelim = " ";
-		final String lineTerm = "\n";
-		final String q = "\"";
-		final String missingData = "#MI";
-		int axisCount = dataCache.getAxisCount(), dataCols = 0;
-		int rowDimCount = 0, measureAxis = dataCache.getMeasureAxis();
-		int timeAxis = dataCache.getTimeAxis(), versionAxis = dataCache.getVersionAxis();
-		int planTypeAxis = dataCache.getPlanTypeAxis();
-        int yearAxis = dataCache.getYearAxis();
-		int[] axisSize = dataCache.getAxisSizes(), cellIndex = new int[axisCount];
-		int[] rowDimIndexes = null, rowIntersection = null;
-		float sendElapsed = 0;
-		long sendStart = 0, sendEnd = 0;
+		final String fieldDelim = " ", lineTerm = "\n";
+		final String q = "\"", missingData = "#MI";
+		final String measureDim = dataCache.getMeasureDim();
+		final String timeDim = dataCache.getTimeDim(), versionDim = dataCache.getVersionDim();
+		final String planTypeDim = dataCache.getPlanTypeDim(), yearDim = dataCache.getYearDim();
+		final List<String> pageDims = Arrays.asList(new String[]{planTypeDim, yearDim, versionDim});
+		final List<String> colDims = Arrays.asList(new String[]{timeDim});
+		final List<String> intersectionDims = Arrays.asList(dataCache.getBaseDimensions());
+		final List<String> dummyMemberList = Arrays.asList(new String[]{"[MEMBER]"});
+		long sendStart = 0;
 		String dataFileName = null, dataFileShortName = null;
-		String[] activeVersions = dataCache.getPlanVersions();
+		String[] planVersions = dataCache.getPlanVersions();
  		FileWriter dataLoadFile = null;
-		List<String> versionFilter = new ArrayList<String>();
-		Set<Integer> nonRowIndexes = new HashSet<Integer>();
 		
 		EsbCube esbCube = null;
 		IEssCube cube = null;
 		IEssOlapServer olapServer = null;
-		PafIntersectionIterator rowIntersections = null;
 		
 		
-		// Selected data in the data cache (e.g. Active Version(s)) is written back to Essbase in the form of an
-		// Essbase data load. The data is first written to a temporary text file residing on the Paf Application
-		// Server, using a format that is supported by Essbase for doing data loads without any corresponding 
-		// load rules. This temporary file is then copied into the database directory of the appropriate Essbase
+		// Selected data in the data cache (e.g. Plan Version(s)) is written back to Essbase in the form of an
+		// Essbase data load. The data is first written to a temporary text file residing on the Pace Server,
+		// using a format that is supported by Essbase for doing data loads without any corresponding load 
+		// rules. This temporary file is then copied into the database directory of the appropriate Essbase
 		// cube. From there, the data is then loaded into Essbase. 
 		//
-		// To minimize the size of the data being transferred to Essbase, this process cycles through each
-		// unique combination of Year, Version, and Plan Type. This allows the Version, Year, and Plan Type
-		// to be defined as headers in each data load file, instead of being duplicated on each data row. 
-		// This arrangement also makes it easier to handle "locked periods", since the evaluation of "locked
-		// periods" is based on the unique combination of Year and Version.
+		// To minimize the size of the data being transferred to Essbase in a given data load, this process 
+		// cycles through each unique combination of Year, Version, and Plan Type. This allows the Version, 
+		// Year, and Plan Type to be defined as headers in each data load file, instead of being duplicated 
+		// on each data row. This arrangement also makes it easier to handle "locked periods", since the 
+		// evaluation of "locked periods" is based on the unique combination of Year and Version.
 		//
 		//
 		// Sample format of Essbase data load is displayed below:
@@ -561,60 +553,48 @@ public class EsbData implements IMdbData{
 		//	"EOPRTL_DLR" "DPT110" "Location" #MI #MI -180610.37999999998 -90305.18999999999 -23743.739999999998 -27297.020000000004 -6212.060000000001 -7045.560000000001  
 		//
 		
-		try {
-			
-			logger.info("Preparing data to be sent to Essbase");
-			sendStart = System.currentTimeMillis();
-			
-			// Create version filter
-			logger.debug("Creating version filter...");			
-			// Add in active versions
-			for (String version:activeVersions) {
-				versionFilter.add(version);
-			}
-				
-			// Adjust version dimension size to match number of member in version filter
-			axisSize[versionAxis] = versionFilter.size();
-			
-			// Setting page & col header dimensions
-			logger.debug("Setting page & col header dimensions...");			
-			int[] pageDimIndexes = {planTypeAxis, yearAxis, versionAxis};
-			int colDimIndex = timeAxis;
-			for (int index:pageDimIndexes) {
-				nonRowIndexes.add(index);
-			}
-			
-			// Create an array of row dimensions to cycle through. For Essbase optimization reasons, Measures & Time 
-			// are set as the right-most (inner) row header. Rows are comprised of all dimensions except Time, Version, 
-			// Plan Type and Year.
-			logger.debug("Setting row dimensions...");
-			rowDimCount = axisCount - (pageDimIndexes.length + 1);		
-			//TODO - Pull the list of sparse/dense dimensions from the outline and order accordingly
-			rowDimIndexes = new int[rowDimCount];
-			String[] rowMembers = new String[rowDimCount];
-			rowDimIndexes[0] = measureAxis;
-			int dimIndex = 1;
-			for (int axisIndex = 0; axisIndex < axisCount; axisIndex++) {
-				if (!nonRowIndexes.contains(axisIndex) && axisIndex != measureAxis && axisIndex != timeAxis) { 
-					// Build an array of  the row dimension axes to feed into row iterator
-					rowDimIndexes[dimIndex] = axisIndex;
-					// Increment dimension index
-					dimIndex++;
-				}
-			}
+
+		logger.info("Preparing data to be sent to Essbase");
+		sendStart = System.currentTimeMillis();
 		
-			// Instantiate row iterator - used to iterate through all row dimension members
-			rowIntersections = new PafIntersectionIterator(rowDimIndexes, dataCache);
-	
-			// Open the cube object, use connection property string if supplied
-			logger.info("Opening cube: [" + esbConnAlias + "]"); 
-			if (connectionProps != null) {
-				esbCube = new EsbCube(connectionProps);				
-			} else {
-				esbCube = new EsbCube(esbConnAlias);				
+		// Create an array list containing all intersections dimensions in the optimal 
+		// Essbase data load order. Measures & Time are set as inner-most dimensions. 
+		// The remaining dimensions are arbitrarily ordered after Measure and Time.
+		//TODO - Pull the list of sparse/dense dimensions from the outline and order accordingly
+		logger.debug("Creating list of iteration dimensions..." );
+		List<String> iteratorDims = new ArrayList<String>();
+		iteratorDims.add(measureDim);
+		iteratorDims.add(timeDim);
+		for (String dim : intersectionDims) {
+			if (!dim.equals(measureDim) && !dim.equals(timeDim)) {
+				iteratorDims.add(dim);
 			}
-			cube = esbCube.getEssCube();
-			olapServer = esbCube.getOlapServer();
+		}
+		
+		// Create an ordered list of row dimensions - all dimensions, except the page and column dimensions
+		List<String> rowDims = new ArrayList<String>(iteratorDims);
+		rowDims.removeAll(pageDims);
+		rowDims.removeAll(colDims);
+		
+		// Create a map of member lists to pass to the intersection iterator. The page
+		// and column dimensions each have their own explicit processing loops, so only a
+		// single "dummy" member will be specified for those dimensions. All data cache 
+		// members will be selected for the remaining (row) dimensions.
+		logger.debug("Creating member filter map..." );
+		List<String> versionFilter = Arrays.asList(planVersions);
+		Map<String, List<String>> memberListMap = new HashMap<String, List<String>>();
+		for (String dim : pageDims) {
+			memberListMap.put(dim, dummyMemberList);
+		}
+		for (String dim : colDims) {
+			memberListMap.put(dim, dummyMemberList);
+		}
+			
+		// Instantiate row iterator - used to iterate through all row dimension members
+		Odometer rowIterator = dataCache.getCellIterator(iteratorDims.toArray(new String[0]), memberListMap);
+
+					
+		try {
 			
 			// Create Essbase data load file. Create the temporary file directory, if it does not already exist.
 			File fileObject = new File(dataFilePath);
@@ -626,26 +606,30 @@ public class EsbData implements IMdbData{
 				logger.error(errMsg);
 				throw new IOException(errMsg.toString());			
 			}
+
 			File tempFile = File.createTempFile(dataFilePrefix, ESS_TEXT_FILE_SUFFIX, fileObject);
 			dataFileName = tempFile.getPath();
 			tempFile.deleteOnExit();
-						
+			// Open the cube object, use connection property string if supplied
+			logger.info("Opening cube: [" + esbConnAlias + "]"); 
+			if (connectionProps != null) {
+				esbCube = new EsbCube(connectionProps);				
+			} else {
+				esbCube = new EsbCube(esbConnAlias);				
+			}
+			cube = esbCube.getEssCube();
+			olapServer = esbCube.getOlapServer();
+			
 			// Cycle through list of Plan Types
-			String[] planTypes = dataCache.getAxisMembers(planTypeAxis);
+			String[] planTypes = dataCache.getDimMembers(planTypeDim);
 			for (String planType: planTypes) {
-				int planTypeMemberIndex = dataCache.getMemberIndex(planType, planTypeAxis);
-				cellIndex[planTypeAxis] = planTypeMemberIndex;
 	
 				// Cycle through list of Years
-				String[] years = dataCache.getAxisMembers(yearAxis);
+				String[] years = dataCache.getDimMembers(yearDim);
 				for (String year:years) {
-					int yearMemberIndex = dataCache.getMemberIndex(year, yearAxis);
-					cellIndex[yearAxis] = yearMemberIndex;
 					
 					// Cycle through list of Versions 
 					for (String version:versionFilter) {
-						int versionMemberIndex = dataCache.getMemberIndex(version, versionAxis);
-						cellIndex[versionAxis] = versionMemberIndex;
 						logger.info("Creating Essbase Data Load File: Plan Type [" + planType + "] - Year ["
 								+ year + "] - Version [" + version + "]"); 
 						
@@ -654,17 +638,17 @@ public class EsbData implements IMdbData{
 						
 						// Get the list of open (unlocked) periods
 						List<String> openPeriods = dataCache.getOpenPeriods(version, year);
-						dataCols = openPeriods.size();
+						int dataCols = openPeriods.size();
 					
 						// Format header definition
 						logger.debug("Formatting file header");
 						dataLoadFile.append(dQuotes(planType) + fieldDelim + dQuotes(year) + fieldDelim + dQuotes(version));
 						dataLoadFile.append(lineTerm);
 											
-						// Format column headers
+						// Format column headers(row dimensions followed by column dimension)
 						logger.debug("Formatting column headers");
-						for (int axis:rowDimIndexes) {
-							dataLoadFile.append(dQuotes(dataCache.getDimension(axis)) + fieldDelim);
+						for (String rowDim : rowDims) {
+								dataLoadFile.append(dQuotes(rowDim) + fieldDelim);								
 						}
 						for (String period:openPeriods) {
 							dataLoadFile.append(dQuotes(period) + fieldDelim);
@@ -673,14 +657,21 @@ public class EsbData implements IMdbData{
 						
 						// Writing data rows
 						logger.debug("Writing data rows");
-						while (rowIntersections.hasNext()) {
+						while (rowIterator.hasNext()) {
+							
 							// Get next row header intersection
-							rowIntersection = rowIntersections.getNext();
+							@SuppressWarnings("unchecked")
+							ArrayList<String> coords = rowIterator.nextValue();
+							Intersection intersection = new Intersection(iteratorDims, coords, intersectionDims);
+							intersection.setCoordinate(versionDim, version);
+							intersection.setCoordinate(planTypeDim, planType);
+							intersection.setCoordinate(yearDim, year);
 							
 							// Get list of members in row header
-							cellIndex = dataCache.updateCellIndex(cellIndex, rowDimIndexes, rowIntersection);								
-							for (dimIndex = 0; dimIndex < rowIntersection.length; dimIndex++) {
-								rowMembers[dimIndex] = dataCache.getDimMember(rowDimIndexes[dimIndex], rowIntersection[dimIndex]);
+							String[] rowMembers = new String[rowDims.size()];
+							int i = 0;
+							for (String rowDim : rowDims) {
+								rowMembers[i++] = intersection.getCoordinate(rowDim);
 							}
 							
 							// Write out row header
@@ -690,9 +681,8 @@ public class EsbData implements IMdbData{
 							// Write out data values
 							for (int dataCol = 0; dataCol < dataCols; dataCol++) {
 								String colMember = openPeriods.get(dataCol);
-								int colMemberIndex = dataCache.getMemberIndex(colMember, timeAxis);
-								cellIndex[colDimIndex] = colMemberIndex;
-								double cellValue = dataCache.getCellValue(cellIndex);
+								intersection.setCoordinate(timeDim, colMember);
+								double cellValue = dataCache.getCellValue(intersection);
 								if (cellValue != 0) {
 									dataLoadFile.append(String.valueOf(cellValue) + fieldDelim);
 								} else {
@@ -712,7 +702,7 @@ public class EsbData implements IMdbData{
 						logger.info("");
 						
 						// Reset the row intersection iterator for the next set of page headers
-						rowIntersections.reset();
+						rowIterator.reset();
 					}					
 				}
 			}
@@ -730,11 +720,9 @@ public class EsbData implements IMdbData{
 			}
 
 			// Log elapsed time
-			sendEnd = System.currentTimeMillis();
-			sendElapsed = (float)(sendEnd - sendStart) / 1000;
-			DecimalFormat decimalFormat = new DecimalFormat("[#,##0.00]");
-			String formattedTime = decimalFormat.format(sendElapsed);
-			logger.info("Essbase Save Complete - Total elapsed time: " + formattedTime + " seconds") ;
+			String logMsg = LogUtil.timedStep("Essbase Save", sendStart);
+			logger.info(logMsg);
+			performanceLogger.info(logMsg);
 			
 		} catch (EssException esx) {
 			// Catch essbase exception
@@ -742,12 +730,14 @@ public class EsbData implements IMdbData{
 			logger.error(errMsg);
 			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, esx);	
 			throw pfe;
-		} catch (Exception ex) {
-			// Catch runtime errors (file handler errors)
-			String errMsg = ex.getMessage();
+
+		} catch (IOException ioe) {
+			// Catch file i/o exception
+			String errMsg = ioe.getMessage();
 			logger.error(errMsg);
-			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
+			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ioe);	
 			throw pfe;
+
 		} finally {
 			try {
 				// Close cube

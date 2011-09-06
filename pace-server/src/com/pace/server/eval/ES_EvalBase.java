@@ -199,7 +199,7 @@ public abstract class ES_EvalBase implements IEvalStep {
             logStmt =  "Evaluating Rule: " + evalState.getRule().toString();
             logStmt += "\nCurrent changed cell list: " + StringUtils.arrayToString(evalState.getCurrentChangedCells().toArray(new Intersection[0]), 5);
             logStmt += "\nData slice after step: " + step.getClass().getCanonicalName() + "\n" 
-            + dataCache.getDataSlice(evalState.getSliceState().getDataSliceParms());
+            + dataCache.getDataSlice(evalState.getSliceState().getDataSliceParms(), evalState.getDimSequence());
             logger.debug(logStmt);
         }       
     }

@@ -649,7 +649,7 @@ public class PafMetaData {
 
         
         // if no url is specified try to build default relative db path
-        if (url == null || url.trim() == "") {
+        if (url == null || url.trim().equals("")) {
         	String dbPath = serverSettings.getPafServerHome() + File.separator + PafBaseConstants.PAF_CACHE_DB;
         	url = "jdbc:derby:" + dbPath;
         }

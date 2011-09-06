@@ -7,6 +7,7 @@ import java.util.Set;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 
@@ -28,4 +29,6 @@ public interface IPafEvalState {
 	public String getMeasureName();
 	public Set<Intersection> getCurrentLockedCells();
 	public void addAllAllocations(Collection<Intersection> cellsToLock);
+	public boolean isAttributeEval();
+	public PafDataCache getDataCache();
 }

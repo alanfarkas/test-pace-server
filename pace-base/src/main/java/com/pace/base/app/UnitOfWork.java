@@ -204,7 +204,7 @@ public class UnitOfWork{
 	 *  
 	 * @return Map<Integer, List<String>>
 	 */
-	public Map<Integer, List<String>> getUowMap() {
+	public Map<Integer, List<String>> buildUowMap() {
 		
 		Map <Integer, List<String>> uowMap = new HashMap<Integer, List<String>>(axisIndex.size());
 		for (int axis = 0; axis < axisIndex.size(); axis++) {
@@ -213,6 +213,23 @@ public class UnitOfWork{
 			uowMap.put(axis, memberList);
 		}
 		return uowMap;
+		
+	}
+
+	/**
+	 *  Convert unit of work to a member filter map
+	 *  
+	 * @return Map<String, List<String>>
+	 */
+	public Map<String, List<String>> buildMemberFilter() {
+		
+		Map <String, List<String>> memberFilter = new HashMap<String, List<String>>(axisIndex.size());
+		for (String dim : dimensions) {
+			String[] members = getDimMembers(dim); 
+			List<String> memberList = new ArrayList<String>(Arrays.asList(members));
+			memberFilter.put(dim, memberList);
+		}
+		return memberFilter;
 		
 	}
 

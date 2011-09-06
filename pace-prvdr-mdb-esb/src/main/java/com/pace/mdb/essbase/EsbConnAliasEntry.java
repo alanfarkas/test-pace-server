@@ -55,7 +55,7 @@ public class EsbConnAliasEntry {
 			// Look for connection alias entry in property file           
             Properties installProps = PropertyLoader.loadProperties("Install");
 			setEsbConnAlias(esbConnAlias);
-			if (esbConnAlias == "TitanServer") {
+			if (esbConnAlias.equals("TitanServer")) {
 				setEsbConnType(EsbConnType.PAF_CONN_ESB_SERVER);
 			}
 			else {

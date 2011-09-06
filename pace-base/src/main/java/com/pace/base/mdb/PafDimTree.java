@@ -1727,7 +1727,7 @@ public abstract class PafDimTree {
      * 
      * 
      * @param branchName
-     * @return
+     * @return List<PafDimMember>
      */
     public List<PafDimMember> getLowestMembers(String branchName) {
     	
@@ -1744,6 +1744,32 @@ public abstract class PafDimTree {
     	return floorMembers;
     }
     
+    /**
+     * 
+     * This method performs a traversal starting at the member specified in the current tree.
+     * It then returns the lowest level members under the specified branch. This is the equivalent
+     * of a "relative" level 0 call. In the case that the branch has no children it returns itself
+     * 
+     * 
+     * @param branchName
+     * @return List<String>
+     */
+	public List<String> getLowestMemberNames(String branchName) {
+
+		List<PafDimMember> members = new ArrayList<PafDimMember>();
+    	List<String> floorMembers = new ArrayList<String>();
+    	
+    	PafDimMember start = this.getMember(branchName);
+    	members = getMembers(start, members, TreeTraversalOrder.POST_ORDER);
+    	
+    	for (PafDimMember m : members) {
+    		if (!m.hasChildren())
+    			floorMembers.add(m.getKey());
+    	}
+    	return floorMembers;
+	}
+
+
 	/**
      *  Perform a traversal of the PafDimTree returning the member
      *  names using the selected traversal method. 

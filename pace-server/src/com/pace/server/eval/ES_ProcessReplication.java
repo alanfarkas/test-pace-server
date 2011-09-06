@@ -25,9 +25,15 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
-import com.pace.base.app.*;
+import com.pace.base.SortOrder;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.MeasureType;
+import com.pace.base.app.VarRptgFlag;
+import com.pace.base.app.VersionDef;
+import com.pace.base.app.VersionFormula;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.IntersectionUtil;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.rules.Formula;
 import com.pace.base.state.EvalState;
@@ -39,8 +45,7 @@ import com.pace.base.state.EvalState;
  *
  */
 public class ES_ProcessReplication implements IEvalStep {
-    @SuppressWarnings("unused")
-	private static Logger logger = Logger.getLogger(ES_ProcessReplication.class);
+    private static Logger logger = Logger.getLogger(ES_ProcessReplication.class);
     
 	public enum ReplicationType { ReplicateAll, ReplicateExisting };
 	
@@ -81,6 +86,7 @@ public class ES_ProcessReplication implements IEvalStep {
     		Intersection[] replicatedIx, ReplicationType replicationType) throws PafException{
 
     	String timeDim = evalState.getTimeDim();
+    	String versionDim = evalState.getVersionDim();
 
     	// Get the list of locked periods on the view
     	Set<String> lockedPeriods = evalState.getClientState().getLockedPeriods();
@@ -88,22 +94,35 @@ public class ES_ProcessReplication implements IEvalStep {
     		lockedPeriods = new HashSet<String>(0);  
     	}
 
+		// Sort replicated cells so that lower level intersections are handled first. 
+		// This is done to allow lower level replicated intersections to be created.
+    	// Else their targets will get locked out by upper level intersections. 
+		Intersection[] sortedReplicatedIx =  EvalUtil.sortIntersectionsByAxis(replicatedIx, 
+				evalState.getClientState().getMemberIndexLists(), evalState.getAxisPriority(), 
+				SortOrder.Ascending);            
+
+
     	// Take each user replication and push down to the floor of the uow.
-    	for(Intersection ix : replicatedIx){
-    		//get the list of floor inter. for the intersection to be replicated.
-    		List<Intersection> flrIx = EvalUtil.buildFloorIntersections(ix, evalState);
+    	for(Intersection ix : sortedReplicatedIx){
+ 
+    		//get the list of floor intersections for the intersection to be replicated.
+    		List<Intersection> flrIx = IntersectionUtil.buildFloorIntersections(ix, evalState);
     		
     		double replicatedValue = 0;
     		boolean isVarVer = false;
+    		String baseVersion = null;
     		
-    		//get the value of the the intersection to be replicated - from the DC, or the eval state
-    		//if the intersection is a variance version.
+
+    		// Variance version replication preparation
+            //TODO - Simply this logic, since all versions are now in the data cache
     		if(evalState != null && evalState.getVarianceReplicationValues() != null && evalState.getVarianceReplicationValues().containsKey(ix)){
     			isVarVer = true;
-    			replicatedValue = evalState.getVarianceReplicationValues().get(ix);
-    		}else{
-    			replicatedValue = dataCache.getCellValue(ix);
+    			VersionDef versionDef = dataCache.getVersionDef(ix.getCoordinate(versionDim));
+    			baseVersion = versionDef.getVersionFormula().getBaseVersion();
     		}
+
+    		//get the value of the the intersection to be replicated
+    		replicatedValue = dataCache.getCellValue(ix);
     		
     		if(flrIx != null){
     			//add all of the floor intersections to the changed cell stack.
@@ -114,13 +133,24 @@ public class ES_ProcessReplication implements IEvalStep {
 	    			//also filter out level 0 elapsed period intersections, as they 
 	    			//are not locked if any upper level member appears in the
 	    			//page header (TTN-1259).
-	    			if(!evalState.getCurrentChangedCells().contains(i) &&
-	    					!evalState.getCurrentLockedCells().contains(i) &&
-	    					!isIntersectionUnderProtection(evalState, i) &&
-	    					!lockedPeriods.contains(i.getCoordinate(timeDim))){
+	    			//
+	    			//if variance version replication, need to convert target
+	    			//intersection to its corresponding base intersection for 
+	    			//comparison to changed and locked cells collections. (AF-8/24/11)
+	    			//TODO Clean up variance version logic and overlap with convertChange method
+	  				Intersection tempIx = null;
+	    			if (isVarVer) {
+	    				tempIx = i.clone();
+	    				tempIx.setCoordinate(versionDim, baseVersion);
+	    			} else {
+	    				tempIx = i;
+	    			}
+ 	    			if(!evalState.getCurrentChangedCells().contains(tempIx) &&
+	    					!evalState.getCurrentLockedCells().contains(tempIx) &&
+	    					!isIntersectionUnderProtection(evalState, tempIx) &&
+	    					!lockedPeriods.contains(tempIx.getCoordinate(timeDim))){
 	    				
 	    				boolean cellChanged = true;
-	    				Intersection tempIx = null;
 	    				
 		    			switch (replicationType) {
 			    			case ReplicateAll:
@@ -160,7 +190,7 @@ public class ES_ProcessReplication implements IEvalStep {
 		    				//lock this intersection
 		    				evalState.getCurrentLockedCells().add(tempIx);	
 		    			}
-	    			} 
+	    			}
 	    		}
     		}
     	}
@@ -203,13 +233,13 @@ public class ES_ProcessReplication implements IEvalStep {
         // the only thing that should change in this case is the version
         // so look up appropriate variance version
         VersionDef vd = evalState.getClientState().getApp().getVersionDef(is.getCoordinate(versDim));
-        VersionFormula versFormula = (VersionFormula) vd.getVersionFormula();
+        VersionFormula versFormula = vd.getVersionFormula();
        
 		// get cell value of corresponding comparison version intersection
 		Intersection tempIs = is.clone();
 		tempIs.setCoordinate(versDim, versFormula.getCompareVersion());
 		double compareValue = dataCache.getCellValue(tempIs);
-
+		
 		// Get the variance reporting flag for the measure being calculated
    		String measure = is.getCoordinate(measDim);
 		try {
@@ -236,7 +266,7 @@ public class ES_ProcessReplication implements IEvalStep {
     }
     
     /***
-     * gets the value for a base varaiance version intersection.
+     * gets the value for a base variance version intersection.
      * @param is the intersection of the variance version
      * @param evalState Evaluation sequence.
      * @param dataCache PafUowCache
@@ -249,7 +279,7 @@ public class ES_ProcessReplication implements IEvalStep {
         // the only thing that should change in this case is the version
         // so look up appropriate variance version
         VersionDef vd = evalState.getClientState().getApp().getVersionDef(is.getCoordinate(versDim));
-        VersionFormula versFormula = (VersionFormula) vd.getVersionFormula();
+        VersionFormula versFormula = vd.getVersionFormula();
        
 		// get cell value of corresponding comparison version intersection
 		Intersection tempIs = is.clone();

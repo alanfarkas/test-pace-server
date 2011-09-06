@@ -75,7 +75,7 @@ public class EsbDomain {
 	protected void disconnect()  {
 		try {
 			// Disconnect from domain
-			if (essbase!= null && (essbase.isSignedOn() == true))
+			if (essbase!= null && (essbase.isSignedOn()))
 				essbase.signOff();
 		} catch (EssException ee) {
 			//throw pafException;

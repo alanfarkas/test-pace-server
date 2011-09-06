@@ -1361,7 +1361,7 @@ public class PafServiceProvider implements IPafService {
 	/**
 	 *	Evaluate pending calculations on view section
 	 *
-	 * @param evalRequest Evlataion reqest object
+	 * @param evalRequest Evaluation request object
 	 * @return PafDataSlice Paf data slice
 	 * @throws RemoteException
 	 * @throws PafSoapException
@@ -1369,7 +1369,6 @@ public class PafServiceProvider implements IPafService {
 	public PafView evaluateView(EvaluateViewRequest evalRequest)
 			throws RemoteException, PafSoapException {
 
-		PafDataSlice dataSlice = null;
 		PafView pView = null;
 		PafView pViewEmpty = null;
 		String clientId = evalRequest.getClientId();
@@ -1406,9 +1405,10 @@ public class PafServiceProvider implements IPafService {
 			//Evaluate view
 			PafView currentView = clientState.getView(evalRequest.getViewName());
 			PafMVS pafMVS = clientState.getMVS(PafMVS.generateKey(currentView, currentView.getViewSections()[0]));
-			PafDataCache dsCache = pafMVS.getDataSliceCache();
+			PafDataCache dataCache = pafMVS.getDataCache();
+			dataCache.setPafMVS(pafMVS);
 			PafDataSliceParms sliceParms = pafMVS.getDataSliceParms();
-			dataService.evaluateView(evalRequest, clientState, dsCache, sliceParms);
+			dataService.evaluateView(evalRequest, clientState, dataCache, sliceParms);
 			
 			//Set original user selections
 			PafView view = clientState.getView(evalRequest.getViewName());
@@ -3130,9 +3130,9 @@ public class PafServiceProvider implements IPafService {
 
 							//Build a map of valid members for each base dimension
 							for(String baseMember : expressionList){
-								Set<Intersection> validAttrIntersections = dataService.getAttributeIntersections(baseDim, baseMember, attrDimLists.toArray(new String[0]));
+								Set<Intersection> validAttrIntersections = dataService.getAttributeCombos(baseDim, baseMember, attrDimLists.toArray(new String[0]));
 								for(List<String> attrIntersectionList : attrIntersectionLists){
-									if(dataService.isValidAttributeIntersection(baseDim, baseMember, attrDimLists.toArray(new String[0]),
+									if(dataService.isValidAttributeCombo(baseDim, baseMember, attrDimLists.toArray(new String[0]),
 											attrIntersectionList.toArray(new String[0]), validAttrIntersections)){
 										validBaseMemberList.add(baseMember);
 										break;
@@ -3250,19 +3250,26 @@ public class PafServiceProvider implements IPafService {
 				}
 			}
 			
-			int uowCellCount = workUnit.getMemberCount();
 			
-			//If the cell count falls within the bounds, then update the unit of work in the client state
+			// Calculate the UOW cell count. For sizing purposes we will ignore derived versions, which
+			// have been added to the unit of work definition to support Attribute Evaluation re-design
+			// (TTN-1506).
+			UnitOfWork sizingWorkUnit = workUnit.clone();
+			String versionDim = clientState.getApp().getMdbDef().getVersionDim();
+			List<String> versions = new ArrayList<String>(Arrays.asList(sizingWorkUnit.getDimMembers(versionDim)));
+			versions.removeAll(clientState.getApp().getDerivedVersions());
+			sizingWorkUnit.setDimMembers(versionDim, versions.toArray(new String[0]));
+			int uowCellCount = sizingWorkUnit.getMemberCount();
+			
+			// If the cell count falls within the bounds, then update the unit of work in the client state
 			if ((sizeMax == null || uowCellCount <= sizeMax) && uowCellCount > 0){
 				clientState.setUnitOfWork(workUnit);
 			}
 			
-			resp.setUowCellCount(uowCellCount);
-			
+			// Fill out remaining response object fields
+			resp.setUowCellCount(uowCellCount);			
 			resp.setEmptyDimensions(workUnit.getEmptyDimensions());
 			
-			//Update response with the cell count
-			//resp.setUowCellCount()
 		} catch (RuntimeException re) {
 
 			handleRuntimeException(re);

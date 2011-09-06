@@ -224,14 +224,14 @@ public class StringUtils {
 	 * @param number Number to format
 	 * @return
 	 */
-	public static String commaFormat(int number) {
+	public static String commaFormat(Number number) {
 		
 		String defaultPattern = "#,###,###,###,###";
 		return decimalFormat(number, defaultPattern);
 	}
 
 	/**
-     * 	Format a number using the supplied decimal format patterh
+     * 	Format a number using the supplied decimal format pattern
      * 
      * @param number Number to format
      * @param pattern Decimal format pattern
@@ -254,7 +254,7 @@ public class StringUtils {
      * @param list List of objects containing alpha-numeric characters
      * @return String
      */
-    public static String listToString(List<String> list) {
+    public static String arrayListToString(List<String> list) {
     	
     	Object[] array = list.toArray(new String[0]);
         return arrayToString(array);

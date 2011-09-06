@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.app.UnitOfWork;
 import com.pace.base.utility.StringUtils;
 
 /**
@@ -43,6 +44,8 @@ public class PafDataSliceParms {
 	private String[][] colTuples = null;
 	private String[] pageMembers = null;
 	private String[][] rowTuples = null;
+	private String[] attributeDims = null;
+	private String[] dimSequence = null;
 	private static Logger logger = Logger.getLogger("PafDataSliceParms");
 	
 	public PafDataSliceParms () {
@@ -65,6 +68,20 @@ public class PafDataSliceParms {
 		return allDims.toArray(new String[0]);
 	}
 
+
+	/**
+	 * @return the attributeDims
+	 */
+	public String[] getAttributeDims() {
+		return attributeDims;
+	}
+
+	/**
+	 * @param attributeDims the attributeDims to set
+	 */
+	public void setAttributeDims(String[] attributeDims) {
+		this.attributeDims = attributeDims;
+	}
 
 	/**
 	 *	Return the column dimensions
@@ -104,6 +121,20 @@ public class PafDataSliceParms {
 	}
 
 	
+	/**
+	 * @return the dimSequence
+	 */
+	public String[] getDimSequence() {
+		return dimSequence;
+	}
+
+	/**
+	 * @param dimSequence the dimSequence to set
+	 */
+	public void setDimSequence(String[] dimSequence) {
+		this.dimSequence = dimSequence;
+	}
+
 	/**
 	 *	Return the page dimensions
 	 *
@@ -247,6 +278,34 @@ public class PafDataSliceParms {
 	
 	}
 	
+
+	/**
+	 * 	Create a unit of work specification 
+	 * 
+	 * @return UnitOfWork
+	 */
+	public UnitOfWork buildUowSpec() {
+		return buildUowSpec(getAllDimensions());
+	}
+
+	/**
+	 * 	Create a unit of work specification for the specified dimensions
+	 * 
+	 * @param dimensions Array of dimensions in axis order
+	 * @return UnitOfWork
+	 */
+	public UnitOfWork buildUowSpec(String[] dimensions) {
+		
+		int dimCount = dimensions.length;
+		String[][] memberArray = new String[dimCount][];
+		for (int i = 0; i < dimCount; i++) {
+			String dimension = dimensions[i];
+			memberArray[i] = getMembers(dimension);
+		}
+		
+		return new UnitOfWork(dimensions, memberArray);
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

@@ -36,6 +36,4 @@ public interface IEvalStrategy {
 
     public PafDataCache executeDefaultStrategy(EvalState evalState) throws PafException;
 
-    public PafDataCache executeAttributeStrategy(EvalState evalState) throws PafException;
-
 }

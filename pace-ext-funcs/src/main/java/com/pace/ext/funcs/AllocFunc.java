@@ -445,7 +445,7 @@ public class AllocFunc extends AbstractFunction {
         for (Intersection target : targets ) {
         	baseCoords = target.getCoordinates();
         	baseCoords[msrIndex] = baseMeasure;
-            baseTargetSum += dataCache.getCellValue(baseCoords);
+            baseTargetSum += dataCache.getCellValue(target.getDimensions(), baseCoords);
         }
         
 //        if (logger.isDebugEnabled()) logger.debug("Original total of unlocked base measure targets: " + baseTargetSum);  
@@ -455,9 +455,7 @@ public class AllocFunc extends AbstractFunction {
 
         	// target coordinates have already been shifted by the 
         	// addition operation above.
-        	baseCoords = target.getCoordinates();     	
-        	
-            baseValue = dataCache.getCellValue(baseCoords);
+            baseValue = dataCache.getCellValue(target);
             if (baseTargetSum == 0) {
                 allocValue = allocAvailable / targets.size();
             }

@@ -155,6 +155,7 @@ public class ES_ConvertVarianceVersions implements IEvalStep {
         
         // Add data points for replications in variance versions. Since variance versions
         // don't exist in the data cache these values will need to be looked up from the eval state
+        //TODO - Simply this logic, since all versions are now in the data cache
         Map<Intersection, Double> varianceReplicationValues = new HashMap<Intersection, Double>();
         for (Intersection is : evalState.getSliceState().getReplicateAllCells()) {
             if (vdNames.contains(is.getCoordinate(versDim))) {
@@ -227,7 +228,7 @@ public class ES_ConvertVarianceVersions implements IEvalStep {
     			String dim = compareDims[i];
     			String currMember = compareIs.getCoordinate(dim);
     			PafDimTree dimTree = uowTrees.getTree(dim);
-    			String compareMember = PafDataSliceCacheCalc.resolveMemberSpec(compareMembers[i], dimTree, currMember);
+    			String compareMember = PafDataCacheCalc.resolveMemberSpec(compareMembers[i], dimTree, currMember);
     			compareIs.setCoordinate(dim, compareMember);
     		}
     		

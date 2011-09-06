@@ -19,17 +19,28 @@
  */
 package com.pace.base.state;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.pace.base.app.*;
+import com.pace.base.app.MeasureType;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.VersionDef;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
-import com.pace.base.mdb.*;
-import com.pace.base.rules.*;
-import com.pace.base.view.PafViewHeader;
-import com.pace.base.view.PafViewSection;
-import com.pace.base.view.PageTuple;
-import com.pace.base.view.ViewTuple;
+import com.pace.base.mdb.PafDataCache;
+import com.pace.base.mdb.PafDimMember;
+import com.pace.base.mdb.PafDimTree;
+import com.pace.base.mdb.TreeTraversalOrder;
+import com.pace.base.rules.Formula;
+import com.pace.base.rules.RoundingRule;
+import com.pace.base.rules.Rule;
+import com.pace.base.rules.RuleGroup;
+import com.pace.base.rules.RuleSet;
 
 
 /**
@@ -60,7 +71,6 @@ public class EvalState implements IPafEvalState, Cloneable {
 	
 	private Set <Intersection> userLocksAndChangedCells = new HashSet<Intersection>();
 
-	//pmack
 	private boolean roundingResourcePass = false;
 	private boolean skipRounding = false;
 
@@ -106,7 +116,6 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private PafClientState clientState;
 	private PafDataCache dataCache;
 	private boolean isAttributeEval = false;
-	private Set<String> explodedBaseDims;
 	private boolean isDefaultEvalStep = false;
 	private boolean hasContribPctFormulas = false;
 
@@ -122,6 +131,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private String timeDim;
 	private String versionDim;
 	private String[] axisPriority;
+	private String[] dimSequence;
 	
 
 	/**
@@ -211,12 +221,12 @@ public class EvalState implements IPafEvalState, Cloneable {
 			this.addOrigLockedCellByTime(is);
 		}
 
-		// initilize datacache trees from clientState
+		// Initialize data cache trees from clientState
 		this.dataCacheTrees = clientState.getUowTrees();
 
 
 		// initialize time structures.
-		// Get a postorder version of the time dimension for the datacache
+		// Get a post order version of the time dimension for the data cache
 		// and filter out any locked periods
 		this.timeSubTree = dataCacheTrees.getTree(timeDim);
 		List<String> timePeriods = timeSubTree.getMemberNames(TreeTraversalOrder.POST_ORDER);
@@ -947,21 +957,6 @@ public class EvalState implements IPafEvalState, Cloneable {
 
 
 	/**
-	 * @return the explodedBaseDims
-	 */
-	public Set<String> getExplodedBaseDims() {
-		return explodedBaseDims;
-	}
-
-	/**
-	 * @param explodedBaseDims the explodedBaseDims to set
-	 */
-	public void setExplodedBaseDims(Set<String> explodedBaseDims) {
-		this.explodedBaseDims = explodedBaseDims;
-	}
-
-
-	/**
 	 * @return the hasContribPctFormulas
 	 */
 	public boolean hasContribPctFormulas() {
@@ -1063,6 +1058,22 @@ public class EvalState implements IPafEvalState, Cloneable {
 	 */
 	public void setAxisPriority(String[] axisPriority) {
 		this.axisPriority = axisPriority;
+	}
+
+
+	/**
+	 * @param dimSequence the dimSequence to set
+	 */
+	public void setDimSequence(String[] dimSequence) {
+		this.dimSequence = dimSequence;
+	}
+
+
+	/**
+	 * @return the dimSequence
+	 */
+	public String[] getDimSequence() {
+		return dimSequence;
 	}
 
 
