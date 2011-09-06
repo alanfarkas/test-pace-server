@@ -1,0 +1,37 @@
+<RuleSet xmlns="http://www.thepalladiumgroup.com/paf_rule_set">
+  <name>Alloc_Sum</name>
+
+ 
+   <!-- Used in TTHs on 9/6/11 Do not update -->  
+ 
+ 
+ 
+  
+  <ruleGroups>
+  
+  
+  <!-- TEST TO SEE THAT 
+  			-	Alloc and Sum functions
+  -->
+  
+ 
+    <RuleGroup>
+      <rules>
+        <Rule>
+          <formula>
+            <resultTerm>MDTTL_DLR</resultTerm>
+            <expression>@ALLOC(MDPERM_DLR, MDPROMO_DLR, MDCLEAR_DLR)</expression>
+          </formula>
+        </Rule>
+        <Rule>
+          <formula>
+            <resultTerm>MDTTL_DLR</resultTerm>
+            <expression>@SUM(MDPERM_DLR, MDPROMO_DLR, MDCLEAR_DLR)</expression>
+          </formula>
+        </Rule>             
+      </rules>
+    </RuleGroup>
+ 
+
+  </ruleGroups>
+</RuleSet>

@@ -10,7 +10,23 @@
     <CustomFunctionDef>
         <functionName>@IWOS</functionName>
         <className>com.pace.ext.funcs.IWOSFunc</className>
-    </CustomFunctionDef>    
+    </CustomFunctionDef>  
+    <CustomFunctionDef>
+        <functionName>@ALLOC</functionName>
+        <className>com.pace.ext.funcs.AllocFunc</className>
+    </CustomFunctionDef>        
+    <CustomFunctionDef>
+        <functionName>@ALLOCONLY</functionName>
+        <className>com.pace.ext.funcs.AllocOnlyFunc</className>
+    </CustomFunctionDef>  
+    <CustomFunctionDef>
+        <functionName>@SUM</functionName>
+        <className>com.pace.ext.funcs.SumFunc</className>
+    </CustomFunctionDef>        
+    <CustomFunctionDef>
+        <functionName>@SUMONLY</functionName>
+        <className>com.pace.ext.funcs.SumOnlyFunc</className>
+    </CustomFunctionDef>  
     <CustomFunctionDef>
         <functionName>@RELATIVECOUNT</functionName>
         <className>com.pace.ext.funcs.RelativeCountFunc</className>
