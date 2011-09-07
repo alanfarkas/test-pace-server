@@ -6,12 +6,13 @@
   <ruleGroups>
   
   <!-- TEST TO SEE THAT 
-  			-	Alloc and Sum functions work
+  			-	Alloc and Sum functions
 
   -->
  
  
 <!-- Default Behavior, allocates and sums into children -->
+
  
     <RuleGroup>
     <skipProtProc>true</skipProtProc>
@@ -39,16 +40,18 @@
     </RuleGroup> 
 
 
+
 <!-- Allocates and sums into children with filters -->
  
-    <RuleGroup>
+
+<!--    <RuleGroup>
     <skipProtProc>true</skipProtProc>
       <rules>
         <Rule>
 		  <evalLockedIntersections>true</evalLockedIntersections>
           <formula>
-            <resultTerm>EXCLUDE3</resultTerm>
-            <expression>@ALLOC(EXCLUDE3, EXCLUDE9)</expression>
+            <resultTerm>MDTTL_DLR</resultTerm>
+            <expression>@ALLOC(MDTTL_DLR, MDCLEAR_DLR)</expression>
           </formula>
         </Rule>
 	  </rules>
@@ -59,25 +62,27 @@
 	  <rules>
         <Rule>
           <formula>
-            <resultTerm>EXCLUDE3</resultTerm>
-            <expression>@SUM(EXCLUDE3, EXCLUDE9)</expression>
+            <resultTerm>MDTTL_DLR</resultTerm>
+            <expression>@SUM(MDTTL_DLR, MDCLEAR_DLR)</expression>
           </formula>
         </Rule>             
       </rules>
     </RuleGroup> 
+-->
 
 
 
 <!-- Allocates and sums only into listed children -->
- 
+
+<!--
     <RuleGroup>
     <skipProtProc>true</skipProtProc>
       <rules>
         <Rule>
 		  <evalLockedIntersections>true</evalLockedIntersections>
           <formula>
-            <resultTerm>EXCLUDE2</resultTerm>
-            <expression>@ALLOCONLY(EXCLUDE2, EXCLUDE4, EXCLUDE5, EXCLUDE6)</expression>
+            <resultTerm>MDTTL_DLR</resultTerm>
+            <expression>@ALLOCONLY(MDTTL_DLR, MDCLEAR_DLR, MDPROMO_DLR )</expression>
           </formula>
         </Rule>
 	  </rules>
@@ -88,12 +93,14 @@
 	  <rules>
         <Rule>
           <formula>
-            <resultTerm>EXCLUDE2</resultTerm>
-            <expression>@SUMONLY(EXCLUDE2, EXCLUDE4, EXCLUDE5, EXCLUDE6)</expression>
+            <resultTerm>MDTTL_DLR</resultTerm>
+            <expression>@SUMONLY(MDTTL_DLR, MDCLEAR_DLR, MDPROMO_DLR )</expression>
           </formula>
         </Rule>             
       </rules>
     </RuleGroup> 
+
+-->
 
   </ruleGroups>
   
