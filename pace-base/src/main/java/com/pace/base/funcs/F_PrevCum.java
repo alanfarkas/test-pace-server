@@ -26,9 +26,9 @@ import java.util.Set;
 
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.IntersectionUtil;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
@@ -85,7 +85,7 @@ public class F_PrevCum extends AbstractFunction {
     }
     
     private double sumLevel0Desc(Intersection dataIs, IPafEvalState evalState, IPafDataCache dataCache) throws PafException {
-		List<Intersection>floorIs = IntersectionUtil.buildFloorIntersections(dataIs, evalState);
+		List<Intersection>floorIs = EvalUtil.buildFloorIntersections(dataIs, evalState);
 		double sum = 0;
 		for (Intersection is : floorIs) 
 			sum+= dataCache.getCellValue(is);

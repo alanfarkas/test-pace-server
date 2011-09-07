@@ -870,6 +870,26 @@ public class PafDataCache implements IPafDataCache {
 		setCellValue(intersection, value);
 	}
 
+
+	
+	/**
+	 *	Set the value for a specific data cache cell and optionally track changes
+	 *
+	 * @param intersection Cell intersection
+	 * @param value Value to put into cell
+	 * @param trackChangeOpt Data cache change tracking option
+	 */
+	public void setCellValue(Intersection intersection, double value, DcTrackChangeOpt trackChangeOpt) {
+
+        // Update cell value
+        if (trackChangeOpt == DcTrackChangeOpt.NONE) {
+              setCellValue(intersection, value);
+        } else {
+              setCellValueAndTrackChanges(intersection, value);
+        }     
+
+	}
+		
 	/**
 	 *	Set the value for a specific data cache cell and track any changed cells
 	 *
@@ -1898,6 +1918,13 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public List<PafDataCacheCell> getChangedCells() {
 		return changedCells.getCells();
+	}
+
+	/**
+	 * @return Returns the set of changed data cache intersections.
+	 */
+	public Set<Intersection> getChangedIntersections() {
+		return changedCells.getCellIntersections();
 	}
 
 	/**

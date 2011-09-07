@@ -41,10 +41,11 @@ import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionFormula;
 import com.pace.base.app.VersionType;
 import com.pace.base.app.VersionVarianceType;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.funcs.IPafFunction;
+import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.PafAttributeTree;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDataCache;
@@ -305,11 +306,7 @@ public abstract class PafDataCacheCalc {
 
 						// Update aggregated member value
 						intersection.setCoordinate(aggDimension, aggMember);
-						if (trackChanges == DcTrackChangeOpt.NONE) {
-							dataCache.setCellValue(intersection, aggAmount);
-						} else {
-							dataCache.setCellValueAndTrackChanges(intersection, aggAmount);
-						}	
+						dataCache.setCellValue(intersection, aggAmount, trackChanges);
 
 					} 
 				}  // Next intersection
@@ -567,7 +564,7 @@ public abstract class PafDataCacheCalc {
 		
 		
 		// Explode attribute intersection into corresponding base intersections
-		Odometer cacheIterator = IntersectionUtil.explodeAttributeIntersection(dataCache, attrIs, memberTrees);
+		Odometer cacheIterator = EvalUtil.explodeAttributeIntersection(dataCache, attrIs, memberTrees);
 
 		// Exit if no intersections were found
 		if (cacheIterator == null) {
@@ -603,11 +600,8 @@ public abstract class PafDataCacheCalc {
 		}
 		
 		// Store results
-		if (trackChanges == DcTrackChangeOpt.NONE) {
-			dataCache.setCellValue(attrIs, result);
-		} else {
-			dataCache.setCellValueAndTrackChanges(attrIs, result);
-		}
+		dataCache.setCellValue(attrIs, result, trackChanges);
+
 	}
 
 	
@@ -637,7 +631,7 @@ public abstract class PafDataCacheCalc {
 			// Get list of valid base members for the current base dimension
 			Set<String> assocAttributes = new HashSet<String>(assocAttrMap.get(baseDim));
 			memberComboDims.addAll(assocAttributes);
-			List<String> baseMembers = IntersectionUtil.getComponentBaseMembers(dataCache, baseDim, assocAttributes, attrIs, uowTrees);
+			List<String> baseMembers = EvalUtil.getComponentBaseMembers(dataCache, baseDim, assocAttributes, attrIs, uowTrees);
 			baseMemberMap.put(baseDim, baseMembers);
 		}
 

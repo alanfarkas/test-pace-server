@@ -33,6 +33,7 @@ import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.data.Intersection;
+import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataCacheCell;
 import com.pace.base.state.EvalState;
@@ -214,10 +215,8 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 
              
              // Store changed cells as intersections, keyed by measure
-             List<PafDataCacheCell> dccChangedCells = dataCache.getChangedCells();
-             for (PafDataCacheCell cell : dccChangedCells) {
-            	 evalState.addChangedCell(cell.getCellIntersection());
-             }
+             Set<Intersection> dcChangedIsSet = dataCache.getChangedIntersections();
+             evalState.addAllChangedCells(dcChangedIsSet);
              dataCache.initChangedCells();
 		}
 		

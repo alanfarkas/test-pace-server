@@ -33,7 +33,6 @@ import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionFormula;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.IntersectionUtil;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.rules.Formula;
 import com.pace.base.state.EvalState;
@@ -106,7 +105,7 @@ public class ES_ProcessReplication implements IEvalStep {
     	for(Intersection ix : sortedReplicatedIx){
  
     		//get the list of floor intersections for the intersection to be replicated.
-    		List<Intersection> flrIx = IntersectionUtil.buildFloorIntersections(ix, evalState);
+    		List<Intersection> flrIx = EvalUtil.buildFloorIntersections(ix, evalState);
     		
     		double replicatedValue = 0;
     		boolean isVarVer = false;

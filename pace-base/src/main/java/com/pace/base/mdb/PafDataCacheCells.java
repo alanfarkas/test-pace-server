@@ -19,7 +19,9 @@
 package com.pace.base.mdb;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.pace.base.data.Intersection;
 
@@ -34,7 +36,7 @@ import com.pace.base.data.Intersection;
  */
 public class PafDataCacheCells {
 
-	List<PafDataCacheCell> cells = new ArrayList<PafDataCacheCell>();
+	private List<PafDataCacheCell> cells = new ArrayList<PafDataCacheCell>();
 //	private static Logger logger = Logger.getLogger(PafDataCacheCells.class);
 	
 	
@@ -58,5 +60,20 @@ public class PafDataCacheCells {
 		return cells;
 	}
 	
+	
+	/**
+	 * 
+	 * Return the set of changed cell intersections
+	 * 
+	 * @return List<Intersection>
+	 */
+	public Set<Intersection> getCellIntersections() {
+		
+		Set<Intersection> intersections = new HashSet<Intersection>();
+		for (PafDataCacheCell cell : cells) {
+			intersections.add(cell.getCellIntersection());
+		}
+		return intersections;		
+	}
 }
 

@@ -14,7 +14,6 @@ import com.pace.base.PafException;
 import com.pace.base.app.VersionType;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.IntersectionUtil;
 import com.pace.base.funcs.AbstractFunction;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -389,7 +388,7 @@ public class AllocFunc extends AbstractFunction {
 	            String currentMeasure = target.getCoordinate(evalState.getAppDef().getMdbDef().getMeasureDim());
 	    		if (evalState.getRoundingRules().containsKey(currentMeasure)){
 	    			places = evalState.getRoundingRules().get(currentMeasure).getDigits();
-	    			allocValue = IntersectionUtil.Round(allocValue, places);
+	    			allocValue = EvalUtil.Round(allocValue, places);
 	    			evalState.getAllocatedLockedCells().add(target);
 	    		}
     		}
@@ -438,7 +437,7 @@ public class AllocFunc extends AbstractFunction {
         for (Intersection target : targets ) {
         	baseCoords = target.getCoordinates();
         	baseCoords[msrIndex] = baseMeasure;
-            baseTargetSum += dataCache.getCellValue(target.getDimensions(), baseCoords);
+            baseTargetSum += dataCache.getCellValue(target);
         }
         
 //        if (logger.isDebugEnabled()) logger.debug("Original total of unlocked base measure targets: " + baseTargetSum);  

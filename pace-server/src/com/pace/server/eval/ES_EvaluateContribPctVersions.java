@@ -37,7 +37,6 @@ import com.pace.base.mdb.PafDataCache;
 import com.pace.base.rules.Formula;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.SliceState;
-import com.pace.base.utility.IntersectionUtils;
 
 
 /**
@@ -229,7 +228,7 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		memberFilter.put(versionDim, contribPctVersions);
 		
 		// Migrate changed contribution percent cells
-		Set<Intersection> changedContribPctCells  = IntersectionUtils.getFilteredIntersections(changedCells, memberFilter);
+		Set<Intersection> changedContribPctCells  = EvalUtil.getFilteredIntersections(changedCells, memberFilter);
 		dsEvalState.removeAllUserChanges(changedContribPctCells);
 		Map<Intersection, Double> changedContribPctValueMap = new HashMap<Intersection, Double>();
 		for (Intersection changedCell : changedContribPctCells) {
@@ -238,7 +237,7 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		dsEvalState.addAllChangedContribPctCells(changedContribPctValueMap);
 		
 		// Migrate locked contribution percent cells
-		Set<Intersection> lockedContribPctCells  = IntersectionUtils.getFilteredIntersections(lockedCells, memberFilter);
+		Set<Intersection> lockedContribPctCells  = EvalUtil.getFilteredIntersections(lockedCells, memberFilter);
 		dsEvalState.removeAllUserChanges(lockedContribPctCells);
 		for (Intersection lockedCell : lockedContribPctCells) {
 			changedContribPctValueMap.put(lockedCell, dataCache.getCellValue(lockedCell));
@@ -246,16 +245,16 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		dsEvalState.addAllChangedContribPctCells(changedContribPctValueMap);
 		
 		// Migrate protected contribution percent cells
-		Set<Intersection> contribPctProtectedCells = IntersectionUtils.getFilteredIntersections(protectedCells, memberFilter);
+		Set<Intersection> contribPctProtectedCells = EvalUtil.getFilteredIntersections(protectedCells, memberFilter);
 		dsEvalState.removeAllProtectedCells(contribPctProtectedCells);
 		
 		// Migrate replicate all contribution percent cells
-		replicateAllContribPctCells = IntersectionUtils.getFilteredIntersections(replicateAllCells, memberFilter);
+		replicateAllContribPctCells = EvalUtil.getFilteredIntersections(replicateAllCells, memberFilter);
 		sliceState.removeReplicateAllCells(replicateAllContribPctCells);
 		dsEvalState.setReplicateAllContribPctCells(replicateAllContribPctCells);
 		
 		// Migrate replicate existing contribution percent cells
-		replicateExistingContribPctCells = IntersectionUtils.getFilteredIntersections(replicateExistingCells, memberFilter);
+		replicateExistingContribPctCells = EvalUtil.getFilteredIntersections(replicateExistingCells, memberFilter);
 		sliceState.removeReplicateExistingCells(replicateExistingContribPctCells);
 		dsEvalState.setReplicateAllContribPctCells(replicateExistingContribPctCells);
 						

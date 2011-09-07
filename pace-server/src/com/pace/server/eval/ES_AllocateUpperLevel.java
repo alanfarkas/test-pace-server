@@ -33,7 +33,6 @@ import com.pace.base.app.MeasureType;
 import com.pace.base.app.VersionType;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -206,7 +205,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         if (lockedTimePeriods.contains(intersection.getCoordinate(timeDim))) return dataCache;
     	
         
-    	List<Intersection> targetList = IntersectionUtil.buildFloorIntersections(intersection, evalState);
+    	List<Intersection> targetList = EvalUtil.buildFloorIntersections(intersection, evalState);
     	if (targetList.size() == 0) return dataCache;
     	if (targetList.size() == 1 && targetList.get(0).equals(intersection)) {
     		return dataCache;

@@ -14,7 +14,6 @@ import com.pace.base.PafException;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.IntersectionUtil;
 import com.pace.base.funcs.AbstractFunction;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
