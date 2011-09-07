@@ -34,11 +34,11 @@ import com.pace.base.state.IPafEvalState;
  */
 public class SumFunc extends AbstractFunction {
 
-   	private static int MEASURE_ARGS = 1, REQUIRED_ARGS = 1; //, MAX_ARGS = 4;
+   	protected static int MEASURE_ARGS = 1; //, MAX_ARGS = 4;
+	protected static int REQUIRED_ARGS = 1;
    	
-  	private String msrToSum = null;
-
-	private Set<String> inputMsrs = new HashSet<String>();
+	protected String msrToSum = null;
+	protected Set<String> inputMsrs = new HashSet<String>();
 	
 	private static Logger logger = Logger.getLogger(SumFunc.class);
 
@@ -116,21 +116,25 @@ public class SumFunc extends AbstractFunction {
     	// Get required arguments
     	msrToSum = this.measureName;
     	
-
-    	
     	// Check for optional parameters - if any other parameters 
-    	// then they represent the inputs rather than the default children
+    	// then they represent children to be filtered out of the default children
     	int index = 1;
     	inputMsrs.clear();
+    	
+     	// initialize with children measures
+    	for (PafDimMember msrMbr : measureTree.getChildren(msrToSum)) {
+    		inputMsrs.add(msrMbr.getKey());      		
+    	}
+    	
+     	// remove any measures specified
     	if (parms.length > 1) {
-    		while (index<=parms.length)
-    			inputMsrs.add(parms[index++]);
-    	}
-    	else { // default measure list is children of measure specified
-        	for (PafDimMember msrMbr : measureTree.getChildren(msrToSum)) {
-        		inputMsrs.add(msrMbr.getKey());      		
-        	}
-    	}
+    		while (index<parms.length) {
+    			inputMsrs.remove(parms[index++]);
+    		}
+    	}   	
+    	
+    	
+    	this.isValidated = true;    		
 	}
 
 

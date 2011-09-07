@@ -44,4 +44,5 @@ public interface IPafEvalState {
 	public Set<Intersection> getAllocatedLockedCells();
 	public void addChangedCell(Intersection target);
 	public String getTimeDim();
+	public List<String> getTriggeredAggMsrs();
 }

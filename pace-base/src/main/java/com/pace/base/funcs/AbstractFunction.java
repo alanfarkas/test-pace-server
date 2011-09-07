@@ -20,6 +20,8 @@ public abstract class AbstractFunction implements IPafFunction {
 	protected String measureName;
 	protected String opCode;
 	protected boolean isInitialized;
+	protected boolean isParsed;
+	protected boolean isValidated;
    
 //	//TODO Pull out Custom Function codes into user maintainable object
 //	// Embedded functions
@@ -37,7 +39,12 @@ public abstract class AbstractFunction implements IPafFunction {
     
     public abstract double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException;
     public abstract Set<Intersection> getTriggerIntersections(IPafEvalState evalState) throws PafException;
+    
+    // TODO: Enable this and conform all function signatures to make custom validation a part of
+    // initial function processing. Should have a big performance improvement for custom functions
+    // protected abstract void validateParms(IPafEvalState evalState) throws PafException;
 
+    
 
 	public void parseParameters(String functionString) {
 
@@ -107,6 +114,11 @@ public abstract class AbstractFunction implements IPafFunction {
 		// set measure, always 1st parameter
 		// (not true anymore for lots of functions.
 		this.measureName = parms[0];
+		
+		
+		this.isParsed = true;
+		
+		
 		
 		
 	}

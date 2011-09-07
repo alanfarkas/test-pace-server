@@ -106,6 +106,8 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private Set <Intersection> replicateAllContribPctCells = new HashSet<Intersection>();
 	private Set <Intersection> replicateExistingContribPctCells = new HashSet<Intersection>();
 	
+	private List<String> triggeredAggMsrs = new ArrayList<String>();
+	
 	
 	private PafApplicationDef appDef;
 
@@ -1102,6 +1104,12 @@ public class EvalState implements IPafEvalState, Cloneable {
 	public void clearConsumedByRulegroup() {
 		consumedByRulegroup.clear();
 	}
+
+	public List<String> getTriggeredAggMsrs() {
+		return this.triggeredAggMsrs;
+	}
+	
+
 
 
 }

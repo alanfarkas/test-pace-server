@@ -37,57 +37,45 @@ import com.pace.base.data.EvalUtil;
 
 public class AllocFunc extends AbstractFunction {
 
-   	private static int MEASURE_ARGS = 1, REQUIRED_ARGS = 1; //, MAX_ARGS = 4;
+   	protected static int MEASURE_ARGS = 1; //, MAX_ARGS = 4;
+	protected static int REQUIRED_ARGS = 1;
    	
-  	private String msrToAlloc = null;
-	
-	private boolean hasRestrictedTargets;
-	private List<String> targetMsrs;
-	private List<Intersection> unlockIntersections = new ArrayList<Intersection>();
+	protected String msrToAlloc = null;
+	protected List<String> targetMsrs = new ArrayList<String>();
+	protected List<Intersection> unlockIntersections = new ArrayList<Intersection>();
 	
 	private static Logger logger = Logger.getLogger(AllocFunc.class);
 
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 
-
     	// convenience variables
       	String msrDim = dataCache.getMeasureDim(), timeDim = dataCache.getTimeDim();
-       	PafDimTree msrTree = evalState.getDataCacheTrees().getTree(msrDim);
-
  	
     	// Validate function parameters
     	validateParms(evalState);
    	   	 	
-    	// this function will allocate a specified measure into its hierarchical children
-    	// if only a measure is specified the allocation occurs by default into it's children
-    	// if additional parameters are passed then the allocation is limited to the included measures
     	
         // targets holds all intersections to allocate into.
+    	// The lists have been processed by validateParms
     	// initialize it off the list of target measures and the evalstate collections
     	
 
         Set<Intersection> allocTargets = new HashSet<Intersection>();
-        if (this.hasRestrictedTargets) {
         	for (String msr : this.targetMsrs) {
         		// for each msr in the list I need the equivalent intersection populated from the sourceIsx
 				Intersection allocTarget = sourceIs.clone();
 				allocTarget.setCoordinate(msrDim, msr);
 				allocTargets.addAll(EvalUtil.buildFloorIntersections(allocTarget, evalState));  					
         	}
-        }
-        else {
-        	// no specific measures so defaults to the children of the measures
-        	for (PafDimMember msrMbr : msrTree.getChildren(sourceIs.getCoordinate(msrDim))) {
-				Intersection allocTarget = sourceIs.clone();
-				allocTarget.setCoordinate(msrDim, msrMbr.getKey());
-				allocTargets.addAll(EvalUtil.buildFloorIntersections(allocTarget, evalState));         		
-        	}
-        }
+
+        
         
         allocateChange(sourceIs, allocTargets, evalState, dataCache);
         
+        // indicate additional aggregations required by this operation
+        evalState.getTriggeredAggMsrs().addAll(this.targetMsrs);
+        
     	// actual intersection in question should remain unchanged by this operation
-
         return dataCache.getCellValue(sourceIs);
     }
     
@@ -98,9 +86,12 @@ public class AllocFunc extends AbstractFunction {
      * @param evalState Evaluation state object
      * @throws PafException
      */
-    private void validateParms(IPafEvalState evalState) throws PafException {
+    protected void validateParms(IPafEvalState evalState) throws PafException {
 
     	int parmIndex = 0;
+    	// quick check to get out if it looks like these have been validated already
+    	if (this.isValidated) return;
+    	
     	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
     	String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();
     	
@@ -136,14 +127,23 @@ public class AllocFunc extends AbstractFunction {
 
     	
     	// Check for optional parameters - if any other parameters 
-    	// then they represent the targets rather than the default children
+    	// then they represent children to be filtered out of the default children
     	int index = 1;
+    	targetMsrs.clear();
+    	
+    	// initialize with children measures
+    	for (PafDimMember msrMbr : measureTree.getChildren(msrToAlloc)) {
+    		targetMsrs.add(msrMbr.getKey());      		
+    	} 
+    	
+    	// remove any measures specified
     	if (parms.length > 1) {
-    		hasRestrictedTargets = true;
-    		while (index<parms.length)
-    			targetMsrs.add(parms[index++]);
+    		while (index<parms.length) {
+    			targetMsrs.remove(parms[index++]);
+    		}
     	}
-		
+    	
+    	this.isValidated = true;
 	}
 
 

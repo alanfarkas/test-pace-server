@@ -794,7 +794,6 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 			String currentMeasure;
 			evalState.setRuleGroup(rg);
 			evalState.setTimeSliceMode(false);
-			evalState.setTimeSliceMode(false);
 
 
 			// 1st process aggregate measures. If needed, a second pass through this

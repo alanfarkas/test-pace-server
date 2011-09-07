@@ -98,8 +98,14 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             Map<String, List<String>> aggFilter = new HashMap<String, List<String>>(1);
             List<String> mbrs = new ArrayList<String>(1);
             mbrs.add(measure);
-            aggFilter.put(evalState.getAppDef().getMdbDef().getMeasureDim(), mbrs);
             
+            //total hack at this point. Allows additional measures to be signaled for 
+            // aggregation other than the primary measure of the rule. Used by certain custom functions
+            // and needs cleared after this operation.
+            mbrs.addAll( evalState.getTriggeredAggMsrs() ); 
+            evalState.getTriggeredAggMsrs().clear();
+            
+            aggFilter.put(evalState.getAppDef().getMdbDef().getMeasureDim(), mbrs);
             
             //BEGIN(1) - TTN-584
             Set<String> lockedPeriods = dataCache.getLockedPeriods();

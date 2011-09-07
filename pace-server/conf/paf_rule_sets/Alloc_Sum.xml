@@ -1,37 +1,101 @@
 <RuleSet xmlns="http://www.thepalladiumgroup.com/paf_rule_set">
   <name>Alloc_Sum</name>
 
- 
    <!-- Used in TTHs on 9/6/11 Do not update -->  
- 
- 
- 
   
   <ruleGroups>
   
-  
   <!-- TEST TO SEE THAT 
-  			-	Alloc and Sum functions
+  			-	Alloc and Sum functions work
+
   -->
-  
+ 
+ 
+<!-- Default Behavior, allocates and sums into children -->
  
     <RuleGroup>
+    <skipProtProc>true</skipProtProc>
       <rules>
         <Rule>
+		  <evalLockedIntersections>true</evalLockedIntersections>
           <formula>
             <resultTerm>MDTTL_DLR</resultTerm>
-            <expression>@ALLOC(MDPERM_DLR, MDPROMO_DLR, MDCLEAR_DLR)</expression>
+            <expression>@ALLOC(MDTTL_DLR)</expression>
           </formula>
         </Rule>
+	  </rules>
+	</RuleGroup>
+	   
+	<RuleGroup>
+	    <skipProtProc>true</skipProtProc>
+	  <rules>
         <Rule>
           <formula>
             <resultTerm>MDTTL_DLR</resultTerm>
-            <expression>@SUM(MDPERM_DLR, MDPROMO_DLR, MDCLEAR_DLR)</expression>
+            <expression>@SUM(MDTTL_DLR)</expression>
           </formula>
         </Rule>             
       </rules>
-    </RuleGroup>
+    </RuleGroup> 
+
+
+<!-- Allocates and sums into children with filters -->
  
+    <RuleGroup>
+    <skipProtProc>true</skipProtProc>
+      <rules>
+        <Rule>
+		  <evalLockedIntersections>true</evalLockedIntersections>
+          <formula>
+            <resultTerm>EXCLUDE3</resultTerm>
+            <expression>@ALLOC(EXCLUDE3, EXCLUDE9)</expression>
+          </formula>
+        </Rule>
+	  </rules>
+	</RuleGroup>
+	   
+	<RuleGroup>
+	    <skipProtProc>true</skipProtProc>
+	  <rules>
+        <Rule>
+          <formula>
+            <resultTerm>EXCLUDE3</resultTerm>
+            <expression>@SUM(EXCLUDE3, EXCLUDE9)</expression>
+          </formula>
+        </Rule>             
+      </rules>
+    </RuleGroup> 
+
+
+
+<!-- Allocates and sums only into listed children -->
+ 
+    <RuleGroup>
+    <skipProtProc>true</skipProtProc>
+      <rules>
+        <Rule>
+		  <evalLockedIntersections>true</evalLockedIntersections>
+          <formula>
+            <resultTerm>EXCLUDE2</resultTerm>
+            <expression>@ALLOCONLY(EXCLUDE2, EXCLUDE4, EXCLUDE5, EXCLUDE6)</expression>
+          </formula>
+        </Rule>
+	  </rules>
+	</RuleGroup>
+	   
+	<RuleGroup>
+	    <skipProtProc>true</skipProtProc>
+	  <rules>
+        <Rule>
+          <formula>
+            <resultTerm>EXCLUDE2</resultTerm>
+            <expression>@SUMONLY(EXCLUDE2, EXCLUDE4, EXCLUDE5, EXCLUDE6)</expression>
+          </formula>
+        </Rule>             
+      </rules>
+    </RuleGroup> 
 
   </ruleGroups>
+  
+  
 </RuleSet>
