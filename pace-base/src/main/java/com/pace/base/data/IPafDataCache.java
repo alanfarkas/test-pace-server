@@ -3,7 +3,7 @@ package com.pace.base.data;
 import com.pace.base.PafException;
 
 /**
- * Interface that provides read-only access to data cache; used in custom functions
+ * Interface that provides access to data cache; used in custom functions
  *
  * @version	x.xx
  * @author AFarkas
@@ -17,5 +17,8 @@ public interface IPafDataCache {
 	public String getMeasureDim();    
 	public String getTimeDim();
 	public boolean isMember(String dimension, String member);
-	public String getVersionDim();    
+	public String getVersionDim();
+	public int getAxisIndex(String msrDim);
+	public void setCellValue(Intersection target, double allocValue);
+	public double getCellValue(String[] dimensions, String[] baseCoords);    
 }

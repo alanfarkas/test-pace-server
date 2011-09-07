@@ -105,9 +105,7 @@ public class PafServiceProvider implements IPafService {
 			logger.info(Messages.getString("PafServiceProvider.8")); //$NON-NLS-1$
 
 		} catch (Exception ex) {
-
 			PafErrHandler.handleException(ex, PafErrSeverity.Error);
-
 		}
 	}
 

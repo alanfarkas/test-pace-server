@@ -43,7 +43,7 @@ public class AllocFunc extends AbstractFunction {
 	
 	private boolean hasRestrictedTargets;
 	private List<String> targetMsrs;
-	private List<Intersection> unlockIntersections;
+	private List<Intersection> unlockIntersections = new ArrayList<Intersection>();
 	
 	private static Logger logger = Logger.getLogger(AllocFunc.class);
 
@@ -66,13 +66,13 @@ public class AllocFunc extends AbstractFunction {
     	// initialize it off the list of target measures and the evalstate collections
     	
 
-        List<Intersection> allocTargets = new ArrayList<Intersection>();
+        Set<Intersection> allocTargets = new HashSet<Intersection>();
         if (this.hasRestrictedTargets) {
         	for (String msr : this.targetMsrs) {
         		// for each msr in the list I need the equivalent intersection populated from the sourceIsx
 				Intersection allocTarget = sourceIs.clone();
 				allocTarget.setCoordinate(msrDim, msr);
-				allocTargets.addAll(IntersectionUtil.buildFloorIntersections(allocTarget, evalState));  					
+				allocTargets.addAll(EvalUtil.buildFloorIntersections(allocTarget, evalState));  					
         	}
         }
         else {
@@ -80,21 +80,19 @@ public class AllocFunc extends AbstractFunction {
         	for (PafDimMember msrMbr : msrTree.getChildren(sourceIs.getCoordinate(msrDim))) {
 				Intersection allocTarget = sourceIs.clone();
 				allocTarget.setCoordinate(msrDim, msrMbr.getKey());
-				allocTargets.addAll(IntersectionUtil.buildFloorIntersections(allocTarget, evalState));         		
+				allocTargets.addAll(EvalUtil.buildFloorIntersections(allocTarget, evalState));         		
         	}
         }
         
-        // allocateToTargets(allocTargets, )
-    	
-
-
-       	
+        allocateChange(sourceIs, allocTargets, evalState, dataCache);
+        
+    	// actual intersection in question should remain unchanged by this operation
 
         return dataCache.getCellValue(sourceIs);
     }
     
 
-    /**
+  /**
      *  Parse and validate function parameters 
      *
      * @param evalState Evaluation state object
@@ -142,7 +140,7 @@ public class AllocFunc extends AbstractFunction {
     	int index = 1;
     	if (parms.length > 1) {
     		hasRestrictedTargets = true;
-    		while (index<=parms.length)
+    		while (index<parms.length)
     			targetMsrs.add(parms[index++]);
     	}
 		
@@ -221,18 +219,24 @@ public class AllocFunc extends AbstractFunction {
     }
     
     /**
-	     * @param intersection
-	     * @param evalState
-	     * @param dataCache
+     * This takes an arbitray intersection and allocates it across a potential pool of intersections. No restrictions are initially
+     * placed on the validity of this pool as it's used to do measure to measure allocations. The math however won't work if the parent
+     * doesn't total the children as thats assumed the base condition for allocation.
+     * 
+     * 
+	     * @param intersection Intersection to allocate
+	     * @param targetPoolIsxs Set of intersections that should total the parent intersection
+	     * @param evalState State variable for current point in evaluation process
+	     * @param dataCache Access to the data for updating values as a result of the allocation
 	     * @return
 	     * @throws PafException
 	     */
-	    public PafDataCache allocateChange(Intersection intersection, EvalState evalState, PafDataCache dataCache) throws PafException {
+	    public IPafDataCache allocateChange(Intersection allocSrcIsx, Set<Intersection> targets, IPafEvalState evalState, IPafDataCache dataCache) throws PafException {
 	
-	    	double allocTotal = dataCache.getCellValue(intersection);
-	//  	if (logger.isDebugEnabled()) logger.debug("Allocating change for :" + intersection.toString() + " = " + allocTotal);
+	    	double allocTotal = dataCache.getCellValue(allocSrcIsx);
+	    	// if (logger.isDebugEnabled()) logger.debug("Allocating change for :" + intersection.toString() + " = " + allocTotal);
 	
-	    	// useful values
+	    	// convenience variables
 	    	String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
 	        String currentYear = evalState.getAppDef().getCurrentYear(); 
 	        String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
@@ -242,34 +246,21 @@ public class AllocFunc extends AbstractFunction {
 	    	// initial check, don't allocate any intersection that is "elapsed" during forward plannable sessions
 	        // if current plan is forward plannable, also don't allow
 	        // allocation into any intersections containing protected time periods
-	        Set<String> lockedTimePeriods = null;
-	
-	        if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
-	            lockedTimePeriods = evalState.getClientState().getLockedPeriods();
-	        }
-	        if (lockedTimePeriods == null)
-	            lockedTimePeriods = new HashSet<String>(0);  
 	        
-	        // dump out if current intersection is in an elapsed period
-	        if (lockedTimePeriods.contains(intersection.getCoordinate(timeDim))) return dataCache;
-	        
-	    	List<Intersection> targetList = EvalUtil.buildFloorIntersections(intersection, evalState);
-	    	if (targetList.size() == 0) return dataCache;
-	    	if (targetList.size() == 1 && targetList.get(0).equals(intersection)) {
-	    		return dataCache;
-	    	}
+	        if (EvalUtil.isElapsedIsx(allocSrcIsx, evalState, dataCache)) return dataCache;
 	
-	    	Set<Intersection> targets = new HashSet<Intersection>(targetList.size() * 2);
-	        targets.addAll(targetList);
+	        
 	        
 	        // total locked cells under intersection
 	        stepTime = System.currentTimeMillis();    
 	        
-	
 	        
 	        double lockedTotal = 0;
 	        Set<Intersection> lockedTargets = new HashSet<Intersection>(evalState.getLoadFactor());
+			Set<String> lockedTimePeriods = evalState.getClientState().getLockedPeriods();		
+			if (lockedTimePeriods == null) lockedTimePeriods = new HashSet<String>(0); 
 	        
+				
 	        // add up all locked cell values
 	        for (Intersection target : targets) {
 	            if (evalState.getCurrentLockedCells().contains(target) || 
@@ -372,7 +363,9 @@ public class AllocFunc extends AbstractFunction {
 	    }
 
 
-	protected void allocateToTargets(Set<Intersection> targets, double allocAvailable, double origTargetSum, PafDataCache dataCache, EvalState evalState) throws PafException {
+
+
+	protected void allocateToTargets(Set<Intersection> targets, double allocAvailable, double origTargetSum, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
         double origValue = 0;
         double allocValue = 0;
         int places = 0;
@@ -414,14 +407,14 @@ public class AllocFunc extends AbstractFunction {
             
         }        
  
-        // default is to lock the results of allocation, but can be overriden,
-		// however unlocking can only occur at the end of the overall allocation pass
-        if (!evalState.getRule().isLockAllocation())
-        	unlockIntersections.addAll(targets);        
+//        // default is to lock the results of allocation, but can be overriden,
+//		// however unlocking can only occur at the end of the overall allocation pass
+//        if (!evalState.getRule().isLockAllocation())
+//        	unlockIntersections.addAll(targets);        
         
     }
     
-    protected void allocateToTargets(Set<Intersection> targets, String baseMeasure, double allocAvailable, PafDataCache dataCache, EvalState evalState) throws PafException {
+    protected void allocateToTargets(Set<Intersection> targets, String baseMeasure, double allocAvailable, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
         double baseValue = 0;
         double allocValue = 0;
         double baseTargetSum = 0;

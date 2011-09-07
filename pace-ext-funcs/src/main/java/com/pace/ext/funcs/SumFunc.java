@@ -36,10 +36,9 @@ public class SumFunc extends AbstractFunction {
 
    	private static int MEASURE_ARGS = 1, REQUIRED_ARGS = 1; //, MAX_ARGS = 4;
    	
-  	private String msrToAlloc = null;
-	
-	private boolean hasRestrictedTargets;
-	private List<String> targetMsrs;
+  	private String msrToSum = null;
+
+	private Set<String> inputMsrs = new HashSet<String>();
 	
 	private static Logger logger = Logger.getLogger(SumFunc.class);
 
@@ -54,43 +53,29 @@ public class SumFunc extends AbstractFunction {
     	// Validate function parameters
     	validateParms(evalState);
    	   	 	
-    	// this function will allocate a specified measure into its hierarchical children
-    	// if only a measure is specified the allocation occurs by default into it's children
-    	// if additional parameters are passed then the allocation is limited to the included measures
+    	// this function will sum a specified measure from its hierarchical children
+    	// if only a measure is specified the aggregation occurs by default from it's children
+    	// if additional parameters are passed then the aggregation is limited to the included measures
     	
-        // targets holds all intersections to allocate into.
+        // inputs holds all intersections to sum.
     	// initialize it off the list of target measures and the evalstate collections
     	
+    	double sum = 0;
 
-        List<Intersection> allocTargets = new ArrayList<Intersection>();
-        if (this.hasRestrictedTargets) {
-        	for (String msr : this.targetMsrs) {
+        List<Intersection> inputs = new ArrayList<Intersection>();
+       	for (String msr : this.inputMsrs) {
         		// for each msr in the list I need the equivalent intersection populated from the sourceIsx
-				Intersection allocTarget = sourceIs.clone();
-				allocTarget.setCoordinate(msrDim, msr);
-				allocTargets.addAll(IntersectionUtil.buildFloorIntersections(allocTarget, evalState));  					
+				Intersection input = sourceIs.clone();
+				input.setCoordinate(msrDim, msr);
+        		sum += dataCache.getCellValue(input);
         	}
-        }
-        else {
-        	// no specific measures so defaults to the children of the measures
-        	for (PafDimMember msrMbr : msrTree.getChildren(sourceIs.getCoordinate(msrDim))) {
-				Intersection allocTarget = sourceIs.clone();
-				allocTarget.setCoordinate(msrDim, msrMbr.getKey());
-				allocTargets.addAll(IntersectionUtil.buildFloorIntersections(allocTarget, evalState));         		
-        	}
-        }
         
-//        sumTargets(allocTargets, )
-    	
-
-
-       	
-
-        return dataCache.getCellValue(sourceIs);
+        return sum;
+ 
     }
     
 
-    /**
+	/**
      *  Parse and validate function parameters 
      *
      * @param evalState Evaluation state object
@@ -116,7 +101,6 @@ public class SumFunc extends AbstractFunction {
     		logger.error(errMsg);
     		throw new PafException(errMsg, PafErrSeverity.Error);
     	}
-   	
     	
     	// Check validity of all arguments for existence in measures dimension
     	PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
@@ -130,18 +114,23 @@ public class SumFunc extends AbstractFunction {
     	}
    	
     	// Get required arguments
-    	msrToAlloc = this.measureName;
+    	msrToSum = this.measureName;
+    	
 
     	
     	// Check for optional parameters - if any other parameters 
-    	// then they represent the targets rather than the default children
+    	// then they represent the inputs rather than the default children
     	int index = 1;
+    	inputMsrs.clear();
     	if (parms.length > 1) {
-    		hasRestrictedTargets = true;
     		while (index<=parms.length)
-    			targetMsrs.add(parms[index++]);
+    			inputMsrs.add(parms[index++]);
     	}
-		
+    	else { // default measure list is children of measure specified
+        	for (PafDimMember msrMbr : measureTree.getChildren(msrToSum)) {
+        		inputMsrs.add(msrMbr.getKey());      		
+        	}
+    	}
 	}
 
 
@@ -153,26 +142,23 @@ public class SumFunc extends AbstractFunction {
 		/*
 		 * The trigger intersections for the @ALLOC function are:
 		 *
-		 * 1. Any changed intersection containing the alloc measure 
+		 * 1. Any changed intersection containing the input measures 
 		 * 
 		 */
 		
-		Set<Intersection> triggerIntersections = null; // = new HashSet<Intersection>(0);
+		Set<Intersection> triggerIntersections = new HashSet<Intersection>();
 		Map<String, Set<Intersection>> changedCellsByMsr = evalState.getChangedCellsByMsr();
     	
     	// Parse function parameters
      	validateParms(evalState);
-    	   					
-		// Add in alloc measure
-     	Set<Intersection> allocIsxs = changedCellsByMsr.get(msrToAlloc);
-     	if (allocIsxs == null) {
-     		triggerIntersections = new HashSet<Intersection>(0);
+      	
+     	// return any intersection that is on the right hand side
+     	for (String msr : this.inputMsrs) {
+     		if (changedCellsByMsr.get(msr) != null) {
+     			triggerIntersections.addAll(changedCellsByMsr.get(msr));
+     		}
      	}
-     	else {
-       		triggerIntersections = new HashSet<Intersection>( 2 * allocIsxs.size() );
-     		triggerIntersections.addAll(allocIsxs);
-     	}
-
+     	
 		return triggerIntersections;
 	}
 	
@@ -182,16 +168,21 @@ public class SumFunc extends AbstractFunction {
 	public boolean changeTriggersFormula(Intersection is, IPafEvalState evalState) {
 		
 		/*
-		 * A change to the allocation measure triggers this formula
+		 * A change to any of the input measures triggers this formula
 		 *
 		 */
 
-    	String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();
-		String measure = is.getCoordinate(measureDim);	
-		if (measure.equals(msrToAlloc))	
-			return true;
-		else
-			return false;
+    	String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
+		
+     	// return any intersection that is on the right hand side
+     	for (String msr : this.inputMsrs)
+     		if (msr.equals(is.getCoordinate(msrDim))) return true;
+
+     	// no matches, doesn't trigger
+     	return false;
+
+		
+		
 	}
 	
 	   /* (non-Javadoc)
@@ -207,8 +198,7 @@ public class SumFunc extends AbstractFunction {
     	   	
     	// Add all parameters
     	Set<String> memberList = new HashSet<String>();
-    	memberList.add(msrToAlloc);
-    	memberList.addAll(targetMsrs);
+    	memberList.addAll(inputMsrs);
     	dependencyMap.put(measureDim, memberList);
     	
 		// Return member dependency map

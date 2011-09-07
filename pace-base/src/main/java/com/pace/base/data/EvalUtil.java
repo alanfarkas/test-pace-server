@@ -37,6 +37,7 @@ import com.pace.base.SortOrder;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.VersionType;
 import com.pace.base.funcs.*;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -45,6 +46,7 @@ import com.pace.base.rules.Formula;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.Rule;
 import com.pace.base.state.EvalState;
+import com.pace.base.state.IPafEvalState;
 import com.pace.base.utility.Odometer;
 import com.pace.base.utility.TimeBalance;
 import com.pace.base.data.DimSortComparator;
@@ -418,9 +420,58 @@ public class EvalUtil {
         return intersections;
     }
     
+	/**
+	 * @param allocSrcIsx
+	 * @param evalState
+	 * @param dataCache
+	 * @return
+	 */
+	public static boolean isElapsedIsx(Intersection allocSrcIsx, IPafEvalState evalState, IPafDataCache dataCache) {
+		
+		// Has to be a forward plannable version for elapsed period to apply
+		if (evalState.getPlanVersion().getType() != VersionType.ForwardPlannable) {
+			return false;
+			}
+		
+		// Must be forward plannable so get locked periods
+		Set<String> lockedTimePeriods = evalState.getClientState().getLockedPeriods();
+
+		// If no locked periods can't be elapsed.
+		if (lockedTimePeriods == null) {
+			return false;
+		}
+		
+		// Check on time dim match
+		if (lockedTimePeriods.contains(allocSrcIsx.getCoordinate(dataCache.getTimeDim())))
+			return true;
+		else
+			return false;
+	}
+	
+//	public static List<Intersection> filterElapsedIsx(List<Intersection> isxPool, IPafEvalState evalState) {
+//		
+//		// Has to be a forward plannable version for elapsed period to apply
+//		if (evalState.getPlanVersion().getType() != VersionType.ForwardPlannable) {
+//			return isxPool; //unmodified
+//		}		
+//		
+//		Set<String> lockedTimePeriods = evalState.getClientState().getLockedPeriods();		
+//		
+//		for (Intersection isx : isxPool) {
+//			if (lockedTimePeriods.contains(isx.getCoordinate(evalState.getTimeDim())) &&
+//					evalState.get
+//					
+//			
+//			) {
+//				isxPool.remove(isx);
+//			}
+//		}
+//		
+//		return isxPool;
+//
+//	}
     
-    
-    public static List<Intersection> buildFloorIntersections(Intersection is, EvalState evalState) {
+    public static List<Intersection> buildFloorIntersections(Intersection is, IPafEvalState evalState) {
         MemberTreeSet mts = evalState.getClientState().getUowTrees();
         String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
         String timeDim = evalState.getAppDef().getMdbDef().getTimeDim(); 
