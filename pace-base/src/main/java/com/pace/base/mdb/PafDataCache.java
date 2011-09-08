@@ -431,7 +431,9 @@ public class PafDataCache implements IPafDataCache {
 						}
 					}
 				}
-				componentVersions.add(compareVersion);
+				if (compareVersion != null) {
+					componentVersions.add(compareVersion);
+				}
 			}
 
 	
