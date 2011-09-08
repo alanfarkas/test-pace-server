@@ -37,6 +37,7 @@ import org.apache.log4j.NDC;
 import com.pace.base.*;
 import com.pace.base.app.*;
 import com.pace.base.comm.*;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
@@ -2880,8 +2881,8 @@ public class PafServiceProvider implements IPafService {
 				pushToNDCStack(attrRequest.getClientId());
 
 				// Get valid attributes
-				String[] attrMembers = dataService.getValidAttributeMembers(attrRequest.getReqAttrDim(), attrRequest.getSelBaseDim(), 
-						attrRequest.getSelBaseMember(), attrRequest.getSelAttrSpecs());
+				String[] attrMembers = AttributeUtil.getValidAttributeMembers(attrRequest.getReqAttrDim(), attrRequest.getSelBaseDim(), 
+						attrRequest.getSelBaseMember(), attrRequest.getSelAttrSpecs(), dataService.getAllDimTrees());
 				resp.setMembers(attrMembers);
 				success = true;
 			}
@@ -3108,6 +3109,7 @@ public class PafServiceProvider implements IPafService {
 								attrMemberLists.add(userSelectionsMap.get(hierDim));
 							}
 						}
+						String[] attrDims = attrDimLists.toArray(new String[0]);
 
 						//If there are no attribute dimensions, then do not filter the base dimension
 						List<String> validBaseMemberList = new ArrayList<String>();
@@ -3119,28 +3121,26 @@ public class PafServiceProvider implements IPafService {
 						}
 						else{
 							//Get a list of all possible attribute intersection lists
-							List<List<String>> attrIntersectionLists = new ArrayList<List<String>>();
 							Odometer isIterator = new Odometer(attrMemberLists.toArray(new List[0]));
+							List<Intersection> selAttrCombos = new ArrayList<Intersection>();
 							while (isIterator.hasNext()) {
-								List<String> isList = isIterator.nextValue();
-								attrIntersectionLists.add(isList);
-							}
+								@SuppressWarnings("unchecked")
+								Intersection intersection = new Intersection(attrDims, (String[])isIterator.nextValue().toArray(new String[0]));
+								selAttrCombos.add(intersection);
+							}					        
 
 							//Build a map of valid members for each base dimension
 							for(String baseMember : expressionList){
-								Set<Intersection> validAttrIntersections = dataService.getAttributeCombos(baseDim, baseMember, attrDimLists.toArray(new String[0]));
-								for(List<String> attrIntersectionList : attrIntersectionLists){
-									if(dataService.isValidAttributeCombo(baseDim, baseMember, attrDimLists.toArray(new String[0]),
-											attrIntersectionList.toArray(new String[0]), validAttrIntersections)){
-										validBaseMemberList.add(baseMember);
-										break;
-									}
+								Set<Intersection> validAttrCombos = AttributeUtil.getValidAttributeCombos(baseDim, baseMember, attrDims, dataService.getAllDimTrees());
+								validAttrCombos.retainAll(selAttrCombos);
+								if(!validAttrCombos.isEmpty()){
+									validBaseMemberList.add(baseMember);
 								}
 							}
 						}
 						validBaseMembers.put(baseDim, validBaseMemberList);
 					}
-					
+
 				}
 				
 				//Update the work unit with the user filter

@@ -36,6 +36,7 @@ import com.pace.base.app.*;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.mdb.AttributeUtil;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
@@ -342,7 +343,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 						// get set of all valid attribute intersections for intersection represented
 						// by generation member for upcoming test.
 						String baseMember = isTest.getCoordinate(baseDim);
-						Set<Intersection> validAttrIntersections = dataService.getAttributeCombos(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);
+						Set<Intersection> validAttrIntersections = AttributeUtil.getValidAttributeCombos(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);
 
 						// create intersection containing associated attribute dimensions of selected 
 						// base member.
@@ -449,7 +450,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 				// if attribute intersection is valid - add target to list
 				String baseMember = isTarget.getCoordinate(baseDim);
 
-				Set<Intersection> validAttrIntersections = dataService.getAttributeCombos(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);									
+				Set<Intersection> validAttrIntersections = AttributeUtil.getValidAttributeCombos(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);									
 				if (validAttrIntersections.contains(attrIs)) {
 					allocTargets.add(isTarget);
 				}

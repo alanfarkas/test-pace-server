@@ -16,7 +16,7 @@
 	xx/xx/xx		xxxxxxxx		x.xx			..............
  * 
  */
-package com.pace.server.eval;
+package com.pace.base.mdb;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -45,14 +45,6 @@ import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.funcs.IPafFunction;
-import com.pace.base.mdb.DcTrackChangeOpt;
-import com.pace.base.mdb.PafAttributeTree;
-import com.pace.base.mdb.PafBaseTree;
-import com.pace.base.mdb.PafDataCache;
-import com.pace.base.mdb.PafDataSliceParms;
-import com.pace.base.mdb.PafDimMember;
-import com.pace.base.mdb.PafDimTree;
-import com.pace.base.mdb.TreeTraversalOrder;
 import com.pace.base.rules.Formula;
 import com.pace.base.rules.Rule;
 import com.pace.base.rules.RuleGroup;
@@ -64,7 +56,6 @@ import com.pace.base.utility.Odometer;
 import com.pace.base.utility.StringUtils;
 import com.pace.base.utility.TimeBalance;
 import com.pace.base.view.PafViewSection;
-import com.pace.server.PafDataService;
 
 
 
@@ -410,7 +401,6 @@ public abstract class PafDataCacheCalc {
 	public static PafDataCache calcAttributeIntersections(PafDataCache dataCache, EvalState evalState, PafClientState clientState, 
 			Map<String, List<String>> memberMap, DcTrackChangeOpt trackChanges) throws PafException {
 
-		PafDataService dataService = PafDataService.getInstance();
 		PafViewSection viewSection = dataCache.getPafMVS().getViewSection();
 		String[] attributeDims = viewSection.getAttributeDims();
 		String[] viewDims = viewSection.getDimensionsPriority();
@@ -440,7 +430,7 @@ public abstract class PafDataCacheCalc {
 			// to catch any attribute intersections that were originally in the view,
 			// but were located in rows or columns that were subsequently suppressed
 			// and removed from the view entirely.
-			if (invalidViewIs.contains(attrIs) || dataService.isInvalidAttributeIntersection(attrIs, attributeDims)) {
+			if (invalidViewIs.contains(attrIs) || dataCache.isInvalidAttributeIntersection(attrIs, attributeDims)) {
 				continue;
 			}
 

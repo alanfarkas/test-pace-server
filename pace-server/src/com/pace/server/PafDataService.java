@@ -60,7 +60,6 @@ import com.pace.base.state.SliceState;
 import com.pace.base.utility.*;
 import com.pace.base.view.*;
 import com.pace.server.eval.IEvalStrategy;
-import com.pace.server.eval.PafDataCacheCalc;
 import com.pace.server.eval.RuleBasedEvalStrategy;
 
 
@@ -400,7 +399,7 @@ public class PafDataService {
 
 					// Copy current data slice cell to data cache, skipping any
 					// invalid attribute intersections
-					if (!hasAttributes || isValidAttributeIntersection(cellIs, attributeDims)) {
+					if (!hasAttributes || dataCache.isValidAttributeIntersection(cellIs, attributeDims)) {
 						dataCache.setCellValue(cellIs, dataSlice[sliceIndex]);
 					}
 					sliceIndex++;
@@ -847,10 +846,7 @@ public class PafDataService {
 		}
 
 		//Attribute Dimensions
-		Set<String> attributeDims = getAttributeTrees().keySet();
-		for (String dim : attributeDims){
-			treeSet.addTree(dim, getDimTree(dim));
-		}
+		treeSet.addAllTrees(attributeTrees);
 
 		return treeSet;
 	}
@@ -2454,7 +2450,7 @@ public class PafDataService {
 							}
 							
 							// Skip any invalid attribute intersections
-							if (isInvalidAttributeCombo(baseDim, baseMember, attrDims, attrIs)) {
+							if (AttributeUtil.isInvalidAttributeCombo(baseDim, baseMember, attrDims, attrIs, getAllDimTrees())) {
 								validTupleExpansion = false;
 								break;
 							}
@@ -2852,106 +2848,6 @@ public class PafDataService {
 
 
 	/**
-	 *	Return the valid attribute member combinations for the specified
-	 *  base dimension, base member, and attribute dimension(s). If all attributes
-	 *  aren't mapped to the same base member level, then an empty set is 
-	 *  returned.
-	 * 
-	 *  This is a convenience method for getAttributeCombinations(baseDimName,
-	 *  baseMemberName, attrDimNames, uowTrees), where uowTrees has been set
-	 *  to null.
-	 *  
-	 * @param baseDimName Base dimension name
-	 * @param baseMemberName Base member name
-	 * @param attrDimNames Array of attribute dimension name(s)
-	 *
-	 * @return Set<Intersection>
-	 */
-	public Set<Intersection> getAttributeCombos(final String baseDimName, final String baseMemberName, 
-			final String[] attrDimNames)  {
-		
-		return getAttributeCombos(baseDimName, baseMemberName, attrDimNames, null);
-
-	}
-	
-	/**
-	 *	Return the valid attribute member combinations for the specified
-	 *  base dimension, base member, and attribute dimension(s). If no uow
-	 *  cache trees are supplied, then all members found in the full dimension
-	 *  trees are potentially valid. 
-	 *  
-	 *  If all attributes aren't mapped to the same base member level, then an 
-	 *  empty set is returned.
-	 * 
-	 * @param baseDimName Base dimension name
-	 * @param baseMemberName Base member name
-	 * @param attrDimNames Array of attribute dimension name(s)
-	 * @param uowTrees Collection of uow cache trees
-	 *
-	 * @return Set<Intersection>
-	 */
-	@SuppressWarnings("unchecked")
-	public Set<Intersection> getAttributeCombos(final String baseDimName, final String baseMemberName, 
-			final String[] attrDimNames, MemberTreeSet uowTrees)  {
-
-		Set<Intersection> attrCombos = new HashSet<Intersection>();
-		PafBaseTree baseTree = null;
-
-		// Throw exception, if attribute dim names is null or the array is empty
-		if ( attrDimNames == null || attrDimNames.length == 0 ) {
-			String errMsg = "getAttributeIntersections error - attribute dim names are null or empty";
-			logger.error(errMsg);
-			throw new IllegalArgumentException(errMsg);
-		}
-		
-		int attrDimCount = attrDimNames.length;
-		 
-		Set<Intersection> level0AttrCombinations = new HashSet<Intersection>();
-
-		// Get the set of level 0 attribute member intersections for the selected base member
-		if (uowTrees == null) {
-			baseTree = getBaseTree(baseDimName);
-		} else {
-			baseTree = (PafBaseTree) uowTrees.getTree(baseDimName);
-		}
-		level0AttrCombinations = baseTree.getAttributeCombinations(baseMemberName, attrDimNames);
-
-		// Cycle through each level 0 attribute intersection and generate all valid member 
-		// combinations of these level 0 attributes and their ancestor members.
-		for (Intersection attrIs:level0AttrCombinations) {
-
-			// Generate an array of member lists containing each attribute dimension's
-			// valid level 0 attributes along with their ancestors
-			String[] attrMemberCombo = attrIs.getCoordinates();
-			List<String>[] memberLists = new List[attrDimCount];
-			for (int i = 0; i < attrDimCount; i++) {
-				String attrDimName = attrDimNames[i];
-				String attrMemberName = attrMemberCombo[i];
-				memberLists[i] = new ArrayList<String>();
-				memberLists[i].add(attrMemberCombo[i]);	
-				List<PafDimMember> ancestors = getAttributeTree(attrDimName).getAncestors(attrMemberName);
-				for (PafDimMember attrMember:ancestors) {
-					memberLists[i].add(attrMember.getKey());	    			
-				}
-			}
-
-			// Use the odometer to generate all the possible attribute member combinations and
-			// add them to the intersection collection.
-			Odometer isIterator = new Odometer(memberLists);
-			while (isIterator.hasNext()) {
-				List<String> isList = isIterator.nextValue();
-				Intersection is = new Intersection(attrDimNames, isList.toArray(new String[0]));
-				attrCombos.add(is);
-			}
-
-		}
-
-		// Return the set of valid attribute combinations
-		return attrCombos;
-	}
-
-
-	/**
 	 *	Return the invalid attribute member combinations for the specified
 	 *  base tree, base member, and attribute dimension(s)
 	 * 
@@ -3017,153 +2913,13 @@ public class PafDataService {
 		}
 
 		// Remove valid intersections
-		validAttrCombos = getAttributeCombos(baseDimName, baseMemberName, attrDimNames);
+		validAttrCombos = AttributeUtil.getValidAttributeCombos(baseDimName, baseMemberName, attrDimNames, getAllDimTrees());
 		invalidAttrCombos.removeAll(validAttrCombos);
 
 		// Return invalid intersections
 		return invalidAttrCombos;
 	}
 
-	/**
-	 *	Determine if the specified attribute member combination is valid
-	 *	for the specified base member and attribute dimensions
-	 *
-	 * @param baseDimName Base dimension name
-	 * @param baseMemberName Base member name
-	 * @param attrDimNames Attribute dimension names
-	 * @param attrIs Attribute member intersection
-	 * @param attrISSet Attribute Intersection Set
-	 * 
-	 * @return True if the attribute combination is valid
-	 */
-	public boolean isValidAttributeCombo(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrIs,
-			Set<Intersection> attrISSet) {
-
-		boolean isValid = false;
-
-		// Create custom intersection object
-		Intersection intersection = new Intersection(attrDimNames, attrIs);
-
-		// Validate intersection
-		if (attrISSet.contains(intersection)) {
-			isValid = true;
-		}
-		return isValid;
-	}
-
-	/**
-	 * Determines if the specified attribute intersection is valid
-	 * 
-	 * @param attrIs Attribute intersection
-	 * @param attrDimNames Attribute dimension names
-	 * 
-	 * @return True if the intersection represents a valid attribute intersection
-	 */
-	public boolean isValidAttributeIntersection(Intersection attrIs, String[] attrDimNames) {
-		
-		boolean isValid = true;
-		
-		// Select each base dimension with attributes and verify each 
-		// corresponding attribute combination
-		final List<String> attrDimList = Arrays.asList(attrDimNames);
-		final Set<String> baseDimNames = getBaseDimNamesWithAttributes();
-		validation:
-			for (String baseDimName : baseDimNames) {
-
-				PafBaseTree baseTree = baseTrees.get(baseDimName);
-				Set<String> assocAttrDimSet =  new HashSet<String>(baseTree.getAttributeDimNames());
-				assocAttrDimSet.retainAll(attrDimList);
-				if (!assocAttrDimSet.isEmpty()) {
-					String baseMemberName = attrIs.getCoordinate(baseDimName);
-					String[] assocAttrDims = assocAttrDimSet.toArray(new String[0]);
-					String[] attrCombo = attrIs.getCoordinates(assocAttrDims);
-					if (!isValidAttributeCombo(baseDimName, baseMemberName,
-							assocAttrDims, attrCombo)) {
-						isValid = false;
-						break validation;
-					}
-				}
-			}
-
-		return isValid;
-	}
-
-	/**
-	 *	Determine if the specified attribute member combination is valid
-	 *	for the specified base member and attribute dimensions
-	 *
-	 *  This is a convenience method that calls isValidAttributeIntersection(
-	 *  baseDimName, baseMemberName, uowTrees, attrDimNames, attrIs) with
-	 *  uowTrees set to null.
-	 *  
-	 * @param baseDimName Base dimension name
-	 * @param baseMemberName Base member name
-	 * @param attrDimNames Attribute dimension names
-	 * @param attrCombo Attribute member combination
-	 * 
-	 * @return True if the attribute combination is valid
-	 */
-	public boolean isValidAttributeCombo(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrCombo) {
-		return isValidAttributeCombo(baseDimName, baseMemberName, null, attrDimNames, attrCombo);
-	}
-
-	/**
-	 *	Determine if the specified attribute member combination is valid
-	 *	for the specified base member, attribute dimensions, and uow
-	 *  trees.
-	 *
-	 * @param baseDimName Base dimension name
-	 * @param baseMemberName Base member name
-	 * @param uowTrees Collection of uow cache trees
-	 * @param attrDimNames Attribute dimension names
-	 * @param attrCombo Attribute member intersection
-	 * 
-	 * @return True if the attribute combination is valid
-	 */
-	public boolean isValidAttributeCombo(String baseDimName, String baseMemberName, MemberTreeSet uowTrees, 
-			String[] attrDimNames, String[] attrCombo) {
-
-		boolean isValid = false;
-
-		// Create custom intersection object
-		Intersection intersection = new Intersection(attrDimNames, attrCombo);
-
-		// Get set of valid intersection objects
-		Set<Intersection> intersections = getAttributeCombos(baseDimName, baseMemberName, attrDimNames, uowTrees);
-
-		// Validate intersection
-		if (intersections.contains(intersection)) {
-			isValid = true;
-		}
-		return isValid;
-	}
-
-	
-	/**
-	 * @param attrIs Attribute intersection
-	 * @param attrDimNames Attribute dimension names
-	 * 
-	 * @return True if the the attribute intersection is invalid
-	 */
-	public boolean isInvalidAttributeIntersection(Intersection attrIs, String[] attrDimNames) {
-		return !isValidAttributeIntersection(attrIs, attrDimNames);
-	}
-
-	
-	/**
-	 *	Determine if the specified attribute member combination is invalid
-	 *	for the specified base member and attribute dimensions
-	 *
-	 * @param baseDimName Base dimension name
-	 * @param baseMemberName Base member name
-	 * @param attrDimNames Attribute dimension names
-	 * @param attrCombo Attribute member combination
-	 * 
-	 * @return True if the attribute combination is invalid
-	 */
-	public boolean isInvalidAttributeCombo(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrCombo) {
-		return !isValidAttributeCombo(baseDimName, baseMemberName, attrDimNames, attrCombo);
-	}
 
 	/**
 	 *	Return attribute tree for specified dimension
@@ -3937,113 +3693,6 @@ public class PafDataService {
 		PafDimSpec[] filteredMetadata = mdbData.getFilteredMetadata(expandedUOW, appDef);
 		
 		return filteredMetadata;
-	}
-
-
-	/**
-	 *	Return the valid list of attribute members and rollups
-	 *  on the requested attribute dimension, in light of selections 
-	 *  on the related base dimension and selections on any 
-	 *  related attribute members
-	 *  
-	 * @param attrRequest Valid attribute request object
-	 * @return PafValidAttrResponse Valid attribute response object
-	 * 
-	 * @param requestedAttrDim - Requested attribute dimension
-	 * @param selBaseDim - Selected base dimension
-	 * @param selBaseMember - Selected base member
-	 * @param selAttrSpecs - Selected attribute dimension (can be null)
-	 * 
-	 * @return String[]
-	 */
-	public String[] getValidAttributeMembers(String requestedAttrDim, String selBaseDim, String selBaseMember, PafDimSpec[] selAttrSpecs) {
-
-		// Validate parameters
-		if (requestedAttrDim == null || requestedAttrDim.equals("")) {
-			String errMsg = "Unable to get valid attribute members - reqAttriDim is null or blank";
-			logger.info(errMsg);
-			throw new IllegalArgumentException(errMsg);
-		}
-		if (selBaseDim == null || selBaseDim.equals("")) {
-			String errMsg = "Unable to get valid attribute members - selBaseDim is null or blank";
-			logger.info(errMsg);
-			throw new IllegalArgumentException(errMsg);
-		}
-		if (selBaseMember == null || selBaseMember.equals("")) {
-			String errMsg = "Unable to get valid attribute members - selBaseMember is null or blank";
-			logger.info(errMsg);
-			throw new IllegalArgumentException(errMsg);
-		}
-		
-		// Execute simplified logic if there are no attribute member selections
-		if (selAttrSpecs == null || selAttrSpecs.length == 0) {
-			
-			// Get set of  all valid attribute intersections
-			String allAttrDims[] = new String[1];
-			allAttrDims[0] = requestedAttrDim;
-			Set<Intersection> validAttrIntersections = getAttributeCombos(selBaseDim, selBaseMember, allAttrDims);
-
-			// Return set of valid attributes
-			Set<String> validAttrSet = new HashSet<String>();
-			for (Intersection validAttrIS:validAttrIntersections) {
-				validAttrSet.add(validAttrIS.getCoordinate(requestedAttrDim));
-			}
-			return validAttrSet.toArray(new String[0]);
-			
-		}
-		
-		// Combine requested attribute dimension and selected attribute dimension
-		// array into a single array
-		String[] allAttrDims = new String[selAttrSpecs.length + 1];
-		allAttrDims[0] = requestedAttrDim;
-		int i = 1;
-		for (PafDimSpec dimSpec : selAttrSpecs) {
-			allAttrDims[i++] = dimSpec.getDimension();	
-		}
-		
-		// Create map of attribute selections
-		Map<String, Set<String>> selAttrMap = new HashMap<String, Set<String>>();
-		for (PafDimSpec dimSpec : selAttrSpecs) {
-			Set<String> selAttributes = new HashSet<String>(Arrays.asList(dimSpec.getExpressionList()));
-			selAttrMap.put(dimSpec.getDimension(), selAttributes);
-		}
-		
-		// Get the set of valid attribute member intersections for the selected base member
-		Set<Intersection> validAttrIntersections = getAttributeCombos(selBaseDim, selBaseMember, allAttrDims);
-
-		// Remove any intersections for unselected attributes
-		Set<Intersection> invalidLevel0AttrIntersections = new HashSet<Intersection>();
-		for (String selAttrDim:selAttrMap.keySet()) {
-			Set<String> selAttributes = selAttrMap.get(selAttrDim);
-			for (Intersection attributeIS:validAttrIntersections) {
-				if (!selAttributes.contains(attributeIS.getCoordinate(selAttrDim))) {
-					invalidLevel0AttrIntersections.add(attributeIS);
-				}
-			}
-		}
-		validAttrIntersections.removeAll(invalidLevel0AttrIntersections);
-		
-		// Get the unique list of valid attributes
-		Set<String> validAttributeSet = new HashSet<String>();
-		for (Intersection attrIs:validAttrIntersections) {
-			validAttributeSet.add(attrIs.getCoordinate(requestedAttrDim));
-		}
-				
-		// Add in ancestors of each unique attribute
-		Set<String> validAncestors = new HashSet<String>();
-		for (String validAttributeMember:validAttributeSet) {
-
-			List<PafDimMember> ancestors = getAttributeTree(requestedAttrDim).getAncestors(validAttributeMember);
-			for (PafDimMember attrMember:ancestors) {
-				validAncestors.add(attrMember.getKey());	    			
-			}
-
-		}
-		validAttributeSet.addAll(validAncestors);
-		
-		// Return valid attribute members
-		String[] validAttributeMembers = validAttributeSet.toArray(new String[0]);
-		return validAttributeMembers;
 	}
 
 

@@ -3998,9 +3998,8 @@ public class PafViewService {
 		//invalid, then the entire view section is invalid.
 		else if(baseDimAxis.getValue() == PafAxis.PAGE && primaryAttrAxis == PafAxis.PAGE){
 			if(!attrPageDimNames.isEmpty()){
-				if (!dataService.isValidAttributeCombo(baseDim, baseDimName, uowTrees, 
-						attrPageDimNames.toArray(new String[0]),
-						attrPageMembersInTuple.toArray(new String[0]))){
+				if (!AttributeUtil.isValidAttributeCombo(baseDim, baseDimName, attrPageDimNames.toArray(new String[0]),
+						attrPageMembersInTuple.toArray(new String[0]),uowTrees)){
 					viewSection.setRowTuples(new ViewTuple[0]);
 					viewSection.setColTuples(new ViewTuple[0]);
 				}
@@ -4047,11 +4046,12 @@ public class PafViewService {
 			i++;
 		}
 		
-		Set<Intersection> attributeIntersections = null;
+		Set<Intersection> validAttrCombos = null;
+		String[] attrDimNameArray = attrDimNames.toArray(new String[0]);
 		
 		if (baseDimAxis.getValue() == PafAxis.PAGE){
 			//Get the list of attribute intersections
-			attributeIntersections = dataService.getAttributeCombos(baseDimName, baseMemberName, attrDimNames.toArray(new String[0]), uowTrees);
+			validAttrCombos = AttributeUtil.getValidAttributeCombos(baseDimName, baseMemberName, attrDimNameArray, uowTrees);
 		}
 
 		//Get each view tuple
@@ -4083,14 +4083,13 @@ public class PafViewService {
 			if (baseDimAxis.getValue() != PafAxis.PAGE){
 				baseMemberName = tuple.getMemberDefs()[baseDimIndex];
 				
-				//Get the list of attribute intersections
-				attributeIntersections = dataService.getAttributeCombos(baseDimName, baseMemberName, attrDimNames.toArray(new String[0]), uowTrees);
+				//Get the list of valid attribute combinations
+				validAttrCombos = AttributeUtil.getValidAttributeCombos(baseDimName, baseMemberName, attrDimNameArray, uowTrees);
 			}
 
-			//Is the attribute intersection valid?
-			if (dataService.isValidAttributeCombo(baseDimName, baseMemberName, 
-					attrDimNames.toArray(new String[0]),
-					attrMembers.toArray(new String[0]), attributeIntersections)){
+			//Add tuple to collection of filtered tuples, if the attribute combination is valid
+			Intersection attrCombo = new Intersection(attrDimNameArray, attrMembers.toArray(new String[0]));
+			if (validAttrCombos.contains(attrCombo)) {
 				filteredTuples.add(tuple);
 			}
 		}
@@ -4123,7 +4122,7 @@ public class PafViewService {
 		List<String> rowMembers;
 		List<String> colMembers;
 		int coordMemberIndex;
-		Set<Intersection> attributeIntersections = null;
+		Set<Intersection> validAttributeCombos = null;
 		int rowTupleBlankCount = 0;
 		int colTupleBlankCount = 0;
 		boolean isFirstPass = true;
@@ -4207,6 +4206,7 @@ public class PafViewService {
 				}
 				i++;
 			}
+			String[] attrDimNameArray = attrDimNames.toArray(new String[0]);
 						
 			//Store dimension/member combinations
 			Map<String, String> mappedDimsWithMembers = new HashMap<String, String>();
@@ -4220,7 +4220,7 @@ public class PafViewService {
 			
 			if (baseDimAxis.getValue() == PafAxis.PAGE){
 				//Get the list of attribute intersections
-				attributeIntersections = dataService.getAttributeCombos(baseDim, baseDimName, attrDimNames.toArray(new String[0]), uowTrees);
+				validAttributeCombos = AttributeUtil.getValidAttributeCombos(baseDim, baseDimName, attrDimNameArray, uowTrees);
 			}
 			
 			//Get each view tuple
@@ -4249,7 +4249,7 @@ public class PafViewService {
 					baseDimName = rowTuple.getMemberDefs()[baseDimIndex];
 					
 					//Get the list of attribute intersections
-					attributeIntersections = dataService.getAttributeCombos(baseDim, baseDimName, attrDimNames.toArray(new String[0]), uowTrees);
+					validAttributeCombos = AttributeUtil.getValidAttributeCombos(baseDim, baseDimName, attrDimNameArray, uowTrees);
 				}
 				
 				rowMembers = getTupleMemberDefs(rowTuple);
@@ -4288,7 +4288,7 @@ public class PafViewService {
 						baseDimName = colTuple.getMemberDefs()[baseDimIndex];
 						
 						//Get the list of attribute intersections
-						attributeIntersections = dataService.getAttributeCombos(baseDim, baseDimName, attrDimNames.toArray(new String[0]), uowTrees);
+						validAttributeCombos = AttributeUtil.getValidAttributeCombos(baseDim, baseDimName, attrDimNameArray, uowTrees);
 					}
 					
 					colMembers = getTupleMemberDefs(colTuple);
@@ -4326,10 +4326,9 @@ public class PafViewService {
 						attrMembers.add( colTuple.getMemberDefs()[index]);
 					}
 
-					//Is the attribute intersection valid?
-					if (!dataService.isValidAttributeCombo(baseDim, baseDimName, 
-							attrDimNames.toArray(new String[0]),
-							attrMembers.toArray(new String[0]), attributeIntersections)){
+					//If the attribute intersection valid, add it to the invalid intersections collection
+					Intersection attributeCombo = new Intersection(attrDimNameArray, attrMembers.toArray(new String[0]));
+					if (!validAttributeCombos.contains(attributeCombo)) {
 
 						LockedCell invalidCell = new LockedCell(rowId, colId);
 						invalidCells.add(invalidCell);

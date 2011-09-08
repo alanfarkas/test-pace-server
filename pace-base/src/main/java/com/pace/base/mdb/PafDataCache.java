@@ -712,6 +712,31 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 *	Return set of names of any base dimensions that have been
+	 *  assigned one or more attribute dimensions
+	 *
+	 * @return Set<String>
+	 */
+	public Set<String> getBaseDimNamesWithAttributes() {
+
+		Set<String> baseDimNames = new HashSet<String>();
+
+		// Iterate through all attribute dimensions and append all associated
+		// base dimensions to base dimension name set
+		for (String attrDim : this.attributeDims) {
+			PafAttributeTree attrTree = (PafAttributeTree) dimTrees.getTree(attrDim);
+			String baseDimName = attrTree.getBaseDimName();
+			if (!baseDimNames.contains(baseDimName)) {
+				baseDimNames.add(baseDimName);
+			}			
+		}
+
+		// Return all base dimensions that have been assigned one or more attribute dimensions
+		return baseDimNames;
+	}
+
+	
+	/**
 	 *	Return the data cache cell count
 	 *
 	 * @return Returns the data cache cell count.
@@ -2734,6 +2759,55 @@ public class PafDataCache implements IPafDataCache {
 			}
 		}
 		return stringBuffer.toString();
+	}
+
+
+	/**
+	 * @param attrIs Attribute intersection
+	 * @param attrDimNames Attribute dimension names
+	 * 
+	 * @return True if the the attribute intersection is invalid
+	 */
+	public boolean isInvalidAttributeIntersection(Intersection attrIs, String[] attrDimNames) {
+		return !isValidAttributeIntersection(attrIs, attrDimNames);
+	}
+
+
+	/**
+	 * Determines if the specified attribute intersection is valid
+	 * 
+	 * @param attrIs Attribute intersection
+	 * @param attrDimNames Attribute dimension names
+	 * 
+	 * @return True if the intersection represents a valid attribute intersection
+	 */
+	public boolean isValidAttributeIntersection(Intersection attrIs, String[] attrDimNames) {
+		
+		boolean isValid = true;
+		
+		// Select each base dimension with attributes and verify each 
+		// corresponding attribute combination
+		final List<String> attrDimList = Arrays.asList(attrDimNames);
+		final Set<String> baseDimNames = getBaseDimNamesWithAttributes();
+		validation:
+			for (String baseDimName : baseDimNames) {
+	
+				PafBaseTree baseTree = (PafBaseTree) dimTrees.getTree(baseDimName);
+				Set<String> assocAttrDimSet =  new HashSet<String>(baseTree.getAttributeDimNames());
+				assocAttrDimSet.retainAll(attrDimList);
+				if (!assocAttrDimSet.isEmpty()) {
+					String baseMemberName = attrIs.getCoordinate(baseDimName);
+					String[] assocAttrDims = assocAttrDimSet.toArray(new String[0]);
+					String[] attrCombo = attrIs.getCoordinates(assocAttrDims);
+					if (!AttributeUtil.isValidAttributeCombo(baseDimName, baseMemberName,
+							assocAttrDims, attrCombo, dimTrees)) {
+						isValid = false;
+						break validation;
+					}
+				}
+			}
+	
+		return isValid;
 	}
 
 
