@@ -107,7 +107,7 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             mbrs.addAll( evalState.getTriggeredAggMsrs() ); 
             evalState.getTriggeredAggMsrs().clear();
             
-            aggFilter.put(evalState.getAppDef().getMdbDef().getMeasureDim(), mbrs);
+            aggFilter.put(measureDim, mbrs);
             
             //BEGIN(1) - TTN-584
             Set<String> lockedPeriods = dataCache.getLockedPeriods();
@@ -219,6 +219,16 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
              Set<Intersection> dcChangedIsSet = dataCache.getChangedIntersections();
              evalState.addAllChangedCells(dcChangedIsSet);
              dataCache.initChangedCells();
+             
+         
+			// Re-calculate potentially impacted attribute intersections supporting the current
+            // view. 
+			if (evalState.isAttributeEval() && dataCache.isDirty()) {
+				PafDataCacheCalc.calcAttributeIntersections(dataCache, clientState, dataCache.getPafMVS().getDataSliceParms(),
+						aggFilter, DcTrackChangeOpt.NONE);
+				dataCache.setDirty(false);
+			}
+
 		}
 		
 		logEvalDetail(this, evalState, dataCache);

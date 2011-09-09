@@ -33,10 +33,12 @@ import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionType;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
+import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataCacheCalc;
 import com.pace.base.rules.Formula;
 import com.pace.base.state.EvalState;
+import com.pace.base.state.PafClientState;
 import com.pace.base.state.SliceState;
 
 
@@ -63,8 +65,6 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 
 		String currentMeasure = evalState.getMeasureName();
 		String currentPeriod = null;
-		String measureDim = evalState.getMsrDim();
-		String timeDim = evalState.getTimeDim();
 		String versionDim = evalState.getVersionDim();
 		PafApplicationDef appDef = evalState.getAppDef();
 		PafDataCache dataCache = evalState.getDataCache();
@@ -94,23 +94,6 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 			}
 		} 
 
-
-		// Create data slice cache member filter - current measure, plan version, and open periods (or current
-		// period if in time slice mode). This filter controls what intersections in the data slice cache are 
-		// updated as a result of changes in the uow cache.
-		Map<String, List<String>> dsCacheMemberFilter = new HashMap<String, List<String>>();
-		List<String> measureFilter = new ArrayList<String>();
-		measureFilter.add(currentMeasure);
-		dsCacheMemberFilter.put(measureDim, measureFilter);
-		dsCacheMemberFilter.put(versionDim, Arrays.asList(dataCache.getPlanVersions()));
-		List<String> periodList = null;
-		if (evalState.isTimeSliceMode()) {
-			periodList = Arrays.asList(new String[]{currentPeriod});
-		} else {
-			periodList = dataCache.getForwardPlannablePeriods();
-		}
-		dsCacheMemberFilter.put(timeDim, periodList);
-		
 		
 		// Catalog each set of contribution % changes by the base intersection impacted. 
 		// The base intersection flexes in response to the corresponding contribution % change.
@@ -153,16 +136,14 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 				evalState.getCurrentLockedCells().add(basisIntersection);
 				evalState.getOrigLockedCells().add(basisIntersection);
 
-				// Evaluate change in data slice cache and copy to uow cache
+				// Evaluate change to target intersection
 				EvalUtil.evalFormula(f, versionDim, targetIntersection, dataCache, evalState);
-				double newBaseValue = dataCache.getCellValue(targetIntersection);
-				dataCache.setCellValue(targetIntersection, newBaseValue);
 				evalState.addUserChanges(targetIntersection);
 
-				// Allocate and aggregate uow cache changes
+				// Allocate and aggregate data cache changes
 				allocateUpper.performEvaluation(evalState);
 				aggregate.performEvaluation(evalState);
-
+				
 			} // Next changedCell
 
 		} // Next baseIntersection
@@ -206,18 +187,18 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 	 *  Migrate contribution percent changed and replicated cells into separate 
 	 *  collections on the data slice evaluation state.
 	 *
-	 * @param dsEvalState Data slice evaluation state
+	 * @param evalState Evaluation state
 	 * @throws PafException 
 	 */
-	public void stageContributionPctChanges(EvalState dsEvalState) throws PafException {
+	public void stageContributionPctChanges(EvalState evalState) throws PafException {
 		
-		String versionDim = dsEvalState.getVersionDim();
-		SliceState sliceState = dsEvalState.getSliceState();
-		PafDataCache dataCache = dsEvalState.getDataCache();
+		String versionDim = evalState.getVersionDim();
+		SliceState sliceState = evalState.getSliceState();
+		PafDataCache dataCache = evalState.getDataCache();
 		List<String> contribPctVersions = dataCache.getVersionsByType(VersionType.ContribPct);
-		Set<Intersection> changedCells = dsEvalState.getCurrentChangedCells();
-		Set<Intersection> lockedCells = dsEvalState.getCurrentLockedCells();
-		Set<Intersection> protectedCells = dsEvalState.getCurrentProtectedCells();
+		Set<Intersection> changedCells = evalState.getCurrentChangedCells();
+		Set<Intersection> lockedCells = evalState.getCurrentLockedCells();
+		Set<Intersection> protectedCells = evalState.getCurrentProtectedCells();
 		Intersection[] replicateAllCells = sliceState.getReplicateAllCells();
 		Intersection[] replicateExistingCells = sliceState.getReplicateExistingCells();
 		Set<Intersection> replicateAllContribPctCells = null;
@@ -230,34 +211,34 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		
 		// Migrate changed contribution percent cells
 		Set<Intersection> changedContribPctCells  = EvalUtil.getFilteredIntersections(changedCells, memberFilter);
-		dsEvalState.removeAllUserChanges(changedContribPctCells);
+		evalState.removeAllUserChanges(changedContribPctCells);
 		Map<Intersection, Double> changedContribPctValueMap = new HashMap<Intersection, Double>();
 		for (Intersection changedCell : changedContribPctCells) {
 			changedContribPctValueMap.put(changedCell, dataCache.getCellValue(changedCell));
 		}
-		dsEvalState.addAllChangedContribPctCells(changedContribPctValueMap);
+		evalState.addAllChangedContribPctCells(changedContribPctValueMap);
 		
 		// Migrate locked contribution percent cells
 		Set<Intersection> lockedContribPctCells  = EvalUtil.getFilteredIntersections(lockedCells, memberFilter);
-		dsEvalState.removeAllUserChanges(lockedContribPctCells);
+		evalState.removeAllUserChanges(lockedContribPctCells);
 		for (Intersection lockedCell : lockedContribPctCells) {
 			changedContribPctValueMap.put(lockedCell, dataCache.getCellValue(lockedCell));
 		}
-		dsEvalState.addAllChangedContribPctCells(changedContribPctValueMap);
+		evalState.addAllChangedContribPctCells(changedContribPctValueMap);
 		
 		// Migrate protected contribution percent cells
 		Set<Intersection> contribPctProtectedCells = EvalUtil.getFilteredIntersections(protectedCells, memberFilter);
-		dsEvalState.removeAllProtectedCells(contribPctProtectedCells);
+		evalState.removeAllProtectedCells(contribPctProtectedCells);
 		
 		// Migrate replicate all contribution percent cells
 		replicateAllContribPctCells = EvalUtil.getFilteredIntersections(replicateAllCells, memberFilter);
 		sliceState.removeReplicateAllCells(replicateAllContribPctCells);
-		dsEvalState.setReplicateAllContribPctCells(replicateAllContribPctCells);
+		evalState.setReplicateAllContribPctCells(replicateAllContribPctCells);
 		
 		// Migrate replicate existing contribution percent cells
 		replicateExistingContribPctCells = EvalUtil.getFilteredIntersections(replicateExistingCells, memberFilter);
 		sliceState.removeReplicateExistingCells(replicateExistingContribPctCells);
-		dsEvalState.setReplicateAllContribPctCells(replicateExistingContribPctCells);
+		evalState.setReplicateAllContribPctCells(replicateExistingContribPctCells);
 						
 	}
 

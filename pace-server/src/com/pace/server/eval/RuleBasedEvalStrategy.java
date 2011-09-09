@@ -190,7 +190,11 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		long startTime = System.currentTimeMillis(), stepTime = 0;
 		evalState.setStartTime(startTime);
-		logger.info(Messages.getString("RuleBasedEvalStrategy.12")); //$NON-NLS-1$
+		if (evalState.isAttributeEval()) {
+			logger.info(Messages.getString("RuleBasedEvalStrategy.83")); //$NON-NLS-1$
+		} else {
+			logger.info(Messages.getString("RuleBasedEvalStrategy.12")); //$NON-NLS-1$
+		}
 
 		RuleSet ruleSet = evalState.getMeasureRuleSet();
 		logger.info(Messages.getString("RuleBasedEvalStrategy.13") + ruleSet.getName() );         //$NON-NLS-1$
@@ -317,7 +321,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		// Reference data that is needed to generically support default evaluation 
 		// is loaded as part of the initial UOW load.
 		long startTime = System.currentTimeMillis();
-		performanceLogger.info("Determining which mdb data to load for evaluation");
+		performanceLogger.info(Messages.getString("RuleBasedEvalStrategy.84")); //$NON-NLS-1$
    
 		// Check dependencies related to user-initiated (non-default) evaluation. If
 		// calculations are dependent on a particular version, that entire version
@@ -366,7 +370,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
     	
     	// Refresh data cache
 		PafDataService.getInstance().updateDataCacheFromMdb(clientState, dataCache, new ArrayList<String>(versionsToLoad));
-		String stepDesc = "Mdb data load to support evaluation";
+		String stepDesc = Messages.getString("RuleBasedEvalStrategy.88"); //$NON-NLS-1$
 		performanceLogger.info(LogUtil.timedStep(stepDesc, startTime));
 	}
 
