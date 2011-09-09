@@ -191,7 +191,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		long startTime = System.currentTimeMillis(), stepTime = 0;
 		evalState.setStartTime(startTime);
 		if (evalState.isAttributeEval()) {
-			logger.info(Messages.getString("RuleBasedEvalStrategy.83")); //$NON-NLS-1$
+			logger.info(Messages.getString("RuleBasedEvalStrategy.30")); //$NON-NLS-1$
 		} else {
 			logger.info(Messages.getString("RuleBasedEvalStrategy.12")); //$NON-NLS-1$
 		}
