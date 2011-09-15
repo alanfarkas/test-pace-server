@@ -8,10 +8,20 @@ package com.pace.base.mdb;
  *
  */
 public class BooleanArrayFactory implements ObjectTestFactory {
+	
+	private int periodCount = 37;
+	private int measureCount = 50;
+	
+	public BooleanArrayFactory() {
+	}
+
 	public Object makeObject() {
-		Boolean[] objs = new Boolean[1000];
-		for (int i=0; i<objs.length; i++)
-			objs[i] = new Boolean(true);
+		boolean[][] objs = new boolean[measureCount][periodCount];
+		for (int i=0; i<measureCount; i++) {
+			for (int j=0; j<periodCount; j++) {
+				objs[i][j] = true;
+			}
+		}
 		return objs;
 	}
 }

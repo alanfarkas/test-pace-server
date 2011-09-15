@@ -167,6 +167,12 @@ public class PafDataService {
 		logger.info("UOW intialized with version(s): " + StringUtils.arrayListToString(loadedVersions));
 		uowCache.put(clientId, dataCache);           
 
+		// Intialize attribute eval initialization property
+		for (PafMVS pafMVS : clientState.getAllMVS()) {
+			pafMVS.setInitializedForAttrEval(false);
+		}
+		
+		
 		logger.info("Data cache loaded, cached object count: " + uowCache.size());
 
 	}
@@ -981,7 +987,7 @@ public class PafDataService {
 		logger.info(LogUtil.timedStep(stepDesc, startTime));
 
 		// Get data slice corresponding to this view section
-		dataSlice = dataCache.getDataSlice(sliceParms, viewSection.getDimensionsPriority());
+		dataSlice = dataCache.getDataSlice(sliceParms);
 
 		if (compressData == true){
 			// compress slice for return.

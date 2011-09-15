@@ -58,10 +58,10 @@ import com.pace.base.view.PafMVS;
  * @author Alan Farkas
  *
  */
-public class PafDataCache implements IPafDataCache {
+public class DcDouble implements IPafDataCache {
 
 	private Map<Intersection, Integer> dataBlockIndexMap = null; // Maps data block key to an item in the data block pool
-	private List<DataBlock> dataBlockPool = null;				// Collection of populated data blocks
+	private List<Double[][]> dataBlockPool = null;				// [Measure][Time]
 	private LinkedList<Integer> deletedBlockIndexes = null;		// Surrogate keys of deleted blocks (Linked list for performance reasons)
 	private Map<String, Set<Intersection>> dataBlocksByVersion = null;	// Data block keys organized by version
 	private Map<Intersection, Set<Intersection>> aliasKeyLookup = null; // Identifies any alias keys for a given data block
@@ -107,7 +107,7 @@ public class PafDataCache implements IPafDataCache {
 	 * @param clientState Client State
 	 * @param lockedPeriods Set of locked periods
 	 */
-	public PafDataCache(PafClientState clientState, Set<String> lockedPeriods) {
+	public DcDouble(PafClientState clientState, Set<String> lockedPeriods) {
 		this.lockedPeriods = lockedPeriods;
 		initDataCache(clientState);		
 	}
@@ -118,12 +118,12 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @param clientState Client State
 	 */
-	public PafDataCache(PafClientState clientState) {
+	public DcDouble(PafClientState clientState) {
 		this(clientState, new HashSet<String>());
 	}
 	
 	
-	protected PafDataCache() {
+	protected DcDouble() {
 		// For testing purposes
 	}
 
@@ -191,7 +191,7 @@ public class PafDataCache implements IPafDataCache {
 		blockSize = getMeasureSize() * getTimeSize();
 		int initialBlockCount = getMaxCoreDataBlockCount();
 		dataBlockIndexMap = new HashMap<Intersection, Integer>(initialBlockCount);
-		dataBlockPool = new ArrayList<DataBlock>(initialBlockCount);
+		dataBlockPool = new ArrayList<Double[][]>(initialBlockCount);
 		
 		// Initialize various data block housekeeping objects
 		dataBlocksByVersion = new HashMap<String, Set<Intersection>>(getVersionSize());
@@ -855,10 +855,10 @@ public class PafDataCache implements IPafDataCache {
 		DataCacheCellAddress cellAddress = generateCellAddress(intersection);
 
 		// Return cell value
-		DataBlock dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
+		Double[][] dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
 		if (dataBlock != null) {
 			// Intersection exists - return cell value
-			return dataBlock.getCellValue(cellAddress);
+			return dataBlock[cellAddress.getCoordX()][cellAddress.getCoordY()];
 		} else {
 			// Intersection does not exist
 			if (isValidIntersection(intersection)) {
@@ -958,8 +958,8 @@ public class PafDataCache implements IPafDataCache {
 		double roundedValue = longValue + roundedMantissa;
 		
 		// Update cell value
-		DataBlock dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
-		dataBlock.setCellValue(cellAddress, roundedValue);
+		Double[][] dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
+		dataBlock[cellAddress.getCoordX()][cellAddress.getCoordY()] = roundedValue;
 
 		// Set dirty flag to indicate that data cache was updated
 		setDirty(true);
@@ -999,11 +999,11 @@ public class PafDataCache implements IPafDataCache {
 	 * @param key Data block key
 	 * @return DataBlockResponse Data block response
 	 */
-	private DataBlockResponse addDataBlock(Intersection key) {
+	private DoubleDataBlockResp addDataBlock(Intersection key) {
 
 		int surrogateKey = 0;
-		DataBlock dataBlock = null;
-		DataBlockResponse dataBlockResp = null;
+		Double[][] dataBlock = null;
+		DoubleDataBlockResp dataBlockResp = null;
 		
 		
 		// If the data block already exists, jut return its
@@ -1027,7 +1027,7 @@ public class PafDataCache implements IPafDataCache {
 		// block doesn't already exists, then create it.  
 		if (isAliasDataBlockKey(key)) {
 			Intersection primaryKey = generatePrimaryKey(key);
-			DataBlockResponse aliasDataBlockResp =  getDataBlock(primaryKey);
+			DoubleDataBlockResp aliasDataBlockResp =  getDataBlock(primaryKey);
 			if (aliasDataBlockResp.getDataBlock() == null) {
 				aliasDataBlockResp = addDataBlock(primaryKey);
 				surrogateKey = addDataBlock(primaryKey).getSurrogateKey();
@@ -1051,7 +1051,7 @@ public class PafDataCache implements IPafDataCache {
 		dataBlockCount++;
 		
 		// Create new data block and add it to data block pool
-		dataBlock = new DataBlock(getMeasureSize(), getTimeSize());
+		dataBlock = new Double[getMeasureSize()][getTimeSize()];
 		dataBlockPool.add(dataBlock);
 		
 		// Add data block key to lookup collections
@@ -1059,7 +1059,7 @@ public class PafDataCache implements IPafDataCache {
 		addDataBlockKey(key);
 		
 		// Return data block response
-		dataBlockResp = new DataBlockResponse();
+		dataBlockResp = new DoubleDataBlockResp();
 		dataBlockResp.setSurrogateKey(surrogateKey);
 		dataBlockResp.setDataBlock(dataBlock);
 		return dataBlockResp;
@@ -1148,8 +1148,8 @@ public class PafDataCache implements IPafDataCache {
 	private void deleteDataBlock(Intersection key) {
 		
 		// Retrieve the data block being deleted
-		DataBlockResponse dataBlockResp = getDataBlock(key);
-		DataBlock dataBlock = dataBlockResp.getDataBlock();
+		DoubleDataBlockResp dataBlockResp = getDataBlock(key);
+		Double[][] dataBlock = dataBlockResp.getDataBlock();
 		
 		if (dataBlock == null) {
 			String errMsg = "Data Cache Error - attempt to delete block deletion error - a data block with a key of [" 
@@ -1377,9 +1377,9 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return DataBlockResponse
 	 */
-	private DataBlockResponse getDataBlock(Intersection dataBlockKey) {
+	private DoubleDataBlockResp getDataBlock(Intersection dataBlockKey) {
 		
-		DataBlock dataBlock = null;
+		Double[][] dataBlock = null;
 		
 		// Find data block index entry
 		Integer  surrogateKey = dataBlockIndexMap.get(dataBlockKey);
@@ -1396,7 +1396,7 @@ public class PafDataCache implements IPafDataCache {
 		}
 		
 		// Return data block response
-		DataBlockResponse dataBlockResp = new DataBlockResponse();
+		DoubleDataBlockResp dataBlockResp = new DoubleDataBlockResp();
 		dataBlockResp.setSurrogateKey(surrogateKey);
 		dataBlockResp.setDataBlock(dataBlock);
 		return dataBlockResp;
@@ -1408,7 +1408,7 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @param dataBlockResp Data Block Response Object
 	 */
-	private void updateDataBlock(DataBlockResponse dataBlockResp) {
+	private void updateDataBlock(DoubleDataBlockResp dataBlockResp) {
 		dataBlockPool.set(dataBlockResp.getSurrogateKey(), dataBlockResp.getDataBlock());
 	}
 
@@ -1419,7 +1419,7 @@ public class PafDataCache implements IPafDataCache {
 	 * @param dataBlockKey Data Block Key
 	 * @param dataBlock Data Block
 	 */
-	private void updateDataBlock(Intersection dataBlockKey, DataBlock dataBlock) {
+	private void updateDataBlock(Intersection dataBlockKey, Double[][] dataBlock) {
 		
 		Integer  surrogateKey = dataBlockIndexMap.get(dataBlockKey);	
 		dataBlockPool.set(surrogateKey, dataBlock);
@@ -2746,6 +2746,30 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	
+	/*
+	 *	Represent the DataCache as a 2-dimensional array of data cells
+	 *
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+
+		int measureSize = getMeasureSize();
+		int timeSize = getTimeSize();
+		StringBuffer stringBuffer = new StringBuffer("\n");	
+		String format = "%#11.2f\t";
+
+		for (Double[][] dataBlock : dataBlockPool) {
+			for (int measureIndex = 0; measureIndex < measureSize; measureIndex++ ) {
+				for (int timeIndex = 0; timeIndex < timeSize; timeIndex++ ) {
+					stringBuffer.append(String.format(format, dataBlock[measureIndex][timeIndex]));
+				}
+				stringBuffer.append("\n");
+			}
+		}
+		return stringBuffer.toString();
+	}
+
+
 	/**
 	 * @param attrIs Attribute intersection
 	 * @param attrDimNames Attribute dimension names
@@ -2792,22 +2816,6 @@ public class PafDataCache implements IPafDataCache {
 			}
 	
 		return isValid;
-	}
-
-
-	/*
-	 *	Represent the DataCache as a 2-dimensional array of data cells
-	 *
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-
-		StringBuffer stringBuffer = new StringBuffer("\n");	
-
-		for (DataBlock dataBlock : dataBlockPool) {
-			stringBuffer.append(dataBlock.toString());
-		}
-		return stringBuffer.toString();
 	}
 
 

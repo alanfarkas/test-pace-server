@@ -7,10 +7,10 @@ package com.pace.base.mdb;
  * @author Alan Farkas
  *
  */
-public class DataBlockResponse {
+public class DoubleDataBlockResp {
 	
 	private Integer surrogateKey = null;
-	private DataBlock dataBlock = null;
+	private Double[][] dataBlock = null;
 
 	/**
 	 * @return the surrogateKey
@@ -28,13 +28,13 @@ public class DataBlockResponse {
 	/**
 	 * @return the dataBlock
 	 */
-	public DataBlock getDataBlock() {
+	public Double[][] getDataBlock() {
 		return dataBlock;
 	}
 	/**
-	 * @param dataBlock the dataBlock to set
+	 * @param dataBlock2 the dataBlock to set
 	 */
-	public void setDataBlock(DataBlock dataBlock) {
+	public void setDataBlock(Double[][] dataBlock) {
 		this.dataBlock = dataBlock;
 	}
 

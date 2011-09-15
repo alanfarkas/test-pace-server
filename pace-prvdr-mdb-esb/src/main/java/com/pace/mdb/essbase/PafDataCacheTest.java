@@ -320,10 +320,11 @@ public class PafDataCacheTest extends TestCase {
 			dsParms.setColTuples(new String[][] { 
 					{"SLS_DLR", version}, {"RECRTL_DLR", version}, {"EOPRTL_DLR", version}
 					});
+			dsParms.setDimSequence(dataCache.getBaseDimensions());
 			
 			// Get data slice
 			logger.info("Getting data slice");
-			dataSlice = dataCache.getDataSlice(dsParms, dataCache.getBaseDimensions());
+			dataSlice = dataCache.getDataSlice(dsParms);
 			
 			// Get data slice statistics
 			logger.info("Getting data slice statistics...");

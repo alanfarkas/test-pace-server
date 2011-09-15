@@ -719,23 +719,22 @@ public class PafViewService {
 			// Populate each view section with required data
 			logger.info("Fetching view data: " + viewRequest.getViewName());
 			for (PafViewSection viewSection : renderedView.getViewSections()) {
-								
-				//get previous data slice parms
-				PafDataSliceParms prevDataSliceParms = null;
-				//if(viewRequest instanceof EvaluateViewRequest){
-					String mvsKey = PafMVS.generateKey(renderedView, viewSection);
-					
-					if (clientState.getMVS(mvsKey) != null ){
-
-						prevDataSliceParms = clientState.getMVS(mvsKey).getDataSliceParms();
-					}
-				//}
+				
+				boolean isViewSectionChanged = false;
 				
 				// Add view and all of it's view sections to "Materialized View
-				// Section" collection
-				PafMVS pafMVS = new PafMVS(renderedView, viewSection);
-				clientState.addMVS(pafMVS.getKey(), pafMVS);
-				
+				// Section" collection or use previous MVS entry if it exists
+				String mvsKey = PafMVS.generateKey(renderedView, viewSection);
+				PafMVS pafMVS = clientState.getMVS(mvsKey);
+				PafDataSliceParms prevDataSliceParms = null;
+				if (pafMVS == null ){
+					pafMVS = new PafMVS(renderedView, viewSection);
+					clientState.addMVS(pafMVS.getKey(), pafMVS);
+				} else {
+					// MVS exists - also get previous data slice parms
+					prevDataSliceParms = pafMVS.getDataSliceParms();
+				}
+			
 				// Populate data slice
 				PafDataSlice dataSlice = pafDataService.getDataSlice(renderedView, viewSection, clientState, false);
 				viewSection.setPafDataSlice(dataSlice);
@@ -764,6 +763,7 @@ public class PafViewService {
 				    	if(prevDataSliceParms != null){
 					    	if(suppressedViewIsChanged(viewSection, prevDataSliceParms) == true){
 					    		renderedView.setDirtyFlag(true);
+					    		isViewSectionChanged = true;
 					    	}
 				    	}
 					}
@@ -779,6 +779,7 @@ public class PafViewService {
 				    	if(prevDataSliceParms != null){
 					    	if(suppressedViewIsChanged(viewSection, prevDataSliceParms) == true){
 					    		renderedView.setDirtyFlag(true);
+					    		isViewSectionChanged = true;
 					    	}
 				    	}
 					}
@@ -792,9 +793,12 @@ public class PafViewService {
 				}
 				
 				// Build data slice parameters after the suppression
-				PafDataSliceParms sliceParms = pafDataService.buildDataSliceParms(viewSection);
-				clientState.getMVS(pafMVS.getKey()).setDataSliceParms(sliceParms);
-												
+				if (isViewSectionChanged) {
+					PafDataSliceParms sliceParms = pafDataService.buildDataSliceParms(viewSection);
+					pafMVS.setDataSliceParms(sliceParms);
+					pafMVS.setInitializedForAttrEval(false);
+				}
+				
 				// Populate cell note data
 				CellNoteCache noteCache = CellNoteCacheManager.getInstance().getNoteCache(viewRequest.getClientId() );
 				SimpleCellNote[] simpleCellNotes = noteCache.getAllNotes(viewSection.getDimensionsPriority());
@@ -803,6 +807,7 @@ public class PafViewService {
 				//TTN-1228
 				viewSection.setReadOnly(viewSection.isReadOnly() || clientState.getPlannerRole().isReadOnly());
 				
+				// 
 				// compress slice for return.
 				//try {
 					//if the data array is null set it to null.  The client checks for the null.

@@ -5,6 +5,7 @@ package com.pace.base.mdb;
 import com.pace.base.data.Intersection;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class BlockDC {
 	public void setDataBlockArray(List<double[][]> dataBlockArray) {
 		this.dataBlockArray = dataBlockArray;
 	}
+	private List<BitSet[][]> propertyArray = null;
 	int intersectionCount = 0;
 
 	public BlockDC() {
@@ -27,6 +29,7 @@ public class BlockDC {
 	public BlockDC(int initSize) {
 		cellIndexMap = new HashMap<Intersection, Integer>(initSize);
 		dataBlockArray = new ArrayList<double[][]>();
+		propertyArray = new ArrayList<BitSet[][]>();
 	}
 	public List<double[][]> getDataBlockArray() {
 		return dataBlockArray;
@@ -40,6 +43,14 @@ public class BlockDC {
 		
 		// Intialize data block
 		getDataBlockArray().add(new double[measureCount][periodCount]);
+		BitSet[][] properties = new BitSet[measureCount][periodCount];
+		propertyArray.add(properties);
+//		for (int i = 0; i < measureCount; i++) {
+//			for (int j = 0; j < periodCount; j++) {
+//				bitSet.set(0, bitSet.size());
+//			}
+//		}
+
 		
 	}
 }

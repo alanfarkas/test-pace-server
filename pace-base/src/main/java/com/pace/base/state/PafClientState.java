@@ -22,6 +22,7 @@ package com.pace.base.state;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -207,6 +208,12 @@ public class PafClientState implements IPafClientState {
 		return materializedViewSections.get(key);
 	}
 
+	/**
+	 * @return All materialized view sections
+	 */
+	public Collection<PafMVS> getAllMVS() {
+		return materializedViewSections.values();
+	}
 	
     public String getClientId() {
         return clientId;

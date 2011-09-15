@@ -1417,6 +1417,8 @@ public class PafServiceProvider implements IPafService {
 			
 			pView = viewService.getView(evalRequest, clientState);
 			
+			// Construct an empty view to return to the client, if no view definition changes
+			// were detected
 			if (pView.isDirtyFlag() == false){
 				pViewEmpty = new PafView();
 				pViewEmpty.setDirtyFlag(false);
@@ -1535,8 +1537,7 @@ public class PafServiceProvider implements IPafService {
 				
 				dataSlices = new PafDataSlice[sectionCount];
 				for (int i = 0; i < sectionCount; i++) {
-					dataSlices[i] = dataService.getDataSlice(view, view
-							.getViewSections()[i], clientState, true);
+					dataSlices[i] = dataService.getDataSlice(view, view.getViewSections()[i], clientState, true);
 				}
 			} else {
 				
