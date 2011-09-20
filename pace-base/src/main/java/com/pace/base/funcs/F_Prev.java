@@ -35,13 +35,13 @@ import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * Implements a next function. It looks up the value of the a particular intersection in the datacache
+ * Implements a previous function. It looks up the value of the a particular intersection in the datacache
  * ie. @Prev(BOP_DLR, Time, 1)
  * would return the value of at the intersection, that starts at the source intersection, but is invoked
  * for the measure BOP_DLR, and is offset in the Time dimension - 1
  *
- * @version	x.xx
- * @author jim
+ * @version	2.8.2.0
+ * @author jwatkins
  *
  */
 
