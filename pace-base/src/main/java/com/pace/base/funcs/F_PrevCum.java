@@ -175,8 +175,10 @@ public class F_PrevCum extends AbstractFunction {
 				logger.error(errMsg);
 				throw new PafException(errMsg, PafErrSeverity.Error);
 			}
-		} else
+		} else {
 			offsetDim = evalState.getTimeDim();
+			offsetTree = evalState.getDataCacheTrees().getTree(offsetDim);
+		}
 		
 		// be default the offset amount is 1, however if a 3rd parameter is
 		// specified it may by overridden
