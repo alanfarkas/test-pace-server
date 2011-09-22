@@ -1,23 +1,11 @@
 package com.pace.ext.funcs;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
-import com.pace.base.data.IPafDataCache;
-import com.pace.base.data.Intersection;
-import com.pace.base.funcs.AbstractFunction;
-import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
-import com.pace.base.state.EvalState;
 import com.pace.base.state.IPafEvalState;
 
 /**

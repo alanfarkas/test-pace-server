@@ -1,7 +1,5 @@
 package com.pace.base.mdb;
 
-import java.util.BitSet;
-
 import org.apache.log4j.Logger;
 
 import sun.security.util.BitArray;

@@ -11,7 +11,21 @@ public class BitSetArrayFactory implements ObjectTestFactory {
 	private int measureCount = 50;
 	private int blockSize = periodCount * measureCount;
 	private Logger logger = Logger.getLogger(BitSetArrayFactory.class);
-
+	
+//	public enum PropertyType {
+//		Dirty(1),
+//		Exists(1);
+//		
+//		private final int length;
+//		
+//		PropertyType(int length) {
+//			this.length = length;
+//		}
+//		
+//		public int length() {
+//			return this.length;
+//		}
+//	}
 	public BitSetArrayFactory(int bitCount) {
 		this.bitCount = bitCount;
 	}

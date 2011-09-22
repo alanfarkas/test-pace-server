@@ -69,6 +69,7 @@ public class PafDataCache implements IPafDataCache {
 	private int axisCount = 0;						// Total number of defined dimensions (size of allDimensions)
 	private int blockSize = 0;						// Number of cells in a data block
 	private int dataBlockCount = 0;					// Number of existing data blocks
+	private int cellPropsBitCount = 0;				// Number of bits comprising each cell property set
 	private int[] axisSizes = null;					// # of members in each axis
 	private int[] coreKeyAxes = null; 				// The core dimension axes that comprise that data block key
 	private int[][] keyIndexesByIsSize = null;		// Optimization tool - an array that will be used to isolate
@@ -166,7 +167,7 @@ public class PafDataCache implements IPafDataCache {
 			PafDimTree dimTree = dimTrees.getTree(dim);
 			String[]members;
 			if (!dim.equals(versionDim)) {
-				// Pull all dimensions, except Version, from dim trees
+				// Pull all dimensions except Version from dim trees
 				members = dimTree.getMemberNames(TreeTraversalOrder.POST_ORDER).toArray(new String[0]);
 			} else {
 				// Version dim is flat, so just pull members from uow definition
@@ -185,6 +186,9 @@ public class PafDataCache implements IPafDataCache {
 		// Create keyIndexes Array
 		createKeyIndexArrays();
 		
+		// Set cell property statistics
+		cellPropsBitCount = CellPropertyType.getTotBitCount();
+		
 		// Initialize data block index and data block pool. To minimize the
 		// the time it takes to initially populate the data cache, the index
 		// and pool are pre-allocated to hold all initially defined blocks.
@@ -198,7 +202,7 @@ public class PafDataCache implements IPafDataCache {
 		aliasKeyLookup = new HashMap<Intersection, Set<Intersection>>();
 		deletedBlockIndexes = new LinkedList<Integer>();
 
-		// Initialize data block list
+		// Log data cache statistics
 		long maxCellCount = initialBlockCount * getBlockSize();
 		String stepDesc = "Data Cache intialized with a potential base intersection count of : [" 
 			+ StringUtils.commaFormat(maxCellCount) + "] ";
@@ -868,6 +872,7 @@ public class PafDataCache implements IPafDataCache {
 				// Invalid intersection - throw error
 				String errMsg = "Data Cache error - Unable to get data cache cell value for invalid intersection: "
 					+ StringUtils.arrayToString(intersection.getCoordinates());
+				logger.error(errMsg);
 				throw new IllegalArgumentException(errMsg);
 			}
 		}
@@ -961,8 +966,87 @@ public class PafDataCache implements IPafDataCache {
 		DataBlock dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
 		dataBlock.setCellValue(cellAddress, roundedValue);
 
-		// Set dirty flag to indicate that data cache was updated
-		setDirty(true);
+		// Set dirty flag on cell, data block, and data cache, to indicate that the objects
+		// were updated
+		dataBlock.setDirty();
+		dataBlock.setCellProperty(CellPropertyType.Dirty, cellAddress, true);
+		setDirty();
+		
+		// Indicate that cell exists
+		dataBlock.setCellProperty(CellPropertyType.Empty, cellAddress, false);
+	}
+
+
+	/**
+	 * Returns the value of specified cell intersection property
+	 * 
+	 * @param intersection Cell intersection
+	 * @param propertyType Cell property type
+	 * 
+	 * @return
+	 */
+	private Object getCellProperty(Intersection intersection, CellPropertyType propertyType) {
+		
+		Object value = null;
+		
+		DataCacheCellAddress cellAddress = generateCellAddress(intersection);
+		if (isExistingDataBlock(cellAddress.getDataBlockKey())) {
+			// Get intersection's property value
+			DataBlock dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
+			value = dataBlock.getCellProperty(propertyType, cellAddress);
+		} else {
+			if (isValidIntersection(intersection)) {
+				// Intersection doesn't exist - return default property value
+				value = propertyType.getDefaultValue();
+			} else {
+				// Invalid intersection - throw error
+				String errMsg = "Data Cache error - Unable to get data cache property value ["
+					+ propertyType.name() + "]for invalid intersection: "
+					+ StringUtils.arrayToString(intersection.getCoordinates());
+				logger.error(errMsg);
+				throw new IllegalArgumentException(errMsg); 
+			}
+		}
+		return value;
+	}
+
+	/**
+	 *	Set the property value for the specified data cache cell
+	 *
+	 * @param intersection Cell intersection
+	 * @param propertyType Cell property type
+	 * @param value Cell property value
+	 */
+	private void setCellProperty(Intersection intersection, CellPropertyType propertyType, Object value) {
+		
+		// Add intersection if it doesn't already exist
+		DataCacheCellAddress cellAddress = addCell(intersection);
+		
+		// Update cell property value
+		DataBlock dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
+		dataBlock.setCellProperty(CellPropertyType.Empty, cellAddress, value);
+	}
+
+	/**
+	 *	Set the property values for the specified list of data cache cells
+	 *
+	 * @param intersections Cell intersections
+	 * @param propertyType Cell property type
+	 * @param value Cell property values
+	 */
+	private void setCellsProperty(List<Intersection> intersections, CellPropertyType propertyType, List<Object> values) {
+		
+		// Verify that intersections and values lists are the same size
+		if (intersections.size() != values.size()) {
+			String errMsg = "Data Cache setCellsProperty error - Intersections and Values lists are not the same size";
+			logger.error(errMsg);
+			throw new IllegalArgumentException(errMsg);
+		}
+		
+		// Set the property of each specified cell
+		for (int i = 0; i < intersections.size(); i++) {
+			setCellProperty(intersections.get(i), propertyType, values.get(i));
+		}
 	}
 
 
@@ -1051,7 +1135,7 @@ public class PafDataCache implements IPafDataCache {
 		dataBlockCount++;
 		
 		// Create new data block and add it to data block pool
-		dataBlock = new DataBlock(getMeasureSize(), getTimeSize());
+		dataBlock = new DataBlock(getMeasureSize(), getTimeSize(), this.cellPropsBitCount);
 		dataBlockPool.add(dataBlock);
 		
 		// Add data block key to lookup collections
@@ -1249,7 +1333,7 @@ public class PafDataCache implements IPafDataCache {
 		return isAttributeIs;
 	}
 
-
+	
 	/**
 	 * Returns true if the data block key maps directly
 	 * to a unique data block in the data cache. 
@@ -2468,7 +2552,6 @@ public class PafDataCache implements IPafDataCache {
 	 * @return True if the member exists in the specified dimension
 	 */
 	public boolean isMemberIgnoresCase(String dimension, String searchMember, StringBuffer foundMember) {
-
 	
 		// Initialize found member string buffer
 		foundMember.setLength(0);
@@ -2491,6 +2574,87 @@ public class PafDataCache implements IPafDataCache {
 
 		// Member not found
 		return false;
+	}
+
+
+	/**
+	 *	Determines if the specified data cache intersection is dirty
+	 *
+	 * @param intersection Cell intersection
+	 * @return True if the specified intersection is dirty
+	 */
+	public boolean isDirtyIntersection(Intersection intersection) {
+
+		boolean isDirty = (Boolean) getCellProperty(intersection, CellPropertyType.Dirty);
+		return isDirty;
+	}
+
+	/**
+	 *	Clears the dirty property on the specified cell intersection 
+	 *
+	 * @param intersection Cell intersection
+	 */
+	public void clearDirtyIntersection(Intersection intersection) {
+		setCellProperty(intersection, CellPropertyType.Dirty, false);
+	}
+
+	/**
+	 *	Clears the dirty property on the specified cell intersections 
+	 *
+	 * @param intersections Cell intersections
+	 */
+	public void clearDirtyIntersections(List<Intersection> intersections) {
+	
+		for (Intersection intersection : intersections) {
+			clearDirtyIntersection(intersection);
+		}
+	}
+
+
+	/**
+	 *	Determines if the specified data cache intersection is
+	 *	empty (unpopulated)
+	 *
+	 * @param intersection Cell intersection
+	 * @return True if the specified intersection has not been populated
+	 */
+	public boolean isEmptyIntersection(Intersection intersection) {
+
+		boolean isEmpty = (Boolean) getCellProperty(intersection, CellPropertyType.Empty);
+		return isEmpty;
+	}
+
+	/**
+	 *	Determines if the specified data cache intersection is populated
+	 *
+	 * @param intersection Cell intersection
+	 * @return True if the specified intersection is populated
+	 */
+	public boolean isPopulatedIntersection(Intersection intersection) {
+		return !isEmptyIntersection(intersection);
+	}
+
+	/**
+	 *	Marks the specified cell intersection as empty
+	 *
+	 * @param intersection Cell intersection
+	 */
+	public void setEmptyIntersection(Intersection intersection) {
+		
+		setCellProperty(intersection, CellPropertyType.Empty, true);
+		setCellValue(intersection, 0); // Initialize cell value
+	}
+
+	/**
+	 *	Marks the specified cell intersection as empty
+	 *
+	 * @param intersections Cell intersections
+	 */
+	public void setEmptyIntersections(List<Intersection> intersections) {
+		
+		for (Intersection intersection : intersections) {
+			setEmptyIntersection(intersection);
+		}
 	}
 
 
@@ -2523,14 +2687,14 @@ public class PafDataCache implements IPafDataCache {
 
 		boolean isFound = false;
 
-		// An intersection exists if its coordinates are valid and
-		// its corresponding data block exists.
-		
+		// An intersection exists if its coordinates are valid and its corresponding
+		// data block exists. 
+
 		// Get the data block key (this step also validates the measure and time members)
 		DataCacheCellAddress cellAddress = generateCellAddress(intersection);
 		
-		// Look for corresponding data block
-		if (dataBlockIndexMap.containsKey(cellAddress.getDataBlockKey())) {
+		// Check if the data block exists
+		if (isExistingDataBlock(cellAddress.getDataBlockKey())) {
 			isFound = true;
 		}
 
@@ -2706,6 +2870,20 @@ public class PafDataCache implements IPafDataCache {
 		this.isDirty = isDirty;
 	}
 
+	/**
+	 * Set dirty flag
+	 */
+	public void setDirty() {
+		setDirty(true);
+	}
+	
+	/**
+	 * Clear dirty flag
+	 */
+	public void clearDirty() {
+		setDirty(false);
+	}
+	
 
 	/**
 	 * @return the componentBaseMemberMap
