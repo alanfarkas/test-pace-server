@@ -52,7 +52,7 @@ public class DataBlock {
 	 * @return Object
 	 */
 	public Object getCellProperty(CellPropertyType propertyType, DataCacheCellAddress cellAddress) {		
-		return properties.getCellProperty(propertyType, cellAddress);
+		return properties.getCellProperty(propertyType, cellAddress).getValue();
 	}
 
 	/**

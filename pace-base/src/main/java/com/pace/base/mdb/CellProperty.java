@@ -12,11 +12,11 @@ public abstract class CellProperty {
 	protected CellPropertyType type = null;
 	protected boolean[] propertyBits = null;
 	
-	public boolean[] getPropertyBits() {
+	protected boolean[] getPropertyBits() {
 		return propertyBits;
 	}
 	
-	public void setPropertyBits(boolean[] propertyBits) {
+	protected void setPropertyBits(boolean[] propertyBits) {
 		this.propertyBits = propertyBits;
 	}
 

@@ -10,7 +10,7 @@ package com.pace.base.mdb;
 public enum CellPropertyType {
 	
 	Dirty(1,false),
-	Empty(1, true);
+	Empty(1,true);
 	
 	private int bitCount = 0;		// Number of bits in property type
 	private Object defaultValue;	// Default property value (if cell does not exist)
