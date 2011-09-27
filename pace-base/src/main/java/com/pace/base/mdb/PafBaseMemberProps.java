@@ -57,8 +57,8 @@ public class PafBaseMemberProps extends PafDimMemberProps  implements Cloneable{
 	// Last member formula used
 	private String lastFormula = null;
 
-	// Share option (e.g. "Store Data" , "Never Share", "Shared Member")
-	private IEssMember.EEssShareOption shareOption = null;
+	// Share option (e.g. "Store Data" , "Never Share", "Shared Member") - Default to "Store Data"
+	private IEssMember.EEssShareOption shareOption = EEssShareOption.STORE_DATA;
 
 	// User-defined attributes
 	private String[] UDAs = null;

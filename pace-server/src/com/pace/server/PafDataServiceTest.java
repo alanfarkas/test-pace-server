@@ -15,7 +15,9 @@ import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.Season;
 import com.pace.base.comm.ClientInitRequest;
 import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafBaseTree;
+import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.testCommonParms;
 import com.pace.base.state.PafClientState;
 
@@ -45,7 +47,26 @@ public class PafDataServiceTest extends TestCase {
 		super.tearDown();
 	}
     
-    /**
+  
+	public void testBuildVirtualTimeTree() {
+
+		boolean isSuccess = false;
+		try {
+			PafDimTree timeTree = testCommonParms.getTimeTree();
+			PafDimTree yearTree = testCommonParms.getYearTree();
+			PafDimTree virtualTimeTree = pds.buildVirtualTimeTree(timeTree, yearTree);
+			isSuccess = true;
+        } catch (PafException pex) {
+            PafErrHandler.handleException(pex);
+        } catch (Exception ex) {
+                PafErrHandler.handleException(ex, PafErrSeverity.Error);
+        } finally {
+        	assertTrue(isSuccess);
+        }
+	}
+	
+	
+	/**
      * 
      */
     public void testLoadDataCache() {

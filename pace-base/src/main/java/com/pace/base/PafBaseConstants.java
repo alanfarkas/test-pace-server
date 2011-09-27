@@ -50,6 +50,7 @@ public class PafBaseConstants {
 	public static final String ESS_REPORT_SCRIPT_SUFFIX = ".rep";
 	public static final String ESS_TEMP_FILE_PREFIX = "esb";
 	public static final String ESS_TEXT_FILE_SUFFIX = ".txt";
+	public static final String ESS_DEF_ALIAS_TABLE = "Default";
 	public static final int ESS_CONNECT_TIMEOUT_ERR = 1042006;
 	public static final int ESS_NET_TIMEOUT_DEFAULT = 30000;
     

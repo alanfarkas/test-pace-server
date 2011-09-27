@@ -846,16 +846,87 @@ public class PafDataService {
 		//PafUowCache cache  = uowCache.get(clientState.getClientId());
 		MemberTreeSet treeSet = new MemberTreeSet();
 	
-		//Base Dimensions
+		// Base Dimensions
 		for (String dim : clientState.getUnitOfWork().getDimensions() ) {
 			treeSet.addTree(dim, calculateDataCacheSubTree(clientState, dim, optionalWorkUnit));
 		}
 
-		//Attribute Dimensions
+		// Attribute Dimensions
 		treeSet.addAllTrees(attributeTrees);
 
+		// Virtual Time Dimension
+		PafDimTree timeTree = treeSet.getTree(clientState.getMdbDef().getTimeDim());
+		PafDimTree yearTree = treeSet.getTree(clientState.getMdbDef().getYearDim());
+		treeSet.addTree(PafServerConstants.VIRTUAL_TIME_DIM, buildVirtualTimeTree(timeTree, yearTree));
+		
 		return treeSet;
 	}
+
+	/**
+	 * Build the virtual time tree
+	 * 
+	 * @param timeTree UOW time tree
+	 * @param yearTree UOW year tree
+	 * 
+	 * @return Virtual time tree
+	 * @throws PafException 
+	 */
+	protected PafDimTree buildVirtualTimeTree(PafDimTree timeTree, PafDimTree yearTree) throws PafException {
+		
+		// The virtual time tree is formed by combining the UOW Time and Year trees. It is used 
+		// in evaluation, instead of the seperate Time and Year trees. The main advantage of 
+		// the virtual time tree is that it makes it easy to index and accumulate time 
+		// periods across year boundaries.
+		
+		// Get the year tree child members
+//		List<PafDimMember> yearChildren = yearTree.getRootNode().getChildren();
+		List<PafDimMember> yearChildren = Arrays.asList(new PafDimMember[]{yearTree.getRootNode()});
+		  
+		// Create the virtual time tree.
+		PafBaseMemberProps rootProps = new PafBaseMemberProps();
+		PafBaseMember root = new PafBaseMember(PafServerConstants.VIRTUAL_TIME_DIM, rootProps);
+		rootProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, root.getKey());
+		rootProps.setGenerationNumber(1);
+		rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree() + 1); 
+		PafDimTree virtualTimeTree = new PafBaseTree(root, new String[]{PafBaseConstants.ESS_DEF_ALIAS_TABLE});
+		
+		// Build out the virtual time tree
+		for (PafDimMember yearMember : yearChildren) {
+			// Add child members
+			addVirtualTimeChild(virtualTimeTree, root, yearMember, timeTree.getRootNode());
+		}
+		return virtualTimeTree;
+	}
+
+
+	/**
+	 * Add child to virtual time tree
+	 * 
+	 * @param virtualTimeTree Virtual time tree
+	 * @param parentNode Parent node
+	 * @param yearMember Name of year member
+	 * @param timeNode Time tree node
+	 * 
+	 * @throws PafException 
+	 */
+	private void addVirtualTimeChild(PafDimTree virtualTimeTree, PafDimMember parentNode, PafDimMember yearMember, PafDimMember timeNode) throws PafException {
+		
+		// Create child member. Each child member is built by concatenating the current year member with the current time member. 
+		PafBaseMemberProps memberProps = new PafBaseMemberProps();
+		PafDimMember virtualTimeChild = new PafBaseMember(yearMember + PafServerConstants.VIRTUAL_TIME_MBR_DELIM + timeNode.getKey(), memberProps);
+		memberProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, virtualTimeChild.getKey());
+		memberProps.setLevelNumber(timeNode.getMemberProps().getLevelNumber()); 				// Use level number of time member
+		memberProps.setGenerationNumber(parentNode.getMemberProps().getGenerationNumber() + 1);	// Gen number is parent gen + 1
+		
+		// Add child member to virtual time tree. 
+		virtualTimeTree.addChild(parentNode, virtualTimeChild);
+
+		// Recursively add a child member to virtual time tree for each child member of the regular time tree
+		for (PafDimMember child : timeNode.getChildren()) {
+			addVirtualTimeChild(virtualTimeTree, virtualTimeChild, yearMember, child);
+		}		
+	}
+
 
 	/**
 	 *	Get the memberIndexLists for the specified member tree set

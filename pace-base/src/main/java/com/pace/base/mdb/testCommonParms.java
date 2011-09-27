@@ -392,16 +392,17 @@ public abstract class testCommonParms {
 		
   //      PafBaseTree esbMetaData = (PafBaseTree)jtest.Repository.getObject(PafBaseTree.class, "Tested-Class(1)");
         		 
-		// Create Time Tree for Q1
-		String rootKey = "Q1";
-		PafBaseMember root = new PafBaseMember(rootKey);
-		PafBaseMemberProps attr = new PafBaseMemberProps();
-		attr.setGenerationNumber(0);
-		attr.setLevelNumber(2);
-		root.setMemberProps(attr);
-		PafBaseTree tree = new PafBaseTree(root, new String[]{"Default"});
+		PafBaseTree tree = null;
 		
 		if (dimension.equalsIgnoreCase("time")) {
+			// Create Time Tree for Q1
+			String rootKey = "Q1";
+			PafBaseMember root = new PafBaseMember(rootKey);
+			PafBaseMemberProps attr = new PafBaseMemberProps();
+			attr.setGenerationNumber(0);
+			attr.setLevelNumber(2);
+			root.setMemberProps(attr);
+			tree = new PafBaseTree(root, new String[]{"Default"});
 			// Add February
 			PafBaseMember feb = new PafBaseMember("Feb");
 			feb.setMemberProps(new PafBaseMemberProps());
@@ -444,7 +445,29 @@ public abstract class testCommonParms {
 				child.getMemberProps().setLevelNumber(0);
 				tree.addChild("Apr", child);
 			}
+		} else if (dimension.equalsIgnoreCase("year")) {
+			// Create Year Tree for 
+			String rootKey = "Year";
+			PafBaseMember root = new PafBaseMember(rootKey);
+			PafBaseMemberProps attr = new PafBaseMemberProps();
+			attr.setGenerationNumber(1);
+			attr.setLevelNumber(1);
+			root.setMemberProps(attr);
+			tree = new PafBaseTree(root, new String[]{"Default"});
+			// Add FY2006
+			PafBaseMember FY2006 = new PafBaseMember("FY2006");
+			FY2006.setMemberProps(new PafBaseMemberProps());
+			FY2006.getMemberProps().setGenerationNumber(1);
+			FY2006.getMemberProps().setLevelNumber(1);
+			tree.addChild(rootKey, FY2006);
+			// Add FY2007
+			PafBaseMember FY2007 = new PafBaseMember("FY2007");
+			FY2007.setMemberProps(new PafBaseMemberProps());
+			FY2007.getMemberProps().setGenerationNumber(1);
+			FY2007.getMemberProps().setLevelNumber(1);
+			tree.addChild(rootKey, FY2007);		
 		}
+
 
 		
 		// Return PafBaseTree for Selected Dimension
@@ -457,6 +480,12 @@ public abstract class testCommonParms {
 		
 		// Return PafBaseTree for Time Dimension
 		return getPafBaseTree(getAppDef().getMdbDef().getTimeDim());
+	}
+
+	public static PafBaseTree getYearTree() throws PafException {
+		
+		// Return PafBaseTree for Time Dimension
+		return getPafBaseTree(getAppDef().getMdbDef().getYearDim());
 	}
 
 	private static PafBaseMemberProps getPafBaseMemberProps() {

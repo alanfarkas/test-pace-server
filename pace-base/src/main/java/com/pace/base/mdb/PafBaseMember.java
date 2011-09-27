@@ -44,6 +44,18 @@ public class PafBaseMember extends PafDimMember implements Cloneable {
 		setKey(key);
 	}
     
+    /**
+	 * @param key Member name
+	 */
+	public PafBaseMember(String key, PafBaseMemberProps memberProps) {
+	
+		// Set PafBaseMember key
+		setKey(key);
+		
+		// Set Properties
+		setMemberProps(memberProps);
+	}
+    
     public PafBaseMember() {
         
     }
