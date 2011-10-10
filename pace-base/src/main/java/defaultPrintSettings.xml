@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+<bean 
+class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+	<bean id="defaultPrintStyle"
+		class = "com.pace.base.ui.PrintStyle">
+		<property name="defaultStyle" value="false" />
+		<property name="portrait" value="false" />
+		<property name="landscape" value="true" />
+		<property name="adjustTo" value="false" />
+		<property name="percentNormalSize" value="100" />
+		<property name="fitTo" value="true" />
+		<property name="pageWide" value="1" />
+		<property name="pageTall" value="1" />
+		<property name="paperSize" value="Letter" />	
+		<property name="firstPageNumber" value="Auto" />
+		<property name="header" value="0.3" />
+		<property name="top" value="0.75" />
+		<property name="left" value="0.7" />
+		<property name="right" value="0.7" />
+		<property name="bottom" value="0.75" />
+		<property name="footer" value="0.3" />
+		<property name="centerHorizontally" value="false" />
+		<property name="centerVertically" value="false" />
+		<property name="headerText" value="" />
+		<property name="footerText" value="" />
+		<property name="diffOddAndEvenPages" value="false" />
+		<property name="diffFirstPage" value="false" />	
+		<property name="scaleWithDocument" value="true" />						
+		<property name="alignWithPageMargin" value="true" />	
+		<property name="entireView" value="true" />
+		<property name="userSelection" value="false" />	
+		<property name="userSelectionText" value="" />
+		<property name="colsToRepeatAtLeft" value="Pace Column Headings" />				
+		<property name="rowsToRepeatAtTop" value="Pace Row Headings" />		
+		<property name="gridlines" value="false" />	
+		<property name="blackAndWhite" value="false" />
+		<property name="draftQuality" value="false" />
+		<property name="rowAndColHeadings" value="false" />
+		<property name="comment" value="(None)" />
+		<property name="cellErrorsAs" value="displayed"/>
+		<property name="downThenOver" value="true" />
+		<property name="overThenDown" value="false" />
+	</bean>
+</beans>
