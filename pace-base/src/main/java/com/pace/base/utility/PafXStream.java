@@ -36,17 +36,51 @@ import org.apache.log4j.Logger;
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafConfigFileNotFoundException;
 import com.pace.base.PafErrSeverity;
-import com.pace.base.app.*;
+import com.pace.base.app.AliasMapping;
+import com.pace.base.app.CustomActionDef;
+import com.pace.base.app.DynamicMemberDef;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PafDimSpec;
+import com.pace.base.app.PafPlannerRole;
+import com.pace.base.app.PafUserSecurity;
+import com.pace.base.app.PafWorkSpec;
+import com.pace.base.app.PlanCycle;
+import com.pace.base.app.Season;
+import com.pace.base.app.SeasonList;
+import com.pace.base.app.VersionDef;
+import com.pace.base.app.VersionFormula;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.comm.PafViewTreeItem;
 import com.pace.base.db.membertags.MemberTagCommentEntry;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
-import com.pace.base.rules.*;
+import com.pace.base.rules.MemberSet;
+import com.pace.base.rules.RoundingRule;
+import com.pace.base.rules.Rule;
+import com.pace.base.rules.RuleGroup;
+import com.pace.base.rules.RuleSet;
 import com.pace.base.ui.PafProject;
 import com.pace.base.ui.PafServer;
-import com.pace.base.view.*;
+import com.pace.base.ui.PrintStyle;
+import com.pace.base.ui.PrintStyles;
+import com.pace.base.view.Dimension;
+import com.pace.base.view.GenFormat;
+import com.pace.base.view.HierarchyFormat;
+import com.pace.base.view.LevelFormat;
+import com.pace.base.view.NumericMemberFormat;
+import com.pace.base.view.PafBorder;
+import com.pace.base.view.PafNumberFormat;
+import com.pace.base.view.PafStyle;
+import com.pace.base.view.PafUserSelection;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewGroup;
+import com.pace.base.view.PafViewGroupItem;
+import com.pace.base.view.PafViewHeader;
+import com.pace.base.view.PafViewSection;
+import com.pace.base.view.PageTuple;
+import com.pace.base.view.ViewTuple;
 import com.thoughtworks.xstream.XStream;
 
 /**
@@ -189,6 +223,10 @@ public class PafXStream {
 		xs.alias("DynamicMemberDef", DynamicMemberDef.class);
 		xs.alias("MemberTagDef", MemberTagDef.class);
 		xs.alias("MemberTagCommentEntry", MemberTagCommentEntry.class);
+
+		//Added for TN 900 - print preference
+		xs.alias("PrintStyles", PrintStyles.class);
+		xs.alias("PrintStyle", PrintStyle.class);
 
 		namespaceHeaderMap = new HashMap<String, String>();
 		namespaceHeaderMap.put(PAF_APPLICATION_DEF_ARRAY, PAF_APPLICATION_DEF_ARRAY + " " + PafBaseConstants.HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_APPS);
