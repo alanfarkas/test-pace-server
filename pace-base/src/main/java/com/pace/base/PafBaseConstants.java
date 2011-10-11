@@ -85,6 +85,7 @@ public class PafBaseConstants {
 	public static final String FN_DynamicMembers = "paf_dynamic_members.xml";	
 	public static final String FN_MemberTagMetaData = "paf_member_tags.xml";
 	public static final String FN_EssbaseConnPropTest = "connection.properties";
+	public static final String FN_PrintStyles = "paf_print_styles.xml";
 	
 	public static final String FN_ServerSettings = "serverSettings.xml";
 	public static final String FN_MdbDataSources = "mdbDs.xml";	
@@ -243,9 +244,33 @@ public class PafBaseConstants {
 	public static final String SVN_HIDDEN_DIR_NAME = ".svn";
 	
 	
-	public static final String VIEW_PAGE_ORIENTATION_LANDSCAPE = "Landscape";
-	public static final String VIEW_PAGE_ORIENTATION_PORTRAIT = "Portrait";
-
+	//TTN 900 - Print Preferences - added by Iris
+	public final static String PRINTSTYLE_DEFAULT_PRINT_SETTINGS_FILE = "default_printsettings.xml";
+	public static final String PRINTSTYLE_PAGE_ORIENTATION_LANDSCAPE = "Landscape";
+	public static final String PRINTSTYLE_PAGE_ORIENTATION_PORTRAIT = "Portrait";
+	public static final String PRINTSTYLE_PAGE_SCALING_ADJUSTTO = "AdjustTo";
+	public static final String PRINTSTYLE_PAGE_SCALING_FITTO = "FitTo";
+	public static final String PRINTSTYLE_PRINTEREA_ENTIREVIEW = "Entire View";
+	public static final String PRINTSTYLE_SHEET_PAGEORDER_DOWNTHENOVER = "DownThenOver";
+	public static final String PRINTSTYLE_SHEET_PAGEORDER_OVERTHENDOWN = "OverThenDown";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_LETTER = "Letter";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_TABLOID = "Tabloid";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_LEGAL = "Legal";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_EXECUTIVE = "Executive";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_A3 = "A3";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_A4 = "A4";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_B4JIS = "B4 (JIS)";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_B5JIS = "B5 (JIS)";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_ENVELOPE10 = "Envelope #10";
+	public static final String PRINTSTYLE_PAGE_PAPERSIZE_ENVELOPEMONARCH = "Envelope Monarch";
+	public static final String PRINTSTYLE_SHEET_COMMENTS_NONE = "(None)";
+	public static final String PRINTSTYLE_SHEET_COMMENTS_ATENDOFSHEET = "At end of sheet";
+	public static final String PRINTSTYLE_SHEET_COMMENTS_ASDISPLAYEDONSHEET = "As displayed on sheet";
+	public static final String PRINTSTYLE_SHEET_CELLERRORSAS_DISPLAYED = "displayed";
+	public static final String PRINTSTYLE_SHEET_CELLERRORSAS_BLANK = "<blank>";
+	public static final String PRINTSTYLE_SHEET_CELLERRORSAS_DASHDASH= "--";
+	public static final String PRINTSTYLE_SHEET_CELLERRORSAS_NA= "#N/A";
+	
 	//performance logging statistic constants
 	public static final String PERFORMANCE_LOGGER_AUTH = "pace.performance.authentication";
 	public static final String PERFORMANCE_LOGGER_CELLNOTES_IO = "pace.performance.cellnotes.io";
