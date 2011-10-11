@@ -38,6 +38,7 @@ import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.ViewPrintState;
 import com.pace.base.app.*;
 import com.pace.base.comm.IPafViewRequest;
 import com.pace.base.comm.PafViewTreeItem;
@@ -51,6 +52,8 @@ import com.pace.base.mdb.*;
 import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.state.PafClientState;
+import com.pace.base.ui.PrintStyle;
+import com.pace.base.ui.PrintStyles;
 import com.pace.base.utility.CompressionUtil;
 import com.pace.base.utility.PafViewSectionUtil;
 import com.pace.base.utility.StringUtils;
@@ -80,6 +83,9 @@ public class PafViewService {
 	private Map<String, VersionType> versionsTypeCache = null;
 
 	private Map<String, HierarchyFormat> hierarchyFormatsCache = null;
+	
+	//TTN 900 - Print Preferences
+	private Map<String, PrintStyle> globalPrintStyleCache = null; //<guid, PrintStyle>
 
 	private PafApplicationDef pafApp = null;
 	
@@ -110,6 +116,8 @@ public class PafViewService {
 	public void loadViewCache() {
 
 		logger.info("Loading view cache");
+
+		
 		viewCache = assembleViews();
 
 		if ( PafMetaData.isDebugMode()) {
@@ -125,10 +133,13 @@ public class PafViewService {
 		
 		globalNumericFormatCache = PafMetaData.getPaceProject().getNumericFormats();
 		hierarchyFormatsCache = PafMetaData.getPaceProject().getHierarchyFormats();
+		//TTN 900 - load global print styles
+		globalPrintStyleCache = PafMetaData.getPaceProject().getPrintStyles();
 
 		loadMeasuresCache();
 		loadVersionsCache();
-
+		
+		
 		// Initialize member tag map
 		setValidMemberTagMap(null);
 	}
@@ -153,6 +164,7 @@ public class PafViewService {
 			}
 			
 		}
+		
 		
 		//import view array of objects
 		PafView[] pafViews = PafMetaData.getPaceProject().getViews().toArray(new PafView[0]);
@@ -515,6 +527,7 @@ public class PafViewService {
 
 	}
 
+	
 	/**
 	 * Populates the version type cache with all the versions from teh 
 	 * version cache and thier version type. If a version is derived meaning
@@ -629,6 +642,7 @@ public class PafViewService {
 	}
 
 	public static PafViewService getInstance() {
+		logger.info("Initializing PafViewService");
 		if (_instance == null) {
 			_instance = new PafViewService();
 			_instance.loadViewCache();
@@ -638,8 +652,8 @@ public class PafViewService {
 	}
 
 	private PafViewService() {
-		logger.info("Initializing PafViewService");
-		loadViewCache();
+//		logger.info("Initializing PafViewService");
+//		loadViewCache();
 	}
 
 	/**
@@ -708,6 +722,15 @@ public class PafViewService {
 			
 			// replace operators used in tuple definitions
 			renderedView = replaceUserOperators(renderedView, viewRequest.getUserSelections(), clientState);
+		
+			//TTN 900 - Print Settings - populate PrintStyle object if the view is not using the embeded print style
+			if( renderedView.getViewPrintState() == ViewPrintState.GLOBAL )
+				renderedView.setPrintStyle(globalPrintStyleCache.get(renderedView.getGlobalPrintStyleGUID()));
+			else if( renderedView.getViewPrintState() == ViewPrintState.DEFAULT ) {
+				PrintStyles printStyles = new PrintStyles();
+				printStyles.setPrintStyles(globalPrintStyleCache);
+				renderedView.setPrintStyle(printStyles.getDefaultPrintStyle());
+			}
 			
 			PafViewSection[] sections = renderedView.getViewSections();
 			
