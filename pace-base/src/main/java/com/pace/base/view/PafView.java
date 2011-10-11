@@ -21,6 +21,10 @@ package com.pace.base.view;
 
 import java.util.Arrays;
 
+import com.pace.base.ViewPrintState;
+import com.pace.base.ui.PrintStyle;
+
+
 
 /**
  * View object (defined and rendered)
@@ -37,10 +41,16 @@ public class PafView implements IPafView, Cloneable {
     private String backGroundColor;
 	private PafViewHeader headers[];   
 	private PafUserSelection[] userSelections;
+	
 	private String pageOrientation;	
 	private Integer pagesTall;	
 	private Integer pagesWide;	
-    private boolean rowsSuppressed;
+
+	private PrintStyle printStyle;
+	private String globalPrintStyleGUID;
+	private ViewPrintState viewPrintState;
+	
+	private boolean rowsSuppressed;
     private boolean columnsSuppressed;
     private boolean dirtyFlag = false;
 
@@ -113,9 +123,13 @@ public class PafView implements IPafView, Cloneable {
 	public String[] getViewSectionNames() {
 		return viewSectionNames;
 	}
+	/**
+	 * @param viewSectionNames the viewSectionNames to set
+	 */
 	public void setViewSectionNames(String[] viewSectionNames) {
 		this.viewSectionNames = viewSectionNames;
 	}
+	
 	public String getPageOrientation() {
 		return pageOrientation;
 	}
@@ -134,7 +148,7 @@ public class PafView implements IPafView, Cloneable {
 	public void setPagesWide(Integer pagesWide) {
 		this.pagesWide = pagesWide;
 	}
-	
+
 	@Override
 	public PafView clone() throws CloneNotSupportedException {
 		
@@ -197,12 +211,6 @@ public class PafView implements IPafView, Cloneable {
 		result = prime * result + (dirtyFlag ? 1231 : 1237);
 		result = prime * result + Arrays.hashCode(headers);
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result
-				+ ((pageOrientation == null) ? 0 : pageOrientation.hashCode());
-		result = prime * result
-				+ ((pagesTall == null) ? 0 : pagesTall.hashCode());
-		result = prime * result
-				+ ((pagesWide == null) ? 0 : pagesWide.hashCode());
 		result = prime * result + (rowsSuppressed ? 1231 : 1237);
 		result = prime * result + Arrays.hashCode(userSelections);
 		result = prime * result + Arrays.hashCode(viewSectionNames);
@@ -247,21 +255,6 @@ public class PafView implements IPafView, Cloneable {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (pageOrientation == null) {
-			if (other.pageOrientation != null)
-				return false;
-		} else if (!pageOrientation.equals(other.pageOrientation))
-			return false;
-		if (pagesTall == null) {
-			if (other.pagesTall != null)
-				return false;
-		} else if (!pagesTall.equals(other.pagesTall))
-			return false;
-		if (pagesWide == null) {
-			if (other.pagesWide != null)
-				return false;
-		} else if (!pagesWide.equals(other.pagesWide))
-			return false;
 		if (rowsSuppressed != other.rowsSuppressed)
 			return false;		
 		if (!Arrays.equals(userSelections, other.userSelections))
@@ -270,6 +263,36 @@ public class PafView implements IPafView, Cloneable {
 			return false;
 		return true;
 	}
-
+	public PrintStyle getPrintStyle() {
+		// TODO Auto-generated method stub
+		return this.printStyle;
+	}
 	
+	public void setPrintStyle(PrintStyle printStyle) {
+		// TODO Auto-generated method stub
+		this.printStyle = printStyle;
+	}
+   /**
+	 * @return the printState
+	 */
+	public ViewPrintState getViewPrintState() {
+		return viewPrintState;
+	}
+	/**
+	 * @param printState the printState to set
+	 */
+	public void setViewPrintState(ViewPrintState viewPrintState) {
+		this.viewPrintState = viewPrintState;
+	}
+	@Override
+	public String getGlobalPrintStyleGUID() {
+		// TODO Auto-generated method stub
+		return this.globalPrintStyleGUID;
+	}
+	@Override
+	public void setGlobalPrintStyleGUID(String globalPrintStyleGUID) {
+		// TODO Auto-generated method stub
+		this.globalPrintStyleGUID = globalPrintStyleGUID;
+	}
+
 }
