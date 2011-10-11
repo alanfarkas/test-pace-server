@@ -245,7 +245,7 @@ public class PafBaseConstants {
 	
 	
 	//TTN 900 - Print Preferences - added by Iris
-	public final static String PRINTSTYLE_DEFAULT_PRINT_SETTINGS_FILE = "default_printsettings.xml";
+	public static final String PRINTSTYLE_DEFAULT_PRINT_SETTINGS_FILE = "default_printsettings.xml";
 	public static final String PRINTSTYLE_PAGE_ORIENTATION_LANDSCAPE = "Landscape";
 	public static final String PRINTSTYLE_PAGE_ORIENTATION_PORTRAIT = "Portrait";
 	public static final String PRINTSTYLE_PAGE_SCALING_ADJUSTTO = "AdjustTo";
@@ -271,6 +271,8 @@ public class PafBaseConstants {
 	public static final String PRINTSTYLE_SHEET_CELLERRORSAS_DASHDASH= "--";
 	public static final String PRINTSTYLE_SHEET_CELLERRORSAS_NA= "#N/A";
 	
+	public static final String VIEW_PAGE_ORIENTATION_LANDSCAPE = "Landscape";
+	public static final String VIEW_PAGE_ORIENTATION_PORTRAIT = "Portrait";
 	//performance logging statistic constants
 	public static final String PERFORMANCE_LOGGER_AUTH = "pace.performance.authentication";
 	public static final String PERFORMANCE_LOGGER_CELLNOTES_IO = "pace.performance.cellnotes.io";
