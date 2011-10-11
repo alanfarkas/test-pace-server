@@ -94,5 +94,54 @@
 	<artifactId>mail</artifactId>
 	<version>1.4.1</version>
 </dependency>
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-context</artifactId>
+	<version>3.0.5.RELEASE</version>
+	<type>jar</type>
+	<scope>compile</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-beans</artifactId>
+	<version>3.0.5.RELEASE</version>
+	<type>jar</type>
+	<scope>compile</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-core</artifactId>
+	<version>3.0.5.RELEASE</version>
+	<type>jar</type>
+	<scope>compile</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-asm</artifactId>
+	<version>3.0.5.RELEASE</version>
+	<type>jar</type>
+	<scope>compile</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-aop</artifactId>
+	<version>3.0.5.RELEASE</version>
+	<type>jar</type>
+	<scope>compile</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-web</artifactId>
+	<version>3.0.5.RELEASE</version>
+	<type>jar</type>
+	<scope>compile</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-expression</artifactId>
+	<version>3.0.5.RELEASE</version>
+	<type>jar</type>
+	<scope>compile</scope>
+</dependency>
   </dependencies>
 </project>
