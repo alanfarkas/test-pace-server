@@ -44,9 +44,31 @@ import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
-import com.pace.base.migration.*;
+import com.pace.base.migration.CustomFunctionDefClassNameMigrationAction;
+import com.pace.base.migration.CustomMenuDefActionClassNameMigrationAction;
+import com.pace.base.migration.MemberTagDefTypeClassNameMigrationAction;
+import com.pace.base.migration.MigrationAction;
+import com.pace.base.migration.MigrationActionStatus;
+import com.pace.base.migration.PafAppsMigrationAction;
+import com.pace.base.migration.PafDTDtoXSDMigrationAction;
+import com.pace.base.migration.PafDynamicMembersMigrationAction;
+import com.pace.base.migration.PafGenerationToHierarchyMigration;
+import com.pace.base.migration.PafGlobalStylesClassNameMigrationAction;
+import com.pace.base.migration.PafGlobalStylesMigrationAction;
+import com.pace.base.migration.PafPlannerConfigMigrationAction;
+import com.pace.base.migration.PafRuleSetsSeparationMigrationAction;
+import com.pace.base.migration.PafSecurityMigrationAction;
+import com.pace.base.migration.PafStringCaseInsensitiveComparatorMigrationAction;
+import com.pace.base.migration.PafViewGroupsMigrationAction;
+import com.pace.base.migration.PafViewPrintStylesMigrationAction;
+import com.pace.base.migration.PafViewSectionBorderMigration;
+import com.pace.base.migration.PafViewSectionsSeparationMigrationAction;
+import com.pace.base.migration.PafViewsSeparationMigrationAction;
+import com.pace.base.migration.PrintStylesMigrationAction;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.RuleSet;
+import com.pace.base.ui.PrintStyle;
+import com.pace.base.ui.PrintStyles;
 import com.pace.base.utility.FileUtils;
 import com.pace.base.utility.MigrateServerUtil;
 import com.pace.base.view.HierarchyFormat;
@@ -636,6 +658,8 @@ public class XMLPaceProject extends PaceProject {
 		if (upgradeProject) {
 
 			new PafViewsSeparationMigrationAction(this).run();
+			//TTN 900
+			new PafViewPrintStylesMigrationAction(this).run();
 
 		}
 		
@@ -678,6 +702,26 @@ public class XMLPaceProject extends PaceProject {
 		setViews(pafViewList);
 		
 		
+	}
+
+	//TTN 900 - Added by Iris
+	@Override
+	protected void readPrintStyles() throws PaceProjectReadException {
+		//if auto convert project, create at least one default print style
+		if ( upgradeProject ) {
+			new PrintStylesMigrationAction(this).run();
+		}
+
+		PafXStreamElementItem<PrintStyles> pafXStreamElementItem 
+			= new PafXStreamElementItem<PrintStyles>(getProjectInput() + PafBaseConstants.FN_PrintStyles);
+		PrintStyles pp = null;
+		try {
+			pp = pafXStreamElementItem.read();
+		} catch ( PaceProjectReadException e ) {
+			throw new PaceProjectReadException(getProjectInput() + PafBaseConstants.FN_PrintStyles, e.getMessage());
+		}
+		setPrintStyles(pp==null?null:pp.getPrintStyles());
+				
 	}
 
 	@Override
@@ -1145,6 +1189,15 @@ public class XMLPaceProject extends PaceProject {
 
 		}
 		
+	}
+	//TTN 900 - Added by Iris
+	@Override
+	protected void writePrintStyles() {
+		Map<String, PrintStyle> map = getPrintStyles();
+		PrintStyles ps = new PrintStyles();
+		ps.setPrintStyles(map);
+		PafXStreamElementItem<PrintStyles> pafXStreamElementItem = new PafXStreamElementItem<PrintStyles>(getProjectOutputDir() + PafBaseConstants.FN_PrintStyles);
+		pafXStreamElementItem.write(ps);
 	}
 
 	/**

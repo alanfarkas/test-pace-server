@@ -21,14 +21,27 @@ package com.pace.base.project;
 import java.util.List;
 import java.util.Map;
 
-import com.pace.base.app.*;
+import com.pace.base.app.DynamicMemberDef;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PafPlannerRole;
+import com.pace.base.app.PafUserSecurity;
+import com.pace.base.app.PlanCycle;
+import com.pace.base.app.VersionDef;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.RuleSet;
-import com.pace.base.view.*;
+import com.pace.base.ui.PrintStyle;
+import com.pace.base.view.HierarchyFormat;
+import com.pace.base.view.PafNumberFormat;
+import com.pace.base.view.PafStyle;
+import com.pace.base.view.PafUserSelection;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewGroup;
+import com.pace.base.view.PafViewSection;
 
 /**
  * Class_description_goes_here
@@ -59,7 +72,8 @@ public interface IPaceProject {
 	public List<PafUserSecurity> getUserSecurity();
 	public List<RoundingRule> getRoundingRules();
 	public Map<String, RuleSet> getRuleSets();
-
+	public Map<String, PrintStyle> getPrintStyles();
+	
 	public void setPlanCycles(List<PlanCycle> planCycleList);
 	public void setApplicationDefinitions(List<PafApplicationDef> appDefList);
 	public void setNumericFormats(Map<String, PafNumberFormat> numericFormatMap);
@@ -79,7 +93,7 @@ public interface IPaceProject {
 	public void setMemberTags(List<MemberTagDef> memberTagDefList);
 	public void setUserSecurity(List<PafUserSecurity> userSecurityList);
 	public void setRoundingRules(List<RoundingRule> roundingRuleList);
-	public void setRuleSets(Map<String, RuleSet> ruleSetList);	
-
+	public void setRuleSets(Map<String, RuleSet> ruleSetList);
+	public void setPrintStyles(Map<String, PrintStyle> printStyleList);
 
 }

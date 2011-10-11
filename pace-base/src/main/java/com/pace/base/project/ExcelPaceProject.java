@@ -32,17 +32,54 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
-import com.pace.base.app.*;
+import com.pace.base.app.DynamicMemberDef;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PafPlannerRole;
+import com.pace.base.app.PafUserSecurity;
+import com.pace.base.app.PlanCycle;
+import com.pace.base.app.Season;
+import com.pace.base.app.SeasonList;
+import com.pace.base.app.VersionDef;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
-import com.pace.base.project.excel.elements.*;
+import com.pace.base.project.excel.elements.ApplicationDefExcelElementItem;
+import com.pace.base.project.excel.elements.CustomFunctionsExcelElementItem;
+import com.pace.base.project.excel.elements.CustomMenusExcelElementItem;
+import com.pace.base.project.excel.elements.DynamicMembersExcelElementItem;
+import com.pace.base.project.excel.elements.GlobalStylesExcelElementItem;
+import com.pace.base.project.excel.elements.HierarchyFormatsExcelElementItem;
+import com.pace.base.project.excel.elements.MeasuresExcelElementItem;
+import com.pace.base.project.excel.elements.MemberTagsExcelElementItem;
+import com.pace.base.project.excel.elements.NumericFormatsExcelElementItem;
+import com.pace.base.project.excel.elements.PlanCyclesExcelElementItem;
+import com.pace.base.project.excel.elements.PrintStylesExcelElementItem;
+import com.pace.base.project.excel.elements.RoleConfigsExcelElementItem;
+import com.pace.base.project.excel.elements.RolesExcelElementItem;
+import com.pace.base.project.excel.elements.RoundingRulesExcelElementItem;
+import com.pace.base.project.excel.elements.RuleSetsExcelElementItem;
+import com.pace.base.project.excel.elements.SeasonsExcelElementItem;
+import com.pace.base.project.excel.elements.UserSecurityExcelElementItem;
+import com.pace.base.project.excel.elements.UserSelectionsExcelElementItem;
+import com.pace.base.project.excel.elements.VersionsExcelElementItem;
+import com.pace.base.project.excel.elements.ViewGroupsExcelElementItem;
+import com.pace.base.project.excel.elements.ViewSectionsExcelElementItem;
+import com.pace.base.project.excel.elements.ViewsExcelElementItem;
 import com.pace.base.project.utils.PafExcelUtil;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.RuleSet;
+import com.pace.base.ui.PrintStyle;
+import com.pace.base.ui.PrintStyles;
 import com.pace.base.utility.FileUtils;
-import com.pace.base.view.*;
+import com.pace.base.view.HierarchyFormat;
+import com.pace.base.view.PafNumberFormat;
+import com.pace.base.view.PafStyle;
+import com.pace.base.view.PafUserSelection;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewGroup;
+import com.pace.base.view.PafViewSection;
 
 /**
  * Class_description_goes_here
@@ -77,7 +114,6 @@ public class ExcelPaceProject extends PaceProject {
 		projectIdDependencyMap.put(ProjectElementId.RoleConfigs, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.ViewGroups, ProjectElementId.RuleSets, ProjectElementId.Versions, ProjectElementId.DynamicMembers, ProjectElementId.Views, ProjectElementId.ViewGroups, ProjectElementId.CustomFunctions, ProjectElementId.CustomMenus)));
 		projectIdDependencyMap.put(ProjectElementId.GlobalStyles, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.HierarchyFormats)));
 		projectIdDependencyMap.put(ProjectElementId.DynamicMembers, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.ApplicationDef, ProjectElementId.RoleConfigs)));
-		
 	}
 	
 	/**
@@ -288,7 +324,9 @@ public class ExcelPaceProject extends PaceProject {
 		newProjectOrderList.add(ProjectElementId.CustomMenus);
 		newProjectOrderList.add(ProjectElementId.RuleSets);
 		newProjectOrderList.add(ProjectElementId.RoleConfigs);
-		
+		//TTN 900 
+		newProjectOrderList.add(ProjectElementId.PrintStyles);
+
 		List<ProjectElementId> defaultProjectOrderList = super.getProjectElementIdListOrder();
 		
 		//add any other project tabs not needing order
@@ -749,6 +787,26 @@ public class ExcelPaceProject extends PaceProject {
 	}
 
 	@Override
+	protected void readPrintStyles() throws PaceProjectReadException {
+		// TODO Auto-generated method stub
+		logger.debug("Reading print styles.");
+		
+		PrintStylesExcelElementItem<Map<String,PrintStyle>> excelElementItem = new PrintStylesExcelElementItem<Map<String,PrintStyle>>(getWorkbook());
+		
+		try {
+			
+			setPrintStyles(excelElementItem.read());
+			
+		} catch (PaceProjectReadException e) {
+
+			throw new PaceProjectReadException("Error reading Print Styles.");
+			//addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
+	}
+
+	@Override
 	protected void writeApplicationDefinitions() throws PaceProjectWriteException {
 
 		logger.debug("Writing application def.");
@@ -1013,6 +1071,14 @@ public class ExcelPaceProject extends PaceProject {
 		
 	}
 
+	@Override
+	protected void writePrintStyles() throws PaceProjectWriteException {
+		logger.debug("Writing Print Styles.");
+		
+		PrintStylesExcelElementItem<Map<String, PrintStyle>> excelElementItem = new PrintStylesExcelElementItem<Map<String, PrintStyle>>(getWorkbook());
+		Map<String, PrintStyle> printStyles = getPrintStyles();
+		excelElementItem.write(printStyles);
+	}
 	/**
 	 * @return the workbook
 	 */
@@ -1116,5 +1182,6 @@ public class ExcelPaceProject extends PaceProject {
 		}				
 		
 	}
+
 	
 }

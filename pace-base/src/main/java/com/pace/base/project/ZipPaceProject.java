@@ -590,6 +590,19 @@ public class ZipPaceProject extends PaceProject {
 	}
 
 	@Override
+	protected void readPrintStyles() throws PaceProjectReadException {
+		// TODO Auto-generated method stub
+		
+		if ( xmlPaceProject != null) {
+			
+			xmlPaceProject.readPrintStyles();
+			
+			setPrintStyles(xmlPaceProject.getPrintStyles());
+			
+		}
+	}
+
+	@Override
 	protected void writeApplicationDefinitions() {
 
 		if ( xmlPaceProject != null) {
@@ -856,6 +869,19 @@ public class ZipPaceProject extends PaceProject {
 			xmlPaceProject.setSeasons(getSeasons());
 		
 			xmlPaceProject.writeSeasons();
+			
+		}
+		
+	}
+
+	@Override
+	protected void writePrintStyles() throws PaceProjectWriteException {
+		// TODO Auto-generated method stub
+		if ( xmlPaceProject != null) {
+			
+			xmlPaceProject.setPrintStyles(getPrintStyles());
+		
+			xmlPaceProject.writePrintStyles();
 			
 		}
 		

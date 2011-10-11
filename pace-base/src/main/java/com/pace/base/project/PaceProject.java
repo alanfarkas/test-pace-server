@@ -32,14 +32,28 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafException;
-import com.pace.base.app.*;
+import com.pace.base.app.DynamicMemberDef;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PafPlannerRole;
+import com.pace.base.app.PafUserSecurity;
+import com.pace.base.app.PlanCycle;
+import com.pace.base.app.Season;
+import com.pace.base.app.VersionDef;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.RuleSet;
-import com.pace.base.view.*;
+import com.pace.base.ui.PrintStyle;
+import com.pace.base.view.HierarchyFormat;
+import com.pace.base.view.PafNumberFormat;
+import com.pace.base.view.PafStyle;
+import com.pace.base.view.PafUserSelection;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewGroup;
+import com.pace.base.view.PafViewSection;
 
 /**
  * A Pace Project is created from a conf directory via xml, an Excel 2007 spreadsheet, or
@@ -142,12 +156,10 @@ public abstract class PaceProject implements IPaceProject {
 				switch (elementId) {
 				
 				case ApplicationDef:
-					
 					readApplicationDefinitions();
 					break;
 								  
 				case Views: 
-					
 					readViews();
 					break;
 					
@@ -212,27 +224,22 @@ public abstract class PaceProject implements IPaceProject {
 					break;
 					 
 				case GlobalStyles:
-					
 					readGlobalStyles();
 					break;
 					 
 				case UserSelections: 
-					
 					readUserSelections();
 					break;
 					
 				case DynamicMembers:
-					
 					readDynamicMembers();
 					break;
 					 
 				case CustomMenus:
-					
 					readCustomMenus();
 					break;
 					 
 				case CustomFunctions:
-					
 					readCustomFunctions();
 					break;
 					
@@ -242,6 +249,10 @@ public abstract class PaceProject implements IPaceProject {
 					
 				case MemberTags:
 					readMemberTags();
+					break;
+				
+				case PrintStyles:
+					readPrintStyles();
 					break;
 					
 				default:
@@ -455,6 +466,11 @@ public abstract class PaceProject implements IPaceProject {
 					writeMemberTags();
 					break;
 									
+					//TTN 900 - Iris
+				case PrintStyles:
+					writePrintStyles();
+					break;
+
 				default:
 					
 					logger.error("No write method defined for element id: " + orderedElementId);
@@ -1110,6 +1126,13 @@ public abstract class PaceProject implements IPaceProject {
 		return getProjectElementList(ProjectElementId.Views);
 		
 	}
+	
+	//TTN 900 - Print Preferences - Added by Iris
+	public Map<String, PrintStyle> getPrintStyles() {
+		
+		return getProjectElementMap(ProjectElementId.PrintStyles);
+		
+	}
 
 	/**
 	 * 
@@ -1314,7 +1337,21 @@ public abstract class PaceProject implements IPaceProject {
 		setProjectElementList(ProjectElementId.Views, viewList);
 		
 	}
-	
+	//TTN 900 - Print Preferences - Added by Iris
+	public void setPrintStyles(Map<String, PrintStyle> printStyles) {
+		
+		if ( printStyles == null ) {
+			
+			getProjectDataMap().put(ProjectElementId.PrintStyles, null);
+			
+		} else {
+			
+			// add/replace element id and data object in map
+			getProjectDataMap().put(ProjectElementId.PrintStyles, new TreeMap<String, PrintStyle>(printStyles));
+			
+		}
+	}
+
 	/**
 	 * 
 	 *  Clears the project data map.
@@ -1355,6 +1392,8 @@ public abstract class PaceProject implements IPaceProject {
 	protected abstract void readUserSecurity() throws PaceProjectReadException;
 	protected abstract void readRoundingRules() throws PaceProjectReadException;
 	protected abstract void readRuleSets() throws PaceProjectReadException;
+	//TTN 900 - Added by Iris
+	protected abstract void readPrintStyles() throws PaceProjectReadException;
 
 	protected abstract void writePlanCycles() throws PaceProjectWriteException;
 	protected abstract void writeSeasons() throws PaceProjectWriteException;
@@ -1377,5 +1416,7 @@ public abstract class PaceProject implements IPaceProject {
 	protected abstract void writeUserSecurity() throws PaceProjectWriteException;
 	protected abstract void writeRoundingRules() throws PaceProjectWriteException;
 	protected abstract void writeRuleSets() throws PaceProjectWriteException;	
+	//TTN 900 - Added by Iris
+	protected abstract void writePrintStyles() throws PaceProjectWriteException;	
 	
 }

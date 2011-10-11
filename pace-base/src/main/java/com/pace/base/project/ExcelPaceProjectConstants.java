@@ -67,6 +67,10 @@ public class ExcelPaceProjectConstants {
 	
 	public static List<String> VALID_MEMBER_TAG_TYPE_LIST = new ArrayList<String>();
 		
+	public static List<String> VALID_PAGE_SCALING_LIST = new ArrayList<String>();
+	public static List<String> VALID_PAGE_ORDER_LIST = new ArrayList<String>();
+	public static List<String> VALID_PAGE_SIZE_LIST = new ArrayList<String>();
+	
 	static {
 				
 		//populate version type
@@ -101,7 +105,9 @@ public class ExcelPaceProjectConstants {
 		VALID_BOOLEAN_LIST.addAll(Arrays.asList(Boolean.TRUE.toString(), Boolean.FALSE.toString()));
 		VALID_LEVEL_GENERATION_LIST.addAll(Arrays.asList(ExcelPaceProjectConstants.LEVEL, ExcelPaceProjectConstants.GENERATION));
 		VALID_ALIAS_MEMBER_LIST.addAll(Arrays.asList(AliasMemberDisplayType.Alias.toString(), AliasMemberDisplayType.Member.toString()));
-		VALID_PAGE_ORIENTATION_LIST.addAll(Arrays.asList(PafBaseConstants.VIEW_PAGE_ORIENTATION_LANDSCAPE, PafBaseConstants.VIEW_PAGE_ORIENTATION_PORTRAIT));
+		VALID_PAGE_ORIENTATION_LIST.addAll(Arrays.asList(PafBaseConstants.PRINTSTYLE_PAGE_ORIENTATION_LANDSCAPE, PafBaseConstants.PRINTSTYLE_PAGE_ORIENTATION_PORTRAIT));
+		VALID_PAGE_ORDER_LIST.addAll(Arrays.asList(PafBaseConstants.PRINTSTYLE_SHEET_PAGEORDER_DOWNTHENOVER, PafBaseConstants.PRINTSTYLE_SHEET_PAGEORDER_OVERTHENDOWN));
+		VALID_PAGE_SCALING_LIST.addAll(Arrays.asList(PafBaseConstants.PRINTSTYLE_PAGE_SCALING_ADJUSTTO,PafBaseConstants.PRINTSTYLE_PAGE_SCALING_FITTO));
 		
 		for (MemberTagType memberTagType : MemberTagType.values() ) {
 			

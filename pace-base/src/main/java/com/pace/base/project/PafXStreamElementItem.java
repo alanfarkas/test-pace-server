@@ -33,6 +33,7 @@ public class PafXStreamElementItem<T> {
 		} catch (PafConfigFileNotFoundException ex) {
 			
 			PafErrHandler.handleException(ex);
+//			throw new PaceProjectReadException(fullFileName, ex.getMessage());			
 			
 		} catch (RuntimeException re) {
 			

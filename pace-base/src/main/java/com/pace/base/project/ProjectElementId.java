@@ -48,6 +48,7 @@ public enum ProjectElementId {
 	CustomFunctions ("Custom Functions", "Custom Functions provide the ability to write and use custom functions in Pace."),
  	MemberTags ("Member Tags", "Member Tag Definitions."), 
 	RoundingRules ("Rounding Rules", "A list of Rounding Rules."),
+	PrintStyles ("Print Styles", "A list of print styles"),
 	
 	//only used for excel and as sub data regions
 	RuleSet_RuleSet,
