@@ -10,7 +10,12 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.pace.base.view.*;
+import com.pace.base.ViewPrintState;
+import com.pace.base.view.IPafView;
+import com.pace.base.view.PafUserSelection;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewHeader;
+import com.pace.base.view.PafViewSection;
 
 /**
  * @author jmilliron
@@ -21,7 +26,7 @@ public class PafAdminConsoleView implements IPafView, Cloneable {
 	private static Logger logger = Logger.getLogger(PafAdminConsoleView.class);
 
 	private Set<String> viewSectionNames;
-
+	
 	private ArrayList<PafViewHeader> headers;
 
 	private String name;
@@ -36,10 +41,15 @@ public class PafAdminConsoleView implements IPafView, Cloneable {
 	private Integer pagesTall;	
 	private Integer pagesWide;
 
+	private PrintStyle printStyle;
+	private String globalPrintStyleGUID;
+	private ViewPrintState viewPrintState;
+	
 	public PafAdminConsoleView() {
 		viewSectionNames = new HashSet<String>();
 		headers = new ArrayList<PafViewHeader>();
 		userSelections = new ArrayList<PafUserSelection>();
+		printStyle = new PrintStyle();
 	}
 
 	public PafAdminConsoleView(PafView view) {
@@ -53,10 +63,11 @@ public class PafAdminConsoleView implements IPafView, Cloneable {
 			this.setBackGroundColor(view.getBackGroundColor());
 			PafUserSelection[] userSelectionsAr = view.getUserSelections();
 			this.userSelections = new ArrayList<PafUserSelection>();
-			this.pageOrientation = view.getPageOrientation();
-			this.pagesTall = view.getPagesTall();
-			this.pagesWide = view.getPagesWide();
-
+			//TTN 900
+			this.setGlobalPrintStyleGUID(view.getGlobalPrintStyleGUID());
+			this.setPrintStyle(view.getPrintStyle());
+			this.setViewPrintState(view.getViewPrintState());
+			
 			if (userSelectionsAr != null) {
 
 				for (PafUserSelection userSelection : userSelectionsAr) {
@@ -186,10 +197,11 @@ public class PafAdminConsoleView implements IPafView, Cloneable {
 		view.setHeaders(this.getHeaders());
 		view.setUserSelections(this.userSelections
 				.toArray(new PafUserSelection[0]));
-		view.setPageOrientation(this.getPageOrientation());
-		view.setPagesTall(this.getPagesTall());
-		view.setPagesWide(this.getPagesWide());
-
+		//TTN 900
+		view.setPrintStyle(this.getPrintStyle());
+		view.setGlobalPrintStyleGUID(this.getGlobalPrintStyleGUID());
+		view.setViewPrintState(this.getViewPrintState());
+		
 		return view;
 	}
 
@@ -219,9 +231,9 @@ public class PafAdminConsoleView implements IPafView, Cloneable {
 		strBuff.append("\t************************************\n");
 
 		strBuff.append("\t************************************\n");
-		strBuff.append("\t*Page Orientation: " + this.getPageOrientation() + "\n");
-		strBuff.append("\t*Pages Tall: " + this.getPagesTall() + "\n");
-		strBuff.append("\t*Pages Wide: " + this.getPagesWide() + "\n");
+//		strBuff.append("\t*Page Orientation: " + this.getPageOrientation() + "\n");
+//		strBuff.append("\t*Pages Tall: " + this.getPagesTall() + "\n");
+//		strBuff.append("\t*Pages Wide: " + this.getPagesWide() + "\n");
 		strBuff.append("\t************************************\n");
 		
 		return strBuff.toString();
@@ -277,10 +289,6 @@ public class PafAdminConsoleView implements IPafView, Cloneable {
 		this.userSelections.add(userSelection);
 	}
 
-	public String getPageOrientation() {
-		return pageOrientation;
-	}
-
 	public void setPageOrientation(String pageOrientation) {
 		this.pageOrientation = pageOrientation;
 	}
@@ -301,4 +309,51 @@ public class PafAdminConsoleView implements IPafView, Cloneable {
 		this.pagesWide = pagesWide;
 	}
 
+	/**
+	 * @param headers the headers to set
+	 */
+	public void setHeaders(ArrayList<PafViewHeader> headers) {
+		this.headers = headers;
+	}
+
+
+	@Override
+	public ViewPrintState getViewPrintState() {
+		// TODO Auto-generated method stub
+		return this.viewPrintState;
+	}
+
+	@Override
+	public void setViewPrintState(ViewPrintState viewPrintState) {
+		// TODO Auto-generated method stub
+		this.viewPrintState = viewPrintState;
+	}
+
+	@Override
+	public PrintStyle getPrintStyle() {
+		// TODO Auto-generated method stub
+		return printStyle;
+	}
+
+	@Override
+	public void setPrintStyle(PrintStyle printStyle) {
+		// TODO Auto-generated method stub
+		this.printStyle = printStyle;
+	}
+
+	@Override
+	public String getGlobalPrintStyleGUID() {
+		// TODO Auto-generated method stub
+		return globalPrintStyleGUID;
+	}
+
+	@Override
+	public void setGlobalPrintStyleGUID(String globalPrintStyleGUID) {
+		// TODO Auto-generated method stub
+		this.globalPrintStyleGUID = globalPrintStyleGUID;
+	}
+
+	public String getPageOrientation() {
+		return pageOrientation;
+	}
 }
