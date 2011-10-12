@@ -19,8 +19,10 @@
 package com.pace.server;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -28,6 +30,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.*;
 import com.pace.base.app.*;
+import com.pace.base.comm.ApplicationState;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.db.membertags.MemberTagDef;
@@ -49,15 +52,12 @@ public class PafAppService {
 
 	private static PafAppService _instance = null;
 
-	private static List<PafApplicationDef> applications;
+	private static Map<String, PafApplicationDef> applicationDefs = new HashMap<String, PafApplicationDef>();
+	private static Map<String, ApplicationState> applicationStates = new HashMap<String, ApplicationState>();
         
 	private static Logger logger = Logger.getLogger(PafAppService.class);
 
-	// private static SeasonList seasons;
-	private PafAppService() {
-        // load applications
-        loadApplications();
-	}
+	private PafAppService() { }
 
 	public static PafAppService getInstance() {
 		if (_instance == null)
@@ -90,14 +90,16 @@ public class PafAppService {
 			
 		}
     	
-        applications = PafMetaData.getPaceProject().getApplicationDefinitions();
+		
+        List<PafApplicationDef> appDefs = PafMetaData.getPaceProject().getApplicationDefinitions();
         
-        for (PafApplicationDef app : applications) {
+        for (PafApplicationDef app : appDefs) {
             app.initMeasures(PafMetaData.getPaceProject().getMeasures());
             app.initVersions(PafMetaData.getPaceProject().getVersions());
             app.initMemberTags(PafMetaData.getPaceProject().getMemberTags());
             app.initFunctionFactory(PafMetaData.getPaceProject().getCustomFunctions());
             app.initCustomMenus(PafMetaData.getPaceProject().getCustomMenus()); 
+            applicationDefs.put(app.getAppId(), app);
         }
         logger.info(Messages.getString("PafAppService.23"));       //$NON-NLS-1$
     }
@@ -106,16 +108,29 @@ public class PafAppService {
 	 * @return Returns the applications.
 	 */
 	public List<PafApplicationDef> getApplications() {
-		return applications;
+		return new ArrayList<PafApplicationDef>(applicationDefs.values());
 	}
 
 	public PafApplicationDef getApplication(String id) {
-		for (PafApplicationDef spec : applications) {
-			if (spec.getAppId().equals(id))
-				return spec;
-		}
-		throw new IllegalArgumentException(Messages.getString("PafAppService.0") //$NON-NLS-1$
+		if (applicationDefs.containsKey(id))
+			return (applicationDefs.get(id));
+		else
+			throw new IllegalArgumentException(Messages.getString("PafAppService.0") //$NON-NLS-1$
 				+ id + Messages.getString("PafAppService.1")); //$NON-NLS-1$
+	}
+	
+	public ApplicationState getApplicationState(String id) {
+		ApplicationState appState = applicationStates.get(id);
+		if (appState == null) {
+			throw new IllegalArgumentException(Messages.getString("PafAppService.0") //$NON-NLS-1$
+				+ id + Messages.getString("PafAppService.1")); //$NON-NLS-1$
+		}
+		
+		return appState;
+	}
+	
+	public void setApplicationState(String id, ApplicationState state) {
+		applicationStates.put(id, state);
 	}
  
 

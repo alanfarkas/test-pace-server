@@ -3529,10 +3529,7 @@ public class PafDataService {
 	/**
 	 * 
 	 */
-	private PafDataService() {
-		logger.info("Initializing PafDataService"); 
-		loadApplications();
-	}
+	private PafDataService() {	}
 
 
 	/**
@@ -3550,7 +3547,7 @@ public class PafDataService {
 	 *  Primarily loads pafBaseMember trees for a particular application
 	 *
 	 */
-	private void loadApplications() {
+	public void loadApplicationData() {
 
 		// assumes a single application at this point
 		// loads all dimensions into the tree hashmap, so at the very least

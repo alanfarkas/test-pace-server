@@ -120,7 +120,7 @@ public class PafViewService {
 		
 		viewCache = assembleViews();
 
-		if ( PafMetaData.isDebugMode()) {
+//		if ( PafMetaData.isDebugMode()) {
 		
 			//reload numeric formats and hierarchy formats
 			try {
@@ -129,7 +129,7 @@ public class PafViewService {
 				logger.error(e.getMessage());
 			}
 		
-		}
+//		}
 		
 		globalNumericFormatCache = PafMetaData.getPaceProject().getNumericFormats();
 		hierarchyFormatsCache = PafMetaData.getPaceProject().getHierarchyFormats();
@@ -154,7 +154,7 @@ public class PafViewService {
 	public PafView[] assembleViews() {
 
 		
-		if ( PafMetaData.isDebugMode()) {
+//		if ( PafMetaData.isDebugMode()) {
 			
 			//reload view groups, views and view sections (TTN-1456)
 			try {
@@ -163,7 +163,7 @@ public class PafViewService {
 				logger.error(e.getMessage());
 			}
 			
-		}
+//		}
 		
 		
 		//import view array of objects
@@ -644,17 +644,15 @@ public class PafViewService {
 	public static PafViewService getInstance() {
 		logger.info("Initializing PafViewService");
 		if (_instance == null) {
+			logger.info("Initializing PafViewService");			
 			_instance = new PafViewService();
-			_instance.loadViewCache();
 		}
 
 		return _instance;
 	}
 
-	private PafViewService() {
-//		logger.info("Initializing PafViewService");
-//		loadViewCache();
-	}
+	private PafViewService() {	}
+
 
 	/**
 	 * Given a view name, returns a pafview object. This is directly available

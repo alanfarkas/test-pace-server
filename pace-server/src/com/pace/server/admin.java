@@ -8,16 +8,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import com.pace.base.PafSoapException;
 
-public class PafInitServlet extends HttpServlet {
+public class admin extends HttpServlet {
 
-	Logger logger = Logger.getLogger(PafInitServlet.class);
 	/**
 	 * Constructor of the object.
 	 */
-	public PafInitServlet() {
+	public admin() {
 		super();
 	}
 
@@ -39,9 +37,21 @@ public class PafInitServlet extends HttpServlet {
 	 * @throws ServletException if an error occurred
 	 * @throws IOException if an error occurred
 	 */
-	@SuppressWarnings("unused")
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
+		String msg;
+		// quick and dirty
+		PafServiceProvider psp = new PafServiceProvider();
+		try {
+			psp.loadApplication(null);
+			msg = "Application is loading...check back later :) ";
+		}
+		
+		catch (PafSoapException pse) {
+			msg = pse.getMessage();
+		}
+		
 
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
@@ -49,9 +59,7 @@ public class PafInitServlet extends HttpServlet {
 		out.println("<HTML>");
 		out.println("  <HEAD><TITLE>A Servlet</TITLE></HEAD>");
 		out.println("  <BODY>");
-		out.print("    This is ");
-		out.print(this.getClass());
-		out.println(", using the GET method");
+		out.println(msg);	
 		out.println("  </BODY>");
 		out.println("</HTML>");
 		out.flush();
@@ -68,7 +76,6 @@ public class PafInitServlet extends HttpServlet {
 	 * @throws ServletException if an error occurred
 	 * @throws IOException if an error occurred
 	 */
-	@SuppressWarnings("unused")
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
@@ -90,20 +97,10 @@ public class PafInitServlet extends HttpServlet {
 	/**
 	 * Initialization of the servlet. <br>
 	 *
-	 * @throws ServletException if an error occure
+	 * @throws ServletException if an error occurs
 	 */
-	@SuppressWarnings("unused")
 	public void init() throws ServletException {
-		// logger.getRootLogger().setLevel(Level.INFO);
-		logger.debug("Initialization Servlet Called");
-        logger.info("--------------------------------------------------");       
-        logger.info("Starting Pace Application Framework Server.");
-        logger.info("Server Version: " + PafServerConstants.SERVER_VERSION);
-        logger.info("--------------------------------------------------");
-//		new PafMetaData();
-//		PafDataService.getInstance();
-//		PafViewService.getInstance();
-
+		// Put your code here
 	}
 
 }

@@ -27,7 +27,7 @@ package com.pace.server;
  */
 public class PafServerConstants {
 
-	public static final String SERVER_VERSION = "2.8.2.0 DEV";
+	public static final String SERVER_VERSION = "2.8.2.0 DEV-SNAPSHOT";
     public static final String VIRTUAL_TIME_DIM = "*TIME";  
     public static final String VIRTUAL_TIME_MBR_DELIM = ".";  
 //    public static final String SERVER_HOME_ENV = "PafServerHome";

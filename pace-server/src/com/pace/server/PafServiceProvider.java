@@ -61,13 +61,12 @@ import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewSection;
 import com.pace.server.comm.*;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * 
+ * The Class PafServiceProvider.
  *
  * @author Jwatkins
  * @version	x.xx
- *
  */
 
 @WebService(endpointInterface="com.pace.server.IPafService")
@@ -75,52 +74,56 @@ import com.pace.server.comm.*;
 public class PafServiceProvider implements IPafService {
 
 	// injected handle to the web service context
+	/** The ws ctx. */
 	@Resource
 	WebServiceContext wsCtx;	
 	
-	private PafViewService viewService;
-	private PafDataService dataService;
-	private PafAppService appService;
+	/** The view service. */
+	private PafViewService viewService = PafViewService.getInstance();
+	
+	/** The data service. */
+	private PafDataService dataService = PafDataService.getInstance();
+	
+	/** The app service. */
+	private PafAppService appService = PafAppService.getInstance();
+	
+	/** The server platform. */
 	private static String serverPlatform = null;
+	
+	/** The logger. */
 	private static Logger logger = Logger.getLogger(PafServiceProvider.class);
+	
+	/** The log audit. */
 	private static Logger logAudit = Logger.getLogger("pace.audit");
+	
+	/** The clients. */
 	private static ConcurrentHashMap<String, PafClientState> clients = new ConcurrentHashMap<String, PafClientState>();
 
+	/**
+	 * Instantiates a new paf service provider.
+	 */
 	public PafServiceProvider() {
-		// get handles to singleton implementors
-		if (serverPlatform == null) {
-
-			serverPlatform = System.getProperty(Messages.getString("PafServiceProvider.0")) + Messages.getString("PafServiceProvider.1") //$NON-NLS-1$ //$NON-NLS-2$
-			+ System.getProperty(Messages.getString("PafServiceProvider.2")) + Messages.getString("PafServiceProvider.3") //$NON-NLS-1$ //$NON-NLS-2$
-			+ System.getProperty(Messages.getString("PafServiceProvider.4")) + Messages.getString("PafServiceProvider.5") //$NON-NLS-1$ //$NON-NLS-2$
-			+ System.getProperty(Messages.getString("PafServiceProvider.6")); //$NON-NLS-1$
-		}
-
 		try {
-
-			viewService = PafViewService.getInstance();
-			dataService = PafDataService.getInstance();
-			appService = PafAppService.getInstance();
-
-			System.out.println(Messages.getString("PafServiceProvider.7") + logger.getLevel()); //$NON-NLS-1$
-			logger.info(Messages.getString("PafServiceProvider.8")); //$NON-NLS-1$
-
-		} catch (Exception ex) {
-			PafErrHandler.handleException(ex, PafErrSeverity.Error);
+			loadApplication(null);
+			
+		} catch (Throwable t) {
+			// don't do anything as all error handling should have been handled elsewhere
+			// otherwise the app server things something went wrong.
 		}
 	}
+	
+	
 
 	
 	/**
-	 *	Export all view definitions to xml
-	 *
+	 * Export all view definitions to xml.
 	 */
 	public void saveViewCache() {
 		viewService.saveViewCache();
 	}
 
 	/**
-	 *	Get paf server version
+	 * Get paf server version.
 	 *
 	 * @return Version ID
 	 */
@@ -129,12 +132,11 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Get Client View
+	 * Get Client View.
 	 *
 	 * @param viewRequest View request
-	 * 
 	 * @return PafView
-	 * @throws PafSoapException
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafView getView(ViewRequest viewRequest) throws PafSoapException {
 
@@ -222,18 +224,21 @@ public class PafServiceProvider implements IPafService {
 		return compressedView;
 	}
 
-	/**
-	 *	Method_description_goes_here
-	 *
-	 */
-	public PafResponse refreshMetaDataCache() {
-		logger.info(Messages.getString("PafServiceProvider.11")); //$NON-NLS-1$
-		dataService.clearMemberTreeStore();
-		return new PafResponse();
-	}
+//	/**
+//	 *	Method_description_goes_here
+//	 *
+//	 */
+//	public PafResponse refreshMetaDataCache() {
+//		logger.info(Messages.getString("PafServiceProvider.11")); //$NON-NLS-1$
+//		dataService.clearMemberTreeStore();
+//		return new PafResponse();
+//	}
 
 	
-	public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteException, PafSoapException {
+	/* (non-Javadoc)
+ * @see com.pace.server.IPafService#reinitializeClientState(com.pace.base.comm.PafRequest)
+ */
+public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteException, PafSoapException {
 
 		// Set logger client info property to user name
 		try {
@@ -256,6 +261,11 @@ public class PafServiceProvider implements IPafService {
 		
 	}
 	
+	/**
+	 * Reinitialize client state.
+	 *
+	 * @param clientId the client id
+	 */
 	private void reinitializeClientState(String clientId) {
 
 		ClientInitRequest pcInit = clients.get(clientId).getInitRequest();
@@ -272,14 +282,12 @@ public class PafServiceProvider implements IPafService {
 
 	/**
 	 * Begin initial tracking of a client upon receiving this request generates
-	 * a unique id, but is not actually authenticated to perform any operations
-	 * 
-	 * @param pcInit
-	 *            Client init request
-	 * 
+	 * a unique id, but is not actually authenticated to perform any operations.
+	 *
+	 * @param pcInit Client init request
 	 * @return PafServerAck
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafServerAck clientInit(ClientInitRequest pcInit)
 			throws RemoteException, PafSoapException {
@@ -393,13 +401,12 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Perform client authorization
+	 * Perform client authorization.
 	 *
 	 * @param authReq Authorization request
-	 * 
 	 * @return PafAuthResponse
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafAuthResponse clientAuth(PafAuthRequest authReq)
 			throws RemoteException, PafSoapException{
@@ -594,13 +601,12 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Start Planning Session
+	 * Start Planning Session.
 	 *
 	 * @param planRequest Plan session response
-	 * 
 	 * @return PafPlanSessionResponse
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	// TODO Refactor startPlanSession to be cleaner, less arrayList to array
 	// behavior, and wrap some operations
@@ -940,10 +946,9 @@ public class PafServiceProvider implements IPafService {
 	
 
 	/**
-	 *	Find the planner configurations for the roles available to a user
+	 * Find the planner configurations for the roles available to a user.
 	 *
-	 * @param roleName an array of role names
-	 * 
+	 * @param plannerRoles the planner roles
 	 * @return PafPlannerConfig[]
 	 */
 	private PafPlannerConfig[] findPafPlannerConfig(PafPlannerRole[] plannerRoles){
@@ -971,11 +976,10 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Find planner configuration for specified role and planCycle
+	 * Find planner configuration for specified role and planCycle.
 	 *
 	 * @param roleName Role name
 	 * @param planCycle Plan cycle
-	 * 
 	 * @return PafPlannerConfig
 	 */
 	private PafPlannerConfig findPafPlannerConfig(String roleName,
@@ -1069,10 +1073,9 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Get all active planning versions
+	 * Get all active planning versions.
 	 *
 	 * @param baseVersionDef Base version definition
-	 * 
 	 * @return Set<String>
 	 */
 	private Set<String> getActiveVersions(VersionDef baseVersionDef) {
@@ -1265,13 +1268,12 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Return client cache block
+	 * Return client cache block.
 	 *
-	 * @param cacheRequest
+	 * @param cacheRequest the cache request
 	 * @return ClientCacheBlock
-	 * 
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafClientCacheBlock clientCacheRequest(
@@ -1330,9 +1332,9 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Method_description_goes_here
+	 * Method_description_goes_here.
 	 *
-	 * @return
+	 * @return the simple version defs
 	 */
 	private SimpleVersionDef[] getSimpleVersionDefs() {
 
@@ -1358,12 +1360,12 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Evaluate pending calculations on view section
+	 * Evaluate pending calculations on view section.
 	 *
 	 * @param evalRequest Evaluation request object
 	 * @return PafDataSlice Paf data slice
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafView evaluateView(EvaluateViewRequest evalRequest)
 			throws RemoteException, PafSoapException {
@@ -1453,12 +1455,12 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Method_description_goes_here
+	 * Method_description_goes_here.
 	 *
-	 * @param saveWorkRequest
-	 * @return
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @param saveWorkRequest the save work request
+	 * @return the paf command response
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafCommandResponse saveWork(SaveWorkRequest saveWorkRequest)
 			throws RemoteException, PafSoapException {
@@ -1496,12 +1498,12 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Method_description_goes_here
+	 * Method_description_goes_here.
 	 *
-	 * @param reloadRequest
-	 * @return
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @param reloadRequest the reload request
+	 * @return the paf data slice
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafDataSlice reloadDatacache(PafViewRequest reloadRequest)
@@ -1565,17 +1567,16 @@ public class PafServiceProvider implements IPafService {
 	}
 	
 	/**
-	 *	Refresh selected versions in data cache from the mdb
-	 *
-	 *	This method is typically called from the Pace Client after a custom action is run
-	 *	with the <refreshUow> parameter set to true and the <refreshUowVersionFilter>
-	 *	parameter utilized.
+	 * Refresh selected versions in data cache from the mdb
+	 * 
+	 * This method is typically called from the Pace Client after a custom action is run
+	 * with the <refreshUow> parameter set to true and the <refreshUowVersionFilter>
+	 * parameter utilized.
 	 *
 	 * @param updateRequest Update data cache request
-	 * 
 	 * @return PafDataSlice
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafDataSlice updateDatacache(PafUpdateDatacacheRequest updateRequest) throws RemoteException, PafSoapException {
 		PafDataSlice dataSlices[] = null;
@@ -1643,13 +1644,12 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Return specified dimension tree
+	 * Return specified dimension tree.
 	 *
 	 * @param pafTreeRequest Tree request object (contains specified dimension name)
-	 * 
 	 * @return PafTreeResponse (contains requested dimension tree)
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafTreeResponse getDimensionTree(PafTreeRequest pafTreeRequest)
@@ -1702,13 +1702,12 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Get all dimension trees
+	 * Get all dimension trees.
 	 *
 	 * @param pafTreesRequest Request object
-	 * 
 	 * @return PafTreesResponse (contains dimension trees)
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafTreesResponse getDimensionTrees(@SuppressWarnings("unused") //$NON-NLS-1$
@@ -1756,11 +1755,11 @@ public class PafServiceProvider implements IPafService {
 	
 	
 	/**
-	 *	Method_description_goes_here
+	 * Method_description_goes_here.
 	 *
-	 * @param cmdRequest
-	 * @return
-	 * @throws PafSoapException
+	 * @param cmdRequest the cmd request
+	 * @return the paf custom command response
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafCustomCommandResponse runCustomCommand(
 			PafCustomCommandRequest cmdRequest) throws PafSoapException {
@@ -1799,12 +1798,13 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Ends the current planning session.  This method cleans up the UOW Cache
-	 *  and then removes the client id from the map of clients.
+	 * Ends the current planning session.  This method cleans up the UOW Cache
+	 * and then removes the client id from the map of clients.
 	 *
-	 * @param endSessionRequest
-	 * @throws RemoteException
-	 * @throws PafSoapException
+	 * @param endSessionRequest the end session request
+	 * @return the paf response
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafResponse endPlanningSession(PafRequest endSessionRequest)
 			throws RemoteException, PafSoapException {
@@ -1924,10 +1924,10 @@ public class PafServiceProvider implements IPafService {
 	}
 	
 	/**
-	 *	Method_description_goes_here
+	 * Method_description_goes_here.
 	 *
-	 * @param re
-	 * @throws PafSoapException
+	 * @param re the re
+	 * @throws PafSoapException the paf soap exception
 	 */
 	private void handleRuntimeException(RuntimeException re) throws PafSoapException {
 		
@@ -1947,13 +1947,12 @@ public class PafServiceProvider implements IPafService {
 
 	/**
 	 * Changes a db user's password in the paf security db by calling the PafSecurityService layer.
-	 * 
-	 * @param changePasswordRequest
-	 *            Client Change Password Request (contains clientId)
+	 *
+	 * @param changePasswordRequest Client Change Password Request (contains clientId)
 	 * @return PafClientSecurityResponse
-	 * @throws RemoteException
+	 * @throws RemoteException the remote exception
 	 * @throws PafNotAuthenticatedSoapException Thrown when client id is not valid or session token is not valid
-	 * @throws PafNotAuthorizedSoapException Thrown when client is not authorized 
+	 * @throws PafNotAuthorizedSoapException Thrown when client is not authorized
 	 */
 	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafClientSecurityResponse changePafUserPassword(PafClientChangePasswordRequest changePasswordRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException  {
@@ -1980,11 +1979,10 @@ public class PafServiceProvider implements IPafService {
 
 	/**
 	 * Creates a db user in the paf security db by calling the PafSecurityService layer.
-	 * 
-	 * @param clientSecurityRequest
-	 *            Client Security Request (contains clientId)
+	 *
+	 * @param clientSecurityRequest Client Security Request (contains clientId)
 	 * @return PafClientSecurityResponse
-	 * @throws RemoteException
+	 * @throws RemoteException the remote exception
 	 * @throws PafNotAuthenticatedSoapException Thrown when client id is not valid or session token is not valid
 	 * @throws PafNotAuthorizedSoapException Thrown when client is not authorized
 	 */
@@ -2013,13 +2011,13 @@ public class PafServiceProvider implements IPafService {
 
 	/**
 	 * Deletes a db user in the paf security db by calling the PafSecurityService layer.
-	 * 
-	 * @param clientSecurityRequest
-	 *            Client Security Request (contains clientId)
+	 *
+	 * @param clientSecurityRequest Client Security Request (contains clientId)
 	 * @return PafClientSecurityResponse
-	 * @throws RemoteException
+	 * @throws RemoteException the remote exception
 	 * @throws PafNotAuthenticatedSoapException Thrown when client id is not valid or session token is not valid
 	 * @throws PafNotAuthorizedSoapException Thrown when client is not authorized
+	 * @throws PafSoapException the paf soap exception
 	 */
 	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafClientSecurityResponse deletePafUser(PafClientSecurityRequest clientSecurityRequest) throws RemoteException, 
@@ -2061,7 +2059,14 @@ public class PafServiceProvider implements IPafService {
 
 	/**
 	 * Gets a multidimensional array of domains and security groups in those domains.
-	 * 
+	 *
+	 * @param groupSecurityRequest the group security request
+	 * @return the paf groups
+	 * @throws RemoteException the remote exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
+	 * @throws PafSoapException the paf soap exception
+	 * @throws PafNotAbletoGetLDAPContext the paf not ableto get ldap context
 	 */
 	public PafGroupSecurityResponse getPafGroups(PafGroupSecurityRequest groupSecurityRequest)throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException, PafNotAbletoGetLDAPContext{
 		
@@ -2107,7 +2112,14 @@ public class PafServiceProvider implements IPafService {
 	
 	/**
 	 * Gets a multidimensional array of domains and security groups in those domains.
-	 * 
+	 *
+	 * @param groupSecurityRequest the group security request
+	 * @return the user names for security groups
+	 * @throws RemoteException the remote exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
+	 * @throws PafSoapException the paf soap exception
+	 * @throws PafNotAbletoGetLDAPContext the paf not ableto get ldap context
 	 */
 	public PafUserNamesforSecurityGroupsResponse getUserNamesForSecurityGroups(PafUserNamesforSecurityGroupsRequest groupSecurityRequest)throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException, PafNotAbletoGetLDAPContext{
 		
@@ -2170,6 +2182,9 @@ public class PafServiceProvider implements IPafService {
 		return response;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.pace.server.IPafService#verifyUsers(com.pace.server.comm.PafVerifyUsersRequest)
+	 */
 	public PafVerifyUsersResponse verifyUsers(PafVerifyUsersRequest req) throws RemoteException, PafSoapException,
 	PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafNotAbletoGetLDAPContext{
 		PafVerifyUsersResponse InvalidUsers = new PafVerifyUsersResponse();
@@ -2216,6 +2231,12 @@ public class PafServiceProvider implements IPafService {
 		return InvalidUsers;
 	}
 	
+	/**
+	 * Security domain user names.
+	 *
+	 * @param clientID the client id
+	 * @return the paf security domain user names
+	 */
 	private PafSecurityDomainUserNames securityDomainUserNames(String clientID){
 		PafSecurityDomainUserNames securityDomainUserNames = new PafSecurityDomainUserNames();
 		
@@ -2254,13 +2275,13 @@ public class PafServiceProvider implements IPafService {
 	
 	/**
 	 * Gets a single db user in the paf security db by calling the PafSecurityService layer.
-	 * 
-	 * @param clientSecurityRequest
-	 *            Client Security Request (contains clientId)
+	 *
+	 * @param clientSecurityRequest Client Security Request (contains clientId)
 	 * @return PafClientSecurityResponse
-	 * @throws RemoteException
+	 * @throws RemoteException the remote exception
 	 * @throws PafNotAuthenticatedSoapException Thrown when client id is not valid or session token is not valid
 	 * @throws PafNotAuthorizedSoapException Thrown when client is not authorized
+	 * @throws PafNotAbletoGetLDAPContext the paf not ableto get ldap context
 	 */
 	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafClientSecurityResponse getPafUser(PafClientSecurityRequest clientSecurityRequest) throws RemoteException, 
@@ -2387,6 +2408,9 @@ public class PafServiceProvider implements IPafService {
 		return response;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.pace.server.IPafService#setGroups(com.pace.server.comm.PafSetPaceGroupsRequest)
+	 */
 	public PafSetPaceGroupsResponse setGroups(PafSetPaceGroupsRequest paceGroupRequest) throws RemoteException, PafSoapException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException {
 		PafSetPaceGroupsResponse paceGroupResponse = new PafSetPaceGroupsResponse();
 		
@@ -2422,6 +2446,9 @@ public class PafServiceProvider implements IPafService {
 		return paceGroupResponse;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.pace.server.IPafService#getGroups(com.pace.server.comm.PafGetPaceGroupsRequest)
+	 */
 	public PafGetPaceGroupsResponse getGroups(PafGetPaceGroupsRequest paceGroupRequest) throws RemoteException, PafSoapException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException {
 		PafGetPaceGroupsResponse paceGroupsResponse = new PafGetPaceGroupsResponse();
 		
@@ -2443,11 +2470,10 @@ public class PafServiceProvider implements IPafService {
 
 	/**
 	 * Gets all db users in the paf security db by calling the PafSecurityService layer.
-	 * 
-	 * @param clientSecurityRequest
-	 *            Client Security Request (contains clientId)
+	 *
+	 * @param clientSecurityRequest Client Security Request (contains clientId)
 	 * @return PafClientSecurityResponse
-	 * @throws RemoteException
+	 * @throws RemoteException the remote exception
 	 * @throws PafNotAuthenticatedSoapException Thrown when client id is not valid or session token is not valid
 	 * @throws PafNotAuthorizedSoapException Thrown when client is not authorized
 	 */
@@ -2478,11 +2504,10 @@ public class PafServiceProvider implements IPafService {
 	
 	/**
 	 * Gets all db users in the paf security db by calling the PafSecurityService layer.
-	 * 
-	 * @param clientSecurityRequest
-	 *            Client Security Request (contains clientId)
+	 *
+	 * @param clientSecurityRequest Client Security Request (contains clientId)
 	 * @return PafClientSecurityResponse
-	 * @throws RemoteException
+	 * @throws RemoteException the remote exception
 	 * @throws PafNotAuthenticatedSoapException Thrown when client id is not valid or session token is not valid
 	 * @throws PafNotAuthorizedSoapException Thrown when client is not authorized
 	 */
@@ -2529,13 +2554,11 @@ public class PafServiceProvider implements IPafService {
 
 	/**
 	 * Resets a db user's password in the paf security db by calling the PafSecurityService layer.
-	 * 
-	 * @param clientSecurityRequest
-	 *            Client Security Request (contains clientId)
+	 *
+	 * @param clientSecurityRequest Client Security Request (contains clientId)
 	 * @return PafClientSecurityPasswordResetResponse
-	 * @throws RemoteException
-	 * @throws PafNotAuthenticatedSoapException Thrown when client id is not valid or session token is not valid
-	 * @throws PafNotAuthorizedSoapException Thrown when client is not authorized
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafClientSecurityPasswordResetResponse resetPafUserPassword(PafClientSecurityRequest clientSecurityRequest) throws RemoteException, PafSoapException {
 
@@ -2586,13 +2609,13 @@ public class PafServiceProvider implements IPafService {
 
 	/**
 	 * Updates a db user in the paf security db by calling the PafSecurityService layer.
-	 * 
-	 * @param clientSecurityRequest
-	 *            Client Security Request (contains clientId)
+	 *
+	 * @param clientSecurityRequest Client Security Request (contains clientId)
 	 * @return PafClientSecurityResponse
-	 * @throws RemoteException
+	 * @throws RemoteException the remote exception
 	 * @throws PafNotAuthenticatedSoapException Thrown when client id is not valid or session token is not valid
 	 * @throws PafNotAuthorizedSoapException Thrown when client is not authorized
+	 * @throws PafSoapException the paf soap exception
 	 */	
 	public PafClientSecurityResponse updatePafUser(PafClientSecurityRequest clientSecurityRequest) throws RemoteException, 
 																PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
@@ -2627,12 +2650,15 @@ public class PafServiceProvider implements IPafService {
 
 	
 	/**
-	 * Import attribute dimensions from multi-dimensional database
+	 * Import attribute dimensions from multi-dimensional database.
 	 *
-	 * @parm importAttrRequest Import attributes request object
-	 * 
+	 * @param importAttrRequest the import attr request
 	 * @return PafImportAttrResponse Import attributes response object
-	 * @throws PafSoapException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException 
+	 * @throws RemoteException the remote exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
+	 * @throws PafSoapException the paf soap exception
+	 * @parm importAttrRequest Import attributes request object
 	 */
 	public PafImportAttrResponse importMdbAttributeDims(PafImportAttrRequest importAttrRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
 		PafImportAttrResponse resp = new PafImportAttrResponse();
@@ -2673,6 +2699,9 @@ public class PafServiceProvider implements IPafService {
 		return resp;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.pace.server.IPafService#clearImportedMdbAttributeDims(com.pace.server.comm.PafClearImportedAttrRequest)
+	 */
 	public PafClearImportedAttrResponse clearImportedMdbAttributeDims(PafClearImportedAttrRequest clearImportedAttrRequest) 
 		throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
 		
@@ -2707,11 +2736,9 @@ public class PafServiceProvider implements IPafService {
 	}
 	
 	/**
-	 * Verifiy client id is authenticated and valid
-	 * 
-	 * @param clientId
-	 *      		Used to get client state from clients map.
+	 * Verifiy client id is authenticated and valid.
 	 *
+	 * @param clientId Used to get client state from clients map.
 	 * @return boolean true if authenticated and false if not
 	 * @throws PafNotAuthenticatedSoapException Thrown when client id is not valid or session token is not valid
 	 */	
@@ -2814,13 +2841,14 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *	Get list of properties from multi-dimensional database
+	 * Get list of properties from multi-dimensional database.
+	 *
 	 * @param mdbRequest Mdb props request object
-	 * 
 	 * @return PafMdbPropsResponse Mdb props response object
-	 * @throws RemoteException, PafSoapException 
-	 * @throws PafSoapException 
-	 * @throws PafNotAuthenticatedSoapException 
+	 * @throws RemoteException the remote exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafMdbPropsResponse getMdbProps(PafMdbPropsRequest mdbRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
@@ -2858,16 +2886,16 @@ public class PafServiceProvider implements IPafService {
 	
 	
 	/**
-	 *	Return the valid list of attribute members and rollups
-	 *  in light of selections on the related base dimension
-	 *  and any other related attribute members
-	 *  
+	 * Return the valid list of attribute members and rollups
+	 * in light of selections on the related base dimension
+	 * and any other related attribute members.
+	 *
 	 * @param attrRequest Valid attribute request object
 	 * @return PafValidAttrResponse Valid attribute response object
-	 * 
-	 * @throws RemoteException, PafSoapException 
-	 * @throws PafSoapException 
-	 * @throws PafNotAuthenticatedSoapException 
+	 * @throws RemoteException the remote exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafValidAttrResponse getValidAttributeMembers(PafValidAttrRequest attrRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
@@ -2901,7 +2929,12 @@ public class PafServiceProvider implements IPafService {
 	
 	
 	/**
-	 *	Provides the PafSimpleTrees to the client
+	 * Provides the PafSimpleTrees to the client.
+	 *
+	 * @param planRequest the plan request
+	 * @return the paf populate role filter response
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafPopulateRoleFilterResponse populateRoleFilters(PafPlanSessionRequest planRequest) throws RemoteException, PafSoapException{
 		PafPopulateRoleFilterResponse resp = new PafPopulateRoleFilterResponse();
@@ -3015,7 +3048,12 @@ public class PafServiceProvider implements IPafService {
 	}
 	
 	/**
-	 *	Returns the UOW size to the client
+	 * Returns the UOW size to the client.
+	 *
+	 * @param filteredUOWSize the filtered uow size
+	 * @return the filtered uow size
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafGetFilteredUOWSizeResponse getFilteredUOWSize(PafGetFilteredUOWSizeRequest filteredUOWSize) throws RemoteException, PafSoapException{
 		PafGetFilteredUOWSizeResponse resp = new PafGetFilteredUOWSizeResponse();
@@ -3289,12 +3327,13 @@ public class PafServiceProvider implements IPafService {
 	}
 	
 	/**
-	 *	Logs off the current user.  This method cleans up the UOW Cache
-	 *  tied to the client id.
+	 * Logs off the current user.  This method cleans up the UOW Cache
+	 * tied to the client id.
 	 *
-	 * @param logoffRequest			Logoff request	
-	 * @throws RemoteException		blah	
-	 * @throws PafSoapException		blah
+	 * @param logoffRequest 		Logoff request
+	 * @return the paf response
+	 * @throws RemoteException 	blah
+	 * @throws PafSoapException 	blah
 	 */
 	public PafResponse logoff(PafRequest logoffRequest)
 			throws RemoteException, PafSoapException {
@@ -3355,7 +3394,10 @@ public class PafServiceProvider implements IPafService {
 //		return attrComboLists;
 //	}
 	
-	public PafGetNotesResponse getCellNotes(
+	/* (non-Javadoc)
+ * @see com.pace.server.IPafService#getCellNotes(com.pace.server.comm.PafGetNotesRequest)
+ */
+public PafGetNotesResponse getCellNotes(
 			PafGetNotesRequest getNotesRequest) throws RemoteException,
 			PafSoapException {
 
@@ -3369,6 +3411,9 @@ public class PafServiceProvider implements IPafService {
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see com.pace.server.IPafService#saveCellNotes(com.pace.server.comm.PafSaveNotesRequest)
+	 */
 	public PafSaveNotesResponse saveCellNotes(
 			PafSaveNotesRequest saveNotesRequest) throws RemoteException,
 			PafSoapException {
@@ -3460,9 +3505,12 @@ public class PafServiceProvider implements IPafService {
 	
 	/**
 	 * Querys the cache db and gets the number of cell notes per app/data source.
-	 * 
-	 * @parm pafRequest	The request
+	 *
+	 * @param pafRequest the paf request
 	 * @return PafCellNoteInformationResponse
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
+	 * @parm pafRequest	The request
 	 */
 	public PafCellNoteInformationResponse getCellNotesInformation(PafRequest pafRequest) 
 		throws RemoteException, PafSoapException {
@@ -3500,9 +3548,12 @@ public class PafServiceProvider implements IPafService {
 	
 	/**
 	 * Gets simple cell notes to export.
-	 * 
-	 * @parm pafSimpleCellNoteExportRequest	The request to export the cell notes.
+	 *
+	 * @param pafSimpleCellNoteExportRequest the paf simple cell note export request
 	 * @return PafSimpleCellNoteExportResponse
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
+	 * @parm pafSimpleCellNoteExportRequest	The request to export the cell notes.
 	 */
 	public PafSimpleCellNoteExportResponse getSimpleCellNotesToExport(PafSimpleCellNoteExportRequest pafSimpleCellNoteExportRequest) throws RemoteException, PafSoapException {
 		
@@ -3569,10 +3620,13 @@ public class PafServiceProvider implements IPafService {
 	}
 	
 	/**
-	 * Import Simple Cell Notes
-	 * 
-	 * @parm PafSimpleCellNoteImportRequest	The request to import simple cell notes.
+	 * Import Simple Cell Notes.
+	 *
+	 * @param pafSimpleCellNoteImportRequest the paf simple cell note import request
 	 * @return PafSimpleCellNoteImportResponse
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
+	 * @parm PafSimpleCellNoteImportRequest	The request to import simple cell notes.
 	 */
 	public PafSimpleCellNoteImportResponse importSimpleCellNotes(PafSimpleCellNoteImportRequest pafSimpleCellNoteImportRequest) throws RemoteException, PafSoapException
 	{
@@ -3614,12 +3668,14 @@ public class PafServiceProvider implements IPafService {
 	}
 
 	/**
-	 *  Clear member tag data for the specified application(s) and member tags
+	 * Clear member tag data for the specified application(s) and member tags.
 	 *
 	 * @param filteredMbrTagsRequest Contains optional app/member tag filter
-	 * 
 	 * @return PafSuccessResponse
-	 * @throws RemoteException, PafSoapException, PafNotAuthorizedSoapException, PafNotAuthenticatedSoapException 
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
 	 */
 	public PafSuccessResponse clearMemberTagData(PafFilteredMbrTagRequest filteredMbrTagsRequest) throws RemoteException, PafSoapException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException {
 		
@@ -3657,12 +3713,14 @@ public class PafServiceProvider implements IPafService {
 
 
 	/**
-	 *  Clear member tag data for the specified application(s) and member tags
+	 * Clear member tag data for the specified application(s) and member tags.
 	 *
 	 * @param filteredMbrTagsRequest Contains optional app/member tag filter
-	 * 
 	 * @return PafSuccessResponse
-	 * @throws RemoteException, PafSoapException, PafNotAuthorizedSoapException, PafNotAuthenticatedSoapException 
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
 	 */
 	public PafGetMemberTagDataResponse exportMemberTagData(PafFilteredMbrTagRequest filteredMbrTagsRequest) throws RemoteException, PafSoapException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException {
 
@@ -3701,12 +3759,14 @@ public class PafServiceProvider implements IPafService {
 
 
 	/**
-	 *  Get all or specified member tag definitions
+	 * Get all or specified member tag definitions.
 	 *
 	 * @param memberTagDefsRequest Contains an optional member tag filter
-	 * 
 	 * @return PafGetMemberTagDefsResponse
-	 * @throws RemoteException, PafSoapException, PafNotAuthorizedSoapException, PafNotAuthenticatedSoapException 
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
 	 */
 	public PafGetMemberTagDefsResponse getMemberTagDefs(PafGetMemberTagDefsRequest memberTagDefsRequest) throws RemoteException, PafSoapException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException {
 
@@ -3744,10 +3804,9 @@ public class PafServiceProvider implements IPafService {
 
 
 	/**
-	 *	Get all member tag defs for the specified application
+	 * Get all member tag defs for the specified application.
 	 *
 	 * @param app Current application definition
-	 *
 	 * @return MemberTagDef[]
 	 */
 	private MemberTagDef[] getMemberTagDefs(PafApplicationDef app) {
@@ -3759,12 +3818,14 @@ public class PafServiceProvider implements IPafService {
 	
 
 	/**
-	 *  Get member tag statistics
+	 * Get member tag statistics.
 	 *
 	 * @param filteredMbrTagsRequest Contains optional app/member tag filter
-	 * 
 	 * @return PafGetMemberTagInfoResponse
-	 * @throws RemoteException, PafSoapException, PafNotAuthorizedSoapException, PafNotAuthenticatedSoapException
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
 	 */
 	public PafGetMemberTagInfoResponse getMemberTagInfo(PafFilteredMbrTagRequest filteredMbrTagsRequest) throws RemoteException, PafSoapException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException {
 		
@@ -3802,12 +3863,14 @@ public class PafServiceProvider implements IPafService {
 
 
 	/**
-	 *  Import data into the member tag database
+	 * Import data into the member tag database.
 	 *
 	 * @param importMemberTagRequest Imported member tag data
-	 * 
 	 * @return PafSuccessResponse
-	 * @throws RemoteException, PafSoapException, PafNotAuthorizedSoapException, PafNotAuthenticatedSoapException 
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
 	 */
 	public PafSuccessResponse importMemberTagData(PafImportMemberTagRequest importMemberTagRequest) throws RemoteException, PafSoapException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException {
 
@@ -3858,12 +3921,14 @@ public class PafServiceProvider implements IPafService {
 
 
 	/**
-	 *  Save updates to the member tag database
+	 * Save updates to the member tag database.
 	 *
 	 * @param saveMbrTagsRequest Member tag additions, updates, and deletions
-	 * 
 	 * @return PafSuccessResponse
-	 * @throws RemoteException, PafSoapException, PafNotAuthorizedSoapException, PafNotAuthenticatedSoapException 
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException the paf soap exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
 	 */
 	public PafSuccessResponse saveMemberTagData(PafSaveMbrTagRequest saveMbrTagsRequest) throws RemoteException, PafSoapException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException {
 
@@ -3905,12 +3970,11 @@ public class PafServiceProvider implements IPafService {
 
 
 	/**
-	 * 
 	 * Closes a clients session by removing Client State from the clients map.
-	 * 
+	 *
 	 * @param pafRequest request
 	 * @return PafSuccessResponse success or not
-	 * @throws RemoteException 
+	 * @throws RemoteException the remote exception
 	 */
 	public PafSuccessResponse closeClientSession(PafRequest pafRequest) throws RemoteException {
 
@@ -3938,13 +4002,12 @@ public class PafServiceProvider implements IPafService {
 
 
 	/**
-	 * 
 	 * Checks to see if a client session is active by using the client id
-	 * TTN-1160
-	 * 
+	 * TTN-1160.
+	 *
 	 * @param pafRequest request
 	 * @return PafSuccessResponse success or not
-	 * @throws RemoteException 
+	 * @throws RemoteException the remote exception
 	 */
 	public PafSuccessResponse isSessionActive(PafRequest pafRequest) throws RemoteException {
 
@@ -3966,6 +4029,11 @@ public class PafServiceProvider implements IPafService {
 	}
 	
 	
+	/**
+	 * List cookies.
+	 *
+	 * @param clientId the client id
+	 */
 	private void listCookies(String clientId) {
 		MessageContext mc = wsCtx.getMessageContext();		   
 		//HttpSession session = ((javax.servlet.http.HttpServletRequest)mc.get(MessageContext.SERVLET_REQUEST)).getSession();
@@ -3981,6 +4049,67 @@ public class PafServiceProvider implements IPafService {
 	   else {
 		   logger.debug("Cookies are null in session");
 	   }		
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.pace.server.IPafService#getApplicationState(com.pace.base.comm.ApplicationStateRequest)
+	 */
+	@Override
+	public ApplicationStateResponse getApplicationState(
+			ApplicationStateRequest appReq) throws RemoteException,
+			PafSoapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.pace.server.IPafService#loadApplication(com.pace.base.comm.LoadApplicationRequest)
+	 */
+	@Override
+	public PafSuccessResponse loadApplication(LoadApplicationRequest appReq)
+			throws RemoteException, PafSoapException {
+		// regardless of parameters, for now just load the application
+		
+		
+		// get handles to singleton implementors
+		if (serverPlatform == null) {
+
+			serverPlatform = System.getProperty(Messages.getString("PafServiceProvider.0")) + Messages.getString("PafServiceProvider.1") //$NON-NLS-1$ //$NON-NLS-2$
+			+ System.getProperty(Messages.getString("PafServiceProvider.2")) + Messages.getString("PafServiceProvider.3") //$NON-NLS-1$ //$NON-NLS-2$
+			+ System.getProperty(Messages.getString("PafServiceProvider.4")) + Messages.getString("PafServiceProvider.5") //$NON-NLS-1$ //$NON-NLS-2$
+			+ System.getProperty(Messages.getString("PafServiceProvider.6")); //$NON-NLS-1$
+		}
+
+		try {
+			
+			
+			// initialize the application service and reload the application metadata			
+			appService.loadApplications();			
+
+			// initialize view service and reload the view definitions
+			viewService.loadViewCache();
+			
+			// initialize the data service and re/load the application data sources
+			if ( appReq==null || appReq.isLoadMdb() )
+				dataService.loadApplicationData();
+
+			System.out.println(Messages.getString("PafServiceProvider.7") + logger.getLevel()); //$NON-NLS-1$
+			logger.info(Messages.getString("PafServiceProvider.8")); //$NON-NLS-1$
+
+		} catch (Exception ex) {
+			
+			PafErrHandler.handleException(ex, PafErrSeverity.Error);
+			
+			return new PafSuccessResponse(false);
+		}
+		
+		//appService.setApplicationState(id, state)
+
+		new PafSuccessResponse(true);
+		
+		return null;
 	}
 	
 	
