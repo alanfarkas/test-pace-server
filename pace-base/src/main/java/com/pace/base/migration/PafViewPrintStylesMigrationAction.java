@@ -10,6 +10,7 @@ import com.pace.base.ViewPrintState;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
+import com.pace.base.ui.DefaultPrintSettings;
 import com.pace.base.ui.PrintStyle;
 import com.pace.base.ui.PrintStyles;
 import com.pace.base.utility.GUIDUtil;
@@ -19,21 +20,22 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 
 	private static Logger logger = Logger.getLogger(PafViewPrintStylesMigrationAction.class);
 	private int count = 0;
-	private Map<String, PrintStyle> printStyles = null;
+	private Map<String, PrintStyle> printStylesMap = null;
+	PrintStyle migratePrintStyle = null;
 	
 	public PafViewPrintStylesMigrationAction() {
 		// TODO Auto-generated constructor stub
 	}
 
 	public PafViewPrintStylesMigrationAction(XMLPaceProject xmlPaceProject) {
-		
 		this.xmlPaceProject = xmlPaceProject;
-		
 		if ( this.xmlPaceProject != null ) {
 			boolean currentUpgradeProject = this.xmlPaceProject.isUpgradeProject();
 			this.xmlPaceProject.setUpgradeProject(true);
-			this.printStyles = this.xmlPaceProject.getPrintStyles();
+			this.printStylesMap = this.xmlPaceProject.getPrintStyles();
 			this.xmlPaceProject.setUpgradeProject(currentUpgradeProject);
+			DefaultPrintSettings.getInstance();
+			migratePrintStyle = DefaultPrintSettings.getDefaultPrintSettings();
 		}
 	}	
 	
@@ -75,12 +77,13 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 		xmlPaceProject.setUpgradeProject(false);
 		List<PafView> pafViews = xmlPaceProject.getViews();
 		xmlPaceProject.setUpgradeProject(currentUpgradeProject);
+		
 		for( PafView pafView : pafViews ) {
 			constructMigrationGlobalPrintStyleForView( pafView );
 		}
 		
 		xmlPaceProject.setViews(pafViews);
-		xmlPaceProject.setPrintStyles(printStyles);
+		xmlPaceProject.setPrintStyles(printStylesMap);
 		try {
 			xmlPaceProject.save(ProjectElementId.Views);
 			xmlPaceProject.save(ProjectElementId.PrintStyles);
@@ -91,8 +94,6 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 	}
 	
 	public void constructMigrationGlobalPrintStyleForView( PafView view ) {
-		Thread.currentThread().setContextClassLoader(PrintStyles.class.getClassLoader());
-		PrintStyle migratePrintStyle = PrintStyles.loadDefaultPrintSettings();
 		if( view.getPageOrientation() == null && view.getPagesTall() == null && view.getPagesWide() == null ) {
 			if( view.getPrintStyle() == null && view.getViewPrintState() == null ) {
 				migratePrintStyle.setGUID(GUIDUtil.getGUID());
@@ -118,11 +119,11 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 				migratePrintStyle.setPageTall(view.getPagesTall());
 			}
 			if( view.getPagesWide() != null ) {
-				migratePrintStyle.setPageWide(view .getPagesWide());
+				migratePrintStyle.setPageWide(view.getPagesWide());
 			}
 			boolean found = false;
-			for( String key : printStyles.keySet() ) {
-				PrintStyle ps = (PrintStyle)printStyles.get(key);
+			for( String key : printStylesMap.keySet() ) {
+				PrintStyle ps = (PrintStyle)printStylesMap.get(key);
 				if( migratePrintStyle.equals(ps) ) {
 					found = true;
 					if( ps.getDefaultStyle() ) {
@@ -142,7 +143,7 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 				migratePrintStyle.setGUID(guid);
 				migratePrintStyle.setDefaultStyle(false);
 				migratePrintStyle.setName("Migration Print Style #" + ++count);
-				printStyles.put(guid, migratePrintStyle);
+				printStylesMap.put(guid, migratePrintStyle);
 				view.setGlobalPrintStyleGUID(guid);
 				view.setPrintStyle(migratePrintStyle);
 				view.setViewPrintState(ViewPrintState.GLOBAL);

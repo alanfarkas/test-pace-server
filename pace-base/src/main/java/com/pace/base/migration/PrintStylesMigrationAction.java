@@ -5,12 +5,13 @@ import java.util.Map;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
+import com.pace.base.ui.DefaultPrintSettings;
 import com.pace.base.ui.PrintStyle;
 import com.pace.base.ui.PrintStyles;
 import com.pace.base.utility.GUIDUtil;
 
 public class PrintStylesMigrationAction extends MigrationAction {
-	private Map<String, PrintStyle> printStyles = null;
+	private Map<String, PrintStyle> printStyleMap= null;
 	
 	public PrintStylesMigrationAction(XMLPaceProject xmlPaceProject) {
 		// TODO Auto-generated constructor stub
@@ -19,7 +20,7 @@ public class PrintStylesMigrationAction extends MigrationAction {
 			boolean currentUpgradeProject = this.xmlPaceProject.isUpgradeProject();
 			this.xmlPaceProject.setUpgradeProject(false);
 			try {
-				this.printStyles = xmlPaceProject.getPrintStyles();
+				this.printStyleMap = xmlPaceProject.getPrintStyles();
 			} catch(Exception e ){
 				System.out.println("File Not Found.");
 			}
@@ -37,7 +38,7 @@ public class PrintStylesMigrationAction extends MigrationAction {
 	public MigrationActionStatus getStatus() {
 		// TODO Auto-generated method stub
 		if( this.xmlPaceProject != null ) {
-			if( printStyles == null || printStyles.size() == 0) {
+			if( printStyleMap == null || printStyleMap.size() == 0) {
 				return MigrationActionStatus.NotStarted;
 			}
 			else if( xmlPaceProject.getPrintStyles().size() > 0  ) {
@@ -50,14 +51,14 @@ public class PrintStylesMigrationAction extends MigrationAction {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		if( printStyles == null || printStyles.size() == 0) {
-			Thread.currentThread().setContextClassLoader(PrintStyles.class.getClassLoader());
-			PrintStyle defaultStyle = PrintStyles.loadDefaultPrintSettings();
+		if( printStyleMap == null || printStyleMap.size() == 0) {
+			DefaultPrintSettings.getInstance();
+			PrintStyle defaultStyle = DefaultPrintSettings.getDefaultPrintSettings();
 			defaultStyle.setGUID(GUIDUtil.getGUID());
 			defaultStyle.setName("Print Style #1");
 			defaultStyle.setDefaultStyle(true);
-			printStyles.put(defaultStyle.getGUID(), defaultStyle);
-			xmlPaceProject.setPrintStyles(printStyles);
+			printStyleMap.put(defaultStyle.getGUID(), defaultStyle);
+			xmlPaceProject.setPrintStyles(printStyleMap);
 			try {
 				xmlPaceProject.save(ProjectElementId.PrintStyles);
 			} catch (ProjectSaveException e) {

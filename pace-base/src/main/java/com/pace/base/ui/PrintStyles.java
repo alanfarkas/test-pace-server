@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.pace.base.PafBaseConstants;
 import com.pace.base.project.InvalidPaceProjectInputException;
 import com.pace.base.project.PaceProjectCreationException;
 import com.pace.base.project.ProjectElementId;
@@ -24,7 +23,6 @@ public class PrintStyles implements IPafMapModelManager {
 	private static Logger logger = Logger.getLogger(PrintStyles.class);
 	protected Map<String, PrintStyle> printStyles = null;
 	protected String projectFolder;
-	
 	public PrintStyles() {
 		// TODO Auto-generated constructor stub
 		super();
@@ -35,6 +33,7 @@ public class PrintStyles implements IPafMapModelManager {
 		this.projectFolder = projectFolder;
 		load();
 	}
+	
 	@Override
 	public void load() {
 		// TODO Auto-generated method stub
@@ -258,16 +257,7 @@ public class PrintStyles implements IPafMapModelManager {
 		this.projectFolder = projectFolder;
 	}
 	
-	@Autowired
-	public static PrintStyle loadDefaultPrintSettings() {
-		// TODO Auto-generated method stub
-	   	ApplicationContext context = 
-	    	  new ClassPathXmlApplicationContext(new String[] {"defaultPrintSettings.xml"});
-	   return (PrintStyle)context.getBean("defaultPrintStyle");
-	}
-	
 	public void setDefaultPrintStyle(String name, boolean setDefault) {
-		
 		String guid = getGUIDByName(name);
 		if (printStyles != null && printStyles.containsKey(guid) && setDefault) {
 
