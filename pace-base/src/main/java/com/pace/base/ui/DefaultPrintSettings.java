@@ -19,14 +19,14 @@ public class DefaultPrintSettings {
 		return _instance;
 	}
 	
-	public static void loadDefaultPrintSettings() {
+	private static void loadDefaultPrintSettings() {
 		Thread.currentThread().setContextClassLoader(DefaultPrintSettings.class.getClassLoader());
 		ApplicationContext context = 
 	    	  new ClassPathXmlApplicationContext(new String[] {"defaultPrintSettings.xml"});
 		defaultPrintStyle = (PrintStyle)context.getBean("defaultPrintStyle");
 	}
 
-	public static PrintStyle getDefaultPrintSettings() {
+	public PrintStyle getDefaultPrintSettings() {
 		return defaultPrintStyle;
 	}
 }

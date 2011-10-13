@@ -34,8 +34,7 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 			this.xmlPaceProject.setUpgradeProject(true);
 			this.printStylesMap = this.xmlPaceProject.getPrintStyles();
 			this.xmlPaceProject.setUpgradeProject(currentUpgradeProject);
-			DefaultPrintSettings.getInstance();
-			migratePrintStyle = DefaultPrintSettings.getDefaultPrintSettings();
+			migratePrintStyle = DefaultPrintSettings.getInstance().getDefaultPrintSettings();
 		}
 	}	
 	
