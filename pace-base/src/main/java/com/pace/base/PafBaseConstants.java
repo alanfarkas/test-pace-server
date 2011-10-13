@@ -270,6 +270,7 @@ public class PafBaseConstants {
 	public static final String PRINTSTYLE_SHEET_CELLERRORSAS_BLANK = "<blank>";
 	public static final String PRINTSTYLE_SHEET_CELLERRORSAS_DASHDASH= "--";
 	public static final String PRINTSTYLE_SHEET_CELLERRORSAS_NA= "#N/A";
+	public static final String EMBEDED_PRINT_SETTINGS = "Embeded Print Settings";
 	
 	public static final String VIEW_PAGE_ORIENTATION_LANDSCAPE = "Landscape";
 	public static final String VIEW_PAGE_ORIENTATION_PORTRAIT = "Portrait";

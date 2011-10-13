@@ -21,7 +21,7 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 	private static Logger logger = Logger.getLogger(PafViewPrintStylesMigrationAction.class);
 	private int count = 0;
 	private Map<String, PrintStyle> printStylesMap = null;
-	PrintStyle migratePrintStyle = null;
+	private PrintStyle defaultPrintStyle = DefaultPrintSettings.getInstance().getDefaultPrintSettings();
 	
 	public PafViewPrintStylesMigrationAction() {
 		// TODO Auto-generated constructor stub
@@ -34,14 +34,13 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 			this.xmlPaceProject.setUpgradeProject(true);
 			this.printStylesMap = this.xmlPaceProject.getPrintStyles();
 			this.xmlPaceProject.setUpgradeProject(currentUpgradeProject);
-			migratePrintStyle = DefaultPrintSettings.getInstance().getDefaultPrintSettings();
 		}
 	}	
 	
 	@Override
 	public String getActionName() {
 		// TODO Auto-generated method stub
-		return "Converting view's print settings to com.pase.base.ui.PrintStyle.";
+		return "Converting view's old print settings to com.pase.base.ui.PrintStyle.";
 	}
 
 	@Override
@@ -93,11 +92,12 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 	}
 	
 	public void constructMigrationGlobalPrintStyleForView( PafView view ) {
+		PrintStyle migratePrintStyle = defaultPrintStyle.clone();
 		if( view.getPageOrientation() == null && view.getPagesTall() == null && view.getPagesWide() == null ) {
 			if( view.getPrintStyle() == null && view.getViewPrintState() == null ) {
 				migratePrintStyle.setGUID(GUIDUtil.getGUID());
 				migratePrintStyle.setDefaultStyle(false);
-				migratePrintStyle.setName("Default Print Settings");
+				migratePrintStyle.setName(PafBaseConstants.EMBEDED_PRINT_SETTINGS);
 				view.setGlobalPrintStyleGUID(null);
 				view.setPrintStyle(migratePrintStyle);
 				view.setViewPrintState(ViewPrintState.LOCAL);
@@ -143,14 +143,13 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 				migratePrintStyle.setDefaultStyle(false);
 				migratePrintStyle.setName("Migration Print Style #" + ++count);
 				printStylesMap.put(guid, migratePrintStyle);
+				view.setViewPrintState(ViewPrintState.GLOBAL);
 				view.setGlobalPrintStyleGUID(guid);
 				view.setPrintStyle(migratePrintStyle);
-				view.setViewPrintState(ViewPrintState.GLOBAL);
 			}
 			view.setPageOrientation(null);
 			view.setPagesTall(null);
 			view.setPagesWide(null);
 		}
 	}
-
 }
