@@ -6,4 +6,49 @@
   <desc></desc>
   <headers/>
   <userSelections/>
+  <printStyle>
+    <GUID>c50001f5-b233-42f2-9ec5-e56e679405d3</GUID>
+    <name>Embeded Print Settings</name>
+    <defaultStyle>false</defaultStyle>
+    <portrait>false</portrait>
+    <landscape>true</landscape>
+    <adjustTo>false</adjustTo>
+    <percentNormalSize>100</percentNormalSize>
+    <fitTo>true</fitTo>
+    <pageWide>1</pageWide>
+    <pageTall>1</pageTall>
+    <paperSize>Letter</paperSize>
+    <firstPageNumber>Auto</firstPageNumber>
+    <header>0.3</header>
+    <top>0.75</top>
+    <left>0.7</left>
+    <right>0.7</right>
+    <bottom>0.75</bottom>
+    <footer>0.3</footer>
+    <centerHorizontally>false</centerHorizontally>
+    <centerVertically>false</centerVertically>
+    <headerText></headerText>
+    <footerText></footerText>
+    <diffOddAndEvenPages>false</diffOddAndEvenPages>
+    <diffFirstPage>false</diffFirstPage>
+    <scaleWithDocument>true</scaleWithDocument>
+    <alignWithPageMargin>true</alignWithPageMargin>
+    <entireView>true</entireView>
+    <userSelection>false</userSelection>
+    <userSelectionText></userSelectionText>
+    <colsToRepeatAtLeft>Pace Column Headings</colsToRepeatAtLeft>
+    <rowsToRepeatAtTop>Pace Row Headings</rowsToRepeatAtTop>
+    <gridlines>false</gridlines>
+    <blackAndWhite>false</blackAndWhite>
+    <draftQuality>false</draftQuality>
+    <rowAndColHeadings>false</rowAndColHeadings>
+    <comment>(None)</comment>
+    <cellErrorsAs>displayed</cellErrorsAs>
+    <downThenOver>true</downThenOver>
+    <overThenDown>false</overThenDown>
+  </printStyle>
+  <viewPrintState>LOCAL</viewPrintState>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
 </PafView>
