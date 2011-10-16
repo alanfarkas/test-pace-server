@@ -100,7 +100,7 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 				migratePrintStyle.setName(PafBaseConstants.EMBEDED_PRINT_SETTINGS);
 				view.setGlobalPrintStyleGUID(null);
 				view.setPrintStyle(migratePrintStyle);
-				view.setViewPrintState(ViewPrintState.LOCAL);
+				view.setViewPrintState(ViewPrintState.DEFAULT);
 			}
 		}
 		else {
