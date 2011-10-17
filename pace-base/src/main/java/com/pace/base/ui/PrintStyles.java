@@ -326,4 +326,19 @@ public class PrintStyles implements IPafMapModelManager {
 		}
 		return null;
 	}
+	
+	public String[] getNames() {
+		int i = 0;
+		String[] names = new String[printStyles.size()];
+		
+		for (String guid : getKeys()) {
+			PrintStyle style = (PrintStyle) printStyles.get(guid);
+			names[i++] = style.getName();
+		}
+		
+		return names;
+	}
+	
+	
+	
 }
