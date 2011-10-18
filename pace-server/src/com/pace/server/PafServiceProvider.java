@@ -4111,6 +4111,28 @@ public PafGetNotesResponse getCellNotes(
 		
 		return null;
 	}
+
+
+
+
+	@Override
+	public UploadAppResponse uploadApplication(
+			UploadAppRequest uploadAppReq) throws RemoteException,
+			PafSoapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+
+	@Override
+	public DownloadAppResponse downloadApplication(
+			DownloadAppRequest downAppReq) throws RemoteException,
+			PafSoapException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 

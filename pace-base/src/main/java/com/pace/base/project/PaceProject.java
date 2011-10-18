@@ -74,6 +74,8 @@ public abstract class PaceProject implements IPaceProject {
 
 	protected Map<ProjectElementId, Object> projectDataMap = new HashMap<ProjectElementId, Object>();;
 	
+	public PaceProject(){}
+	
 	/**
 	 * 
 	 * @param projectDataMap

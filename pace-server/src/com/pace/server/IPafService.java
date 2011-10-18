@@ -24,10 +24,14 @@ import com.pace.base.PafSoapException;
 import com.pace.base.comm.ApplicationStateRequest;
 import com.pace.base.comm.ApplicationStateResponse;
 import com.pace.base.comm.ClientInitRequest;
+import com.pace.base.comm.DownloadAppRequest;
+import com.pace.base.comm.DownloadAppResponse;
 import com.pace.base.comm.EvaluateViewRequest;
 import com.pace.base.comm.LoadApplicationRequest;
 import com.pace.base.comm.PafRequest;
 import com.pace.base.comm.PafResponse;
+import com.pace.base.comm.UploadAppRequest;
+import com.pace.base.comm.UploadAppResponse;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewSection;
@@ -64,6 +68,9 @@ public interface IPafService extends Remote {
      */
     public PafPlanSessionResponse startPlanSession(PafPlanSessionRequest planRequest)  throws RemoteException, PafSoapException; 
 	
+    public UploadAppResponse uploadApplication(UploadAppRequest uploadAppReq)  throws RemoteException, PafSoapException; 
+    public DownloadAppResponse downloadApplication(DownloadAppRequest downAppReq)  throws RemoteException, PafSoapException;     
+    
 	/**
 	 * Gets the view.
 	 *
