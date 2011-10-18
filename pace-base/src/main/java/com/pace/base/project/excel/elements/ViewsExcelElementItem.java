@@ -361,7 +361,7 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 			
 						//"Global Print Style GUID"
 						case 43:
-							view.setGlobalPrintStyleGUID(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
+							view.setGlobalPrintStyleGUID(PafExcelUtil.getString(getProjectElementId(), firstValueObject, false));
 							break;
 							
 						default:
