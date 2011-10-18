@@ -124,13 +124,6 @@
         <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/serializer-2.7.1.jar"/>
         <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/slf4j-api-1.5.8.jar"/>
         <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/slf4j-jdk14-1.5.8.jar"/>
-        <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/spring-beans-2.5.5.jar"/>
-        <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/spring-context-2.5.5.jar"/>
-        <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/spring-context-support-2.5.5.jar"/>
-        <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/spring-core-2.5.5.jar"/>
-        <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/spring-jms-2.5.5.jar"/>
-        <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/spring-tx-2.5.5.jar"/>
-        <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/spring-web-2.5.5.jar"/>
         <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/velocity-1.6.2.jar"/>
         <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/wsdl4j-1.6.2.jar"/>
         <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/wss4j-1.5.8.jar"/>
@@ -174,6 +167,15 @@
 		<pathelement location="${userlib.path}/hibernate-annotations-3.3/lib/ejb3-persistence.jar"/>
 		<pathelement location="${userlib.path}/hibernate-annotations-3.3/lib/hibernate-commons-annotations.jar"/>
 	</path>
+	<path id="Spring 3.0.5.userclasspath">		
+        <pathelement location="${userlib.path}/spring-3.0.5/lib/spring-aop-3.0.5.RELEASE.jar"/>
+        <pathelement location="${userlib.path}/spring-3.0.5/lib/spring-asm-3.0.5.RELEASE.jar"/>
+        <pathelement location="${userlib.path}/spring-3.0.5/lib/spring-beans-3.0.5.RELEASE.jar"/>
+        <pathelement location="${userlib.path}/spring-3.0.5/lib/spring-context-3.0.5.RELEASE.jar"/>
+        <pathelement location="${userlib.path}/spring-3.0.5/lib/spring-core-3.0.5.RELEASE.jar"/>
+        <pathelement location="${userlib.path}/spring-3.0.5/lib/spring-expression-3.0.5.RELEASE.jar"/>
+        <pathelement location="${userlib.path}/spring-3.0.5/lib/spring-web-3.0.5.RELEASE.jar"/>
+	</path>	
 	<path id="JavaMail.userclasspath">
 	    <pathelement location="${userlib.path}/JavaMail/smtp.jar"/>
 	    <pathelement location="${userlib.path}/JavaMail/activation.jar"/>
@@ -207,9 +209,6 @@
     <path id="servlet-api.userclasspath">
         <pathelement location="c:/java/servlet-api/servlet-api.jar"/>
     </path>
-    <path id="Spring 2.0.7.userclasspath">
-        <pathelement location="${userlib.path}/spring-framework-2.0.7/dist/spring.jar"/>
-    </path>
 	<path id="XStream 1.1.2.userclasspath">
 		<pathelement location="${userlib.path}/xstream-1.1.2/xstream-1.1.2/xstream-1.1.2.jar"/>
 		<pathelement location="${userlib.path}/xstream-1.1.2/xstream-1.1.2/lib/xpp3-1.1.3.4d_b4_min.jar"/>
@@ -220,6 +219,7 @@
 	    <path refid="EDS 11.1.2.userclasspath"/>
 	    <path refid="Hibernate 3.2.userclasspath"/>
 	    <path refid="Hibernate Annotations 3.3.userclasspath"/>
+        <path refid="Spring 3.0.5.userclasspath"/>
 	    <path refid="JavaMail.userclasspath"/>
 	    <path refid="Jep.userclasspath"/>
 	    <path refid="Junit.userclasspath"/>
@@ -249,7 +249,7 @@
         <path refid="Log4j 1.2.9.userclasspath"/>
         <path refid="LdapBp 1.0.userclasspath"/>
         <path refid="Derby 10.2.2.userclasspath"/> 
-        <path refid="Spring 2.0.7.userclasspath"/>
+        <path refid="Spring 3.0.5.userclasspath"/>
         <path refid="Hibernate 3.2.userclasspath"/> 
     	<path refid="LdapBp 1.0.userclasspath"/>
         <path refid="servlet-api.userclasspath"/>
