@@ -339,6 +339,16 @@ public class PrintStyles implements IPafMapModelManager {
 		return names;
 	}
 	
+	public PrintStyle findDuplicatePrintStyleName( PrintStyle printStyleSource ) {
+		for (String guid : getKeys()) {
+			PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
+			if ( ! printStyle.getGUID().equals(printStyleSource.getGUID()) && printStyle.getName().equalsIgnoreCase(printStyleSource.getName())) {
+				return printStyle;
+			} 
+		}
+		return null;
+	}
+	
 	
 	
 }
