@@ -11,11 +11,13 @@ public class Season implements Cloneable {
     private String id;    
     private boolean isOpen = true;
     private String planCycle;
-    private String year;
+    private String[] years;
     private String timePeriod;
     private PafDimSpec[] otherDims;
+    @Deprecated
+    private String year; // Not used - needed for backwards compatability
     
-    /**
+	/**
 	 * Default Season constructor 
 	 */
 	public Season() {
@@ -46,18 +48,35 @@ public class Season implements Cloneable {
         this.otherDims = otherDims;
     }
     /**
-     * @return Returns the year.
+     * @return Returns the years.
      */
-    public String getYear() {
-        return year;
+    public String[] getYears() {
+        return years;
     }
     /**
-     * @param year The year to set.
+     * @param years The years to set.
      */
-    public void setYear(String year) {
-        this.year = year;
+    public void setYears(String[] years) {
+        this.years = years;
     }
+
     /**
+	 * @return the year - NOT USED - Needed for backwards compatability
+	 * @deprecated
+	 */
+	public String getYear() {
+		return year;
+	}
+	/**
+	 * @param year the year to set -  NOT USED - Needed for backwards compatability
+	 * @deprecated
+	 */
+	public void setYear(String year) {
+		this.year = year;
+	}
+	
+
+	/**
      * @return Returns the label.
      */
     public String getId() {
@@ -104,6 +123,7 @@ public class Season implements Cloneable {
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + (isOpen ? 1231 : 1237);
 		result = prime * result + Arrays.hashCode(otherDims);
+		result = prime * result + Arrays.hashCode(years);
 		result = prime * result
 				+ ((planCycle == null) ? 0 : planCycle.hashCode());
 		result = prime * result
@@ -132,6 +152,8 @@ public class Season implements Cloneable {
 		if (isOpen != other.isOpen)
 			return false;
 		if (!Arrays.equals(otherDims, other.otherDims))
+			return false;
+		if (!Arrays.equals(years, other.years))
 			return false;
 		if (planCycle == null) {
 			if (other.planCycle != null)
