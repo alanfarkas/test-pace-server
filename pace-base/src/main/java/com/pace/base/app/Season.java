@@ -190,6 +190,12 @@ public class Season implements Cloneable {
 				
 			}
 			
+			if ( this.years != null ) {
+				
+				clonedSeason.years = this.years.clone();			
+				
+			}
+			
 		} catch (CloneNotSupportedException e) {
 			//can't happen if implements cloneable
 			logger.warn(e.getMessage());
