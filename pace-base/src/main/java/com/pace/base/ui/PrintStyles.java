@@ -1,5 +1,6 @@
 package com.pace.base.ui;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -7,9 +8,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.pace.base.project.InvalidPaceProjectInputException;
 import com.pace.base.project.PaceProjectCreationException;
@@ -317,6 +315,10 @@ public class PrintStyles implements IPafMapModelManager {
 		return printStyles.size();
 	}
 	
+	public String[] getNames(boolean withDefaultMarker) {
+		return null; //need to be overriden by derived class
+	}
+	
 	public PrintStyle getPrintStyleByName( String name ) {
 		for (String guid : getKeys()) {
 			PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
@@ -327,28 +329,15 @@ public class PrintStyles implements IPafMapModelManager {
 		return null;
 	}
 	
-	public String[] getNames() {
-		int i = 0;
-		String[] names = new String[printStyles.size()];
-		
-		for (String guid : getKeys()) {
-			PrintStyle style = (PrintStyle) printStyles.get(guid);
-			names[i++] = style.getName();
-		}
-		
-		return names;
-	}
-	
 	public PrintStyle findDuplicatePrintStyleName( PrintStyle printStyleSource ) {
 		for (String guid : getKeys()) {
 			PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
-			if ( ! printStyle.getGUID().equals(printStyleSource.getGUID()) && printStyle.getName().equalsIgnoreCase(printStyleSource.getName())) {
+			if ( ! printStyle.getGUID().equals(printStyleSource.getGUID()) 
+					&& printStyle.getName().equalsIgnoreCase(printStyleSource.getName())) {
 				return printStyle;
 			} 
 		}
 		return null;
 	}
-	
-	
 	
 }
