@@ -201,6 +201,36 @@ public class PrintStyles implements IPafMapModelManager {
 		return false;
 	}
 	
+	@Override
+	public int size() {
+		// TODO Auto-generated method stub
+		return printStyles.size();
+	}
+	
+	public String[] getNames(boolean withDefaultMarker) {
+		return null; //need to be overriden by derived class
+	}
+	
+	public PrintStyle getPrintStyleByGUID( String guid ) {
+		return (PrintStyle)printStyles.get(guid);
+	}
+	
+	public String getNameByGUID( String guid ) {
+		return getPrintStyleByGUID(guid).getName();
+	}
+	
+	public String getGUIDByName( String name ) {
+		return getPrintStyleByName(name).getGUID();
+	}
+
+	public String getProjectFolder() {
+		return this.projectFolder;
+	}
+
+	public void setProjectFolder(String projectFolder) {
+		this.projectFolder = projectFolder;
+	}
+	
 	public boolean isPrintStyleDefaultPrintStyleGivenGUID( String guid ) {
 		PrintStyle printStyle = (PrintStyle)getItem(guid);
 		if( printStyle.getDefaultStyle() )
@@ -233,26 +263,6 @@ public class PrintStyles implements IPafMapModelManager {
 			} 
 		}
 		return null;
-	}
-	
-	public PrintStyle getPrintStyleByGUID( String guid ) {
-		return (PrintStyle)printStyles.get(guid);
-	}
-	
-	public String getNameByGUID( String guid ) {
-		return getPrintStyleByGUID(guid).getName();
-	}
-	
-	public String getGUIDByName( String name ) {
-		return getPrintStyleByName(name).getGUID();
-	}
-
-	public String getProjectFolder() {
-		return this.projectFolder;
-	}
-
-	public void setProjectFolder(String projectFolder) {
-		this.projectFolder = projectFolder;
 	}
 	
 	public void setDefaultPrintStyle(String name, boolean setDefault) {
@@ -309,16 +319,6 @@ public class PrintStyles implements IPafMapModelManager {
 		load();
 	}
 
-	@Override
-	public int size() {
-		// TODO Auto-generated method stub
-		return printStyles.size();
-	}
-	
-	public String[] getNames(boolean withDefaultMarker) {
-		return null; //need to be overriden by derived class
-	}
-	
 	public PrintStyle getPrintStyleByName( String name ) {
 		for (String guid : getKeys()) {
 			PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
@@ -329,7 +329,14 @@ public class PrintStyles implements IPafMapModelManager {
 		return null;
 	}
 	
-	public PrintStyle findDuplicatePrintStyleName( PrintStyle printStyleSource ) {
+	public boolean findDulicatePrintStyleName(String name) {
+	    ArrayList<String> printStyleNames = new ArrayList<String>(Arrays.asList(getNames(false))); 
+		if( printStyleNames.contains(name))
+			return true;
+		return false;
+	}
+	
+	public PrintStyle findDuplicatePrintStyle( PrintStyle printStyleSource ) {
 		for (String guid : getKeys()) {
 			PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
 			if ( ! printStyle.getGUID().equals(printStyleSource.getGUID()) 
