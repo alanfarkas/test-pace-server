@@ -29,6 +29,8 @@ public abstract class PafDimMemberProps implements Cloneable {
 	// Level number (0-based)
 	private int levelNumber = 0;
 
+	// Read-Only property
+	private boolean isReadOnly = false;
 	
 	/**
      * Return the member alias tables
@@ -124,6 +126,19 @@ public abstract class PafDimMemberProps implements Cloneable {
 	 */
 	public void setLevelNumber(int levelNumber) {
 		this.levelNumber = levelNumber;
+	}
+
+	/**
+	 * @return the isReadOnly
+	 */
+	public boolean isReadOnly() {
+		return isReadOnly;
+	}
+	/**
+	 * @param isReadOnly the isReadOnly to set
+	 */
+	public void setReadOnly(boolean isReadOnly) {
+		this.isReadOnly = isReadOnly;
 	}
 
 	/**

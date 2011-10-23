@@ -33,7 +33,7 @@ public class SeasonTest extends TestCase {
 		season.setId(id);
 		season.setOpen(isOpen);
 		season.setPlanCycle(planCycle);
-		season.setYear(year);
+		season.setYears(new String[]{year});
 		season.setTimePeriod(timePeriod);
 		
 		clonedSeason = season.clone();		

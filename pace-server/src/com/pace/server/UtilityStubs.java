@@ -158,7 +158,7 @@ public class UtilityStubs {
         s.setId("Forecast2005");
         s.setPlanCycle("Forecast");
         s.setOpen(true);
-        s.setYear("2005"); 
+        s.setYears(new String[]{"2005"}); 
         s.setTimePeriod("S01");
         SeasonList sl = new SeasonList();
         sl.addSeason(s);
@@ -232,7 +232,7 @@ public class UtilityStubs {
         s.setId("Forecast2005");
         s.setPlanCycle("Forecast");
         s.setOpen(true);
-        s.setYear("2005"); 
+        s.setYears(new String[]{"2005"}); 
         s.setTimePeriod("S01");
         SeasonList sl = new SeasonList();
         sl.addSeason(s);

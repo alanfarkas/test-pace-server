@@ -64,21 +64,9 @@ public class F_Cum extends AbstractFunction {
     		offsetDim = app.getMdbDef().getTimeDim();
     	
         
-    	// get all members at the current level of the current intersection
-    	PafDimTree offsetTree = evalState.getDataCacheTrees().getTree(offsetDim);
-    	PafDimMember curMbr = offsetTree.getMember(dataIs.getCoordinate(offsetDim));
-        List<PafDimMember> peers = offsetTree.getMembersAtLevel(offsetTree.getRootNode().getKey(), (short) curMbr.getMemberProps().getLevelNumber());
+        // add all the cumulative values
+        result  = dataCache.getCumTotal(dataIs, offsetDim);
         
-        // add the value at this intersection to the running total 1st
-        result += dataCache.getCellValue(dataIs);
-        
-        // add all previous values
-        for (PafDimMember peer : peers) {
-            if (peer.getKey().equals(curMbr.getKey())) break;
-            dataIs.setCoordinate(offsetDim, peer.getKey());
-            result += dataCache.getCellValue(dataIs);
-        }
-	
     	return result;
     }
     

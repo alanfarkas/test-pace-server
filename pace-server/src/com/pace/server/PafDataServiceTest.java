@@ -54,7 +54,7 @@ public class PafDataServiceTest extends TestCase {
 		try {
 			PafDimTree timeTree = testCommonParms.getTimeTree();
 			PafDimTree yearTree = testCommonParms.getYearTree();
-			PafDimTree virtualTimeTree = pds.buildVirtualTimeTree(timeTree, yearTree);
+			PafDimTree virtualTimeTree = pds.buildTimeHorizonTree(timeTree, yearTree);
 			isSuccess = true;
         } catch (PafException pex) {
             PafErrHandler.handleException(pex);

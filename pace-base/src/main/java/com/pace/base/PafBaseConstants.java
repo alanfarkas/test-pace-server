@@ -25,6 +25,12 @@ public class PafBaseConstants {
 	public static final String USER_SEL_TAG = "@USER_SEL";
 	public static final String PLAN_VERSION = "@PLAN_VERSION";
 	
+	// time horizon constants
+	public static final String TIME_HORIZON_DEFAULT_YEAR = "**YEAR.NA**";
+	public static final String TIME_HORIZON_DIM = "**TIME.HORIZON**";
+	public static final String TIME_HORIZON_MBR_DELIM = ".";  
+
+	
 	// version type constants
 	public static final VersionType[] BASE_VERSION_TYPE_ARRAY =
 		new VersionType[] {VersionType.ForwardPlannable, VersionType.NonPlannable, VersionType.Plannable};
@@ -299,5 +305,7 @@ public class PafBaseConstants {
 		return XML_NAMESPACE_START + XML_NAMESPACE_URL + xsdFilename + XML_NAMESPACE_END; 
 		
 	}
+
+	//    public static final String SERVER_HOME_ENV = "PafServerHome";
 	
 }

@@ -56,11 +56,11 @@ public class ES_RecalcMeasures extends ES_EvalBase implements IEvalStep {
                 is.setCoordinate(measureDim, evalState.getRule().getFormula().getResultTerm());
   
             	// skip over elapsed time periods if there are any
-            	if (evalState.getDataCache().getLockedPeriods().contains(is.getCoordinate(evalState.getTimeDim()))) {
+//            	if (evalState.getDataCache().getLockedPeriods().contains(is.getCoordinate(evalState.getTimeDim()))) {
+                if (EvalUtil.isElapsedIs(is, evalState, dataCache)) {
             		continue;
             	}
 
-                
                 if (evalState.isRoundingResourcePass()){
                 	if (!EvalUtil.isLevel0(is, evalState)){
                 		targets.add(is); 

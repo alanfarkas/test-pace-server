@@ -246,7 +246,7 @@ public class AllocFunc extends AbstractFunction {
 	        // if current plan is forward plannable, also don't allow
 	        // allocation into any intersections containing protected time periods
 	        
-	        if (EvalUtil.isElapsedIsx(allocSrcIsx, evalState, dataCache)) return dataCache;
+	        if (EvalUtil.isElapsedIs(allocSrcIsx, evalState, dataCache)) return dataCache;
 	
 	        
 	        

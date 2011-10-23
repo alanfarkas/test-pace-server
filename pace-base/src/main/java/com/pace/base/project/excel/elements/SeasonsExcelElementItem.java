@@ -70,7 +70,7 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 	protected void createHeaderListMapEntries() {
 
 		getHeaderListMap().put(getSheetName(), Arrays.asList("id", "plan cycle", "year", "is open", "time"));
-		
+		//TODO change year to years (TTN-1595)
 	}
 
 	@Override
@@ -88,6 +88,7 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 			.excludeEmptyRows(true)
 			.sheetRequired(true)
 			.endOfSheetIdnt(ExcelPaceProjectConstants.END_OF_SHEET_IDENT)
+//		.multiDataRow(true) TTN-1595
 			.build();
 
 		List<PafExcelRow> excelRowList = PafExcelUtil.readExcelSheet(input);
@@ -124,8 +125,8 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 							
 						//year
 						case 2:											
-						
-							season.setYear(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
+						//TODO Update for TTN-1595
+//							season.setYear(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
 							break;
 						
 						//is open
@@ -216,8 +217,9 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 					
 				}
 				
-				//year
-				excelRow.addRowItem(2, PafExcelValueObject.createFromString(season.getYear()));
+				//years
+				//TODO update for TTN-1595
+//				excelRow.addRowItem(2, PafExcelValueObject.createFromString(season.getYear()));
 				
 				//is open
 				excelRow.addRowItem(3, PafExcelValueObject.createFromBoolean(season.isOpen()));		

@@ -59,54 +59,42 @@ public class F_Prev extends AbstractFunction {
 
 		if (!this.isInitialized) initialize(evalState);
     	
-    	double result = 0;
-   	    	
+    	double result = 0;	
     	Intersection dataIs = sourceIs.clone();
-    	
     	
     	if ( this.measureName != null ) {
     		dataIs.setCoordinate(measureDim, this.measureName);
     	}
-    	    	
+
     	try {
-			String curMbrName = sourceIs.getCoordinate(offsetDim);
-			PafDimMember prevMbr = offsetTree.getPeer(curMbrName, offset);
-			
-			if (prevMbr == null)
-				result = 0;
-			else {
-				dataIs.setCoordinate(offsetDim, prevMbr.getKey());
-				result = dataCache.getCellValue(dataIs);
-			}
-			
-			
-			
-		} catch (RuntimeException e) {
-			
-			// Check for absence of parameters
-			if (parms.length == 0) {
-				String errMsg = "@Prev function requires at least one parameter";
-				throw new IllegalArgumentException(errMsg);
-			}
-			
-			// Check for invalid measure
-			PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
-			if (!measureTree.hasMember(measureName)) {
-				String errMsg = "Illegal measure name: [" + measureName + "] used in @Prev function";
-				throw new IllegalArgumentException(errMsg);
-			}
-	
-			// Check for invalid dimension parm
-			if (parms.length > 1) {
-				if (offsetTree == null) {
-					String errMsg = "Illegal dimension name: [" + offsetDim + "] used in @Prev function";
-					throw new IllegalArgumentException(errMsg);
-				}
-			}
-			
-			// Unforseen error - just throw original exception
-			throw(e);
-		}
+    		result = dataCache.getNextCellValue(dataIs, offsetDim, offset);
+
+    	} catch (RuntimeException e) {
+
+    		// Check for absence of parameters
+    		if (parms.length == 0) {
+    			String errMsg = "@Prev function requires at least one parameter";
+    			throw new IllegalArgumentException(errMsg);
+    		}
+
+    		// Check for invalid measure
+    		PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
+    		if (!measureTree.hasMember(measureName)) {
+    			String errMsg = "Illegal measure name: [" + measureName + "] used in @Prev function";
+    			throw new IllegalArgumentException(errMsg);
+    		}
+
+    		// Check for invalid dimension parm
+    		if (parms.length > 1) {
+    			if (offsetTree == null) {
+    				String errMsg = "Illegal dimension name: [" + offsetDim + "] used in @Prev function";
+    				throw new IllegalArgumentException(errMsg);
+    			}
+    		}
+
+    		// Unforseen error - just throw original exception
+    		throw(e);
+    	}
 	
 //		lockRecalcComponent(sourceIs, evalState);
     	return result;

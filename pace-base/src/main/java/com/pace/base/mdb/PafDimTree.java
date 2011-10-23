@@ -21,6 +21,14 @@ import com.pace.base.PafException;
  * @author AFarkas
  *
  */
+/**
+ * @author Alan
+ *
+ */
+/**
+ * @author Alan
+ *
+ */
 public abstract class PafDimTree {
 
     // general variables
@@ -940,13 +948,10 @@ public abstract class PafDimTree {
 			
 		// Get a list of all peers
 		List<PafDimMember> peers = getIPeers(memberName);
-        
+       
         // Prune list down to just those that come before specified member
-		List<PafDimMember> LPeers = new ArrayList<PafDimMember>();
 		int memberIndex = peers.indexOf(getMember(memberName));
-		for (int i = 0; i < memberIndex; i++) {
-			LPeers.add(peers.get(i));
-		}
+		List<PafDimMember> LPeers = peers.subList(0, memberIndex);
 		return LPeers;
 	}
 
@@ -977,15 +982,17 @@ public abstract class PafDimTree {
 	}
 
 	/**
-	 *	Get the nth peer of the specified member.
+	 *	Get the nth peer of the specified member. A null value will be returned
+	 *  if the index points to an out of bounds location and bWrap is set
+	 *  to false.
 	 *
 	 * @param memberName Member name
 	 * @param index Signed integer that indicates the index of the desired peer
-	 * @param wrap Indicates if this method should wrap around the list of peers to get the desired member
+	 * @param bWrap Indicates if this method should wrap around the list of peers to get the desired member
 	 * 
-	 * @return List of Paf Dim Members
+	 * @return Peer member
 	 */
-	public PafDimMember getPeer(String memberName, int index, boolean wrap) {
+	public PafDimMember getPeer(String memberName, int index, boolean bWrap) {
 						
 		int offset = 0;
 		List<PafDimMember> peers = null;
@@ -1006,9 +1013,9 @@ public abstract class PafDimTree {
 			// Check for out of bounds condition
 			int peerCount = peers.size();
 			if (offset > peerCount - 1) {
-				if (wrap) {
+				if (bWrap) {
 					peers = getIPeers(memberName);
-					offset = offset % peerCount;
+					offset = offset % peers.size();
 				} else {
 					return null;
 				}
@@ -1021,7 +1028,7 @@ public abstract class PafDimTree {
 			// Check for out of bounds condition
 			int peerCount = peers.size();
 			if (offset < 0) {
-				if (wrap) {
+				if (bWrap) {
 					peers = getIPeers(memberName);
 					offset = peerCount + (offset % peerCount);
 				} else {
@@ -1047,11 +1054,9 @@ public abstract class PafDimTree {
 		List<PafDimMember> peers = getIPeers(memberName);
         
         // Prune list down to just those that come after specified member
-		List<PafDimMember> RPeers = new ArrayList<PafDimMember>();
 		int memberIndex = peers.indexOf(getMember(memberName));
-		for (int i = memberIndex + 1; i < peers.size(); i++) {
-			RPeers.add(peers.get(i));
-		}
+		List<PafDimMember> RPeers = new ArrayList<PafDimMember>();
+		RPeers = peers.subList(memberIndex +1, peers.size());
 		return RPeers;
 	}
 
@@ -1211,6 +1216,18 @@ public abstract class PafDimTree {
 
         // Return list of descendants
         return mbrList;        
+    }
+    
+    /**
+     *  Return all descendants of root node of tree. This method is a convenience method
+     *  that calls getDescendants(branchName) with the "branchName" parameter set 
+     *  to "rootNode.getKey()".
+     *
+     * @param branchName Name of tree branch to get descendants for
+     * @return ArrayList of descendant paf dim members
+     */
+    public List<PafDimMember> getDescendants() {
+         return getDescendants(rootNode.getKey());       
     }
     
     /**
@@ -1458,6 +1475,16 @@ public abstract class PafDimTree {
 		return (memberKeys);
 	}
 
+	
+	/**
+	 * Return the number of members in the tree
+	 * 
+	 * @return the number of members in the tree
+	 */
+	public int getTreeSize() {
+		return members.size();
+	}
+	
 	/**
      *  Return the descendants of selected branch at the specified generation
      *

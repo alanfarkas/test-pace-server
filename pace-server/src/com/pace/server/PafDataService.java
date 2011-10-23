@@ -50,6 +50,7 @@ import com.pace.base.data.ExpOperation;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.db.Application;
 import com.pace.base.db.SecurityGroup;
 import com.pace.base.mdb.*;
@@ -109,60 +110,14 @@ public class PafDataService {
 //		IMdbClassLoader mdbClassLoader = this.getMdbClassLoader(connProps);
 //		IMdbData mdbData = mdbClassLoader.getMdbDataProvider();
 		IMdbData mdbData = getMdbDataProvider(connProps);
-
 		
-		//BEGIN - TTN-584
-		// create empty locked time set
-		Set<String> lockedTimeSet = new HashSet<String>();
-
-		// if paf planner is stetup to not calculate elapsed periods
-
-		if ( ! clientState.getPlannerConfig().isCalcElapsedPeriods() ) {
-
-			logger.debug("Calculate Elapsed Periods: " + clientState.getPlannerConfig().isCalcElapsedPeriods());
-
-			//get current planning version
-			String currentVersion = clientState.getPlanningVersion().getName();
-
-			//if current planning version exists
-			if ( currentVersion != null ) {
-				//get verstion type map.
-				Map<String, VersionType> versionsTypeMap = PafMetaData.getVersionTypeMap();
-				//if version type map contains planning version
-				if ( versionsTypeMap != null && versionsTypeMap.containsKey(currentVersion) ) {				
-					//get version type
-					VersionType versionType = versionsTypeMap.get(currentVersion);
-					//if version type is foward plannable, check to see if in current year
-					if ( versionType != null && versionType.equals(VersionType.ForwardPlannable)) {
-						PafApplicationDef pafApp = clientState.getApp(); 
-						//get elapsed year
-						String elapsedYear = pafApp.getCurrentYear();
-						//get year dimension name
-						String yearDim = pafApp.getMdbDef().getYearDim();
-						//get year members, should only be 1
-						String[] yearMembers = clientState.getUnitOfWork().getDimMembers(yearDim);
-						//if year members exists and there are more then 0
-						if ( yearMembers != null && yearMembers.length > 0) {							
-							//get 1st year member
-							String yearMember = yearMembers[0]; 
-							//see if uow year member equals elapsed year member and if so, get locked time members
-							if ( yearMember.equalsIgnoreCase(elapsedYear) ) {
-								lockedTimeSet.addAll(PafAppService.getInstance().getLockedList(clientState));
-							}
-						}
-					}
-				}
-			}            
-		}        
-		//END - TTN-584
-
-
 		// Determine which data intersections to extract for each version
 		Map<String, Map<Integer, List<String>>> mdbDataSpecByVersion = buildUowLoadDataSpec(uow, clientState);
 		
 		// Load data cache
 		logger.info("Building the unit of work...");
-		PafDataCache dataCache = new PafDataCache(clientState, lockedTimeSet);
+		Map<String, Set<String>> lockedPeriodMap = PafAppService.getInstance().getLockedPeriodMap(clientState);
+		PafDataCache dataCache = new PafDataCache(clientState, lockedPeriodMap);
 		List<String>loadedVersions = mdbData.updateDataCache(dataCache, mdbDataSpecByVersion);
 		logger.info("UOW intialized with version(s): " + StringUtils.arrayListToString(loadedVersions));
 		uowCache.put(clientId, dataCache);           
@@ -857,41 +812,50 @@ public class PafDataService {
 		// Virtual Time Dimension
 		PafDimTree timeTree = treeSet.getTree(clientState.getMdbDef().getTimeDim());
 		PafDimTree yearTree = treeSet.getTree(clientState.getMdbDef().getYearDim());
-		treeSet.addTree(PafServerConstants.VIRTUAL_TIME_DIM, buildVirtualTimeTree(timeTree, yearTree));
+		treeSet.addTree(PafBaseConstants.TIME_HORIZON_DIM, buildTimeHorizonTree(timeTree, yearTree));
 		
 		return treeSet;
 	}
 
 	/**
-	 * Build the virtual time tree
+	 * Build the virtual time horizon tree
 	 * 
 	 * @param timeTree UOW time tree
 	 * @param yearTree UOW year tree
 	 * 
-	 * @return Virtual time tree
+	 * @return Virtual time horizon tree
 	 * @throws PafException 
 	 */
-	protected PafDimTree buildVirtualTimeTree(PafDimTree timeTree, PafDimTree yearTree) throws PafException {
+	protected PafDimTree buildTimeHorizonTree(PafDimTree timeTree, PafDimTree yearTree) throws PafException {
 		
 		// The virtual time tree is formed by combining the UOW Time and Year trees. It is used 
-		// in evaluation, instead of the seperate Time and Year trees. The main advantage of 
-		// the virtual time tree is that it makes it easy to index and accumulate time 
-		// periods across year boundaries.
+		// in aggregation and any time-based rule function call, instead of the seperate Time 
+		// and Year trees loaded directly from the multidimensional database. The main advantage 
+		// of the virtual time tree is that it makes it easy to index and accumulate time periods
+		// that cross year boundaries.
 		
-		// Get the year tree child members
-//		List<PafDimMember> yearChildren = yearTree.getRootNode().getChildren();
-		List<PafDimMember> yearChildren = Arrays.asList(new PafDimMember[]{yearTree.getRootNode()});
+		// Get the individual year members
+		List<PafDimMember> yearMembers = yearTree.getLowestLevelMembers();
 		  
-		// Create the virtual time tree.
+		// Create the virtual time tree. If there's only one year, then a dummy
+		// root will be created. If there's more than one year, then the name
+		// of the root will be the top of the year tree combined with the 
+		// top of the time tree.
 		PafBaseMemberProps rootProps = new PafBaseMemberProps();
-		PafBaseMember root = new PafBaseMember(PafServerConstants.VIRTUAL_TIME_DIM, rootProps);
+		String rootName = null;
+		if (yearMembers.size() == 1) {
+			rootName = PafBaseConstants.TIME_HORIZON_DIM;
+		} else {
+			rootName = TimeSlice.buildTimeHorizonCoord(timeTree.getRootNode().getKey(), yearTree.getRootNode().getKey());
+		}
+		PafBaseMember root = new PafBaseMember(rootName, rootProps);
 		rootProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, root.getKey());
 		rootProps.setGenerationNumber(1);
 		rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree() + 1); 
 		PafDimTree virtualTimeTree = new PafBaseTree(root, new String[]{PafBaseConstants.ESS_DEF_ALIAS_TABLE});
 		
 		// Build out the virtual time tree
-		for (PafDimMember yearMember : yearChildren) {
+		for (PafDimMember yearMember : yearMembers) {
 			// Add child members
 			addVirtualTimeChild(virtualTimeTree, root, yearMember, timeTree.getRootNode());
 		}
@@ -913,7 +877,7 @@ public class PafDataService {
 		
 		// Create child member. Each child member is built by concatenating the current year member with the current time member. 
 		PafBaseMemberProps memberProps = new PafBaseMemberProps();
-		PafDimMember virtualTimeChild = new PafBaseMember(yearMember + PafServerConstants.VIRTUAL_TIME_MBR_DELIM + timeNode.getKey(), memberProps);
+		PafDimMember virtualTimeChild = new PafBaseMember(TimeSlice.buildTimeHorizonCoord(timeNode.getKey(), yearMember.getKey()), memberProps);
 		memberProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, virtualTimeChild.getKey());
 		memberProps.setLevelNumber(timeNode.getMemberProps().getLevelNumber()); 				// Use level number of time member
 		memberProps.setGenerationNumber(parentNode.getMemberProps().getGenerationNumber() + 1);	// Gen number is parent gen + 1

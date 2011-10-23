@@ -224,13 +224,13 @@ public class GenerateProjectObjects {
 
 		SeasonList sl = new SeasonList();
 		
-		sl.addSeason(createSeason("id 1", true, "pc1", "tp1", "year1"));
-		sl.addSeason(createSeason("id 2", false, "pc2", "tp2", "year2"));
+		sl.addSeason(createSeason("id 1", true, "pc1", "tp1", new String[]{"year1"}));
+		sl.addSeason(createSeason("id 2", false, "pc2", "tp2", new String[]{"year2"}));
 		
 		return sl;
 	}
 
-	public static Season createSeason(String id, boolean isOpen, String planCycle, String timePeriod, String year) {
+	public static Season createSeason(String id, boolean isOpen, String planCycle, String timePeriod, String[] years) {
 		
 		Season s = new Season();
 		
@@ -239,7 +239,7 @@ public class GenerateProjectObjects {
 		s.setOtherDims(createPafDimSpecs());
 		s.setPlanCycle(planCycle);
 		s.setTimePeriod(timePeriod);
-		s.setYear(year);
+		s.setYears(years);
 		
 		return s;
 	}

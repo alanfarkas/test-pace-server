@@ -40,10 +40,13 @@ import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionFormula;
 import com.pace.base.app.VersionType;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
+import com.pace.base.data.TimeSlice;
+import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
 import com.pace.base.utility.Odometer;
@@ -87,11 +90,13 @@ public class PafDataCache implements IPafDataCache {
 	private Map<String, Integer>[] memberIndexMap = null;		// Resolves member name to an index (currently only
 																// 		used to lookup Measures and Time dimension members)
 	private String[] planVersions = null; 			// Plan version 
-	private Set<String> lockedPeriods = null;		// Locked planning periods
+//	private Set<String> lockedPeriods = null;		// Locked planning periods
+	private Map<String, Set<String>> lockedPeriodMap = null; 	// Locked planning periods by year
 	private PafDataCacheCells changedCells = new PafDataCacheCells();		// Optionally tracks changed cells
 	private PafApplicationDef appDef = null;
 	private PafMVS pafMVS = null;
 	private MemberTreeSet dimTrees = null;
+	private EvalState evalState = null;
 	private boolean isDirty = true;					// Indicates that the data cache has been updated
 	private final static int NON_KEY_DIM_COUNT = 2;	// Measure and Time Dimension
 
@@ -106,10 +111,10 @@ public class PafDataCache implements IPafDataCache {
 
 	/**
 	 * @param clientState Client State
-	 * @param lockedPeriods Set of locked periods
+	 * @param lockedPeriodMap Collection of locked periods by year
 	 */
-	public PafDataCache(PafClientState clientState, Set<String> lockedPeriods) {
-		this.lockedPeriods = lockedPeriods;
+	public PafDataCache(PafClientState clientState, Map<String, Set<String>> lockedPeriodMap) {
+		this.lockedPeriodMap = lockedPeriodMap;
 		initDataCache(clientState);		
 	}
 
@@ -120,7 +125,7 @@ public class PafDataCache implements IPafDataCache {
 	 * @param clientState Client State
 	 */
 	public PafDataCache(PafClientState clientState) {
-		this(clientState, new HashSet<String>());
+		this(clientState, new HashMap<String, Set<String>>());
 	}
 	
 	
@@ -232,6 +237,22 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 * @return the evalState
+	 */
+	public EvalState getEvalState() {
+		return evalState;
+	}
+
+
+	/**
+	 * @param evalState the evalState to set
+	 */
+	public void setEvalState(EvalState evalState) {
+		this.evalState = evalState;
+	}
+
+
+	/**
 	 *	Return the PafMVS
 	 *
 	 * @return Returns the PafMVS
@@ -298,7 +319,6 @@ public class PafDataCache implements IPafDataCache {
 
 		int measureAxis = getMeasureAxis(), timeAxis = getTimeAxis();
 
-		//TODO FIX C O M M E N T S !!!
 		// Fill the indexedIsElements array, which contains the list of all
 		// UOW dimensions axis that comprise the data block index. This would be 
 		// all dimensions except Measure and Time, which are not included as 
@@ -320,7 +340,9 @@ public class PafDataCache implements IPafDataCache {
 		}
 
 		// Create an array that will be used to isolate the intersection coordinates
-		// that comprise the data block key for each intersection size
+		// that comprise the data block key for each intersection size. The arrays
+		// for each intersection size contains the axis for each intersection 
+		// intersection dimnension except Measure & Time.
 		//
 		// 	Example:  	
 		//	Intersection Size		indexedAxes
@@ -529,34 +551,80 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 *	Get the entire list of Forward Plannable periods in this data cache
-	 *
-	 * @return List of Forward Plannable periods
-	 */
-	public List<String> getForwardPlannablePeriods() {
-		return getForwardPlannablePeriods(getDimMembers(getTimeDim()), getLockedPeriods()) ;
-	}
-
-
-	/**
-	 *	Get the list of Forward Plannable members from the supplied list of time members
+	 *	Get the list of Forward Plannable members for the specified year
 	 *
 	 * @param allPeriods All valid members of the time dimension
 	 * @param lockedPeriods List of current locked periods
 	 * 
 	 * @return List of Forward Plannable periods
 	 */
-	public List<String> getForwardPlannablePeriods(String[] allPeriods, Set<String> lockedPeriods) {
+	public List<String> getForwardPlannablePeriods(String year) {
 
 		List<String> fpPeriods = new ArrayList<String>();
 
-		// Return any periods from the Time dimension that are not contained in lockedPeriods
-		for (String period:allPeriods) {
+		// Return any periods from the Time dimension that are not locked
+		String[] allPeriods = getDimMembers(getTimeDim());
+		Set<String> lockedPeriods = getLockedPeriods(year);
+		for (String period : allPeriods) {
 			if (!lockedPeriods.contains(period)) {
 				fpPeriods.add(period);
 			}
 		}
 		return fpPeriods;
+	}
+
+
+	/**
+	 *	Get the list of open periods in this data cache based on the 
+	 *  selected version and year
+	 *	 
+	 * @param version Selected member of version dimension
+	 * @param year Selected member of year dimension
+	 * 
+	 * @return List of open periods
+	 */
+	public List<String> getOpenPeriods(String version, String year) {
+
+		List<String> openPeriods = null;
+
+		// Does the selected Version Type and Year combination have locked periods?
+		if (hasLockedPeriods(version, year)) {
+			// Yes - Just return list of Forward Plannable members
+			openPeriods = getForwardPlannablePeriods(year);
+		} else {
+			// No locked periods - Return entire list of time members
+			openPeriods = new ArrayList<String>(Arrays.asList(getDimMembers(getTimeDim())));
+		}
+		return openPeriods;
+	}
+
+
+	/**
+	 *	Get the list of all open time horizen periods for the current plan 
+	 *  version
+	 *	 
+	 * @return List of open time horizon periods
+	 */
+	public List<String> getOpenTimeHorizonPeriods() {
+
+		List<String> openPeriods = new ArrayList<String>();
+
+		// Add in the open time horizon periods for each year
+		String[] years = getAxisMembers(getAxisIndex(getYearDim()));
+		for (String year : years) {
+			openPeriods.addAll(getOpenTimeHorizonPeriods(getPlanVersions()[0], year));
+		}
+
+		// Add the root node of the time horizon tree to the list of open
+		// periods, if there are more than one years.
+		if (years.length > 1 && !openPeriods.isEmpty()) {
+			PafDimMember root = getDimTrees().getTree(getTimeHorizonDim()).getRootNode();
+			openPeriods.add(root.getKey());
+		}
+
+		return openPeriods;
+		
+		
 	}
 
 
@@ -568,34 +636,18 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return List of open periods
 	 */
-	public List<String> getOpenPeriods(String version, String year) {
-		return getOpenPeriods(version, year, getDimMembers(getTimeDim()), getLockedPeriods()) ;
-	}
+	public List<String> getOpenTimeHorizonPeriods(String version, String year) {
 
-
-	/**
-	 *	Get the list open periods based on the version and year
-	 *
-	 * @param version Selected member of version dimension
-	 * @param year Selected member of year dimension
-	 * @param timeMembers A valid members of the time dimension
-	 * @param lockedPeriods List of current locked periods
-	 * 
-	 * @return List of open periods
-	 */
-	public List<String> getOpenPeriods(String version, String year, String[] timeMembers, Set<String> lockedPeriods) {
-
-		List<String> openPeriods = null;
-
-		// Does the selected Version Type and Year combination have locked periods?
-		if (hasLockedPeriods(version, year)) {
-			// Yes - Just return list of Forward Plannable members
-			openPeriods = getForwardPlannablePeriods(timeMembers, lockedPeriods);
-		} else {
-			// No locked periods - Return entire list of time members
-			openPeriods = Arrays.asList(timeMembers);
+		// Get "regular" open time periods
+		List<String> openPeriods = getOpenPeriods(version, year);
+		
+		// Convert to time horizon periods
+		List<String> openTimeHorizonPeriods = new ArrayList<String>(openPeriods.size());
+		for (String period : openPeriods) {
+			openTimeHorizonPeriods.add(TimeSlice.buildTimeHorizonCoord(period, year));
 		}
-		return openPeriods;
+		
+		return openTimeHorizonPeriods;
 	}
 
 
@@ -855,8 +907,11 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public double getCellValue(Intersection intersection)  {
 
+		// Convert time horizon based intersection to time-year intersection
+		Intersection translatedIs = translateTimeHorizonIs(intersection);
+		
 		// Get the cell address of the specified intersection
-		DataCacheCellAddress cellAddress = generateCellAddress(intersection);
+		DataCacheCellAddress cellAddress = generateCellAddress(translatedIs);
 
 		// Return cell value
 		DataBlock dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
@@ -865,13 +920,13 @@ public class PafDataCache implements IPafDataCache {
 			return dataBlock.getCellValue(cellAddress);
 		} else {
 			// Intersection does not exist
-			if (isValidIntersection(intersection)) {
+			if (isValidIntersection(translatedIs)) {
 				// Valid intersection, but does not exist - return 0
 				return 0;
 			} else {
 				// Invalid intersection - throw error
 				String errMsg = "Data Cache error - Unable to get data cache cell value for invalid intersection: "
-					+ StringUtils.arrayToString(intersection.getCoordinates());
+					+ StringUtils.arrayToString(translatedIs.getCoordinates());
 				logger.error(errMsg);
 				throw new IllegalArgumentException(errMsg);
 			}
@@ -935,12 +990,15 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public void setCellValueAndTrackChanges(Intersection intersection, double value) {
 
-		double oldCellValue = getCellValue(intersection);
-		setCellValue(intersection, value);
+		// Convert time horizon based intersection to time-year intersection
+		Intersection translatedIs = translateTimeHorizonIs(intersection);
+		
+		double oldCellValue = getCellValue(translatedIs);
+		setCellValue(translatedIs, value);
 		if (Math.abs(value - oldCellValue) > PafBaseConstants.DC_TRACK_CHANGES_THRESHHOLD) {
 			// Clone intersection before adding to collection as the calling method
 			// may reuse this intersection object to point to a different intersection
-			addChangedCell(intersection.clone(), value);
+			addChangedCell(translatedIs.clone(), value);
 		}
 	}
 
@@ -952,8 +1010,11 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public void setCellValue(Intersection intersection, double value) {
 		
+		// Convert time horizon based intersection to time-year intersection
+		Intersection translatedIs = translateTimeHorizonIs(intersection);
+		
 		// Add intersection if it doesn't already exist
-		DataCacheCellAddress cellAddress = addCell(intersection);
+		DataCacheCellAddress cellAddress = addCell(translatedIs);
 		
 		// Round updated cell value to a predefined number of digits to mask any potential precision errors
 		long longValue = (long) value;
@@ -978,12 +1039,371 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 * Returns the value of the next cell intersection along the time dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @return Cell value
+	 */
+	public double getNextCellValue(Intersection cellIs) {
+		return getNextCellValue(cellIs, getTimeDim(), 1);
+	}
+
+	/**
+	 * Returns the value of the next cell intersection along the specified
+	 * offset dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * 
+	 * @return Cell value
+	 */
+	public double getNextCellValue(Intersection cellIs, String offsetDim, int offset) {
+
+		double result = 0;
+
+		Intersection nextIs = getNextIntersection(cellIs, offsetDim, offset, false);
+		if (nextIs != null) {
+			result = getCellValue(nextIs);
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the value of the next cell intersection along the specified
+	 * offset dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the tree
+	 * 
+	 * @return Cell value
+	 */
+	public double getNextCellValue(Intersection cellIs, String offsetDim, int offset, boolean bWrap) {
+
+		double result = 0;
+
+		Intersection nextIs = getNextIntersection(cellIs, offsetDim, offset, bWrap);
+		if (nextIs != null) {
+			result = getCellValue(nextIs);
+		}
+		return result;
+	}
+
+
+	/**
+	 * Returns the next cell intersection along the time dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @return Cell intersection
+	 */
+
+	public Intersection getNextIntersection(Intersection cellIs) {
+		return getNextIntersection(cellIs, getTimeDim(), 0);
+	}
+
+	/**
+	 * Returns the next cell intersection along the specified offset dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * 
+	 * @return Cell intersection
+	 */
+
+	public Intersection getNextIntersection(Intersection cellIs, String offsetDim, int offset) {
+		return getNextIntersection(cellIs, offsetDim, offset, false);
+	}
+
+	/**
+	 * Returns the next cell intersection along the specified offset dimension. A null value
+	 * will be returned if the offset points to an out of bounds location and bWrap is 
+	 * set to false.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the tree
+	 * 
+	 * @return Cell intersection
+	 */
+
+	public Intersection getNextIntersection(Intersection cellIs, String offsetDim, int offset, boolean bWrap) {
+	
+		Intersection nextIs = null;
+		PafDimTree offsetTree = getDimTrees().getTree(offsetDim);
+		String currMbr = cellIs.getCoordinate(offsetDim);
+		PafDimMember nextMbr = offsetTree.getPeer(currMbr, offset, bWrap);
+		
+		if (nextMbr != null) {
+			nextIs = cellIs.clone();
+			nextIs.setCoordinate(offsetDim, nextMbr.getKey());
+		}
+		
+		return nextIs;
+	}
+
+
+	/**
+	 * Returns the value of the previous cell intersection along the time dimension
+	 * @param cellIs Cell intersection
+	 * 
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * 
+	 * @return Cell value
+	 */
+	public double getPrevCellValue(Intersection cellIs) {
+		return getPrevCellValue(cellIs, getTimeDim(), 1);
+	}
+
+	/**
+	 * Returns the value of the previous cell intersection along the specified
+	 * offset dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * 
+	 * @return Cell value
+	 */
+	public double getPrevCellValue(Intersection cellIs, String offsetDim, int offset) {
+		return getPrevCellValue(cellIs, offsetDim, offset, false);
+	}
+
+	/**
+	 * Returns the value of the previous cell intersection along the specified
+	 * offset dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the tree
+	 * 
+	 * @return Cell value
+	 */
+	public double getPrevCellValue(Intersection cellIs, String offsetDim, int offset, boolean bWrap) {
+		return getNextCellValue(cellIs, offsetDim, -offset, false);
+	}
+
+	/**
+	 * Returns the prev cell intersection along the specified offset dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * 
+	 * @return Cell intersection
+	 */
+
+	public Intersection getPrevIntersection(Intersection cellIs, String offsetDim) {
+		return getPrevIntersection(cellIs, offsetDim, 1);
+	}
+
+	/**
+	 * Returns the prev cell intersection along the specified offset dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * 
+	 * @return Cell intersection
+	 */
+
+	public Intersection getPrevIntersection(Intersection cellIs, String offsetDim, int offset) {
+		return getPrevIntersection(cellIs, offsetDim, offset, false);
+	}
+
+	/**
+	 * Returns the prev cell intersection along the specified offset dimension. A null value
+	 * will be returned if the offset points to an out of bounds location and bWrap is 
+	 * set to false.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the dimension tree
+	 * 
+	 * @return Cell intersection
+	 */
+
+	public Intersection getPrevIntersection(Intersection cellIs, String offsetDim, int offset, boolean bWrap) {
+		return getNextIntersection(cellIs, offsetDim, -offset, bWrap);
+	}
+
+
+	/**
+	 * "Provides a count of the descendants, at the specified level, of the current intersection,
+	 * and it's left peers along the specified dimension. 
+	 * 
+	 * The time dimension is used by default if no dimension parameter is supplied. 
+	 * The dimension floor level is used by default if no level parameter is supplied. 
+	 * 
+ 	 * 
+	 * @param cellIs Cell intersection
+	 * 
+	 * @return Cumulative total
+	 */	
+	public double getCumMbrCount(final Intersection cellIs) {
+		return getCumMbrCount(cellIs, getTimeDim());
+	}
+		
+	/**
+	 * "Provides a count of the descendants, at the specified level, of  the current intersection,
+	 * and it's left peers along the specified dimension. 
+	 * 
+	 * The dimension floor level is used by default if no level parameter is supplied. 
+	 * 
+ 	 * 
+	 * @param cellIs Cell intersection
+	 * @param cumDim Dimension being accumulated
+	 * 
+	 * @return Cumulative total
+	 */	
+	public double getCumMbrCount(final Intersection cellIs, final String cumDim) {
+		
+		PafDimTree cumTree = getDimTrees().getTree(cumDim);
+		int level = cumTree.getLowestAbsLevelInTree();
+		
+		return getCumMbrCount(cellIs, cumDim, level);
+	}
+		
+	/**
+	 * "Provides a count of the descendants, at the specified level, of  the current intersection,
+	 * and it's left peers along the specified dimension. 
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param cumDim Dimension being accumulated
+	 * @param level The level of the members being accumulated
+	 * 
+	 * @return Cumulative total
+	 */	
+	public double getCumMbrCount(final Intersection cellIs, final String cumDim, final int level) {
+	
+      	// Get list of cum members for the specified level
+		String cumMember;
+		PafDimTree cumTree;
+		if (cumDim.equals(getTimeDim())) {
+			// Use time horizon dimension whenever the time dimension is specified
+			cumTree = getDimTrees().getTree(cumDim);
+//			cumMember = buildTimeHorizonMember(cellIs);
+			cumMember = cellIs.getCoordinate(cumDim);
+		} else {
+			cumTree = getDimTrees().getTree(cumDim);			
+			cumMember = cellIs.getCoordinate(cumDim);
+		}	
+		List<PafDimMember> cumMembers = cumTree.getCumMembers(cumMember, level);
+
+		// Return number of cum members
+		return cumMembers.size();
+	}
+	
+		
+	private String buildTimeHorizonMember(Intersection cellIs) {
+		String member = cellIs.getCoordinate(getYearDim()) + PafBaseConstants.TIME_HORIZON_MBR_DELIM + cellIs.getCoordinate(getTimeDim());
+		return member;
+	}
+
+
+	/**
+	 * Returns the cumulative total of specified intersection along the time dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param cumDim Dimension being accumulated
+	 * 
+	 * @return Cell value
+	 */	
+	public double getCumTotal(final Intersection cellIs) {
+		return getCumTotal(cellIs, getTimeDim());
+	}
+
+	/**
+	 * Returns the cumulative total of specified intersection, along the specified dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param cumDim Dimension being accumulated
+	 * 
+	 * @return Cell value
+	 */	
+	public double getCumTotal(final Intersection cellIs, final String cumDim) {
+		return getCumTotal(cellIs, cumDim, 0);
+	}
+
+	/**
+	 * Returns the cumulative total of specified intersection, along the specified dimension,
+	 * up through the nth previous intersection. An offset of 0 indicates that all intersections
+	 * leading up to, and including, the specified intersection will be accumulated. 
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param cumDim Dimension being accumulated
+	 * @param offset Specifies a relative position, along the cum dimension, that will be used to retrieve the desired intersection
+	 * 
+	 * @return Cumulative total
+	 */	
+	public double getCumTotal(final Intersection cellIs, final String cumDim, final int offset) {
+
+		double result = 0;
+		List<PafDimMember> cumMembers = new ArrayList<PafDimMember>();
+		
+		
+		// Determine the last intersection to be accumulated
+		Intersection lastIs;
+		if (offset == 0) {
+			// Accumulate through the current intersection
+			lastIs = cellIs;
+		} else {
+			// Accumulate through the previous intersection that is "offset" positions away
+			lastIs = getPrevIntersection(cellIs, cumDim, offset);
+		}
+
+		// Skip processing if there are no members to accumulate as the
+		// offset points to a location before the first member in the 
+		// dimension.
+		if (lastIs != null) {
+			// Get the list of members to accumulate 
+			String lastMbr = lastIs.getCoordinate(cumDim);
+			PafDimTree cumTree = getDimTrees().getTree(cumDim);
+			cumMembers = cumTree.getILPeers(lastMbr);
+
+			// Accumulate the values for all intersections up through the specified offset
+			// position. To account for any cell changes that haven't yet been aggregated 
+			// (ex. perpertual inventory process), we aggregate at the floor level.
+			Intersection tempIs = lastIs.clone();
+			for (PafDimMember member : cumMembers) {
+				tempIs.setCoordinate(cumDim, member.getKey());
+				result += EvalUtil.sumFloorIntersections(tempIs, evalState);
+			}	
+		}
+
+		return result;
+	}
+
+
+	/**
+	 * Returns each intersections's member coordinate, for the specified dimension, of members  coordinates of the left peers of the specified intersection, along the specified dimension,
+	 * up through the nth previous intersection
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param cumDim Dimension being accumulated
+	 * @param offset Specifies a relative position, along the cum dimension, that will be used to retrieve the desired intersection
+	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the dimension tree
+	 * 
+	 * @return Cell value
+	 */	
+	public List<String> getCumMembers(Intersection cellIs, String cumDim, int offset, boolean bWrap) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	/**
 	 * Returns the value of specified cell intersection property
 	 * 
 	 * @param intersection Cell intersection
 	 * @param propertyType Cell property type
 	 * 
-	 * @return
+	 * @return Cell property value
 	 */
 	private Object getCellProperty(Intersection intersection, CellPropertyType propertyType) {
 		
@@ -1333,6 +1753,17 @@ public class PafDataCache implements IPafDataCache {
 		return isAttributeIs;
 	}
 
+	/**
+	 * Returns true if the intersection in not an attribute intersection
+	 * 
+	 * @param intersection Cell intersection
+	 * @return True if the intersection is not an attribute intersection 
+	 */
+	public boolean isBaseIntersection(Intersection intersection) {
+		return !isAttributeIntersection(intersection);
+	}
+
+	
 	
 	/**
 	 * Returns true if the data block key maps directly
@@ -1514,28 +1945,77 @@ public class PafDataCache implements IPafDataCache {
 	/**
 	 *	Return the cell address for the specified intersection
 	 *
-	 * @param intersection Cell intersection 
+	 * @param cellIs Cell intersection 
 	 * @return DataCacheCellAddress
 	 */
-	private DataCacheCellAddress generateCellAddress(Intersection intersection) {
+	private DataCacheCellAddress generateCellAddress(final Intersection cellIs) {
 		
 		int measureAxis = getMeasureAxis();
 		int timeAxis = getTimeAxis();
 		DataCacheCellAddress cellAddress = new DataCacheCellAddress();
 
-		
-		// Convert intersection to data block key
-		Intersection dataBlockKey = generateDataBlockKey(intersection);
+		// Generate data block key that corresponds to the cell intersection
+		Intersection dataBlockKey = generateDataBlockKey(cellIs);
 		cellAddress.setDataBlockKey(dataBlockKey);
 		
 		// Set x and y coordinates (measure, time)
-		int measureIndex = getMemberIndex(intersection.getCoordinates()[measureAxis], measureAxis);
+		int measureIndex = getMemberIndex(cellIs.getCoordinates()[measureAxis], measureAxis);
 		cellAddress.setCoordX(measureIndex);
-		int timeIndex = getMemberIndex(intersection.getCoordinates()[timeAxis], timeAxis);
+		int timeIndex = getMemberIndex(cellIs.getCoordinates()[timeAxis], timeAxis);
 		cellAddress.setCoordY(timeIndex);
 
 		// Return cell address
 		return cellAddress;
+	}
+
+
+	/**
+	 * Translates a cell intersection based on a time horizon coordinate to one
+	 * that is based on time and year as seperate dimensions.
+	 * 
+	 * If a time horizon coordinate is not found, then the original intersection 
+	 * is returned.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @return Translated intersection
+	 */
+	protected Intersection translateTimeHorizonIs(final Intersection cellIs) {
+		
+		Intersection translatedIs = null;
+		
+		// If this is a time horizon intersection, translate it to a time-year
+		// intersection, else return the original intersection.
+		if (isTimeHorizonIs(cellIs)) {
+			TimeSlice timeSlice = new TimeSlice(cellIs.getCoordinate(getTimeDim()));
+			translatedIs = cellIs.clone();
+			translatedIs.setCoordinate(getTimeDim(), timeSlice.getPeriod());
+			translatedIs.setCoordinate(getYearDim(), timeSlice.getYear());
+		} else {
+			translatedIs = cellIs;
+		}
+		return translatedIs;
+	}
+
+
+	/**
+	 * Checks if the current intersection contains a time horizon coordinate
+	 * 
+	 * @param cellIs Cell intersection
+	 * @return True is the specified intersection containts a time horizon coordinate
+	 */
+	public boolean isTimeHorizonIs(Intersection cellIs) {
+		
+		// An intersection containing a time horizon coordinate will still contain both
+		// time and years dimensions. However, the time dimension coordinate will be a 
+		// member from the time horizon dimension tree, a combined year-time member. 
+		// And the year dimension coordinate will be set to a unique value that indicates
+		// the this is a time horizon intersection.
+		
+		if (cellIs.getCoordinate(getYearDim()).equals(PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 
@@ -1550,8 +2030,8 @@ public class PafDataCache implements IPafDataCache {
 		Intersection dataBlockKey = null;
 		
 		// The data block key is calculated by taking the intersection
-		// and removing the elements that correspond to the non-key
-		// dimensions. 
+		// and removing the elements that correspond to the dimensions
+		// contained in the data block. 
 		//
 		// To reduce overhead, this method accesses a pre-built array 
 		// that contains the desired intersection elements for each
@@ -1679,11 +2159,47 @@ public class PafDataCache implements IPafDataCache {
 
 	
 	/**
-	 * @return Returns the lockedPeriods.
+	 * @return Returns the lockedPeriodMap
 	 */
-	public Set<String> getLockedPeriods() {
+	public Map<String, Set<String>> getLockedPeriodMap() {
+		return lockedPeriodMap;
+	}
+
+
+	/**
+	 * Returns the locked Periods for the specified year
+	 * 
+	 * @param year Year member
+	 * @return Returns the locked Periods
+	 */
+	public Set<String> getLockedPeriods(String year) {
+		
+		Set<String> lockedPeriods = new HashSet<String>();
+		lockedPeriods = lockedPeriodMap.get(year);
+		
 		return lockedPeriods;
 	}
+
+	/**
+	 * Returns true if the data cache contains any locked periods
+	 * 
+	 * @return True if the data cache contains any locked periods
+	 */
+	public boolean hasLockedPeriods() {
+		
+		// Check if at least one year has any locked periods
+		boolean hasLockedPeriods = false;
+		String[] years = getDimMembers(getYearDim());
+		for (String year : years) {
+			if (getLockedPeriods(year).size() > 0) {
+				hasLockedPeriods = true;
+				break;
+			}
+		}
+		
+		return hasLockedPeriods;
+	}
+
 
 	/**
 	 *	Returns the axis number corresponding to the Measure dimension
@@ -1791,6 +2307,33 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public int getTimeSize() {
 		return getAxisSize(getTimeAxis());
+	}
+
+	/**
+	 *	Returns the axis number corresponding to the Time Horizon dimension
+	 *
+	 * @return Axis number corresponding to the Time Horizon dimension
+	 */
+	public int getTimeHorizonAxis() {
+		return getAxisIndex(getTimeHorizonDim());
+	}
+
+	/**
+	 *	Returns the name of the Time Horizon dimension
+	 *
+	 * @return Name of the Time Horizon dimension
+	 */
+	public String getTimeHorizonDim() {
+		return PafBaseConstants.TIME_HORIZON_DIM;
+	}
+
+	/**
+	 *	Return the number of members in the Time Horizon dimension
+	 *
+	 * @return The number of members in the Time Horizon dimension
+	 */
+	public int getTimeHorizonSize() {
+		return getAxisSize(getTimeHorizonAxis());
 	}
 
 	/**
@@ -2987,6 +3530,7 @@ public class PafDataCache implements IPafDataCache {
 		}
 		return stringBuffer.toString();
 	}
+
 
 
 }

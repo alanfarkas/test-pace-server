@@ -117,7 +117,7 @@ public class RoundingRulesExcelElementItem<T extends List<RoundingRule>> extends
 							rr.setRoundingFunction(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
 							break;
 						
-						//digets
+						//digits
 						case 1:						
 													
 							rr.setDigits(PafExcelUtil.getInteger(getProjectElementId(), firstValueObject, true));	

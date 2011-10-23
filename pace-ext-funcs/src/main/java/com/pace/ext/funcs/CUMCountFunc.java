@@ -32,9 +32,11 @@ import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * "CUM Count" Custom Function - Provides a count of the level 0 members up to and including the current 
- * intersection member, in the specified dimension. If no dimension is used, then the time dimension is
- * used by default.
+ * "CUM Count" Custom Function - Provides a count of the descendants, at the specified level, of 
+ * the current intersection, and it's left peers along the specified dimension. 
+ * 
+ * The time dimension is used by default if no dimension parameter is supplied. 
+ * The dimension floor level is used by default if no level parameter is supplied. 
  * 
  * @version	x.xx
  * @author AFarkas
@@ -45,36 +47,26 @@ public class CUMCountFunc extends AbstractFunction {
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) {
   
     	double result = 0;
-    	int level = 0;
-        PafApplicationDef app = evalState.getAppDef();
+    	int level = -1;
         String cumDim = null;
     	
-       	// Determine which dimension is being accumulated
-    	if ( parms.length > 0 ){
-    		// TODO Check if valid dimension is specified
-    		cumDim = parms[0];
-    	} else {
-    		cumDim = app.getMdbDef().getTimeDim();
-    	}
+        // Get the cum member count based on which function parameters have been supplied.
+        // Default parameter handling is performed within the called CumMbrCount methods.       
+        if ( parms.length == 0 ){
+        	// No parameters have been supplied
+        	result = dataCache.getCumMbrCount(sourceIs);
+        } else {
+        	// Dimension name has been supplied
+        	cumDim = parms[0];
+        	if ( parms.length == 1 ) {
+        		result = dataCache.getCumMbrCount(sourceIs, cumDim);
+        	} else {
+        		// Level number has been supplied
+        		level = Integer.valueOf(parms[1]);
+        		result = dataCache.getCumMbrCount(sourceIs, cumDim, level);
+        	}
+        }
 
-       	PafDimTree cumTree = evalState.getDataCacheTrees().getTree(cumDim);
-    	
-       	// Check for level option
-    	if ( parms.length > 1 ){
-    		// TODO Check for valid integer / maybe default level to lowest level in tree
-    		level = Integer.valueOf(parms[1]);
-    	} else {
-    		// If no level specified, then default to lowest level in localized time tree
-    		level = cumTree.getLowestAbsLevelInTree();
-    	}
-
-       	// Get list of cum members for the specified level
-
-       	String currentMember = sourceIs.getCoordinate(cumDim);
-       	List<PafDimMember> cumMembers = cumTree.getCumMembers(currentMember, level);
-       	
-    	// Return "cumulative count" (number of cum members)
-       	result = cumMembers.size();
         return result;
     }
     

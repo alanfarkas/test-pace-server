@@ -49,22 +49,15 @@ public class WOSFunc extends AbstractFunction {
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 
     	double pos = 0;
-
- //   	String logMsg = null;
-      	String measureDim = dataCache.getMeasureDim(), timeDim = dataCache.getTimeDim();
+       	String measureDim = dataCache.getMeasureDim(), timeDim = dataCache.getTimeDim();
       	String currentPeriod = sourceIs.getCoordinate(timeDim);
     	Intersection tempIs = null;
     	
-    	
-//    	logMsg = "Calculating custom function [" + getOpCode() + "] at intersection " 
-//    					+ StringUtils.arrayToString(sourceIs.getCoordinates());
-//    	logger.debug(logMsg);
     	
     	// Parse function parameters
     	parseParms(evalState);
     	   	
       	// Get the list of periods at bottom level or selected level, whichever is higher
-//    	logger.debug("Getting list of periods");
        	PafDimTree timeTree = evalState.getDataCacheTrees().getTree(timeDim);
        	int timeFloor = timeTree.getLowestAbsLevelInTree();
        	int validPeriodLevel = Math.max(timeFloor, periodLevel);
@@ -78,42 +71,19 @@ public class WOSFunc extends AbstractFunction {
         // set period number to first descendant period.
         if (currPeriodNo == -1) {
         	currTimeMbr = timeTree.getFirstDescendant(currTimeMbr.getKey(), (short) validPeriodLevel);
-            currPeriodNo = periods.indexOf(currTimeMbr);           
+            currPeriodNo = periods.indexOf(currTimeMbr);   
        }
     	
        	// Get beginning inventory value at adjusted period member 
       	tempIs = sourceIs.clone();
       	tempIs.setCoordinate(measureDim, invMeas); 
-      	tempIs.setCoordinate(timeDim, currTimeMbr.getKey()); /* TTN-1302 */
-    	if (!dataCache.isMember(timeDim, currTimeMbr.getKey())) { /* TODO Remove this check when TTN-1269 is resolved */
-    		errMsg = "Error in [WOSFunc] - ";
-    		errMsg += "Unable to calculate intersection: "
-    			+ StringUtils.arrayToString(sourceIs.getCoordinates()) 
-    			+ " - dependent data at " + currTimeMbr.getKey() + " is not accessible.";
-    		logger.warn(errMsg);
-    		return 0;
-    	}
-       double beginInv = dataCache.getCellValue(tempIs);
+      	tempIs.setCoordinate(timeDim, currTimeMbr.getKey()); 
+      	double beginInv = dataCache.getCellValue(tempIs);
        	
         // If beginning inventory <= 0, return 0
         if (beginInv <= 0) {
         	return 0;
         }
-        
-        // If not wrapping around, set maxPeriods = to distance to end of
-        // time horizon (or leave at maxPeriods is specified and less).
-        // Generally yields a 9999 to indicate more inventory than
-        // sales can consume.
-        
-    	int tmpMax;        
-        if (!bWrap) {
-        	tmpMax = periods.size() - currPeriodNo;
-        	tmpMax = tmpMax < maxPeriods ? tmpMax : maxPeriods;
-        }
-        else
-        	tmpMax = maxPeriods;
-        
-        
         
         
         // Main POS logic - Start at the current week and proceed forward, until
@@ -122,52 +92,39 @@ public class WOSFunc extends AbstractFunction {
         // searched.
         double cumSales = 0, prevCumSales = 0;
         double periodSales = 0;
-        int periodInx = currPeriodNo;
-        tempIs = sourceIs.clone();
     	tempIs.setCoordinate(measureDim, salesMeas);
-        for (int periodCount = 0;; periodCount++) {
+    	boolean bMaxPeriods = false;
+    	for (int periodCount = 1; !bMaxPeriods; periodCount++) {
 
-        	// Compute week index (0-based). Week index is adjusted to allow
-        	// "wrap around" logic.
-        	periodInx = periodInx % periods.size();
-        	
-        	// Get intersection for indexed week
-        	String timeMbr = periods.get(periodInx).getKey();
-        	tempIs.setCoordinate(timeDim, timeMbr);
-        	if (!dataCache.isMember(timeDim, timeMbr)) { /* TODO Remove this check when TTN-1269 is resolved */
-        		errMsg = "Error in [WOSFunc] - ";
-        		errMsg += "Unable to calculate intersection: "
-        			+ StringUtils.arrayToString(sourceIs.getCoordinates()) 
-        			+ " - dependent data at " + timeMbr + " is not accessible.";
-        		logger.warn(errMsg);
-        		return 0;
-        	}
+    		// Compute cumulative sales
+    		periodSales = dataCache.getCellValue(tempIs);
+    		cumSales += periodSales;
 
-        	// Compute cumulative sales
-        	periodSales = dataCache.getCellValue(tempIs);
-        	cumSales += periodSales;
-        	
-        	// Exit loop if cumulative sales > beginning inventory or max weeks have
-        	// been searched
-        	if (cumSales >=  beginInv || periodCount >= tmpMax ) {
-        		pos = periodCount;
-        		break;
-        	}
-        	
-        	// Advance to next week
-        	prevCumSales = cumSales;
-        	periodInx++;
-        }
-        
-        // If POS is < max count, determine if there are any fractional weeks to add
-        // to result.
-        if (pos < tmpMax && beginInv > prevCumSales) {
-        	// Add in ratio of remaining inventory divided by the next week's sales
-        	pos += (beginInv - prevCumSales) / periodSales;
-        }
-        
-        // Return weeks of supply
-        return pos;
+    		// Exit loop if cumulative sales > beginning inventory 
+    		if (cumSales >=  beginInv) {
+    			break;
+    		}
+
+    		// Advance to next week
+    		prevCumSales = cumSales;
+    		tempIs = dataCache.getNextIntersection(tempIs, timeDim, 1, bWrap);
+    		pos = periodCount;
+
+    		// Check if we've reached max periods
+    		if (tempIs == null || periodCount >= maxPeriods) {
+    			bMaxPeriods = true;
+    		}
+    	}
+
+    	// If the maximum number of periods have not been reached, determine if 
+    	// there are any fractional weeks to add to result.
+    	if (!bMaxPeriods  && beginInv > prevCumSales) {
+    		// Add in ratio of remaining inventory divided by the next week's sales
+    		pos += (beginInv - prevCumSales) / periodSales;
+    	}
+
+    	// Return weeks of supply
+    	return pos;
     }
     
 	/**

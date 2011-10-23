@@ -58,7 +58,7 @@ import com.pace.base.view.PafMVS;
  * @author Alan Farkas
  *
  */
-public class DcDouble implements IPafDataCache {
+public class DcDouble  {
 
 	private Map<Intersection, Integer> dataBlockIndexMap = null; // Maps data block key to an item in the data block pool
 	private List<Double[][]> dataBlockPool = null;				// [Measure][Time]

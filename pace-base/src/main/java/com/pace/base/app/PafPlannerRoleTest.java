@@ -97,7 +97,7 @@ public class PafPlannerRoleTest extends TestCase {
 		season1.setId(id);
 		season1.setOpen(isOpen);
 		season1.setPlanCycle(planCycle);
-		season1.setYear(year);
+		season1.setYears(new String[]{year});
 		season1.setTimePeriod(timePeriod);
 		
 		otherDims = new PafDimSpec[3];
@@ -139,7 +139,7 @@ public class PafPlannerRoleTest extends TestCase {
 		season2.setId(id2);
 		season2.setOpen(isOpen2);
 		season2.setPlanCycle(planCycle2);
-		season2.setYear(year2);
+		season2.setYears(new String[]{year2});
 		season2.setTimePeriod(timePeriod2);
 		
 		otherDims2 = new PafDimSpec[3];

@@ -138,49 +138,63 @@
           <id>Fall - Plan - 2007</id>
           <isOpen>true</isOpen>
           <planCycle>Plan</planCycle>
-          <year>FY2007</year>
+          <years>
+          	<string>FY2007</string>
+          </years>
           <timePeriod>@IDESCENDENTS(S02)</timePeriod>
         </Season>
         <Season>
           <id>Spring - Forecast - 2006</id>
           <isOpen>true</isOpen>
           <planCycle>Forecast</planCycle>
-          <year>FY2006</year>
+          <years>
+          	<string>FY2006</string>
+          </years>
           <timePeriod>@IDESCENDENTS(S01)</timePeriod>
         </Season>
         <Season>
           <id>Fall - Forecast - 2006</id>
           <isOpen>true</isOpen>
           <planCycle>Forecast</planCycle>
-          <year>FY2006</year>
+          <years>
+          	<string>FY2006</string>
+          </years>
           <timePeriod>@IDESCENDENTS(S02)</timePeriod>
         </Season>
         <Season>
           <id>Spring - Plan - 2007</id>
           <isOpen>true</isOpen>
           <planCycle>Plan</planCycle>
-          <year>FY2007</year>
+          <years>
+          	<string>FY2007</string>
+          </years>
           <timePeriod>@IDESCENDENTS(S01)</timePeriod>
         </Season>
         <Season>
           <id>Fall - Plan - 2006</id>
           <isOpen>true</isOpen>
           <planCycle>Plan</planCycle>
-          <year>FY2006</year>
+          <years>
+          	<string>FY2006</string>
+          </years>
           <timePeriod>@IDESCENDENTS(S02)</timePeriod>
         </Season>
         <Season>
           <id>Spring - Forecast - 2007</id>
           <isOpen>true</isOpen>
           <planCycle>Forecast</planCycle>
-          <year>FY2007</year>
+          <years>
+          	<string>FY2007</string>
+          </years>
           <timePeriod>@IDESCENDENTS(S01)</timePeriod>
         </Season>
         <Season>
           <id>Fall - Approval - 2006</id>
           <isOpen>true</isOpen>
           <planCycle>Approval</planCycle>
-          <year>FY2006</year>
+          <years>
+          	<string>FY2006</string>
+          </years>
           <timePeriod>@IDESCENDENTS(S02)</timePeriod>
         </Season>
       </Seasons>

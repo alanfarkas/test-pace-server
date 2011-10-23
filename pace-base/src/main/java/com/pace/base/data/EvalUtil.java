@@ -423,12 +423,13 @@ public class EvalUtil {
     }
     
 	/**
-	 * @param allocSrcIsx
+	 * @param cellIs
 	 * @param evalState
 	 * @param dataCache
-	 * @return
+	 * 
+	 * @return True is the specified intersection is elapsed
 	 */
-	public static boolean isElapsedIsx(Intersection allocSrcIsx, IPafEvalState evalState, IPafDataCache dataCache) {
+	public static boolean isElapsedIs(Intersection cellIs, IPafEvalState evalState, IPafDataCache dataCache) {
 		
 		// Has to be a forward plannable version for elapsed period to apply
 		if (evalState.getPlanVersion().getType() != VersionType.ForwardPlannable) {
@@ -444,7 +445,7 @@ public class EvalUtil {
 		}
 		
 		// Check on time dim match
-		if (lockedTimePeriods.contains(allocSrcIsx.getCoordinate(dataCache.getTimeDim())))
+		if (lockedTimePeriods.contains(cellIs.getCoordinate(dataCache.getTimeDim())))
 			return true;
 		else
 			return false;
@@ -484,12 +485,32 @@ public class EvalUtil {
 	public static List<Intersection> buildFloorIntersections(Intersection is, IPafEvalState evalState) {
 		
 		List<Intersection> floorIntersections = null;
-		if (!evalState.isAttributeEval()) {
+		if (evalState.getDataCache().isBaseIntersection(is)) {
 			floorIntersections = EvalUtil.buildBaseFloorIntersections (is, evalState);
 		} else {
 			floorIntersections = EvalUtil.buildAttrFloorIntersections (is, evalState);
 		}
 		return floorIntersections;
+	}
+    
+	/**
+	 * Summarize the floor intersections underneath the specified intersection
+	 * 
+	 * @param is Cell intersection
+	 * @param evalState Evaluation state
+	 * 
+	 * @return List<Intersection>
+	 */
+	public static double sumFloorIntersections(Intersection is, IPafEvalState evalState) {
+		
+		double sum = 0;
+		PafDataCache dataCache = evalState.getDataCache();
+		List<Intersection> floorIntersections = buildFloorIntersections(is, evalState);
+		for (Intersection floorIs : floorIntersections) {
+			sum += dataCache.getCellValue(floorIs);
+		}
+		
+		return sum;
 	}
     
     

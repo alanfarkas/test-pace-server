@@ -140,7 +140,8 @@ public abstract class PafDataCacheCalc {
 
 		boolean isTimeAggregation = false;
 		long calcStart = 0;
-		String measureDim = dataCache.getMeasureDim(), versionDim = dataCache.getVersionDim(), timeDim = dataCache.getTimeDim();
+		String measureDim = dataCache.getMeasureDim(), versionDim = dataCache.getVersionDim();
+		String timeDim = dataCache.getTimeDim(); 
 		String[] dimensions = dataCache.getBaseDimensions();
 		String[] planVersions = dataCache.getPlanVersions();
 		List<String> aggMembers = null;
@@ -420,7 +421,7 @@ public abstract class PafDataCacheCalc {
 			// Get next intersection
 			@SuppressWarnings("unchecked")
 			String[] coordinates = (String[]) cacheIterator.nextValue().toArray(new String[0]);
-			Intersection attrIs = new Intersection(viewDims, coordinates);
+			Intersection attrIs = dataCache.translateTimeHorizonIs(new Intersection(viewDims, coordinates));
 
 			// Skip any invalid intersections. The view section's invalid intersection
 			// collection only contains invalid intersections that are visible on the 

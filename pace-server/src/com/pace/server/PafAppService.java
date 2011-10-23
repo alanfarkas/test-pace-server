@@ -19,6 +19,7 @@
 package com.pace.server;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -134,6 +135,63 @@ public class PafAppService {
 	}
  
 
+	/**
+	 * Create a map of elapsed periods by year
+	 * 
+	 * @param clientState Client State
+	 * @return Map of elapsed periods by year
+	 */
+	public Map<String, Set<String>> getLockedPeriodMap(PafClientState clientState) {
+		
+		Map<String, Set<String>> lockedPeriodMap = new HashMap<String, Set<String>>();
+		UnitOfWork uow = clientState.getUnitOfWork();
+		boolean isCalcElapsedPeriods = clientState.getPlannerConfig().isCalcElapsedPeriods();
+		PafApplicationDef pafApp = clientState.getApp(); 
+		String elapsedYear = pafApp.getCurrentYear();
+		String timeDim = pafApp.getMdbDef().getTimeDim();
+		String yearDim = pafApp.getMdbDef().getYearDim();
+		
+		
+		// Initialize map
+		String[] years = uow.getDimMembers(yearDim);
+			for (String year : years) {
+			lockedPeriodMap.put(year, new HashSet<String>());
+		}
+		
+		// Set the locked periods by year. This step will be skipped if
+		// elapsed periods are to be calculated.
+		if (!isCalcElapsedPeriods) {
+			
+			String currentVersion = clientState.getPlanningVersion().getName();
+			Map<String, VersionType> versionsTypeMap = PafMetaData.getVersionTypeMap();
+			VersionType versionType = versionsTypeMap.get(currentVersion);
+			boolean isYearElapsed = false;
+			
+			// Processing years in backwards order makes it easier to determine 
+			// which years are elapsed.
+			for (int i = years.length -1; i >=0; i--) {
+				String year = years[i];
+				if (year.equalsIgnoreCase(elapsedYear)) {
+					isYearElapsed = true;
+				}
+				if (versionType.equals(VersionType.ForwardPlannable)) {
+					if (isYearElapsed) {
+						Set<String> lockedPeriods = new HashSet<String>();
+						if (year.equalsIgnoreCase(elapsedYear)) {
+							// Current year - add only elapsed periods
+							lockedPeriods.addAll(PafAppService.getInstance().getLockedList(clientState));
+						} else {
+							// Historical year - mark all periods as locked
+							lockedPeriods.addAll(Arrays.asList(uow.getDimMembers(timeDim)));
+						}
+						lockedPeriodMap.put(year, lockedPeriods);
+					}
+				
+				}
+			}
+		}
+		return lockedPeriodMap;
+	}
     
     public Set<String> getLockedList(PafClientState clientState) {
 

@@ -213,7 +213,8 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                     srcIs = EvalUtil.translocateIntersection(is, measFunc, evalState);
                     if (srcIs != null) {
                     	// skip over elapsed time periods if there are any
-                    	if (evalState.getDataCache().getLockedPeriods().contains(srcIs.getCoordinate(evalState.getTimeDim()))) {
+                    	if (EvalUtil.isElapsedIs(srcIs, evalState, dataCache)) { // TTN-1595 Multi-Year Support
+ //                   	if (evalState.getDataCache().getLockedPeriods().contains(srcIs.getCoordinate(evalState.getTimeDim()))) {
                     		cellsToLock.remove(srcIs);
                     		newChngCells.remove(srcIs);
                     		continue;
@@ -226,7 +227,8 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                     srcIs = is;
                     
                 	// skip over elapsed time periods if there are any
-                	if (evalState.getDataCache().getLockedPeriods().contains(srcIs.getCoordinate(evalState.getTimeDim()))) {
+                	if (EvalUtil.isElapsedIs(srcIs, evalState, dataCache)) { // TTN-1595 Multi-Year Support
+//                	if (evalState.getDataCache().getLockedPeriods().contains(srcIs.getCoordinate(evalState.getTimeDim()))) {
                 		cellsToLock.remove(srcIs);
                 		newChngCells.remove(srcIs);
                 		continue;

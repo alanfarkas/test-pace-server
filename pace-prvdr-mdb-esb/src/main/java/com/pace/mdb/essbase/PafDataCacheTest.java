@@ -60,7 +60,7 @@ public class PafDataCacheTest extends TestCase {
     //TODO update activeVersion to planVersions
     @SuppressWarnings("unused")
 	private String[] activeVersions = testCommonParms.getActiveVersions();
-    private Set<String> lockedPeriods = testCommonParms.getLockedPeriods();
+    private Map<String, Set<String>> lockedPeriodMap = testCommonParms.getLockedPeriodMap();
     @SuppressWarnings("unused")
 	private String mdxSelect = testCommonParms.getSampleMdxSelect();
 	private IMdbData esbData = null;
@@ -547,12 +547,13 @@ public class PafDataCacheTest extends TestCase {
 			esbData = new EsbData(props);
 			
 			// Get Data Cache
-			dataCache = new PafDataCache(clientState, lockedPeriods);
+			dataCache = new PafDataCache(clientState, lockedPeriodMap);
 			esbData.updateDataCache(dataCache, dataSpecByVersion);
 			
 			// Get Forward Plannable Periods
-			logger.info("Getting Forward Plannable periods, with no parameters");
-			fpPeriods = dataCache.getForwardPlannablePeriods();
+			logger.info("Getting Forward Plannable periods, with year: [" + currentYear +"]");
+			fpPeriods = dataCache.getForwardPlannablePeriods(currentYear);
+			Set<String> lockedPeriods = dataCache.getLockedPeriods(currentYear);
 			logger.info("Locked Periods: " + StringUtils.arrayToString(lockedPeriods.toArray()));
 			logger.info("Forward Plannable Periods: " + StringUtils.arrayToString(fpPeriods.toArray()));
 			
@@ -639,6 +640,7 @@ public class PafDataCacheTest extends TestCase {
 			
 			logger.info("Getting open periods - current year, plan version");
 			openPeriods = dataCache.getOpenPeriods(planVersion, currentYear);
+			Set<String> lockedPeriods = dataCache.getLockedPeriods(currentYear);
 			logger.info("Locked Periods: " + StringUtils.arrayToString(lockedPeriods.toArray()));
 			logger.info("Open Periods: " + StringUtils.arrayToString(openPeriods.toArray()));
 			logger.info("");

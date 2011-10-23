@@ -148,7 +148,7 @@ public abstract class testCommonParms {
 		s.setId("Forecast2006");
 		s.setPlanCycle("Forecast");
 		s.setOpen(true);
-		s.setYear("2006"); 
+		s.setYears(new String[]{"2006"}); 
 		s.setTimePeriod("S01");
 		SeasonList sl = new SeasonList();
 		sl.addSeason(s);
@@ -349,7 +349,16 @@ public abstract class testCommonParms {
 		return vd;
 	}
 
-	@SuppressWarnings("unchecked")
+
+	public static Map<String, Set<String>> getLockedPeriodMap() {
+		
+		Map<String, Set<String>> lockedPeriodMap = new HashMap<String, Set<String>>();
+		lockedPeriodMap.put(getCurrentYear(), getLockedPeriods());
+		
+		return lockedPeriodMap;
+	}
+
+
 	public static Set<String> getLockedPeriods() {
 
 		Set<String> lockedPeriods = new HashSet<String>();
@@ -733,7 +742,7 @@ public abstract class testCommonParms {
 		season.setId("Fall - Plan - 2006");
 		season.setOpen(true);
 		season.setPlanCycle("Plan");
-		season.setYear("FY2007");
+		season.setYears(new String[]{"FY2007"});
 		season.setTimePeriod("@IDESCENDENTS(S01)");
 		clientState.setPlanSeason(season);
 		return clientState;

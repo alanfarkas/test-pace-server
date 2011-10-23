@@ -77,6 +77,23 @@ public abstract class PafDimMember implements Cloneable {
 	}
 	
 	/**
+	 *	Return Member and its children
+	 *
+	 * @return children Arraylist of PafBaseMembers
+	 */
+	public List<PafDimMember> getIChildren() {
+		
+		List<PafDimMember> childList = new ArrayList<PafDimMember>();
+		childList.add(this);
+		if (children != null) {
+			childList.addAll(children);
+		}
+		return childList;
+	}
+	
+
+	
+	/**
 	 *	Return PafBaseMember key (member name)
 	 *
 	 * @return PafBaseMember key (member name)

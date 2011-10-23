@@ -1716,17 +1716,14 @@ public class PafViewService {
 								// if year member and elapsed year =
 							} else if (yearMemberIndex == elapasedYearMemberIndex) {
 
-								Set<String> lockedTimeSet = PafAppService
-										.getInstance().getLockedList(
-												clientState);
-
 								if (mappedDimensions.containsKey(timeDim)) {
 
 									// get time member
-									timeMember = getMember(timeDim, section,
-											rowTuple, colTuple);
+									timeMember = getMember(timeDim, section, rowTuple, colTuple);
 
 									// if time member is in locked Set of times
+									Map<String, Set<String>> lockedPeriodMap = PafAppService.getInstance().getLockedPeriodMap(clientState);
+									Set<String> lockedTimeSet = lockedPeriodMap.get(yearMember);
 									if (lockedTimeSet.contains(timeMember)) {
 
 										// add to forward plannable list

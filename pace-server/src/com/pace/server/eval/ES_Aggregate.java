@@ -28,15 +28,18 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataCacheCalc;
 import com.pace.base.mdb.PafDataCacheCell;
+import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.StringUtils;
@@ -64,7 +67,9 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 		PafClientState clientState = evalState.getClientState();
 		PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
 		String measureDim = dataCache.getMeasureDim();
+		String timeDim = dataCache.getTimeDim();
 		String versionDim = dataCache.getVersionDim();
+		String yearDim = dataCache.getYearDim();
 
         // opt out if flag set for this rule
         if ( evalState.getRule().isSkipAggregation() ) return;
@@ -81,19 +86,8 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 		Map<String, MeasureDef> msrCat = evalState.getAppDef().getMeasureDefs();        
 		MeasureDef msrDef = msrCat.get(measure);
         
-        TimeBalance tb;
-        if (msrDef == null)
-            tb = TimeBalance.None;
-        else if (msrDef.getType() == MeasureType.TimeBalFirst)
-            tb = TimeBalance.First;
-        else if (msrDef.getType() == MeasureType.TimeBalLast)
-            tb = TimeBalance.Last;
-        else
-            tb = TimeBalance.None;
-		
 		if ((msrDef == null) || (msrDef.getType() != MeasureType.Recalc)) {       
             // get dimension to aggregate
-            String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
             String[] hierDims = evalState.getAppDef().getMdbDef().getHierDims();
             
             // build measure dimension/member filter object.
@@ -109,48 +103,15 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             
             aggFilter.put(measureDim, mbrs);
             
-            //BEGIN(1) - TTN-584
-            Set<String> lockedPeriods = dataCache.getLockedPeriods();
-                        
-            /* if locked periods exists, then we need to include the open periods on the
-             * time filter.   
-             */
-            if ( lockedPeriods != null && lockedPeriods.size() > 0 ) {
+            //
+            // Force aggregation to use the time horizon members. Add time horizon periods to time
+            // filter, and set year to time horizon default since year is embedded in each time 
+            // horizon period (TTN-1595).
+            //
+            List<String> openTimeHorizonPeriods = dataCache.getOpenTimeHorizonPeriods();
+            aggFilter.put(timeDim, openTimeHorizonPeriods);
+            aggFilter.put(yearDim, Arrays.asList(new String[]{PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR}));
             
-	            //get current year members
-	            String[] yearMembers = dataCache.getDimMembers(dataCache.getYearDim());
-	            
-	            //if current year members exists
-	            if ( yearMembers != null && yearMembers.length > 0) {
-	            
-	            	//get 1st year member
-	            	String yearMember = yearMembers[0];
-	            
-	            	//get current open time periods
-		            List<String> openPeriods = dataCache.getOpenPeriods(clientState.getPlanningVersion().getName(), yearMember);
-		               
-		            //if open time periods exists, add time dim to filter list
-		            if ( openPeriods != null ) {
-		            	
-		            	aggFilter.put(timeDim, openPeriods);
-		            	
-		            }
-	            }
-	            
-            }
-            //END(1) - TTN-584
-            
-            //aggFilter.put(, value)
-            
-//            // if in time slice mode, only aggregate current time period
-//            if (evalState.isTimeSliceMode()) {
-//            	mbrs = new ArrayList<String>(1);
-//            	mbrs.add(evalState.getCurrentTimeSlice());
-//            	aggFilter.put(evalState.getTimeDim(), mbrs);
-//            }
-            
-            // aggregate standard hierarchies, then time
-
             
             // During a default evaluation process, a version filter is created
             // to reflect options set on the planner paf config. The version
@@ -238,7 +199,16 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 	private void aggregateDimension(EvalState evalState, PafDataCache dataCache, String dim, Map<String, List<String>> aggFilter, 
 			DcTrackChangeOpt trackChanges) throws PafException {
 
-		PafDataCacheCalc.aggDimension(dim, dataCache, evalState.getDataCacheTrees().getTree(dim), aggFilter, trackChanges);
+		// If time aggregation, aggregate along the time horizon hierarchy
+		PafDimTree aggTree;
+		MemberTreeSet treeSet = evalState.getDataCacheTrees();
+		if (!dim.equals(dataCache.getTimeDim())) {
+			aggTree = treeSet.getTree(dim);
+		} else {
+			aggTree = treeSet.getTree(dataCache.getTimeHorizonDim());
+		}
+		
+		PafDataCacheCalc.aggDimension(dim, dataCache, aggTree, aggFilter, trackChanges);
 	}
 
 }

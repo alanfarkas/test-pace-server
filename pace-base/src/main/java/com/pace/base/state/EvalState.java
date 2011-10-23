@@ -146,6 +146,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 		this.clientState = clientState;
 		this.appDef = clientState.getApp();
 		this.dataCache = dataCache;
+		dataCache.setEvalState(this);
 		init();
 	}
 
@@ -158,6 +159,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 		this.clientState = clientState;
 		this.appDef = clientState.getApp();
 		this.dataCache = dataCache;
+		dataCache.setEvalState(this);
 		init();
 	}
 
