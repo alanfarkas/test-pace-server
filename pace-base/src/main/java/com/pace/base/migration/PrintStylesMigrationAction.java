@@ -51,7 +51,7 @@ public class PrintStylesMigrationAction extends MigrationAction {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		if( printStyleMap == null || printStyleMap.size() == 0) {
+		if( getStatus() == MigrationActionStatus.NotStarted ) {
 			PrintStyle defaultStyle = DefaultPrintSettings.getInstance().getDefaultPrintSettings();
 			defaultStyle.setGUID(GUIDUtil.getGUID());
 			defaultStyle.setName("Print Style #1");

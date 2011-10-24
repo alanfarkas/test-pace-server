@@ -21,6 +21,7 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 	private static Logger logger = Logger.getLogger(PafViewPrintStylesMigrationAction.class);
 	private int count = 0;
 	private Map<String, PrintStyle> printStylesMap = null;
+	List<PafView> pafViews = null;
 	private PrintStyle defaultPrintStyle = DefaultPrintSettings.getInstance().getDefaultPrintSettings();
 	
 	public PafViewPrintStylesMigrationAction() {
@@ -31,8 +32,10 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 		this.xmlPaceProject = xmlPaceProject;
 		if ( this.xmlPaceProject != null ) {
 			boolean currentUpgradeProject = this.xmlPaceProject.isUpgradeProject();
-			this.xmlPaceProject.setUpgradeProject(true);
-			this.printStylesMap = this.xmlPaceProject.getPrintStyles();
+			xmlPaceProject.setUpgradeProject(true);
+			printStylesMap = xmlPaceProject.getPrintStyles();
+			xmlPaceProject.setUpgradeProject(false);
+			pafViews = xmlPaceProject.getViews();
 			this.xmlPaceProject.setUpgradeProject(currentUpgradeProject);
 		}
 	}	
@@ -46,17 +49,12 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 	@Override
 	public MigrationActionStatus getStatus() {
 		// TODO Auto-generated method stub
-		MigrationActionStatus status = MigrationActionStatus.NotStarted;
-		List<PafView> pafViews = xmlPaceProject.getViews();
+		MigrationActionStatus status = MigrationActionStatus.Completed;
 		if( pafViews.size() == 0 )
 			status = MigrationActionStatus.Failed;
 		for( PafView pafView : pafViews ) {
-			if( pafView.getViewPrintState() != null && pafView.getPrintStyle() != null 
-				&& pafView.getPageOrientation() == null && pafView.getPagesTall() == null && pafView.getPagesWide() == null ) {
-				status = MigrationActionStatus.Completed;
-			}
-			else if( pafView.getViewPrintState() == null && pafView.getPrintStyle() == null ) {
-				status = MigrationActionStatus.NotStarted;
+			if( pafView.getViewPrintState() == null && pafView.getPrintStyle() == null ) {
+				return MigrationActionStatus.NotStarted;
 			}
 		}
 		return status;
@@ -71,23 +69,25 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 		//4. set old print setting fields to null
 		//5. assign the global styles to those views
 		//6. add the global print style to the global print style collection 
-		boolean currentUpgradeProject = this.xmlPaceProject.isUpgradeProject();
-		xmlPaceProject.setUpgradeProject(false);
-		List<PafView> pafViews = xmlPaceProject.getViews();
-		xmlPaceProject.setUpgradeProject(currentUpgradeProject);
-		
-		for( PafView pafView : pafViews ) {
-			constructMigrationGlobalPrintStyleForView( pafView );
-		}
-		
-		xmlPaceProject.setViews(pafViews);
-		xmlPaceProject.setPrintStyles(printStylesMap);
-		try {
-			xmlPaceProject.save(ProjectElementId.Views);
-			xmlPaceProject.save(ProjectElementId.PrintStyles);
-		} catch (ProjectSaveException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		if( getStatus() == MigrationActionStatus.NotStarted ) {
+			boolean currentUpgradeProject = this.xmlPaceProject.isUpgradeProject();
+			xmlPaceProject.setUpgradeProject(false);
+			List<PafView> pafViews = xmlPaceProject.getViews();
+			xmlPaceProject.setUpgradeProject(currentUpgradeProject);
+			
+			for( PafView pafView : pafViews ) {
+				constructMigrationGlobalPrintStyleForView( pafView );
+			}
+			
+			xmlPaceProject.setViews(pafViews);
+			xmlPaceProject.setPrintStyles(printStylesMap);
+			try {
+				xmlPaceProject.save(ProjectElementId.Views);
+				xmlPaceProject.save(ProjectElementId.PrintStyles);
+			} catch (ProjectSaveException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 	
