@@ -23,12 +23,18 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafBaseConstants;
-import com.pace.base.app.*;
+import com.pace.base.app.AliasMapping;
+import com.pace.base.app.AppColors;
+import com.pace.base.app.AppSettings;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.Season;
+import com.pace.base.app.SuppressZeroSettings;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
@@ -113,7 +119,7 @@ public class PafAppsMigrationAction extends MigrationAction {
 							//loop over each dim, if dimension is not in map, return not started
 							for (String dimName : allDimensions) {
 								
-								if ( ! aliasMappingMap.containsKey(dimName)) {
+								if ( ! aliasMappingMap.containsKey(dimName) ) {
 									
 									return MigrationActionStatus.NotStarted;
 									
@@ -150,6 +156,15 @@ public class PafAppsMigrationAction extends MigrationAction {
 						status = MigrationActionStatus.NotStarted;
 					}
 					//End Suppress Zeros for null check. 
+					
+					//Begin Season check
+					Set<Season> seasons = pafApp.getSeasonList().getSeasons();
+					for( Season season : seasons ) {
+						if( season.getYears() == null || season.getYears().length == 0 || season.getYear() != null ) {
+							return MigrationActionStatus.NotStarted;
+						}
+					}
+					//End Season check
 				}
 				
 			}
@@ -312,6 +327,16 @@ public class PafAppsMigrationAction extends MigrationAction {
 					globalSuppressZeros.setVisible(false);
 				}			
 				
+			}
+			//TTN 1595 - converting year to Years
+			Set<Season> seasons = pafApp.getSeasonList().getSeasons();
+			for( Season season : seasons ) {
+				List<String> years = new ArrayList<String>();
+				if( ( season.getYears() == null || season.getYears().length == 0 ) && season.getYear() != null ) {
+					years.add(season.getYear());
+					season.setYear(null);
+				}
+				season.setYears(years.toArray(new String[0]));
 			}
 			
 			//set the global suppress zeros
