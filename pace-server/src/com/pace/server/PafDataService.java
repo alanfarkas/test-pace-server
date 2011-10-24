@@ -809,7 +809,7 @@ public class PafDataService {
 		// Attribute Dimensions
 		treeSet.addAllTrees(attributeTrees);
 
-		// Virtual Time Dimension
+		// Virtual Time Horizon Dimension
 		PafDimTree timeTree = treeSet.getTree(clientState.getMdbDef().getTimeDim());
 		PafDimTree yearTree = treeSet.getTree(clientState.getMdbDef().getYearDim());
 		treeSet.addTree(PafBaseConstants.TIME_HORIZON_DIM, buildTimeHorizonTree(timeTree, yearTree));
@@ -828,67 +828,79 @@ public class PafDataService {
 	 */
 	protected PafDimTree buildTimeHorizonTree(PafDimTree timeTree, PafDimTree yearTree) throws PafException {
 		
+		PafDimMember timeRoot = timeTree.getRootNode(), yearRoot = yearTree.getRootNode();
+		List<PafDimMember> yearMembers = yearTree.getLowestLevelMembers();
+		List<PafDimMember> timeChildMbrs = null;
+
+		
 		// The virtual time tree is formed by combining the UOW Time and Year trees. It is used 
 		// in aggregation and any time-based rule function call, instead of the seperate Time 
 		// and Year trees loaded directly from the multidimensional database. The main advantage 
 		// of the virtual time tree is that it makes it easy to index and accumulate time periods
 		// that cross year boundaries.
 		
-		// Get the individual year members
-		List<PafDimMember> yearMembers = yearTree.getLowestLevelMembers();
-		  
-		// Create the virtual time tree. If there's only one year, then a dummy
-		// root will be created. If there's more than one year, then the name
-		// of the root will be the top of the year tree combined with the 
-		// top of the time tree.
+		// Create the time horizon tree. The name of the root node will be a combination of
+		// the root of the year tree and the root of the time tree.
 		PafBaseMemberProps rootProps = new PafBaseMemberProps();
-		String rootName = null;
-		if (yearMembers.size() == 1) {
-			rootName = PafBaseConstants.TIME_HORIZON_DIM;
-		} else {
-			rootName = TimeSlice.buildTimeHorizonCoord(timeTree.getRootNode().getKey(), yearTree.getRootNode().getKey());
-		}
-		PafBaseMember root = new PafBaseMember(rootName, rootProps);
+		String rootName = TimeSlice.buildTimeHorizonCoord(timeRoot.getKey(), yearRoot.getKey());
+		PafBaseMember root = new PafBaseMember(rootName, rootProps);		
 		rootProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, root.getKey());
 		rootProps.setGenerationNumber(1);
-		rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree() + 1); 
-		PafDimTree virtualTimeTree = new PafBaseTree(root, new String[]{PafBaseConstants.ESS_DEF_ALIAS_TABLE});
 		
-		// Build out the virtual time tree
+		// The is some differing logic depending on whether the is just a single year in the UOW
+		// or multiple years, represented by a year tree with a virtual node whose children are 
+		// the individual years.
+		if (yearMembers.size() == 1) {
+			// There is a one-to-one mapping between the members in the time tree and the
+			// members in the time horizon tree.
+			rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree()); 
+			timeChildMbrs = timeRoot.getChildren();
+		} else {
+			// There is a time horizon node for each combination of level 0 year member and
+			// all time members, plus the time horizon tree root node.
+			rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree() + 1); 
+			timeChildMbrs = new ArrayList<PafDimMember>(Arrays.asList(new PafDimMember[]{timeRoot}));
+		}
+		PafDimTree timeHorizonTree = new PafBaseTree(root, new String[]{PafBaseConstants.ESS_DEF_ALIAS_TABLE});
+		
+		
+		// Build out the time horizon tree
 		for (PafDimMember yearMember : yearMembers) {
 			// Add child members
-			addVirtualTimeChild(virtualTimeTree, root, yearMember, timeTree.getRootNode());
+			addTimeHorizonChildren(timeHorizonTree, root, yearMember, timeChildMbrs);
 		}
-		return virtualTimeTree;
+		return timeHorizonTree;
 	}
 
 
 	/**
 	 * Add child to virtual time tree
 	 * 
-	 * @param virtualTimeTree Virtual time tree
+	 * @param timeHorizonTree Virtual time tree
 	 * @param parentNode Parent node
 	 * @param yearMember Name of year member
-	 * @param timeNode Time tree node
+	 * @param timeMembers Time tree node
 	 * 
 	 * @throws PafException 
 	 */
-	private void addVirtualTimeChild(PafDimTree virtualTimeTree, PafDimMember parentNode, PafDimMember yearMember, PafDimMember timeNode) throws PafException {
+	private void addTimeHorizonChildren(PafDimTree timeHorizonTree, PafDimMember parentNode, PafDimMember yearMember, List<PafDimMember> timeMembers) throws PafException {
 		
-		// Create child member. Each child member is built by concatenating the current year member with the current time member. 
-		PafBaseMemberProps memberProps = new PafBaseMemberProps();
-		PafDimMember virtualTimeChild = new PafBaseMember(TimeSlice.buildTimeHorizonCoord(timeNode.getKey(), yearMember.getKey()), memberProps);
-		memberProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, virtualTimeChild.getKey());
-		memberProps.setLevelNumber(timeNode.getMemberProps().getLevelNumber()); 				// Use level number of time member
-		memberProps.setGenerationNumber(parentNode.getMemberProps().getGenerationNumber() + 1);	// Gen number is parent gen + 1
-		
-		// Add child member to virtual time tree. 
-		virtualTimeTree.addChild(parentNode, virtualTimeChild);
+		for (PafDimMember timeMember : timeMembers) {
+			
+			// Create child member
+			PafBaseMemberProps memberProps = new PafBaseMemberProps();
+			String memberName = TimeSlice.buildTimeHorizonCoord(timeMember.getKey(), yearMember.getKey());
+			PafDimMember timeHorizonChild = new PafBaseMember(memberName, memberProps);
+			memberProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, timeHorizonChild.getKey());
+			memberProps.setLevelNumber(timeMember.getMemberProps().getLevelNumber()); 				// Use level number of time member
+			memberProps.setGenerationNumber(parentNode.getMemberProps().getGenerationNumber() + 1);	// Gen number is parent gen + 1
 
-		// Recursively add a child member to virtual time tree for each child member of the regular time tree
-		for (PafDimMember child : timeNode.getChildren()) {
-			addVirtualTimeChild(virtualTimeTree, virtualTimeChild, yearMember, child);
-		}		
+			// Add child member to time horizon tree 
+			timeHorizonTree.addChild(parentNode, timeHorizonChild);
+
+			// Recursively add a child member to time horizon tree for each child member of the regular time tree
+			addTimeHorizonChildren(timeHorizonTree, timeHorizonChild, yearMember, timeMember.getChildren());
+		}
 	}
 
 
