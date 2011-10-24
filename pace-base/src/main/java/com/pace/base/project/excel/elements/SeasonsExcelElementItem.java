@@ -88,7 +88,7 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 			.excludeEmptyRows(true)
 			.sheetRequired(true)
 			.endOfSheetIdnt(ExcelPaceProjectConstants.END_OF_SHEET_IDENT)
-//		.multiDataRow(true) TTN-1595
+			.multiDataRow(true)
 			.build();
 
 		List<PafExcelRow> excelRowList = PafExcelUtil.readExcelSheet(input);
@@ -123,10 +123,22 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 							season.setPlanCycle(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));	
 							break;
 							
-						//year
+						//years
 						case 2:											
-						//TODO Update for TTN-1595
-//							season.setYear(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
+						//Update for TTN-1595
+							List<String> yearsList = new ArrayList<String>();
+							boolean yearsReadError = false;
+							for ( PafExcelValueObject year : rowItemList ) {
+								try {
+									yearsList.add(PafExcelUtil.getString(getProjectElementId(), year, true));
+								} catch (ExcelProjectDataErrorException epdee) {
+									addProjectDataErrorToList(epdee.getProjectDataError());
+									yearsReadError = true;
+								}
+							}
+							if ( ! yearsReadError && yearsList.size() > 0 ) {
+								season.setYears(yearsList.toArray(new String[0]));
+							}
 							break;
 						
 						//is open
@@ -218,8 +230,13 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 				}
 				
 				//years
-				//TODO update for TTN-1595
-//				excelRow.addRowItem(2, PafExcelValueObject.createFromString(season.getYear()));
+				//TTN 1595 - multi-year
+				String[] years = season.getYears();
+				if ( years != null ) {
+					for (String year : years ) {
+							excelRow.addRowItem(2, PafExcelValueObject.createFromString(year));
+					}
+				}
 				
 				//is open
 				excelRow.addRowItem(3, PafExcelValueObject.createFromBoolean(season.isOpen()));		
