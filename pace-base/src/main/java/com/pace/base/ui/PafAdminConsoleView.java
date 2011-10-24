@@ -37,8 +37,11 @@ public class PafAdminConsoleView implements IPafView, Cloneable {
 
 	private ArrayList<PafUserSelection> userSelections;
 	
+	@Deprecated
 	private String pageOrientation;	
+	@Deprecated
 	private Integer pagesTall;	
+	@Deprecated
 	private Integer pagesWide;
 
 	private PrintStyle printStyle;

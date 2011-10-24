@@ -41,9 +41,11 @@ public class PafView implements IPafView, Cloneable {
     private String backGroundColor;
 	private PafViewHeader headers[];   
 	private PafUserSelection[] userSelections;
-	
+	@Deprecated
 	private String pageOrientation;	
+	@Deprecated
 	private Integer pagesTall;	
+	@Deprecated
 	private Integer pagesWide;	
 
 	private PrintStyle printStyle;
