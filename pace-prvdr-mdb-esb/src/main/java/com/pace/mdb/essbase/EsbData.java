@@ -49,6 +49,7 @@ import com.pace.base.app.UnitOfWork;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.IMdbData;
 import com.pace.base.mdb.PafDataCache;
+import com.pace.base.mdb.PafDimMember;
 import com.pace.base.state.IPafClientState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
@@ -121,67 +122,6 @@ public class EsbData implements IMdbData{
 				+ esbConnAlias + " - Use Connection Pool: " + useConnPool);
 		this.esbConnAlias = esbConnAlias;
 		this.useConnPool = useConnPool;
-	}
-	
-
-	
-	/** 
-	 *	Return a populated Data Cache based on the supplied UOW, and 
-	 *  Application Definition. 
-	 *
-	 * @param dataSpecByVersion Specifies the intersections to retrieve for each version
-	 * @param attributeDims Set of attribute dimension names 
-	 * @param clientState Client State
-	 * @param lockedPeriods List of locked reporting periods
-	 * 
-	 * @return PafDataCache - Result set and corresponding meta-data
-	 * @throws PafException
-	 */
-	public PafDataCache loadUowCache(Map<String, Map<Integer, List<String>>> dataSpecByVersion, String[] attributeDims, PafClientState clientState, Set<String> lockedPeriods) throws PafException {
-		
-		//TODO migrate this method to the data service (or data cache) since the logic here is not specific to the Essbase provider
-//		int axisCount = 0;
-//		int[] axisSize = null;
-//		String[] uowDims = uowSpec.getDimensions();
-//		String[][] memberArray = null;
-		
-//		PafApplicationDef appDef = clientState.getApp();
-		PafDataCache dataCache = null;
-//		PafUowCacheParms dataCacheParms = null;
-		
-		
-		// B u i l d   a n d   l o a d   t h e   u n i t   o f   w o r k
-//		logger.info("Initializing UOW..." ); 
-//		dataCache = new PafUowCache(clientState, attributeDims, lockedPeriods);
-		
-//		// Parse out the dimensional specification in the expanded 
-//		// unit of work map
-//		axisCount = uowDims.length;
-//		axisSize = new int[axisCount];
-//		memberArray = new String[axisCount][];
-//		for (int axis = 0; axis < axisCount; axis++) {
-//			String[] members = uowSpec.getDimMembers(uowDims[axis]);
-//			memberArray[axis] = members;
-//			axisSize[axis] = members.length;
-//		}
-//
-//		//  Create a data cache conforming to the unit of work specification
-//		logger.debug("Inserting Essbase meta-data into PafUowCache...");
-//		dataCacheParms = new PafUowCacheParms();
-//		dataCacheParms.setAppDef(appDef);
-//		dataCacheParms.setActiveVersion(new String[]{clientState.getPlanningVersion().getName()});
-//		dataCacheParms.setLockedPeriods(lockedPeriods);
-//		dataCacheParms.setAxisCount(axisCount);
-//		dataCacheParms.setAxisSize(axisSize);
-//		dataCacheParms.setDimensions(uowDims);
-//		dataCacheParms.setMemberArray(memberArray);
-//		dataCache = new PafUowCache(dataCacheParms);
-
-		// Load the data cache with the required Essbase data
-//		refreshDataCache(dataCache, dataSpecByVersion);
-
-		logger.debug("Returning Paf Data Cache");
-		return dataCache;
 	}
 	
 
@@ -315,7 +255,7 @@ public class EsbData implements IMdbData{
 			
 			// Construct MDX select statement that will extract data for selected version,
 			// suppressing misssing intersection rows
-			String mdxSelect = buildMdxSelect(filteredMemberMap, true);
+			String mdxSelect = buildMdxSelect(filteredMemberMap, dataCache, true);
 			String mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
 
 			// Update data cache with Essbase data for selected version
@@ -437,12 +377,16 @@ public class EsbData implements IMdbData{
 	/**
 	 *	Build an MDX select statement using the supplied collection of dimension members.
 	 *
+	 *  If the data cache parameter is supplied then virtual and read-only members will
+	 *  be filtered from the resulting query.
+	 *  
  	 * @param dimMembers A map containing a list of members for each axis
+ 	 * @param dataCache Data cache this required for member filtering
  	 * @param isNonEmptyFlagUsed Indicates that only "non empty" flag should be appended to MDX query
  	 *  	  
  	 * @return Returns an MDX select statement that matches the specified dimensionality.
 	 */
-	public String buildMdxSelect(Map<Integer, List<String>> dimMembers, Boolean isNonEmptyFlagUsed) {
+	public String buildMdxSelect(Map<Integer, List<String>> dimMembers, PafDataCache dataCache, Boolean isNonEmptyFlagUsed) {
 
 		int axis = 0;
 		String mdxSelect = null;
@@ -469,10 +413,26 @@ public class EsbData implements IMdbData{
 			IllegalArgumentException iae = new IllegalArgumentException(errMsg);	
 			throw iae;			
 		}
-				
+		
+	
 		// Build MDX Select
 		for (axis = 0; axis < dimMembers.size(); axis++) {
-			List<String> memberList = dimMembers.get(axis);
+			
+			List<String> memberList;
+			
+			// Filter out any virtual root members, if data cache was passed in (TTN-1595)
+			if (dataCache != null) {
+				List<String> origMemberList = dimMembers.get(axis);
+				memberList = new ArrayList<String>(origMemberList);
+				String dim = dataCache.getDimension(axis);
+				PafDimMember root = dataCache.getDimTrees().getTree(dim).getRootNode();
+				if (root.getMemberProps().isVirtual()) {
+					memberList.remove(root.getKey());
+				}
+			} else {
+				memberList = dimMembers.get(axis);	
+			}
+			
 			
 			// Includes the optional keywords Non Empty before the set specification in each axis in order to suppress 
 			// slices that contain entirely #MISSING values.
@@ -514,6 +474,7 @@ public class EsbData implements IMdbData{
 		final List<String> colDims = Arrays.asList(new String[]{timeDim});
 		final List<String> intersectionDims = Arrays.asList(dataCache.getBaseDimensions());
 		final List<String> dummyMemberList = Arrays.asList(new String[]{"[MEMBER]"});
+
 		long sendStart = 0;
 		String dataFileName = null, dataFileShortName = null;
 		String[] planVersions = dataCache.getPlanVersions();
@@ -620,14 +581,16 @@ public class EsbData implements IMdbData{
 			cube = esbCube.getEssCube();
 			olapServer = esbCube.getOlapServer();
 			
+			// Get list of years - filter out any read only or virtual members (TTN-1595)
+			String[] years = dataCache.getFilteredDimMembers(yearDim, false, false);
+			
 			// Cycle through list of Plan Types
 			String[] planTypes = dataCache.getDimMembers(planTypeDim);
 			for (String planType: planTypes) {
 	
 				// Cycle through list of Years
-				String[] years = dataCache.getDimMembers(yearDim);
 				for (String year:years) {
-					
+										
 					// Cycle through list of Versions 
 					for (String version:versionFilter) {
 						logger.info("Creating Essbase Data Load File: Plan Type [" + planType + "] - Year ["
@@ -791,7 +754,7 @@ public class EsbData implements IMdbData{
 			// from the MDX query.
 			esbApp = esbCubeView.getEsbApp();
 			esbDb = esbCubeView.getEsbDb(); 
-			mdxSelect = buildMdxSelect(expandedUOW, true);
+			mdxSelect = buildMdxSelect(expandedUOW, null, true);
 			mdxFrom = " FROM " + esbApp + "." + esbDb;
 			mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
 			logger.info("Running meta-data filter query: " + mdxQuery);

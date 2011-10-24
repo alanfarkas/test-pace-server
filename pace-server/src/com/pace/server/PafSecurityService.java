@@ -383,18 +383,26 @@ public class PafSecurityService {
 					.toArray(new String[0]));
 		}
 
-		// Get plantype, time, years and version
+		// Get plantype, time, and version
 		String planType = role.getPlanType();
 		String cycle = season.getPlanCycle();
 		String version = app.findPlanCycleVersion(cycle);
-		String[] years = season.getYears();
 		String time = season.getTimePeriod();
 
-		// Add them to the unit of work
+		// Add planType and time to the unit of work
 		workUnit.setDimMembers(mdbDef.getPlanTypeDim(),
 				new String[] { planType });
-		workUnit.setDimMembers(mdbDef.getYearDim(), years);
 		workUnit.setDimMembers(mdbDef.getTimeDim(), new String[] { time });
+
+		// Add years to unit of work. Add in year root if uow
+		// contains multiple years (TTN-1595).
+		List<String> yearList = new ArrayList<String>();
+		if (season.getYears().length > 1) {
+			yearList.add(mdbDef.getYearDim());
+		}
+		yearList.addAll(Arrays.asList(season.getYears()));
+		workUnit.setDimMembers(mdbDef.getYearDim(), yearList.toArray(new String[0]));
+
 
 		// append reference version to unit of work for now
 		// TODO Refactor reference version code out of security provider

@@ -667,28 +667,19 @@ public class PafDataService {
 		if (dim.equals(yearDim) && mbrNames.length > 1) {
 
 			// Create virtual root
-			PafBaseMemberProps rootProps;
-			try {
-				rootProps = baseTree.getRootNode().getMemberProps().clone();
-			} catch (CloneNotSupportedException e) {
-				// Throw Paf Exception
-				String errMsg = "Error generating virtual root in UOW Year tree - " + e.getMessage();
-				logger.error(errMsg);
-				PafException pfe = new PafException(errMsg, PafErrSeverity.Error, e);	
-				pfe.setStackTrace(e.getStackTrace());
-				throw pfe;
-			}
-			
-			String rootName = "**All Years**";
+			PafBaseMember root = baseTree.getRootNode().getShallowDiscCopy();
+			PafBaseMemberProps rootProps = root.getMemberProps();
+			String rootDesc = "**" + root.getKey() + "**";
 			for (String aliasTableName : baseTree.getAliasTableNames()) {
-				rootProps.addMemberAlias(aliasTableName, rootName);
+				rootProps.addMemberAlias(aliasTableName, rootDesc);
 			}
-			//rootProps.setVirtual(true);
-			PafBaseMember root = new PafBaseMember(rootName, rootProps);
+			rootProps.setVirtual(true);
 			
 			// Create year sub tree and add in UOW years
+			List<String> yearList = new ArrayList<String>(Arrays.asList(mbrNames));
+			yearList.remove(root.getKey());
 			PafBaseTree yearTree = new PafBaseTree(root, baseTree.getAliasTableNames());
-			for (String year : mbrNames) {
+			for (String year : yearList) {
 				PafBaseMember yearMember = baseTree.getMember(year).getShallowDiscCopy();
 				PafBaseMemberProps memberProps = yearMember.getMemberProps();
 				memberProps.setGenerationNumber(2);

@@ -32,6 +32,10 @@ public abstract class PafDimMemberProps implements Cloneable {
 	// Read-Only property
 	private boolean isReadOnly = false;
 	
+	// Virtual property
+	private boolean isVirtual = false;
+	
+
 	/**
      * Return the member alias tables
      *
@@ -142,6 +146,20 @@ public abstract class PafDimMemberProps implements Cloneable {
 	}
 
 	/**
+	 * @return the isVirtual
+	 */
+	public boolean isVirtual() {
+		return isVirtual;
+	}
+	/**
+	 * @param isVirtual the isVirtual to set
+	 */
+	public void setVirtual(boolean isVirtual) {
+		this.isVirtual = isVirtual;
+	}
+	
+	
+	/**
 	 *	Add member alias to list of aliases for specified member
 	 *
 	 * @param aliasTableName Essbase alias table name
@@ -191,6 +209,8 @@ public abstract class PafDimMemberProps implements Cloneable {
 						.hashCode());
 		result = prime * result + generationNumber;
 		result = prime * result + levelNumber;
+		result = prime * result + (isReadOnly ? 1231 : 1237);
+		result = prime * result + (isVirtual ? 1231 : 1237);
 		return result;
 	}
 	
@@ -225,10 +245,19 @@ public abstract class PafDimMemberProps implements Cloneable {
 		if (levelNumber != compare.levelNumber)
 			return false;
 				
+		// -- Check isReadOnly
+		if (isReadOnly != compare.isReadOnly)
+			return false;
+
+		// -- Check isVirtual
+		if (isVirtual != compare.isVirtual)
+			return false;
+
 		return true;
 	}
 
-    /*
+ 
+	/*
      *	Return key properties
      *
      * @see java.lang.Object#toString()
@@ -236,7 +265,9 @@ public abstract class PafDimMemberProps implements Cloneable {
     public String toString() {
     	return "Alias: " + getMemberAlias() + PafBaseConstants.LINE_TERM
     		+ "Gen: " +  generationNumber + PafBaseConstants.LINE_TERM
-    		+ "Lvl: " + levelNumber;
+    		+ "Lvl: " + levelNumber + PafBaseConstants.LINE_TERM
+    		+ "Read Only: " + isReadOnly + PafBaseConstants.LINE_TERM
+    		+ "Virtual: " + isVirtual;
      }
 
 }

@@ -62,6 +62,7 @@ public class PafBaseMemberProps extends PafDimMemberProps  implements Cloneable{
 
 	// User-defined attributes
 	private String[] UDAs = null;
+	
 
    
 	/**
@@ -221,6 +222,7 @@ public class PafBaseMemberProps extends PafDimMemberProps  implements Cloneable{
 		this.UDAs = uDAs;
 	}
 
+	
 	/**
 	 *	Return a simple version of the PafBaseMemberProps
 	 *

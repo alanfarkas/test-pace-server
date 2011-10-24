@@ -3009,6 +3009,51 @@ public class PafDataCache implements IPafDataCache {
 		return getAxisMembers(getAxisIndex(dimName));
 	}    
 
+	/**
+	 *	Return an array containing the members in the specified dimension name
+	 *  the meet the specified selection criteria.
+	 *  
+	 *  A null value in a property filter indicates that property will
+	 *  be ignored.
+	 *
+	 * @param dimName Dimension name
+	 * @param isReadOnly Determines if read-only members should be selected
+	 * @param isVirtual Determines if virtual members should be selected
+	 * 
+	 * @return Returns an array containing the members in the specified axis.
+	 */
+	public String[] getFilteredDimMembers(String dimName, Boolean isReadOnly, Boolean isVirtual) {
+		
+		//TODO Create a more extensible way to filter out members
+		
+		List<String> filteredMembers = new ArrayList<String>();
+		String[] allMembers = getAxisMembers(getAxisIndex(dimName));
+		PafDimTree dimTree = getDimTrees().getTree(dimName);
+		
+		for (String memberName : allMembers) {
+			PafDimMemberProps memberProps = dimTree.getMember(memberName).getMemberProps();
+			
+			// Apply "readOnly" filter
+			if (isReadOnly != null) {
+					if ((isReadOnly && !memberProps.isReadOnly())
+						|| (!isReadOnly && memberProps.isReadOnly())) {
+					continue;
+				}
+			}
+			
+			// Apply "virtual" filter
+			if (isVirtual != null) {
+				if ( (isVirtual && !memberProps.isVirtual()) || (!isVirtual && memberProps.isVirtual()) ) {
+				continue;
+				}
+			}
+			
+			filteredMembers.add(memberName);
+		}
+		
+		return filteredMembers.toArray(new String[0]);
+	}    
+
 
 	/**
 	 *	Return number of data cache rows
