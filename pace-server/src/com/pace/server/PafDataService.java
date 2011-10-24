@@ -117,6 +117,7 @@ public class PafDataService {
 		// Load data cache
 		logger.info("Building the unit of work...");
 		Map<String, Set<String>> lockedPeriodMap = PafAppService.getInstance().getLockedPeriodMap(clientState);
+//		clientState.setLockedPeriodMap();
 		PafDataCache dataCache = new PafDataCache(clientState, lockedPeriodMap);
 		List<String>loadedVersions = mdbData.updateDataCache(dataCache, mdbDataSpecByVersion);
 		logger.info("UOW intialized with version(s): " + StringUtils.arrayListToString(loadedVersions));
@@ -606,6 +607,7 @@ public class PafDataService {
 		MdbDef mdbDef = clientState.getMdbDef();
 		String measureDim = mdbDef.getMeasureDim();
 		String versionDim = mdbDef.getVersionDim();
+		String yearDim = mdbDef.getYearDim();
 		String[] mbrNames = null;
 		
 		//Get the dimension members.  Use the optional workUnit parameter if it is not null
@@ -661,6 +663,41 @@ public class PafDataService {
 			return tree;
 		}
 		
+		// Special year dimension logic for multiple year UOW (TTN-1595).
+		if (dim.equals(yearDim) && mbrNames.length > 1) {
+
+			// Create virtual root
+			PafBaseMemberProps rootProps;
+			try {
+				rootProps = baseTree.getRootNode().getMemberProps().clone();
+			} catch (CloneNotSupportedException e) {
+				// Throw Paf Exception
+				String errMsg = "Error generating virtual root in UOW Year tree - " + e.getMessage();
+				logger.error(errMsg);
+				PafException pfe = new PafException(errMsg, PafErrSeverity.Error, e);	
+				pfe.setStackTrace(e.getStackTrace());
+				throw pfe;
+			}
+			
+			String rootName = "**All Years**";
+			for (String aliasTableName : baseTree.getAliasTableNames()) {
+				rootProps.addMemberAlias(aliasTableName, rootName);
+			}
+			//rootProps.setVirtual(true);
+			PafBaseMember root = new PafBaseMember(rootName, rootProps);
+			
+			// Create year sub tree and add in UOW years
+			PafBaseTree yearTree = new PafBaseTree(root, baseTree.getAliasTableNames());
+			for (String year : mbrNames) {
+				PafBaseMember yearMember = baseTree.getMember(year).getShallowDiscCopy();
+				PafBaseMemberProps memberProps = yearMember.getMemberProps();
+				memberProps.setGenerationNumber(2);
+				yearTree.addChild(root, yearMember);
+			}
+						
+			return yearTree;
+		}
+
 		// All other dimensions - Start out by making a tree copy
 		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, mbrNames, mdbDef);
 		PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);
@@ -856,15 +893,16 @@ public class PafDataService {
 			rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree()); 
 			timeChildMbrs = timeRoot.getChildren();
 		} else {
-			// There is a time horizon node for each combination of level 0 year member and
-			// all time members, plus the time horizon tree root node.
+			// There time horizon tree contains a node for each combination of year and time 
+			// period, plus the root node which is comprised of the root of the year tree 
+			// and the root of the time tree. 
 			rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree() + 1); 
 			timeChildMbrs = new ArrayList<PafDimMember>(Arrays.asList(new PafDimMember[]{timeRoot}));
 		}
 		PafDimTree timeHorizonTree = new PafBaseTree(root, new String[]{PafBaseConstants.ESS_DEF_ALIAS_TABLE});
 		
 		
-		// Build out the time horizon tree
+		// Build out the rest of the time horizon tree
 		for (PafDimMember yearMember : yearMembers) {
 			// Add child members
 			addTimeHorizonChildren(timeHorizonTree, root, yearMember, timeChildMbrs);

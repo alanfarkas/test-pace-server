@@ -78,6 +78,8 @@
       <string>Fall - Plan - 2007</string>
       <string>Spring - Forecast - 2006</string>
       <string>Fall - Forecast - 2006</string>
+      <string>Plan - 2006-2007</string>
+      <string>Forecast - 2005-2007</string>
     </seasonIds>
     <readOnly>false</readOnly>
   </PlannerRole>

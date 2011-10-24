@@ -168,7 +168,7 @@ public class PafBaseMember extends PafDimMember implements Cloneable {
 		
 		// Clone member properties
 		if (getMemberProps() != null) {
-			setMemberProps((PafBaseMemberProps) getMemberProps().clone());
+			baseMember.setMemberProps((PafBaseMemberProps) getMemberProps().clone());
 		}
 		
 		// Return base member clone

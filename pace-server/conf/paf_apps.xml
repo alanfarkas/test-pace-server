@@ -143,6 +143,16 @@
           </years>
           <timePeriod>@IDESCENDENTS(S02)</timePeriod>
         </Season>
+         <Season>
+          <id>Plan - 2006-2007</id>
+          <isOpen>true</isOpen>
+          <planCycle>Plan</planCycle>
+          <years>
+          	<string>FY2006</string>
+          	<string>FY2007</string>
+          </years>
+          <timePeriod>@IDESCENDENTS(Time)</timePeriod>
+        </Season>
         <Season>
           <id>Spring - Forecast - 2006</id>
           <isOpen>true</isOpen>
@@ -160,6 +170,17 @@
           	<string>FY2006</string>
           </years>
           <timePeriod>@IDESCENDENTS(S02)</timePeriod>
+        </Season>
+        <Season>
+          <id>Forecast - 2005-2007</id>
+          <isOpen>true</isOpen>
+          <planCycle>Forecast</planCycle>
+          <years>
+          	<string>FY2005</string>
+         	<string>FY2006</string>
+         	<string>FY2007</string>
+          </years>
+          <timePeriod>@IDESCENDENTS(Time)</timePeriod>
         </Season>
         <Season>
           <id>Spring - Plan - 2007</id>
