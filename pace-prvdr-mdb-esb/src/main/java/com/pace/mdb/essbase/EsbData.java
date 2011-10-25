@@ -256,6 +256,7 @@ public class EsbData implements IMdbData{
 			// Construct MDX select statement that will extract data for selected version,
 			// suppressing misssing intersection rows
 			String mdxSelect = buildMdxSelect(filteredMemberMap, dataCache, true);
+			if (mdxSelect == null) continue;	// Null query indicates that no data can be loaded for this version
 			String mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
 
 			// Update data cache with Essbase data for selected version
@@ -423,11 +424,17 @@ public class EsbData implements IMdbData{
 			// Filter out any virtual root members, if data cache was passed in (TTN-1595)
 			if (dataCache != null) {
 				List<String> origMemberList = dimMembers.get(axis);
-				memberList = new ArrayList<String>(origMemberList);
 				String dim = dataCache.getDimension(axis);
 				PafDimMember root = dataCache.getDimTrees().getTree(dim).getRootNode();
 				if (root.getMemberProps().isVirtual()) {
+					memberList = new ArrayList<String>(origMemberList);
 					memberList.remove(root.getKey());
+					if (memberList.size() == 0) {
+						// No members selected in axis - can't build query
+						return null;
+					}
+				} else {
+					memberList = origMemberList;
 				}
 			} else {
 				memberList = dimMembers.get(axis);	
