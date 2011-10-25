@@ -84,11 +84,20 @@ public class TimeSlice {
 	
 	
 	/**
-	 * Return the time horizon coordinate
+	 * Return the time horizon year coordinate
 	 * 
-	 * @return the time horizon coordinate
+	 * @return the time horizon year coordinate
 	 */
-	public String getTimeHorizonCoord() {
+	public String getTimeHorizonYear() {
+		return PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR;
+	}
+	
+	/**
+	 * Return the time horizon period coordinate
+	 * 
+	 * @return the time horizon period coordinate
+	 */
+	public String getTimeHorizonPeriod() {
 		return buildTimeHorizonCoord(period, year);
 	}
 	
@@ -147,7 +156,7 @@ public class TimeSlice {
 	 */
 	@Override
 	public String toString() {
-		return getTimeHorizonCoord();
+		return getTimeHorizonPeriod();
 	}
 	
 

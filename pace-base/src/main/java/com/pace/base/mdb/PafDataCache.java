@@ -1130,16 +1130,27 @@ public class PafDataCache implements IPafDataCache {
 	 * @return Cell intersection
 	 */
 
-	public Intersection getNextIntersection(Intersection cellIs, String offsetDim, int offset, boolean bWrap) {
+	public Intersection getNextIntersection(final Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
 	
-		Intersection nextIs = null;
-		PafDimTree offsetTree = getDimTrees().getTree(offsetDim);
-		String currMbr = cellIs.getCoordinate(offsetDim);
+		Intersection translatedIs = null, nextIs = null;
+		PafDimTree offsetTree = null;
+		
+		// if time dimension is selected, use time horizon dimension for search
+		if (offsetDim.equals(getTimeDim())) {
+			offsetTree = getDimTrees().getTree(getTimeHorizonDim());
+			translatedIs = translateTimeYearIs(cellIs);
+		} else {
+			offsetTree = getDimTrees().getTree(offsetDim);
+			translatedIs = cellIs;
+		}
+		
+		String currMbr = translatedIs.getCoordinate(offsetDim);
 		PafDimMember nextMbr = offsetTree.getPeer(currMbr, offset, bWrap);
 		
 		if (nextMbr != null) {
-			nextIs = cellIs.clone();
+			nextIs = translatedIs.clone();
 			nextIs.setCoordinate(offsetDim, nextMbr.getKey());
+			nextIs = translateTimeHorizonIs(nextIs);
 		}
 		
 		return nextIs;
@@ -1990,6 +2001,33 @@ public class PafDataCache implements IPafDataCache {
 			translatedIs = cellIs.clone();
 			translatedIs.setCoordinate(getTimeDim(), timeSlice.getPeriod());
 			translatedIs.setCoordinate(getYearDim(), timeSlice.getYear());
+		} else {
+			translatedIs = cellIs;
+		}
+		return translatedIs;
+	}
+
+	/**
+	 * Translates a cell intersection based on a time and year coordinate to one
+	 * that is based on a time horizon coordinate.
+	 * 
+	 * If a time horizon coordinate is not found, then the original intersection 
+	 * is returned.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @return Translated intersection
+	 */
+	protected Intersection translateTimeYearIs(final Intersection cellIs) {
+		
+		Intersection translatedIs = null;
+		
+		// If this is a time-year intersection, translate it to a time horizon
+		// intersection, else return the original intersection.
+		if (!isTimeHorizonIs(cellIs)) {
+			TimeSlice timeSlice = new TimeSlice(cellIs.getCoordinate(getTimeDim()), cellIs.getCoordinate(getYearDim()));
+			translatedIs = cellIs.clone();
+			translatedIs.setCoordinate(getTimeDim(), timeSlice.getTimeHorizonPeriod());
+			translatedIs.setCoordinate(getYearDim(), timeSlice.getTimeHorizonYear());
 		} else {
 			translatedIs = cellIs;
 		}

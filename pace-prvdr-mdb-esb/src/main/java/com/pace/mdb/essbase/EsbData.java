@@ -256,7 +256,14 @@ public class EsbData implements IMdbData{
 			// Construct MDX select statement that will extract data for selected version,
 			// suppressing misssing intersection rows
 			String mdxSelect = buildMdxSelect(filteredMemberMap, dataCache, true);
-			if (mdxSelect == null) continue;	// Null query indicates that no data can be loaded for this version
+			if (mdxSelect == null) {
+				// Null query indicates that after futher member filtering, no queried 
+				// members remained in one or more axes.
+				logMsg = "UpdateDataCache() - all requested data is already loaded - no data update is required";
+				logger.info(logMsg);
+				performanceLogger.info(logMsg);
+				continue;	
+			}
 			String mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
 
 			// Update data cache with Essbase data for selected version
