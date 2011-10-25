@@ -10,11 +10,15 @@
 
  <!-- one or more jaxws:endpoint POJO declarations -->
  <jaxws:endpoint
- id="PaceAppService"
- address="http://localhost:8080/pace"  
- implementor="com.pace.server.PafServiceProvider">
+ 	id="PaceAppService"
+ 	address="http://localhost:8080/pace/PafService"  
+ 	implementor="com.pace.server.PafServiceProvider">
  <jaxws:invoker>
- <bean class="org.jboss.wsf.stack.cxf.InvokerJSE"/>
+ 	<bean class="org.jboss.wsf.stack.cxf.InvokerJSE"/>
  </jaxws:invoker>
+        <jaxws:properties>
+			<entry key="javax.xml.ws.session.maintain"> <value type="java.lang.Boolean">true</value> </entry>
+			<entry key="thread.local.request.context"> <value type="java.lang.Boolean">true</value> </entry>
+    	</jaxws:properties>
  </jaxws:endpoint>
 </beans>
