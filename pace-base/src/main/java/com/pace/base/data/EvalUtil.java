@@ -657,6 +657,8 @@ public class EvalUtil {
 	    MemberTreeSet mts = evalState.getClientState().getUowTrees();
 	    String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
 	    String timeDim = evalState.getAppDef().getMdbDef().getTimeDim(); 
+	    String yearDim = evalState.getAppDef().getMdbDef().getYearDim(); 
+	    PafDataCache dataCache = evalState.getDataCache();
 	    PafDimTree tree;
 	    List<PafDimMember> desc = null;
 	    Map<String, List<String>> memberListMap = new HashMap<String, List<String>>();
@@ -680,6 +682,15 @@ public class EvalUtil {
 	    		continue;
 	    	}
 	
+	    	// Year dimension - if time horizon intersection, just return
+	    	// member since the year hierarchy does not apply. If not 
+	    	// time horizon intersection, just go through normal logic.
+	    	if (dim.equals(yearDim) && dataCache.isTimeHorizonIs(is)) {
+	    		memberList = Arrays.asList(new String[]{is.getCoordinate(dim)});
+	    		memberListMap.put(dim, memberList);
+	    		continue;
+	    	}
+	    	
 	    	// Just add the lowest members under branch. This tree method will 
 	    	// return the member itself if it has no children.
 	    	tree = mts.getTree(dim);
@@ -712,7 +723,8 @@ public class EvalUtil {
 		TimeBalance tb = TimeBalance.None;
 		List<PafDimMember> desc = null;
 		List<String> memberList = new ArrayList<String>();
-	
+		PafDataCache dataCache = evalState.getDataCache();
+		
 		// Initialize time balance attribute for the measure in the intersection.
 		MeasureDef msr = evalState.getAppDef().getMeasureDef(is.getCoordinate(msrDim));                
 		if (msr == null || msr.getType() != MeasureType.Recalc ) { 
@@ -730,8 +742,13 @@ public class EvalUtil {
 	
 	
 		// get lowest time members under branch. This tree method will return the member
-		// itself if it has no children.
-		timeTree = mts.getTree(timeDim);
+		// itself if it has no children. use time horizon tree if this is a time horizon
+		// intersection.
+		if (!dataCache.isTimeHorizonIs(is)) {
+			timeTree = mts.getTree(timeDim);
+		} else {
+			timeTree = mts.getTree(dataCache.getTimeHorizonDim());			
+		}
 		desc = timeTree.getLowestMembers(is.getCoordinate(timeDim));
 	
 		// the time dimension floor members vary by time balance attribute of the

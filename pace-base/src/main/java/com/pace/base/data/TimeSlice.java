@@ -88,7 +88,7 @@ public class TimeSlice {
 	 * 
 	 * @return the time horizon year coordinate
 	 */
-	public String getTimeHorizonYear() {
+	static public String getTimeHorizonYear() {
 		return PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR;
 	}
 	

@@ -1135,7 +1135,7 @@ public class PafDataCache implements IPafDataCache {
 		Intersection translatedIs = null, nextIs = null;
 		PafDimTree offsetTree = null;
 		
-		// if time dimension is selected, use time horizon dimension for search
+		// If time dimension is selected, use time horizon dimension for search
 		if (offsetDim.equals(getTimeDim())) {
 			offsetTree = getDimTrees().getTree(getTimeHorizonDim());
 			translatedIs = translateTimeYearIs(cellIs);
@@ -1296,10 +1296,9 @@ public class PafDataCache implements IPafDataCache {
 		String cumMember;
 		PafDimTree cumTree;
 		if (cumDim.equals(getTimeDim())) {
-			// Use time horizon dimension whenever the time dimension is specified
-			cumTree = getDimTrees().getTree(cumDim);
-//			cumMember = buildTimeHorizonMember(cellIs);
-			cumMember = cellIs.getCoordinate(cumDim);
+			// Use time horizon tree whenever the time dimension is specified
+			cumTree = getDimTrees().getTree(getTimeHorizonDim());
+			cumMember = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(cumDim), cellIs.getCoordinate(getYearDim()));
 		} else {
 			cumTree = getDimTrees().getTree(cumDim);			
 			cumMember = cellIs.getCoordinate(cumDim);
@@ -1311,12 +1310,6 @@ public class PafDataCache implements IPafDataCache {
 	}
 	
 		
-	private String buildTimeHorizonMember(Intersection cellIs) {
-		String member = cellIs.getCoordinate(getYearDim()) + PafBaseConstants.TIME_HORIZON_MBR_DELIM + cellIs.getCoordinate(getTimeDim());
-		return member;
-	}
-
-
 	/**
 	 * Returns the cumulative total of specified intersection along the time dimension
 	 * 
@@ -1372,39 +1365,33 @@ public class PafDataCache implements IPafDataCache {
 		// offset points to a location before the first member in the 
 		// dimension.
 		if (lastIs != null) {
-			// Get the list of members to accumulate 
-			String lastMbr = lastIs.getCoordinate(cumDim);
-			PafDimTree cumTree = getDimTrees().getTree(cumDim);
+			// Get the list of members to accumulate. If time dimension is selected, use time 
+			// horizon dimension for search. 
+			PafDimTree cumTree;
+			Intersection translatedIs;
+			if (cumDim.equals(getTimeDim())) {
+				cumTree = getDimTrees().getTree(getTimeHorizonDim());
+				translatedIs = translateTimeYearIs(lastIs);
+			} else {
+				cumTree = getDimTrees().getTree(cumDim);
+				translatedIs = lastIs;
+			}
+
+			// Get all leading peers
+			String lastMbr = translatedIs.getCoordinate(cumDim);
 			cumMembers = cumTree.getILPeers(lastMbr);
 
 			// Accumulate the values for all intersections up through the specified offset
 			// position. To account for any cell changes that haven't yet been aggregated 
 			// (ex. perpertual inventory process), we aggregate at the floor level.
-			Intersection tempIs = lastIs.clone();
+			Intersection tempIs = translatedIs.clone();
 			for (PafDimMember member : cumMembers) {
 				tempIs.setCoordinate(cumDim, member.getKey());
 				result += EvalUtil.sumFloorIntersections(tempIs, evalState);
 			}	
 		}
-
+		
 		return result;
-	}
-
-
-	/**
-	 * Returns each intersections's member coordinate, for the specified dimension, of members  coordinates of the left peers of the specified intersection, along the specified dimension,
-	 * up through the nth previous intersection
-	 * 
-	 * @param cellIs Cell intersection
-	 * @param cumDim Dimension being accumulated
-	 * @param offset Specifies a relative position, along the cum dimension, that will be used to retrieve the desired intersection
-	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the dimension tree
-	 * 
-	 * @return Cell value
-	 */	
-	public List<String> getCumMembers(Intersection cellIs, String cumDim, int offset, boolean bWrap) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 
