@@ -3,6 +3,7 @@
 
 	<property name="proj_root" location="${basedir}" />
 	<property name="wrksp_root" location="${proj_root}\.."/>	
+	<property name="admin_wrksp_root" location="${proj_root}\.." />
 	<property name="proj_wrksp" location="${wrksp_root}\.."/>
 
 	<property name="client_dir" location="${proj_root}\client" />	
@@ -13,8 +14,8 @@
 	<property name="proj_pafbase" location="${wrksp_root}\pace-base" />
 	<property name="esb_deployed_class_path"  location="${dev_web}\WEB-INF\classes\com\pace\mdb\essbase" />
 
-	<property name="web_service_client_plugin" location="${wrksp_root}\com.palladium.paf.adminconsole.webservicesclient" />
-	<property name="extra_jars_plugin" location="${wrksp_root}\com.palladium.paf.adminconsole.extrajars" />	
+	<property name="web_service_client_plugin" location="${admin_wrksp_root}\com.pace.admin.webservicesclient" />
+	<property name="extra_jars_plugin" location="${admin_wrksp_root}\com.pace.admin.extrajars" />	
 	
 	<property name="install_stg_root"  location="${proj_wrksp}\pace-server-installs\ia-project\server-stage" />
 	<property name="install_war"  location="${install_stg_root}\server\server\default\deploy\pace.war" />
@@ -212,10 +213,10 @@
 		
 		<echo>"Making jar"</echo>		
 		<mkdir dir="${client_dir}\dist"/>
-		<jar jarfile="${client_dir}\dist\paf_client.jar" basedir="${client_dir}\classes" excludes="*.java" />
+		<jar jarfile="${client_dir}\dist\pace-client.jar" basedir="${client_dir}\classes" excludes="*.java" />
 	
-		<copy file="${client_dir}\dist\paf_client.jar" todir="${web_service_client_plugin}\lib" />
-		<copy file="${local_web}\WEB-INF\lib\paf_base.jar" todir="${extra_jars_plugin}\lib" />
+		<copy file="${client_dir}\dist\pace-client.jar" todir="${web_service_client_plugin}\lib" />
+		<copy file="${client_dir}\dist\pace-base.jar" todir="${extra_jars_plugin}\lib" />
 		
 	</target>	
 
