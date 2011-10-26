@@ -217,6 +217,11 @@ public abstract class PafDataCacheCalc {
 		// so that all children are calculated before their parents.
 		logger.debug("Getting list of members to aggregate");
 		aggMembers = memberTree.getMemberNames(TreeTraversalOrder.POST_ORDER, 1);
+		
+		// TTN-1595 - Time aggregation, don't aggregate root
+		if (isTimeAggregation) {
+			aggMembers.remove(memberTree.getRootNode());
+		}
 
 		// Modify the aggregation filter so that it can be used to generate all
 		// the cell intersections that need to be included in the aggregation

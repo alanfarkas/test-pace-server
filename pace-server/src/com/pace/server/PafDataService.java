@@ -868,12 +868,14 @@ public class PafDataService {
 		// that cross year boundaries.
 		
 		// Create the time horizon tree. The name of the root node will be a combination of
-		// the root of the year tree and the root of the time tree.
+		// the root of the year tree and the root of the time tree. Mark the new root as
+		// synthetic if either the time root or the year root are synthetic.
 		PafBaseMemberProps rootProps = new PafBaseMemberProps();
 		String rootName = TimeSlice.buildTimeHorizonCoord(timeRoot.getKey(), yearRoot.getKey());
 		PafBaseMember root = new PafBaseMember(rootName, rootProps);		
 		rootProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, root.getKey());
 		rootProps.setGenerationNumber(1);
+		rootProps.setVirtual(yearRoot.getMemberProps().isVirtual() || yearRoot.getMemberProps().isVirtual());
 		
 		// The is some differing logic depending on whether the is just a single year in the UOW
 		// or multiple years, represented by a year tree with a virtual node whose children are 
@@ -887,7 +889,9 @@ public class PafDataService {
 			// There time horizon tree contains a node for each combination of year and time 
 			// period, plus the root node which is comprised of the root of the year tree 
 			// and the root of the time tree. 
+			// Since the root of the year tree is synthetic
 			rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree() + 1); 
+			rootProps.setVirtual(true);
 			timeChildMbrs = new ArrayList<PafDimMember>(Arrays.asList(new PafDimMember[]{timeRoot}));
 		}
 		PafDimTree timeHorizonTree = new PafBaseTree(root, new String[]{PafBaseConstants.ESS_DEF_ALIAS_TABLE});
@@ -2585,6 +2589,12 @@ public class PafDataService {
 		if (term.contains("@")) {
 			ExpOperation expOp = new ExpOperation(term);
 			String [] expTerms = resolveExpOperation(expOp, viewTuple.getParentFirst(), dim, clientState);
+			// Special year dimension logic for view rendering - if no children are found then 
+			// use specified member. This will allow @CHILD(@UOWROOT(Year)) to work in both a
+			// single year and multiple-year UOW. (TTN-1595)
+			if (expTerms.length == 0 && dim.equals(clientState.getApp().getMdbDef().getYearDim())) {
+				expTerms = new String[]{expOp.getParms()[0]};
+			}
 			for (String expTerm : expTerms) {
 				ViewTuple vt = viewTuple.clone();
 				vt.getMemberDefs()[axisIndex] = expTerm;

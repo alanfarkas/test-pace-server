@@ -35,10 +35,12 @@ import com.pace.base.app.MeasureType;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataCacheCalc;
 import com.pace.base.mdb.PafDataCacheCell;
+import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
@@ -68,6 +70,7 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 		PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
 		String measureDim = dataCache.getMeasureDim();
 		String timeDim = dataCache.getTimeDim();
+		String timeHorizonDim = dataCache.getTimeHorizonDim();
 		String versionDim = dataCache.getVersionDim();
 		String yearDim = dataCache.getYearDim();
 
@@ -104,13 +107,18 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             aggFilter.put(measureDim, mbrs);
             
             //
-            // Force aggregation to use the time horizon members. Add time horizon periods to time
-            // filter, and set year to time horizon default since year is embedded in each time 
-            // horizon period (TTN-1595).
+            // TTN-1595 - Force aggregation to use the time horizon members. Add time horizon 
+            // open periods to time filter, but remove top node since it is virtual. Also set year 
+            // to time horizon default, since year is embedded in each time horizon period ().
             //
             List<String> openTimeHorizonPeriods = dataCache.getOpenTimeHorizonPeriods();
+            PafDimTree timeHorizonTree = dataCache.getDimTrees().getTree(timeHorizonDim);
+            PafDimMember timeHorizonRoot = timeHorizonTree.getRootNode();
+            if (timeHorizonRoot.getMemberProps().isVirtual()) {
+                openTimeHorizonPeriods.remove(timeHorizonRoot.getKey());            	
+            }
             aggFilter.put(timeDim, openTimeHorizonPeriods);
-            aggFilter.put(yearDim, Arrays.asList(new String[]{PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR}));
+            aggFilter.put(yearDim, Arrays.asList(TimeSlice.getTimeHorizonYear()));
             
             
             // During a default evaluation process, a version filter is created

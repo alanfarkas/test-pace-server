@@ -790,8 +790,8 @@ public class EvalUtil {
 		PafViewSection viewSection = dataCache.getPafMVS().getViewSection();
 		Map <String, List<String>> memberFilters = new HashMap<String, List<String>>();
 	    TimeBalance tb = TimeBalance.None;
-	
-		// Initialize time balance attribute for the measure in the dsCache intersection
+
+	    // Initialize time balance attribute for the measure in the dsCache intersection
 		MeasureDef measureDef = dataCache.getMeasureDef(attrIs.getCoordinate(dataCache.getMeasureDim()));                
 		if (measureDef == null || measureDef.getType() != MeasureType.Recalc ) { 
 			if (measureDef ==null)
@@ -814,11 +814,11 @@ public class EvalUtil {
 		Set<String> viewAttributes = new HashSet<String>(Arrays.asList(viewSection.getAttributeDims()));
 		for (int axisInx = 0; axisInx < baseDimCount; axisInx++) {
 	
-			// Get current base tree and current base member
+			// Get current base member and tree
 			String baseDimension = baseDimensions[axisInx];
-			PafBaseTree pafBaseTree = (PafBaseTree) memberTrees.getTree(baseDimension);
+			PafBaseTree pafBaseTree = memberTrees.getBaseTree(baseDimension);
 			String baseMember = attrIs.getCoordinate(baseDimension);
-	
+			
 			// Get associated attribute dim names
 			Set<String> assocAttributes = new HashSet<String>();
 			assocAttributes.addAll(pafBaseTree.getAttributeDimNames());

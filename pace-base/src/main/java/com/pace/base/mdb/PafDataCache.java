@@ -608,19 +608,23 @@ public class PafDataCache implements IPafDataCache {
 	public List<String> getOpenTimeHorizonPeriods() {
 
 		List<String> openPeriods = new ArrayList<String>();
-
-		// Add in the open time horizon periods for each year
-		String[] years = getAxisMembers(getAxisIndex(getYearDim()));
-		for (String year : years) {
-			openPeriods.addAll(getOpenTimeHorizonPeriods(getPlanVersions()[0], year));
+		PafDimTree timeHorizonTree = getDimTrees().getTree(getTimeHorizonDim());
+		PafDimTree yearTree = getDimTrees().getTree(getYearDim());
+		
+		// Add in the open time horizon periods for each level 0 year
+		List<PafDimMember> yearMbrs = yearTree.getLowestLevelMembers();
+		for (PafDimMember yearMbr : yearMbrs) {
+			openPeriods.addAll(getOpenTimeHorizonPeriods(getPlanVersions()[0], yearMbr.getKey()));
 		}
 
+		// For now, in a multi-year uow, the top node is to be locked, due to 
+		// allocation complexities.
 		// Add the root node of the time horizon tree to the list of open
 		// periods, if there are more than one years.
-		if (years.length > 1 && !openPeriods.isEmpty()) {
-			PafDimMember root = getDimTrees().getTree(getTimeHorizonDim()).getRootNode();
-			openPeriods.add(root.getKey());
-		}
+//		if (yearMbrs.size() > 1 && !openPeriods.isEmpty()) {
+//			PafDimMember root = timeHorizonTree.getRootNode();
+//			openPeriods.add(root.getKey());
+//		}
 
 		return openPeriods;
 		
@@ -642,9 +646,14 @@ public class PafDataCache implements IPafDataCache {
 		List<String> openPeriods = getOpenPeriods(version, year);
 		
 		// Convert to time horizon periods
+		PafDimTree timeHorizonTree = getDimTrees().getTree(getTimeHorizonDim());
 		List<String> openTimeHorizonPeriods = new ArrayList<String>(openPeriods.size());
 		for (String period : openPeriods) {
-			openTimeHorizonPeriods.add(TimeSlice.buildTimeHorizonCoord(period, year));
+			String timeHorizonPeriod = TimeSlice.buildTimeHorizonCoord(period, year);
+			// Validate against time horizon tree
+			if (timeHorizonTree.hasMember(timeHorizonPeriod)) {
+				openTimeHorizonPeriods.add(TimeSlice.buildTimeHorizonCoord(period, year));
+			}
 		}
 		
 		return openTimeHorizonPeriods;
@@ -1387,7 +1396,7 @@ public class PafDataCache implements IPafDataCache {
 			Intersection tempIs = translatedIs.clone();
 			for (PafDimMember member : cumMembers) {
 				tempIs.setCoordinate(cumDim, member.getKey());
-				result += EvalUtil.sumFloorIntersections(tempIs, evalState);
+				result += EvalUtil.sumFloorIntersections(translateTimeHorizonIs(tempIs), evalState);
 			}	
 		}
 		
