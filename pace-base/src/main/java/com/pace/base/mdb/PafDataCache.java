@@ -1987,20 +1987,20 @@ public class PafDataCache implements IPafDataCache {
 	 * @return Translated intersection
 	 */
 	protected Intersection translateTimeHorizonIs(final Intersection cellIs) {
-		
-		Intersection translatedIs = null;
-		
-		// If this is a time horizon intersection, translate it to a time-year
-		// intersection, else return the original intersection.
-		if (isTimeHorizonIs(cellIs)) {
-			TimeSlice timeSlice = new TimeSlice(cellIs.getCoordinate(getTimeDim()));
-			translatedIs = cellIs.clone();
-			translatedIs.setCoordinate(getTimeDim(), timeSlice.getPeriod());
-			translatedIs.setCoordinate(getYearDim(), timeSlice.getYear());
-		} else {
-			translatedIs = cellIs;
-		}
-		return translatedIs;
+	return cellIs;	
+//		Intersection translatedIs = null;
+//		
+//		// If this is a time horizon intersection, translate it to a time-year
+//		// intersection, else return the original intersection.
+//		if (isTimeHorizonIs(cellIs)) {
+//			TimeSlice timeSlice = new TimeSlice(cellIs.getCoordinate(getTimeDim()));
+//			translatedIs = cellIs.clone();
+//			translatedIs.setCoordinate(getTimeDim(), timeSlice.getPeriod());
+//			translatedIs.setCoordinate(getYearDim(), timeSlice.getYear());
+//		} else {
+//			translatedIs = cellIs;
+//		}
+//		return translatedIs;
 	}
 
 	/**
@@ -2014,20 +2014,20 @@ public class PafDataCache implements IPafDataCache {
 	 * @return Translated intersection
 	 */
 	protected Intersection translateTimeYearIs(final Intersection cellIs) {
-		
-		Intersection translatedIs = null;
-		
-		// If this is a time-year intersection, translate it to a time horizon
-		// intersection, else return the original intersection.
-		if (!isTimeHorizonIs(cellIs)) {
-			TimeSlice timeSlice = new TimeSlice(cellIs.getCoordinate(getTimeDim()), cellIs.getCoordinate(getYearDim()));
-			translatedIs = cellIs.clone();
-			translatedIs.setCoordinate(getTimeDim(), timeSlice.getTimeHorizonPeriod());
-			translatedIs.setCoordinate(getYearDim(), timeSlice.getTimeHorizonYear());
-		} else {
-			translatedIs = cellIs;
-		}
-		return translatedIs;
+		return cellIs;
+//		Intersection translatedIs = null;
+//		
+//		// If this is a time-year intersection, translate it to a time horizon
+//		// intersection, else return the original intersection.
+//		if (!isTimeHorizonIs(cellIs)) {
+//			TimeSlice timeSlice = new TimeSlice(cellIs.getCoordinate(getTimeDim()), cellIs.getCoordinate(getYearDim()));
+//			translatedIs = cellIs.clone();
+//			translatedIs.setCoordinate(getTimeDim(), timeSlice.getTimeHorizonPeriod());
+//			translatedIs.setCoordinate(getYearDim(), TimeSlice.getTimeHorizonYear());
+//		} else {
+//			translatedIs = cellIs;
+//		}
+//		return translatedIs;
 	}
 
 
@@ -2358,7 +2358,8 @@ public class PafDataCache implements IPafDataCache {
 	 * @return Name of the Time Horizon dimension
 	 */
 	public String getTimeHorizonDim() {
-		return PafBaseConstants.TIME_HORIZON_DIM;
+//		return PafBaseConstants.TIME_HORIZON_DIM;
+		return getTimeDim();
 	}
 
 	/**

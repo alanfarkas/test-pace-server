@@ -110,7 +110,8 @@ public class TimeSlice {
 	 * @return Time horizon coordinate
 	 */
 	static public String buildTimeHorizonCoord(String period, String year) {
-		return year + PafBaseConstants.TIME_HORIZON_MBR_DELIM + period;
+		return period;
+//		return year + PafBaseConstants.TIME_HORIZON_MBR_DELIM + period;
 	}
 	
 	
