@@ -43,7 +43,7 @@
 		<property name="pafSecurityBootupPassword" value="xIdk82723Sdfke83" />				
 		<property name="enableServerPasswordReset" value="false" />		
 		<property name="enableClientPasswordReset" value="false" />	
-		<property name="autoConvertProject" value="true" />
+		<property name="autoConvertProject" value="false" />
 		<property name="autoLoadAttributes" value="true" />
 		<property name="clearCellNotes" value="false" />
 		<property name="clearAllCellNotes" value="false" />
