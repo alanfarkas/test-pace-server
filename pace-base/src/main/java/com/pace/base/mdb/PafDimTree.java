@@ -950,8 +950,11 @@ public abstract class PafDimTree {
 		List<PafDimMember> peers = getIPeers(memberName);
        
         // Prune list down to just those that come before specified member
+		List<PafDimMember> LPeers = new ArrayList<PafDimMember>();
 		int memberIndex = peers.indexOf(getMember(memberName));
-		List<PafDimMember> LPeers = peers.subList(0, memberIndex);
+		for (int i = 0; i < memberIndex; i++) {
+			LPeers.add(peers.get(i));
+		}
 		return LPeers;
 	}
 
@@ -1054,9 +1057,11 @@ public abstract class PafDimTree {
 		List<PafDimMember> peers = getIPeers(memberName);
         
         // Prune list down to just those that come after specified member
-		int memberIndex = peers.indexOf(getMember(memberName));
 		List<PafDimMember> RPeers = new ArrayList<PafDimMember>();
-		RPeers = peers.subList(memberIndex +1, peers.size());
+		int memberIndex = peers.indexOf(getMember(memberName));
+		for (int i = memberIndex + 1; i < peers.size(); i++) {
+			RPeers.add(peers.get(i));
+		}
 		return RPeers;
 	}
 
