@@ -79,11 +79,50 @@ public class F_PrevCum extends AbstractFunction {
 		dataIs.setCoordinate( msrDim, this.getMeasureName() );
 		        
         // accumulate values
-        double result  = dataCache.getCumTotal(dataIs, offsetDim, offset);
+//        double result  = dataCache.getCumTotal(dataIs, offsetDim, offset);
+
+    	// get all members at the current level of the current intersection
+
+    	PafDimMember curMbr = offsetTree.getMember(dataIs.getCoordinate(offsetDim));
+        List<PafDimMember> peers = offsetTree.getMembersAtLevel(offsetTree.getRootNode().getKey(), (short) curMbr.getMemberProps().getLevelNumber());
+        
+        // calculate which member to stop accumulation on, by default -1 and contained on the offset variable
+        // peers need to be in order
+        
+        // accumulator
+    	double result = 0;        
+        
+    	// fastest approach and default case presumes offset 1
+        if (offset == 1) {
+        	// add all previous values until offset member is reached
+        	for (PafDimMember peer : peers) {
+        		if (peer.getKey().equals(curMbr.getKey())) 
+        			break;
+        		dataIs.setCoordinate(offsetDim, peer.getKey());
+        		result += sumLevel0Desc(dataIs, evalState, dataCache);
+        	}
+        } else {
+        	// incur overhead for more complex case, being a list this search is unfortunately O(n).
+        	// find index of current member in list
+    		int i = peers.indexOf(curMbr);
+    		int stopIndex = i - offset;
+    		int index = 0;
+        	while  (index <= stopIndex) {
+        		dataIs.setCoordinate(offsetDim, peers.get(index).getKey());
+        		result += sumLevel0Desc(dataIs, evalState, dataCache);        		
+        	}
+        }
 
         return result;
     }
     
+    private double sumLevel0Desc(Intersection dataIs, IPafEvalState evalState, IPafDataCache dataCache) throws PafException {
+		List<Intersection>floorIs = EvalUtil.buildFloorIntersections(dataIs, evalState);
+		double sum = 0;
+		for (Intersection is : floorIs) 
+			sum+= dataCache.getCellValue(is);
+		return sum;
+	}
     /**
      *  Parse and validate function parameters 
      *

@@ -71,7 +71,17 @@ public class F_Next extends AbstractFunction {
     	}
     	  	
     	try {
-    		result = dataCache.getNextCellValue(dataIs, offsetDim, offset);
+//    		result = dataCache.getNextCellValue(dataIs, offsetDim, offset);
+    		
+			String curMbrName = sourceIs.getCoordinate(offsetDim);
+			PafDimMember nextMbr = offsetTree.getPeer(curMbrName, offset);
+			
+			if (nextMbr == null)
+				result = 0;
+			else {
+				dataIs.setCoordinate(offsetDim, nextMbr.getKey());
+				result = dataCache.getCellValue(dataIs);
+			}
 
     	} catch (RuntimeException e) {
 			
