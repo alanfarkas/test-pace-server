@@ -2927,6 +2927,54 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		return resp;
 	}
 	
+	/**
+	 * Return the valid list of attribute members and rollups
+	 * in light of selections on the related base dimension
+	 * and any other related attribute members.
+	 *
+	 * @param attrRequest Valid attribute request object
+	 * @return PafValidAttrResponse Valid attribute response object
+	 * @throws RemoteException the remote exception
+	 * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
+	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
+	 * @throws PafSoapException the paf soap exception
+	 */
+	public PafValidAttrResponse getValidAttributeMembers(PafValidAttrRequestNew attrRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
+		
+		PafValidAttrResponse resp = new PafValidAttrResponse();
+		boolean success = false;
+		try
+		{
+			if(isAuthorized(attrRequest.getClientId(), false)){
+				
+				//Set logger client info property to user name
+				pushToNDCStack(attrRequest.getClientId());
+
+				// Get valid attributes
+				Set<String> validAttrSet = new HashSet<String>();
+				String[] selBaseMembers = attrRequest.getSelBaseMembers();
+				for (int i = 0; i < selBaseMembers.length; i++) {
+					String baseMember = selBaseMembers[i];
+					String[] attrMembers = AttributeUtil.getValidAttributeMembers(attrRequest.getReqAttrDim(),
+							attrRequest.getSelBaseDim(), baseMember, attrRequest.getSelAttrSpecs(),
+							dataService.getAllDimTrees());
+					validAttrSet.addAll(Arrays.asList(attrMembers));
+				}
+				resp.setMembers(validAttrSet.toArray(new String[0]));
+				success = true;
+			}
+			
+		}catch (RuntimeException re) {
+			handleRuntimeException(re);
+		}finally{
+			// Pop logger client id from stack and format response object
+			popFromNDCStack(attrRequest.getClientId());
+			resp.setSuccess(success);
+		}
+		
+		return resp;
+	}
+	
 	
 	/**
 	 * Provides the PafSimpleTrees to the client.
