@@ -70,7 +70,7 @@ public class F_Next extends AbstractFunction {
     	}
     	  	
     	try {
-    		dataCache.shiftIntersection(dataIs, offsetDim, offset);
+    		dataIs = dataCache.shiftIntersection(dataIs, offsetDim, offset);
     		if (dataIs != null) {
     			result = dataCache.getCellValue(dataIs);
     		}

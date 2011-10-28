@@ -1153,8 +1153,8 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @param cellIs Cell intersection
 	 */
-	public void shiftIntersection(Intersection cellIs) {
-		shiftIntersection(cellIs, getTimeDim(), 1);		
+	public Intersection shiftIntersection(Intersection cellIs) {
+		return shiftIntersection(cellIs, getTimeDim(), 1);		
 	}
 
 	/**
@@ -1169,24 +1169,26 @@ public class PafDataCache implements IPafDataCache {
 	 * @param offsetDim Offset dimension
 	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
 	 */
-	public void shiftIntersection(Intersection cellIs, final String offsetDim, final int offset) {
-		shiftIntersection(cellIs, offsetDim, offset, false);		
+	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset) {
+		return shiftIntersection(cellIs, offsetDim, offset, false);		
 	}
 
 	/**
 	 * Shift the specified intersection to the next cell intersection along the specified
 	 * offset dimension. A backwards shift will be performed if a negative offset is 
-	 * supplied.
+	 * supplied. 
 	 * 
-	 * The intersection will be set to a null value will be returned if 
-	 * the offset points to an out of bounds location and bWrap is set to false.
+	 * This function should be use in place of the getNextIntersection() and getPrevInstersection()
+	 * methods if the value of cellIs can be modified.
+	 * 
+	 * A null value will be returned if the offset points to an out of bounds location and bWrap is set to false.
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param offsetDim Offset dimension
 	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
 	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the tree
 	 */
-	public void shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
+	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
 	
 		PafDimTree offsetTree = null;
 		PafDimMember nextMbr = null;
@@ -1213,6 +1215,7 @@ public class PafDataCache implements IPafDataCache {
 			}
 //		}
 		
+			return cellIs;
 	}
 
 
