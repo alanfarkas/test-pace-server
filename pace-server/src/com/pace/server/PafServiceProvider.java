@@ -3148,104 +3148,17 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		
 			//User Filtering is selected
 			if(clientState.isUserFilteredUow()){
-				
-				workUnit = clientState.getUnitOfWork().clone();
-				
-				//Get all possible hierarchical base dimension with attributes
-				String[] hierDims = clientState.getApp().getMdbDef().getHierDims();
-				Map<String,Set<String>> hierDimsMap = new HashMap<String,Set<String>>();
-				for(String baseDim : hierDims){
 
-					//Get all possible attributes for the hierarchical base dimension
-					hierDimsMap.put(baseDim, dataService.getBaseTree(baseDim).getAttributeDimNames());
-				}
-					
-				//Get the role filter user selections
-				PafDimSpec[] pafDimSpecs = filteredUOWSize.getPafUserSelections();
-				//Convert to Map
-				Map<String, List<String>> userSelectionsMap = new HashMap<String, List<String>>();
-				for(PafDimSpec dimSpec : pafDimSpecs){
-					if(dimSpec.getDimension() != null && dimSpec.getExpressionList() != null){
-						userSelectionsMap.put(dimSpec.getDimension(),  Arrays.asList(dimSpec.getExpressionList()));
-					}
-				}
-				
-				// Add the role filter user selections to client state (TTN-1472)
-				clientState.setRoleFilterSelections(userSelectionsMap);
-				
-				//
-				Map<String, List<String>> validBaseMembers = new HashMap<String, List<String>>();
-				for(String baseDim : hierDimsMap.keySet()){
-					
-					if (userSelectionsMap.containsKey(baseDim)){
-						
-						List<String> expressionList;
-						expressionList = userSelectionsMap.get(baseDim);
-						//Only a single user selection can be made for hier dims so only looking at the first item
-						//in the expressionList works here.
-						//First, change expression list to IDesc
-						expressionList.set(0, "@IDESC(" + expressionList.get(0) + ", 0)"); //$NON-NLS-1$ //$NON-NLS-2$
-						
-						//Next, expand the base dimension expression list
-						expressionList = dataService.expandExpressionList(baseDim, expressionList, clientState);
-						
-						//Get a list of attribute dimensions and a list of attribute member lists
-						List<String> attrDimLists = new ArrayList<String>();
-						List<List<String>> attrMemberLists = new ArrayList<List<String>>();
-						for(String hierDim : hierDimsMap.get(baseDim)){
-							if (userSelectionsMap.containsKey(hierDim)){
-								attrDimLists.add(hierDim);
-								attrMemberLists.add(userSelectionsMap.get(hierDim));
-							}
-						}
-						String[] attrDims = attrDimLists.toArray(new String[0]);
+				// Create use filtered work unit
+				workUnit = dataService.createUserFilteredWorkUnit(clientState, filteredUOWSize.getPafUserSelections());
 
-						//If there are no attribute dimensions, then do not filter the base dimension
-						List<String> validBaseMemberList = new ArrayList<String>();
-						if(attrDimLists.size() ==0){
-							//Build a map of valid members for each base dimension
-							for(String baseMember : expressionList){
-								validBaseMemberList.add(baseMember);
-							}
-						}
-						else{
-							//Get a list of all possible attribute intersection lists
-							Odometer isIterator = new Odometer(attrMemberLists.toArray(new List[0]));
-							List<Intersection> selAttrCombos = new ArrayList<Intersection>();
-							while (isIterator.hasNext()) {
-								@SuppressWarnings("unchecked")
-								Intersection intersection = new Intersection(attrDims, (String[])isIterator.nextValue().toArray(new String[0]));
-								selAttrCombos.add(intersection);
-							}					        
-
-							//Build a map of valid members for each base dimension
-							for(String baseMember : expressionList){
-								Set<Intersection> validAttrCombos = AttributeUtil.getValidAttributeCombos(baseDim, baseMember, attrDims, dataService.getAllDimTrees());
-								validAttrCombos.retainAll(selAttrCombos);
-								if(!validAttrCombos.isEmpty()){
-									validBaseMemberList.add(baseMember);
-								}
-							}
-						}
-						validBaseMembers.put(baseDim, validBaseMemberList);
-					}
-
-				}
-				
-				//Update the work unit with the user filter
-				for(String dim : validBaseMembers.keySet()){
-					workUnit.setDimMembers(dim, validBaseMembers.get(dim).toArray(new String[0]));
-				}				
-			}
-			else{
+			} else {
 				workUnit = PafSecurityService.getWorkSpec(filteredUOWSize.getSelectedRole(), filteredUOWSize.getSeasonId(), clientState);
 				workUnit = dataService.expandUOW(workUnit, clientState);
-				
 				clientState.setUnitOfWork(workUnit.clone());
-				
 				clientState.setPlanSeason(planSeason);
 			}
-			
+
 			//Do not data filter if one or more dimensions have been filtered to 0 members
 			if(workUnit.getMemberCount() > 0){
 				if(filteredUOWSize.getIsInvalidIntersectionSuppressionSelected() == true){
