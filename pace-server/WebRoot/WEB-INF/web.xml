@@ -1,75 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee   http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-
-<!-- <context-param>-->
-<!--  <param-name>contextConfigLocation</param-name>-->
-<!--  <param-value>WEB-INF/beans.xml</param-value>-->
-<!-- </context-param>-->
-<!-- <listener>-->
-<!--  <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>-->
-<!-- </listener>-->
-<!-- <servlet>-->
-<!--  <display-name>CXF Servlet</display-name>-->
-<!--  <servlet-name>CXFServlet</servlet-name>-->
-<!--  <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>-->
-<!-- </servlet>-->
-<!-- <servlet-mapping>-->
-<!--  <servlet-name>CXFServlet</servlet-name>-->
-<!--  <url-pattern>/*</url-pattern>-->
-<!-- </servlet-mapping>-->
-
- <env-entry>
-  <env-entry-name>pace/paceHome</env-entry-name>
-  <env-entry-type>java.lang.String</env-entry-type>
-  <env-entry-value>..\..</env-entry-value>
- </env-entry>
-
-
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>pace</display-name>
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>/WEB-INF/cxf.xml</param-value>
+  </context-param>
+  <listener>
+    <listener-class>
+      org.springframework.web.context.ContextLoaderListener
+    </listener-class>
+  </listener>
   <servlet>
-  	<display-name>pace-service</display-name>
-  	<servlet-name>pace-service</servlet-name>
-  	<servlet-class>
-  		com.pace.server.PafServiceProvider
-  	</servlet-class>
-  	<load-on-startup>1</load-on-startup>
+    <servlet-name>CXFServlet</servlet-name>
+    <servlet-class>
+        org.apache.cxf.transport.servlet.CXFServlet
+    </servlet-class>
   </servlet>
   <servlet-mapping>
-  	<servlet-name>pace-service</servlet-name>
-  	<url-pattern>/*</url-pattern>
+    <servlet-name>CXFServlet</servlet-name>
+    <url-pattern>/*</url-pattern>
   </servlet-mapping>
 
-<!-- 
-
- <servlet>
-  <description>This servlet loads caches and performs other time consuming initialization tasks for the webservice</description>
-  <display-name>Paf Initialization Servlet</display-name>
-  <servlet-name>PafInitServlet</servlet-name>
-  <servlet-class>com.pace.server.PafInitServlet</servlet-class>
-  <load-on-startup>1</load-on-startup>
- </servlet>
-  <servlet>
-    <description>This is the description of my J2EE component</description>
-    <display-name>This is the display name of my J2EE component</display-name>
-    <servlet-name>admin</servlet-name>
-    <servlet-class>com.pace.server.admin</servlet-class>
-  </servlet>
-
- 
- <servlet-mapping>
-  <servlet-name>PafInitServlet</servlet-name>
-  <url-pattern>/servlet/PafInitServlet</url-pattern>
- </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>admin</servlet-name>
-    <url-pattern>/servlet/admin</url-pattern>
-  </servlet-mapping> 
- 
- -->
- 
-
- 
- <login-config>
-  <auth-method>BASIC</auth-method>
- </login-config>
 </web-app>
