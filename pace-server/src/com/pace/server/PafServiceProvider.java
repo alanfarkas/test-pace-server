@@ -3157,10 +3157,10 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 								}
 							}
 							
-							//Get trees associated with the unit of work
+							// Get trees associated with the unit of work
 							MemberTreeSet treeSet = dataService.getUowCacheTrees(clientState, workUnitDF);
 							
-//							Filter the hier dimension members to only include the L0 members
+							// Filter the hier dimension members to only include the L0 members
 							for(String dim1 : clientState.getApp().getMdbDef().getHierDims())
 							{
 								List<String> lowestLevelMembers = new ArrayList<String>();
@@ -3171,16 +3171,16 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 								workUnitDF.setDimMembers(dim1, lowestLevelMembers.toArray(new String[0]));
 							}
 							
-							//Update the Unit of Work with the base member selections from the data filter spec
+							// Update the Unit of Work with the base member selections from the data filter spec
 							for(PafDimSpec dimSpec : nonHierDimSpecs){
 								workUnitDF.setDimMembers(dimSpec.getDimension(), dimSpec.getExpressionList());
 							}
 
-							//Filter the data using an Essbase MDX query with the Non Empty flag
+							// Filter the data using an Essbase MDX query with the Non Empty flag
 							PafDimSpec[] hierDimSpecs = dataService.getFilteredMetadata(clientState, clientState.getApp(), workUnitDF.getPafDimSpecs());
 
-							//Update the Unit of Work with the data filtered hierachical dim metadata
-							//Expand hierarchy dim members to include ancestors
+							// Update the Unit of Work with the data filtered hierachical dim metadata
+							// Expand hierarchy dim members to include ancestors
 							for(PafDimSpec dimSpec : hierDimSpecs){
 								List<PafDimMember> ancestors = new ArrayList<PafDimMember>();
 								Set<String> uniqueMembers = new HashSet<String>();

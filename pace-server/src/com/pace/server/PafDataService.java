@@ -3821,7 +3821,7 @@ public class PafDataService {
 		// Add the role filter user selections to client state (TTN-1472)
 		clientState.setRoleFilterSelections(userSelectionsMap);
 		
-		//
+		// Process the selection on each role filter dimension
 		Map<String, List<String>> validBaseMembers = new HashMap<String, List<String>>();
 		for(String baseDim : hierDimsMap.keySet()){
 			
@@ -3829,13 +3829,14 @@ public class PafDataService {
 				
 				List<String> expressionList;
 				expressionList = userSelectionsMap.get(baseDim);
-				//Only a single user selection can be made for hier dims so only looking at the first item
-				//in the expressionList works here.
-				//First, change expression list to IDesc
-	//TODO Update to handle multiple expressions for a single dimension - TTN-1644
 				
-				
-				expressionList.set(0, "@IDESC(" + expressionList.get(0) + ", 0)"); //$NON-NLS-1$ //$NON-NLS-2$
+				// Wrap each selected member in @IDESC([member name], 0). This 
+				// will force all descendants of each selected member to be included
+				// int the UOW. This code has been modfied to handle multiple 
+				// selections per base dimension (TTN-1644).
+				for (int i = 0; i < expressionList.size(); i++) {
+					expressionList.set(i, ExpOperation.I_DESC_TAG + "(" +  expressionList.get(i) + ", 0)");
+				}
 				
 				//Next, expand the base dimension expression list
 				expressionList = expandExpressionList(baseDim, expressionList, clientState);
