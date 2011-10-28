@@ -32,7 +32,7 @@ public class PafValidAttrRequest extends PafRequest {
 	
 	private String reqAttrDim = null;
 	private String selBaseDim = null;
-	private String selBaseMember = null;
+	private String[] selBaseMembers = null;
 //	private String[] selAttrDims = null;
 	private PafDimSpec[] selAttrSpecs = null;
 	
@@ -61,16 +61,16 @@ public class PafValidAttrRequest extends PafRequest {
 		this.selBaseDim = selBaseDim;
 	}
 	/**
-	 * @return the selBaseMember
+	 * @return the selBaseMembers
 	 */
-	public String getSelBaseMember() {
-		return selBaseMember;
+	public String[] getSelBaseMembers() {
+		return selBaseMembers;
 	}
 	/**
-	 * @param selBaseMember the selBaseMember to set
+	 * @param selBaseMembers the selBaseMembers to set
 	 */
-	public void setSelBaseMember(String selBaseMember) {
-		this.selBaseMember = selBaseMember;
+	public void setSelBaseMembers(String[] selBaseMembers) {
+		this.selBaseMembers = selBaseMembers;
 	}
 	public PafDimSpec[] getSelAttrSpecs() {
 		return selAttrSpecs;

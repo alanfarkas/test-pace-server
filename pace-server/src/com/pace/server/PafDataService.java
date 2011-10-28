@@ -3795,7 +3795,7 @@ public class PafDataService {
 	 * @return UnitOfWork
 	 * @throws PafException 
 	 */
-	protected UnitOfWork createUserFilteredWorkUnit(PafClientState clientState, PafDimSpec[] userSelections) throws PafException {
+	protected UnitOfWork createUserFilteredWorkSpec(PafClientState clientState, PafDimSpec[] userSelections) throws PafException {
 
 		UnitOfWork workUnit = clientState.getUnitOfWork().clone();
 		
