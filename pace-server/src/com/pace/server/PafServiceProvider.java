@@ -2939,7 +2939,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
 	 * @throws PafSoapException the paf soap exception
 	 */
-	public PafValidAttrResponse getValidAttributeMembers(PafValidAttrRequestNew attrRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
+	public PafValidAttrResponse getValidAttributeMembersNew(PafValidAttrRequestNew attrRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
 		
 		PafValidAttrResponse resp = new PafValidAttrResponse();
 		boolean success = false;
@@ -3096,7 +3096,9 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 	}
 	
 	/**
-	 * Returns the UOW size to the client.
+	 * Returns the filtered UOW size to the client. This method also updates the client state with 
+	 * the rolefilter user selections and generates the UOW specifcation corresponding to these 
+	 * selections.
 	 *
 	 * @param filteredUOWSize the filtered uow size
 	 * @return the filtered uow size

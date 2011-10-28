@@ -195,7 +195,7 @@ public interface IPafService extends Remote {
 	 * @throws PafSoapException the paf soap exception
 	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
 	 */
-	public PafValidAttrResponse getValidAttributeMembers(PafValidAttrRequestNew attrRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafSoapException, PafNotAuthorizedSoapException;
+	public PafValidAttrResponse getValidAttributeMembersNew(PafValidAttrRequestNew attrRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafSoapException, PafNotAuthorizedSoapException;
     
     /**
      * Gets the mdb props.
