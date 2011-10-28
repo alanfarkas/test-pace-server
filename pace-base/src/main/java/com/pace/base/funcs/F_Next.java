@@ -62,7 +62,6 @@ public class F_Next extends AbstractFunction {
 		if (!this.isInitialized) initialize(evalState);
     	
     	double result = 0;
-
     	Intersection dataIs = sourceIs.clone();
     	
     	
@@ -71,18 +70,11 @@ public class F_Next extends AbstractFunction {
     	}
     	  	
     	try {
-//    		result = dataCache.getNextCellValue(dataIs, offsetDim, offset);
+    		dataCache.shiftIntersection(dataIs, offsetDim, offset);
+    		if (dataIs != null) {
+    			result = dataCache.getCellValue(dataIs);
+    		}
     		
-			String curMbrName = sourceIs.getCoordinate(offsetDim);
-			PafDimMember nextMbr = offsetTree.getPeer(curMbrName, offset);
-			
-			if (nextMbr == null)
-				result = 0;
-			else {
-				dataIs.setCoordinate(offsetDim, nextMbr.getKey());
-				result = dataCache.getCellValue(dataIs);
-			}
-
     	} catch (RuntimeException e) {
 			
 			// Check for absense of parameters

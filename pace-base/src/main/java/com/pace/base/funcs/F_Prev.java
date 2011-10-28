@@ -67,16 +67,10 @@ public class F_Prev extends AbstractFunction {
     	}
 
     	try {
- //   		result = dataCache.getNextCellValue(dataIs, offsetDim, offset);
-			String curMbrName = sourceIs.getCoordinate(offsetDim);
-			PafDimMember prevMbr = offsetTree.getPeer(curMbrName, offset);
-			
-			if (prevMbr == null)
-				result = 0;
-			else {
-				dataIs.setCoordinate(offsetDim, prevMbr.getKey());
-				result = dataCache.getCellValue(dataIs);
-			}
+    		dataCache.shiftIntersection(dataIs, offsetDim, offset);
+    		if (dataIs != null) {
+    			result = dataCache.getCellValue(dataIs);
+    		}
 
     	} catch (RuntimeException e) {
 

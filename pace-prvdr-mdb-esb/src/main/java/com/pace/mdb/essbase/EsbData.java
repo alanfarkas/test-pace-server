@@ -433,7 +433,7 @@ public class EsbData implements IMdbData{
 				List<String> origMemberList = dimMembers.get(axis);
 				String dim = dataCache.getDimension(axis);
 				PafDimMember root = dataCache.getDimTrees().getTree(dim).getRootNode();
-				if (root.getMemberProps().isVirtual()) {
+				if (root.getMemberProps().isSynthetic()) {
 					memberList = new ArrayList<String>(origMemberList);
 					memberList.remove(root.getKey());
 					if (memberList.size() == 0) {

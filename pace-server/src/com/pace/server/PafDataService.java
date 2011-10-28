@@ -673,7 +673,7 @@ public class PafDataService {
 			for (String aliasTableName : baseTree.getAliasTableNames()) {
 				rootProps.addMemberAlias(aliasTableName, rootDesc);
 			}
-			rootProps.setVirtual(true);
+			rootProps.setSynthetic(true);
 			
 			// Create year sub tree and add in UOW years
 			List<String> yearList = new ArrayList<String>(Arrays.asList(mbrNames));
@@ -860,7 +860,7 @@ public class PafDataService {
 		List<PafDimMember> yearMembers = yearTree.getLowestLevelMembers();
 		List<PafDimMember> timeChildMbrs = null;
 
-	if (yearMembers.size() == 1) return	timeTree;  // Don't incur overhead of building tree if single-year UOW
+//	if (yearMembers.size() == 1) return	timeTree;  // Don't incur overhead of building tree if single-year UOW
 	
 		// The virtual time tree is formed by combining the UOW Time and Year trees. It is used 
 		// in aggregation and any time-based rule function call, instead of the seperate Time 
@@ -876,7 +876,7 @@ public class PafDataService {
 		PafBaseMember root = new PafBaseMember(rootName, rootProps);		
 		rootProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, root.getKey());
 		rootProps.setGenerationNumber(1);
-		rootProps.setVirtual(yearRoot.getMemberProps().isVirtual() || yearRoot.getMemberProps().isVirtual());
+		rootProps.setSynthetic(yearRoot.getMemberProps().isSynthetic() || yearRoot.getMemberProps().isSynthetic());
 		
 		// The is some differing logic depending on whether the is just a single year in the UOW
 		// or multiple years, represented by a year tree with a virtual node whose children are 
@@ -892,7 +892,7 @@ public class PafDataService {
 			// and the root of the time tree. 
 			// Since the root of the year tree is synthetic
 			rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree() + 1); 
-			rootProps.setVirtual(true);
+			rootProps.setSynthetic(true);
 			timeChildMbrs = new ArrayList<PafDimMember>(Arrays.asList(new PafDimMember[]{timeRoot}));
 		}
 		PafDimTree timeHorizonTree = new PafBaseTree(root, new String[]{PafBaseConstants.ESS_DEF_ALIAS_TABLE});

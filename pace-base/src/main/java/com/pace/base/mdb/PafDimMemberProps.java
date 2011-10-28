@@ -32,8 +32,8 @@ public abstract class PafDimMemberProps implements Cloneable {
 	// Read-Only property
 	private boolean isReadOnly = false;
 	
-	// Virtual property
-	private boolean isVirtual = false;
+	// Synthetic property
+	private boolean isSynthetic = false;
 	
 
 	/**
@@ -146,16 +146,16 @@ public abstract class PafDimMemberProps implements Cloneable {
 	}
 
 	/**
-	 * @return the isVirtual
+	 * @return the isSynthetic
 	 */
-	public boolean isVirtual() {
-		return isVirtual;
+	public boolean isSynthetic() {
+		return isSynthetic;
 	}
 	/**
-	 * @param isVirtual the isVirtual to set
+	 * @param isSynthetic the isSynthetic to set
 	 */
-	public void setVirtual(boolean isVirtual) {
-		this.isVirtual = isVirtual;
+	public void setSynthetic(boolean isSynthetic) {
+		this.isSynthetic = isSynthetic;
 	}
 	
 	
@@ -210,7 +210,7 @@ public abstract class PafDimMemberProps implements Cloneable {
 		result = prime * result + generationNumber;
 		result = prime * result + levelNumber;
 		result = prime * result + (isReadOnly ? 1231 : 1237);
-		result = prime * result + (isVirtual ? 1231 : 1237);
+		result = prime * result + (isSynthetic ? 1231 : 1237);
 		return result;
 	}
 	
@@ -249,8 +249,8 @@ public abstract class PafDimMemberProps implements Cloneable {
 		if (isReadOnly != compare.isReadOnly)
 			return false;
 
-		// -- Check isVirtual
-		if (isVirtual != compare.isVirtual)
+		// -- Check isSynthetic
+		if (isSynthetic != compare.isSynthetic)
 			return false;
 
 		return true;
@@ -267,7 +267,7 @@ public abstract class PafDimMemberProps implements Cloneable {
     		+ "Gen: " +  generationNumber + PafBaseConstants.LINE_TERM
     		+ "Lvl: " + levelNumber + PafBaseConstants.LINE_TERM
     		+ "Read Only: " + isReadOnly + PafBaseConstants.LINE_TERM
-    		+ "Virtual: " + isVirtual;
+    		+ "Virtual: " + isSynthetic;
      }
 
 }

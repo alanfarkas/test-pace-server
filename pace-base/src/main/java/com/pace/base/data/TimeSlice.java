@@ -6,6 +6,7 @@ package com.pace.base.data;
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafBaseConstants;
+import com.pace.base.app.MdbDef;
 
 
 /**
@@ -34,24 +35,11 @@ public class TimeSlice {
 	 * @param timeHorizonCoord Time horizon member 
 	 */
 	public TimeSlice(String timeHorizonCoord) {
-		
-		// Look for period/year delimiter. Throw an error if the delimiter is not found
-		// of if it is the last character.
-		int pos = timeHorizonCoord.indexOf(PafBaseConstants.TIME_HORIZON_MBR_DELIM);
-		if (pos == -1 || pos > timeHorizonCoord.length()) {
-			String errMsg = "Invalid Time Horizon coordinate [" + timeHorizonCoord 
-					+ "] passed to TimeSlice constructor";
-			logger.error(errMsg);
-			throw new IllegalArgumentException(errMsg);
-		}
-		
-		// Split time horizon coordinate into period and year
-		this.period = timeHorizonCoord.substring(pos + 1);
-		this.year = timeHorizonCoord.substring(0, pos);
+		convertTimeHorizonCoord(timeHorizonCoord, period, year);
 	}
 
 	/**
-	 * Don't allow instanciation whithout any parameters
+	 * Don't allow instansiation whithout any parameters
 	 */
 	@SuppressWarnings("unused")
 	private TimeSlice() {}
@@ -84,21 +72,18 @@ public class TimeSlice {
 	
 	
 	/**
-	 * Return the time horizon year coordinate
+	 * Update the cell intersection using the specified time horizon coordinate
 	 * 
-	 * @return the time horizon year coordinate
+	 * @param cellIs Cell intersection
 	 */
-	static public String getTimeHorizonYear() {
-		return PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR;
-	}
-	
-	/**
-	 * Return the time horizon period coordinate
-	 * 
-	 * @return the time horizon period coordinate
-	 */
-	public String getTimeHorizonPeriod() {
-		return buildTimeHorizonCoord(period, year);
+	public static void applyTimeHorizonCoord(Intersection cellIs, String timeHorizonCoord, MdbDef mdbDef) {
+		
+		String period = null, year = null;
+		String timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
+		
+		convertTimeHorizonCoord(timeHorizonCoord, period, year);
+		cellIs.setCoordinate(timeDim, period);
+		cellIs.setCoordinate(yearDim, yearDim);
 	}
 	
 	/**
@@ -110,11 +95,47 @@ public class TimeSlice {
 	 * @return Time horizon coordinate
 	 */
 	static public String buildTimeHorizonCoord(String period, String year) {
-		return period;
-//		return year + PafBaseConstants.TIME_HORIZON_MBR_DELIM + period;
+		return year + PafBaseConstants.TIME_HORIZON_MBR_DELIM + period;
 	}
 	
+	static public void convertTimeHorizonCoord(final String timeHorizonCoord, String period, String year) {
+		
+		// Look for period/year delimiter. Throw an error if the delimiter is not found
+		// of if it is the last character.
+		int pos = timeHorizonCoord.indexOf(PafBaseConstants.TIME_HORIZON_MBR_DELIM);
+		if (pos == -1 || pos > timeHorizonCoord.length()) {
+			String errMsg = "Invalid Time Horizon coordinate [" + timeHorizonCoord 
+					+ "] passed to TimeSlice";
+//			logger.error(errMsg);
+			throw new IllegalArgumentException(errMsg);
+		}
+		
+		// Split time horizon coordinate into period and year
+		period = timeHorizonCoord.substring(pos + 1);
+		year = timeHorizonCoord.substring(0, pos);
+		
+	}
+
 	
+	/**
+	 * Return the time horizon period coordinate
+	 * 
+	 * @return the time horizon period coordinate
+	 */
+	public String getTimeHorizonPeriod() {
+		return buildTimeHorizonCoord(period, year);
+	}
+	
+	/**
+	 * Return the default time horizon year coordinate
+	 * 
+	 * @return the default time horizon year coordinate
+	 */
+	static public String getTimeHorizonYear() {
+		return PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR;
+	}
+	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -159,6 +180,5 @@ public class TimeSlice {
 	public String toString() {
 		return getTimeHorizonPeriod();
 	}
-	
 
 }

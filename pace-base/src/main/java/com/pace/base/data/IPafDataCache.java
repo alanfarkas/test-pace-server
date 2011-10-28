@@ -35,4 +35,8 @@ public interface IPafDataCache {
 	public String getVersionDim();
 	public boolean isMember(String dimension, String member);
 	public void setCellValue(Intersection target, double allocValue);
+	public void shiftIntersection(Intersection cellIs);
+	public void shiftIntersection(Intersection cellIs, final String offsetDim, final int offset);
+	public void shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap);
+
 }

@@ -1067,11 +1067,11 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return Cell value
 	 */
-	public double getNextCellValue(Intersection cellIs, String offsetDim, int offset) {
+	public double getNextCellValue(final Intersection cellIs, final String offsetDim, final int offset) {
 
 		double result = 0;
 
-		Intersection nextIs = getNextIntersection(cellIs, offsetDim, offset, false);
+		final Intersection nextIs = getNextIntersection(cellIs, offsetDim, offset, false);
 		if (nextIs != null) {
 			result = getCellValue(nextIs);
 		}
@@ -1089,11 +1089,11 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return Cell value
 	 */
-	public double getNextCellValue(Intersection cellIs, String offsetDim, int offset, boolean bWrap) {
+	public double getNextCellValue(final Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
 
 		double result = 0;
 
-		Intersection nextIs = getNextIntersection(cellIs, offsetDim, offset, bWrap);
+		final Intersection nextIs = getNextIntersection(cellIs, offsetDim, offset, bWrap);
 		if (nextIs != null) {
 			result = getCellValue(nextIs);
 		}
@@ -1107,13 +1107,13 @@ public class PafDataCache implements IPafDataCache {
 	 * @param cellIs Cell intersection
 	 * @return Cell intersection
 	 */
-
-	public Intersection getNextIntersection(Intersection cellIs) {
-		return getNextIntersection(cellIs, getTimeDim(), 0);
+	public Intersection getNextIntersection(final Intersection cellIs) {
+		return getNextIntersection(cellIs, getTimeDim(), 1);
 	}
 
 	/**
-	 * Returns the next cell intersection along the specified offset dimension
+	 * Returns the next cell intersection along the specified offset dimension. A null value
+	 * will be returned if the offset points to an out of bounds location
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param offsetDim Offset dimension
@@ -1121,8 +1121,7 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return Cell intersection
 	 */
-
-	public Intersection getNextIntersection(Intersection cellIs, String offsetDim, int offset) {
+	public Intersection getNextIntersection(final Intersection cellIs, final String offsetDim, final int offset) {
 		return getNextIntersection(cellIs, offsetDim, offset, false);
 	}
 
@@ -1138,31 +1137,82 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return Cell intersection
 	 */
-
 	public Intersection getNextIntersection(final Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
 	
-		Intersection translatedIs = null, nextIs = null;
-		PafDimTree offsetTree = null;
-		
-		// If time dimension is selected, use time horizon dimension for search
-		if (offsetDim.equals(getTimeDim())) {
-			offsetTree = getDimTrees().getTree(getTimeHorizonDim());
-			translatedIs = translateTimeYearIs(cellIs);
-		} else {
-			offsetTree = getDimTrees().getTree(offsetDim);
-			translatedIs = cellIs;
-		}
-		
-		String currMbr = translatedIs.getCoordinate(offsetDim);
-		PafDimMember nextMbr = offsetTree.getPeer(currMbr, offset, bWrap);
-		
-		if (nextMbr != null) {
-			nextIs = translatedIs.clone();
-			nextIs.setCoordinate(offsetDim, nextMbr.getKey());
-			nextIs = translateTimeHorizonIs(nextIs);
-		}
-		
+		Intersection nextIs = cellIs.clone();
+		shiftIntersection(cellIs, offsetDim, offset, bWrap);
 		return nextIs;
+	}
+
+
+	/**
+	 * Shift the specified intersection to the next cell intersection along the time dimension.
+	 * 
+	 * The intersection will be set to a null value will be returned if 
+	 * the offset points to an out of bounds location.
+	 * 
+	 * @param cellIs Cell intersection
+	 */
+	public void shiftIntersection(Intersection cellIs) {
+		shiftIntersection(cellIs, getTimeDim(), 1);		
+	}
+
+	/**
+	 * Shift the specified intersection to the next cell intersection along the specified
+	 * offset dimension. A backwards shift will be performed if a negative offset is 
+	 * supplied.
+	 * 
+	 * The intersection will be set to a null value will be returned if 
+	 * the offset points to an out of bounds location.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 */
+	public void shiftIntersection(Intersection cellIs, final String offsetDim, final int offset) {
+		shiftIntersection(cellIs, offsetDim, offset, false);		
+	}
+
+	/**
+	 * Shift the specified intersection to the next cell intersection along the specified
+	 * offset dimension. A backwards shift will be performed if a negative offset is 
+	 * supplied.
+	 * 
+	 * The intersection will be set to a null value will be returned if 
+	 * the offset points to an out of bounds location and bWrap is set to false.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the tree
+	 */
+	public void shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
+	
+		PafDimTree offsetTree = null;
+		PafDimMember nextMbr = null;
+		String currMbrName = null; 
+
+		
+//		// If time dimension is selected, use time horizon dimension for shift
+//		if (offsetDim.equals(getTimeDim())) {
+//			offsetTree = getDimTrees().getTree(getTimeHorizonDim());
+//			currMbrName = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeDim()), cellIs.getCoordinate(getYearDim()));
+//			nextMbr = offsetTree.getPeer(currMbr, offset, bWrap);		
+//			if (nextMbr != null) {
+//				TimeSlice.applyTimeHorizonCoord(cellIs, nextMbr.getKey(), getAppDef().getMdbDef());
+//			}
+//		} else {
+			// Use specified dimension for shift
+			offsetTree = getDimTrees().getTree(offsetDim);
+			currMbrName = cellIs.getCoordinate(offsetDim);
+			nextMbr = offsetTree.getPeer(currMbrName, offset, bWrap);
+			if (nextMbr != null) {
+				cellIs.setCoordinate(offsetDim, nextMbr.getKey());
+			} else {
+				cellIs = null;
+			}
+//		}
+		
 	}
 
 
@@ -3078,7 +3128,7 @@ public class PafDataCache implements IPafDataCache {
 			
 			// Apply "virtual" filter
 			if (isVirtual != null) {
-				if ( (isVirtual && !memberProps.isVirtual()) || (!isVirtual && memberProps.isVirtual()) ) {
+				if ( (isVirtual && !memberProps.isSynthetic()) || (!isVirtual && memberProps.isSynthetic()) ) {
 				continue;
 				}
 			}
