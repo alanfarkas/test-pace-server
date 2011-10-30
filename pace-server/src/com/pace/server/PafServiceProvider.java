@@ -3160,7 +3160,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 							// Get trees associated with the unit of work
 							MemberTreeSet treeSet = dataService.getUowCacheTrees(clientState, workUnitDF);
 							
-							// Filter the hier dimension members to only include the L0 members
+							// Filter the hierarchy dimension members to only include the floor members
 							for(String dim1 : clientState.getApp().getMdbDef().getHierDims())
 							{
 								List<String> lowestLevelMembers = new ArrayList<String>();

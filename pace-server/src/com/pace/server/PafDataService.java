@@ -3829,11 +3829,10 @@ public class PafDataService {
 				
 				List<String> expressionList;
 				expressionList = userSelectionsMap.get(baseDim);
-				
 				// Wrap each selected member in @IDESC([member name], 0). This 
 				// will force all descendants of each selected member to be included
-				// int the UOW. This code has been modfied to handle multiple 
-				// selections per base dimension (TTN-1644).
+				// int the UOW. This section of code has been modfied to handle 
+				// multiple selections per base dimension (TTN-1644).
 				for (int i = 0; i < expressionList.size(); i++) {
 					expressionList.set(i, ExpOperation.I_DESC_TAG + "(" +  expressionList.get(i) + ", 0)");
 				}

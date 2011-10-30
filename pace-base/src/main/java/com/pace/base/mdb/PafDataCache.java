@@ -1140,7 +1140,7 @@ public class PafDataCache implements IPafDataCache {
 	public Intersection getNextIntersection(final Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
 	
 		Intersection nextIs = cellIs.clone();
-		shiftIntersection(cellIs, offsetDim, offset, bWrap);
+		nextIs = shiftIntersection(cellIs, offsetDim, offset, bWrap);
 		return nextIs;
 	}
 
@@ -1161,9 +1161,12 @@ public class PafDataCache implements IPafDataCache {
 	 * Shift the specified intersection to the next cell intersection along the specified
 	 * offset dimension. A backwards shift will be performed if a negative offset is 
 	 * supplied.
-	 * 
+
 	 * The intersection will be set to a null value will be returned if 
 	 * the offset points to an out of bounds location.
+	 * 
+	 * This function should be used in place of the getNextIntersection() and getPrevInstersection()
+	 * methods if the value of cellIs can be modified without any ill effects.
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param offsetDim Offset dimension
@@ -1178,10 +1181,10 @@ public class PafDataCache implements IPafDataCache {
 	 * offset dimension. A backwards shift will be performed if a negative offset is 
 	 * supplied. 
 	 * 
-	 * This function should be use in place of the getNextIntersection() and getPrevInstersection()
-	 * methods if the value of cellIs can be modified.
-	 * 
 	 * A null value will be returned if the offset points to an out of bounds location and bWrap is set to false.
+	 * 
+	 * This function should be used in place of the getNextIntersection() and getPrevInstersection()
+	 * methods if the value of cellIs can be modified without any ill effects.
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param offsetDim Offset dimension
@@ -1202,7 +1205,8 @@ public class PafDataCache implements IPafDataCache {
 //			nextMbr = offsetTree.getPeer(currMbr, offset, bWrap);		
 //			if (nextMbr != null) {
 //				TimeSlice.applyTimeHorizonCoord(cellIs, nextMbr.getKey(), getAppDef().getMdbDef());
-//			}
+//			} else {
+//				cellis = null;
 //		} else {
 			// Use specified dimension for shift
 			offsetTree = getDimTrees().getTree(offsetDim);
@@ -1410,47 +1414,17 @@ public class PafDataCache implements IPafDataCache {
 	public double getCumTotal(final Intersection cellIs, final String cumDim, final int offset) {
 
 		double result = 0;
-		List<PafDimMember> cumMembers = new ArrayList<PafDimMember>();
-		
-		
+ 		
 		// Determine the last intersection to be accumulated
-		Intersection lastIs;
-		if (offset == 0) {
-			// Accumulate through the current intersection
-			lastIs = cellIs;
-		} else {
-			// Accumulate through the previous intersection that is "offset" positions away
-			lastIs = getPrevIntersection(cellIs, cumDim, offset);
-		}
-
-		// Skip processing if there are no members to accumulate as the
-		// offset points to a location before the first member in the 
-		// dimension.
-		if (lastIs != null) {
-			// Get the list of members to accumulate. If time dimension is selected, use time 
-			// horizon dimension for search. 
-			PafDimTree cumTree;
-			Intersection translatedIs;
-			if (cumDim.equals(getTimeDim())) {
-				cumTree = getDimTrees().getTree(getTimeHorizonDim());
-				translatedIs = translateTimeYearIs(lastIs);
-			} else {
-				cumTree = getDimTrees().getTree(cumDim);
-				translatedIs = lastIs;
-			}
-
-			// Get all leading peers
-			String lastMbr = translatedIs.getCoordinate(cumDim);
-			cumMembers = cumTree.getILPeers(lastMbr);
-
-			// Accumulate the values for all intersections up through the specified offset
-			// position. To account for any cell changes that haven't yet been aggregated 
+		Intersection lastIs = getPrevIntersection(cellIs, cumDim, offset);
+		
+		// Accumulate the values for all intersections up through the specified offset
+		// position.
+		while (lastIs != null) {
+			// To account for any cell changes that haven't yet been aggregated 
 			// (ex. perpertual inventory process), we aggregate at the floor level.
-			Intersection tempIs = translatedIs.clone();
-			for (PafDimMember member : cumMembers) {
-				tempIs.setCoordinate(cumDim, member.getKey());
-				result += EvalUtil.sumFloorIntersections(translateTimeHorizonIs(tempIs), evalState);
-			}	
+			result += EvalUtil.sumFloorIntersections(lastIs, evalState);
+			lastIs = shiftIntersection(lastIs, cumDim, -1);
 		}
 		
 		return result;
