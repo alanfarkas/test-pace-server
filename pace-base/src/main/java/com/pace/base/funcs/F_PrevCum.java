@@ -18,10 +18,8 @@
  */
 package com.pace.base.funcs;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,11 +27,8 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
-import com.pace.base.app.PafApplicationDef;
-import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
-import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
@@ -79,50 +74,11 @@ public class F_PrevCum extends AbstractFunction {
 		dataIs.setCoordinate( msrDim, this.getMeasureName() );
 		        
         // accumulate values
-//        double result  = dataCache.getCumTotal(dataIs, offsetDim, offset);
+       double result  = dataCache.getCumTotal(dataIs, offsetDim, offset);
 
-    	// get all members at the current level of the current intersection
-
-    	PafDimMember curMbr = offsetTree.getMember(dataIs.getCoordinate(offsetDim));
-        List<PafDimMember> peers = offsetTree.getMembersAtLevel(offsetTree.getRootNode().getKey(), (short) curMbr.getMemberProps().getLevelNumber());
-        
-        // calculate which member to stop accumulation on, by default -1 and contained on the offset variable
-        // peers need to be in order
-        
-        // accumulator
-    	double result = 0;        
-        
-    	// fastest approach and default case presumes offset 1
-        if (offset == 1) {
-        	// add all previous values until offset member is reached
-        	for (PafDimMember peer : peers) {
-        		if (peer.getKey().equals(curMbr.getKey())) 
-        			break;
-        		dataIs.setCoordinate(offsetDim, peer.getKey());
-        		result += sumLevel0Desc(dataIs, evalState, dataCache);
-        	}
-        } else {
-        	// incur overhead for more complex case, being a list this search is unfortunately O(n).
-        	// find index of current member in list
-    		int i = peers.indexOf(curMbr);
-    		int stopIndex = i - offset;
-    		int index = 0;
-        	while  (index <= stopIndex) {
-        		dataIs.setCoordinate(offsetDim, peers.get(index).getKey());
-        		result += sumLevel0Desc(dataIs, evalState, dataCache);        		
-        	}
-        }
-
-        return result;
+       return result;
     }
     
-    private double sumLevel0Desc(Intersection dataIs, IPafEvalState evalState, IPafDataCache dataCache) throws PafException {
-		List<Intersection>floorIs = EvalUtil.buildFloorIntersections(dataIs, evalState);
-		double sum = 0;
-		for (Intersection is : floorIs) 
-			sum+= dataCache.getCellValue(is);
-		return sum;
-	}
     /**
      *  Parse and validate function parameters 
      *
@@ -131,7 +87,6 @@ public class F_PrevCum extends AbstractFunction {
      */
     protected void validateParms(IPafEvalState evalState) throws PafException {
 
-    	int parmIndex = 0;
     	// quick check to get out if it looks like these have been validated already
     	if (this.isValidated) return;
     	

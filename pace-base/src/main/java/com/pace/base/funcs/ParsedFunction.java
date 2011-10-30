@@ -43,18 +43,13 @@ public class ParsedFunction extends AbstractFunction {
 	 * @see com.pace.base.funcs.AbstractFunction#calculate(com.pace.base.data.Intersection, com.pace.base.data.IPafRoDataCache, com.pace.base.state.IPafEvalState, java.lang.String[])
 	 */
 	@Override
-	public double calculate(@SuppressWarnings("unused")
-	Intersection sourceIs, @SuppressWarnings("unused")
-	IPafDataCache dataCache,
-			@SuppressWarnings("unused")
+	public double calculate(Intersection sourceIs, IPafDataCache dataCache,
 			IPafEvalState evalState) throws PafException {
 		throw new PafException("Can't calculate a Parsed Function. This function has not been converted into a concrete funtion.", PafErrSeverity.Warning);
 	}
 
-	@SuppressWarnings("unused")
 	@Override
-	public Set<Intersection> getTriggerIntersections(@SuppressWarnings("unused")
-	IPafEvalState evalState) throws PafException {
+	public Set<Intersection> getTriggerIntersections(IPafEvalState evalState) throws PafException {
 		// TODO Auto-generated method stub
 		return null;
 	}

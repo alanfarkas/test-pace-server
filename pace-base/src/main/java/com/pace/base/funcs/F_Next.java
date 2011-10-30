@@ -18,11 +18,9 @@
  */
 package com.pace.base.funcs;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +32,6 @@ import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
-import com.pace.base.rules.Formula;
 import com.pace.base.state.IPafEvalState;
 
 /**
@@ -106,7 +103,6 @@ public class F_Next extends AbstractFunction {
     	return result;
     }
 
-	@SuppressWarnings("unused")
 	@Override
 	public Set<Intersection> getTriggerIntersections(IPafEvalState evalState) throws PafException {
 		PafDimMember offsetMember;  

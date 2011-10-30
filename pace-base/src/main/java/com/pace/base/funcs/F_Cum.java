@@ -20,7 +20,6 @@ package com.pace.base.funcs;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,8 +27,6 @@ import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
-import com.pace.base.mdb.PafDimMember;
-import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
 /**

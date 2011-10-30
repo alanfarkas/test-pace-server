@@ -61,7 +61,6 @@ public class F_TriggerIntersection extends AbstractFunction {
     	return result;
     }
 
-	@SuppressWarnings("unused")
 	@Override
 	public Set<Intersection> getTriggerIntersections(IPafEvalState evalState) throws PafException {
 		// TODO Auto-generated method stub
