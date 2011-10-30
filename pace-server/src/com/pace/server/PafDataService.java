@@ -860,8 +860,7 @@ public class PafDataService {
 		List<PafDimMember> yearMembers = yearTree.getLowestLevelMembers();
 		List<PafDimMember> timeChildMbrs = null;
 
-//	if (yearMembers.size() == 1) return	timeTree;  // Don't incur overhead of building tree if single-year UOW
-	
+
 		// The virtual time tree is formed by combining the UOW Time and Year trees. It is used 
 		// in aggregation and any time-based rule function call, instead of the seperate Time 
 		// and Year trees loaded directly from the multidimensional database. The main advantage 

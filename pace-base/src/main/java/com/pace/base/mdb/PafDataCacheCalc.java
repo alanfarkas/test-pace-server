@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.app.MdbDef;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafApplicationDef;
@@ -43,6 +44,7 @@ import com.pace.base.app.VersionVarianceType;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.funcs.IPafFunction;
 import com.pace.base.rules.Formula;
 import com.pace.base.rules.Rule;
@@ -141,13 +143,15 @@ public abstract class PafDataCacheCalc {
 		boolean isTimeAggregation = false;
 		long calcStart = 0;
 		String measureDim = dataCache.getMeasureDim(), versionDim = dataCache.getVersionDim();
-		String timeDim = dataCache.getTimeDim(); 
+		String timeDim = dataCache.getTimeDim(), yearDim = dataCache.getYearDim();
+		int timeAxis = dataCache.getAxisIndex(timeDim), yearAxis = dataCache.getAxisIndex(yearDim);
 		String[] dimensions = dataCache.getBaseDimensions();
 		String[] planVersions = dataCache.getPlanVersions();
 		List<String> aggMembers = null;
 		List<String> timeOpenPeriods = new ArrayList<String>();
 		Set<MeasureType> aggMeasureTypes = new HashSet<MeasureType>(Arrays.asList(new MeasureType[]{MeasureType.Aggregate, MeasureType.TimeBalFirst, MeasureType.TimeBalLast}));
 		Map<String, List<String>> aggFilter = new HashMap<String, List<String>>();
+		MdbDef mdbDef = dataCache.getAppDef().getMdbDef();
 		Odometer cellIterator = null;
 
 
@@ -218,10 +222,10 @@ public abstract class PafDataCacheCalc {
 		logger.debug("Getting list of members to aggregate");
 		aggMembers = memberTree.getMemberNames(TreeTraversalOrder.POST_ORDER, 1);
 		
-		// TTN-1595 - Time aggregation, don't aggregate root
-		if (isTimeAggregation) {
-			aggMembers.remove(memberTree.getRootNode());
-		}
+//		// TTN-1595 - Time aggregation, don't aggregate root
+//		if (isTimeAggregation) {
+//			aggMembers.remove(memberTree.getRootNode());
+//		}
 
 		// Modify the aggregation filter so that it can be used to generate all
 		// the cell intersections that need to be included in the aggregation
@@ -254,7 +258,12 @@ public abstract class PafDataCacheCalc {
 			if (children.size() > 0) {
 
 				// Cycle through all selected member intersections in the data cache
-				// across the member being aggregated.
+				// across the member being aggregated. 
+				// 
+				// Each iterated intersection is a time horizon-based intesection, and
+				// with the expection of a time dimension aggreation, must be initially
+				// converted to a time/year-basd intersection. Time dimension aggregation
+				// must be handled differently (TTN-1595).
 				while (cellIterator.hasNext()) {
 					
 					// Get next member intersection
@@ -274,36 +283,61 @@ public abstract class PafDataCacheCalc {
 						// Aggregate children across selected member intersection. When aggregating 
 						// across the "Time" dimension, the aggregation process must properly aggregate 
 						// any measures set with the "Time Balance First" or "Time Balance Last" property.
-						if (!isTimeAggregation || measureType == MeasureType.Aggregate){
+						//
+						// All
+						if (!isTimeAggregation){
+
+							// Translate time horzion coordinate in aggregate intersection to
+							// time year coordinates. 
+							TimeSlice.translateTimeHorizonCoords(coords, timeAxis, yearAxis);
+							
 							// Standard aggregation process - sum up children of selected member
 							for (PafDimMember child:children) {
+
 								intersection.setCoordinate(aggDimension, child.getKey());
 								double cellValue = dataCache.getCellValue(intersection);
 								aggAmount = aggAmount + cellValue;
 							}
-						} else if (measureType == MeasureType.TimeBalFirst)  {
-							// Time Balance First - selected time dimension member equals it's first child
-							PafDimMember child = children.get(0);
-							intersection.setCoordinate(aggDimension, child.getKey());
-							aggAmount = dataCache.getCellValue(intersection);												
-						} else if (measureType == MeasureType.TimeBalLast) {
-							// Time Balance Last - selected time dimension member equals it's last child
-							PafDimMember child = children.get(children.size() - 1);
-							intersection.setCoordinate(aggDimension, child.getKey());
-							aggAmount = dataCache.getCellValue(intersection);	
-						} else {
-							// Invalid Measure Type - Throw IllegalArgumentException (should never get here)
-							String errMsg = "Agg Dimension error - invalid Measure Type of [" + measureType.toString() + "] encountered.";
-							logger.error(errMsg);
-							IllegalArgumentException iae = new IllegalArgumentException(errMsg);
-							throw iae;
-						}
 
-						// Update aggregated member value
-						intersection.setCoordinate(aggDimension, aggMember);
-						dataCache.setCellValue(intersection, aggAmount, trackChanges);
+							// Update aggregated member value (non-time aggregation)
+							intersection.setCoordinate(aggDimension, aggMember);
+							dataCache.setCellValue(intersection, aggAmount, trackChanges);
 
-					} 
+						} else { 
+							// Time aggregation
+							if (measureType == MeasureType.Aggregate){
+								// Standard aggregation process along time hierarchy (TTN-1595)
+								for (PafDimMember child:children) {
+									TimeSlice.applyTimeHorizonCoord(intersection, child.getKey(), mdbDef); 
+									double cellValue = dataCache.getCellValue(intersection);
+									aggAmount = aggAmount + cellValue;
+								}
+							} else if (measureType == MeasureType.TimeBalFirst)  {
+								// Time Balance First - selected time dimension member equals it's first child
+								PafDimMember child = children.get(0);
+								TimeSlice.applyTimeHorizonCoord(intersection, child.getKey(), mdbDef); // TTN-1595
+								//							intersection.setCoordinate(aggDimension, child.getKey());
+								aggAmount = dataCache.getCellValue(intersection);												
+							} else if (measureType == MeasureType.TimeBalLast) {
+								// Time Balance Last - selected time dimension member equals it's last child
+								PafDimMember child = children.get(children.size() - 1);
+								TimeSlice.applyTimeHorizonCoord(intersection, child.getKey(), mdbDef); // TTN-1595
+								//							intersection.setCoordinate(aggDimension, child.getKey());
+								aggAmount = dataCache.getCellValue(intersection);	
+							} else {
+								// Invalid Measure Type - Throw IllegalArgumentException (should never get here)
+								String errMsg = "Agg Dimension error - invalid Measure Type of [" + measureType.toString() + "] encountered.";
+								logger.error(errMsg);
+								IllegalArgumentException iae = new IllegalArgumentException(errMsg);
+								throw iae;
+							}
+
+							// Update aggregated time member value
+							TimeSlice.applyTimeHorizonCoord(intersection, aggMember, mdbDef); 
+							dataCache.setCellValue(intersection, aggAmount, trackChanges);
+
+						} 
+					}
 				}  // Next intersection
 			}	
 			cellIterator.reset();
@@ -408,6 +442,7 @@ public abstract class PafDataCacheCalc {
 		PafViewSection viewSection = dataCache.getPafMVS().getViewSection();
 		String[] attributeDims = viewSection.getAttributeDims();
 		String[] viewDims = viewSection.getDimensionsPriority();
+		int timeIndex = dataCache.getAxisIndex(dataCache.getTimeDim()), yearIndex = dataCache.getAxisIndex(dataCache.getYearDim());
 		Set<Intersection> invalidViewIs = viewSection.invalidAttrIntersections();
 		Map<String, Set<Intersection>> recalcIsByMsr = new HashMap<String, Set<Intersection>>();
 		MemberTreeSet memberTrees = clientState.getUowTrees();
@@ -423,10 +458,11 @@ public abstract class PafDataCacheCalc {
 		Odometer cacheIterator = new Odometer(memberMap, viewDims);
 		while(cacheIterator.hasNext()) {
 
-			// Get next intersection
+			// Get next intersection and convert to a time/year based intersection
 			@SuppressWarnings("unchecked")
 			String[] coordinates = (String[]) cacheIterator.nextValue().toArray(new String[0]);
-			Intersection attrIs = dataCache.translateTimeHorizonIs(new Intersection(viewDims, coordinates));
+			TimeSlice.translateTimeHorizonCoords(coordinates, timeIndex, yearIndex);		
+			Intersection attrIs = new Intersection(viewDims, coordinates);
 
 			// Skip any invalid intersections. The view section's invalid intersection
 			// collection only contains invalid intersections that are visible on the 

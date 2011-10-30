@@ -619,8 +619,8 @@ public class PafDataCache implements IPafDataCache {
 
 		// For now, in a multi-year uow, the top node is to be locked, due to 
 		// allocation complexities.
-		// Add the root node of the time horizon tree to the list of open
-		// periods, if there are more than one years.
+//		// Add the root node of the time horizon tree to the list of open
+//		// periods, if there are more than one years.
 //		if (yearMbrs.size() > 1 && !openPeriods.isEmpty()) {
 //			PafDimMember root = timeHorizonTree.getRootNode();
 //			openPeriods.add(root.getKey());
@@ -2385,8 +2385,8 @@ public class PafDataCache implements IPafDataCache {
 	 * @return Name of the Time Horizon dimension
 	 */
 	public String getTimeHorizonDim() {
-//		return PafBaseConstants.TIME_HORIZON_DIM;
-		return getTimeDim();
+		return PafBaseConstants.TIME_HORIZON_DIM;
+//		return getTimeDim();
 	}
 
 	/**

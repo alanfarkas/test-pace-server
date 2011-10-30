@@ -28,7 +28,8 @@ public class PafBaseConstants {
 	// time horizon constants
 	public static final String TIME_HORIZON_DEFAULT_YEAR = "**YEAR.NA**";
 	public static final String TIME_HORIZON_DIM = "**TIME.HORIZON**";
-	public static final String TIME_HORIZON_MBR_DELIM = ".";  
+	public static final String TIME_HORIZON_MBR_DELIM = "||";  
+	public static final int TIME_HORIZON_MBR_DELIM_LEN = TIME_HORIZON_MBR_DELIM.length();  
 
 	
 	// version type constants

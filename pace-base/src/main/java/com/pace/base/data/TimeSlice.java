@@ -35,7 +35,15 @@ public class TimeSlice {
 	 * @param timeHorizonCoord Time horizon member 
 	 */
 	public TimeSlice(String timeHorizonCoord) {
-		convertTimeHorizonCoord(timeHorizonCoord, period, year);
+
+		// Look for period/year delimiter. Throw an error if the delimiter is not found
+		// or if it is the last character.
+		int pos = findTimeHorizonDelim(timeHorizonCoord);
+
+		// Split time horizon coordinate into period and year
+		period = timeHorizonCoord.substring(pos + PafBaseConstants.TIME_HORIZON_MBR_DELIM_LEN);
+		year = timeHorizonCoord.substring(0, pos);
+		
 	}
 
 	/**
@@ -78,12 +86,15 @@ public class TimeSlice {
 	 */
 	public static void applyTimeHorizonCoord(Intersection cellIs, String timeHorizonCoord, MdbDef mdbDef) {
 		
-		String period = null, year = null;
 		String timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
 		
-		convertTimeHorizonCoord(timeHorizonCoord, period, year);
-		cellIs.setCoordinate(timeDim, period);
-		cellIs.setCoordinate(yearDim, yearDim);
+		// Look for period/year delimiter. Throw an error if the delimiter is not found
+		// or if it is the last character.
+		int pos = findTimeHorizonDelim(timeHorizonCoord);
+
+		// Split time horizon coordinate into period and year
+		cellIs.setCoordinate(timeDim, timeHorizonCoord.substring(pos + PafBaseConstants.TIME_HORIZON_MBR_DELIM_LEN));
+		cellIs.setCoordinate(yearDim, timeHorizonCoord.substring(0, pos));
 	}
 	
 	/**
@@ -98,25 +109,49 @@ public class TimeSlice {
 		return year + PafBaseConstants.TIME_HORIZON_MBR_DELIM + period;
 	}
 	
-	static public void convertTimeHorizonCoord(final String timeHorizonCoord, String period, String year) {
+	
+	/**
+	 * Translate time horizon intersection coordinates to time/year coordinats
+	 * 
+	 * @param coords Intersection coordinates
+	 * @param peridIndex Period coordinate index
+	 * @param yearIndex Year coorindate index
+	 */
+	public static void translateTimeHorizonCoords(String[] coords, int periodIndex, int yearIndex) {
 		
+		String yearCoord = coords[yearIndex];
+		
+		// Verify that these are time horizon coordinates before performing translation
+		if (yearCoord.equals(PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR)) {
+			String timeHorizonCoord = coords[periodIndex];
+			int pos = findTimeHorizonDelim(timeHorizonCoord);
+			coords[periodIndex] = timeHorizonCoord.substring(pos + PafBaseConstants.TIME_HORIZON_MBR_DELIM_LEN);
+			coords[yearIndex] = timeHorizonCoord.substring(0, pos);
+		}
+	
+	}
+
+	/**
+	 * Return the position of the time horizon delimiter in a time horizon coordinate
+	 * 
+	 * @param timeHorizonCoord Time horizon coordinate
+	 * @return
+	 */
+	private static int findTimeHorizonDelim(String timeHorizonCoord) {
+
 		// Look for period/year delimiter. Throw an error if the delimiter is not found
-		// of if it is the last character.
+		// or if it is the last character.
 		int pos = timeHorizonCoord.indexOf(PafBaseConstants.TIME_HORIZON_MBR_DELIM);
 		if (pos == -1 || pos > timeHorizonCoord.length()) {
 			String errMsg = "Invalid Time Horizon coordinate [" + timeHorizonCoord 
-					+ "] passed to TimeSlice";
+					+ "] passed to TimeSlice object";
 //			logger.error(errMsg);
 			throw new IllegalArgumentException(errMsg);
 		}
 		
-		// Split time horizon coordinate into period and year
-		period = timeHorizonCoord.substring(pos + 1);
-		year = timeHorizonCoord.substring(0, pos);
-		
+		return pos;
 	}
 
-	
 	/**
 	 * Return the time horizon period coordinate
 	 * 

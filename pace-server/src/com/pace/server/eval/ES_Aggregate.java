@@ -111,28 +111,28 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             // open periods to time filter, but remove top node since it is virtual. Also set year 
             // to time horizon default, since year is embedded in each time horizon period ().
             //
-//            List<String> openTimeHorizonPeriods = dataCache.getOpenTimeHorizonPeriods();
-//            PafDimTree timeHorizonTree = dataCache.getDimTrees().getTree(timeHorizonDim);
-//            PafDimMember timeHorizonRoot = timeHorizonTree.getRootNode();
-//            if (timeHorizonRoot.getMemberProps().isVirtual()) {
-//                openTimeHorizonPeriods.remove(timeHorizonRoot.getKey());            	
-//            }
-//            aggFilter.put(timeDim, openTimeHorizonPeriods);
-//            aggFilter.put(yearDim, Arrays.asList(TimeSlice.getTimeHorizonYear()));
-            if (dataCache.hasLockedPeriods() ) {              
-            	//get current year members
-            	String[] yearMembers = dataCache.getDimMembers(yearDim);            
-            	//if current year members exists
-            	if ( yearMembers != null && yearMembers.length > 0) {           
-            		//get 1st year member
-            		String yearMember = yearMembers[0];
-            		//get current open time periods
-            		List<String> openPeriods = dataCache.getOpenPeriods(clientState.getPlanningVersion().getName(), yearMember);   
-            		//if open time periods exists, add time dim to filter list
-            		if ( openPeriods != null ) 
-            			aggFilter.put(timeDim, openPeriods);     	
-            	}
+            List<String> openTimeHorizonPeriods = dataCache.getOpenTimeHorizonPeriods();
+            PafDimTree timeHorizonTree = dataCache.getDimTrees().getTree(timeHorizonDim);
+            PafDimMember timeHorizonRoot = timeHorizonTree.getRootNode();
+            if (timeHorizonRoot.getMemberProps().isSynthetic()) {
+                openTimeHorizonPeriods.remove(timeHorizonRoot.getKey());            	
             }
+            aggFilter.put(timeDim, openTimeHorizonPeriods);
+            aggFilter.put(yearDim, Arrays.asList(TimeSlice.getTimeHorizonYear()));
+//            if (dataCache.hasLockedPeriods() ) {              
+//            	//get current year members
+//            	String[] yearMembers = dataCache.getDimMembers(yearDim);            
+//            	//if current year members exists
+//            	if ( yearMembers != null && yearMembers.length > 0) {           
+//            		//get 1st year member
+//            		String yearMember = yearMembers[0];
+//            		//get current open time periods
+//            		List<String> openPeriods = dataCache.getOpenPeriods(clientState.getPlanningVersion().getName(), yearMember);   
+//            		//if open time periods exists, add time dim to filter list
+//            		if ( openPeriods != null ) 
+//            			aggFilter.put(timeDim, openPeriods);     	
+//            	}
+//            }
 
              
             
