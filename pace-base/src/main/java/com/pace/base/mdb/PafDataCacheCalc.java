@@ -283,12 +283,10 @@ public abstract class PafDataCacheCalc {
 						// Aggregate children across selected member intersection. When aggregating 
 						// across the "Time" dimension, the aggregation process must properly aggregate 
 						// any measures set with the "Time Balance First" or "Time Balance Last" property.
-						//
-						// All
 						if (!isTimeAggregation){
 
-							// Translate time horzion coordinate in aggregate intersection to
-							// time year coordinates. 
+							// Non-Time Aggreation - translate time horzion coordinate in aggregated 
+							// intersection to time year coordinates. 
 							TimeSlice.translateTimeHorizonCoords(coords, timeAxis, yearAxis);
 							
 							// Standard aggregation process - sum up children of selected member

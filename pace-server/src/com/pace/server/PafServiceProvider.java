@@ -3892,6 +3892,48 @@ public PafGetNotesResponse getCellNotes(
 
 
 	/**
+	 * Validate user security configuration.
+	 *
+	 * @param validateUserSecurityReq The user security validation request
+	 * @return ValidationResponse
+	 * 
+	 * @throws RemoteException
+	 * @throws PafNotAuthorizedSoapException 
+	 * @throws PafNotAuthenticatedSoapException 
+	 * @throws PafSoapException 
+	 */
+	public ValidationResponse validateUserSecurity(ValidateUserSecurityRequest validateUserSecurityReq) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
+	
+		ValidationResponse resp = new ValidationResponse();
+		List<String> validationErrors = new ArrayList<String>();
+		boolean success = false;
+		try
+		{
+			if(isAuthorized(validateUserSecurityReq.getClientId(), false)){
+				
+				// Set logger client info property to user name
+				pushToNDCStack(validateUserSecurityReq.getClientId());
+				
+				// Validate the user security configuration
+				success =  dataService.validateUserSecurity(validateUserSecurityReq.getSecuritySpecs(), validationErrors);
+			}
+			
+		}catch (RuntimeException re) {
+			handleRuntimeException(re);
+//		}catch (PafException pex) {
+//			PafErrHandler.handleException(pex);
+//			throw pex.getPafSoapException();
+		}finally{
+			// Pop logger client id from stack and format response object
+			popFromNDCStack(validateUserSecurityReq.getClientId());
+			resp.setValidationErrors(validationErrors.toArray(new String[0]));
+			resp.setSuccess(success);
+		}
+		
+		return resp;
+
+	}	
+	/**
 	 * Closes a clients session by removing Client State from the clients map.
 	 *
 	 * @param pafRequest request

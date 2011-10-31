@@ -3891,6 +3891,20 @@ public class PafDataService {
 	}
 
 
+	/**
+	 * Validate user security specifications
+	 * 
+	 * @param securitySpecs User security specifications, one for each security dimension
+	 * @param validationErrors List of validation errors
+	 * 
+	 * @return Success status
+	 */
+	public boolean validateUserSecurity(PafDimSpec[] securitySpecs, List<String> validationErrors) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+
 
 
 

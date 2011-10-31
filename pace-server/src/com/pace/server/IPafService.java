@@ -603,4 +603,19 @@ public interface IPafService extends Remote {
 	 * @throws RemoteException the remote exception
 	 */
 	public PafSuccessResponse isSessionActive(PafRequest pafRequest) throws RemoteException;
+
+	/**
+	 * Validate user security configuration.
+	 *
+	 * @param validateUserSecurityReq The user security validation request
+	 * @return ValidationResponse
+	 * 
+	 * @throws RemoteException
+	 * @throws PafNotAuthorizedSoapException 
+	 * @throws PafNotAuthenticatedSoapException 
+	 * @throws PafSoapException 
+	 */
+	public ValidationResponse validateUserSecurity(ValidateUserSecurityRequest validateUserSecurityReq) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException;
+	
+
 }
