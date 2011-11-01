@@ -21,7 +21,9 @@ public class ApplicationState {
 	private RunningState currentRunState;
 	private List<Exception> exceptions = new ArrayList<Exception>();
 	
-	private void ApplicationState(String appId) {
+	public ApplicationState() {} // required by SOAP Layer
+	
+	public ApplicationState(String appId) {
 		applicationId = appId;
 		currentRunState= RunningState.STOPPED;
 	}
@@ -44,7 +46,7 @@ public class ApplicationState {
 	 * @param currentState the currentState to set
 	 */
 	public void setCurrentRunState(RunningState currentState) {
-		currentState = currentState;
+		this.currentRunState = currentState;
 	}
 	
 	public void clearExceptions() {

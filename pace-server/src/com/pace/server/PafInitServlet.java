@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafErrHandler;
+import com.pace.base.PafErrSeverity;
+
 public class PafInitServlet extends HttpServlet {
 
 	Logger logger = Logger.getLogger(PafInitServlet.class);
@@ -100,6 +103,15 @@ public class PafInitServlet extends HttpServlet {
         logger.info("Starting Pace Application Framework Server.");
         logger.info("Server Version: " + PafServerConstants.SERVER_VERSION);
         logger.info("--------------------------------------------------");
+        logger.info("Initializing Autoload Applications");
+        
+        try { 
+        	new PafServiceProvider().loadApplication(null);
+        }
+        catch (Exception pex) {
+        	PafErrHandler.handleException(pex, PafErrSeverity.Error);
+        }
+        
 //		new PafMetaData();
 //		PafDataService.getInstance();
 //		PafViewService.getInstance();

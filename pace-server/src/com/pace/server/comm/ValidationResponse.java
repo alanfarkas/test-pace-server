@@ -18,6 +18,8 @@
  */
 package com.pace.server.comm;
 
+import com.pace.base.comm.PafSuccessResponse;
+
 /**
  * Sends back success/failure response
  *

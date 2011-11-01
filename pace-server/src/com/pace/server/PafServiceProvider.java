@@ -48,6 +48,8 @@ import com.pace.base.db.cellnotes.SimpleCellNote;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.db.membertags.SimpleMemberTagData;
 import com.pace.base.mdb.*;
+import com.pace.base.project.PaceProject;
+import com.pace.base.project.XMLPaceProject;
 import com.pace.base.rules.RuleGroup;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.state.PafClientState;
@@ -69,8 +71,7 @@ import com.pace.server.comm.*;
  * @version	x.xx
  */
 
-@WebService(endpointInterface="com.pace.server.IPafService")
-
+@WebService
 public class PafServiceProvider implements IPafService {
 
 	// injected handle to the web service context
@@ -104,11 +105,11 @@ public class PafServiceProvider implements IPafService {
 	 */
 	public PafServiceProvider() {
 		try {
-			loadApplication(null);
+			// loadApplication(null);
 			
 		} catch (Throwable t) {
 			// don't do anything as all error handling should have been handled elsewhere
-			// otherwise the app server things something went wrong.
+			// otherwise the app server thinks something went wrong.
 		}
 	}
 	
@@ -294,7 +295,6 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 		PafServerAck ack = null;
 	
-
 		try {
 			
 			String clientId = String.valueOf(Math.random());
@@ -4023,10 +4023,19 @@ public PafGetNotesResponse getCellNotes(
 	public ApplicationStateResponse getApplicationState(
 			ApplicationStateRequest appReq) throws RemoteException,
 			PafSoapException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		ApplicationStateResponse asr = new ApplicationStateResponse();
+		asr.setAppStates(appService.getAllApplicationStates() );
+
+		return asr;
 	}
 
+// protected utility method invoked by initialization servlet.
+	static void autoStartApplications() {
+
+	}
+
+		
 
 	/* (non-Javadoc)
 	 * @see com.pace.server.IPafService#loadApplication(com.pace.base.comm.LoadApplicationRequest)
@@ -4034,8 +4043,10 @@ public PafGetNotesResponse getCellNotes(
 	@Override
 	public PafSuccessResponse loadApplication(LoadApplicationRequest appReq)
 			throws RemoteException, PafSoapException {
+
 		// regardless of parameters, for now just load the application
-		
+		String reqAppId = (appReq==null?"TITAN":appReq.getAppIds().get(0));
+
 		
 		// get handles to singleton implementors
 		if (serverPlatform == null) {
@@ -4046,8 +4057,19 @@ public PafGetNotesResponse getCellNotes(
 			+ System.getProperty(Messages.getString("PafServiceProvider.6")); //$NON-NLS-1$
 		}
 
+
+		// presume the appReq object has the appropriate app id.
+		// status updates should be synchronized...hmm
+
+		
+		ApplicationState as = new ApplicationState( reqAppId );	
+		as.setCurrentRunState(ApplicationState.RunningState.STARTING);
+		
+		// FIXIT replace this with synchronized "updateApplicationState" method
+		appService.setApplicationState(reqAppId, as);
+
+		
 		try {
-			
 			
 			// initialize the application service and reload the application metadata			
 			appService.loadApplications();			
@@ -4061,22 +4083,24 @@ public PafGetNotesResponse getCellNotes(
 
 			System.out.println(Messages.getString("PafServiceProvider.7") + logger.getLevel()); //$NON-NLS-1$
 			logger.info(Messages.getString("PafServiceProvider.8")); //$NON-NLS-1$
+			
+			as.setCurrentRunState(ApplicationState.RunningState.RUNNING);			
 
 		} catch (Exception ex) {
 			
 			PafErrHandler.handleException(ex, PafErrSeverity.Error);
-			
-			return new PafSuccessResponse(false);
+			PafSuccessResponse psr = new PafSuccessResponse(false);
+			psr.addException(ex);
+			psr.setResponseMsg("Error loading application" + ex.getMessage() );
+			as.setCurrentRunState(ApplicationState.RunningState.FAILED);
 		}
 		
-		//appService.setApplicationState(id, state)
+		// FIXIT replace this with synchronized "updateApplicationState" method
+		appService.setApplicationState(reqAppId, as);
 
-		new PafSuccessResponse(true);
+		return new PafSuccessResponse(true);
 		
-		return null;
 	}
-
-
 
 
 	@Override
@@ -4084,18 +4108,28 @@ public PafGetNotesResponse getCellNotes(
 			UploadAppRequest uploadAppReq) throws RemoteException,
 			PafSoapException {
 		// TODO Auto-generated method stub
-		return null;
+		return new UploadAppResponse(true);
 	}
-
-
 
 
 	@Override
 	public DownloadAppResponse downloadApplication(
 			DownloadAppRequest downAppReq) throws RemoteException,
 			PafSoapException {
-		// TODO Auto-generated method stub
-		return null;
+
+		DownloadAppResponse resp = new DownloadAppResponse();
+		
+		try {
+			PaceProject proj = new XMLPaceProject(PafMetaData.getPaceHome(), false);
+			resp.getApplicationProjects().add(proj);
+			resp.setSuccess(true);
+		}
+		catch (Exception ex) {
+			resp.setSuccess(false);
+			resp.addException(ex);
+		}
+			
+		return resp;
 	}
 	
 	

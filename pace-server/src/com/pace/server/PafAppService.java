@@ -133,6 +133,10 @@ public class PafAppService {
 	public void setApplicationState(String id, ApplicationState state) {
 		applicationStates.put(id, state);
 	}
+	
+	public List<ApplicationState> getAllApplicationStates() {
+		return new ArrayList<ApplicationState>(applicationStates.values());		
+	}
  
 
 	/**

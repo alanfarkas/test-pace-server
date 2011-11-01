@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.pace.base.project.PaceProject;
 
-public class DownloadAppResponse extends PafResponse {
+public class DownloadAppResponse extends PafSuccessResponse {
 	private List<PaceProject> applicationProjects = new ArrayList<PaceProject>();
 
 	public List<PaceProject> getApplicationProjects() {

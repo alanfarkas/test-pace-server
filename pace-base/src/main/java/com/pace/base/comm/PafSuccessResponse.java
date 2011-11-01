@@ -16,7 +16,11 @@
 	xx/xx/xx		xxxxxxxx		x.xx			..............
  * 
  */
-package com.pace.server.comm;
+package com.pace.base.comm;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Sends back success/failure response
@@ -25,10 +29,23 @@ package com.pace.server.comm;
  * @author Alan
  *
  */
-public class PafSuccessResponse {
+public class PafSuccessResponse extends PafResponse {
 
 	private boolean isSuccess = false;
+	private List<Exception> exceptionList = new ArrayList<Exception>();
 	
+
+	public List<Exception> getExceptionList() {
+		return exceptionList;
+	}
+
+	public void addException(Exception e) {
+		this.exceptionList.add(e);
+	}
+	
+	public void clearExceptions() {
+		this.exceptionList.clear();
+	}
 
 	/**
 	 * @param Default constructor

@@ -13,7 +13,7 @@
  
  <jaxws:endpoint
  	id="PaceAppService"
- 	address="/app-service"  
+ 	address="/app"  
  	implementor="com.pace.server.PafServiceProvider">
     <jaxws:properties>
 			<entry key="javax.xml.ws.session.maintain"> <value type="java.lang.Boolean">true</value> </entry>

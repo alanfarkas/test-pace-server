@@ -1,15 +1,12 @@
 package com.pace.base.comm;
 
 
-public class UploadAppResponse extends PafResponse {
-	boolean successful;
-
-	public boolean isSuccessful() {
-		return successful;
-	}
-
-	public void setSuccessful(boolean successful) {
-		this.successful = successful;
-	}
+public class UploadAppResponse extends PafSuccessResponse {
 	
+	public UploadAppResponse() {} // empty constructor for SOAP layer
+	
+	public UploadAppResponse(boolean b) {
+		this.setSuccess(b);
+	}
+		
 }
