@@ -170,7 +170,7 @@ public class PafDataCache implements IPafDataCache {
 		for (int axis = 0; axis < axisCount; axis++) {
 			String dim = allDimensions.get(axis);
 			PafDimTree dimTree = dimTrees.getTree(dim);
-			String[]members;
+			String[] members;
 			if (!dim.equals(versionDim)) {
 				// Pull all dimensions except Version from dim trees
 				members = dimTree.getMemberNames(TreeTraversalOrder.POST_ORDER).toArray(new String[0]);

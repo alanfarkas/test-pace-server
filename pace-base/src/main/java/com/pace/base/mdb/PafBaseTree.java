@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.data.Intersection;
 
@@ -164,11 +165,40 @@ public class PafBaseTree extends PafDimTree {
      * @throws PafException
      */
     public void addChildCopies(PafBaseTree tree, PafBaseMember sourceMember, PafBaseMember copyMember, int lowestLvl) throws PafException {
+    	addChildCopies(tree, sourceMember, copyMember, lowestLvl, null);
+    }
+    
+    /**
+     *	Copy child nodes from one tree branch to tree branch to another, in the same 
+     *  or different tree. Any members not in the optional member filter will be 
+     *  skipped.
+     * 
+     * @param tree Tree that children will be added to
+     * @param sourceMember Branch being copied
+     * @param copyMember Branch to copy children to
+     * @param lowestLvl Specifies the depth of the branch being copied
+     * @param memberFilter Optional member filter
+     * 
+     * @throws PafException
+     */
+    public void addChildCopies(PafBaseTree tree, PafBaseMember sourceMember, PafBaseMember copyMember, int lowestLvl, List<String> optionalMemberFilter) throws PafException {
 
     	PafBaseMember baseChild = null, childCopy = null;
+    	boolean isFiltered = false;
     	
+    	// Check for member filtering
+    	if (optionalMemberFilter != null && !optionalMemberFilter.isEmpty()) {
+    		isFiltered = true;
+    	}
+    	
+    	// Add children
     	for (PafDimMember child : sourceMember.getChildren() ) {
+
     		if (child.getMemberProps().getLevelNumber() >= lowestLvl) {
+    			
+    			// Skip member if not contained in optional member filter
+    			if (isFiltered && !optionalMemberFilter.contains(child.getKey()))
+    				continue;
     			
     			// Clone child
     			baseChild = (PafBaseMember) child;
@@ -193,11 +223,12 @@ public class PafBaseTree extends PafDimTree {
     			tree.addChild(copyMember, childCopy); // TTN-1347
     			
     			// Add descendants of current child to tree (recursive call)
-    			addChildCopies(tree, (PafBaseMember) child, childCopy, lowestLvl);           
+    			addChildCopies(tree, (PafBaseMember) child, childCopy, lowestLvl, optionalMemberFilter);           
     		}                    
     	}
     }
     
+
     /**
      *	Method_description_goes_here
      *
@@ -465,7 +496,55 @@ public class PafBaseTree extends PafDimTree {
         return newTree;
     }
 
-   /**
+	/**
+	 * Create a discontiguous copy of this tree containing the supplied member lists
+	 * 
+	 * @param discontigMemberLists List of discontiguous member lists that map to members in this tree
+	 * @return Discontiguous tree
+	 * @throws PafException 
+	 */
+	public PafBaseTree getDiscSubTreeCopy(List<List<String>> discontigMemberLists) throws PafException {
+		
+		PafBaseTree newTree = null;
+		List<String> discontigMemberList = discontigMemberLists.get(0);
+		String newRootName = null;
+		int begSearchInx = 0;
+		
+		// Find the root member - it should be a single item on the first list
+		if (discontigMemberList.size() == 1) {
+			newRootName = discontigMemberList.get(0);
+			begSearchInx = 1;
+		} else {
+			// Root not found - use root of this tree
+			newRootName = getRootNode().getKey();
+			begSearchInx = 0;
+		}
+		
+		// Create new root node
+		PafBaseMember newRootNode = getMember(newRootName).getShallowDiscCopy();
+		PafDimMemberProps memberProps = newRootNode.getMemberProps();		
+		memberProps.setSynthetic(true);
+		String alias = PafBaseConstants.SYNTHETIC_ROOT_ALIAS_PREFIX + newRootName + PafBaseConstants.SYNTHETIC_ROOT_ALIAS_SUFFIX;
+		memberProps.setAllAliases(getAliasTableNames(), alias);
+
+		// Create new tree
+		newTree = new PafBaseTree(newRootNode, getAliasTableNames());
+        newTree.setAttributeDimInfo(getAttributeDimInfo());
+        newTree.setDiscontig(true);
+		
+		// Add all discontiguous branches - assume the members in each list are 
+        // sorted in ascending generation order
+        for (int i = begSearchInx; i < discontigMemberLists.size(); i++) {
+        	List<String> memberList = discontigMemberLists.get(i);
+        	String branchRootName = memberList.get(0);
+            newTree.addChildCopies(newTree, getMember(branchRootName).getParent(), newRootNode, 0, memberList );
+        }
+
+        return newTree;
+	}
+
+
+	/**
      *  Return a "Simple" version of the PafBaseTree
      *
      * @return PafSimpleBaseTree

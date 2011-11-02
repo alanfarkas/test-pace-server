@@ -1,6 +1,7 @@
 package com.pace.base.mdb;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.essbase.api.metadata.IEssMember;
@@ -44,6 +45,7 @@ public abstract class PafDimMemberProps implements Cloneable {
     public Map<String, String> getAliases() {
         return aliases;
     }
+
     /**
      * Set the member alias tables
      *
@@ -52,6 +54,17 @@ public abstract class PafDimMemberProps implements Cloneable {
     public void setAliases(Map<String, String> aliases) {
         this.aliases = aliases;
     }
+ 
+    /**
+     * Set all member aliases to the specified value
+     *
+     * @param aliasTableNames List of alias table names
+     * @param alias Alias value
+     */
+    public void setAllAliases(String[] aliasTableNames, String alias) { 
+    	for (String aliasTableName : aliasTableNames) 
+    		addMemberAlias(aliasTableName, alias);
+      }
  
 	/**
 	 * Return the member alias for the "Default" alias table
@@ -267,7 +280,7 @@ public abstract class PafDimMemberProps implements Cloneable {
     		+ "Gen: " +  generationNumber + PafBaseConstants.LINE_TERM
     		+ "Lvl: " + levelNumber + PafBaseConstants.LINE_TERM
     		+ "Read Only: " + isReadOnly + PafBaseConstants.LINE_TERM
-    		+ "Virtual: " + isSynthetic;
+    		+ "Alias: " + isSynthetic;
      }
 
 }

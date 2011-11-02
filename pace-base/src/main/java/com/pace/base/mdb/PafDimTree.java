@@ -39,8 +39,9 @@ public abstract class PafDimTree {
     private SortedMap<Integer, List<PafDimMember>> membersByGen = new TreeMap<Integer, List<PafDimMember>>();       
     private List<PafDimMember> sharedMembers = null; // Null value indicates collection is uninitialized, Empty set indicates no shared members
     private PafDimMember rootNode = null;
+    private boolean isDiscontig = false;
 
-    // static logger
+	// static logger
     private static Logger logger = Logger.getLogger(PafDimTree.class);
     
    
@@ -186,6 +187,20 @@ public abstract class PafDimTree {
 
     	return sharedMembers;
     }
+
+    /**
+	 * @return the isDiscontig
+	 */
+	public boolean isDiscontig() {
+		return isDiscontig;
+	}
+
+	/**
+	 * @param isDiscontig the isDiscontig to set
+	 */
+	public void setDiscontig(boolean isDiscontig) {
+		this.isDiscontig = isDiscontig;
+	}
 
     /**
      *  Get the names of all shared members

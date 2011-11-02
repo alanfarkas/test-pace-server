@@ -23,8 +23,10 @@ package com.pace.base.app;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.pace.base.data.PafMemberList;
 import com.pace.base.data.PafSimpleUow;
@@ -38,13 +40,13 @@ import com.pace.base.data.PafSimpleUow;
  *
  */
 public class UnitOfWork{
-    HashMap <String, String[]>dimMembers = new HashMap<String, String[]>();
-    String[] dimensions; // this is kept to preserve the order or retrieval from the hashmap
+    private HashMap <String, String[]>dimMembers = new HashMap<String, String[]>();
+    private String[] dimensions; // this is kept to preserve the order or retrieval from the hashmap
     private HashMap<Integer, String> axisIndex = new HashMap<Integer, String>();
     private HashMap<String, Integer> dimIndex = new HashMap<String, Integer>();
+    private Map<String, List<List<String>>> discMbrGrpsByDim = new HashMap<String, List<List<String>>>();
     
-    public UnitOfWork() {
-    }
+    public UnitOfWork() {}
     
     public UnitOfWork(PafSimpleUow simpleUow) {
         dimensions = new String[simpleUow.getPafMemberEntries().length];
@@ -133,7 +135,55 @@ public class UnitOfWork{
         return dimMembers;
     }
 
-    public PafSimpleUow getSimpleUow() {
+    /**
+	 * @return the discontigDims
+	 */
+	public Set<String> getDiscontigDims() {
+		
+		Set<String> discontigDims = new HashSet<String>();
+		if (discMbrGrpsByDim != null) {
+			discontigDims.addAll(discMbrGrpsByDim.keySet());
+		}
+		return discontigDims;
+	}
+
+	/**
+	 * 	Determine if the dimension is discontiguous
+	 *
+	 * @param dimension Dimension
+	 * @return True is the dimension is discontiguous
+	 */
+	public boolean isDiscontigDim(String dimension) {
+		return getDiscontigDims().contains(dimension);
+	}
+	
+	/**
+	 * @return the discontigMemberGroups
+	 */
+	public Map<String, List<List<String>>> getDiscontigMemberGroups() {
+		return discMbrGrpsByDim;
+	}
+
+	/**
+	 * @param discMbrGroupsByDim the discontigMemberGroups to set
+	 */
+	public void setDiscontigMemberGroups(Map<String, List<List<String>>> discMbrGroupsByDim) {
+		this.discMbrGrpsByDim = discMbrGroupsByDim;
+	}
+
+	/**
+	 * Return the list of discontiguous member groups for the specified
+	 * dimension.
+	 * 
+	 * @param dimension Dimension name
+	 * @return List<List<String>>
+	 */
+	public List<List<String>> getDiscontigMemberGroups(String dimension) {
+		return discMbrGrpsByDim.get(dimension);
+	}
+
+
+	public PafSimpleUow getSimpleUow() {
         PafSimpleUow simpleUow = new PafSimpleUow();
         PafMemberList[] memberLists = new PafMemberList[dimensions.length];
         int i = 0;

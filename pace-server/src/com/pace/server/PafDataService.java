@@ -388,33 +388,83 @@ public class PafDataService {
 	 *
 	 * @param uow Unit of work object
 	 * @param clientState Client state object
+	 * @param discontigMbrGrpsByDim Discrete lists of expanded member groups by discontiguous dimension
 	 * 
 	 * @return Hash Map containing the expanded members for each dimension
 	 * @throws PafException 
 	 */
-	private Map<Integer, List<String>> expandUow(UnitOfWork uow, PafClientState clientState) throws PafException {
+	private Map<Integer, List<String>> expandUowMembers(UnitOfWork uow, PafClientState clientState, 
+			Map<String, List<List<String>>> discontigMbrGrpsByDim) throws PafException {
 
 		int axis = 0;
+		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
 		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
 		String[] terms = null;
 		Map<Integer, List<String>> expandedUow = new HashMap<Integer, List<String>>();
+		Set<String> discontigDims = new HashSet<String>();
+
 
 		// Get the list of expanded members for each dimension
 		for (String dim : uow.getDimensions() ) {
+
+			// Get the list of uow member specifications for current dimension
 			terms = uow.getDimMembers(dim);
-			List<String> members = new ArrayList<String>();
-			for (String term : terms) {
-				members.addAll(Arrays.asList(expandExpression(term, true, dim, null)));
+
+			// Check for discontiguous hierarchies. A hierarchy is considered discontiguous
+			// if it consists of more than one member specification. Measures and Version
+			// dimensions are ignored, since these hierarchies do not aggregate and have 
+			// special handling elsewhere (TTN-1644).
+			boolean isDiscontig = false;
+			List<List<String>> discontigMbrGrps = null;
+			if (terms.length > 1) {
+				if (!dim.equals(measureDim) && !dim.equals(versionDim)) {
+					isDiscontig = true;
+					discontigDims.add(dim);
+					discontigMbrGrps = new ArrayList<List<String>>();
+					discontigMbrGrpsByDim.put(dim, discontigMbrGrps);
+				}			
 			}
+
+			// Expand each member specification
+			List<String> dimMemberList = new ArrayList<String>();
+			for (String term : terms) {
+
+				List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
+				dimMemberList.addAll(expandedMbrs);
+
+				// Additional processing for discontiguous dimension hierarchy (TTN-1644)
+				if (isDiscontig) {
+					// Add in sythentic root to beginning of member list, if this is the first
+					// term
+					if (discontigMbrGrps.size() == 0) {
+						dimMemberList.add(0, dim);
+						discontigMbrGrps.add(0,new ArrayList<String>(Arrays.asList(new String[]{dim})));
+					}
+					discontigMbrGrps.add(expandedMbrs);
+				}
+			}
+
 			// Special logic for version dimension - filter out version dimension root
 			if (dim.equalsIgnoreCase(versionDim)) {
-				members.remove(versionDim);
+				dimMemberList.remove(versionDim);
 			}
-			expandedUow.put(axis++, members);
+			
+			// Check for duplicate members
+			Set<String> uniqueMembers = new HashSet<String>(dimMemberList);
+			int dupMbrCount = dimMemberList.size() - uniqueMembers.size();
+			if (dupMbrCount != 0) {
+				String errMsg = dupMbrCount + " duplicate member(s) found in UOW definition for dimension: "
+					+ dim + ". User security or underlying dimensional hierarchies need to be adjusted.";
+				logger.warn(errMsg);
+				throw new IllegalArgumentException(errMsg);
+			}
+			
+			// Add expanded member list to uow definiton
+			expandedUow.put(axis++, dimMemberList);
 		}
+		
 		return expandedUow;
 	}
-	
 	
 	/**
 	 *	Expand out the members in a unit of work uing the base trees
@@ -426,20 +476,29 @@ public class PafDataService {
 	 * @throws PafException 
 	 */
 	public UnitOfWork expandUOW(UnitOfWork uow, PafClientState clientState) throws PafException{
-		//Call expandUOW
-		Map<Integer, List<String>> expandedUow = this.expandUow(uow, clientState);
-		
-		String[] dimensions = new String[expandedUow.size()];
-		String[][] dimensionMembers = new String[expandedUow.size()][];
 
-		for(Integer axisIndex : expandedUow.keySet()){
+		UnitOfWork expandedUow = null;
+		Map<Integer, List<String>> expandedUowMap = null;
+		Map<String, List<List<String>>> discontigMemberGroupsByDim = new HashMap<String, List<List<String>>>();
+
+		
+		// Expand uow member specifications
+		expandedUowMap = expandUowMembers(uow, clientState, discontigMemberGroupsByDim);
+		
+		// Create new expanded uow
+		String[] dimensions = new String[expandedUowMap.size()];
+		String[][] dimensionMembers = new String[expandedUowMap.size()][];
+		for(Integer axisIndex : expandedUowMap.keySet()){
 			dimensions[axisIndex] = uow.getAxisIndices().get(axisIndex);
 			
-			dimensionMembers[axisIndex] = expandedUow.get(axisIndex).toArray(new String[0]);
+			dimensionMembers[axisIndex] = expandedUowMap.get(axisIndex).toArray(new String[0]);
 		}
-
-		return new UnitOfWork(dimensions, dimensionMembers);
+		expandedUow = new UnitOfWork(dimensions, dimensionMembers);
+		expandedUow.setDiscontigMemberGroups(discontigMemberGroupsByDim);
+		
+		return expandedUow;
 	}
+
 
 	public PafBaseMember getUowRoot(PafClientState clientState, String dim, UnitOfWork uow) {
 		TreeMap<Integer, ArrayList<PafBaseMember>> treeMap = getMembersByLevel(clientState, dim);
@@ -608,15 +667,18 @@ public class PafDataService {
 		String measureDim = mdbDef.getMeasureDim();
 		String versionDim = mdbDef.getVersionDim();
 		String yearDim = mdbDef.getYearDim();
-		String[] mbrNames = null;
-		
+		String[] uowMbrNames = null;
+		UnitOfWork expandedUow = null;
+
+
 		//Get the dimension members.  Use the optional workUnit parameter if it is not null
 		if(optionalWorkUnit != null){
-			mbrNames = optionalWorkUnit.getDimMembers(dim);
+			expandedUow = optionalWorkUnit;
 		}
 		else{
-			mbrNames = clientState.getUnitOfWork().getDimMembers(dim);
+			expandedUow = clientState.getUnitOfWork();
 		}
+		uowMbrNames = expandedUow.getDimMembers(dim);
 
 		// Version dimension special logic - Prune out any shared members and versions
 		// not contained in the version filter. 
@@ -627,7 +689,7 @@ public class PafDataService {
 			String[] versionFilters = clientState.getPlannerConfig().getVersionFilter();
 
 			//get tree
-			TreeMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, mbrNames, mdbDef);
+			TreeMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, uowMbrNames, mdbDef);
 			PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);
 			PafBaseTree tree = baseTree.getSubTreeCopyByGen(root.getKey(), root.getMemberProps().getLevelNumber() + 1);
 			
@@ -656,15 +718,15 @@ public class PafDataService {
 							tree.removeBranch(branchMemberName);				
 						}						
 					}				
-						}
-					}
-					
+				}
+			}
+
 			// Return version tree
 			return tree;
 		}
 		
 		// Special year dimension logic for multiple year UOW (TTN-1595).
-		if (dim.equals(yearDim) && mbrNames.length > 1) {
+		if (dim.equals(yearDim) && uowMbrNames.length > 1) {
 
 			// Create virtual root
 			PafBaseMember root = baseTree.getRootNode().getShallowDiscCopy();
@@ -676,7 +738,7 @@ public class PafDataService {
 			rootProps.setSynthetic(true);
 			
 			// Create year sub tree and add in UOW years
-			List<String> yearList = new ArrayList<String>(Arrays.asList(mbrNames));
+			List<String> yearList = new ArrayList<String>(Arrays.asList(uowMbrNames));
 			yearList.remove(root.getKey());
 			PafBaseTree yearTree = new PafBaseTree(root, baseTree.getAliasTableNames());
 			for (String year : yearList) {
@@ -690,9 +752,11 @@ public class PafDataService {
 		}
 
 		// All other dimensions - Start out by making a tree copy
-		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, mbrNames, mdbDef);
+		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, uowMbrNames, mdbDef);
 		PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);
-		if (baseTree.hasSharedMembers()) {
+		if (expandedUow.isDiscontigDim(dim)) {
+			copy = baseTree.getDiscSubTreeCopy(expandedUow.getDiscontigMemberGroups(dim));
+		} else if (baseTree.hasSharedMembers()) {
 			// Shared members exist, get whole branch since generations on 
 			// shared members may be higher than original member
 			copy = baseTree.getSubTreeCopy(root.getKey());	
@@ -704,7 +768,7 @@ public class PafDataService {
 
 		// build list of members in the cache, use hash set for quick find
 		List<String>cacheMbrs = new ArrayList<String>(); 
-		cacheMbrs.addAll(Arrays.asList(mbrNames));
+		cacheMbrs.addAll(Arrays.asList(uowMbrNames));
 
 //		// build copy of tree members for traversal, to allow removal
 //		// get copy in generation order to prune from top to bottom
