@@ -19,9 +19,17 @@ public class PafServer implements Comparable, Cloneable {
 	private boolean doesNotPromptOnHotDeploy;
 	private boolean doesNotPromptOnHotRefresh;
 	private boolean https;
+	private String osServiceName;
+	private Integer jmsMessagingPort;
 		
 
 	public PafServer() {		
+	}
+	
+	public PafServer(String name, String host, Integer port) {
+		
+		this(name, host, port, null, false);
+				
 	}
 	
 	public PafServer(String name, String host, Integer port, String homeDirectory) {
@@ -268,4 +276,61 @@ public class PafServer implements Comparable, Cloneable {
 		return https;
 	}
 
+	
+
+	public String getOsServiceName() {
+		return osServiceName;
+	}
+
+	public void setOsServiceName(String osServiceName) {
+		this.osServiceName = osServiceName;
+	}
+
+	public Integer getJmsMessagingPort() {
+		return jmsMessagingPort;
+	}
+
+	public void setJmsMessagingPort(Integer jmsMessagingPort) {
+		this.jmsMessagingPort = jmsMessagingPort;
+	}
+
+	@Override
+	public String toString() {
+		return "PafServer ["
+				+ (name != null ? "name=" + name + ", " : "")
+				+ (host != null ? "host=" + host + ", " : "")
+				+ (port != null ? "port=" + port + ", " : "")
+				+ (homeDirectory != null ? "homeDirectory=" + homeDirectory
+						+ ", " : "")
+				+ "defaultServer="
+				+ defaultServer
+				+ ", "
+				+ (webappName != null ? "webappName=" + webappName + ", " : "")
+				+ (wsdlServiceName != null ? "wsdlServiceName="
+						+ wsdlServiceName + ", " : "")
+				+ (urlTimeoutInMilliseconds != null ? "urlTimeoutInMilliseconds="
+						+ urlTimeoutInMilliseconds + ", "
+						: "")
+				+ (startupFile != null ? "startupFile=" + startupFile + ", "
+						: "")
+				+ (shutdownFile != null ? "shutdownFile=" + shutdownFile + ", "
+						: "")
+				+ (jndiPort != null ? "jndiPort=" + jndiPort + ", " : "")
+				+ (serverStartupTimeoutInMilliseconds != null ? "serverStartupTimeoutInMilliseconds="
+						+ serverStartupTimeoutInMilliseconds + ", "
+						: "")
+				+ "doesNotPromptOnHotDeploy="
+				+ doesNotPromptOnHotDeploy
+				+ ", doesNotPromptOnHotRefresh="
+				+ doesNotPromptOnHotRefresh
+				+ ", https="
+				+ https
+				+ ", "
+				+ (osServiceName != null ? "osServiceName=" + osServiceName + ", "
+						: "")
+				+ (jmsMessagingPort != null ? "jmsMessagingPort="
+						+ jmsMessagingPort : "") + "]";
+	}
+	
+	
 }
