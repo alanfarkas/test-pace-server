@@ -1977,6 +1977,101 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 * 	Update the data cache with the contents of the data slice
+	 * 
+	 * @param dataCache Data Cache
+	 * @param pafDataSlice Paf Data Slice
+	 * @param parms Object containing required PafDataSlice parameters
+	 * @param dimSequence Dimension sequence for data cache intersections associated with the corresponding view section
+	 * 
+	 * @throws PafException
+	 */
+	public void updateDataCache(PafDataSlice pafDataSlice, PafDataSliceParms parms) throws PafException {
+
+		boolean hasPageDimensions = false;
+		int cols = 0, rows = 0;
+		double[] dataSlice = null;
+		String[] rowDims = parms.getRowDimensions(), colDims = parms.getColDimensions();
+		String[][] rowTuples = parms.getRowTuples(), colTuples = parms.getColTuples();
+		String [] attributeDims = parms.getAttributeDims();
+		boolean hasAttributes = false;
+
+		// Had to move this method over from the PafDataCache object so I could get access
+		// to the "isValidAttributeIntersection()" method (AF - 8/23/2011)
+		//TODO If possible, move this this method and all the attribute validation methods to PafDataCache
+		// --- Might not be possible because of data filtering calls in PafServiceProvider.startPlanSession()
+		
+		try {
+			// Validate data slice parms
+			logger.info("Validating PafDataSlice parameters...");
+			hasPageDimensions = validateDataSliceParms(parms);
+			if (attributeDims != null && attributeDims.length > 0) {
+				hasAttributes = true;
+			}
+
+			// Getting data slice array 
+			logger.info("Getting data slice array");
+			cols = pafDataSlice.getColumnCount();
+			dataSlice = pafDataSlice.getData();
+			rows = pafDataSlice.getRowCount();
+
+			// Create reusable cell intersection that will to access
+			// data cache data. This intersection will get updated as
+			// we iterate through all the tuple members
+			Intersection cellIs = new Intersection(parms.getDimSequence());
+			
+			// Enter page headers into appropriate elements of the data  
+			// cache cell intersection 
+			if (hasPageDimensions) {
+				logger.debug("Entering page headers into cell intersection");
+				for (int i = 0; i < parms.getPageDimensions().length; i++) {
+					cellIs.setCoordinate(parms.getPageDimensions()[i], parms.getPageMembers()[i]);
+				}
+			}
+
+			// Load data slice. Start by cycling through row tuples
+			logger.info("Updating data cache with data slice - rows: " + rows + " columns: " + cols + " cells: " + dataSlice.length);  	
+			int sliceIndex = 0;
+			for (String[] rowTuple:rowTuples) {
+
+				// Updated the cell intersection with the current row header members
+				for (int i = 0; i < rowDims.length; i++) {
+					cellIs.setCoordinate(rowDims[i], rowTuple[i]);
+				}
+
+				// Cycle through column tuples
+				for (String[] colTuple:colTuples) {
+
+					// Update the cell intersection with the current column header
+					// members 
+					for (int i = 0; i < colDims.length; i++) {
+						cellIs.setCoordinate(colDims[i], colTuple[i]);
+					}
+
+					// Copy current data slice cell to data cache, skipping any
+					// invalid attribute intersections
+					if (!hasAttributes || isValidAttributeIntersection(cellIs, attributeDims)) {
+						setCellValue(cellIs, dataSlice[sliceIndex]);
+					}
+					sliceIndex++;
+				}
+			}
+
+		} catch (PafException pfe) {
+			// throw Paf Exception
+			throw pfe;
+		} catch (Exception ex) {
+			// throw Paf Exception
+			String errMsg = ex.getMessage();
+			logger.error(errMsg);
+			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
+			throw pfe;
+		}
+
+	}
+
+
+	/**
 	 *	Return the cell address for the specified intersection
 	 *
 	 * @param cellIs Cell intersection 

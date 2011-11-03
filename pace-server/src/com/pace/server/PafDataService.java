@@ -287,100 +287,6 @@ public class PafDataService {
 	}
 
 	
-	/**
-	 * 	Update the data cache with the contents of the data slice
-	 * 
-	 * @param dataCache Data Cache
-	 * @param pafDataSlice Paf Data Slice
-	 * @param parms Object containing required PafDataSlice parameters
-	 * @param dimSequence Dimension sequence for data cache intersections associated with the corresponding view section
-	 * 
-	 * @throws PafException
-	 */
-	public void updateDataCacheFromSlice(PafDataCache dataCache, PafDataSlice pafDataSlice, PafDataSliceParms parms) throws PafException {
-
-		boolean hasPageDimensions = false;
-		int cols = 0, rows = 0;
-		double[] dataSlice = null;
-		String[] rowDims = parms.getRowDimensions(), colDims = parms.getColDimensions();
-		String[][] rowTuples = parms.getRowTuples(), colTuples = parms.getColTuples();
-		String [] attributeDims = parms.getAttributeDims();
-		boolean hasAttributes = false;
-
-		// Had to move this method over from the PafDataCache object so I could get access
-		// to the "isValidAttributeIntersection()" method (AF - 8/23/2011)
-		//TODO If possible, move this this method and all the attribute validation methods to PafDataCache
-		// --- Might not be possible because of data filtering calls in PafServiceProvider.startPlanSession()
-		
-		try {
-			// Validate data slice parms
-			logger.info("Validating PafDataSlice parameters...");
-			hasPageDimensions = dataCache.validateDataSliceParms(parms);
-			if (attributeDims != null && attributeDims.length > 0) {
-				hasAttributes = true;
-			}
-
-			// Getting data slice array 
-			logger.info("Getting data slice array");
-			cols = pafDataSlice.getColumnCount();
-			dataSlice = pafDataSlice.getData();
-			rows = pafDataSlice.getRowCount();
-
-			// Create reusable cell intersection that will to access
-			// data cache data. This intersection will get updated as
-			// we iterate through all the tuple members
-			Intersection cellIs = new Intersection(parms.getDimSequence());
-			
-			// Enter page headers into appropriate elements of the data  
-			// cache cell intersection 
-			if (hasPageDimensions) {
-				logger.debug("Entering page headers into cell intersection");
-				for (int i = 0; i < parms.getPageDimensions().length; i++) {
-					cellIs.setCoordinate(parms.getPageDimensions()[i], parms.getPageMembers()[i]);
-				}
-			}
-
-			// Load data slice. Start by cycling through row tuples
-			logger.info("Updating data cache with data slice - rows: " + rows + " columns: " + cols + " cells: " + dataSlice.length);  	
-			int sliceIndex = 0;
-			for (String[] rowTuple:rowTuples) {
-
-				// Updated the cell intersection with the current row header members
-				for (int i = 0; i < rowDims.length; i++) {
-					cellIs.setCoordinate(rowDims[i], rowTuple[i]);
-				}
-
-				// Cycle through column tuples
-				for (String[] colTuple:colTuples) {
-
-					// Update the cell intersection with the current column header
-					// members 
-					for (int i = 0; i < colDims.length; i++) {
-						cellIs.setCoordinate(colDims[i], colTuple[i]);
-					}
-
-					// Copy current data slice cell to data cache, skipping any
-					// invalid attribute intersections
-					if (!hasAttributes || dataCache.isValidAttributeIntersection(cellIs, attributeDims)) {
-						dataCache.setCellValue(cellIs, dataSlice[sliceIndex]);
-					}
-					sliceIndex++;
-				}
-			}
-
-		} catch (PafException pfe) {
-			// throw Paf Exception
-			throw pfe;
-		} catch (Exception ex) {
-			// throw Paf Exception
-			String errMsg = ex.getMessage();
-			logger.error(errMsg);
-			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
-			throw pfe;
-		}
-
-	}
-
 
 
 	/**
@@ -396,78 +302,58 @@ public class PafDataService {
 	private List<String> expandUowDim(String dim, String[] terms, PafClientState clientState, 
 			List<ArrayList<String>> discontigMbrGrps) throws PafException {
 
-//		int axis = 0;
 		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
 		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
-//		String[] terms = null;
-//		Map<Integer, List<String>> expandedUow = new HashMap<Integer, List<String>>();
-//		Set<String> discontigDims = new HashSet<String>();
 
 
-		// Get the list of expanded members for each dimension
-//		for (String dim : uow.getDimensions() ) {
+		// Check for discontiguous hierarchies. A hierarchy is considered discontiguous
+		// if it consists of more than one member specification. Measures and Version
+		// dimensions are ignored, since these hierarchies do not aggregate and have 
+		// special handling elsewhere (TTN-1644).
+		boolean isDiscontig = false;
+		if (terms.length > 1) {
+			if (!dim.equals(measureDim) && !dim.equals(versionDim)) {
+				isDiscontig = true;
+			}			
+		}
 
-			// Get the list of uow member specifications for current dimension
-//			terms = uow.getDimMembers(dim);
-			
-			// 
-//			dimMemberList = expandUowDim(dim, terms, clientState, discontigMemberLists);
+		// Expand each member specification
+		List<String> dimMemberList = new ArrayList<String>();
+		for (String term : terms) {
 
-			// Check for discontiguous hierarchies. A hierarchy is considered discontiguous
-			// if it consists of more than one member specification. Measures and Version
-			// dimensions are ignored, since these hierarchies do not aggregate and have 
-			// special handling elsewhere (TTN-1644).
-			boolean isDiscontig = false;
-//			List<List<String>> discontigMbrGrps = null;
-			if (terms.length > 1) {
-				if (!dim.equals(measureDim) && !dim.equals(versionDim)) {
-					isDiscontig = true;
-//					discontigDims.add(dim);
-//					discontigMbrGrps = new ArrayList<List<String>>();
-//					discontigMbrGrpsByDim.put(dim, discontigMbrGrps);
-				}			
-			}
+			ArrayList<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
+			dimMemberList.addAll(expandedMbrs);
 
-			// Expand each member specification
-			List<String> dimMemberList = new ArrayList<String>();
-			for (String term : terms) {
-
-				ArrayList<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
-				dimMemberList.addAll(expandedMbrs);
-
-				// Additional processing for discontiguous dimension hierarchy (TTN-1644)
-				if (isDiscontig) {
-					// Add in sythentic root to beginning of member list, if this is the first
-					// term
-					if (discontigMbrGrps.size() == 0) {
-						dimMemberList.add(0, dim);
-						discontigMbrGrps.add(0,new ArrayList<String>(Arrays.asList(new String[]{dim})));
-					}
-					discontigMbrGrps.add(expandedMbrs);
+			// Additional processing for discontiguous dimension hierarchy (TTN-1644)
+			if (isDiscontig) {
+				// Add in sythentic root to beginning of member list, if this is the first
+				// term
+				if (discontigMbrGrps.size() == 0) {
+					dimMemberList.add(0, dim);
+					discontigMbrGrps.add(0,new ArrayList<String>(Arrays.asList(new String[]{dim})));
 				}
+				discontigMbrGrps.add(expandedMbrs);
 			}
+		}
 
-			// Special logic for version dimension - filter out version dimension root
-			if (dim.equalsIgnoreCase(versionDim)) {
-				dimMemberList.remove(versionDim);
-			}
-			
-			// Check for duplicate members
-			Set<String> uniqueMembers = new HashSet<String>(dimMemberList);
-			int dupMbrCount = dimMemberList.size() - uniqueMembers.size();
-			if (dupMbrCount != 0) {
-				String errMsg = dupMbrCount + " duplicate member(s) found in UOW definition for dimension: "
-					+ dim + ". User security or underlying dimensional hierarchies need to be adjusted.";
-				logger.error(errMsg);
-			}
-			
-			// Add expanded member list to uow definiton
-//			expandedUow.put(axis++, dimMemberList);
-//		}
-		
+		// Special logic for version dimension - filter out version dimension root
+		if (dim.equalsIgnoreCase(versionDim)) {
+			dimMemberList.remove(versionDim);
+		}
+
+		// Check for duplicate members
+		Set<String> uniqueMembers = new HashSet<String>(dimMemberList);
+		int dupMbrCount = dimMemberList.size() - uniqueMembers.size();
+		if (dupMbrCount != 0) {
+			String errMsg = dupMbrCount + " duplicate member(s) found in UOW definition for dimension: "
+			+ dim + ". User security or underlying dimensional hierarchies need to be adjusted.";
+			logger.error(errMsg);
+		}
+
 		return dimMemberList;
 	}
-	
+
+
 	/**
 	 *	Expand out the members in a unit of work using the base trees
 	 *
@@ -482,11 +368,8 @@ public class PafDataService {
 			Map<String, List<ArrayList<String>>> discontigMbrGrpsByDim) throws PafException {
 
 		int axis = 0;
-//		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
-//		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
 		String[] terms = null;
 		Map<Integer, List<String>> expandedUow = new HashMap<Integer, List<String>>();
-//		Set<String> discontigDims = new HashSet<String>();
 
 
 		// Get the list of expanded members for each dimension
@@ -498,54 +381,6 @@ public class PafDataService {
 			// Expand the members for each dimension
 			List<ArrayList<String>> discontigMbrGrps = new ArrayList<ArrayList<String>>();
 			List<String> dimMemberList = expandUowDim(dim, terms, clientState, discontigMbrGrps);
-
-//			// Check for discontiguous hierarchies. A hierarchy is considered discontiguous
-//			// if it consists of more than one member specification. Measures and Version
-//			// dimensions are ignored, since these hierarchies do not aggregate and have 
-//			// special handling elsewhere (TTN-1644).
-//			boolean isDiscontig = false;
-//			List<List<String>> discontigMbrGrps = null;
-//			if (terms.length > 1) {
-//				if (!dim.equals(measureDim) && !dim.equals(versionDim)) {
-//					isDiscontig = true;
-//					discontigDims.add(dim);
-//					discontigMbrGrps = new ArrayList<List<String>>();
-//					discontigMbrGrpsByDim.put(dim, discontigMbrGrps);
-//				}			
-//			}
-//
-//			// Expand each member specification
-//			List<String> dimMemberList = new ArrayList<String>();
-//			for (String term : terms) {
-//
-//				List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
-//				dimMemberList.addAll(expandedMbrs);
-//
-//				// Additional processing for discontiguous dimension hierarchy (TTN-1644)
-//				if (isDiscontig) {
-//					// Add in sythentic root to beginning of member list, if this is the first
-//					// term
-//					if (discontigMbrGrps.size() == 0) {
-//						dimMemberList.add(0, dim);
-//						discontigMbrGrps.add(0,new ArrayList<String>(Arrays.asList(new String[]{dim})));
-//					}
-//					discontigMbrGrps.add(expandedMbrs);
-//				}
-//			}
-//
-//			// Special logic for version dimension - filter out version dimension root
-//			if (dim.equalsIgnoreCase(versionDim)) {
-//				dimMemberList.remove(versionDim);
-//			}
-//			
-//			// Check for duplicate members
-//			Set<String> uniqueMembers = new HashSet<String>(dimMemberList);
-//			int dupMbrCount = dimMemberList.size() - uniqueMembers.size();
-//			if (dupMbrCount != 0) {
-//				String errMsg = dupMbrCount + " duplicate member(s) found in UOW definition for dimension: "
-//					+ dim + ". User security or underlying dimensional hierarchies need to be adjusted.";
-//				logger.error(errMsg);
-//			}
 
 			// Add expanded member list to uow definiton
 			expandedUow.put(axis++, dimMemberList);
@@ -3458,7 +3293,7 @@ public class PafDataService {
 		}
 		
 		logger.info("Updating data cache with client data\n" + sliceParms.toString() );
-		updateDataCacheFromSlice(dataCache, newSlice, sliceParms);
+		dataCache.updateDataCache(newSlice, sliceParms);
 
 		IEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
 
@@ -3985,7 +3820,7 @@ public class PafDataService {
 		clientState.setRoleFilterSelections(userSelectionsMap);
 		
 		// Process the selection on each role filter dimension
-		Map<String, List<String>> validBaseMembers = new HashMap<String, List<String>>();
+//		Map<String, List<String>> validBaseMembers = new HashMap<String, List<String>>();
 		for(String baseDim : hierDimsMap.keySet()){
 			
 			if (userSelectionsMap.containsKey(baseDim)){
@@ -4037,7 +3872,7 @@ public class PafDataService {
 						selAttrCombos.add(intersection);
 					}					        
 
-					//Build a map of valid members for each base dimension
+					//Build a map of valid members for each base member
 					for(String baseMember : expressionList){
 						Set<Intersection> validAttrCombos = AttributeUtil.getValidAttributeCombos(baseDim, baseMember, attrDims, getAllDimTrees());
 						validAttrCombos.retainAll(selAttrCombos);
@@ -4045,16 +3880,31 @@ public class PafDataService {
 							validBaseMemberList.add(baseMember);
 						}
 					}
+					
+					// Since this dimension is filtered, the uow discontiguous collection needs to be
+					// set on this dimension, so that the corresponding uow tree is built properly as
+					// a discontiguous tree. The root member must appear first, its own list, followed
+					// by the remaining base members in their own list (TTN-1644).
+					discontigMbrGrps = new ArrayList<ArrayList<String>>();
+					String rootMember = validBaseMemberList.get(0);
+					discontigMbrGrps.add(new ArrayList<String>(Arrays.asList(new String[]{rootMember})));
+					if (validBaseMemberList.size() > 1) {
+						discontigMbrGrps.add(new ArrayList<String>(validBaseMemberList.subList(1, validBaseMemberList.size())));
+					}
+					workUnit.getDiscontigMemberGroups().put(baseDim, discontigMbrGrps);					
 				}
-				validBaseMembers.put(baseDim, validBaseMemberList);
+				//validBaseMembers.put(baseDim, validBaseMemberList);
+				
+				// Update the work unit and client tree for this filtered dimension
+				workUnit.setDimMembers(baseDim, validBaseMemberList.toArray(new String[0]));
 			}
 
 		}
 		
-		// Update the work unit and client tree for any filtered dimension
-		for(String dim : validBaseMembers.keySet()){
-			workUnit.setDimMembers(dim, validBaseMembers.get(dim).toArray(new String[0]));
-		}				
+//		// Update the work unit and client tree for any filtered dimension
+//		for(String dim : validBaseMembers.keySet()){
+//			workUnit.setDimMembers(dim, validBaseMembers.get(dim).toArray(new String[0]));
+//		}				
 	
 		return workUnit;
 	}
