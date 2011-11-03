@@ -32,7 +32,7 @@ public class PafBaseConstants {
 	public static final int TIME_HORIZON_MBR_DELIM_LEN = TIME_HORIZON_MBR_DELIM.length();  
 
 	// synthetic member constants
-	public static final String SYNTHETIC_ROOT_ALIAS_PREFIX = "[FILTERED";
+	public static final String SYNTHETIC_ROOT_ALIAS_PREFIX = "[FILTERED ";
 	public static final String SYNTHETIC_ROOT_ALIAS_SUFFIX = "]";
 	
 	// version type constants

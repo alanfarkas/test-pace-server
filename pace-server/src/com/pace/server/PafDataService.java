@@ -377,7 +377,7 @@ public class PafDataService {
 			logger.error(errMsg);
 			PafException pfe = new PafException(errMsg, PafErrSeverity.Error, ex);	
 			throw pfe;
-	}
+		}
 
 	}
 
@@ -393,35 +393,38 @@ public class PafDataService {
 	 * @return Hash Map containing the expanded members for each dimension
 	 * @throws PafException 
 	 */
-	private Map<Integer, List<String>> expandUowMembers(UnitOfWork uow, PafClientState clientState, 
-			Map<String, List<List<String>>> discontigMbrGrpsByDim) throws PafException {
+	private List<String> expandUowDim(String dim, String[] terms, PafClientState clientState, 
+			List<ArrayList<String>> discontigMbrGrps) throws PafException {
 
-		int axis = 0;
+//		int axis = 0;
 		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
 		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
-		String[] terms = null;
-		Map<Integer, List<String>> expandedUow = new HashMap<Integer, List<String>>();
-		Set<String> discontigDims = new HashSet<String>();
+//		String[] terms = null;
+//		Map<Integer, List<String>> expandedUow = new HashMap<Integer, List<String>>();
+//		Set<String> discontigDims = new HashSet<String>();
 
 
 		// Get the list of expanded members for each dimension
-		for (String dim : uow.getDimensions() ) {
+//		for (String dim : uow.getDimensions() ) {
 
 			// Get the list of uow member specifications for current dimension
-			terms = uow.getDimMembers(dim);
+//			terms = uow.getDimMembers(dim);
+			
+			// 
+//			dimMemberList = expandUowDim(dim, terms, clientState, discontigMemberLists);
 
 			// Check for discontiguous hierarchies. A hierarchy is considered discontiguous
 			// if it consists of more than one member specification. Measures and Version
 			// dimensions are ignored, since these hierarchies do not aggregate and have 
 			// special handling elsewhere (TTN-1644).
 			boolean isDiscontig = false;
-			List<List<String>> discontigMbrGrps = null;
+//			List<List<String>> discontigMbrGrps = null;
 			if (terms.length > 1) {
 				if (!dim.equals(measureDim) && !dim.equals(versionDim)) {
 					isDiscontig = true;
-					discontigDims.add(dim);
-					discontigMbrGrps = new ArrayList<List<String>>();
-					discontigMbrGrpsByDim.put(dim, discontigMbrGrps);
+//					discontigDims.add(dim);
+//					discontigMbrGrps = new ArrayList<List<String>>();
+//					discontigMbrGrpsByDim.put(dim, discontigMbrGrps);
 				}			
 			}
 
@@ -429,7 +432,7 @@ public class PafDataService {
 			List<String> dimMemberList = new ArrayList<String>();
 			for (String term : terms) {
 
-				List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
+				ArrayList<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
 				dimMemberList.addAll(expandedMbrs);
 
 				// Additional processing for discontiguous dimension hierarchy (TTN-1644)
@@ -455,12 +458,103 @@ public class PafDataService {
 			if (dupMbrCount != 0) {
 				String errMsg = dupMbrCount + " duplicate member(s) found in UOW definition for dimension: "
 					+ dim + ". User security or underlying dimensional hierarchies need to be adjusted.";
-				logger.warn(errMsg);
-				throw new IllegalArgumentException(errMsg);
+				logger.error(errMsg);
 			}
 			
 			// Add expanded member list to uow definiton
+//			expandedUow.put(axis++, dimMemberList);
+//		}
+		
+		return dimMemberList;
+	}
+	
+	/**
+	 *	Expand out the members in a unit of work using the base trees
+	 *
+	 * @param uow Unit of work object
+	 * @param clientState Client state object
+	 * @param discontigMbrGrpsByDim Discrete lists of expanded member groups by discontiguous dimension
+	 * 
+	 * @return Hash Map containing the expanded members for each dimension
+	 * @throws PafException 
+	 */
+	private Map<Integer, List<String>> expandUowMembers(UnitOfWork uow, PafClientState clientState, 
+			Map<String, List<ArrayList<String>>> discontigMbrGrpsByDim) throws PafException {
+
+		int axis = 0;
+//		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
+//		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
+		String[] terms = null;
+		Map<Integer, List<String>> expandedUow = new HashMap<Integer, List<String>>();
+//		Set<String> discontigDims = new HashSet<String>();
+
+
+		// Get the list of expanded members for each dimension
+		for (String dim : uow.getDimensions() ) {
+
+			// Get the list of uow member specifications for current dimension
+			terms = uow.getDimMembers(dim);
+			
+			// Expand the members for each dimension
+			List<ArrayList<String>> discontigMbrGrps = new ArrayList<ArrayList<String>>();
+			List<String> dimMemberList = expandUowDim(dim, terms, clientState, discontigMbrGrps);
+
+//			// Check for discontiguous hierarchies. A hierarchy is considered discontiguous
+//			// if it consists of more than one member specification. Measures and Version
+//			// dimensions are ignored, since these hierarchies do not aggregate and have 
+//			// special handling elsewhere (TTN-1644).
+//			boolean isDiscontig = false;
+//			List<List<String>> discontigMbrGrps = null;
+//			if (terms.length > 1) {
+//				if (!dim.equals(measureDim) && !dim.equals(versionDim)) {
+//					isDiscontig = true;
+//					discontigDims.add(dim);
+//					discontigMbrGrps = new ArrayList<List<String>>();
+//					discontigMbrGrpsByDim.put(dim, discontigMbrGrps);
+//				}			
+//			}
+//
+//			// Expand each member specification
+//			List<String> dimMemberList = new ArrayList<String>();
+//			for (String term : terms) {
+//
+//				List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
+//				dimMemberList.addAll(expandedMbrs);
+//
+//				// Additional processing for discontiguous dimension hierarchy (TTN-1644)
+//				if (isDiscontig) {
+//					// Add in sythentic root to beginning of member list, if this is the first
+//					// term
+//					if (discontigMbrGrps.size() == 0) {
+//						dimMemberList.add(0, dim);
+//						discontigMbrGrps.add(0,new ArrayList<String>(Arrays.asList(new String[]{dim})));
+//					}
+//					discontigMbrGrps.add(expandedMbrs);
+//				}
+//			}
+//
+//			// Special logic for version dimension - filter out version dimension root
+//			if (dim.equalsIgnoreCase(versionDim)) {
+//				dimMemberList.remove(versionDim);
+//			}
+//			
+//			// Check for duplicate members
+//			Set<String> uniqueMembers = new HashSet<String>(dimMemberList);
+//			int dupMbrCount = dimMemberList.size() - uniqueMembers.size();
+//			if (dupMbrCount != 0) {
+//				String errMsg = dupMbrCount + " duplicate member(s) found in UOW definition for dimension: "
+//					+ dim + ". User security or underlying dimensional hierarchies need to be adjusted.";
+//				logger.error(errMsg);
+//			}
+
+			// Add expanded member list to uow definiton
 			expandedUow.put(axis++, dimMemberList);
+
+			// Add discontiguous member groups to master collection
+			if (!discontigMbrGrps.isEmpty()) {
+				discontigMbrGrpsByDim.put(dim, discontigMbrGrps);
+			}
+			
 		}
 		
 		return expandedUow;
@@ -479,7 +573,7 @@ public class PafDataService {
 
 		UnitOfWork expandedUow = null;
 		Map<Integer, List<String>> expandedUowMap = null;
-		Map<String, List<List<String>>> discontigMemberGroupsByDim = new HashMap<String, List<List<String>>>();
+		Map<String, List<ArrayList<String>>> discontigMemberGroupsByDim = new HashMap<String, List<ArrayList<String>>>();
 
 		
 		// Expand uow member specifications
@@ -3860,7 +3954,13 @@ public class PafDataService {
 	 */
 	protected UnitOfWork createUserFilteredWorkSpec(PafClientState clientState, PafDimSpec[] userSelections) throws PafException {
 
+		/*
+		 * This methiod was built to hold code that was originally part of PafService.getfilteredUowSize(). 
+		 * This method was created to make the PafService layer more managable.
+		 */
+		
 		UnitOfWork workUnit = clientState.getUnitOfWork().clone();
+		
 		
 		//Get all possible hierarchical base dimension with attributes
 		String[] hierDims = clientState.getApp().getMdbDef().getHierDims();
@@ -3900,9 +4000,14 @@ public class PafDataService {
 					expressionList.set(i, ExpOperation.I_DESC_TAG + "(" +  expressionList.get(i) + ", 0)");
 				}
 				
-				//Next, expand the base dimension expression list
-				expressionList = expandExpressionList(baseDim, expressionList, clientState);
-				
+				// Next expand the base dimension expression list and process discontiguous
+				// hierarchy, if one exists (TTN-1644)
+//				expressionList = expandExpressionList(baseDim, expressionList, clientState);
+				List<ArrayList<String>> discontigMbrGrps = new ArrayList<ArrayList<String>>();
+				expressionList = expandUowDim(baseDim, expressionList.toArray(new String[0]), clientState, discontigMbrGrps); 
+				if (!discontigMbrGrps.isEmpty()) {
+					workUnit.getDiscontigMemberGroups().put(baseDim, discontigMbrGrps);
+				}
 				//Get a list of attribute dimensions and a list of attribute member lists
 				List<String> attrDimLists = new ArrayList<String>();
 				List<List<String>> attrMemberLists = new ArrayList<List<String>>();
@@ -3946,7 +4051,7 @@ public class PafDataService {
 
 		}
 		
-		//Update the work unit with the user filter
+		// Update the work unit and client tree for any filtered dimension
 		for(String dim : validBaseMembers.keySet()){
 			workUnit.setDimMembers(dim, validBaseMembers.get(dim).toArray(new String[0]));
 		}				

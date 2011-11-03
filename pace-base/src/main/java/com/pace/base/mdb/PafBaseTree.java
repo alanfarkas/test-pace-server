@@ -503,7 +503,7 @@ public class PafBaseTree extends PafDimTree {
 	 * @return Discontiguous tree
 	 * @throws PafException 
 	 */
-	public PafBaseTree getDiscSubTreeCopy(List<List<String>> discontigMemberLists) throws PafException {
+	public PafBaseTree getDiscSubTreeCopy(List<ArrayList<String>> discontigMemberLists) throws PafException {
 		
 		PafBaseTree newTree = null;
 		List<String> discontigMemberList = discontigMemberLists.get(0);
