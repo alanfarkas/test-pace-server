@@ -3,11 +3,11 @@
   type="WEB"
   name="pace-server"
   id="myeclipse.1299871328154"
-  context-root="/pace"
-  j2ee-spec="5.0"
+  context-root="/pace-server"
+  j2ee-spec="6.0"
   archive="pace-server.war">
   <attributes>
-    <attribute name="webrootdir" value="/WebRoot" />
+    <attribute name="webrootdir" value="WebRoot" />
   </attributes>
 </project-module>
 
