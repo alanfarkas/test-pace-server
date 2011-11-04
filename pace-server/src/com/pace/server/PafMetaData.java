@@ -51,6 +51,7 @@ import com.pace.base.db.RdbProps;
 import com.pace.base.project.InvalidPaceProjectInputException;
 import com.pace.base.project.PaceProject;
 import com.pace.base.project.PaceProjectCreationException;
+import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.utility.*;
 import com.pace.base.view.PafView;
@@ -381,6 +382,16 @@ public class PafMetaData {
 		
 		return xmlPaceProject;
 		
+	}
+	
+	public static void updatePaceProject(XMLPaceProject paceProject) {
+		xmlPaceProject = paceProject;
+		try {
+			xmlPaceProject.save();
+		} catch (ProjectSaveException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**

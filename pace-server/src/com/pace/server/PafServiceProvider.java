@@ -49,6 +49,7 @@ import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.db.membertags.SimpleMemberTagData;
 import com.pace.base.mdb.*;
 import com.pace.base.project.PaceProject;
+import com.pace.base.project.ProjectSerializationType;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.rules.RuleGroup;
 import com.pace.base.rules.RuleSet;
@@ -4067,9 +4068,12 @@ public PafGetNotesResponse getCellNotes(
 		
 		// FIXIT replace this with synchronized "updateApplicationState" method
 		appService.setApplicationState(reqAppId, as);
+		
 
 		
 		try {
+			
+		
 			
 			// initialize the application service and reload the application metadata			
 			appService.loadApplications();			
@@ -4078,8 +4082,14 @@ public PafGetNotesResponse getCellNotes(
 			viewService.loadViewCache();
 			
 			// initialize the data service and re/load the application data sources
-			if ( appReq==null || appReq.isLoadMdb() )
+			if ( appReq==null || appReq.isLoadMdb() ) {
+				dataService.clearDimTreeCache();
 				dataService.loadApplicationData();
+			}
+			
+			// initialize the user list
+			PafSecurityService.initUsers();
+
 
 			System.out.println(Messages.getString("PafServiceProvider.7") + logger.getLevel()); //$NON-NLS-1$
 			logger.info(Messages.getString("PafServiceProvider.8")); //$NON-NLS-1$
@@ -4107,7 +4117,11 @@ public PafGetNotesResponse getCellNotes(
 	public UploadAppResponse uploadApplication(
 			UploadAppRequest uploadAppReq) throws RemoteException,
 			PafSoapException {
-		// TODO Auto-generated method stub
+
+		PaceProject projectIn = uploadAppReq.getApplicationProjects().get(0);
+		XMLPaceProject project = (XMLPaceProject) projectIn.convertTo(ProjectSerializationType.XML);
+		PafMetaData.updatePaceProject(project);
+			
 		return new UploadAppResponse(true);
 	}
 

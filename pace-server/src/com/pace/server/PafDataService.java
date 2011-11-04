@@ -1313,7 +1313,7 @@ public class PafDataService {
 	 *	Initialize member tree cache
 	 *
 	 */
-	protected void clearMemberTreeCache() {
+	protected void clearDimTreeCache() {
 
 		logger.info("Clearing dimension tree cache.");
 
@@ -1376,7 +1376,7 @@ public class PafDataService {
 	 *
 	 * @param pafApp Application definition
 	 */
-	public void initMemberTreeStore(PafApplicationDef pafApp) {
+	public void initDimTreeStore(PafApplicationDef pafApp) {
 
 		IMdbMetaData metaData = null;
 		MdbDef mdbDef = pafApp.getMdbDef();
@@ -3615,7 +3615,7 @@ public class PafDataService {
 
 				logger.info("Loading base trees " + appString);				
 				
-				this.initMemberTreeStore(pafApp);
+				this.initDimTreeStore(pafApp);
 																
 				this.initCellNotes(pafApp);
 			}
