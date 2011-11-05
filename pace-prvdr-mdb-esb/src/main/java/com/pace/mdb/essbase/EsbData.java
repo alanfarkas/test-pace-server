@@ -554,7 +554,8 @@ public class EsbData implements IMdbData{
 		// Create a map of member lists to pass to the intersection iterator. The page
 		// and column dimensions each have their own explicit processing loops, so only a
 		// single "dummy" member will be specified for those dimensions. All data cache 
-		// members will be selected for the remaining (row) dimensions.
+		// members will be selected for the remaining (row) dimensions, with the
+		// exception of any read-only or synthetic members.
 		logger.debug("Creating member filter map..." );
 		List<String> versionFilter = Arrays.asList(planVersions);
 		Map<String, List<String>> memberListMap = new HashMap<String, List<String>>();
@@ -563,6 +564,10 @@ public class EsbData implements IMdbData{
 		}
 		for (String dim : colDims) {
 			memberListMap.put(dim, dummyMemberList);
+		}
+		// Filter out read-only and synthetic member from row dimensions (TTN-1644).
+		for (String dim : rowDims) {	
+			memberListMap.put(dim, Arrays.asList(dataCache.getFilteredDimMembers(dim, null, false, false)));
 		}
 			
 		// Instantiate row iterator - used to iterate through all row dimension members
@@ -595,8 +600,8 @@ public class EsbData implements IMdbData{
 			cube = esbCube.getEssCube();
 			olapServer = esbCube.getOlapServer();
 			
-			// Get list of years - filter out any read only or syntheric members (TTN-1595)
-			String[] years = dataCache.getFilteredDimMembers(yearDim, false, false);
+			// Get list of years - filter out any read only or synthetic members (TTN-1595)
+			String[] years = dataCache.getFilteredDimMembers(yearDim, null, false, false);
 			
 			// Cycle through list of Plan Types
 			String[] planTypes = dataCache.getDimMembers(planTypeDim);

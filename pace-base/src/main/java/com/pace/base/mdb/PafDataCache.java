@@ -3167,46 +3167,52 @@ public class PafDataCache implements IPafDataCache {
 	}    
 
 	/**
-	 *	Return an array containing the members in the specified dimension name
-	 *  the meet the specified selection criteria.
+	 *	Return an array containing the dimension members that meet the 
+	 *  specified selection criteria.
 	 *  
 	 *  A null value in a property selection indicates that property will be ignored.
 	 *
 	 * @param dimName Dimension name
+	 * @param optionalBranch Branch to select members from (if not supplied then the entire dimension is selected)
 	 * @param isReadOnly Determines if read-only members should be selected
 	 * @param isSynthetic Determines if synthetic members should be selected
 	 * 
 	 * @return Returns an array containing the members in the specified axis.
 	 */
-	public String[] getFilteredDimMembers(String dimName, Boolean isReadOnly, Boolean isSynthetic) {
+	public String[] getFilteredDimMembers(String dimName, String optionalBranch, Boolean isReadOnly, Boolean isSynthetic) {
 		
 		//TODO Create a more extensible way to filter out members
-		//TODO Probably need to add property collections to tree for quick lookup.
 		//TODO Migrate this method to the DimTree Class.
-		//TODO Add optional Branch parm, so that a specific branch can be pulled.
 		
-		List<String> filteredMembers = new ArrayList<String>();
-		String[] allMembers = getAxisMembers(getAxisIndex(dimName));
 		PafDimTree dimTree = getDimTrees().getTree(dimName);
+		Set<String> filteredMembers = null;
 		
-		for (String memberName : allMembers) {
-			PafDimMemberProps memberProps = dimTree.getMember(memberName).getMemberProps();
-			
-			// Apply "readOnly" filter
-			if (isReadOnly != null) {
-					if ((isReadOnly && !memberProps.isReadOnly()) || (!isReadOnly && memberProps.isReadOnly())) {
-					continue;
-				}
+		// Start out with a set of all members under consideration - either entire dimension or a selected branch
+		if (optionalBranch == null) {
+			filteredMembers = new HashSet<String>(Arrays.asList(getDimMembers(dimName)));
+		} else {
+			PafDimMember branchMember = dimTree.getMember(optionalBranch);
+			filteredMembers = new HashSet<String>(dimTree.getMemberNames(dimTree.getMembers(branchMember, TreeTraversalOrder.POST_ORDER)));
+		}
+
+		// Apply "synthetic" filter
+		if (isReadOnly != null) {
+			Set<String> syntheticMembers = dimTree.getSyntheticMemberNames();
+			if (isSynthetic) {
+				filteredMembers.retainAll(syntheticMembers);
+			} else {
+				filteredMembers.removeAll(syntheticMembers);
 			}
-			
-			// Apply "sythentic" filter
-			if (isSynthetic != null) {
-				if ( (isSynthetic && !memberProps.isSynthetic()) || (!isSynthetic && memberProps.isSynthetic()) ) {
-				continue;
-				}
+		}
+		
+		// Apply "readOnly" filter
+		if (isReadOnly != null) {
+			Set<String> readOnlyMembers = dimTree.getReadOnlyMemberNames();
+			if (isReadOnly) {
+				filteredMembers.retainAll(readOnlyMembers);
+			} else {
+				filteredMembers.removeAll(readOnlyMembers);
 			}
-			
-			filteredMembers.add(memberName);
 		}
 		
 		return filteredMembers.toArray(new String[0]);
