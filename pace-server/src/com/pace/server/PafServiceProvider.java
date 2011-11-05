@@ -4073,6 +4073,8 @@ public PafGetNotesResponse getCellNotes(
 		
 		try {
 			
+			// update the pace project object
+			PafMetaData.updateApplicationConfig();
 		
 			
 			// initialize the application service and reload the application metadata			
@@ -4083,7 +4085,8 @@ public PafGetNotesResponse getCellNotes(
 			
 			// initialize the data service and re/load the application data sources
 			if ( appReq==null || appReq.isLoadMdb() ) {
-				dataService.clearDimTreeCache();
+				PafMetaData.clearDataCache();
+//				dataService.clearDimTreeCache();
 				dataService.loadApplicationData();
 			}
 			
@@ -4120,7 +4123,7 @@ public PafGetNotesResponse getCellNotes(
 
 		PaceProject projectIn = uploadAppReq.getApplicationProjects().get(0);
 		XMLPaceProject project = (XMLPaceProject) projectIn.convertTo(ProjectSerializationType.XML);
-		PafMetaData.updatePaceProject(project);
+		PafMetaData.updateApplicationConfig(project);
 			
 		return new UploadAppResponse(true);
 	}

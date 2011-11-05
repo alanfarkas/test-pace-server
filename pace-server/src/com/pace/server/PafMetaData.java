@@ -168,13 +168,7 @@ public class PafMetaData {
     
     static {    	
         
-        try {
-			xmlPaceProject = new XMLPaceProject(paceHome + File.separator + PafBaseConstants.DN_ConfFldr, PafMetaData.getServerSettings().isAutoConvertProject());
-		} catch (InvalidPaceProjectInputException e) {
-			logger.error(e.getMessage());
-		} catch (PaceProjectCreationException e) {
-			logger.error(e.getMessage());
-		}
+    	updateApplicationConfig();
     	
     }
        
@@ -384,7 +378,17 @@ public class PafMetaData {
 		
 	}
 	
-	public static void updatePaceProject(XMLPaceProject paceProject) {
+	public static void updateApplicationConfig() {
+        try {
+			xmlPaceProject = new XMLPaceProject(paceHome + File.separator + PafBaseConstants.DN_ConfFldr, PafMetaData.getServerSettings().isAutoConvertProject());
+		} catch (InvalidPaceProjectInputException e) {
+			logger.error(e.getMessage());
+		} catch (PaceProjectCreationException e) {
+			logger.error(e.getMessage());
+		}		
+	}
+	
+	public static void updateApplicationConfig(XMLPaceProject paceProject) {
 		xmlPaceProject = paceProject;
 		try {
 			xmlPaceProject.save();
