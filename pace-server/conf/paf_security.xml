@@ -289,7 +289,7 @@
   </PafUser>
   <PafUser>
     <userName>joe</userName>
-    <admin>false</admin>
+    <admin>true</admin>
     <roleFilters>
       <entry>
         <string>Division Planner</string>
@@ -300,7 +300,33 @@
               <DimSpec>
                 <dimension>Product</dimension>
                 <expressionList>
-                  <string>@IDESC(TotProd, L0)</string>
+                  <string>@IDESC(DPT363, L0)</string>
+                  <string>@IDESC(DPT365, L0)</string>
+                  <string>@IDESC(DPT367, L0)</string>
+                </expressionList>
+              </DimSpec>
+              <DimSpec>
+                <dimension>Location</dimension>
+                <expressionList>
+                  <string>StoreTotal</string>
+                </expressionList>
+              </DimSpec>
+            </dimSpec>
+          </WorkSpec>
+        </WorkSpec-array>
+      </entry>
+      <entry>
+        <string>Testing</string>
+        <WorkSpec-array>
+          <WorkSpec>
+            <name>Testing</name>
+            <dimSpec>
+              <DimSpec>
+                <dimension>Product</dimension>
+                <expressionList>
+                  <string>@IDESC(DPT140, L0)</string>
+                  <string>@IDESC(DIV03, L1)</string>
+                  <string>@IDESC(DIV09, L0)</string>
                 </expressionList>
               </DimSpec>
               <DimSpec>

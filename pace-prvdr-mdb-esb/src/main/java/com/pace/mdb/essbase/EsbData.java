@@ -511,6 +511,7 @@ public class EsbData implements IMdbData{
 		// on each data row. This arrangement also makes it easier to handle "locked periods", since the 
 		// evaluation of "locked periods" is based on the unique combination of Year and Version.
 		//
+		// Read-Only & Synthetic members intersections are not written back to Essbase.
 		//
 		// Sample format of Essbase data load is displayed below:
 		//
@@ -565,7 +566,7 @@ public class EsbData implements IMdbData{
 		for (String dim : colDims) {
 			memberListMap.put(dim, dummyMemberList);
 		}
-		// Filter out read-only and synthetic member from row dimensions (TTN-1644).
+		// Filter out read-only and synthetic members from row dimensions (TTN-1644).
 		for (String dim : rowDims) {	
 			memberListMap.put(dim, Arrays.asList(dataCache.getFilteredDimMembers(dim, null, false, false)));
 		}

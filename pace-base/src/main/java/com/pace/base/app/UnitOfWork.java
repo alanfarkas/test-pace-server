@@ -44,7 +44,13 @@ public class UnitOfWork{
     private String[] dimensions; // this is kept to preserve the order or retrieval from the hashmap
     private HashMap<Integer, String> axisIndex = new HashMap<Integer, String>();
     private HashMap<String, Integer> dimIndex = new HashMap<String, Integer>();
-    private Map<String, List<ArrayList<String>>> discMbrGrpsByDim = new HashMap<String, List<ArrayList<String>>>();
+    
+    // Discontiguous member groups by dimension. This collection is only populated for discontiguous
+    // dimensions - dimensions whose unexpanded member list is comprised of multiple expressions,
+    // instead of a single branch or member. Each member group contains the expanded member terms
+    // for a single member expression. This information is needed for the subsequent process that
+    // creates a discontiguous uow tree for each discontiguous dimension. 
+    private Map<String, List<List<String>>> discMbrGrpsByDim = new HashMap<String, List<List<String>>>(); 
     
     public UnitOfWork() {}
     
@@ -164,14 +170,14 @@ public class UnitOfWork{
 	/**
 	 * @return the discontigMemberGroups
 	 */
-	public Map<String, List<ArrayList<String>>> getDiscontigMemberGroups() {
+	public Map<String, List<List<String>>> getDiscontigMemberGroups() {
 		return discMbrGrpsByDim;
 	}
 
 	/**
 	 * @param discMbrGroupsByDim the discontigMemberGroups to set
 	 */
-	public void setDiscontigMemberGroups(Map<String, List<ArrayList<String>>> discMbrGroupsByDim) {
+	public void setDiscontigMemberGroups(Map<String, List<List<String>>> discMbrGroupsByDim) {
 		this.discMbrGrpsByDim = discMbrGroupsByDim;
 	}
 
@@ -182,7 +188,7 @@ public class UnitOfWork{
 	 * @param dimension Dimension name
 	 * @return List<List<String>>
 	 */
-	public List<ArrayList<String>> getDiscontigMemberGroups(String dimension) {
+	public List<List<String>> getDiscontigMemberGroups(String dimension) {
 		return discMbrGrpsByDim.get(dimension);
 	}
 
@@ -216,11 +222,10 @@ public class UnitOfWork{
     	}
     	
     	for (String dimension : discMbrGrpsByDim.keySet()) {
-    		List<ArrayList<String>> dimMbrGrps = discMbrGrpsByDim.get(dimension);
-    		List<ArrayList<String>> clonedMbrGrps = new ArrayList<ArrayList<String>>();
-    		for (ArrayList<String> memberList : dimMbrGrps) {
-    			@SuppressWarnings("unchecked")
-				ArrayList<String> clonedMemberList = (ArrayList<String>) memberList.clone();
+    		List<List<String>> dimMbrGrps = discMbrGrpsByDim.get(dimension);
+    		List<List<String>> clonedMbrGrps = new ArrayList<List<String>>();
+    		for (List<String> memberList : dimMbrGrps) {
+    			List<String> clonedMemberList = new ArrayList<String>(memberList);
     			clonedMbrGrps.add(clonedMemberList);
     		}
     		UOWClone.getDiscontigMemberGroups().put(dimension, clonedMbrGrps);

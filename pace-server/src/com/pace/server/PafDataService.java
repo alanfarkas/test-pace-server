@@ -300,7 +300,7 @@ public class PafDataService {
 	 * @throws PafException 
 	 */
 	private List<String> expandUowDim(String dim, String[] terms, PafClientState clientState, 
-			List<ArrayList<String>> discontigMbrGrps) throws PafException {
+			List<List<String>> discontigMbrGrps) throws PafException {
 
 		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
 		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
@@ -321,12 +321,12 @@ public class PafDataService {
 		List<String> dimMemberList = new ArrayList<String>();
 		for (String term : terms) {
 
-			ArrayList<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
+			List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
 			dimMemberList.addAll(expandedMbrs);
 
 			// Additional processing for discontiguous dimension hierarchy (TTN-1644)
 			if (isDiscontig) {
-				// Add in sythentic root to beginning of member list, if this is the first
+				// Add in synthetic root to beginning of member list, if this is the first
 				// term
 				if (discontigMbrGrps.size() == 0) {
 					dimMemberList.add(0, dim);
@@ -365,7 +365,7 @@ public class PafDataService {
 	 * @throws PafException 
 	 */
 	private Map<Integer, List<String>> expandUowMembers(UnitOfWork uow, PafClientState clientState, 
-			Map<String, List<ArrayList<String>>> discontigMbrGrpsByDim) throws PafException {
+			Map<String, List<List<String>>> discontigMbrGrpsByDim) throws PafException {
 
 		int axis = 0;
 		String[] terms = null;
@@ -379,10 +379,10 @@ public class PafDataService {
 			terms = uow.getDimMembers(dim);
 			
 			// Expand the members for each dimension
-			List<ArrayList<String>> discontigMbrGrps = new ArrayList<ArrayList<String>>();
+			List<List<String>> discontigMbrGrps = new ArrayList<List<String>>();
 			List<String> dimMemberList = expandUowDim(dim, terms, clientState, discontigMbrGrps);
 
-			// Add expanded member list to uow definiton
+			// Add expanded member list to uow definition
 			expandedUow.put(axis++, dimMemberList);
 
 			// Add discontiguous member groups to master collection
@@ -396,7 +396,7 @@ public class PafDataService {
 	}
 	
 	/**
-	 *	Expand out the members in a unit of work uing the base trees
+	 *	Expand out the members in a unit of work using the base trees
 	 *
 	 * @param uow Unit of work object
 	 * @param clientState Client state object
@@ -408,7 +408,7 @@ public class PafDataService {
 
 		UnitOfWork expandedUow = null;
 		Map<Integer, List<String>> expandedUowMap = null;
-		Map<String, List<ArrayList<String>>> discontigMemberGroupsByDim = new HashMap<String, List<ArrayList<String>>>();
+		Map<String, List<List<String>>> discontigMemberGroupsByDim = new HashMap<String, List<List<String>>>();
 
 		
 		// Expand uow member specifications
@@ -1766,7 +1766,7 @@ public class PafDataService {
 	}
 
 	/**
-	 * Deletes a PafAttributeTree from the Hibernate datastore.
+	 * Deletes a PafAttributeTree from the Hibernate data store.
 	 * 
 	 * @param dim The dimension to be deleted.
 	 */
@@ -3371,6 +3371,7 @@ public class PafDataService {
 		return axis;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public List<SecurityGroup> getGroups(String app){
 		Session session = PafMetaData.currentPafClientCacheDBSession();
 		Transaction tx = null;
@@ -3514,6 +3515,7 @@ public class PafDataService {
 		Map<String, Application> ApplicationMap = new HashMap<String, Application>();
 		
 		//get list of apps
+		@SuppressWarnings("unchecked")
 		List<Application> ApplicationList = s.createQuery("from Application").list();
 		
 		if ( ApplicationList != null ) {
@@ -3631,7 +3633,6 @@ public class PafDataService {
 	 * @param pafApp The application to initialize.
 	 * @throws PafException
 	 */
-	@SuppressWarnings("unchecked")
 	private void initCellNotes(PafApplicationDef pafApp) throws PafException {
 		
 		//if clear all is true, delete all cell notes for every app and every datasource
@@ -3790,8 +3791,8 @@ public class PafDataService {
 	protected UnitOfWork createUserFilteredWorkSpec(PafClientState clientState, PafDimSpec[] userSelections) throws PafException {
 
 		/*
-		 * This methiod was built to hold code that was originally part of PafService.getfilteredUowSize(). 
-		 * This method was created to make the PafService layer more managable.
+		 * This method was built to hold code that was originally part of PafService.getfilteredUowSize(). 
+		 * This method was created to make the PafService layer more manageable.
 		 */
 		
 		UnitOfWork workUnit = clientState.getUnitOfWork().clone();
@@ -3828,7 +3829,7 @@ public class PafDataService {
 				expressionList = userSelectionsMap.get(baseDim);
 				// Wrap each selected member in @IDESC([member name], 0). This 
 				// will force all descendants of each selected member to be included
-				// int the UOW. This section of code has been modfied to handle 
+				// int the UOW. This section of code has been modified to handle 
 				// multiple selections per base dimension (TTN-1644).
 				for (int i = 0; i < expressionList.size(); i++) {
 					expressionList.set(i, ExpOperation.I_DESC_TAG + "(" +  expressionList.get(i) + ", 0)");
@@ -3836,7 +3837,7 @@ public class PafDataService {
 				
 				// Next expand the base dimension expression list and process discontiguous
 				// hierarchy, if one exists (TTN-1644)
-				List<ArrayList<String>> discontigMbrGrps = new ArrayList<ArrayList<String>>();
+				List<List<String>> discontigMbrGrps = new ArrayList<List<String>>();
 				expressionList = expandUowDim(baseDim, expressionList.toArray(new String[0]), clientState, discontigMbrGrps); 
 				if (!discontigMbrGrps.isEmpty()) {
 					workUnit.getDiscontigMemberGroups().put(baseDim, discontigMbrGrps);
@@ -3880,10 +3881,10 @@ public class PafDataService {
 					}
 					
 					// Since this dimension is filtered, the uow discontiguous collection needs to be
-					// set on this dimension, so that the corresponding uow tree is built properly as
+					// populated for this dimension, so that the corresponding uow tree is built properly as
 					// a discontiguous tree. The root member must appear first, its own list, followed
 					// by the remaining base members in their own list (TTN-1644).
-					discontigMbrGrps = new ArrayList<ArrayList<String>>();
+					discontigMbrGrps = new ArrayList<List<String>>();
 					String rootMember = validBaseMemberList.get(0);
 					discontigMbrGrps.add(new ArrayList<String>(Arrays.asList(new String[]{rootMember})));
 					if (validBaseMemberList.size() > 1) {
@@ -3891,7 +3892,6 @@ public class PafDataService {
 					}
 					workUnit.getDiscontigMemberGroups().put(baseDim, discontigMbrGrps);					
 				}
-				//validBaseMembers.put(baseDim, validBaseMemberList);
 				
 				// Update the work unit and client tree for this filtered dimension
 				workUnit.setDimMembers(baseDim, validBaseMemberList.toArray(new String[0]));
