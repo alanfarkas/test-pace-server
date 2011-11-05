@@ -3820,7 +3820,6 @@ public class PafDataService {
 		clientState.setRoleFilterSelections(userSelectionsMap);
 		
 		// Process the selection on each role filter dimension
-//		Map<String, List<String>> validBaseMembers = new HashMap<String, List<String>>();
 		for(String baseDim : hierDimsMap.keySet()){
 			
 			if (userSelectionsMap.containsKey(baseDim)){
@@ -3837,7 +3836,6 @@ public class PafDataService {
 				
 				// Next expand the base dimension expression list and process discontiguous
 				// hierarchy, if one exists (TTN-1644)
-//				expressionList = expandExpressionList(baseDim, expressionList, clientState);
 				List<ArrayList<String>> discontigMbrGrps = new ArrayList<ArrayList<String>>();
 				expressionList = expandUowDim(baseDim, expressionList.toArray(new String[0]), clientState, discontigMbrGrps); 
 				if (!discontigMbrGrps.isEmpty()) {
@@ -3901,11 +3899,6 @@ public class PafDataService {
 
 		}
 		
-//		// Update the work unit and client tree for any filtered dimension
-//		for(String dim : validBaseMembers.keySet()){
-//			workUnit.setDimMembers(dim, validBaseMembers.get(dim).toArray(new String[0]));
-//		}				
-	
 		return workUnit;
 	}
 

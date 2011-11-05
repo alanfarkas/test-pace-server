@@ -428,7 +428,7 @@ public class EsbData implements IMdbData{
 			
 			List<String> memberList;
 			
-			// Filter out any virtual root members, if data cache was passed in (TTN-1595)
+			// Filter out any synthetic members, if data cache was passed in (TTN-1595)
 			if (dataCache != null) {
 				List<String> origMemberList = dimMembers.get(axis);
 				String dim = dataCache.getDimension(axis);
@@ -595,7 +595,7 @@ public class EsbData implements IMdbData{
 			cube = esbCube.getEssCube();
 			olapServer = esbCube.getOlapServer();
 			
-			// Get list of years - filter out any read only or virtual members (TTN-1595)
+			// Get list of years - filter out any read only or syntheric members (TTN-1595)
 			String[] years = dataCache.getFilteredDimMembers(yearDim, false, false);
 			
 			// Cycle through list of Plan Types

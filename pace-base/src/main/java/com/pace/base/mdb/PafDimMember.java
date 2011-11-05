@@ -44,11 +44,25 @@ public abstract class PafDimMember implements Cloneable {
 
 
 	/**
+	 *  Indicates if member is readOnly
+	 *
+	 * @return true if member is readOnly
+	 */
+	public abstract boolean isReadOnly();
+	
+	/**
 	 *  Indicates if member is shared
 	 *
 	 * @return true if member is shared
 	 */
 	public abstract boolean isShared();
+	
+	/**
+	 *  Indicates if member is synthetic
+	 *
+	 * @return true if member is synthetic
+	 */
+	public abstract boolean isSynthetic();
 	
 	/**
 	 *	Return children of current PafBaseMember

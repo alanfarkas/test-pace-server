@@ -96,8 +96,8 @@ public class PafBaseTree extends PafDimTree {
         addToLvlTree(root);
         addToGenTree(root);
         
-		// Add to shared collection
-        addToSharedMbrs(root);
+		// Add to member property collections
+        addToMbrPropCollections(root);
 
                     
     }

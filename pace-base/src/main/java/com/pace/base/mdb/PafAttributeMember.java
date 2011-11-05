@@ -47,6 +47,16 @@ public class PafAttributeMember extends PafDimMember {
 	}
 
 	/**
+	 *  Indicates if member is readOnly
+	 *
+	 * @return true if member is readOnly
+	 */
+	public boolean isReadOnly() {
+		// All atribute members are read only, by definition
+		return true;
+	}
+        
+	/**
 	 *  Indicates if member is shared
 	 *
 	 * @return true if member is shared
@@ -54,6 +64,16 @@ public class PafAttributeMember extends PafDimMember {
 	public boolean isShared() {
 		// Attribute trees don't support shared members
 		return false;
+	}
+        
+	/**
+	 *  Indicates if member is synthetic
+	 *
+	 * @return true if member is synthteic
+	 */
+	public boolean isSynthetic() {
+		// All attribute members are synthetic, by definition
+		return true;
 	}
         
     /**

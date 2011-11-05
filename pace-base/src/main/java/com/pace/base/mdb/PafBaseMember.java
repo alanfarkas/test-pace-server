@@ -146,16 +146,30 @@ public class PafBaseMember extends PafDimMember implements Cloneable {
 	}
 
 	/**
+	 *  Indicates if member is read-only
+	 *
+	 * @return true if member is read-only
+	 */
+	public boolean isReadOnly() {
+		return getMemberProps().isReadOnly();
+	}
+
+	/**
 	 *  Indicates if member is shared
 	 *
 	 * @return true if member is shared
 	 */
 	public boolean isShared() {
-		if (getMemberProps().getShareOption() == EEssShareOption.SHARED_MEMBER) {
-			return true;
-		} else {
-			return false;
-		}
+		return getMemberProps().getShareOption() == EEssShareOption.SHARED_MEMBER;
+	}
+
+	/**
+	 *  Indicates if member is synthetic
+	 *
+	 * @return true if member is synthetic
+	 */
+	public boolean isSynthetic() {
+		return getMemberProps().isSynthetic();
 	}
 
 	/* (non-Javadoc)

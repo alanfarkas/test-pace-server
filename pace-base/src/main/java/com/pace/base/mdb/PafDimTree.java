@@ -37,7 +37,9 @@ public abstract class PafDimTree {
     private Map<String, PafDimMember> members = null;
     private SortedMap<Integer, List<PafDimMember>> membersByLevel = new TreeMap<Integer, List<PafDimMember>>();   
     private SortedMap<Integer, List<PafDimMember>> membersByGen = new TreeMap<Integer, List<PafDimMember>>();       
-    private List<PafDimMember> sharedMembers = null; // Null value indicates collection is uninitialized, Empty set indicates no shared members
+    private List<PafDimMember> readOnlyMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no read-only members
+    private List<PafDimMember> sharedMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no shared members
+    private List<PafDimMember> syntheticMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no synthetic members
     private PafDimMember rootNode = null;
     private boolean isDiscontig = false;
 
@@ -151,6 +153,23 @@ public abstract class PafDimTree {
 	}
 
     /**
+     *  Get the list of read-only members
+     *
+     * @return List<PafDimMember>
+     */
+    public List<PafDimMember> getReadOnlyMembers() {
+    	
+    	// Rebuild this collection as needed. This list of read-only members does not get 
+    	// preserved in the tree cache, so it may be necessary to reproduce if the tree 
+    	// was pulled directly from hibernate instead of being re-pulled from the 
+    	// multidimensional database.
+    	//
+     	rebuildMemberPropCollections();    		
+ 
+     	return readOnlyMembers;
+    }
+
+    /**
      *  Get the list of shared members
      *
      * @return List<PafDimMember>
@@ -162,31 +181,28 @@ public abstract class PafDimTree {
     	// was pulled directly from hibernate instead of being re-pulled from the 
     	// multidimensional database.
     	//
-    	if (sharedMembers == null) {
-    		logger.debug("Rebuilding the shared members list for tree rooted at: " 
-    				+ this.getRootNode().getKey() + " in dimension: " + this.getId());
-    		
-    		// Shared members are currently only supported on base trees.
-    		initSharedMembers();    		
-    		if (getTreeType() == DimTreeType.Base) {  
-    			// The entire list of dim members must be pulled using a tree traversal 
-    			// since shared members aren't contained in the primary members hash map.
-    			List<PafDimMember> allMembers = getMembers(TreeTraversalOrder.PRE_ORDER);
-    			for (PafDimMember dimMember : allMembers) {
-    				// Only add member to shared members collection, if it is not 
-    				// contained in the members collection. In the case of sub-trees,
-    				// a member that is defined in Essbase as shared could be contained
-    				// in the members collection, it it was the only occurrence of 
-    				// of that member in the sub-tree.
-    				if (members.get(dimMember.getKey()) != dimMember) {
-    				addToSharedMbrs(dimMember);
-    			}
-    		}
-    	}
-    	}
-
+    	rebuildMemberPropCollections();    		
+ 
     	return sharedMembers;
     }
+
+    /**
+     *  Get the list of synthetic members
+     *
+     * @return List<PafDimMember>
+     */
+    public List<PafDimMember> getSyntheticMembers() {
+    	
+    	// Rebuild this collection as needed. This list of synthetic members does not get 
+    	// preserved in the tree cache, so it may be necessary to reproduce if the tree 
+    	// was pulled directly from hibernate instead of being re-pulled from the 
+    	// multidimensional database.
+    	//
+    	rebuildMemberPropCollections();    		
+ 
+    	return syntheticMembers;
+    }
+
 
     /**
 	 * @return the isDiscontig
@@ -202,42 +218,91 @@ public abstract class PafDimTree {
 		this.isDiscontig = isDiscontig;
 	}
 
+
+	/**
+     *  Return the names of all read-only members
+     *
+     * @return Set<String>
+     */
+    public Set<String> getReadOnlyMemberNames() {
+    	return new HashSet<String>(getMemberNames(getReadOnlyMembers()));
+    }
+
     /**
-     *  Get the names of all shared members
+     *  Return the names of all shared members
      *
      * @return Set<String>
      */
     public Set<String> getSharedMemberNames() {
-    	
-    	Set<String> sharedMemberNames = new HashSet<String>();
-    	
-    	// Cycle through all shared members and add each member name
-    	// to return set.
-    	for (PafDimMember sharedMember : this.getSharedMembers()) {
-    		sharedMemberNames.add(sharedMember.getKey());
-    	}
+    	return new HashSet<String>(getMemberNames(getSharedMembers()));
+    }
 
-    	// Return shared member names
-    	return sharedMemberNames;
+    /**
+     *  Return the names of all synthetic members
+     *
+     * @return Set<String>
+     */
+    public Set<String> getSyntheticMemberNames() {
+    	return new HashSet<String>(getMemberNames(getSyntheticMembers()));
     }
 
 
-	/**
-	 *  Initialize shared members collection
+    /**
+	 *  Initialize the member property collections
 	 *
 	 */
-	public void initSharedMembers() {
-		// TODO Auto-generated method stub
-   		sharedMembers = new ArrayList<PafDimMember>();
-	}
+	public void initMemberPropCollections() {
+		
+		// Initialize member property collections as needed.
+		if (readOnlyMembers == null ) {
+			readOnlyMembers = new ArrayList<PafDimMember>();
+		}
+		if (sharedMembers == null) {
+			sharedMembers = new ArrayList<PafDimMember>();
+		}
+		if (syntheticMembers == null) {
+			syntheticMembers = new ArrayList<PafDimMember>();
+		}
 
-	/**
-	 * @param sharedMembers the sharedMembers to set
+}
+
+    /**
+	 *  Reload the member property collections
+	 *
 	 */
-	protected void setSharedMembers(List<PafDimMember> sharedMembers) {
-		this.sharedMembers = sharedMembers;
-	}
+	public void rebuildMemberPropCollections() {
+		
+		// Reload all member property collections simultaneously to avoid multiple passes through
+		// the tree.
+   		if (readOnlyMembers == null || sharedMembers == null || syntheticMembers == null) {
+   			
+			logger.debug("Rebuilding the member property collections members list for tree rooted at: "
+					+ this.getRootNode().getKey() + " in dimension: " + this.getId());
+			
+			// Initialize member property collections
+			this.initMemberPropCollections();
+
+			// The entire list of dim members must be pulled using a tree traversal 
+			// since shared members aren't contained in the primary members hash map.
+			List<PafDimMember> allMembers = getMembers(TreeTraversalOrder.PRE_ORDER);
+			for (PafDimMember dimMember : allMembers) {
+				// Only add member to shared members collection, if it is not 
+				// contained in the members collection. In the case of sub-trees,
+				// a member that is defined in Essbase as shared could be contained
+				// in the members collection, and considered to be a "stored member",
+				// if it was the only occurrence of that member in the sub-tree.
+				if (members.get(dimMember.getKey()) != dimMember) {
+					addToSharedMembers(dimMember);
+				}
+				addToReadOnlyMembers(dimMember);
+				addToSyntheticMembers(dimMember);
+			}
+		}
+
+ 	}
+
  
+
 	/**
      *  Return the children of the specified paf tree member,
      *  as well as the specified tree member. This is a convenience 
@@ -520,9 +585,8 @@ public abstract class PafDimTree {
     			addToLvlTree(childNode);
     			addToGenTree(childNode);    			
 
-		// Add new child node to shared members collection (all members go through this logic,
-    	// but only shared members will be added to collection).
-		addToSharedMbrs(childNode);
+		// Add new child node to member property collections
+		addToMbrPropCollections(childNode);
     }
     
 	/**
@@ -612,21 +676,62 @@ public abstract class PafDimTree {
 
  
    /**
-     *  Add to shared members collection
+     *  Add member to member property collections
      *
-     * @param member
+     * @param member Dimension member
      */
-    protected void addToSharedMbrs(PafDimMember member) {
+    protected void addToMbrPropCollections(PafDimMember member) {
     	
-    	// Initialize shared member collection, if necessary
-    		if (sharedMembers == null) {
-			initSharedMembers();
-    		}    		
+    	// Check if collections need initializing
+    	initMemberPropCollections();
+    	
+    	// Add member to property collections
+    	addToReadOnlyMembers(member);
+    	addToSharedMembers(member);
+    	addToSyntheticMembers(member);
+    	
+    }
 
-		// Add member to shared members collection if it is shared
+    /**
+     *  Add member to read only member collection
+     *
+     * @param member Dimension member
+     */
+    protected void addToReadOnlyMembers(PafDimMember member) {
+    	
+		// Use a hash set to track members by selected property for fast lookup 
+    	if (member.isReadOnly()) {
+    		readOnlyMembers.add(member); 
+    	}
+    	
+    }
+
+    /**
+     *  Add member to shared member property collections
+     *
+     * @param member Dimension member
+     */
+    protected void addToSharedMembers(PafDimMember member) {
+    	
+		// Use a hash set to track members by selected property for fast lookup 
     	if (member.isShared()) {
     		sharedMembers.add(member); 
     	}
+     	
+    }
+
+    /**
+     *  Add member to synthetic member property collections
+     *
+     * @param member Dimension member
+     */
+    protected void addToSyntheticMembers(PafDimMember member) {
+    	
+		// Use a hash set to track members by selected property for fast lookup 
+    	if (member.isSynthetic()) {
+    		syntheticMembers.add(member);
+    	}
+    	
     }
 
     
@@ -1638,6 +1743,22 @@ public abstract class PafDimTree {
     	}
     	
     	return memberList;
+    }
+    
+    /**
+     *  Converts a set of paf dim members to a set of member names
+     *  
+     * @param dimMembers Set of paf dim members
+     * @return Set of member names
+     */
+    public Set<String> getMemberNames(Set<PafDimMember> dimMembers) {
+    	
+    	Set<String> memberSet = new HashSet<String>();
+    	for (PafDimMember dimMember : dimMembers) {
+    		memberSet.add(dimMember.getKey());
+    	}
+    	
+    	return memberSet;
     }
     
     

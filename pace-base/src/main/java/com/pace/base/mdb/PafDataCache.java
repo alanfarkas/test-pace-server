@@ -3170,18 +3170,20 @@ public class PafDataCache implements IPafDataCache {
 	 *	Return an array containing the members in the specified dimension name
 	 *  the meet the specified selection criteria.
 	 *  
-	 *  A null value in a property filter indicates that property will
-	 *  be ignored.
+	 *  A null value in a property selection indicates that property will be ignored.
 	 *
 	 * @param dimName Dimension name
 	 * @param isReadOnly Determines if read-only members should be selected
-	 * @param isVirtual Determines if virtual members should be selected
+	 * @param isSynthetic Determines if synthetic members should be selected
 	 * 
 	 * @return Returns an array containing the members in the specified axis.
 	 */
-	public String[] getFilteredDimMembers(String dimName, Boolean isReadOnly, Boolean isVirtual) {
+	public String[] getFilteredDimMembers(String dimName, Boolean isReadOnly, Boolean isSynthetic) {
 		
 		//TODO Create a more extensible way to filter out members
+		//TODO Probably need to add property collections to tree for quick lookup.
+		//TODO Migrate this method to the DimTree Class.
+		//TODO Add optional Branch parm, so that a specific branch can be pulled.
 		
 		List<String> filteredMembers = new ArrayList<String>();
 		String[] allMembers = getAxisMembers(getAxisIndex(dimName));
@@ -3192,15 +3194,14 @@ public class PafDataCache implements IPafDataCache {
 			
 			// Apply "readOnly" filter
 			if (isReadOnly != null) {
-					if ((isReadOnly && !memberProps.isReadOnly())
-						|| (!isReadOnly && memberProps.isReadOnly())) {
+					if ((isReadOnly && !memberProps.isReadOnly()) || (!isReadOnly && memberProps.isReadOnly())) {
 					continue;
 				}
 			}
 			
-			// Apply "virtual" filter
-			if (isVirtual != null) {
-				if ( (isVirtual && !memberProps.isSynthetic()) || (!isVirtual && memberProps.isSynthetic()) ) {
+			// Apply "sythentic" filter
+			if (isSynthetic != null) {
+				if ( (isSynthetic && !memberProps.isSynthetic()) || (!isSynthetic && memberProps.isSynthetic()) ) {
 				continue;
 				}
 			}
