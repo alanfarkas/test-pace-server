@@ -774,15 +774,24 @@ public class EsbData implements IMdbData{
 			esbCubeView = new EsbCubeView(cubeViewName,  connectionProps, useConnPool, false, false, true);				
 			
 			// Run mdx query with the "Dataless" option set to true. At this point only meta-deta will be generated.
-			// The data will be returned in a seperate call in which any versions containing formulas will be removed
+			// The data will be returned in a separate call in which any versions containing formulas will be removed
 			// from the MDX query.
 			esbApp = esbCubeView.getEsbApp();
 			esbDb = esbCubeView.getEsbDb(); 
 			mdxSelect = buildMdxSelect(expandedUOW, null, true);
-			mdxFrom = " FROM " + esbApp + "." + esbDb;
-			mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
-			logger.info("Running meta-data filter query: " + mdxQuery);
-			essMdDataSet = esbCubeView.runMdxQuery(mdxQuery, true, false, appDef.getEssNetTimeOut());
+			if (mdxSelect != null) {
+				mdxFrom = " FROM " + esbApp + "." + esbDb;
+				mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
+				logger.info("Running meta-data filter query: " + mdxQuery);
+				essMdDataSet = esbCubeView.runMdxQuery(mdxQuery, true, false, appDef.getEssNetTimeOut());
+			} else {
+				// Null query indicates that after further member filtering, no queried 
+				// members remained in one or more axes.
+				String errMsg = "MDX query Exception: no queried members remain in one or more axes";
+				logger.error(errMsg);
+				PafException pfe = new PafException(errMsg, PafErrSeverity.Error);	
+				throw pfe;
+			}
 			
 			// Determine basic result set statistics.
 			axes = essMdDataSet.getAllAxes();

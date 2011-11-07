@@ -1707,7 +1707,7 @@ public abstract class PafDimTree {
     
   /**
      *  Returns all the member names from the PafBaseTree using the 
-     *  specified tree traversal method. This is a convience method that 
+     *  specified tree traversal method. This is a convenience method that 
      *  calls getMemberNames(traversalOrder, level) with the "level"
      *  parameter set to 0
      *
@@ -1894,7 +1894,21 @@ public abstract class PafDimTree {
     }
     
     
-    
+	/**
+	 * Return the specified member names sorted in the specified tree traversal order
+	 * 
+	 * @param memberNames List of member names to sort
+	 * @param traversalOrder Tree traversal order
+	 * 
+	 * @return List of sorted members names
+	 */
+	public List<String> getSortedMemberNames(List<String> memberNames, TreeTraversalOrder traversalOrder) {
+		List<String> sortedMemberNames = getMemberNames(traversalOrder);
+		sortedMemberNames.retainAll(memberNames);
+		return sortedMemberNames;
+	}
+
+  
     /**
      * 
      * This method performs a traversal starting at the member specified in the current tree.

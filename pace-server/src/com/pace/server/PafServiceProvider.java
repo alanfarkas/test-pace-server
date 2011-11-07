@@ -3139,13 +3139,13 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 					//Data Filtering is selected
 					if (isDataFiltered){
 
-						//The Data Filter Spec exists
+						// The Data Filter Spec exists
 						if(dataFilterSpec != null && dataFilterSpec.getDimSpec().length > 0){
 							UnitOfWork workUnitDF = workUnit.clone();
 
 							PafDimSpec[] nonHierDimSpecs = pafPlannerConfig.getDataFilterSpec().getDimSpec();
 
-							//De-tokenize the expressions
+							// De-tokenize the expressions
 							for(PafDimSpec pafDimSpec : nonHierDimSpecs){
 								if (pafDimSpec.getExpressionList() == null || pafDimSpec.getExpressionList()[0].length() == 0){
 									throw new PafException("Invalid Data Filter Spec Expression for " + pafDimSpec.getDimension() + " .", PafErrSeverity.Error);
@@ -3182,19 +3182,39 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 							PafDimSpec[] hierDimSpecs = dataService.getFilteredMetadata(clientState, clientState.getApp(), workUnitDF.getPafDimSpecs());
 
 							// Update the Unit of Work with the data filtered hierachical dim metadata
-							// Expand hierarchy dim members to include ancestors
 							for(PafDimSpec dimSpec : hierDimSpecs){
+								
+								// Expand hierarchy dim members to include ancestors
 								List<PafDimMember> ancestors = new ArrayList<PafDimMember>();
 								Set<String> uniqueMembers = new HashSet<String>();
+								String dim = dimSpec.getDimension();
+								PafDimTree dimTree = treeSet.getTree(dim);
 								for(String memberName : dimSpec.getExpressionList()){
 									uniqueMembers.add(memberName);
-									ancestors = treeSet.getTree(dimSpec.getDimension()).getAncestors(memberName);
+									ancestors = dimTree.getAncestors(memberName);
 									for(PafDimMember ancestor : ancestors){
 										uniqueMembers.add(ancestor.getKey());
 									}
 								}
+								List<String> sortedMemberList = dimTree.getSortedMemberNames(new ArrayList<String>(uniqueMembers), TreeTraversalOrder.PRE_ORDER);
 								
-								workUnit.setDimMembers(dimSpec.getDimension(), uniqueMembers.toArray(new String[0]));
+								// If this dimension is filtered, the discontiguous member group collection needs to be
+								// populated for this dimension, so that the corresponding uow tree is built properly as
+								// a discontiguous tree. The root member must appear first, its own list, followed
+								// by the remaining base members in their own list, in  a pre-ordered sort (TTN-1644).
+								if (sortedMemberList.size() < workUnit.getDimMembers(dim).length) {
+									List<List<String>> discontigMbrGrps = new ArrayList<List<String>>();
+									String rootMember = sortedMemberList.get(0);
+									discontigMbrGrps.add(new ArrayList<String>(Arrays.asList(new String[]{ rootMember })));
+									if (sortedMemberList.size() > 1) {
+										discontigMbrGrps.add(new ArrayList<String>(sortedMemberList.subList(1,sortedMemberList.size())));
+									}
+									workUnit.getDiscontigMemberGroups().put(dim, discontigMbrGrps);
+								}	
+								
+								// Update unit of work
+								workUnit.setDimMembers(dimSpec.getDimension(), sortedMemberList.toArray(new String[0]));
+
 							}
 						}
 					}

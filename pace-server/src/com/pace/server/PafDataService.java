@@ -3241,6 +3241,7 @@ public class PafDataService {
 		Map<String, List<String>> memberFilter = new HashMap<String, List<String>>(), aggFilter = null;
 		MemberTreeSet uowTrees = clientState.getUowTrees();
 		PafDimTree timeHorizonTree = uowTrees.getTree(timeHorizonDim);
+		List<String> defEvalVersions = new ArrayList<String>();
 		
 		//TODO TTN-1644 Refactor this into PafDataCacheCalc or Evaluation Package
 
@@ -3258,6 +3259,18 @@ public class PafDataService {
 		// Exit if no data to calculate
 		if (dataSpecByVersion.isEmpty()) return;
 	
+
+		// Get a list of any versions that are being calculated in a default evaluation
+		// as these versions will be skipped.
+		PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
+		if (plannerConfig.isDefaultEvalEnabledWorkingVersion()) {
+			defEvalVersions.add(activePlanVersion);
+		}
+		String[] evalRefVersions = plannerConfig.getDefaultEvalRefVersions();
+    	if (evalRefVersions != null && evalRefVersions.length> 0) {
+    		List<String> evalRefVersionList = Arrays.asList(plannerConfig.getDefaultEvalRefVersions());
+     		defEvalVersions.addAll(evalRefVersionList);
+    	}
 		
 		// Apply version filter. If no version filter is supplied than use the active
 		// planning version.
@@ -3278,6 +3291,12 @@ public class PafDataService {
 		// Process each version separately as they each may be populated across varying sets
 		// of intersections;
         for (String version : versions) {
+        	
+        	// Skip processing, if default eval is enabled on this version, since any synthetic
+        	// members will also get calculated during default eval.
+        	if (defEvalVersions.contains(version)) {
+        		continue;
+        	}
         	
         	// Set version specific filters. Skip year & time dimensions as these will be 
         	// the same values for all versions.
