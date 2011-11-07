@@ -1592,8 +1592,9 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 			// Update data cache for specified client state and selected versions
 			@SuppressWarnings("unused")
-			List<String> updatedVersionList = dataService.refreshUowCache(clientState, clientState.getApp(),clientState.getUnitOfWork(), 
+			Map<String, Map<Integer, List<String>>> updatedMdbDataSpec = dataService.refreshUowCache(clientState, clientState.getApp(),clientState.getUnitOfWork(), 
 					Arrays.asList(updateRequest.getVersionFilter()));
+			
 
 			// Run the default evaluation process 
 			// -----------------------------------------------------------------------------

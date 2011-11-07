@@ -122,12 +122,12 @@ public class PafDataService {
 		Map<String, Set<String>> lockedPeriodMap = PafAppService.getInstance().getLockedPeriodMap(clientState);
 //		clientState.setLockedPeriodMap();
 		PafDataCache dataCache = new PafDataCache(clientState, lockedPeriodMap);
-		List<String>loadedVersions = mdbData.updateDataCache(dataCache, mdbDataSpecByVersion);
-		logger.info("UOW intialized with version(s): " + StringUtils.arrayListToString(loadedVersions));
+		Map<String, Map<Integer, List<String>>>loadedMdbDataSpec = mdbData.updateDataCache(dataCache, mdbDataSpecByVersion);
+		logger.info("UOW intialized with version(s): " + StringUtils.setToString(loadedMdbDataSpec.keySet()));
 		uowCache.put(clientId, dataCache);           
 
 		// Calculate synthetic member intersections
-		calculateSyntheticMembers(clientState, dataCache, mdbDataSpecByVersion);
+		calculateSyntheticMembers(clientState, dataCache, loadedMdbDataSpec);
 		
 		// Initialize attribute eval initialization property
 		for (PafMVS pafMVS : clientState.getAllMVS()) {
@@ -199,14 +199,14 @@ public class PafDataService {
 	 * @param expandedUow Expanded unit of work
 	 * @param versionFilter Versions to update
 	 *
-	 * @return List of updated versions
+	 * @return Map describing which intersections were actually retrieved.
 	 * @throws PafException 
 	 */
-	public List<String> refreshUowCache(PafClientState clientState,PafApplicationDef appDef, UnitOfWork expandedUow, 
+	public Map<String, Map<Integer, List<String>>> refreshUowCache(PafClientState clientState,PafApplicationDef appDef, UnitOfWork expandedUow, 
 			List <String> versionFilter) throws PafException {
 	
 		List<String> validatedVersionFilter = new ArrayList<String>();
-		List<String> updatedVersions = null;
+		Map<String, Map<Integer, List<String>>> loadedMdbDataSpec = null;
 	
 		// Get client id
 		String clientId = clientState.getClientId();
@@ -263,11 +263,14 @@ public class PafDataService {
 		
 		// Load mdb data for the required intersections. Any refreshed versions not in the data spec
 		// will be loaded as needed during view rendering or evaluation.
-		updatedVersions = mdbData.refreshDataCache(cache, mdbDataSpec, validatedVersionFilter);
-		logger.info("Data cache updated for versions: " + StringUtils.arrayListToString(updatedVersions));
+		loadedMdbDataSpec = mdbData.refreshDataCache(cache, mdbDataSpec, validatedVersionFilter);
+		logger.info("Data cache updated for versions: " + StringUtils.setToString(loadedMdbDataSpec.keySet()));
 		logger.info("Cached object count: " + uowCache.size());
 
-		return updatedVersions;
+		// Calculate synthetic member intersections
+		calculateSyntheticMembers(clientState, cache, loadedMdbDataSpec);
+		
+		return loadedMdbDataSpec;
 	}
 
 	/**
@@ -287,9 +290,12 @@ public class PafDataService {
 		IMdbData mdbData = getMdbDataProvider(connProps);
 
 		// Refresh filtered versions
-		List<String> updatedVersions = mdbData.updateDataCache(dataCache, clientState.getUnitOfWork(), versionFilter);
-		logger.info("Data cache updated for versions: " + StringUtils.arrayListToString(updatedVersions));
+		Map<String, Map<Integer, List<String>>> updatedMdbDataSpec = mdbData.updateDataCache(dataCache, clientState.getUnitOfWork(), versionFilter);
+		logger.info("Data cache updated for versions: " + StringUtils.setToString(updatedMdbDataSpec.keySet()));
 		
+		// Calculate synthetic member intersections
+		calculateSyntheticMembers(clientState, dataCache, updatedMdbDataSpec);
+			
 	}
 
 	
@@ -1246,10 +1252,10 @@ public class PafDataService {
 		String dsId = mdbDef.getDataSourceId();
 		IPafConnectionProps connProps = clientState.getDataSources().get(dsId);
 		IMdbData mdbData = this.getMdbDataProvider(connProps);
-		mdbData.updateDataCache(dataCache, dataSpecByVersion);
+		Map<String, Map<Integer, List<String>>> loadedMdbDataSpec = mdbData.updateDataCache(dataCache, dataSpecByVersion);
 
 		// Calculate any synthetic member intersections
-		calculateSyntheticMembers(clientState, dataCache, dataSpecByVersion);
+		calculateSyntheticMembers(clientState, dataCache, loadedMdbDataSpec);
 		
 	}
 
@@ -3236,9 +3242,9 @@ public class PafDataService {
 		MemberTreeSet uowTrees = clientState.getUowTrees();
 		PafDimTree timeHorizonTree = uowTrees.getTree(timeHorizonDim);
 		
+		//TODO TTN-1644 Refactor this into PafDataCacheCalc or Evaluation Package
 
 
-		
 		// Exit if no synthetic members to process
 		List<String> synthHierDims = new ArrayList<String>();
 		for (String dim : hierDims) {
@@ -3249,7 +3255,9 @@ public class PafDataService {
 		}
 		if (synthHierDims.isEmpty() && !timeHorizonTree.hasSyntheticMembers()) return;
 		
-		
+		// Exit if no data to calculate
+		if (dataSpecByVersion.isEmpty()) return;
+	
 		
 		// Apply version filter. If no version filter is supplied than use the active
 		// planning version.
@@ -3260,7 +3268,6 @@ public class PafDataService {
 			
 		}
 		
-
 		// Create a time/year filter. Select all uow time horizon periods, as synthetic members
 		// need to be populated across elapsed and no-elapsed periods.
 		memberFilter.put(yearDim, Arrays.asList(TimeSlice.getTimeHorizonYear()));
@@ -3280,12 +3287,14 @@ public class PafDataService {
 			for (int axis : axisDataSpecs.keySet()) {
 				if (axis != timeAxis && axis!= yearAxis) {
 					String dim = dataCache.getDimension(axis);
-					List<String> members =  axisDataSpecs.get(axis);
+					List<String> members = new ArrayList<String>(axisDataSpecs.get(axis));
 					// Filter out any recalc measures
 					if (dim.equals(measureDim)) {
 						members.removeAll(recalcMeasures);
 					}
-					aggFilter.put(dim, members);					
+					if (!members.isEmpty()) {
+						aggFilter.put(dim, members);
+					}					
 				}
 			}
 
@@ -3339,10 +3348,9 @@ public class PafDataService {
 		}
         
         
-		//-----
         dataCache.clearDirty();
-
-        //        this.performanceLogger();
+        String logMsg = LogUtil.timedStep("Synthetic Member Calculation", startTime);
+        evalPerfLogger.info(logMsg);
 	}
 	
 	

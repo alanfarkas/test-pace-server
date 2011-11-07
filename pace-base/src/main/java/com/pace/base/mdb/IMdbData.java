@@ -49,10 +49,10 @@ public interface IMdbData {
 	 * @param mdbDataSpec Specifies the intersections to retrieve for each version
 	 * @param versionFilter List of versions to refresh
 	 * 	  
-	 * @return List of updated versions
+	 * @return Map describing which intersections were actually retrieved.
 	 * @throws PafException 
 	 */ 
-	public abstract List<String> refreshDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException;
+	public abstract Map<String, Map<Integer, List<String>>> refreshDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException;
 
 
 	/** 
@@ -69,10 +69,10 @@ public interface IMdbData {
 	 * @param expandedUow Expanded unit of work specification
 	 * @param versionFilter List of versions to refresh
 	 * 	  
-	 * @return List of updated versions
+	 * @return Map describing which intersections were actually retrieved.
 	 * @throws PafException 
 	 */ 
-	public abstract List<String> updateDataCache(PafDataCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException;
+	public abstract Map<String, Map<Integer, List<String>>> updateDataCache(PafDataCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException;
 	
 
 	/** 
@@ -87,10 +87,10 @@ public interface IMdbData {
 	 * @param dataCache Data cache
 	 * @param mdbDataSpec Specifies the intersections to retrieve for each version
 	 * 
-	 * @return List of updated versions
+	 * @return Map describing which intersections were actually retrieved.
 	 * @throws PafException 
 	 */
-    public abstract List<String> updateDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException;
+    public abstract Map<String, Map<Integer, List<String>>> updateDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException;
 
 	
 	/**

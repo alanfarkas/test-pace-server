@@ -26,6 +26,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.Ostermiller.util.StringTokenizer;
 
@@ -258,6 +259,17 @@ public class StringUtils {
     	
     	Object[] array = list.toArray(new String[0]);
         return arrayToString(array);
+    }
+    
+    /**
+     *  convenience wrapper providing some default options.
+     *
+     * @param set Set of objects containing alpha-numeric characters
+     * @return String
+     */
+    public static String setToString(Set<String> set) {
+    	
+    	return arrayListToString(new ArrayList<String>(set));
     }
     
 	/**

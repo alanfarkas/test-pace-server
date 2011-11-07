@@ -139,10 +139,10 @@ public class EsbData implements IMdbData{
 	 * @param mdbDataSpec Specifies the data intersections to reload from Essbase, by version
 	 * @param versionFilter List of versions to refresh
 	 * 	  
-	 * @return List of updated versions
+	 * @return Map describing which intersections were actually retrieved.
 	 * @throws PafException 
 	 */ 
-	public List<String> refreshDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException {
+	public Map<String, Map<Integer, List<String>>> refreshDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec, List<String> versionFilter) throws PafException {
 	
 		// Initialize refreshed versions
 		List<String> clearedVersions = new ArrayList<String>(versionFilter);
@@ -166,14 +166,14 @@ public class EsbData implements IMdbData{
 	 * @param expandedUow Expanded unit of work specification
 	 * @param versionFilter List of versions to refresh
 	 * 	  
-	 * @return List of updated versions
+	 * @return Map describing which intersections were actually retrieved.
 	 * @throws PafException 
 	 */ 
-	public List<String> updateDataCache(PafDataCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException {
+	public Map<String, Map<Integer, List<String>>> updateDataCache(PafDataCache dataCache, UnitOfWork expandedUow, List<String> versionFilter) throws PafException {
 	
 		// Exit if version filter is empty
 		if (versionFilter == null || versionFilter.isEmpty()) {
-			return new ArrayList<String>();
+			return new HashMap<String, Map<Integer, List<String>>>();
 		}
 		
 		// Create a data specification for each filtered version that specifies that
@@ -203,10 +203,10 @@ public class EsbData implements IMdbData{
 	 * @param dataCache Data cache
 	 * @param mdbDataSpec Specifies the intersections to retrieve from Essbase, by version
 	 * 
-	 * @return List of refreshed versions
+	 * @return Map describing which intersections were actually retrieved.
 	 * @throws PafException
 	 */
-    public List<String> updateDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException {
+    public Map<String, Map<Integer, List<String>>> updateDataCache(PafDataCache dataCache, Map<String, Map<Integer, List<String>>> mdbDataSpec) throws PafException {
 
     	int mdxCellCount = 0;
 		long loadDcStartTime = System.currentTimeMillis();
@@ -214,13 +214,14 @@ public class EsbData implements IMdbData{
 		String esbApp = null, esbDb = null;
 		String mdxFrom = null, mdxWhere = "";
 		String logMsg = null;
+		Map<String, Map<Integer, List<String>>> loadedMdbDataSpec = new HashMap();   // Track data that was actually loadeded
     
 		EsbCubeView esbCubeView = null;
 
 		// Exit if no data has been specified
 		if (mdbDataSpec == null || mdbDataSpec.size() == 0) {
 			logger.debug("UpdateDataCache() - empty data spec - no data was updated");
-			return new ArrayList<String>();
+			return loadedMdbDataSpec;
 		}
 		
 		logger.info("Loading UOW from cube: " + esbConnAlias ); 
@@ -256,7 +257,10 @@ public class EsbData implements IMdbData{
 			// Construct MDX select statement that will extract data for selected version,
 			// suppressing missing intersection rows
 			String mdxSelect = buildMdxSelect(filteredMemberMap, dataCache, true);
-			if (mdxSelect == null) {
+			if (mdxSelect != null) {
+				// Track loaded data intersections
+				loadedMdbDataSpec.put(version, filteredMemberMap);
+			} else {
 				// Null query indicates that after further member filtering, no queried 
 				// members remained in one or more axes.
 				logMsg = "UpdateDataCache() - all requested data is already loaded - no data update is required";
@@ -283,8 +287,8 @@ public class EsbData implements IMdbData{
 			esbCubeView.disconnect();
 		}
 
-		// Return list of retrieved versions
-		return new ArrayList<String>(extractedVersions);
+		// Return map describing which data was actually retrieved from Essbase
+		return loadedMdbDataSpec;
 
     }
 
