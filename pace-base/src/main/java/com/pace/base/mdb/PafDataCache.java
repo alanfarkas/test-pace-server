@@ -600,31 +600,31 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 *	Get the list of all open time horizen periods for the current plan 
+	 *	Get the list of all open time horizon periods for the current plan 
 	 *  version
 	 *	 
 	 * @return List of open time horizon periods
 	 */
 	public List<String> getOpenTimeHorizonPeriods() {
+		return getOpenTimeHorizonPeriods(getPlanVersions()[0]);		
+	}
+
+
+	/**
+	 *	Get the list of all open time horizon periods for the specified version 
+	 *	 
+	 * @return List of open time horizon periods
+	 */
+	public List<String> getOpenTimeHorizonPeriods(String version) {
 
 		List<String> openPeriods = new ArrayList<String>();
-		PafDimTree timeHorizonTree = getDimTrees().getTree(getTimeHorizonDim());
 		PafDimTree yearTree = getDimTrees().getTree(getYearDim());
 		
 		// Add in the open time horizon periods for each level 0 year
 		List<PafDimMember> yearMbrs = yearTree.getLowestLevelMembers();
 		for (PafDimMember yearMbr : yearMbrs) {
-			openPeriods.addAll(getOpenTimeHorizonPeriods(getPlanVersions()[0], yearMbr.getKey()));
+			openPeriods.addAll(getOpenTimeHorizonPeriods(version, yearMbr.getKey()));
 		}
-
-		// For now, in a multi-year uow, the top node is to be locked, due to 
-		// allocation complexities.
-//		// Add the root node of the time horizon tree to the list of open
-//		// periods, if there are more than one years.
-//		if (yearMbrs.size() > 1 && !openPeriods.isEmpty()) {
-//			PafDimMember root = timeHorizonTree.getRootNode();
-//			openPeriods.add(root.getKey());
-//		}
 
 		return openPeriods;
 		
@@ -3220,6 +3220,65 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 * Return all the recalc measures
+	 * 
+	 * @return All the recalc measures
+	 */
+	public List<String> getRecalcMeasures() {
+		return getFilteredMeasures(MeasureType.Recalc);
+	}
+
+
+	/**
+	 * Return the measures matching the selected measure type
+	 * 
+	 * @param selMeasureType Selected measure type
+	 * @return All the measures matching the measure type
+	 */
+	public List<String> getFilteredMeasures(MeasureType selMeasureType) {
+		
+		final String[] measures = getDimMembers(getMeasureDim());
+		List<String> filteredMeasures = new ArrayList<String>();
+		for (String measure : measures) {
+			MeasureDef measureDef = getMeasureDef(measure);
+			if (measureDef != null && measureDef.getType().equals(selMeasureType)) {
+				filteredMeasures.add(measure);
+			}
+		}
+		
+		return filteredMeasures;
+	}
+
+
+	/**
+	 * Return the measures matching one of the selected measure types
+	 * 
+	 * @param selMeasureType Selected measure type
+	 * @return All the measures matching the measure type
+	 */
+	public List<String> getFilteredMeasures(MeasureType[] selMeasureTypes) {
+		
+		final String[] measures = getDimMembers(getMeasureDim());
+		List<String> filteredMeasures = new ArrayList<String>();
+		for (String measure : measures) {
+			MeasureDef measureDef = getMeasureDef(measure);
+			if (measureDef != null) {
+				boolean isValidMeasure = false;
+				for (int i = 0; i < selMeasureTypes.length && isValidMeasure == false; i++) {
+					MeasureType selMeasureType = selMeasureTypes[i]; 
+					if (measureDef.getType().equals(selMeasureType)) {
+						filteredMeasures.add(measure);
+						isValidMeasure = true;
+					}
+				}
+			}
+		}
+
+		return filteredMeasures;
+	}
+
+
+	/**
 	 *	Return number of data cache rows
 	 *
 	 * @return Returns the number of data cache rows.
@@ -3365,7 +3424,7 @@ public class PafDataCache implements IPafDataCache {
 
 	/**
 	 *	Determines if the specified data cache intersection is
-	 *	empty (unpopulated)
+	 *	empty (un-populated)
 	 *
 	 * @param intersection Cell intersection
 	 * @return True if the specified intersection has not been populated

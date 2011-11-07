@@ -46,6 +46,7 @@ import com.pace.base.PafException;
 import com.pace.base.app.*;
 import com.pace.base.comm.EvaluateViewRequest;
 import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.ExpOperation;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
@@ -54,6 +55,8 @@ import com.pace.base.data.TimeSlice;
 import com.pace.base.db.Application;
 import com.pace.base.db.SecurityGroup;
 import com.pace.base.mdb.*;
+import com.pace.base.rules.Rule;
+import com.pace.base.rules.RuleGroup;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
@@ -123,7 +126,10 @@ public class PafDataService {
 		logger.info("UOW intialized with version(s): " + StringUtils.arrayListToString(loadedVersions));
 		uowCache.put(clientId, dataCache);           
 
-		// Intialize attribute eval initialization property
+		// Calculate synthetic member intersections
+		calculateSyntheticMembers(clientState, dataCache, mdbDataSpecByVersion);
+		
+		// Initialize attribute eval initialization property
 		for (PafMVS pafMVS : clientState.getAllMVS()) {
 			pafMVS.setInitializedForAttrEval(false);
 		}
@@ -1242,6 +1248,8 @@ public class PafDataService {
 		IMdbData mdbData = this.getMdbDataProvider(connProps);
 		mdbData.updateDataCache(dataCache, dataSpecByVersion);
 
+		// Calculate any synthetic member intersections
+		calculateSyntheticMembers(clientState, dataCache, dataSpecByVersion);
 		
 	}
 
@@ -3200,6 +3208,144 @@ public class PafDataService {
 		return baseDimTrees;
 	}
 
+
+	/**
+	 *	Calculate synthetic member intersections
+	 *
+	 * @param clientState Client state object
+	 * @param dataCache Data cache
+	 * @param dataSpecByVersion Specifies the intersections to calculate over, by version
+	 * 
+	 * @throws PafException
+	 */
+	public void calculateSyntheticMembers(PafClientState clientState, PafDataCache dataCache, Map<String, Map<Integer, List<String>>> dataSpecByVersion) throws PafException {
+		
+		long startTime = System.currentTimeMillis();
+		int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
+		String activePlanVersion = clientState.getPlanningVersion().getName();
+		String measureDim = dataCache.getMeasureDim();
+		String timeDim = dataCache.getTimeDim();
+		String timeHorizonDim = dataCache.getTimeHorizonDim();
+		String versionDim = dataCache.getVersionDim();
+		String yearDim = dataCache.getYearDim();
+		String[] hierDims = clientState.getApp().getMdbDef().getHierDims();
+		String[] baseDims = dataCache.getBaseDimensions();
+		List<String> recalcMeasures = dataCache.getRecalcMeasures();
+		Set<String> versions = new HashSet<String>();
+		Map<String, List<String>> memberFilter = new HashMap<String, List<String>>(), aggFilter = null;
+		MemberTreeSet uowTrees = clientState.getUowTrees();
+		PafDimTree timeHorizonTree = uowTrees.getTree(timeHorizonDim);
+		
+
+
+		
+		// Exit if no synthetic members to process
+		List<String> synthHierDims = new ArrayList<String>();
+		for (String dim : hierDims) {
+			PafDimTree dimTree = uowTrees.getTree(dim);
+			if (dimTree.hasSyntheticMembers()) {
+				synthHierDims.add(dim);
+			}
+		}
+		if (synthHierDims.isEmpty() && !timeHorizonTree.hasSyntheticMembers()) return;
+		
+		
+		
+		// Apply version filter. If no version filter is supplied than use the active
+		// planning version.
+		if (dataSpecByVersion != null && !dataSpecByVersion.isEmpty()) {
+			versions = dataSpecByVersion.keySet();
+		} else {
+			versions.add(activePlanVersion);
+			
+		}
+		
+
+		// Create a time/year filter. Select all uow time horizon periods, as synthetic members
+		// need to be populated across elapsed and no-elapsed periods.
+		memberFilter.put(yearDim, Arrays.asList(TimeSlice.getTimeHorizonYear()));
+		List<String> openTimeHorizonPeriods = timeHorizonTree.getMemberNames(TreeTraversalOrder.POST_ORDER);
+		memberFilter.put(timeDim, openTimeHorizonPeriods);
+		
+		
+		// Process each version separately as they each may be populated across varying sets
+		// of intersections;
+        for (String version : versions) {
+        	
+        	// Set version specific filters. Skip year & time dimensions as these will be 
+        	// the same values for all versions.
+			aggFilter = new HashMap<String, List<String>>(memberFilter);
+			aggFilter.put(versionDim, new ArrayList<String>(Arrays.asList(new String[]{version})));
+			Map<Integer, List<String>> axisDataSpecs = dataSpecByVersion.get(version);
+			for (int axis : axisDataSpecs.keySet()) {
+				if (axis != timeAxis && axis!= yearAxis) {
+					String dim = dataCache.getDimension(axis);
+					List<String> members =  axisDataSpecs.get(axis);
+					// Filter out any recalc measures
+					if (dim.equals(measureDim)) {
+						members.removeAll(recalcMeasures);
+					}
+					aggFilter.put(dim, members);					
+				}
+			}
+
+			// Cycle through each hierarchical dimension and time hierarchy
+			// Perform aggregation of base intersections
+			//-- Aggregate all hierarchical dimensions
+			for (String dim : synthHierDims) {
+				PafDimTree dimTree = uowTrees.getTree(dim);
+				aggFilter.put(dim, new ArrayList<String>(dimTree.getSyntheticMemberNames()));
+				PafDataCacheCalc.aggDimension(dim, dataCache, dimTree, aggFilter, DcTrackChangeOpt.NONE);
+			}
+
+			//-- Aggregate time dimension
+			if (timeHorizonTree.hasSyntheticMembers()) {
+				aggFilter = new HashMap<String, List<String>>(memberFilter);
+				aggFilter.put(timeDim, new ArrayList<String>(timeHorizonTree.getSyntheticMemberNames()));
+				PafDataCacheCalc.aggDimension(timeDim, dataCache,timeHorizonTree, aggFilter, DcTrackChangeOpt.NONE);
+			}
+			
+			
+			// Calculate re-calc measure intersections using the default rule set
+			Map<String, List<String>> recalcFilter = new HashMap<String, List<String>>(aggFilter);
+			if (!recalcMeasures.isEmpty()) {
+				EvalState evalState = new EvalState(null, clientState, dataCache);
+				RuleSet ruleSet = clientState.getDefaultMsrRuleset();
+				Intersection is = new Intersection(baseDims);
+				for (RuleGroup rg : ruleSet.getRuleGroups()) {
+					for (Rule r : rg.getRules()) {
+						
+						// Evaluation any formula whose result term is a recalc measure
+						String msrName = r.getFormula().getResultMeasure();						
+						if (recalcMeasures.contains(msrName)) {							
+
+							// Generate the list of intersections to calculate
+							List<String> measureList = new ArrayList<String>(Arrays.asList(new String[]{msrName})); 
+							recalcFilter.put(measureDim, measureList);
+							Odometer cellIterator = dataCache.getCellIterator(baseDims, recalcFilter);
+
+							// iterate over intersections, calculating them
+							while (cellIterator.hasNext()) {
+								@SuppressWarnings("unchecked")
+								String[] coords = (String[]) cellIterator.nextValue().toArray(new String[0]);
+								TimeSlice.translateTimeHorizonCoords(coords, timeAxis, yearAxis);
+								is.setCoordinates(coords);
+								EvalUtil.evalFormula(r.getFormula(), measureDim, is, dataCache, evalState);
+							}
+						}
+					}
+				}
+			}
+		}
+        
+        
+		//-----
+        dataCache.clearDirty();
+
+        //        this.performanceLogger();
+	}
+	
+	
 	/**
 	 *	Evaluate the default rule set if warranted by the client state paf
 	 *  planner configuration settings.

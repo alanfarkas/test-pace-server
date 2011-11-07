@@ -468,20 +468,28 @@ public abstract class PafDimTree {
     	return getMembers().containsKey(key);
     }
 
-     /**
+    /**
      *	Determines if this PafDimTree contains any shared members
      *
-     * @return True if shared members exists
+     * @return True if shared members exist
      */
     public boolean hasSharedMembers() {
-    	if (this.getSharedMembers().size() > 0) {
-    		return true;
-    	} else {
-    		return false;
-    }
+		return (this.getSharedMembers().size() > 0);
     }
 
-   /**
+ 
+
+    /**
+     *	Determines if this PafDimTree contains any synthetic members
+     *
+     * @return True if synthetic members exist
+     */
+	public boolean hasSyntheticMembers() {
+		return (this.getSyntheticMembers().size() > 0);
+	}
+
+
+    /**
     *  Set the members.
     *
     * @param members The members to set

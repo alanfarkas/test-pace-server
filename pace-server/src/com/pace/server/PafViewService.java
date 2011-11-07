@@ -4046,8 +4046,6 @@ public class PafViewService {
 		Integer baseDimIndex = null;
 		int tupleBlankCount = 0;
 		
-		PafDataService dataService = PafDataService.getInstance();
-		
 		attrDimNames.addAll(attrPageDimNames);
 		
 		//Cycle through all the view section dimensions on either the row or column dimension axis

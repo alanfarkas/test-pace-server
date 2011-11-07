@@ -147,7 +147,7 @@ public abstract class PafDataCacheCalc {
 		int timeAxis = dataCache.getAxisIndex(timeDim), yearAxis = dataCache.getAxisIndex(yearDim);
 		String[] dimensions = dataCache.getBaseDimensions();
 		String[] planVersions = dataCache.getPlanVersions();
-		List<String> aggMembers = null;
+		List<String> aggMemberNames = null;
 		List<String> timeOpenPeriods = new ArrayList<String>();
 		Set<MeasureType> aggMeasureTypes = new HashSet<MeasureType>(Arrays.asList(new MeasureType[]{MeasureType.Aggregate, MeasureType.TimeBalFirst, MeasureType.TimeBalLast}));
 		Map<String, List<String>> aggFilter = new HashMap<String, List<String>>();
@@ -220,13 +220,14 @@ public abstract class PafDataCacheCalc {
 		// Get list of members to aggregate - level 1  and above in Post Order, 
 		// so that all children are calculated before their parents.
 		logger.debug("Getting list of members to aggregate");
-		aggMembers = memberTree.getMemberNames(TreeTraversalOrder.POST_ORDER, 1);
+		aggMemberNames = memberTree.getMemberNames(TreeTraversalOrder.POST_ORDER, 1);
 		
-//		// TTN-1595 - Time aggregation, don't aggregate root
-//		if (isTimeAggregation) {
-//			aggMembers.remove(memberTree.getRootNode());
-//		}
-
+		// Apply member filter to list of members to aggregate (TTN-1644).
+		List<String> filteredMembers = aggFilter.get(aggDimension);
+		if (filteredMembers != null && !filteredMembers.isEmpty()) {
+			aggMemberNames.retainAll(filteredMembers);
+		}
+		
 		// Modify the aggregation filter so that it can be used to generate all
 		// the cell intersections that need to be included in the aggregation
 		// process. 
@@ -234,43 +235,56 @@ public abstract class PafDataCacheCalc {
 		// Since the aggregation dimension is being iterated in the outer
 		// loop, the filter on the aggregation dimension will be set to a
 		// single "dummy" member.
-		aggFilter.put(aggDimension, Arrays.asList(new String[]{"[MEMBER]"}));
+		Map<String, List<String>> iteratorFilter = new HashMap<String, List<String>>(aggFilter);
+		iteratorFilter.put(aggDimension, Arrays.asList(new String[]{"[MEMBER]"}));
 			
 		// Initialize the intersection iterator. To reduce overhead, the iterator
 		// only gets created once, but will be reused for each aggregation member.
-		cellIterator = dataCache.getCellIterator(dimensions, aggFilter);
+		cellIterator = dataCache.getCellIterator(dimensions, iteratorFilter);
 
 		// Cycle through aggregation members
-		for (String aggMember : aggMembers) {
+		for (String aggMemberName : aggMemberNames) {
 
 			//BEGIN(2) - TTN-584 - Skip aggregation on elapsed periods
-			if ( isTimeAggregation && timeOpenPeriods.size() > 0 && !timeOpenPeriods.contains(aggMember)) {
-				logger.debug("Skipping aggregation on time member [" + aggMember + "]");
+			if ( isTimeAggregation && timeOpenPeriods.size() > 0 && !timeOpenPeriods.contains(aggMemberName)) {
+				logger.debug("Skipping aggregation on time member [" + aggMemberName + "]");
 				continue;
 			} else {
-				logger.debug("Aggregating member [" + aggMember + "]");
+				logger.debug("Aggregating member [" + aggMemberName + "]");
 			}
 			//END(2) - TTN-584
 
 
 			// Process the aggregation member only if it has children
-			List<PafDimMember> children = memberTree.getMember(aggMember).getChildren();
+			PafDimMember aggMember = memberTree.getMember(aggMemberName);
+			List<PafDimMember> children = aggMember.getChildren();
 			if (children.size() > 0) {
 
 				// Cycle through all selected member intersections in the data cache
 				// across the member being aggregated. 
 				// 
-				// Each iterated intersection is a time horizon-based intesection, and
-				// with the expection of a time dimension aggreation, must be initially
-				// converted to a time/year-basd intersection. Time dimension aggregation
-				// must be handled differently (TTN-1595).
+				// Each iterated intersection is a time horizon-based intersection, and
+				// with the exception of a time dimension aggregation, must be initially
+				// converted to a time/year-based intersection. 
+				//
+				// Time dimension aggregation, on the other hand, is handled a bit 
+				// differently. Since time aggregation occurs along the time horizon
+				// tree, each child intersection being aggregated is first converted 
+				// to a time horizon intersection. After the aggregation, the 
+				// iterated intersection is then converted back to a time/year
+				// based intersection, before being written back to the data cache.
+				//
+				// To reduce overhead, intersections are "translated" from  a time/year
+				// format to a time horizon format, and vice versa, instead of being 
+				// cloned (TTN-1595).
+				//
 				while (cellIterator.hasNext()) {
 					
 					// Get next member intersection
 					@SuppressWarnings("unchecked")
 					String[] coords = (String[]) cellIterator.nextValue().toArray(new String[0]);
 					Intersection intersection = new Intersection(dimensions, coords);
-					intersection.setCoordinate(aggDimension, aggMember); 
+					intersection.setCoordinate(aggDimension, aggMemberName); 
 					
 					// Initialize aggregation total
 					double aggAmount = 0;
@@ -278,14 +292,14 @@ public abstract class PafDataCacheCalc {
 					// Only process measures with valid aggregation types
 					String measure = intersection.getCoordinate(measureDim);
 					MeasureType measureType = dataCache.getMeasureType(measure);
-					if (aggMeasureTypes.contains(measureType)) {
+					if (aggMeasureTypes.contains(measureType) || (aggMember.isSynthetic() && measureType == MeasureType.NonAggregate)){
 
 						// Aggregate children across selected member intersection. When aggregating 
 						// across the "Time" dimension, the aggregation process must properly aggregate 
 						// any measures set with the "Time Balance First" or "Time Balance Last" property.
 						if (!isTimeAggregation){
 
-							// Non-Time Aggreation - translate time horzion coordinate in aggregated 
+							// Non-Time Aggregation - translate time horizon coordinate in aggregated 
 							// intersection to time year coordinates. 
 							TimeSlice.translateTimeHorizonCoords(coords, timeAxis, yearAxis);
 							
@@ -294,11 +308,17 @@ public abstract class PafDataCacheCalc {
 
 								intersection.setCoordinate(aggDimension, child.getKey());
 								double cellValue = dataCache.getCellValue(intersection);
-								aggAmount = aggAmount + cellValue;
+								aggAmount = aggAmount + cellValue;								
 							}
-
+							
+							// If aggregation member is synthetic and measure is non-aggregate then
+							// set the value to be the average of the children. (TTN-1644)
+							if (measureType == MeasureType.NonAggregate) {
+								aggAmount /= children.size();
+							}
+							
 							// Update aggregated member value (non-time aggregation)
-							intersection.setCoordinate(aggDimension, aggMember);
+							intersection.setCoordinate(aggDimension, aggMemberName);
 							dataCache.setCellValue(intersection, aggAmount, trackChanges);
 
 						} else { 
@@ -310,17 +330,21 @@ public abstract class PafDataCacheCalc {
 									double cellValue = dataCache.getCellValue(intersection);
 									aggAmount = aggAmount + cellValue;
 								}
+								// If aggregation member is synthetic and measure is non-aggregate then
+								// set the value to be the average of the children. (TTN-1644)
+								if (measureType == MeasureType.NonAggregate) {
+									aggAmount /= children.size();
+								}
+								
 							} else if (measureType == MeasureType.TimeBalFirst)  {
 								// Time Balance First - selected time dimension member equals it's first child
 								PafDimMember child = children.get(0);
 								TimeSlice.applyTimeHorizonCoord(intersection, child.getKey(), mdbDef); // TTN-1595
-								//							intersection.setCoordinate(aggDimension, child.getKey());
 								aggAmount = dataCache.getCellValue(intersection);												
 							} else if (measureType == MeasureType.TimeBalLast) {
 								// Time Balance Last - selected time dimension member equals it's last child
 								PafDimMember child = children.get(children.size() - 1);
 								TimeSlice.applyTimeHorizonCoord(intersection, child.getKey(), mdbDef); // TTN-1595
-								//							intersection.setCoordinate(aggDimension, child.getKey());
 								aggAmount = dataCache.getCellValue(intersection);	
 							} else {
 								// Invalid Measure Type - Throw IllegalArgumentException (should never get here)
@@ -331,11 +355,12 @@ public abstract class PafDataCacheCalc {
 							}
 
 							// Update aggregated time member value
-							TimeSlice.applyTimeHorizonCoord(intersection, aggMember, mdbDef); 
+							TimeSlice.applyTimeHorizonCoord(intersection, aggMemberName, mdbDef); 
 							dataCache.setCellValue(intersection, aggAmount, trackChanges);
 
 						} 
 					}
+						
 				}  // Next intersection
 			}	
 			cellIterator.reset();
@@ -438,13 +463,14 @@ public abstract class PafDataCacheCalc {
 			Map<String, List<String>> memberMap, DcTrackChangeOpt trackChanges) throws PafException {
 
 		PafViewSection viewSection = dataCache.getPafMVS().getViewSection();
-		String[] attributeDims = viewSection.getAttributeDims();
-		String[] viewDims = viewSection.getDimensionsPriority();
-		int timeIndex = dataCache.getAxisIndex(dataCache.getTimeDim()), yearIndex = dataCache.getAxisIndex(dataCache.getYearDim());
-		Set<Intersection> invalidViewIs = viewSection.invalidAttrIntersections();
+		final String measureDim = dataCache.getMeasureDim();
+		final String[] attributeDims = viewSection.getAttributeDims();
+		final String[] viewDims = viewSection.getDimensionsPriority();
+		final int timeIndex = dataCache.getAxisIndex(dataCache.getTimeDim()), yearIndex = dataCache.getAxisIndex(dataCache.getYearDim());
+		final Set<Intersection> invalidViewIs = viewSection.invalidAttrIntersections();
 		Map<String, Set<Intersection>> recalcIsByMsr = new HashMap<String, Set<Intersection>>();
-		MemberTreeSet memberTrees = clientState.getUowTrees();
-		RuleSet ruleSet = clientState.getCurrentMsrRuleset();
+		final MemberTreeSet memberTrees = clientState.getUowTrees();
+		final RuleSet ruleSet = clientState.getCurrentMsrRuleset();
 
 
 		// Initialize data cache change tracking collection
@@ -501,6 +527,9 @@ public abstract class PafDataCacheCalc {
 		// 2nd pass to do recalcs. Dependent on aggregates being calculated, and processing 
 		// recalc measures in rule group sequence, so that dependent recalcs are also processed
 		if (!recalcIsByMsr.isEmpty()) {
+			if (evalState == null) {
+				evalState = new EvalState(clientState, dataCache);
+			}
 			for (RuleGroup rg : ruleSet.getRuleGroups()) {
 				for (Rule r : rg.getRules()) {
 					// if rule set measure is in list, then it's by definition a recalc
@@ -509,9 +538,8 @@ public abstract class PafDataCacheCalc {
 					if (recalcIsByMsr.containsKey(msrName)) {
 						// iterate over intersections, calculating them
 						for (Intersection is : recalcIsByMsr.get(msrName)) {
-							evalFormula(r.getFormula(),
-									dataCache.getMeasureDim(), is, dataCache,
-									new EvalState(null, clientState, dataCache));
+							//evalFormula(r.getFormula(), measureDim, is, dataCache, new EvalState(null, clientState, dataCache));
+							evalFormula(r.getFormula(), measureDim, is, dataCache, evalState);
 						}
 					}
 				}

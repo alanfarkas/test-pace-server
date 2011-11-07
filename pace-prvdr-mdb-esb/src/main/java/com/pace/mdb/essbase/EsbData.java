@@ -254,10 +254,10 @@ public class EsbData implements IMdbData{
 			}
 			
 			// Construct MDX select statement that will extract data for selected version,
-			// suppressing misssing intersection rows
+			// suppressing missing intersection rows
 			String mdxSelect = buildMdxSelect(filteredMemberMap, dataCache, true);
 			if (mdxSelect == null) {
-				// Null query indicates that after futher member filtering, no queried 
+				// Null query indicates that after further member filtering, no queried 
 				// members remained in one or more axes.
 				logMsg = "UpdateDataCache() - all requested data is already loaded - no data update is required";
 				logger.info(logMsg);
@@ -430,7 +430,7 @@ public class EsbData implements IMdbData{
 			
 			// Filter out any synthetic members, if data cache was passed in (TTN-1595)
 			if (dataCache != null) {
-				List<String> origMemberList = dimMembers.get(axis);
+				final List<String> origMemberList = dimMembers.get(axis);
 				String dim = dataCache.getDimension(axis);
 				PafDimMember root = dataCache.getDimTrees().getTree(dim).getRootNode();
 				if (root.getMemberProps().isSynthetic()) {
@@ -448,7 +448,7 @@ public class EsbData implements IMdbData{
 			}
 			
 			
-			// Includes the optional keywords Non Empty before the set specification in each axis in order to suppress 
+			// Include the optional keywords "Non Empty" before the set specification in each axis in order to suppress 
 			// slices that contain entirely #MISSING values.
 			if(isNonEmptyFlagUsed)
 			{

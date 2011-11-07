@@ -709,9 +709,6 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				dataService.getUowMemberIndexLists(treeSet);
 			clientState.setMemberIndexLists(memberIndexLists);
 			
-			// Load data cache based on unit of work
-			dataService.loadUowCache(clientState);
-			
 			// calculate dynamic rule sets for the client
 			RuleSet[] fullRuleSets = RuleMngr.getInstance().calculateRuleSets(
 					treeSet, app, pafPlannerConfig);
@@ -756,6 +753,9 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			planResponse.getClientCacheBlock().setRuleSets(
 					clientRuleSetList.toArray(new RuleSet[0]));
 
+			// Load data cache based on unit of work
+			dataService.loadUowCache(clientState);
+			
 			// need to set id of simple tree to root dimension, not default
 			// behavior
 			// key is normally root node. Then store in response object

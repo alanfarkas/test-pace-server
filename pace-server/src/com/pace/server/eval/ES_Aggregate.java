@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
@@ -39,13 +38,11 @@ import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataCacheCalc;
-import com.pace.base.mdb.PafDataCacheCell;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.StringUtils;
-import com.pace.base.utility.TimeBalance;
 import com.pace.server.PafAppService;
 import com.pace.server.PafDataService;
 
@@ -112,11 +109,11 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             // to time horizon default, since year is embedded in each time horizon period ().
             //
             List<String> openTimeHorizonPeriods = dataCache.getOpenTimeHorizonPeriods();
-            PafDimTree timeHorizonTree = dataCache.getDimTrees().getTree(timeHorizonDim);
-            PafDimMember timeHorizonRoot = timeHorizonTree.getRootNode();
-            if (timeHorizonRoot.getMemberProps().isSynthetic()) {
-                openTimeHorizonPeriods.remove(timeHorizonRoot.getKey());            	
-            }
+//            PafDimTree timeHorizonTree = dataCache.getDimTrees().getTree(timeHorizonDim);
+//            PafDimMember timeHorizonRoot = timeHorizonTree.getRootNode();
+//            if (timeHorizonRoot.getMemberProps().isSynthetic()) {
+//                openTimeHorizonPeriods.remove(timeHorizonRoot.getKey());            	
+//            }
             aggFilter.put(timeDim, openTimeHorizonPeriods);
             aggFilter.put(yearDim, Arrays.asList(TimeSlice.getTimeHorizonYear()));
 //            if (dataCache.hasLockedPeriods() ) {              
