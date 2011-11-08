@@ -15,6 +15,7 @@ package com.pace.server;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+import javax.jws.WebParam;
 import javax.jws.WebService;
 
 import com.pace.base.PafNotAbletoGetLDAPContext;
@@ -46,9 +47,7 @@ import com.pace.server.comm.*;
  * @version x.xx
  */
 
-@WebService(name="PafService", targetNamespace="pace.palladium.com")
-
-
+@WebService(name="PafService", targetNamespace="pace.ams.com")
 public interface IPafService extends Remote {
 	
 	/**
@@ -67,7 +66,7 @@ public interface IPafService extends Remote {
      * @throws RemoteException the remote exception
      * @throws PafSoapException the paf soap exception
      */
-    public PafPlanSessionResponse startPlanSession(PafPlanSessionRequest planRequest)  throws RemoteException, PafSoapException; 
+    public PafPlanSessionResponse startPlanSession( @WebParam(name="planRequest") PafPlanSessionRequest planRequest)  throws RemoteException, PafSoapException; 
 	
     public UploadAppResponse uploadApplication(UploadAppRequest uploadAppReq)  throws RemoteException, PafSoapException; 
     public DownloadAppResponse downloadApplication(DownloadAppRequest downAppReq)  throws RemoteException, PafSoapException;     

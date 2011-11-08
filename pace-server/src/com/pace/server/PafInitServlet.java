@@ -106,7 +106,8 @@ public class PafInitServlet extends HttpServlet {
         logger.info("Initializing Autoload Applications");
         
         try { 
-        	new PafServiceProvider().loadApplication(null);
+        	
+        	// new PafServiceProvider().loadApplication(null);
         }
         catch (Exception pex) {
         	PafErrHandler.handleException(pex, PafErrSeverity.Error);

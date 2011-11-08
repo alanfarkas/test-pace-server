@@ -57,6 +57,7 @@ import com.pace.base.state.PafClientState;
 import com.pace.base.utility.AESEncryptionUtil;
 import com.pace.base.utility.CompressionUtil;
 import com.pace.base.utility.DomainNameParser;
+import com.pace.base.utility.LogUtil;
 import com.pace.base.utility.Odometer;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafStyle;
@@ -98,6 +99,8 @@ public class PafServiceProvider implements IPafService {
 	/** The log audit. */
 	private static Logger logAudit = Logger.getLogger("pace.audit");
 	
+	private static Logger logPerf = Logger.getLogger("pace.performance");
+	
 	/** The clients. */
 	private static ConcurrentHashMap<String, PafClientState> clients = new ConcurrentHashMap<String, PafClientState>();
 
@@ -106,11 +109,22 @@ public class PafServiceProvider implements IPafService {
 	 */
 	public PafServiceProvider() {
 		try {
-			// loadApplication(null);
+			// initilize planform information
+			if (serverPlatform == null) {
+				serverPlatform = System.getProperty(Messages.getString("PafServiceProvider.0")) + Messages.getString("PafServiceProvider.1") //$NON-NLS-1$ //$NON-NLS-2$
+				+ System.getProperty(Messages.getString("PafServiceProvider.2")) + Messages.getString("PafServiceProvider.3") //$NON-NLS-1$ //$NON-NLS-2$
+				+ System.getProperty(Messages.getString("PafServiceProvider.4")) + Messages.getString("PafServiceProvider.5") //$NON-NLS-1$ //$NON-NLS-2$
+				+ System.getProperty(Messages.getString("PafServiceProvider.6")); //$NON-NLS-1$
+			
+				logger.info("Pace Service Provider Instantiated");
+			}
+			
+			
 			
 		} catch (Throwable t) {
 			// don't do anything as all error handling should have been handled elsewhere
 			// otherwise the app server thinks something went wrong.
+			logger.fatal("Error initializing service framework");
 		}
 	}
 	
@@ -226,15 +240,6 @@ public class PafServiceProvider implements IPafService {
 		return compressedView;
 	}
 
-//	/**
-//	 *	Method_description_goes_here
-//	 *
-//	 */
-//	public PafResponse refreshMetaDataCache() {
-//		logger.info(Messages.getString("PafServiceProvider.11")); //$NON-NLS-1$
-//		dataService.clearMemberTreeStore();
-//		return new PafResponse();
-//	}
 
 	
 	/* (non-Javadoc)
@@ -4066,19 +4071,10 @@ public PafGetNotesResponse getCellNotes(
 	public PafSuccessResponse loadApplication(LoadApplicationRequest appReq)
 			throws RemoteException, PafSoapException {
 
+		long startTime = System.currentTimeMillis();
+		
 		// regardless of parameters, for now just load the application
 		String reqAppId = (appReq==null?"TITAN":appReq.getAppIds().get(0));
-
-		
-		// get handles to singleton implementors
-		if (serverPlatform == null) {
-
-			serverPlatform = System.getProperty(Messages.getString("PafServiceProvider.0")) + Messages.getString("PafServiceProvider.1") //$NON-NLS-1$ //$NON-NLS-2$
-			+ System.getProperty(Messages.getString("PafServiceProvider.2")) + Messages.getString("PafServiceProvider.3") //$NON-NLS-1$ //$NON-NLS-2$
-			+ System.getProperty(Messages.getString("PafServiceProvider.4")) + Messages.getString("PafServiceProvider.5") //$NON-NLS-1$ //$NON-NLS-2$
-			+ System.getProperty(Messages.getString("PafServiceProvider.6")); //$NON-NLS-1$
-		}
-
 
 		// presume the appReq object has the appropriate app id.
 		// status updates should be synchronized...hmm
@@ -4107,7 +4103,6 @@ public PafGetNotesResponse getCellNotes(
 			// initialize the data service and re/load the application data sources
 			if ( appReq==null || appReq.isLoadMdb() ) {
 				PafMetaData.clearDataCache();
-//				dataService.clearDimTreeCache();
 				dataService.loadApplicationData();
 			}
 			
@@ -4132,6 +4127,9 @@ public PafGetNotesResponse getCellNotes(
 		// FIXIT replace this with synchronized "updateApplicationState" method
 		appService.setApplicationState(reqAppId, as);
 
+		String stepDesc = String.format("Application [%s] Loaded", reqAppId);
+		logPerf.info(LogUtil.timedStep(stepDesc, startTime));
+		
 		return new PafSuccessResponse(true);
 		
 	}

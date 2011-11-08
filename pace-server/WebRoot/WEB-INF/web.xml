@@ -4,7 +4,12 @@
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>/WEB-INF/cxf.xml</param-value>
-  </context-param>
+  </context-param>  
+  <env-entry>
+   <env-entry-name>pace/paceHome</env-entry-name>
+   <env-entry-type>java.lang.String</env-entry-type>
+   <env-entry-value>..\..</env-entry-value>
+  </env-entry>   
   <listener>
     <listener-class>
       org.springframework.web.context.ContextLoaderListener

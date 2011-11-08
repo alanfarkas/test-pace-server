@@ -647,7 +647,6 @@ public class PafViewService {
 	}
 
 	public static PafViewService getInstance() {
-		logger.info("Initializing PafViewService");
 		if (_instance == null) {
 			logger.info("Initializing PafViewService");			
 			_instance = new PafViewService();
