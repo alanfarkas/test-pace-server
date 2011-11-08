@@ -66,7 +66,7 @@ public interface IPafService extends Remote {
      * @throws RemoteException the remote exception
      * @throws PafSoapException the paf soap exception
      */
-    public PafPlanSessionResponse startPlanSession( @WebParam(name="planRequest") PafPlanSessionRequest planRequest)  throws RemoteException, PafSoapException; 
+    public PafPlanSessionResponse startPlanSession( PafPlanSessionRequest planRequest)  throws RemoteException, PafSoapException; 
 	
     public UploadAppResponse uploadApplication(UploadAppRequest uploadAppReq)  throws RemoteException, PafSoapException; 
     public DownloadAppResponse downloadApplication(DownloadAppRequest downAppReq)  throws RemoteException, PafSoapException;     
