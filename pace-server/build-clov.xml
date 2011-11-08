@@ -209,6 +209,9 @@
     <path id="servlet-api.userclasspath">
         <pathelement location="c:/java/servlet-api/servlet-api.jar"/>
     </path>
+    <path id="javaee-api.userclasspath">
+        <pathelement location="${userlib.path}/javaee-api/javaee-api-5.0-1.jar"/>
+    </path>	
 	<path id="XStream 1.1.2.userclasspath">
 		<pathelement location="${userlib.path}/xstream-1.1.2/xstream-1.1.2/xstream-1.1.2.jar"/>
 		<pathelement location="${userlib.path}/xstream-1.1.2/xstream-1.1.2/lib/xpp3-1.1.3.4d_b4_min.jar"/>
@@ -227,6 +230,7 @@
 	    <path refid="Ostermiller Utils 1.6.0.userclasspath"/>
 	    <path refid="POI 3.5.userclasspath"/>
 		<path refid="XStream 1.1.2.userclasspath"/>
+		<path refid="javaee-api.userclasspath"/>
 	</path>
 	<path id="pace-prvdr-mdb-esb.classpath">
 	    <pathelement location="${Essbase Provider.location}/${bin}"/>
