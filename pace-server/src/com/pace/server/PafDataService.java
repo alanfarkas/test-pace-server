@@ -3340,31 +3340,39 @@ public class PafDataService {
 				PafDataCacheCalc.aggDimension(dim, dataCache, dimTree, dimFilter, DcTrackChangeOpt.NONE);
 
 				// Calculate re-calc measure intersections using the default rule set
-				long recalcStartTime = System.currentTimeMillis();
 				if (!recalcMeasures.isEmpty()) {
+
+					// Initialization
+					long recalcStartTime = System.currentTimeMillis();
 					EvalState evalState = new EvalState(null, clientState, dataCache);
 					RuleSet ruleSet = clientState.getDefaultMsrRuleset();
 					Intersection is = new Intersection(baseDims);
+
+					// Create an intersection iterator. To reduce overhead, this iterator is 
+					// reused for each calculated measure. So, it must be initialized with a 
+					// dummy measure.
+					dimFilter.put(measureDim, new ArrayList<String>(Arrays.asList(new String[]{"[DUMMY]"})));
+					Odometer cellIterator = dataCache.getCellIterator(baseDims, dimFilter);
+	
+					// Process each recalc measure formula in the each rule group
 					for (RuleGroup rg : ruleSet.getRuleGroups()) {
 						for (Rule r : rg.getRules()) {
 
-							// Evaluation any formula whose result term is a recalc measure
+							// Evaluation any formula whose result term is a recalc measure across
+							// the required synthetic intersections
 							String msrName = r.getFormula().getResultMeasure();						
 							if (recalcMeasures.contains(msrName)) {							
 
-								// Generate the list of intersections to calculate
-								List<String> measureList = new ArrayList<String>(Arrays.asList(new String[]{msrName})); 
-								dimFilter.put(measureDim, measureList);
-								Odometer cellIterator = dataCache.getCellIterator(baseDims, dimFilter);
-
-								// iterate over intersections, calculating them
+								// Iterate over required synthetic intersections and calculate them.
 								while (cellIterator.hasNext()) {
 									@SuppressWarnings("unchecked")
 									String[] coords = (String[]) cellIterator.nextValue().toArray(new String[0]);
 									TimeSlice.translateTimeHorizonCoords(coords, timeAxis, yearAxis);
 									is.setCoordinates(coords);
+									is.setCoordinate(measureDim, msrName);
 									EvalUtil.evalFormula(r.getFormula(), measureDim, is, dataCache, evalState);
 								}
+								cellIterator.reset();
 							}
 						}
 					}
