@@ -3238,7 +3238,7 @@ public class PafDataService {
 		String[] baseDims = dataCache.getBaseDimensions();
 		List<String> recalcMeasures = dataCache.getRecalcMeasures();
 		Set<String> versions = new HashSet<String>();
-		Map<String, List<String>> timeFilter = new HashMap<String, List<String>>(), baseDimCalcFilter = null, dimCalcFilter = null;
+		Map<String, List<String>> timeFilter = new HashMap<String, List<String>>(), baseDimCalcFilter = null;
 		MemberTreeSet uowTrees = clientState.getUowTrees();
 		PafDimTree timeHorizonTree = uowTrees.getTree(timeHorizonDim);
 		List<String> defEvalVersions = new ArrayList<String>();
@@ -3335,13 +3335,12 @@ public class PafDataService {
 				} else {
 					dimTree = timeHorizonTree;
 				}
-				Map<String,List<String>> hierDimFilter = new HashMap<String, List<String>>(baseDimCalcFilter);
-				hierDimFilter.put(dim, new ArrayList<String>(dimTree.getSyntheticMemberNames()));
-				PafDataCacheCalc.aggDimension(dim, dataCache, dimTree, hierDimFilter, DcTrackChangeOpt.NONE);
+				Map<String,List<String>> dimFilter = new HashMap<String, List<String>>(baseDimCalcFilter);
+				dimFilter.put(dim, new ArrayList<String>(dimTree.getSyntheticMemberNames()));
+				PafDataCacheCalc.aggDimension(dim, dataCache, dimTree, dimFilter, DcTrackChangeOpt.NONE);
 
 				// Calculate re-calc measure intersections using the default rule set
 				long recalcStartTime = System.currentTimeMillis();
-				Map<String, List<String>> recalcFilter = new HashMap<String, List<String>>(baseDimCalcFilter);
 				if (!recalcMeasures.isEmpty()) {
 					EvalState evalState = new EvalState(null, clientState, dataCache);
 					RuleSet ruleSet = clientState.getDefaultMsrRuleset();
@@ -3355,8 +3354,8 @@ public class PafDataService {
 
 								// Generate the list of intersections to calculate
 								List<String> measureList = new ArrayList<String>(Arrays.asList(new String[]{msrName})); 
-								recalcFilter.put(measureDim, measureList);
-								Odometer cellIterator = dataCache.getCellIterator(baseDims, recalcFilter);
+								dimFilter.put(measureDim, measureList);
+								Odometer cellIterator = dataCache.getCellIterator(baseDims, dimFilter);
 
 								// iterate over intersections, calculating them
 								while (cellIterator.hasNext()) {
