@@ -47,7 +47,7 @@ import com.pace.server.comm.*;
  * @version x.xx
  */
 
-@WebService(name="PafService", targetNamespace="pace.ams.com")
+@WebService(name="PafService", targetNamespace="pace.palladium.com")
 public interface IPafService extends Remote {
 	
 	/**
