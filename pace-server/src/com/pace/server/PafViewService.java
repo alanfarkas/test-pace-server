@@ -96,6 +96,9 @@ public class PafViewService {
 	private Map<String, Map<String, PafAxis>> validMemberTagMap = null;
 
 	private static Logger logger = Logger.getLogger(PafViewService.class);
+	
+	private PrintStyles printStyles;
+
 
 	public void getViewMetaData() {
 		// IMdStore mdstore = MdFactory.createIMdStore("test1");
@@ -135,6 +138,8 @@ public class PafViewService {
 		hierarchyFormatsCache = PafMetaData.getPaceProject().getHierarchyFormats();
 		//TTN 900 - load global print styles
 		globalPrintStyleCache = PafMetaData.getPaceProject().getPrintStyles();
+		printStyles = new PrintStyles();
+		printStyles.setPrintStyles(globalPrintStyleCache);
 
 		loadMeasuresCache();
 		loadVersionsCache();
@@ -726,8 +731,6 @@ public class PafViewService {
 				if( renderedView.getViewPrintState() == ViewPrintState.GLOBAL )
 					renderedView.setPrintStyle(globalPrintStyleCache.get(renderedView.getGlobalPrintStyleGUID()));
 				else if( renderedView.getViewPrintState() == ViewPrintState.DEFAULT ) {
-					PrintStyles printStyles = new PrintStyles();
-					printStyles.setPrintStyles(globalPrintStyleCache);
 					renderedView.setPrintStyle(printStyles.getDefaultPrintStyle());
 				}
 			}
