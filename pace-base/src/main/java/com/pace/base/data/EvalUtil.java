@@ -682,11 +682,15 @@ public class EvalUtil {
 	    		continue;
 	    	}
 	
-	    	// Year dimension - if time horizon intersection, just return
-	    	// member since the year hierarchy does not apply. If not 
-	    	// time horizon intersection, just go through normal logic (TTN-1595).
-	    	if (dim.equals(yearDim) && dataCache.isTimeHorizonIs(is)) {
-	    		memberList = Arrays.asList(new String[]{is.getCoordinate(dim)});
+//	    	// Year dimension - if time horizon intersection, just return
+//	    	// member since the year hierarchy does not apply. If not 
+//	    	// time horizon intersection, just go through normal logic (TTN-1595).
+//	    	if (dim.equals(yearDim) && dataCache.isTimeHorizonIs(is)) {
+//    		memberList = Arrays.asList(new String[]{is.getCoordinate(dim)});
+
+	    	// Year dimension - use time horizon default year member (TTN-1595)
+		    if (dim.equals(yearDim)) {
+	    		memberList = Arrays.asList(new String[]{TimeSlice.getTimeHorizonYear()});
 	    		memberListMap.put(dim, memberList);
 	    		continue;
 	    	}
@@ -702,7 +706,14 @@ public class EvalUtil {
 	     	memberListMap.put(dim, memberList);
 	    }
 	
-	    return buildIntersections(memberListMap, is.getDimensions());
+	    // Convert time horizon intersections back to time/year intersections (TTN-1595)
+	    List<Intersection> floorIntersections =  buildIntersections(memberListMap, is.getDimensions());
+	    int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
+	    for (Intersection floorIs : floorIntersections) {
+	    	TimeSlice.translateTimeHorizonCoords(floorIs.getCoordinates(), timeAxis, yearAxis);
+	    }
+	    
+	    return floorIntersections;
 	}
 
 	/**
@@ -719,6 +730,7 @@ public class EvalUtil {
 		MemberTreeSet mts = evalState.getClientState().getUowTrees();
 		String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
 		String timeDim = evalState.getAppDef().getMdbDef().getTimeDim(); 
+		String yearDim = evalState.getAppDef().getMdbDef().getYearDim(); 
 		PafDimTree timeTree;
 		TimeBalance tb = TimeBalance.None;
 		List<PafDimMember> desc = null;
@@ -743,13 +755,14 @@ public class EvalUtil {
 	
 		// get lowest time members under branch. This tree method will return the member
 		// itself if it has no children. use time horizon tree if this is a time horizon
-		// intersection.
-		if (!dataCache.isTimeHorizonIs(is)) {
-			timeTree = mts.getTree(timeDim);
-		} else {
+		// intersection (TTN-1595).
+//		if (!dataCache.isTimeHorizonIs(is)) {
+//			timeTree = mts.getTree(timeDim);
+//		} else {
 			timeTree = mts.getTree(dataCache.getTimeHorizonDim());			
-		}
-		desc = timeTree.getLowestMembers(is.getCoordinate(timeDim));
+//		}
+		String timeHorizonDim = TimeSlice.buildTimeHorizonCoord(is.getCoordinate(timeDim), is.getCoordinate(yearDim));
+		desc = timeTree.getLowestMembers(timeHorizonDim);
 	
 		// the time dimension floor members vary by time balance attribute of the
 		// current measure
