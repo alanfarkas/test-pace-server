@@ -316,6 +316,7 @@ public class PafDataService {
 
 		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
 		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
+		String yearDim = clientState.getApp().getMdbDef().getYearDim();
 
 
 		// Check for discontiguous hierarchies. A hierarchy is considered discontiguous
@@ -339,8 +340,9 @@ public class PafDataService {
 			// Additional processing for discontiguous dimension hierarchy (TTN-1644)
 			if (isDiscontig) {
 				// Add in synthetic root to beginning of member list, if this is the first
-				// term
-				if (discontigMbrGrps.size() == 0) {
+				// term. Skip this operation for the year dimension, since the year 
+				// dimension already comes in expanded with the root as the first term.
+				if (discontigMbrGrps.size() == 0 && !dim.equals(yearDim)) {
 					dimMemberList.add(0, dim);
 					discontigMbrGrps.add(0,new ArrayList<String>(Arrays.asList(new String[]{dim})));
 				}
@@ -666,37 +668,17 @@ public class PafDataService {
 			return tree;
 		}
 		
-		// Special year dimension logic for multiple year UOW (TTN-1595).
-		if (dim.equals(yearDim) && uowMbrNames.length > 1) {
-
-			// Create virtual root
-			PafBaseMember root = baseTree.getRootNode().getShallowDiscCopy();
-			PafBaseMemberProps rootProps = root.getMemberProps();
-			String rootDesc = "**" + root.getKey() + "**";
-			for (String aliasTableName : baseTree.getAliasTableNames()) {
-				rootProps.addMemberAlias(aliasTableName, rootDesc);
-			}
-			rootProps.setSynthetic(true);
-			
-			// Create year sub tree and add in UOW years
-			List<String> yearList = new ArrayList<String>(Arrays.asList(uowMbrNames));
-			yearList.remove(root.getKey());
-			PafBaseTree yearTree = new PafBaseTree(root, baseTree.getAliasTableNames());
-			for (String year : yearList) {
-				PafBaseMember yearMember = baseTree.getMember(year).getShallowDiscCopy();
-				PafBaseMemberProps memberProps = yearMember.getMemberProps();
-				memberProps.setGenerationNumber(2);
-				yearTree.addChild(root, yearMember);
-			}
-						
-			return yearTree;
-		}
-
 		// All other dimensions - Start out by making a tree copy
 		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, uowMbrNames, mdbDef);
 		PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);
 		if (expandedUow.isDiscontigDim(dim)) {
-			copy = baseTree.getDiscSubTreeCopy(expandedUow.getDiscontigMemberGroups(dim));
+			String rootAlias = null;
+			if (!dim.equals(yearDim)) {
+				rootAlias = PafBaseConstants.SYNTHETIC_ROOT_ALIAS_PREFIX + root.getKey() + PafBaseConstants.SYNTHETIC_ROOT_ALIAS_SUFFIX;
+			} else {
+				rootAlias = PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS;			
+			}
+			copy = baseTree.getDiscSubTreeCopy(expandedUow.getDiscontigMemberGroups(dim), rootAlias);
 		} else if (baseTree.hasSharedMembers()) {
 			// Shared members exist, get whole branch since generations on 
 			// shared members may be higher than original member
@@ -710,18 +692,6 @@ public class PafDataService {
 		// build list of members in the cache, use hash set for quick find
 		List<String>cacheMbrs = new ArrayList<String>(); 
 		cacheMbrs.addAll(Arrays.asList(uowMbrNames));
-
-//		// build copy of tree members for traversal, to allow removal
-//		// get copy in generation order to prune from top to bottom
-//		// resolves certain issues with shared members and is more efficient.
-//		List<PafDimMember> treeMbrs = new ArrayList<PafDimMember>();
-//		SortedMap<Integer, List<PafDimMember>>treeGen = copy.getMembersByGen();
-//		
-//		for (int gen : treeGen.keySet() ) {
-//			for (PafDimMember m : treeGen.get(gen)) {
-//				treeMbrs.add(m);
-//			}
-//		}
 
 		// Prune invalid and duplicate members from tree. The member
 		// search list must be initialized via a tree traversal since 

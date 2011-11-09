@@ -34,6 +34,7 @@ public class PafBaseConstants {
 	// synthetic member constants
 	public static final String SYNTHETIC_ROOT_ALIAS_PREFIX = "[FILTERED ";
 	public static final String SYNTHETIC_ROOT_ALIAS_SUFFIX = "]";
+	public static final String SYNTHETIC_YEAR_ROOT_ALIAS = "[ALL YEARS]";
 	
 	// version type constants
 	public static final VersionType[] BASE_VERSION_TYPE_ARRAY =

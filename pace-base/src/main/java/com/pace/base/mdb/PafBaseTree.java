@@ -500,10 +500,12 @@ public class PafBaseTree extends PafDimTree {
 	 * Create a discontiguous copy of this tree containing the supplied member lists
 	 * 
 	 * @param discontigMemberLists List of discontiguous member lists that map to members in this tree
+	 * @param rootAlias Alias of synthetic root member
+	 * 
 	 * @return Discontiguous tree
 	 * @throws PafException 
 	 */
-	public PafBaseTree getDiscSubTreeCopy(List<List<String>> discontigMemberLists) throws PafException {
+	public PafBaseTree getDiscSubTreeCopy(List<List<String>> discontigMemberLists, String rootAlias) throws PafException {
 		
 		PafBaseTree newTree = null;
 		List<String> discontigMemberList = discontigMemberLists.get(0);
@@ -524,8 +526,7 @@ public class PafBaseTree extends PafDimTree {
 		PafBaseMember newRootNode = getMember(newRootName).getShallowDiscCopy();
 		PafDimMemberProps memberProps = newRootNode.getMemberProps();		
 		memberProps.setSynthetic(true);
-		String alias = PafBaseConstants.SYNTHETIC_ROOT_ALIAS_PREFIX + newRootName + PafBaseConstants.SYNTHETIC_ROOT_ALIAS_SUFFIX;
-		memberProps.setAllAliases(getAliasTableNames(), alias);
+		memberProps.setAllAliases(getAliasTableNames(), rootAlias);
 
 		// Create new tree
 		newTree = new PafBaseTree(newRootNode, getAliasTableNames());

@@ -626,6 +626,11 @@ public class PafDataCache implements IPafDataCache {
 			openPeriods.addAll(getOpenTimeHorizonPeriods(version, yearMbr.getKey()));
 		}
 
+		// Add in time horizon root
+		if (!openPeriods.isEmpty()) {
+			PafDimTree timeHorizonTree = getDimTrees().getTree(getTimeHorizonDim());
+			openPeriods.add(timeHorizonTree.getRootNode().getKey());
+		}
 		return openPeriods;
 		
 		

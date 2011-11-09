@@ -684,7 +684,7 @@ public class EvalUtil {
 	
 	    	// Year dimension - if time horizon intersection, just return
 	    	// member since the year hierarchy does not apply. If not 
-	    	// time horizon intersection, just go through normal logic.
+	    	// time horizon intersection, just go through normal logic (TTN-1595).
 	    	if (dim.equals(yearDim) && dataCache.isTimeHorizonIs(is)) {
 	    		memberList = Arrays.asList(new String[]{is.getCoordinate(dim)});
 	    		memberListMap.put(dim, memberList);

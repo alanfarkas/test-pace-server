@@ -292,7 +292,7 @@ public abstract class PafDataCacheCalc {
 					// Only process measures with valid aggregation types
 					String measure = intersection.getCoordinate(measureDim);
 					MeasureType measureType = dataCache.getMeasureType(measure);
-					if (aggMeasureTypes.contains(measureType) || (aggMember.isSynthetic() && measureType == MeasureType.NonAggregate)){
+					if (aggMeasureTypes.contains(measureType) || (aggMember.isSynthetic() && measureType == MeasureType.NonAggregate)) {
 
 						// Aggregate children across selected member intersection. When aggregating 
 						// across the "Time" dimension, the aggregation process must properly aggregate 
@@ -323,7 +323,7 @@ public abstract class PafDataCacheCalc {
 
 						} else { 
 							// Time aggregation
-							if (measureType == MeasureType.Aggregate){
+							if (measureType == MeasureType.Aggregate || (aggMember.isSynthetic() && measureType == MeasureType.NonAggregate)) {
 								// Standard aggregation process along time hierarchy (TTN-1595)
 								for (PafDimMember child:children) {
 									TimeSlice.applyTimeHorizonCoord(intersection, child.getKey(), mdbDef); 
