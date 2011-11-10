@@ -20,25 +20,73 @@ package com.pace.server;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.activation.DataHandler;
 import javax.annotation.Resource;
 import javax.jws.WebService;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
-import com.pace.base.*;
-import com.pace.base.app.*;
-import com.pace.base.comm.*;
-import com.pace.base.data.EvalUtil;
-import com.pace.base.data.Intersection;
+import com.pace.base.AuthMode;
+import com.pace.base.InvalidPasswordException;
+import com.pace.base.InvalidUserNameException;
+import com.pace.base.NoEmailAddressException;
+import com.pace.base.PafBaseConstants;
+import com.pace.base.PafErrHandler;
+import com.pace.base.PafErrSeverity;
+import com.pace.base.PafException;
+import com.pace.base.PafInvalidLogonInformation;
+import com.pace.base.PafNotAbletoGetLDAPContext;
+import com.pace.base.PafNotAuthenticatedSoapException;
+import com.pace.base.PafNotAuthorizedSoapException;
+import com.pace.base.PafSecurityToken;
+import com.pace.base.PafSoapException;
+import com.pace.base.app.AppSettings;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PafDimSpec;
+import com.pace.base.app.PafPlannerRole;
+import com.pace.base.app.PafSecurityDomainGroups;
+import com.pace.base.app.PafSecurityDomainUserNames;
+import com.pace.base.app.PafSecurityGroup;
+import com.pace.base.app.PafUserDef;
+import com.pace.base.app.PafUserNamesSecurityGroup;
+import com.pace.base.app.Season;
+import com.pace.base.app.UnitOfWork;
+import com.pace.base.app.VersionDef;
+import com.pace.base.app.VersionType;
+import com.pace.base.comm.ApplicationState;
+import com.pace.base.comm.ApplicationStateRequest;
+import com.pace.base.comm.ApplicationStateResponse;
+import com.pace.base.comm.ClientInitRequest;
+import com.pace.base.comm.DataFilterSpec;
+import com.pace.base.comm.DownloadAppRequest;
+import com.pace.base.comm.DownloadAppResponse;
+import com.pace.base.comm.EvaluateViewRequest;
+import com.pace.base.comm.LoadApplicationRequest;
+import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.comm.PafRequest;
+import com.pace.base.comm.PafResponse;
+import com.pace.base.comm.PafSuccessResponse;
+import com.pace.base.comm.PafViewTreeItem;
+import com.pace.base.comm.SimpleCoordList;
+import com.pace.base.comm.UploadAppRequest;
+import com.pace.base.comm.UploadAppResponse;
+import com.pace.base.comm.UserFilterSpec;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.db.SecurityGroup;
@@ -47,23 +95,97 @@ import com.pace.base.db.cellnotes.CellNotesInformation;
 import com.pace.base.db.cellnotes.SimpleCellNote;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.db.membertags.SimpleMemberTagData;
-import com.pace.base.mdb.*;
+import com.pace.base.mdb.AttributeUtil;
+import com.pace.base.mdb.IPafConnectionProps;
+import com.pace.base.mdb.PafAttributeTree;
+import com.pace.base.mdb.PafBaseTree;
+import com.pace.base.mdb.PafDataCache;
+import com.pace.base.mdb.PafDataSliceParms;
+import com.pace.base.mdb.PafDimMember;
+import com.pace.base.mdb.PafDimTree;
+import com.pace.base.mdb.PafSimpleDimTree;
+import com.pace.base.mdb.TreeTraversalOrder;
+import com.pace.base.project.InvalidPaceProjectInputException;
 import com.pace.base.project.PaceProject;
-import com.pace.base.project.ProjectSerializationType;
+import com.pace.base.project.PaceProjectCreationException;
+import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.rules.RuleGroup;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.AESEncryptionUtil;
 import com.pace.base.utility.CompressionUtil;
+import com.pace.base.utility.DataHandlerPaceProjectUtil;
 import com.pace.base.utility.DomainNameParser;
 import com.pace.base.utility.LogUtil;
-import com.pace.base.utility.Odometer;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafStyle;
 import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewSection;
-import com.pace.server.comm.*;
+import com.pace.server.comm.AttributeDimInfo;
+import com.pace.server.comm.PafAuthRequest;
+import com.pace.server.comm.PafAuthResponse;
+import com.pace.server.comm.PafCellNoteInformationResponse;
+import com.pace.server.comm.PafClearImportedAttrRequest;
+import com.pace.server.comm.PafClearImportedAttrResponse;
+import com.pace.server.comm.PafClientCacheBlock;
+import com.pace.server.comm.PafClientCacheRequest;
+import com.pace.server.comm.PafClientChangePasswordRequest;
+import com.pace.server.comm.PafClientSecurityPasswordResetResponse;
+import com.pace.server.comm.PafClientSecurityRequest;
+import com.pace.server.comm.PafClientSecurityResponse;
+import com.pace.server.comm.PafCommandResponse;
+import com.pace.server.comm.PafCustomCommandRequest;
+import com.pace.server.comm.PafCustomCommandResponse;
+import com.pace.server.comm.PafFilteredMbrTagRequest;
+import com.pace.server.comm.PafGetFilteredUOWSizeRequest;
+import com.pace.server.comm.PafGetFilteredUOWSizeResponse;
+import com.pace.server.comm.PafGetMemberTagDataResponse;
+import com.pace.server.comm.PafGetMemberTagDefsRequest;
+import com.pace.server.comm.PafGetMemberTagDefsResponse;
+import com.pace.server.comm.PafGetMemberTagInfoResponse;
+import com.pace.server.comm.PafGetNotesRequest;
+import com.pace.server.comm.PafGetNotesResponse;
+import com.pace.server.comm.PafGetPaceGroupsRequest;
+import com.pace.server.comm.PafGetPaceGroupsResponse;
+import com.pace.server.comm.PafGroupSecurityRequest;
+import com.pace.server.comm.PafGroupSecurityResponse;
+import com.pace.server.comm.PafImportAttrRequest;
+import com.pace.server.comm.PafImportAttrResponse;
+import com.pace.server.comm.PafImportMemberTagRequest;
+import com.pace.server.comm.PafMdbPropsRequest;
+import com.pace.server.comm.PafMdbPropsResponse;
+import com.pace.server.comm.PafPlanSessionRequest;
+import com.pace.server.comm.PafPlanSessionResponse;
+import com.pace.server.comm.PafPopulateRoleFilterResponse;
+import com.pace.server.comm.PafSaveMbrTagRequest;
+import com.pace.server.comm.PafSaveNotesRequest;
+import com.pace.server.comm.PafSaveNotesResponse;
+import com.pace.server.comm.PafServerAck;
+import com.pace.server.comm.PafSetPaceGroupsRequest;
+import com.pace.server.comm.PafSetPaceGroupsResponse;
+import com.pace.server.comm.PafSimpleCellNoteExportRequest;
+import com.pace.server.comm.PafSimpleCellNoteExportResponse;
+import com.pace.server.comm.PafSimpleCellNoteImportRequest;
+import com.pace.server.comm.PafSimpleCellNoteImportResponse;
+import com.pace.server.comm.PafTreeRequest;
+import com.pace.server.comm.PafTreeResponse;
+import com.pace.server.comm.PafTreesRequest;
+import com.pace.server.comm.PafTreesResponse;
+import com.pace.server.comm.PafUpdateDatacacheRequest;
+import com.pace.server.comm.PafUserNamesforSecurityGroupsRequest;
+import com.pace.server.comm.PafUserNamesforSecurityGroupsResponse;
+import com.pace.server.comm.PafValidAttrRequest;
+import com.pace.server.comm.PafValidAttrResponse;
+import com.pace.server.comm.PafVerifyUsersRequest;
+import com.pace.server.comm.PafVerifyUsersResponse;
+import com.pace.server.comm.PafViewRequest;
+import com.pace.server.comm.SaveWorkRequest;
+import com.pace.server.comm.SimpleMeasureDef;
+import com.pace.server.comm.SimpleVersionDef;
+import com.pace.server.comm.ValidateUserSecurityRequest;
+import com.pace.server.comm.ValidationResponse;
+import com.pace.server.comm.ViewRequest;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -4140,11 +4262,47 @@ public PafGetNotesResponse getCellNotes(
 			UploadAppRequest uploadAppReq) throws RemoteException,
 			PafSoapException {
 
-		PaceProject projectIn = uploadAppReq.getApplicationProjects().get(0);
-		XMLPaceProject project = (XMLPaceProject) projectIn.convertTo(ProjectSerializationType.XML);
-		PafMetaData.updateApplicationConfig(project);
+		boolean isSuccessfulUpload = true;
+		
+		if ( uploadAppReq != null && uploadAppReq.getPaceProjectDataHandler() != null ) {
 			
-		return new UploadAppResponse(true);
+			DataHandler dataHandler = uploadAppReq.getPaceProjectDataHandler();
+			
+			try {
+				
+				PaceProject paceProject = DataHandlerPaceProjectUtil.convertDataHandlerToPaceProject(dataHandler, PafMetaData.getTransferDirPath());
+				
+				if ( paceProject != null && paceProject instanceof XMLPaceProject) {
+				
+					PafMetaData.updateApplicationConfig((XMLPaceProject) paceProject);
+					
+				}				
+				
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+				e.printStackTrace();
+				isSuccessfulUpload = false;
+			} catch (InvalidPaceProjectInputException e) {
+				logger.error(e.getMessage());
+				e.printStackTrace();
+				isSuccessfulUpload = false;
+			} catch (PaceProjectCreationException e) {
+				logger.error(e.getMessage());
+				e.printStackTrace();
+				isSuccessfulUpload = false;
+			} catch (ProjectSaveException e) {
+				logger.error(e.getMessage());
+				e.printStackTrace();
+				isSuccessfulUpload = false;
+			} catch (PafException e) {
+				logger.error(e.getMessage());
+				e.printStackTrace();
+				isSuccessfulUpload = false;
+			}
+			
+		}
+			
+		return new UploadAppResponse(isSuccessfulUpload);
 	}
 
 
@@ -4156,8 +4314,26 @@ public PafGetNotesResponse getCellNotes(
 		DownloadAppResponse resp = new DownloadAppResponse();
 		
 		try {
-			PaceProject proj = new XMLPaceProject(PafMetaData.getPaceHome(), false);
-			resp.getApplicationProjects().add(proj);
+			
+			PaceProject pp = PafMetaData.getPaceProject();
+			
+			if ( pp == null ) {
+				
+				pp = new XMLPaceProject(PafMetaData.getConfigDirPath(), false);
+				
+			}
+							
+			DataHandler dh = DataHandlerPaceProjectUtil.convertPaceProjectToDataHandler(pp, PafMetaData.getTransferDirPath());
+			
+			if ( pp.getApplicationDefinitions() != null && pp.getApplicationDefinitions().size() > 0 ) {
+					
+				resp.setAppId(pp.getApplicationDefinitions().get(0).getAppId());
+					
+			}
+				
+			resp.setPaceProjectDataHandler(dh);
+			
+			
 			resp.setSuccess(true);
 		}
 		catch (Exception ex) {

@@ -1,17 +1,34 @@
 package com.pace.base.comm;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.activation.DataHandler;
+import javax.xml.bind.annotation.XmlMimeType;
+import javax.xml.bind.annotation.XmlType;
 
-import com.pace.base.project.PaceProject;
-
-
+@XmlType
 public class UploadAppRequest extends PafRequest {
-	private List<PaceProject> applicationProjects = new ArrayList<PaceProject>();
+	
+	private String appId;
+	private DataHandler paceProjectDataHandler;	
 	private boolean applyConfigurationUpdate;
 	private boolean applyCubeUpdate;
-
 	
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
+	}
+
+	public DataHandler getPaceProjectDataHandler() {
+		return paceProjectDataHandler;
+	}
+
+	@XmlMimeType("application/octet-stream") 
+	public void setPaceProjectDataHandler(DataHandler paceProjectDataHandler) {
+		this.paceProjectDataHandler = paceProjectDataHandler;
+	}
+
 	public boolean isApplyConfigurationUpdate() {
 		return applyConfigurationUpdate;
 	}
@@ -29,11 +46,4 @@ public class UploadAppRequest extends PafRequest {
 	}
 
 
-	public List<PaceProject> getApplicationProjects() {
-		return applicationProjects;
-	}
-
-	public void setApplicationProjects(List<PaceProject> applicationProjects) {
-		this.applicationProjects = applicationProjects;
-	}
 }

@@ -80,7 +80,7 @@ public class PafMetaData {
 	
 	private static String fileSep = System.getProperty("file.separator");
 	
-	private static PaceProject xmlPaceProject = null;
+	private static PaceProject paceProject = null;
 	
 	private static boolean debugMode = false;
 	
@@ -172,7 +172,7 @@ public class PafMetaData {
     	
     }
        
-    private static String getConfigDirPath() {
+    public static String getConfigDirPath() {
     	return paceHome + fileSep + PafBaseConstants.DN_ConfFldr + fileSep;
     }
 
@@ -185,6 +185,10 @@ public class PafMetaData {
      */
     public static String getTransferDirPath() {
     	return paceHome + fileSep + PafBaseConstants.DN_TransferFldr + fileSep;
+    }
+    
+    public static String getServerConfDirPath() {
+    	return paceHome + fileSep + PafBaseConstants.DN_ConfFldr + fileSep;
     }
 
     static {
@@ -374,13 +378,13 @@ public class PafMetaData {
 	
 	public static PaceProject getPaceProject() {
 		
-		return xmlPaceProject;
+		return paceProject;
 		
 	}
 	
 	public static void updateApplicationConfig() {
         try {
-			xmlPaceProject = new XMLPaceProject(paceHome + File.separator + PafBaseConstants.DN_ConfFldr, PafMetaData.getServerSettings().isAutoConvertProject());
+			paceProject = new XMLPaceProject(getServerConfDirPath(), PafMetaData.getServerSettings().isAutoConvertProject());
 		} catch (InvalidPaceProjectInputException e) {
 			logger.error(e.getMessage());
 		} catch (PaceProjectCreationException e) {
@@ -388,13 +392,16 @@ public class PafMetaData {
 		}		
 	}
 	
-	public static void updateApplicationConfig(XMLPaceProject paceProject) {
-		xmlPaceProject = paceProject;
-		try {
-			xmlPaceProject.save();
-		} catch (ProjectSaveException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public static void updateApplicationConfig(XMLPaceProject xmlPaceProject) throws ProjectSaveException, PafException {
+		
+		if ( xmlPaceProject != null ) {
+			
+			//save out to server conf
+			xmlPaceProject.saveTo(paceProject.getProjectInput());
+				
+			//reload data
+			paceProject.reloadData();
+			
 		}
 	}
 	

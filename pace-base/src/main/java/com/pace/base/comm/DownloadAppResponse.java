@@ -1,19 +1,32 @@
 package com.pace.base.comm;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.activation.DataHandler;
+import javax.xml.bind.annotation.XmlMimeType;
+import javax.xml.bind.annotation.XmlType;
 
-import com.pace.base.project.PaceProject;
-
+@XmlType
 public class DownloadAppResponse extends PafSuccessResponse {
-	private List<PaceProject> applicationProjects = new ArrayList<PaceProject>();
+		
+	private DataHandler paceProjectDataHandler;
 
-	public List<PaceProject> getApplicationProjects() {
-		return applicationProjects;
+	private String appId;
+	
+	public String getAppId() {
+		return appId;
 	}
 
-	public void setApplicationProjects(List<PaceProject> applicationProjects) {
-		this.applicationProjects = applicationProjects;
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
+
+	@XmlMimeType("application/octet-stream")
+	public DataHandler getPaceProjectDataHandler() {
+		return paceProjectDataHandler;
+	}
+
+	public void setPaceProjectDataHandler(DataHandler paceProjectDataHandler) {
+		this.paceProjectDataHandler = paceProjectDataHandler;
+	}
+	
 
 }
