@@ -2,11 +2,26 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
 
+  <groupId>pace-base</groupId>
+  <artifactId>pace-base</artifactId>
   <name>pace-base</name>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging> 
   <url>http://maven.apache.org</url>
+
+  <build>
+  <plugins>
+   <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <configuration>
+     <source>1.6</source>
+     <target>1.6</target>
+    </configuration>
+   </plugin>
+  </plugins>
+ </build>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -140,8 +155,6 @@
 	<version>3.0.5.RELEASE</version>
 	<type>jar</type>
 	<scope>provided</scope>
-</dependency>
-  </dependencies>
-  <groupId>pace-base</groupId>
-  <artifactId>pace-base</artifactId>
+ </dependency>
+</dependencies>
 </project>
