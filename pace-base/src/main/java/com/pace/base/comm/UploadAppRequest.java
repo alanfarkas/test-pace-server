@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 public class UploadAppRequest extends PafRequest {
 	
 	private String appId;
-	private DataHandler paceProjectDataHandler;	
+	private DataHandler paceProjectDataHandler;
 	private boolean applyConfigurationUpdate;
 	private boolean applyCubeUpdate;
 	

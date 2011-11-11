@@ -392,15 +392,14 @@ public class PafMetaData {
 		}		
 	}
 	
-	public static void updateApplicationConfig(XMLPaceProject xmlPaceProject) throws ProjectSaveException, PafException {
+	public static void saveApplicationConfig(PaceProject newPaceProject) throws ProjectSaveException, PafException {
 		
-		if ( xmlPaceProject != null ) {
+		if ( newPaceProject != null ) {
+			
+			//TODO: add filter set to partially save
 			
 			//save out to server conf
-			xmlPaceProject.saveTo(paceProject.getProjectInput());
-				
-			//reload data
-			paceProject.reloadData();
+			newPaceProject.saveTo(paceProject.getProjectInput());
 			
 		}
 	}

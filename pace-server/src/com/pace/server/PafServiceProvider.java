@@ -4258,49 +4258,75 @@ public PafGetNotesResponse getCellNotes(
 
 
 	@Override
-	public UploadAppResponse uploadApplication(
-			UploadAppRequest uploadAppReq) throws RemoteException,
-			PafSoapException {
+	public UploadAppResponse uploadApplication(UploadAppRequest uploadAppReq) 
+			throws RemoteException, PafSoapException {
 
 		boolean isSuccessfulUpload = true;
 		
-		if ( uploadAppReq != null && uploadAppReq.getPaceProjectDataHandler() != null ) {
+		if ( uploadAppReq != null ) {
 			
-			DataHandler dataHandler = uploadAppReq.getPaceProjectDataHandler();
+			//save product configuration
+			if ( uploadAppReq.getPaceProjectDataHandler() != null ) {		
 			
-			try {
+				DataHandler dataHandler = uploadAppReq.getPaceProjectDataHandler();
 				
-				PaceProject paceProject = DataHandlerPaceProjectUtil.convertDataHandlerToPaceProject(dataHandler, PafMetaData.getTransferDirPath());
-				
-				if ( paceProject != null && paceProject instanceof XMLPaceProject) {
-				
-					PafMetaData.updateApplicationConfig((XMLPaceProject) paceProject);
+				try {
 					
-				}				
+					PaceProject paceProject = DataHandlerPaceProjectUtil.convertDataHandlerToPaceProject(dataHandler, PafMetaData.getTransferDirPath());
+					
+					if ( paceProject != null ) {
+					
+						PafMetaData.saveApplicationConfig(paceProject);
+						
+					}				
+					
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+					e.printStackTrace();
+					isSuccessfulUpload = false;
+				} catch (InvalidPaceProjectInputException e) {
+					logger.error(e.getMessage());
+					e.printStackTrace();
+					isSuccessfulUpload = false;
+				} catch (PaceProjectCreationException e) {
+					logger.error(e.getMessage());
+					e.printStackTrace();
+					isSuccessfulUpload = false;
+				} catch (ProjectSaveException e) {
+					logger.error(e.getMessage());
+					e.printStackTrace();
+					isSuccessfulUpload = false;
+				} catch (PafException e) {
+					logger.error(e.getMessage());
+					e.printStackTrace();
+					isSuccessfulUpload = false;
+				}
 				
-			} catch (IOException e) {
-				logger.error(e.getMessage());
-				e.printStackTrace();
-				isSuccessfulUpload = false;
-			} catch (InvalidPaceProjectInputException e) {
-				logger.error(e.getMessage());
-				e.printStackTrace();
-				isSuccessfulUpload = false;
-			} catch (PaceProjectCreationException e) {
-				logger.error(e.getMessage());
-				e.printStackTrace();
-				isSuccessfulUpload = false;
-			} catch (ProjectSaveException e) {
-				logger.error(e.getMessage());
-				e.printStackTrace();
-				isSuccessfulUpload = false;
-			} catch (PafException e) {
-				logger.error(e.getMessage());
-				e.printStackTrace();
-				isSuccessfulUpload = false;
 			}
 			
+			//apply configuration changes
+			if ( uploadAppReq.isApplyConfigurationUpdate() ) {
+				
+				PafMetaData.updateApplicationConfig();
+				
+			}
+			
+			//TODO: verify with Jim this is right way to reload cube data
+			if ( uploadAppReq.isApplyCubeUpdate()) {
+				
+				try {
+					PafMetaData.clearDataCache();
+					dataService.loadApplicationData();
+				} catch (PafException e) {
+					logger.error(e.getMessage());
+					e.printStackTrace();
+					isSuccessfulUpload = false;
+				}
+				
+				
+			}
 		}
+		
 			
 		return new UploadAppResponse(isSuccessfulUpload);
 	}
