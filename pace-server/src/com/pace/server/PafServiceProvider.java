@@ -4338,14 +4338,8 @@ public PafGetNotesResponse getCellNotes(
 		DownloadAppResponse resp = new DownloadAppResponse();
 		
 		try {
-			
-			PaceProject pp = PafMetaData.getPaceProject();
-			
-			if ( pp == null ) {
-				
-				pp = new XMLPaceProject(PafMetaData.getConfigDirPath(), false);
-				
-			}
+						
+			PaceProject pp = new XMLPaceProject(PafMetaData.getConfigDirPath(), false);
 							
 			DataHandler dh = DataHandlerPaceProjectUtil.convertPaceProjectToDataHandler(pp, PafMetaData.getTransferDirPath());
 			
