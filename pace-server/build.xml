@@ -204,6 +204,9 @@
 
 	<target name="make-client-jar" > 
 		
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\pace-base" target="deploy"/>	
+				
 		<echo>"Compiling client WSDL and classes"</echo>
 		<delete dir="${client_dir}\classes" />
 		<mkdir dir="${client_dir}\classes"/>		
