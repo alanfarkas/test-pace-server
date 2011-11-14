@@ -166,11 +166,10 @@ public class PafMetaData {
 
     }
     
-    static {    	
-        
-    	updateApplicationConfig();
-    	
-    }
+    // Wait for explicit initialization of application configuration.
+//    static {    	
+//    	updateApplicationConfig();
+//    }
        
     public static String getConfigDirPath() {
     	return paceHome + fileSep + PafBaseConstants.DN_ConfFldr + fileSep;

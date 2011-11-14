@@ -25,7 +25,7 @@
  </jaxws:endpoint>
  
  
- <!-- Uncomment these when JBoss 7 is used to clean up some cxf errors.
+
  
     <bean id="logInbound" class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
     <bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
@@ -52,7 +52,6 @@
             </list>
         </property>
     </bean> 
--->
 
 
 </beans>

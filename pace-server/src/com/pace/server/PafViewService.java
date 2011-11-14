@@ -86,7 +86,8 @@ public class PafViewService {
 	
 	//TTN 900 - Print Preferences
 	private Map<String, PrintStyle> globalPrintStyleCache = null; //<guid, PrintStyle>
-
+	private PrintStyles printStyles;
+	
 	private PafApplicationDef pafApp = null;
 	
 	static private Map<String, String> invalidViewsMap;
@@ -97,7 +98,7 @@ public class PafViewService {
 
 	private static Logger logger = Logger.getLogger(PafViewService.class);
 	
-	private PrintStyles printStyles;
+
 
 
 	public void getViewMetaData() {
@@ -123,16 +124,6 @@ public class PafViewService {
 		
 		viewCache = assembleViews();
 
-//		if ( PafMetaData.isDebugMode()) {
-		
-			//reload numeric formats and hierarchy formats
-			try {
-				PafMetaData.getPaceProject().loadData(new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.NumericFormats, ProjectElementId.HierarchyFormats)));
-			} catch (PafException e) {
-				logger.error(e.getMessage());
-			}
-		
-//		}
 		
 		globalNumericFormatCache = PafMetaData.getPaceProject().getNumericFormats();
 		hierarchyFormatsCache = PafMetaData.getPaceProject().getHierarchyFormats();
@@ -442,28 +433,12 @@ public class PafViewService {
 
 	public void loadMeasuresCache() {
 
-		if (measuresCache == null || PafMetaData.isDebugMode() ){ 
-			
-			if ( PafMetaData.isDebugMode()) {
-			
-				try {
-					PafMetaData.getPaceProject().loadData(ProjectElementId.Measures);
-				} catch (PafException e) {
-					logger.error(e.getMessage());
-				}
-				
-			}
-			
 			measuresCache = PafMetaData.getPaceProject().getMeasures().toArray(new MeasureDef[0]);
-		}
 
-		if (measuresPlannableCache == null){
 			populateMeasuresPlannableCache();
-		}
 
-		if (measuresMapCache == null){
 			populateMeasuresMapCache();
-		}
+
 	}
 
 	public void populateMeasuresPlannableCache() {
@@ -626,22 +601,18 @@ public class PafViewService {
 
 		//create a new instance of the version map cache
 		versionsNumberFormatMapCache = new HashMap<String, PafNumberFormat>();
-
-		//if the versions cache is not null
-		if (versionsCache != null) {
 			
-			//loop through the versions cache
-			for (VersionDef version : versionsCache) {
+		//loop through the versions cache
+		for (VersionDef version : versionsCache) {
+			
+			//if numeric format name is not null, then put the version/format 
+			//into the map
+			if (version.getNumericFormatName() != null) {
 				
-				//if numeric format name is not null, then put the version/format 
-				//into the map
-				if (version.getNumericFormatName() != null) {
-					
-					versionsNumberFormatMapCache.put(version.getName(),
-							globalNumericFormatCache
-									.get(version.getNumericFormatName()));
-					
-				}
+				versionsNumberFormatMapCache.put(version.getName(),
+						globalNumericFormatCache
+								.get(version.getNumericFormatName()));
+				
 			}
 		}
 	}

@@ -41,6 +41,7 @@ import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.state.IPafClientState;
 import com.pace.base.state.PafClientState;
+import com.pace.base.utility.LogUtil;
 
 /**
  * Class_description_goes_here
@@ -56,7 +57,13 @@ public class PafAppService {
 	private static Map<String, PafApplicationDef> applicationDefs = new HashMap<String, PafApplicationDef>();
 	private static Map<String, ApplicationState> applicationStates = new HashMap<String, ApplicationState>();
         
+	//handles to the other main services
+	PafViewService viewService = PafViewService.getInstance();
+	PafDataService dataService = PafDataService.getInstance();
+	
+	
 	private static Logger logger = Logger.getLogger(PafAppService.class);
+	private static Logger logPerf = Logger.getLogger("pace.performance");
 
 	private PafAppService() { }
 
@@ -91,18 +98,69 @@ public class PafAppService {
 			
 		}
     	
-		
         List<PafApplicationDef> appDefs = PafMetaData.getPaceProject().getApplicationDefinitions();
         
         for (PafApplicationDef app : appDefs) {
+        	
+            // Initialize an application state objected (defaults to stopped)
+            ApplicationState as = new ApplicationState(app.getAppId());
+            applicationStates.put(as.getApplicationId(), as);
+        	
             app.initMeasures(PafMetaData.getPaceProject().getMeasures());
             app.initVersions(PafMetaData.getPaceProject().getVersions());
             app.initMemberTags(PafMetaData.getPaceProject().getMemberTags());
             app.initFunctionFactory(PafMetaData.getPaceProject().getCustomFunctions());
             app.initCustomMenus(PafMetaData.getPaceProject().getCustomMenus()); 
             applicationDefs.put(app.getAppId(), app);
+            
+            // might as well load the view cache as well, it's part of the application definition
+            // and requires no external dependencies
+            viewService.loadViewCache();
         }
         logger.info(Messages.getString("PafAppService.23"));       //$NON-NLS-1$
+    }
+    
+    public synchronized void startApplication(String id, boolean reloadMetadata) throws PafException {
+
+		long startTime = System.currentTimeMillis();
+    	
+    	try {
+			updateAppRunState(id, RunningState.STARTING);
+			PafMetaData.clearDataCache();
+			dataService.loadApplicationData();
+			
+			// initialize the user list
+			PafSecurityService.initUsers();
+			updateAppRunState(id, RunningState.RUNNING);
+			
+		} catch (Exception e) {
+			updateAppRunState(id, RunningState.FAILED);
+			String s = String.format("Failed to start application [%s]", id);
+			throw new PafException(s, PafErrSeverity.Error, e);
+		}
+    	
+		String stepDesc = String.format("Application [%s] Loaded", id);
+		logPerf.info(LogUtil.timedStep(stepDesc, startTime));		
+		
+    }
+    
+    
+    public synchronized void updateAppRunState(String id, RunningState state) {
+    	if ( ! applicationStates.containsKey(id) ) {
+    		String s = String.format("No application with ID [%s] defined", id);
+    		throw new IllegalArgumentException(s);
+    	} else {
+    		applicationStates.get(id).setCurrentRunState(state);
+    	}
+    }
+    
+    public synchronized RunningState getAppRunState(String id) {
+    	if ( ! applicationStates.containsKey(id) ) {
+    		String s = String.format("No application with ID [%s] defined", id);
+    		throw new IllegalArgumentException(s);
+    	} else {
+    		return applicationStates.get(id).getCurrentRunState();
+    	}    	
     }
 
 	/**

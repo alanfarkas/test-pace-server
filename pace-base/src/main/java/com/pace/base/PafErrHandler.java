@@ -30,7 +30,7 @@ public class PafErrHandler {
     
     static public void handleException(Exception e, PafErrSeverity pes) {
         
-        PafException pex = new PafException("", pes, e);
+        PafException pex = new PafException(e.getMessage(), pes, e);
         handleException(pex);   
     }
 

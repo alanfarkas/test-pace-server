@@ -55,6 +55,7 @@ import com.pace.base.PafNotAuthenticatedSoapException;
 import com.pace.base.PafNotAuthorizedSoapException;
 import com.pace.base.PafSecurityToken;
 import com.pace.base.PafSoapException;
+import com.pace.base.RunningState;
 import com.pace.base.app.AppSettings;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.PafApplicationDef;
@@ -4178,12 +4179,6 @@ public PafGetNotesResponse getCellNotes(
 
 		return asr;
 	}
-
-// protected utility method invoked by initialization servlet.
-	static void autoStartApplications() {
-
-	}
-
 		
 
 	/* (non-Javadoc)
@@ -4193,65 +4188,68 @@ public PafGetNotesResponse getCellNotes(
 	public PafSuccessResponse loadApplication(LoadApplicationRequest appReq)
 			throws RemoteException, PafSoapException {
 
-		long startTime = System.currentTimeMillis();
 		
-		// regardless of parameters, for now just load the application
-		String reqAppId = (appReq==null?"TITAN":appReq.getAppIds().get(0));
-
-		// presume the appReq object has the appropriate app id.
-		// status updates should be synchronized...hmm
-
-		
-		ApplicationState as = new ApplicationState( reqAppId );	
-		as.setCurrentRunState(ApplicationState.RunningState.STARTING);
-		
-		// FIXIT replace this with synchronized "updateApplicationState" method
-		appService.setApplicationState(reqAppId, as);
+		String reqAppId="Unintialized";
 		
 
+// Not currently a fan of this approach.
+//		try {
+//			if (isAuthorized(appReq.getClientId(), false)){
+//				// Set logger client info property to user name
+//				pushToNDCStack(appReq.getClientId());					
+//			}
+//		} catch (PafNotAuthenticatedSoapException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (PafNotAuthorizedSoapException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+
+
+		
+				
+		
+		
+		
 		
 		try {
 			
 			// update the pace project object
 			PafMetaData.updateApplicationConfig();
-		
-			
+					
 			// initialize the application service and reload the application metadata			
 			appService.loadApplications();			
 
-			// initialize view service and reload the view definitions
-			viewService.loadViewCache();
 			
+			// Now their should in all cases be an appid defined for at least the current application
+			// If the appID in req doesn't map to the currently loaded application it's probably worth a warning
+
+			if (appReq==null) {
+				reqAppId = appService.getApplications().get(0).getAppId();
+			} else {
+				reqAppId = appReq.getAppIds().get(0);
+			}			
+				
 			// initialize the data service and re/load the application data sources
 			if ( appReq==null || appReq.isLoadMdb() ) {
-				PafMetaData.clearDataCache();
-				dataService.loadApplicationData();
+				appService.startApplication(reqAppId, true);
 			}
 			
-			// initialize the user list
-			PafSecurityService.initUsers();
-
-
 			System.out.println(Messages.getString("PafServiceProvider.7") + logger.getLevel()); //$NON-NLS-1$
 			logger.info(Messages.getString("PafServiceProvider.8")); //$NON-NLS-1$
-			
-			as.setCurrentRunState(ApplicationState.RunningState.RUNNING);			
+						
 
 		} catch (Exception ex) {
 			
 			PafErrHandler.handleException(ex, PafErrSeverity.Error);
 			PafSuccessResponse psr = new PafSuccessResponse(false);
+			String s = String.format("Error loading application [%s]", reqAppId);
 			psr.addException(ex);
-			psr.setResponseMsg("Error loading application" + ex.getMessage() );
-			as.setCurrentRunState(ApplicationState.RunningState.FAILED);
+			psr.setResponseMsg( s + ex.getMessage() );
 		}
-		
-		// FIXIT replace this with synchronized "updateApplicationState" method
-		appService.setApplicationState(reqAppId, as);
-
-		String stepDesc = String.format("Application [%s] Loaded", reqAppId);
-		logPerf.info(LogUtil.timedStep(stepDesc, startTime));
-		
+				
 		return new PafSuccessResponse(true);
 		
 	}

@@ -15,8 +15,9 @@ package com.pace.base.comm;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pace.base.RunningState;
+
 public class ApplicationState {
-	public enum RunningState { STOPPED, STOPPING, STARTING, RUNNING, FAILED }
 	private String applicationId;
 	private RunningState currentRunState;
 	private List<Exception> exceptions = new ArrayList<Exception>();
