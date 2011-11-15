@@ -201,17 +201,6 @@
 	</target>
 	-->
 
-	<target name="export-base-jar" > 
-		
-		<echo>"Running builds for dependent libraries"</echo>
-		<ant antfile="build.xml"
-			dir="${wrksp_root}\pace-base" target="deploy"/>	
-		
-		<echo>"Compiling client WSDL and classes"</echo>
-		<copy file="${client_dir}\dist\pace-base.jar" todir="${extra_jars_plugin}\lib" />
-		
-	</target>	
-
 	<target name="make-client-jar" > 
 		
 		<ant antfile="build.xml"
