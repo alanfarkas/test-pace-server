@@ -670,7 +670,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 							
 				// Re-load application meta-data if debugMode is set to true (TTN-1367)	
 				if (PafMetaData.isDebugMode()) {			
-					appService.loadApplications();
+					appService.loadApplicationConfigurations();
 				}
 				
 				// Populate client state appDef property
@@ -4190,37 +4190,12 @@ public PafGetNotesResponse getCellNotes(
 
 		
 		String reqAppId="Unintialized";
-		
-
-// Not currently a fan of this approach.
-//		try {
-//			if (isAuthorized(appReq.getClientId(), false)){
-//				// Set logger client info property to user name
-//				pushToNDCStack(appReq.getClientId());					
-//			}
-//		} catch (PafNotAuthenticatedSoapException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (PafNotAuthorizedSoapException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-
-
-
-		
-				
-		
-		
-		
+	
 		
 		try {
-			
-			// update the pace project object
-			PafMetaData.updateApplicationConfig();
-					
+								
 			// initialize the application service and reload the application metadata			
-			appService.loadApplications();			
+			appService.loadApplicationConfigurations();			
 
 			
 			// Now their should in all cases be an appid defined for at least the current application
@@ -4234,7 +4209,7 @@ public PafGetNotesResponse getCellNotes(
 				
 			// initialize the data service and re/load the application data sources
 			if ( appReq==null || appReq.isLoadMdb() ) {
-				appService.startApplication(reqAppId, true);
+				appService.loadApplicationMetaData(reqAppId);
 			}
 			
 			System.out.println(Messages.getString("PafServiceProvider.7") + logger.getLevel()); //$NON-NLS-1$

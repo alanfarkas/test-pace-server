@@ -78,17 +78,14 @@ public class PafAppService {
      */
     // TODO make measure and version loads driven by application
     // currently just loads all apps with the current measure/version defs
-    public synchronized void loadApplications() {
+    public synchronized void loadApplicationConfigurations() {
         logger.info(Messages.getString("PafAppService.13")); //$NON-NLS-1$
         
         Set<ProjectElementId> reloadFilterSet = new HashSet<ProjectElementId>();
         
-        reloadFilterSet.add(ProjectElementId.ApplicationDef);
-        reloadFilterSet.add(ProjectElementId.Measures);
-        reloadFilterSet.add(ProjectElementId.Versions);
-        reloadFilterSet.add(ProjectElementId.MemberTags);
-        reloadFilterSet.add(ProjectElementId.CustomFunctions);
-        reloadFilterSet.add(ProjectElementId.CustomMenus);
+		// update the pace project object
+		PafMetaData.updateApplicationConfig();
+       
         
         try {
 			PafMetaData.getPaceProject().loadData(reloadFilterSet);
@@ -115,10 +112,38 @@ public class PafAppService {
             
             // might as well load the view cache as well, it's part of the application definition
             // and requires no external dependencies
+            
+            
             viewService.loadViewCache();
         }
         logger.info(Messages.getString("PafAppService.23"));       //$NON-NLS-1$
     }
+    
+    public synchronized void loadApplicationMetaData(String id) throws PafException {
+		long startTime = System.currentTimeMillis();
+    	
+    	try {
+			updateAppRunState(id, RunningState.STARTING);
+			PafMetaData.clearDataCache();
+			dataService.loadApplicationData();
+			
+			// initialize the user list
+			PafSecurityService.initUsers();
+			updateAppRunState(id, RunningState.RUNNING);
+			
+		} catch (Exception e) {
+			updateAppRunState(id, RunningState.FAILED);
+			String s = String.format("Failed to start application [%s]", id);
+			throw new PafException(s, PafErrSeverity.Error, e);
+		}
+    	
+		String stepDesc = String.format("Application [%s] Loaded", id);
+		logPerf.info(LogUtil.timedStep(stepDesc, startTime));		
+    }
+    
+    
+    
+    
     
     public synchronized void startApplication(String id, boolean reloadMetadata) throws PafException {
 
