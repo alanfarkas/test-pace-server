@@ -212,6 +212,34 @@ public class PafMetaData {
 	public static String getPaceHome() {
 		return paceHome;
 	}
+	
+	public static boolean isAutoLoad() {
+		
+		return getBooleanFromJndi(lclJndiCtxt, "pace/autoStart");
+	}
+	
+	
+	private static boolean getBooleanFromJndi(String ctxRoot, String key) {
+		
+		boolean value = false;
+		
+		try {
+			InitialContext initContext = new InitialContext();
+			
+			//Context envCtx = (Context) initContext.lookup(PafBaseConstants.JN_InitCtx);
+			Context envCtx = (Context) initContext.lookup(ctxRoot);
+			logger.debug("Context Retrieved: " + envCtx.getNameInNamespace() );		
+			value =  (Boolean) envCtx.lookup(key);
+
+		
+		} catch (Throwable ex) {
+			String s = String.format("Unable to retrieve variable [%s] from JNDI. ", key);
+			logger.warn(s + ex.getMessage() );
+		}
+		
+		return value;
+		
+	}
 
 
 	private static String getPaceHomeFromJNDI(String ctxRoot) {

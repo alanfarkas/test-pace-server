@@ -134,33 +134,45 @@ public class PafAppService {
 		logPerf.info(LogUtil.timedStep(stepDesc, startTime));		
     }
     
-    
-    
-    
-    
-    public synchronized void startApplication(String id, boolean reloadMetadata) throws PafException {
-
-		long startTime = System.currentTimeMillis();
+    public synchronized void autoloadApplications() throws PafException {
+    	// for now just check jndi/env variable for behavior.
+    	// will migrate to application specific setting when multi app hits
+    	if ( PafMetaData.isAutoLoad() ) {
+    		loadApplicationConfigurations();
+    		loadApplicationMetaData(null);
+    	}
     	
-    	try {
-			updateAppRunState(id, RunningState.STARTING);
-			PafMetaData.clearDataCache();
-			dataService.loadApplicationData();
-			
-			// initialize the user list
-			PafSecurityService.initUsers();
-			updateAppRunState(id, RunningState.RUNNING);
-			
-		} catch (Exception e) {
-			updateAppRunState(id, RunningState.FAILED);
-			String s = String.format("Failed to start application [%s]", id);
-			throw new PafException(s, PafErrSeverity.Error, e);
-		}
     	
-		String stepDesc = String.format("Application [%s] Loaded", id);
-		logPerf.info(LogUtil.timedStep(stepDesc, startTime));		
-		
+    	
     }
+    
+    
+    
+    
+    
+//    public synchronized void startApplication(String id, boolean reloadMetadata) throws PafException {
+//
+//		long startTime = System.currentTimeMillis();
+//    	
+//    	try {
+//			updateAppRunState(id, RunningState.STARTING);
+//			PafMetaData.clearDataCache();
+//			dataService.loadApplicationData();
+//			
+//			// initialize the user list
+//			PafSecurityService.initUsers();
+//			updateAppRunState(id, RunningState.RUNNING);
+//			
+//		} catch (Exception e) {
+//			updateAppRunState(id, RunningState.FAILED);
+//			String s = String.format("Failed to start application [%s]", id);
+//			throw new PafException(s, PafErrSeverity.Error, e);
+//		}
+//    	
+//		String stepDesc = String.format("Application [%s] Loaded", id);
+//		logPerf.info(LogUtil.timedStep(stepDesc, startTime));		
+//		
+//    }
     
     
     public synchronized void updateAppRunState(String id, RunningState state) {
