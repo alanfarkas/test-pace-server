@@ -5,7 +5,7 @@
   id="myeclipse.1299871328154"
   context-root="/pace"
   j2ee-spec="6.0"
-  archive="pace.war">
+  archive="pace-server.war">
   <attributes>
     <attribute name="webrootdir" value="WebRoot" />
   </attributes>

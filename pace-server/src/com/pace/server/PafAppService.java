@@ -80,21 +80,10 @@ public class PafAppService {
     // currently just loads all apps with the current measure/version defs
     public synchronized void loadApplicationConfigurations() {
         logger.info(Messages.getString("PafAppService.13")); //$NON-NLS-1$
-        
-        Set<ProjectElementId> reloadFilterSet = new HashSet<ProjectElementId>();
-        
+                
 		// update the pace project object
 		PafMetaData.updateApplicationConfig();
-       
-        
-        try {
-			PafMetaData.getPaceProject().loadData(reloadFilterSet);
-		} catch (PafException e) {
-			
-			PafErrHandler.handleException(e);
-			
-		}
-    	
+
         List<PafApplicationDef> appDefs = PafMetaData.getPaceProject().getApplicationDefinitions();
         
         for (PafApplicationDef app : appDefs) {
@@ -113,7 +102,6 @@ public class PafAppService {
             // might as well load the view cache as well, it's part of the application definition
             // and requires no external dependencies
             
-            
             viewService.loadViewCache();
         }
         logger.info(Messages.getString("PafAppService.23"));       //$NON-NLS-1$
@@ -121,6 +109,11 @@ public class PafAppService {
     
     public synchronized void loadApplicationMetaData(String id) throws PafException {
 		long startTime = System.currentTimeMillis();
+		
+		
+		if (id == null) { // just use the id of the currently deployed app config
+			id = getApplications().get(0).getAppId();
+		}
     	
     	try {
 			updateAppRunState(id, RunningState.STARTING);

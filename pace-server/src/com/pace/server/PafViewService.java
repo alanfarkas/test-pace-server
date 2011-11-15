@@ -121,7 +121,6 @@ public class PafViewService {
 
 		logger.info("Loading view cache");
 
-		
 		viewCache = assembleViews();
 
 		

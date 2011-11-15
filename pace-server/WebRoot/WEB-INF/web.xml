@@ -10,6 +10,11 @@
    <env-entry-type>java.lang.String</env-entry-type>
    <env-entry-value>..\..</env-entry-value>
   </env-entry>   
+  <env-entry>
+   <env-entry-name>pace/autoStart</env-entry-name>
+   <env-entry-type>java.lang.Boolean</env-entry-type>
+   <env-entry-value>True</env-entry-value>
+  </env-entry>   
   <listener>
     <listener-class>
       org.springframework.web.context.ContextLoaderListener

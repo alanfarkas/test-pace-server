@@ -107,7 +107,8 @@ public class PafInitServlet extends HttpServlet {
         
         try { 
         	
-        	new PafServiceProvider().loadApplication(null);
+        	PafAppService.getInstance().loadApplicationConfigurations();
+        	PafAppService.getInstance().loadApplicationMetaData(null);        	
         }
         catch (Exception pex) {
         	PafErrHandler.handleException(pex, PafErrSeverity.Error);
