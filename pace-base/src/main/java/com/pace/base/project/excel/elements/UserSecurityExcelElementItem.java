@@ -207,44 +207,12 @@ public class UserSecurityExcelElementItem<T extends List<PafUserSecurity>> exten
 						default:
 							
 							if ( roleNameList != null ) {
-							
-								int roleIndex = 0;
-								
-								for (String roleName : roleNameList) {
-																									
-									if ( roleName != null &&  userSecurity.getRoleFilters().containsKey(roleName)) {
-																										
-										PafWorkSpec[] pwsAr = userSecurity.getRoleFilters().get(roleName);
-									
-										PafDimSpec[] pafDimSpecAr = pwsAr[0].getDimSpec();
-										
-										if ( pafDimSpecAr == null ) {
-											
-											pafDimSpecAr = new PafDimSpec[hierarchyDimList.size()];
-											
-										}
-										
-										PafDimSpec pafDimSpec = new PafDimSpec();
-										
-										//set dim name based on end of header list map starting at hier dim location (eg. Product)
-										pafDimSpec.setDimension(getHeaderListMap().get(getSheetName()).get(startCaseNum));
-										pafDimSpec.setExpressionList(new String[] {PafExcelUtil.getString(getProjectElementId(), rowItemList.get(roleIndex++))});
-										
-										int hierDimIndex = hierarchyDimList.indexOf(pafDimSpec.getDimension());
-										
-										pafDimSpecAr[hierDimIndex] = pafDimSpec;
-										
-										pwsAr[0].setDimSpec(pafDimSpecAr);
-										
-										userSecurity.getRoleFilters().put(roleName, pwsAr);
-										
-									}
-																								
-								}
-								
+								List<String> secList = new ArrayList<String>();
+								secList.addAll(Arrays.asList(PafExcelUtil.getStringAr(getProjectElementId(), rowItemList)));
+								if( secList != null )
+									manageDimensionHiearchy( startCaseNum, userSecurity, roleNameList, secList );
 								//increment start case number.  controls which hier dim index to start on.
 								startCaseNum++;
-							
 							}
 							
 							break;							
@@ -266,6 +234,60 @@ public class UserSecurityExcelElementItem<T extends List<PafUserSecurity>> exten
 		
 		return (T) userSecurityList;
 		
+	}
+
+	private void manageDimensionHiearchy( int startCaseNum, PafUserSecurity userSecurity, List<String> listRoleName, List<String> listSecurity ) {
+		PafWorkSpec[] pwsAr = null;
+		PafDimSpec[] pafDimSpecAr = null;
+		PafDimSpec pafDimSpec = null;
+		String prevRoleName = null;
+		for( int i=0; i < listRoleName.size(); i++ ) {
+			
+			String roleName =  listRoleName.get(i);
+			if ( roleName != null &&  userSecurity.getRoleFilters().containsKey(roleName)) {
+				prevRoleName = roleName;
+				//It's a new role name
+				pwsAr = userSecurity.getRoleFilters().get(roleName);
+			
+				//get an array of dimension
+				pafDimSpecAr = pwsAr[0].getDimSpec();
+				
+				//set dim name based on end of header list map starting at hier dim location (eg. Product)
+				//if empty, create a new one
+				if ( pafDimSpecAr == null ) {
+					pafDimSpecAr = new PafDimSpec[hierarchyDimList.size()];
+				}
+				pafDimSpec = new PafDimSpec();
+				pafDimSpec.setDimension(getHeaderListMap().get(getSheetName()).get(startCaseNum));
+				//get the expression list for each dimension
+				List<String> secList = new ArrayList<String>();
+				secList.add(listSecurity.get(i));
+				pafDimSpec.setExpressionList(secList.toArray(new String[0]));
+				
+				int hierDimIndex = hierarchyDimList.indexOf(pafDimSpec.getDimension());
+				
+				pafDimSpecAr[hierDimIndex] = pafDimSpec;
+				
+				pwsAr[0].setDimSpec(pafDimSpecAr);
+				
+				userSecurity.getRoleFilters().put(roleName, pwsAr);
+					
+			}
+			if( roleName == null && listSecurity.get(i) != null && prevRoleName != null && pafDimSpec != null ) {
+				String[] expList = pafDimSpec.getExpressionList();
+				List<String> secList = new ArrayList<String>();
+				secList.addAll(Arrays.asList(expList));
+				secList.add(listSecurity.get(i));
+				pafDimSpec.setExpressionList(secList.toArray(new String[0]));
+				int hierDimIndex = hierarchyDimList.indexOf(pafDimSpec.getDimension());
+				
+				pafDimSpecAr[hierDimIndex] = pafDimSpec;
+				
+				pwsAr[0].setDimSpec(pafDimSpecAr);
+				
+				userSecurity.getRoleFilters().put(prevRoleName, pwsAr);
+			}
+		}
 	}
 
 	@Override
@@ -337,6 +359,7 @@ public class UserSecurityExcelElementItem<T extends List<PafUserSecurity>> exten
 				
 			}
 			
+			
 			for ( PafUserSecurity userSecurity : userSecuirtyList ) {
 				
 				PafExcelRow excelRow = new PafExcelRow();
@@ -357,39 +380,25 @@ public class UserSecurityExcelElementItem<T extends List<PafUserSecurity>> exten
 				if ( roleFilterMap != null ) {
 					
 					for ( String roleName : roleFilterMap.keySet() ) {
-		
-						//if referencing enabled and key exists in map, use dynamic reference
-						if ( isCellReferencingEnabled() && roleReferenceMap != null && roleReferenceMap.containsKey(roleName) ) {
-							
-							excelRow.addRowItem(3, PafExcelValueObject.createFromFormula(roleReferenceMap.get(roleName)));
-							
-						//role name
-						} else {
-		
-							excelRow.addRowItem(3, PafExcelValueObject.createFromString(roleName));
-							
-						}					
 						
+						//role -> (dimesion, security) list
 						PafWorkSpec[] pafWorkSpecAr = roleFilterMap.get(roleName);
 						
 						if ( pafWorkSpecAr != null ) {
-							
 							for ( PafWorkSpec pafWorkSpec : pafWorkSpecAr ) {
-							
+								//dimension -> security list
 								PafDimSpec[] pafDimSpecAr = pafWorkSpec.getDimSpec();
 																								
 								if ( pafDimSpecAr != null && this.hierarchyDimList != null && pafDimSpecAr.length == this.hierarchyDimList.size()) {
 								
 									Map<String, PafDimSpec> dimSpecMap = new TreeMap<String, PafDimSpec>(String.CASE_INSENSITIVE_ORDER);
 									
-									for (PafDimSpec unOrderPafDimSpec : pafDimSpecAr ) {
-										
+									for (PafDimSpec unOrderPafDimSpec : pafDimSpecAr )
 										dimSpecMap.put(unOrderPafDimSpec.getDimension(), unOrderPafDimSpec);
 										
-									}
-									
 									int startDynamicHeaderNdx = 4;
-									
+									int maxExpCount = 0;
+									//go thru dimension-security list
 									for (int i = 0; i < pafDimSpecAr.length; i++ ) {
 										
 										String dynamicHierDim = this.hierarchyDimList.get(i);
@@ -398,39 +407,42 @@ public class UserSecurityExcelElementItem<T extends List<PafUserSecurity>> exten
 											
 											PafDimSpec dimSpec = dimSpecMap.get(dynamicHierDim);
 											
-											if ( dimSpec.getExpressionList() != null && dimSpec.getExpressionList().length == 1 ) {
-												
-												//dynamic hier member
-												excelRow.addRowItem(startDynamicHeaderNdx + i, PafExcelValueObject.createFromString(dimSpec.getExpressionList()[0]));
-												
+											if ( dimSpec.getExpressionList() != null ) {
+												//go thru each security
+												int expIdx = 0;
+												for (String expression : dimSpec.getExpressionList() ) {
+										            //dynamic hier member
+										            excelRow.addRowItem(startDynamicHeaderNdx + i, PafExcelValueObject.createFromString(expression));	
+										            expIdx++;
+												}
+												if( expIdx > maxExpCount )
+													maxExpCount = expIdx;
+												else 
+													for( int ii=0; ii<maxExpCount-expIdx; ii++)
+											            excelRow.addRowItem(startDynamicHeaderNdx + i, PafExcelValueObject.createBlank());	
 											}
 											
 										}
 										
 									}
-							
+									for( int i=0; i < maxExpCount; i++ )
+										if( i == 0 )
+											if ( isCellReferencingEnabled() && roleReferenceMap != null && roleReferenceMap.containsKey(roleName) )
+												excelRow.addRowItem(3, PafExcelValueObject.createFromFormula(roleReferenceMap.get(roleName)));
+											else
+												excelRow.addRowItem(3, PafExcelValueObject.createFromString(roleName));
+										else
+											excelRow.addRowItem(3, PafExcelValueObject.createBlank());
+								
 								}
 							}
 						}
-						
-						
 					}
-							
-					
 				}
-				
-				
-				excelRowList.add(excelRow);			
-				
+				excelRowList.add(excelRow);	
 			}
-			
 		}
 			
 		PafExcelUtil.writeExcelSheet(input, excelRowList);
-		
-		
 	}
-
-	
-
 }
