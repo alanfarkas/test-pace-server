@@ -4280,24 +4280,24 @@ public PafGetNotesResponse getCellNotes(
 			//apply configuration changes
 			if ( uploadAppReq.isApplyConfigurationUpdate() ) {
 				
-				PafMetaData.updateApplicationConfig();
+				appService.loadApplicationConfigurations();
 				
 			}
-			
-			//TODO: verify with Jim this is right way to reload cube data
+						
 			if ( uploadAppReq.isApplyCubeUpdate()) {
 				
 				try {
-					PafMetaData.clearDataCache();
-					dataService.loadApplicationData();
+					appService.loadApplicationMetaData(PafMetaData.getPaceProject().getApplicationDefinitions().get(0).getAppId());
 				} catch (PafException e) {
 					logger.error(e.getMessage());
-					e.printStackTrace();
 					isSuccessfulUpload = false;
-				}
-				
+				}				
 				
 			}
+			
+		} else {
+			
+			isSuccessfulUpload = false;
 		}
 		
 			
