@@ -465,7 +465,11 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 			clients.put(clientId, state);
 			
-			PafApplicationDef pafApplicationDef = appService.getApplications().get(0);
+			PafApplicationDef pafApplicationDef = null;
+			
+			if ( appService.getApplications().size() > 0 ) {
+				pafApplicationDef = appService.getApplications().get(0);
+			}
 			
 			if ( pafApplicationDef == null ) {
 				ack = new PafServerAck(clientId, PafServiceProvider.serverPlatform,
@@ -4253,6 +4257,8 @@ public PafGetNotesResponse getCellNotes(
 							
 			boolean reinitClientState = false;
 			
+			boolean isApplicationLoaded = (PafMetaData.getPaceProject() != null);
+			
 			//save product configuration
 			if ( uploadAppReq.getPaceProjectDataHandler() != null ) {		
 			
@@ -4262,7 +4268,9 @@ public PafGetNotesResponse getCellNotes(
 					
 					PaceProject paceProject = DataHandlerPaceProjectUtil.convertDataHandlerToPaceProject(dataHandler, PafMetaData.getTransferDirPath());
 					
-					if ( PafMetaData.getPaceProject().getApplicationDefinitions().size() > 0 
+					//if app is currently loaded
+					if ( isApplicationLoaded &&
+							PafMetaData.getPaceProject().getApplicationDefinitions().size() > 0 
 							&& paceProject.getApplicationDefinitions().size() > 0 
 							&& ! paceProject.getApplicationDefinitions().get(0).getAppId().equals(PafMetaData.getPaceProject().getApplicationDefinitions().get(0).getAppId())) {
 						reinitClientState = true;
@@ -4298,11 +4306,17 @@ public PafGetNotesResponse getCellNotes(
 				
 			}
 			
+			boolean isApplyCubeUpdate = false;
+			
 			//apply configuration changes
 			if ( uploadAppReq.isApplyConfigurationUpdate() ) {
 				
 				appService.loadApplicationConfigurations();
 								
+				if ( ! isApplicationLoaded ) {
+					isApplyCubeUpdate = true;
+				}
+				
 				if ( reinitClientState ) {
 					
 					response.setReinitClientState(true);
@@ -4313,7 +4327,7 @@ public PafGetNotesResponse getCellNotes(
 								
 			}
 						
-			if ( uploadAppReq.isApplyCubeUpdate()) {
+			if ( uploadAppReq.isApplyCubeUpdate() || isApplyCubeUpdate ) {
 				
 				try {
 					appService.loadApplicationMetaData(PafMetaData.getPaceProject().getApplicationDefinitions().get(0).getAppId());

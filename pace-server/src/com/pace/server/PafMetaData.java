@@ -426,7 +426,7 @@ public class PafMetaData {
 			//TODO: add filter set to partially save
 			
 			//save out to server conf
-			newPaceProject.saveTo(paceProject.getProjectInput());
+			newPaceProject.saveTo(getServerConfDirPath());
 			
 		}
 	}
