@@ -12,6 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  	<localRepository>${user.home}/.m2/repository</localRepository>
   </properties>
 
   <dependencies>
