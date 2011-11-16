@@ -61,8 +61,7 @@ public class PafSecurityService {
 
 	static {
 		// initialize caches
-		initPlannerRoles();
-		initUsers();
+		//initPlannerRoles();
 	}
 
 	/**
@@ -205,8 +204,6 @@ public class PafSecurityService {
 		//An array of Season objects
 		ArrayList<Season> openSeasons;
 
-		// initialize planner roles in case of debug flag
-		initPlannerRoles();
 		for (String roleName : user.getRoleNames()) {
 			roles[i] = getPlannerRole(roleName);
 
@@ -238,27 +235,21 @@ public class PafSecurityService {
 	 * @return Returns the plannerRoles.
 	 */
 	public static Map<String, PafPlannerRole> initPlannerRoles() {
-		if (PafMetaData.isDebugMode() || plannerRoles == null) {
 			
-			plannerRoles = new HashMap<String, PafPlannerRole>();
-			
-			//if debug is on, reload data
-			if ( PafMetaData.isDebugMode() ) {
-				
-				try {
-					PafMetaData.getPaceProject().loadData(ProjectElementId.Roles);
-				} catch (PafException e) {
-					logger.error(e.getMessage());
-				}
-				
-			}
-			
-			List<PafPlannerRole> roleList = PafMetaData.getPaceProject().getRoles();
-			
-			for (PafPlannerRole role : roleList) {
-				plannerRoles.put(role.getRoleName(), role);
-			}
+		plannerRoles = new HashMap<String, PafPlannerRole>();
+		
+		try {
+			PafMetaData.getPaceProject().loadData(ProjectElementId.Roles);
+		} catch (PafException e) {
+			logger.error(e.getMessage());
 		}
+		
+		List<PafPlannerRole> roleList = PafMetaData.getPaceProject().getRoles();
+		
+		for (PafPlannerRole role : roleList) {
+			plannerRoles.put(role.getRoleName(), role);
+		}
+		
 		return plannerRoles;
 	}
 	
@@ -281,39 +272,34 @@ public class PafSecurityService {
 	 * @return Returns the users.
 	 */
 	public static Map<String, PafUserSecurity> initUsers() {
+							
+		users = new HashMap<String, PafUserSecurity>();
 		
-		if (PafMetaData.isDebugMode() || users == null) {
-			
-			users = new HashMap<String, PafUserSecurity>();
-			
-			try {
-				PafMetaData.getPaceProject().loadData(ProjectElementId.UserSecurity);
-			} catch (PafException e) {
-				logger.error(e.getMessage());
-			}
-			
-			List<PafUserSecurity> ulist = PafMetaData.getPaceProject().getUserSecurity();
-			
-			for (PafUserSecurity u : ulist) {
-				
-				if (u.getDomainName() != null && u.getDomainName().length() > 0 && !u.getDomainName().equals(PafBaseConstants.Native_Domain_Name)){
-					users.put(u.getUserName() + DomainNameParser.AT_TOKEN + u.getDomainName(), u);
-				}
-				else{
-					users.put(u.getUserName(), u);
-				}
-			}
-			
+		try {
+			PafMetaData.getPaceProject().loadData(ProjectElementId.UserSecurity);
+		} catch (PafException e) {
+			logger.error(e.getMessage());
 		}
+		
+		List<PafUserSecurity> ulist = PafMetaData.getPaceProject().getUserSecurity();
+		
+		for (PafUserSecurity u : ulist) {
+			
+			if (u.getDomainName() != null && u.getDomainName().length() > 0 && !u.getDomainName().equals(PafBaseConstants.Native_Domain_Name)){
+				users.put(u.getUserName() + DomainNameParser.AT_TOKEN + u.getDomainName(), u);
+			}
+			else{
+				users.put(u.getUserName(), u);
+			}
+		}
+			
 		return users;
+		
 	}
 
 	public static PafUserSecurity getUser(String userName) {
 		
-		//Map<String, PafUserSecurity> temp = getUsers();
 
-		initUsers();
-		
 		if (users.containsKey(userName)) {
 			return users.get(userName);
 		}

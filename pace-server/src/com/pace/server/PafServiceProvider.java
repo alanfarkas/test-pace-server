@@ -661,7 +661,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 				popFromNDCStack(authReq.getClientId());
 				pushToNDCStack(authReq.getClientId());
-				String appId = PafAppService.getInstance().getApplications().get(0).getAppId();
+				String appId = PafMetaData.getPaceProject().getApplicationDefinitions().get(0).getAppId();
 				
 				// Set planner configurations and roles properties
 				PafPlannerRole[] plannerRoles = PafSecurityService.getPlannerRoles(token, appId);
@@ -673,8 +673,19 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 					appService.loadApplicationConfigurations();
 				}
 				
+				List<PafApplicationDef> pafAppList = PafAppService.getInstance().getApplications();
+				
+				PafApplicationDef currentPafApp = null;
+				
+				for (PafApplicationDef pafAppDef : pafAppList ) {
+					if ( pafAppDef.getAppId().equals(appId)) {
+						currentPafApp = pafAppDef;
+						break;
+					}
+				}
+				
 				// Populate client state appDef property
-				clients.get(authReq.getClientId()).setApp(PafAppService.getInstance().getApplications().get(0));
+				clients.get(authReq.getClientId()).setApp(currentPafApp);
 				
 				// Set application settings - if null, create a new instance
 				AppSettings appSettings = clients.get(authReq.getClientId()).getApp().getAppSettings(); 
@@ -4236,7 +4247,11 @@ public PafGetNotesResponse getCellNotes(
 
 		boolean isSuccessfulUpload = true;
 		
+		UploadAppResponse response = new UploadAppResponse();
+		
 		if ( uploadAppReq != null ) {
+							
+			boolean reinitClientState = false;
 			
 			//save product configuration
 			if ( uploadAppReq.getPaceProjectDataHandler() != null ) {		
@@ -4246,6 +4261,12 @@ public PafGetNotesResponse getCellNotes(
 				try {
 					
 					PaceProject paceProject = DataHandlerPaceProjectUtil.convertDataHandlerToPaceProject(dataHandler, PafMetaData.getTransferDirPath());
+					
+					if ( PafMetaData.getPaceProject().getApplicationDefinitions().size() > 0 
+							&& paceProject.getApplicationDefinitions().size() > 0 
+							&& ! paceProject.getApplicationDefinitions().get(0).getAppId().equals(PafMetaData.getPaceProject().getApplicationDefinitions().get(0).getAppId())) {
+						reinitClientState = true;
+					}
 					
 					if ( paceProject != null ) {
 					
@@ -4281,7 +4302,15 @@ public PafGetNotesResponse getCellNotes(
 			if ( uploadAppReq.isApplyConfigurationUpdate() ) {
 				
 				appService.loadApplicationConfigurations();
-				
+								
+				if ( reinitClientState ) {
+					
+					response.setReinitClientState(true);
+					
+					clients.remove(uploadAppReq.getClientId());
+					
+				}
+								
 			}
 						
 			if ( uploadAppReq.isApplyCubeUpdate()) {
@@ -4301,7 +4330,9 @@ public PafGetNotesResponse getCellNotes(
 		}
 		
 			
-		return new UploadAppResponse(isSuccessfulUpload);
+		response.setSuccess(isSuccessfulUpload);
+		
+		return response;
 	}
 
 

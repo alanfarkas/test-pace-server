@@ -1361,7 +1361,7 @@ public class PafDataService {
 	 * @param pafApp Application definition
 	 */
 	public void initDimTreeStore(PafApplicationDef pafApp) {
-
+				
 		IMdbMetaData metaData = null;
 		MdbDef mdbDef = pafApp.getMdbDef();
 		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getAppContext().getBean(mdbDef.getDataSourceId());
@@ -1699,7 +1699,7 @@ public class PafDataService {
 		if(dims == null || dims.length == 0){
 			return;
 		}
-
+		
 		IMdbMetaData metaData = null;
 		PafMdbProps mdbProps = null;
 		
@@ -3720,6 +3720,8 @@ public class PafDataService {
 	 */
 	public void loadApplicationData() {
 
+		initDataMaps();
+		
 		// assumes a single application at this point
 		// loads all dimensions into the tree hashmap, so at the very least
 		// multipls apps couldn't share dimensions
@@ -3728,7 +3730,7 @@ public class PafDataService {
 		// to populate the base trees
 		try {
 
-			List<PafApplicationDef> pafApps = PafAppService.getInstance().getApplications();
+			List<PafApplicationDef> pafApps = PafMetaData.getPaceProject().getApplicationDefinitions();
 			
 			for (PafApplicationDef pafApp : pafApps ) {
 				
@@ -3786,6 +3788,17 @@ public class PafDataService {
 			PafErrHandler.handleException(ex, PafErrSeverity.Error);
 		}
 	}
+
+	private void initDataMaps() {
+		
+		//clear existing maps
+		baseTrees.clear();
+		attributeTrees.clear();
+		uowCache.clear();
+		systemLockedIntersections.clear();		
+		
+	}
+
 
 	/**
 	 * 

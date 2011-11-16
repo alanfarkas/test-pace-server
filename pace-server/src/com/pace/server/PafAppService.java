@@ -80,12 +80,14 @@ public class PafAppService {
     // currently just loads all apps with the current measure/version defs
     public synchronized void loadApplicationConfigurations() {
         logger.info(Messages.getString("PafAppService.13")); //$NON-NLS-1$
-                
+
+        applicationDefs.clear();
+        
 		// update the pace project object
 		PafMetaData.updateApplicationConfig();
-
+				
         List<PafApplicationDef> appDefs = PafMetaData.getPaceProject().getApplicationDefinitions();
-        
+                        
         for (PafApplicationDef app : appDefs) {
         	
             // Initialize an application state objected (defaults to stopped)
@@ -122,6 +124,8 @@ public class PafAppService {
 			
 			// initialize the user list
 			PafSecurityService.initUsers();
+			PafSecurityService.initPlannerRoles();
+			
 			updateAppRunState(id, RunningState.RUNNING);
 			
 		} catch (Exception e) {
@@ -145,8 +149,6 @@ public class PafAppService {
     	
     	
     }
-    
-    
     
     
     
