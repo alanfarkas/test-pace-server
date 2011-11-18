@@ -35,6 +35,11 @@ public class ApplicationState {
 	public String getApplicationId() {
 		return applicationId;
 	}
+	
+	public void setApplicationId(String appId) {
+		this.applicationId = appId;
+	}
+		
 
 	/**
 	 * @return the currentState
