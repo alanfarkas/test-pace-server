@@ -51,6 +51,7 @@ import com.pace.base.db.RdbProps;
 import com.pace.base.project.InvalidPaceProjectInputException;
 import com.pace.base.project.PaceProject;
 import com.pace.base.project.PaceProjectCreationException;
+import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.utility.*;
@@ -421,12 +422,16 @@ public class PafMetaData {
 	
 	public static void saveApplicationConfig(PaceProject newPaceProject) throws ProjectSaveException, PafException {
 		
+		saveApplicationConfig(newPaceProject, null);
+		
+	}
+	
+	public static void saveApplicationConfig(PaceProject newPaceProject, Set<ProjectElementId> filterList) throws ProjectSaveException, PafException {
+		
 		if ( newPaceProject != null ) {
 			
 			//TODO: add filter set to partially save
-			
-			//save out to server conf
-			newPaceProject.saveTo(getServerConfDirPath());
+			newPaceProject.saveTo(getServerConfDirPath(), filterList);
 			
 		}
 	}

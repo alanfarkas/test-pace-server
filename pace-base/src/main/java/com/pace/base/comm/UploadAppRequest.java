@@ -1,16 +1,25 @@
 package com.pace.base.comm;
 
+import java.util.Set;
+
 import javax.activation.DataHandler;
 import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.bind.annotation.XmlType;
+
+import com.pace.base.project.ProjectElementId;
 
 @XmlType
 public class UploadAppRequest extends PafRequest {
 	
 	private String appId;
+	
 	private DataHandler paceProjectDataHandler;
+	
 	private boolean applyConfigurationUpdate;
+	
 	private boolean applyCubeUpdate;
+	
+	private Set<ProjectElementId> projectElementIdFilters;
 	
 	public String getAppId() {
 		return appId;
@@ -45,5 +54,14 @@ public class UploadAppRequest extends PafRequest {
 		this.applyCubeUpdate = applyCubeUpdate;
 	}
 
+	public Set<ProjectElementId> getProjectElementIdFilters() {
+		return projectElementIdFilters;
+	}
+
+	public void setProjectElementIdFilters(
+			Set<ProjectElementId> projectElementIdFilters) {
+		this.projectElementIdFilters = projectElementIdFilters;
+	}
+	
 
 }

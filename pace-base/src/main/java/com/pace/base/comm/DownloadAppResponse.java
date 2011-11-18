@@ -11,6 +11,8 @@ public class DownloadAppResponse extends PafSuccessResponse {
 
 	private String appId;
 	
+	private boolean isProjectDataFiltered;
+	
 	public String getAppId() {
 		return appId;
 	}
@@ -27,6 +29,14 @@ public class DownloadAppResponse extends PafSuccessResponse {
 	public void setPaceProjectDataHandler(DataHandler paceProjectDataHandler) {
 		this.paceProjectDataHandler = paceProjectDataHandler;
 	}
-	
+
+	public boolean isProjectDataFiltered() {
+		return isProjectDataFiltered;
+	}
+
+	public void setProjectDataFiltered(boolean isProjectDataFiltered) {
+		this.isProjectDataFiltered = isProjectDataFiltered;
+	}
+			
 
 }

@@ -55,7 +55,6 @@ import com.pace.base.PafNotAuthenticatedSoapException;
 import com.pace.base.PafNotAuthorizedSoapException;
 import com.pace.base.PafSecurityToken;
 import com.pace.base.PafSoapException;
-import com.pace.base.RunningState;
 import com.pace.base.app.AppSettings;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.PafApplicationDef;
@@ -70,7 +69,6 @@ import com.pace.base.app.Season;
 import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionType;
-import com.pace.base.comm.ApplicationState;
 import com.pace.base.comm.ApplicationStateRequest;
 import com.pace.base.comm.ApplicationStateResponse;
 import com.pace.base.comm.ClientInitRequest;
@@ -109,6 +107,7 @@ import com.pace.base.mdb.TreeTraversalOrder;
 import com.pace.base.project.InvalidPaceProjectInputException;
 import com.pace.base.project.PaceProject;
 import com.pace.base.project.PaceProjectCreationException;
+import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.rules.RuleGroup;
@@ -118,7 +117,6 @@ import com.pace.base.utility.AESEncryptionUtil;
 import com.pace.base.utility.CompressionUtil;
 import com.pace.base.utility.DataHandlerPaceProjectUtil;
 import com.pace.base.utility.DomainNameParser;
-import com.pace.base.utility.LogUtil;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafStyle;
 import com.pace.base.view.PafView;
@@ -4248,10 +4246,8 @@ public PafGetNotesResponse getCellNotes(
 	@Override
 	public UploadAppResponse uploadApplication(UploadAppRequest uploadAppReq) 
 			throws RemoteException, PafSoapException {
-
-		boolean isSuccessfulUpload = true;
 		
-		UploadAppResponse response = new UploadAppResponse();
+		UploadAppResponse uploadAppResp = new UploadAppResponse();
 		
 		if ( uploadAppReq != null ) {
 							
@@ -4278,30 +4274,26 @@ public PafGetNotesResponse getCellNotes(
 					
 					if ( paceProject != null ) {
 					
-						PafMetaData.saveApplicationConfig(paceProject);
+						PafMetaData.saveApplicationConfig(paceProject, uploadAppReq.getProjectElementIdFilters());
 						
+						uploadAppResp.setSuccess(true);
 					}				
 					
 				} catch (IOException e) {
 					logger.error(e.getMessage());
 					e.printStackTrace();
-					isSuccessfulUpload = false;
 				} catch (InvalidPaceProjectInputException e) {
 					logger.error(e.getMessage());
 					e.printStackTrace();
-					isSuccessfulUpload = false;
 				} catch (PaceProjectCreationException e) {
 					logger.error(e.getMessage());
 					e.printStackTrace();
-					isSuccessfulUpload = false;
 				} catch (ProjectSaveException e) {
 					logger.error(e.getMessage());
 					e.printStackTrace();
-					isSuccessfulUpload = false;
 				} catch (PafException e) {
 					logger.error(e.getMessage());
 					e.printStackTrace();
-					isSuccessfulUpload = false;
 				}
 				
 			}
@@ -4312,16 +4304,19 @@ public PafGetNotesResponse getCellNotes(
 			if ( uploadAppReq.isApplyConfigurationUpdate() ) {
 				
 				appService.loadApplicationConfigurations();
-								
-				if ( ! isApplicationLoaded ) {
+				
+				//if app wasn't previously loaded, load essbase.  took out for now per convo with Jim
+				/*if ( ! isApplicationLoaded ) {
 					isApplyCubeUpdate = true;
-				}
+				}*/
 				
 				if ( reinitClientState ) {
 					
-					response.setReinitClientState(true);
+					uploadAppResp.setReinitClientState(true);
 					
 					clients.remove(uploadAppReq.getClientId());
+					
+					uploadAppResp.setApplyConfigurationUpdateSuccess(true);
 					
 				}
 								
@@ -4331,22 +4326,16 @@ public PafGetNotesResponse getCellNotes(
 				
 				try {
 					appService.loadApplicationMetaData(PafMetaData.getPaceProject().getApplicationDefinitions().get(0).getAppId());
+					uploadAppResp.setApplyCubeUpdateSuccess(true);
 				} catch (PafException e) {
 					logger.error(e.getMessage());
-					isSuccessfulUpload = false;
 				}				
 				
 			}
 			
-		} else {
-			
-			isSuccessfulUpload = false;
-		}
-		
-			
-		response.setSuccess(isSuccessfulUpload);
-		
-		return response;
+		}		
+						
+		return uploadAppResp;
 	}
 
 
@@ -4359,7 +4348,17 @@ public PafGetNotesResponse getCellNotes(
 		
 		try {
 						
-			PaceProject pp = new XMLPaceProject(PafMetaData.getConfigDirPath(), false);
+			Set<ProjectElementId> filterSet = downAppReq.getProjectElementIdFilters();
+			
+			PaceProject pp = null;
+			
+			if ( filterSet != null && filterSet.size() > 0) {
+				pp = new XMLPaceProject(PafMetaData.getConfigDirPath(), filterSet, false);
+				resp.setProjectDataFiltered(true);
+			} else {
+				pp = new XMLPaceProject(PafMetaData.getConfigDirPath(), false);
+			}									
+			
 							
 			DataHandler dh = DataHandlerPaceProjectUtil.convertPaceProjectToDataHandler(pp, PafMetaData.getTransferDirPath());
 			
@@ -4369,8 +4368,7 @@ public PafGetNotesResponse getCellNotes(
 					
 			}
 				
-			resp.setPaceProjectDataHandler(dh);
-			
+			resp.setPaceProjectDataHandler(dh);			
 			
 			resp.setSuccess(true);
 		}
