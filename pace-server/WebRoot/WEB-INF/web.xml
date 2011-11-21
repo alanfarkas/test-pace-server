@@ -4,6 +4,12 @@
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>/WEB-INF/cxf.xml</param-value>
+  </context-param>
+  <context-param>
+  	<description>
+  	Vaadin production mode</description>
+  	<param-name>productionMode</param-name>
+  	<param-value>false</param-value>
   </context-param>  
   <env-entry>
    <env-entry-name>pace/paceHome</env-entry-name>
@@ -34,7 +40,33 @@
     </servlet-class>
     <load-on-startup>10</load-on-startup>
   </servlet>
+  <servlet>
+  	<servlet-name>PaceSettingsApplication</servlet-name>
+  	<servlet-class>com.vaadin.terminal.gwt.server.ApplicationServlet</servlet-class>
+  	<init-param>
+  		<description>
+  		Vaadin application class to start</description>
+  		<param-name>application</param-name>
+  		<param-value>com.pace.settings.PaceSettingsApplication</param-value>
+  	</init-param>
+  	<init-param>
+  		<description>
+  		Application widgetset</description>
+  		<param-name>widgetset</param-name>
+  		<param-value>com.pace.settings.widgetset.Pace_serverWidgetset</param-value>
+  	</init-param>
+  </servlet>
+
+  <servlet-mapping>
+  	<servlet-name>PaceSettingsApplication</servlet-name>
+  	<url-pattern>/settings/*</url-pattern>
+  </servlet-mapping>
   
+  <servlet-mapping>
+  	<servlet-name>PaceSettingsApplication</servlet-name>
+  	<url-pattern>/VAADIN/*</url-pattern>
+  </servlet-mapping>
+      
   <servlet-mapping>
     <servlet-name>CXFServlet</servlet-name>
     <url-pattern>/*</url-pattern>
@@ -44,6 +76,7 @@
     <servlet-name>PafInitServlet</servlet-name>
     <url-pattern>/PafInitServlet</url-pattern>
   </servlet-mapping>
+
 
 
 
