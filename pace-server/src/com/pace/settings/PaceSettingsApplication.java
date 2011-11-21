@@ -1,5 +1,7 @@
 package com.pace.settings;
 
+import com.pace.server.PafMetaData;
+import com.pace.server.ServerSettings;
 import com.vaadin.Application;
 import com.vaadin.ui.*;
 
@@ -19,10 +21,7 @@ public class PaceSettingsApplication extends Application {
 	@Override
 	public void init() {
 		Window mainWindow = new Window("Pace Application Settings");
-		//SettingsUI sui = new SettingsUI();
-		Button btn = new Button();
-		
-		//mainWindow.addComponent(sui);		
+	
 		mainWindow.addComponent(layoutGrid());
  
 		setMainWindow(mainWindow);
@@ -52,7 +51,7 @@ public class PaceSettingsApplication extends Application {
 			
 			
 			// tblSettings
-			tblSettings = new Table();
+			tblSettings = loadTableSettings();
 			tblSettings.setImmediate(false);
 			tblSettings.setWidth("100.0%");
 			tblSettings.setHeight("-1px");
@@ -114,6 +113,31 @@ public class PaceSettingsApplication extends Application {
 			
 			return gridLayout_1;
 				
+	}
+
+	private Table loadTableSettings() {
+		// TODO Auto-generated method stub
+		Table table = new Table();
+		table.setEditable(true);
+		PafMetaData.updateApplicationConfig();
+		ServerSettings ss = PafMetaData.getServerSettings();
+		int i=1;
+		
+		table.addContainerProperty("Setting", String.class,  null);
+		table.addContainerProperty("Value",  String.class,  null);
+		
+		table.addItem(new Object[] {
+				"Authorizaion Mode", ss.getAuthMode()		}, i++ );
+		table.addItem(new Object[] {
+				"Calcscript Timout", ss.getCalcScriptTimeout()		}, i++ );
+		table.addItem(new Object[] {
+				"Minimum Client Version", ss.getClientMinVersion()		}, i++ );
+		table.addItem(new Object[] {
+				"Client Update URL", ss.getClientUpdateUrl()		}, i++ );
+		
+		
+		
+		return table;
 	}
 
 

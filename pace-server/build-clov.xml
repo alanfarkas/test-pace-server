@@ -176,6 +176,10 @@
         <pathelement location="${userlib.path}/spring-3.0.5/lib/spring-expression-3.0.5.RELEASE.jar"/>
         <pathelement location="${userlib.path}/spring-3.0.5/lib/spring-web-3.0.5.RELEASE.jar"/>
 	</path>	
+	<path id="Vaadin 6.7.2.userclasspath">		
+        <pathelement location="${userlib.path}/vaadin-6.7.2/lib/vaadin-6.7.2.jar"/>
+	</path>		
+	
 	<path id="JavaMail.userclasspath">
 	    <pathelement location="${userlib.path}/JavaMail/smtp.jar"/>
 	    <pathelement location="${userlib.path}/JavaMail/activation.jar"/>
@@ -254,6 +258,7 @@
         <path refid="LdapBp 1.0.userclasspath"/>
         <path refid="Derby 10.2.2.userclasspath"/> 
         <path refid="Spring 3.0.5.userclasspath"/>
+    	<path refid="Vaadin 6.7.2.userclasspath"/>
         <path refid="Hibernate 3.2.userclasspath"/> 
     	<path refid="LdapBp 1.0.userclasspath"/>
         <path refid="servlet-api.userclasspath"/>
