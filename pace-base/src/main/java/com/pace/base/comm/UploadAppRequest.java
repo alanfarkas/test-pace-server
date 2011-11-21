@@ -21,6 +21,10 @@ public class UploadAppRequest extends PafRequest {
 	
 	private Set<ProjectElementId> projectElementIdFilters;
 	
+	//when set, will not delete views, view sections and rule sets before writing.  this is
+	//important to deploy individual artifacts like a view without wiping the views dir.
+	private boolean partialDeployment;
+	
 	public String getAppId() {
 		return appId;
 	}
@@ -62,6 +66,16 @@ public class UploadAppRequest extends PafRequest {
 			Set<ProjectElementId> projectElementIdFilters) {
 		this.projectElementIdFilters = projectElementIdFilters;
 	}
+
+	public boolean isPartialDeployment() {
+		return partialDeployment;
+	}
+
+	public void setPartialDeployment(boolean partialDeployment) {
+		this.partialDeployment = partialDeployment;
+	}
+
+	
 	
 
 }

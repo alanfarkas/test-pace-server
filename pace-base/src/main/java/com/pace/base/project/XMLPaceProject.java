@@ -95,6 +95,8 @@ public class XMLPaceProject extends PaceProject {
 	private List<String> attributeDimList = new ArrayList<String>();
 
 	private File outputConfDir;
+	
+	private boolean updateOnly;
 
 	/**
 	 * @param projectDataMap
@@ -988,7 +990,11 @@ public class XMLPaceProject extends PaceProject {
 
 		} else {
 
-			FileUtils.deleteFilesInDir(pafRuleSetsDirectory, false);
+			if ( ! updateOnly ) {
+				FileUtils.deleteFilesInDir(pafRuleSetsDirectory, false);
+			} else {
+				logger.info("Not deleting all rule sets only updating current set");
+			}
 
 		}
 
@@ -999,16 +1005,7 @@ public class XMLPaceProject extends PaceProject {
 			// loop over view sections and write each out to its own
 			// filename
 			for (RuleSet ruleSet : ruleSetMap.values()) {
-
-				
-				// generated file name off of view name
-				/*String generatedFileName = MigrateServerUtil
-						.generateFileName(ruleSet.getName())
-						+ PafBaseConstants.XML_EXT;*/
-				
-				
-				//logger.info("About to create file " + generatedFileName);
-				//PafXStreamElementItem<RuleSet> pafXStreamElementItem = new PafXStreamElementItem<RuleSet>(ruleSetDir + generatedFileName);
+											
 				PafXStreamElementItem<RuleSet> pafXStreamElementItem = new PafXStreamElementItem<RuleSet>(ruleSetDir + ruleSet.getName() + PafBaseConstants.XML_EXT);
 				
 				pafXStreamElementItem.write(ruleSet);
@@ -1078,13 +1075,15 @@ public class XMLPaceProject extends PaceProject {
 			
 				logger.error("Directory " + pafViewSectionsDirectory.getAbsolutePath() + " was not created.");
 				
-			}
-				
+			} 
 
 		} else {
-			//if(deleteAllFiles){
+			
+			if( ! updateOnly ){
 				FileUtils.deleteFilesInDir(pafViewSectionsDirectory, false);
-			//}
+			} else {
+				 logger.info("Not deleting all view sections only updating current set");
+			 }
 
 		}
 		
@@ -1107,12 +1106,6 @@ public class XMLPaceProject extends PaceProject {
 
 				logger.info("Creating file " + generatedFileName);
 								
-				/*//we are not deleting all files so just delete the selected files...
-				if(!deleteAllFiles){
-					FileUtils.deleteFilesInDir(pafViewSectionsDirectory, 
-							new String[] {generatedFileName});
-				}*/
-				
 				if ( pafViewSection != null) {
 					
 					pafXStreamElementItem = new PafXStreamElementItem<PafViewSection>(viewSectionDir + generatedFileName);
@@ -1147,9 +1140,12 @@ public class XMLPaceProject extends PaceProject {
 				
 
 		} else {
-			//if(deleteAllFiles){
+			
+			 if( ! updateOnly ){
 				FileUtils.deleteFilesInDir(pafViewsDirectory, false);
-			//}
+			 } else {
+				 logger.info("Not deleting all views only updating current set");
+			 }
 
 		}
 		
@@ -1172,12 +1168,6 @@ public class XMLPaceProject extends PaceProject {
 
 				logger.info("Creating file " + generatedFileName);
 								
-				/*//we are not deleting all files so just delete the selected files...
-				if(!deleteAllFiles){
-					FileUtils.deleteFilesInDir(pafViewSectionsDirectory, 
-							new String[] {generatedFileName});
-				}*/
-				
 				if ( pafView != null) {
 					
 					pafXStreamElementItem = new PafXStreamElementItem<PafView>(viewDir + generatedFileName);
@@ -1198,6 +1188,22 @@ public class XMLPaceProject extends PaceProject {
 		ps.setPrintStyles(map);
 		PafXStreamElementItem<PrintStyles> pafXStreamElementItem = new PafXStreamElementItem<PrintStyles>(getProjectOutputDir() + PafBaseConstants.FN_PrintStyles);
 		pafXStreamElementItem.write(ps);
+	}
+
+	
+	
+	/**
+	 * @return the updateOnly
+	 */
+	public boolean isUpdateOnly() {
+		return updateOnly;
+	}
+
+	/**
+	 * @param updateOnly the updateOnly to set
+	 */
+	public void setUpdateOnly(boolean updateOnly) {
+		this.updateOnly = updateOnly;
 	}
 
 	/**

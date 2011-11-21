@@ -4245,7 +4245,7 @@ public PafGetNotesResponse getCellNotes(
 
 	@Override
 	public UploadAppResponse uploadApplication(UploadAppRequest uploadAppReq) 
-			throws RemoteException, PafSoapException {
+				throws RemoteException, PafSoapException {
 		
 		UploadAppResponse uploadAppResp = new UploadAppResponse();
 		
@@ -4274,6 +4274,10 @@ public PafGetNotesResponse getCellNotes(
 					
 					if ( paceProject != null ) {
 					
+						if ( paceProject instanceof XMLPaceProject ) {
+							((XMLPaceProject) paceProject).setUpdateOnly(uploadAppReq.isPartialDeployment());
+						}
+						
 						PafMetaData.saveApplicationConfig(paceProject, uploadAppReq.getProjectElementIdFilters());
 						
 						uploadAppResp.setSuccess(true);
