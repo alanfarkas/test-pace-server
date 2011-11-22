@@ -21,6 +21,7 @@ import com.pace.base.db.cellnotes.SimpleCellNote;
 import com.pace.base.db.membertags.MemberTagCommentEntry;
 import com.pace.base.db.membertags.MemberTagCommentPosition;
 import com.pace.base.db.membertags.MemberTagViewSectionData;
+import com.pace.base.mdb.SortingTuples;
 import com.pace.base.utility.CompressionUtil;
 
 public class PafViewSection implements Cloneable, IPafCompressedObj {
@@ -145,6 +146,8 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
     private String elementDelimiterColMemberTag;
     
     private String groupDelimiterColMemberTag;
+    
+	private SortingTuples sortingTuples;
     
 	
 	public String getDescription() {
@@ -1144,8 +1147,12 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 		return groupDelimiterColMemberTag;
 	}
 
-	
+    public SortingTuples getSortingTuples() {
+		return sortingTuples;
+	}
 
-	
+	public void setSortingTuples(SortingTuples sortingTuples) {
+		this.sortingTuples = sortingTuples;
+	}
 	
 }
