@@ -945,7 +945,7 @@ public class PafDataCache implements IPafDataCache {
 			
 			// Data block exists
 			if (isAttrIs && isEmptyIntersection(intersection)) {
-				// Unpopulated attribute intersection - calculate value
+				// Unpopulated attribute intersection - calculate missing value
 				String measure = intersection.getCoordinate(getMeasureDim());
 				PafDataCacheCalc.calcAttributeIntersection(this, intersection, getMeasureType(measure), getDimTrees(), DcTrackChangeOpt.NONE);
 			}
@@ -956,25 +956,26 @@ public class PafDataCache implements IPafDataCache {
 			// Data block does not exist - check if intersection is valid
 			if (isValidIntersection(translatedIs)) {
 				// Valid intersection
-				if (!isAttrIs) {
-					// Base intersection - just return 0
+				if (!isAttrIs || isInvalidAttributeIntersection(translatedIs)) {
+					// Base intersection or invalid attribute intersection - just return 0
 					cellValue = 0;
 				} else {
-					// Attribute intersection - calculate value
+					// Valid attribute intersection - calculate missing value
 					String measure = intersection.getCoordinate(getMeasureDim());
 					PafDataCacheCalc.calcAttributeIntersection(this, intersection, getMeasureType(measure), getDimTrees(), DcTrackChangeOpt.NONE);
 					dataBlock = getDataBlock(dataBlockKey).getDataBlock();
 					cellValue = dataBlock.getCellValue(cellAddress);
 				}
+
 			} else {
 				// Invalid intersection - throw error
 				String errMsg = "Data Cache error - Unable to get data cache cell value for invalid intersection: "
-					+ StringUtils.arrayToString(translatedIs.getCoordinates());
+						+ StringUtils.arrayToString(translatedIs.getCoordinates());
 				logger.error(errMsg);
 				throw new IllegalArgumentException(errMsg);
 			}
 		}
-		
+
 		return cellValue;
 
 	}
@@ -3787,6 +3788,33 @@ public class PafDataCache implements IPafDataCache {
 	
 	/**
 	 * @param attrIs Attribute intersection
+	 * @return True if the the attribute intersection is invalid
+	 */
+	public boolean isInvalidAttributeIntersection(Intersection attrIs) {
+		return !isValidAttributeIntersection(attrIs);
+	}
+
+
+	/**
+	 * Returns any attribute dimensions in the specified cell intersection
+	 * 
+	 * @param cellIs Cell intersection
+	 * @return Array of attribute dimensions
+	 */
+	private String[] getAttributeDims(Intersection cellIs) {
+		
+		int attrDimCount = cellIs.getSize() - getBaseDimCount();
+		String[] attributeDims = new String[attrDimCount];
+		if (attrDimCount > 0) {
+			System.arraycopy(cellIs.getDimensions(), getBaseDimCount(), attributeDims, 0, attrDimCount);
+		}
+
+		return attributeDims;
+	}
+
+
+	/**
+	 * @param attrIs Attribute intersection
 	 * @param attrDimNames Attribute dimension names
 	 * 
 	 * @return True if the the attribute intersection is invalid
@@ -3796,6 +3824,18 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 
+	/**
+	 * Determines if the specified attribute intersection is valid
+	 * 
+	 * @param attrIs Attribute intersection
+	 * @return True if the intersection represents a valid attribute intersection
+	 */
+	public boolean isValidAttributeIntersection(Intersection attrIs) {
+		String[] attrDimNames = getAttributeDims(attrIs);
+		return isValidAttributeIntersection(attrIs, attrDimNames);		
+	}
+
+	
 	/**
 	 * Determines if the specified attribute intersection is valid
 	 * 
