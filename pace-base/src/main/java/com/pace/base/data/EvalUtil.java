@@ -500,8 +500,9 @@ public class EvalUtil {
 	 * @param evalState Evaluation state
 	 * 
 	 * @return List<Intersection>
+	 * @throws PafException 
 	 */
-	public static double sumFloorIntersections(Intersection is, IPafEvalState evalState) {
+	public static double sumFloorIntersections(Intersection is, IPafEvalState evalState) throws PafException {
 		
 		double sum = 0;
 		PafDataCache dataCache = evalState.getDataCache();

@@ -51,8 +51,17 @@ public class DataBlock {
 	 * 
 	 * @return Object
 	 */
-	public Object getCellProperty(CellPropertyType propertyType, DataCacheCellAddress cellAddress) {		
-		return properties.getCellProperty(propertyType, cellAddress).getValue();
+	public Object getCellProperty(CellPropertyType propertyType, DataCacheCellAddress cellAddress) {
+
+		Object propertyValue = null;
+		CellProperty cellProperty =  properties.getCellProperty(propertyType, cellAddress);
+		if (cellProperty != null) {
+			propertyValue = cellProperty.getValue();
+		} else {
+			// Property not set, just return default value for property type
+			propertyValue = propertyType.getDefaultValue();
+		}
+		return propertyValue;
 	}
 
 	/**

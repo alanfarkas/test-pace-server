@@ -99,8 +99,15 @@ public class DataBlockProperties {
 
 		int propertyIndex = generatePropertyBitIndex(cellAddress, propertyType);			
 		for (int offSet = 0; offSet < propertyLength; offSet++) {
-			BitSet arrayElement = cellPropertyArray[getPropArraySubscript(propertyIndex + offSet)];
-			propertyBits[offSet] = arrayElement.get(getBitIndex(propertyIndex + offSet));
+			Boolean propertyBit = null;
+			int subscript = getPropArraySubscript(propertyIndex + offSet);
+			BitSet arrayElement = cellPropertyArray[subscript];
+			if (arrayElement == null) {
+				// Property has not been set, just return null
+				return null;
+			}
+			propertyBit = arrayElement.get(getBitIndex(propertyIndex + offSet));
+			propertyBits[offSet] = propertyBit;
 		}
 		cellProperty.setPropertyBits(propertyBits);
 		return cellProperty;

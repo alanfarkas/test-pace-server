@@ -890,8 +890,10 @@ public class PafDataCache implements IPafDataCache {
 	 *
 	 * @param coords Array of dimension members that define a non-attribute intersection
 	 * @return Returns the cell value.
+	 * 
+	 * @throws PafException 
 	 */
-	public double getBaseCellValue(String[] coords) {
+	public double getBaseCellValue(String[] coords) throws PafException {
 
 		Intersection intersection = new Intersection(getBaseDimensions(), coords);
 		return getCellValue(intersection);
@@ -904,8 +906,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param coords Array of dimension members that define the cell intersection
 	 * 
 	 * @return Returns the cell value.
+	 * @throws PafException 
 	 */
-	public double getCellValue(String[] dimensions, String[] coords) {
+	public double getCellValue(String[] dimensions, String[] coords) throws PafException {
 
 		Intersection intersection = new Intersection(dimensions, coords);
 		return getCellValue(intersection);
@@ -918,25 +921,51 @@ public class PafDataCache implements IPafDataCache {
 	 * @param intersection Member intersection object that corresponds to data cache cell
 	 * 
 	 * @return Returns the cell value
+	 * @throws PafException 
 	 */
-	public double getCellValue(Intersection intersection)  {
+	public double getCellValue(Intersection intersection) throws PafException  {
 
+		double cellValue = 0;
+		
 		// Convert time horizon based intersection to time-year intersection
 		Intersection translatedIs = translateTimeHorizonIs(intersection);
 		
 		// Get the cell address of the specified intersection
 		DataCacheCellAddress cellAddress = generateCellAddress(translatedIs);
+		Intersection dataBlockKey = cellAddress.getDataBlockKey();
 
-		// Return cell value
-		DataBlock dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();
+		// Determine if this is an alias intersection
+		boolean isAttrIs = isAttributeIntersection(intersection);
+		
+		// Look for underlying data block
+		DataBlock dataBlock = getDataBlock(dataBlockKey).getDataBlock();
+
+		// Retrieve the cell value if the data block exists
 		if (dataBlock != null) {
-			// Intersection exists - return cell value
-			return dataBlock.getCellValue(cellAddress);
+			
+			// Data block exists
+			if (isAttrIs && isEmptyIntersection(intersection)) {
+				// Unpopulated attribute intersection - calculate value
+				String measure = intersection.getCoordinate(getMeasureDim());
+				PafDataCacheCalc.calcAttributeIntersection(this, intersection, getMeasureType(measure), getDimTrees(), DcTrackChangeOpt.NONE);
+			}
+			cellValue = dataBlock.getCellValue(cellAddress);
+			
 		} else {
-			// Intersection does not exist
+			
+			// Data block does not exist - check if intersection is valid
 			if (isValidIntersection(translatedIs)) {
-				// Valid intersection, but does not exist - return 0
-				return 0;
+				// Valid intersection
+				if (!isAttrIs) {
+					// Base intersection - just return 0
+					cellValue = 0;
+				} else {
+					// Attribute intersection - calculate value
+					String measure = intersection.getCoordinate(getMeasureDim());
+					PafDataCacheCalc.calcAttributeIntersection(this, intersection, getMeasureType(measure), getDimTrees(), DcTrackChangeOpt.NONE);
+					dataBlock = getDataBlock(dataBlockKey).getDataBlock();
+					cellValue = dataBlock.getCellValue(cellAddress);
+				}
 			} else {
 				// Invalid intersection - throw error
 				String errMsg = "Data Cache error - Unable to get data cache cell value for invalid intersection: "
@@ -945,6 +974,8 @@ public class PafDataCache implements IPafDataCache {
 				throw new IllegalArgumentException(errMsg);
 			}
 		}
+		
+		return cellValue;
 
 	}
 
@@ -984,8 +1015,10 @@ public class PafDataCache implements IPafDataCache {
 	 * @param intersection Cell intersection
 	 * @param value Value to put into cell
 	 * @param trackChangeOpt Data cache change tracking option
+	 * 
+	 * @throws PafException 
 	 */
-	public void setCellValue(Intersection intersection, double value, DcTrackChangeOpt trackChangeOpt) {
+	public void setCellValue(Intersection intersection, double value, DcTrackChangeOpt trackChangeOpt) throws PafException {
 
         // Update cell value
         if (trackChangeOpt == DcTrackChangeOpt.NONE) {
@@ -1001,8 +1034,10 @@ public class PafDataCache implements IPafDataCache {
 	 *
 	 * @param intersection Cell intersection
 	 * @param value Value to put into cell
+	 * 
+	 * @throws PafException 
 	 */
-	public void setCellValueAndTrackChanges(Intersection intersection, double value) {
+	public void setCellValueAndTrackChanges(Intersection intersection, double value) throws PafException {
 
 		// Convert time horizon based intersection to time-year intersection
 		Intersection translatedIs = translateTimeHorizonIs(intersection);
@@ -1056,9 +1091,11 @@ public class PafDataCache implements IPafDataCache {
 	 * Returns the value of the next cell intersection along the time dimension
 	 * 
 	 * @param cellIs Cell intersection
+	 *
 	 * @return Cell value
+	 * @throws PafException 
 	 */
-	public double getNextCellValue(Intersection cellIs) {
+	public double getNextCellValue(Intersection cellIs) throws PafException {
 		return getNextCellValue(cellIs, getTimeDim(), 1);
 	}
 
@@ -1071,8 +1108,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
 	 * 
 	 * @return Cell value
+	 * @throws PafException 
 	 */
-	public double getNextCellValue(final Intersection cellIs, final String offsetDim, final int offset) {
+	public double getNextCellValue(final Intersection cellIs, final String offsetDim, final int offset) throws PafException {
 
 		double result = 0;
 
@@ -1093,8 +1131,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the tree
 	 * 
 	 * @return Cell value
+	 * @throws PafException 
 	 */
-	public double getNextCellValue(final Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
+	public double getNextCellValue(final Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) throws PafException {
 
 		double result = 0;
 
@@ -1236,8 +1275,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
 	 * 
 	 * @return Cell value
+	 * @throws PafException 
 	 */
-	public double getPrevCellValue(Intersection cellIs) {
+	public double getPrevCellValue(Intersection cellIs) throws PafException {
 		return getPrevCellValue(cellIs, getTimeDim(), 1);
 	}
 
@@ -1250,8 +1290,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
 	 * 
 	 * @return Cell value
+	 * @throws PafException 
 	 */
-	public double getPrevCellValue(Intersection cellIs, String offsetDim, int offset) {
+	public double getPrevCellValue(Intersection cellIs, String offsetDim, int offset) throws PafException {
 		return getPrevCellValue(cellIs, offsetDim, offset, false);
 	}
 
@@ -1265,8 +1306,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the tree
 	 * 
 	 * @return Cell value
+	 * @throws PafException 
 	 */
-	public double getPrevCellValue(Intersection cellIs, String offsetDim, int offset, boolean bWrap) {
+	public double getPrevCellValue(Intersection cellIs, String offsetDim, int offset, boolean bWrap) throws PafException {
 		return getNextCellValue(cellIs, offsetDim, -offset, false);
 	}
 
@@ -1388,8 +1430,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param cumDim Dimension being accumulated
 	 * 
 	 * @return Cell value
+	 * @throws PafException 
 	 */	
-	public double getCumTotal(final Intersection cellIs) {
+	public double getCumTotal(final Intersection cellIs) throws PafException {
 		return getCumTotal(cellIs, getTimeDim());
 	}
 
@@ -1400,8 +1443,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param cumDim Dimension being accumulated
 	 * 
 	 * @return Cell value
+	 * @throws PafException 
 	 */	
-	public double getCumTotal(final Intersection cellIs, final String cumDim) {
+	public double getCumTotal(final Intersection cellIs, final String cumDim) throws PafException {
 		return getCumTotal(cellIs, cumDim, 0);
 	}
 
@@ -1415,8 +1459,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param offset Specifies a relative position, along the cum dimension, that will be used to retrieve the desired intersection
 	 * 
 	 * @return Cumulative total
+	 * @throws PafException 
 	 */	
-	public double getCumTotal(final Intersection cellIs, final String cumDim, final int offset) {
+	public double getCumTotal(final Intersection cellIs, final String cumDim, final int offset) throws PafException {
 
 		double result = 0;
  		
