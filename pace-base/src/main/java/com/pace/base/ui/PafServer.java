@@ -163,7 +163,7 @@ public class PafServer implements Comparable, Cloneable {
 		
 		sb.append("://" + host + ":" + port + "/" + webappName);
 		
-		if ( ! wsdlServiceName.equals("?wsdl")) {
+		if ( wsdlServiceName != null && ! wsdlServiceName.equals("?wsdl")) {
 			
 			sb.append("/");
 		} 
