@@ -54,6 +54,7 @@ public class PafPlannerConfig implements Cloneable {
     private String[] versionFilter;
     private Boolean replicateEnabled;
     private Boolean replicateAllEnabled;
+    private String[] readOnlyMeasures;
 
 	/**
 	 * @return Returns the cycle.
@@ -336,6 +337,22 @@ public class PafPlannerConfig implements Cloneable {
 	public void setAutoRunOnSaveMenuItemNames(String[] autoRunOnSaveMenuItemNames) {
 		this.autoRunOnSaveMenuItemNames = autoRunOnSaveMenuItemNames;
 	}
+	
+	/**
+	 * @return the readOnlyMeasures
+	 */
+	public String[] getReadOnlyMeasures() {
+		return readOnlyMeasures;
+	}
+
+	/**
+	 * @param readOnlyMeasures the readOnlyMeasures to set
+	 */
+	public void setReadOnlyMeasures(String[] readOnlyMeasures) {
+		this.readOnlyMeasures = readOnlyMeasures;
+	}
+
+	
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
@@ -371,6 +388,7 @@ public class PafPlannerConfig implements Cloneable {
 		result = prime * result
 				+ (mdbSaveWorkingVersionOnUowLoad ? 1231 : 1237);
 		result = prime * result + Arrays.hashCode(menuItemNames);
+		result = prime * result + Arrays.hashCode(readOnlyMeasures);
 		result = prime
 				* result
 				+ ((replicateAllEnabled == null) ? 0 : replicateAllEnabled
@@ -409,11 +427,8 @@ public class PafPlannerConfig implements Cloneable {
 		if (calcElapsedPeriods != other.calcElapsedPeriods)
 			return false;
 		if (cycle == null) {
-			
-			//if other cycle is not null and not empty string
-			if (other.cycle != null && other.cycle.length() > 0 )
+			if (other.cycle != null)
 				return false;
-			
 		} else if (!cycle.equals(other.cycle))
 			return false;
 		if (dataFilterSpec == null) {
@@ -449,6 +464,8 @@ public class PafPlannerConfig implements Cloneable {
 		if (mdbSaveWorkingVersionOnUowLoad != other.mdbSaveWorkingVersionOnUowLoad)
 			return false;
 		if (!Arrays.equals(menuItemNames, other.menuItemNames))
+			return false;
+		if (!Arrays.equals(readOnlyMeasures, other.readOnlyMeasures))
 			return false;
 		if (replicateAllEnabled == null) {
 			if (other.replicateAllEnabled != null)
@@ -522,5 +539,38 @@ public class PafPlannerConfig implements Cloneable {
 		
 		return cloneRoleConfig;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "PafPlannerConfig [role=" + role + ", cycle=" + cycle
+				+ ", uowSizeLarge=" + uowSizeLarge + ", uowSizeMax="
+				+ uowSizeMax + ", isUserFilteredUow=" + isUserFilteredUow
+				+ ", isDataFilteredUow=" + isDataFilteredUow
+				+ ", userFilterSpec=" + userFilterSpec + ", dataFilterSpec="
+				+ dataFilterSpec + ", viewTreeItemNames="
+				+ Arrays.toString(viewTreeItemNames) + ", menuItemNames="
+				+ Arrays.toString(menuItemNames)
+				+ ", autoRunOnSaveMenuItemNames="
+				+ Arrays.toString(autoRunOnSaveMenuItemNames)
+				+ ", ruleSetNames=" + Arrays.toString(ruleSetNames)
+				+ ", defaultRulesetName=" + defaultRulesetName
+				+ ", defaultEvalEnabledWorkingVersion="
+				+ defaultEvalEnabledWorkingVersion
+				+ ", defaultEvalRefVersions="
+				+ Arrays.toString(defaultEvalRefVersions)
+				+ ", mdbSaveWorkingVersionOnUowLoad="
+				+ mdbSaveWorkingVersionOnUowLoad + ", defaultEvalEnabled="
+				+ defaultEvalEnabled + ", calcElapsedPeriods="
+				+ calcElapsedPeriods + ", versionFilter="
+				+ Arrays.toString(versionFilter) + ", replicateEnabled="
+				+ replicateEnabled + ", replicateAllEnabled="
+				+ replicateAllEnabled + ", readOnlyMeasures="
+				+ Arrays.toString(readOnlyMeasures) + "]";
+	}
+	
+	
 	
 }
