@@ -16,21 +16,26 @@ public class PaceSettingsApplication extends Application {
 	
 	private Table tblSettings;
 	
+	private Window mainWindow;
+	
 	
 	
 	@Override
 	public void init() {
-		Window mainWindow = new Window("Pace Application Settings");
+		mainWindow = new Window("Pace Application Settings");
 	
 		mainWindow.addComponent(layoutGrid());
- 
 		setMainWindow(mainWindow);
 
 	}
 	
+	private void initForm() {
+		
+	}
+	
 	private GridLayout layoutGrid() {
 		
-					
+			PaceSettingsListener eventHandler = new PaceSettingsListener(mainWindow);
 
 			// common part: create layout
 			gridLayout_1 = new GridLayout();
@@ -50,13 +55,12 @@ public class PaceSettingsApplication extends Application {
 
 			
 			
-			// tblSettings
-			tblSettings = loadTableSettings();
-			tblSettings.setImmediate(false);
-			tblSettings.setWidth("100.0%");
-			tblSettings.setHeight("-1px");
-			pnlSettings.addComponent(tblSettings);
-			gridLayout_1.addComponent(pnlSettings, 0, 1, 0, 2);
+			// Settings grid
+			HorizontalLayout hlSettings = createSettingsLayout();
+			
+
+			//pnlSettings.addComponent(tblSettings);
+			gridLayout_1.addComponent(hlSettings, 0, 1, 0, 2);
 			
 			// treeMdbs
 			treeMdbs = new Tree();
@@ -103,6 +107,9 @@ public class PaceSettingsApplication extends Application {
 			
 			Button btnSave = new Button("Save");
 			Button btnCancel = new Button("Cancel");
+//			btnSave.addListener(eventHandler);
+			btnSave.addListener(Button.ClickEvent.class, eventHandler, "handleSave");
+			btnCancel.addListener(Button.ClickEvent.class, eventHandler, "handleCancel");
 			
 			HorizontalLayout hl = new HorizontalLayout();
 			hl.addComponent(btnSave);
@@ -115,29 +122,33 @@ public class PaceSettingsApplication extends Application {
 				
 	}
 
-	private Table loadTableSettings() {
-		// TODO Auto-generated method stub
-		Table table = new Table();
-		table.setEditable(true);
+	private HorizontalLayout createSettingsLayout() {
+		HorizontalLayout hl = new HorizontalLayout();
+		Table tblLabel = new Table();
+		Table tblValue = new Table();
+		tblValue.setEditable(true);
 		PafMetaData.updateApplicationConfig();
 		ServerSettings ss = PafMetaData.getServerSettings();
 		int i=1;
 		
-		table.addContainerProperty("Setting", String.class,  null);
-		table.addContainerProperty("Value",  String.class,  null);
+		tblLabel.setSortDisabled(true);
+		tblValue.setSortDisabled(true);
+		tblLabel.addContainerProperty("Setting", String.class,  null);
+		tblValue.addContainerProperty("Value",  String.class,  null);
 		
-		table.addItem(new Object[] {
-				"Authorizaion Mode", ss.getAuthMode()		}, i++ );
-		table.addItem(new Object[] {
-				"Calcscript Timout", ss.getCalcScriptTimeout()		}, i++ );
-		table.addItem(new Object[] {
-				"Minimum Client Version", ss.getClientMinVersion()		}, i++ );
-		table.addItem(new Object[] {
-				"Client Update URL", ss.getClientUpdateUrl()		}, i++ );
-		
-		
-		
-		return table;
+		addStringProperty("Authorizaion Mode", ss.getAuthMode(), i++, tblLabel, tblValue );
+		addStringProperty("Calcscript Timout", ss.getCalcScriptTimeout(), i++, tblLabel, tblValue );
+		addStringProperty("Minimum Client Version", ss.getClientMinVersion(), i++, tblLabel, tblValue );
+		addStringProperty("Client Update URL", ss.getClientUpdateUrl(), i++, tblLabel, tblValue );
+			
+		hl.addComponent(tblLabel);
+		hl.addComponent(tblValue);
+		return hl;
+	}
+	
+	private void addStringProperty(String key, String value, int index, Table tblLabel, Table tblValue) {
+		tblLabel.addItem(new Object[] { key }, index);
+		tblValue.addItem(new Object[] { value }, index);
 	}
 
 
