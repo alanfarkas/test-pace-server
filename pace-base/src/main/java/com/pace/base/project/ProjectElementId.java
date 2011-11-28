@@ -49,6 +49,7 @@ public enum ProjectElementId {
  	MemberTags ("Member Tags", "Member Tag Definitions."), 
 	RoundingRules ("Rounding Rules", "A list of Rounding Rules."),
 	PrintStyles ("Print Styles", "A list of print styles"),
+	UserMemberLists("Member Lists", "A list of user defined member lists"),
 	
 	//only used for excel and as sub data regions
 	RuleSet_RuleSet,

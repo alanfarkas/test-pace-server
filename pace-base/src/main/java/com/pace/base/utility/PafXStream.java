@@ -53,6 +53,8 @@ import com.pace.base.app.VersionFormula;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.comm.PafViewTreeItem;
+import com.pace.base.data.PafMemberList;
+import com.pace.base.data.UserMemberLists;
 import com.pace.base.db.membertags.MemberTagCommentEntry;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
@@ -227,6 +229,10 @@ public class PafXStream {
 		//Added for TN 900 - print preference
 		xs.alias("PrintStyles", PrintStyles.class);
 		xs.alias("PrintStyle", PrintStyle.class);
+		
+		xs.processAnnotations(UserMemberLists.class);
+		xs.processAnnotations(PafMemberList.class);
+		xs.alias("memberList", PafMemberList.class);
 
 		namespaceHeaderMap = new HashMap<String, String>();
 		namespaceHeaderMap.put(PAF_APPLICATION_DEF_ARRAY, PAF_APPLICATION_DEF_ARRAY + " " + PafBaseConstants.HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_APPS);

@@ -30,6 +30,7 @@ import com.pace.base.app.PlanCycle;
 import com.pace.base.app.VersionDef;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.data.UserMemberLists;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
 import com.pace.base.rules.RoundingRule;
@@ -70,6 +71,7 @@ public interface IPaceProject {
 	public Map<String, PafViewGroup> getViewGroups();
 	public List<MemberTagDef> getMemberTags();
 	public List<PafUserSecurity> getUserSecurity();
+	public UserMemberLists getUserMemberLists();
 	public List<RoundingRule> getRoundingRules();
 	public Map<String, RuleSet> getRuleSets();
 	public Map<String, PrintStyle> getPrintStyles();
@@ -92,6 +94,7 @@ public interface IPaceProject {
 	public void setViewGroups(Map<String, PafViewGroup> viewGroupMap);
 	public void setMemberTags(List<MemberTagDef> memberTagDefList);
 	public void setUserSecurity(List<PafUserSecurity> userSecurityList);
+	public void setUserMemberLists(UserMemberLists userMemberLists);
 	public void setRoundingRules(List<RoundingRule> roundingRuleList);
 	public void setRuleSets(Map<String, RuleSet> ruleSetList);
 	public void setPrintStyles(Map<String, PrintStyle> printStyleList);

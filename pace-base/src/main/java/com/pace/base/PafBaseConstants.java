@@ -97,6 +97,7 @@ public class PafBaseConstants {
 	public static final String FN_MemberTagMetaData = "paf_member_tags.xml";
 	public static final String FN_EssbaseConnPropTest = "connection.properties";
 	public static final String FN_PrintStyles = "paf_print_styles.xml";
+	public static final String FN_UserMemberLists = "user_memberlists.xml";
 	
 	public static final String FN_ServerSettings = "serverSettings.xml";
 	public static final String FN_MdbDataSources = "mdbDs.xml";	
@@ -294,6 +295,7 @@ public class PafBaseConstants {
 	public static final String PERFORMANCE_LOGGER_MDB_IO = "pace.performance.mdb.io";
 	public static final String PERFORMANCE_LOGGER_VIEW_RNDR = "pace.performance.view.render";
 	public static final String PERFORMANCE_LOGGER_UOW_LOAD = "pace.performance.uow.load";
+
 	
 
 	

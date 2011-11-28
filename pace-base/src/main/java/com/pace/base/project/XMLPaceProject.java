@@ -42,6 +42,7 @@ import com.pace.base.app.SeasonList;
 import com.pace.base.app.VersionDef;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.data.UserMemberLists;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
 import com.pace.base.migration.CustomFunctionDefClassNameMigrationAction;
@@ -65,6 +66,7 @@ import com.pace.base.migration.PafViewSectionBorderMigration;
 import com.pace.base.migration.PafViewSectionsSeparationMigrationAction;
 import com.pace.base.migration.PafViewsSeparationMigrationAction;
 import com.pace.base.migration.PrintStylesMigrationAction;
+import com.pace.base.migration.UserMemberListsMigrationAction;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.ui.PrintStyle;
@@ -544,6 +546,25 @@ public class XMLPaceProject extends PaceProject {
 	}
 
 	@Override
+	protected void readUserMemberLists() throws PaceProjectReadException {
+
+		//if upgrade project project
+		if ( upgradeProject) {
+			
+			//run migration
+			new UserMemberListsMigrationAction(this).run();
+			
+		}
+		
+		PafXStreamElementItem<UserMemberLists> pafXStreamElementItem = new PafXStreamElementItem<UserMemberLists> (getProjectInput() + PafBaseConstants.FN_UserMemberLists);
+		
+		UserMemberLists uml = pafXStreamElementItem.read();
+	
+		setUserMemberLists((uml == null) ? null : uml);
+			
+	}
+	
+	@Override
 	protected void readUserSecurity() throws PaceProjectReadException {
 
 		//if upgrade project project
@@ -1018,6 +1039,17 @@ public class XMLPaceProject extends PaceProject {
 		
 	}
 
+	@Override
+	protected void writeUserMemberLists() {
+
+		UserMemberLists uml = getUserMemberLists();
+		
+		PafXStreamElementItem<UserMemberLists> pafXStreamElementItem = new PafXStreamElementItem<UserMemberLists> (getProjectOutputDir() + PafBaseConstants.FN_UserMemberLists);
+		
+		pafXStreamElementItem.write(uml);
+		
+	}	
+	
 	@Override
 	protected void writeUserSecurity() {
 

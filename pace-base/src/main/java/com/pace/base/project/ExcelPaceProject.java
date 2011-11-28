@@ -1183,5 +1183,17 @@ public class ExcelPaceProject extends PaceProject {
 		
 	}
 
+	@Override
+	protected void readUserMemberLists() throws PaceProjectReadException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void writeUserMemberLists() throws PaceProjectWriteException {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 }

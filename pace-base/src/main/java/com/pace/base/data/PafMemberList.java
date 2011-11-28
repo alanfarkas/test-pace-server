@@ -19,6 +19,8 @@
  */
 package com.pace.base.data;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 /**
  * Class_description_goes_here
  *
@@ -26,6 +28,7 @@ package com.pace.base.data;
  * @author jim
  *
  */
+@XStreamAlias("memberLists")
 public class PafMemberList {
 	String dimName;
 	String memberNames[];

@@ -601,6 +601,19 @@ public class ZipPaceProject extends PaceProject {
 			
 		}
 	}
+	
+	@Override
+	protected void readUserMemberLists() throws PaceProjectReadException {
+		if ( xmlPaceProject != null) {
+			
+			xmlPaceProject.readUserMemberLists();
+			
+			setUserMemberLists(xmlPaceProject.getUserMemberLists());
+			
+		}
+		
+	}
+
 
 	@Override
 	protected void writeApplicationDefinitions() {
@@ -885,6 +898,17 @@ public class ZipPaceProject extends PaceProject {
 			
 		}
 		
+	}
+
+
+	@Override
+	protected void writeUserMemberLists() throws PaceProjectWriteException {
+		if ( xmlPaceProject != null) {
+			
+			xmlPaceProject.setUserMemberLists(getUserMemberLists());
+	
+			xmlPaceProject.writeUserMemberLists();
+		}
 	}
 		
 	

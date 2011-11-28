@@ -79,7 +79,7 @@ public class PafAppService {
     // TODO make measure and version loads driven by application
     // currently just loads all apps with the current measure/version defs
     public synchronized void loadApplicationConfigurations() {
-        logger.info(Messages.getString("PafAppService.13")); //$NON-NLS-1$
+
 
         applicationDefs.clear();
         
@@ -106,7 +106,6 @@ public class PafAppService {
             
             viewService.loadViewCache();
         }
-        logger.info(Messages.getString("PafAppService.23"));       //$NON-NLS-1$
     }
     
     public synchronized void loadApplicationMetaData(String id) throws PafException {
@@ -141,8 +140,10 @@ public class PafAppService {
     public synchronized void autoloadApplications() throws PafException {
     	// for now just check jndi/env variable for behavior.
     	// will migrate to application specific setting when multi app hits
+
+    	loadApplicationConfigurations();
+		
     	if ( PafMetaData.isAutoLoad() ) {
-    		loadApplicationConfigurations();
     		loadApplicationMetaData(null);
     	}
     	
