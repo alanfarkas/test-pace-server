@@ -77,7 +77,7 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 	@Override
 	protected void createHeaderListMapEntries() {
 
-		getHeaderListMap().put(getSheetName(), Arrays.asList("role name", "plan cycle name", "default eval on working version", "save working version on uow load", "default rule set name", "rule set names (pipe delimited)", "version filters (pipe delimited)", "enable role filter", "role filter (pipe delimited)", "view / view group names (pipe delimited)", "visible menus (pipe delimited)", "auto save menus (pipe delimited)", "replicate enabled", "replicate all enabled", "allow suppress invalid intersections", "suppress invalid intersection entrys (pipe delimited)", "large cell limit", "max cell limit"));
+		getHeaderListMap().put(getSheetName(), Arrays.asList("role name", "plan cycle name", "default eval on working version", "save working version on uow load", "default rule set name", "rule set names (pipe delimited)", "read only measures (pipe delimited)", "version filters (pipe delimited)", "enable role filter", "role filter (pipe delimited)", "view / view group names (pipe delimited)", "visible menus (pipe delimited)", "auto save menus (pipe delimited)", "replicate enabled", "replicate all enabled", "allow suppress invalid intersections", "suppress invalid intersection entrys (pipe delimited)", "large cell limit", "max cell limit"));
 
 	}
 
@@ -191,21 +191,26 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 							}
 								
 							break;							
+						
+						case 6: 
+							
+							roleConfig.setReadOnlyMeasures(PafExcelUtil.getStringArFromDelimValueObject(getProjectElementId(), firstValueObject));
+							break;
 							
 						//version filter
-						case 6:
+						case 7:
 							
 							roleConfig.setVersionFilter(PafExcelUtil.getStringArFromDelimValueObject(getProjectElementId(), firstValueObject));
 							break;
 							
 						//enable role filter
-						case 7:
+						case 8:
 							
 							roleConfig.setIsUserFilteredUow(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject));							
 							break;		
 							
 						//role filter
-						case 8:							
+						case 9:							
 							
 							String[] roleFilters = PafExcelUtil.getStringArFromDelimValueObject(getProjectElementId(), firstValueObject);
 							
@@ -222,44 +227,44 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 							break;
 							
 						//view & view group names
-						case 9:						
+						case 10:						
 
 							roleConfig.setViewTreeItemNames(PafExcelUtil.getStringArFromDelimValueObject(getProjectElementId(), firstValueObject, true));
 							break;
 
 						//visible menus
-						case 10:
+						case 11:
 													
 							roleConfig.setMenuItemNames(PafExcelUtil.getStringArFromDelimValueObject(getProjectElementId(), firstValueObject));
 							break;
 							
 						//auto save menus 
-						case 11:
+						case 12:
 													
 							roleConfig.setAutoRunOnSaveMenuItemNames(PafExcelUtil.getStringArFromDelimValueObject(getProjectElementId(), firstValueObject));
 							break;
 							
 						//replicate enabled
-						case 12:
+						case 13:
 													
 							roleConfig.setReplicateEnabled(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject));
 							break;							
 						
 						//replicate all enabled
-						case 13:
+						case 14:
 													
 							roleConfig.setReplicateAllEnabled(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject));
 							break;
 							
 						//allow suppress invalid intersection
-						case 14:
+						case 15:
 													
 							roleConfig.setIsDataFilteredUow(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject));
 							break;
 					
 
 						//suppress invalid intersection entry
-						case 15:
+						case 16:
 							
 							String[] dimensionValueAr = PafExcelUtil.getStringArFromDelimValueObject(getProjectElementId(), firstValueObject);
 							
@@ -301,7 +306,7 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 							break;
 							
 						//large cell limit	
-						case 16: 
+						case 17: 
 							
 							Integer largeUowSize = PafExcelUtil.getInteger(getProjectElementId(), firstValueObject);
 							
@@ -312,7 +317,7 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 							break;
 							
 						//max cell limit	
-						case 17: 
+						case 18: 
 							
 							Integer maxUowSize = PafExcelUtil.getInteger(getProjectElementId(), firstValueObject);
 							
@@ -372,6 +377,9 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 			
 			//plan cycles
 			dynamicRefProjectElementMap.put(ProjectElementId.PlanCycles, new PlanCyclesExcelElementItem<List<PlanCycle>>(getWorkbook()).getDynamicReferenceMap());
+			
+			//version
+			dynamicRefProjectElementMap.put(ProjectElementId.Measures, new MeasuresExcelElementItem<List<MeasureDef>>(getWorkbook()).getDynamicReferenceMap());
 			
 			//version
 			dynamicRefProjectElementMap.put(ProjectElementId.Versions, new VersionsExcelElementItem<List<VersionDef>>(getWorkbook()).getDynamicReferenceMap());
@@ -437,6 +445,31 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 					excelRow.addRowItem(5, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
 				}	
 				
+				//read only measures
+				if ( plannerConfig.getReadOnlyMeasures() != null && plannerConfig.getReadOnlyMeasures().length > 0 ) {
+					
+					valueObjectList = new ArrayList<PafExcelValueObject>();
+					
+					Map<String, String> measuresRefMap = dynamicRefProjectElementMap.get(ProjectElementId.Measures);
+					
+					for (String measureName : plannerConfig.getReadOnlyMeasures()) {
+						
+						if ( measuresRefMap != null && measuresRefMap.containsKey(measureName) ) {
+							
+							valueObjectList.add(PafExcelValueObject.createFromFormulaReferenceMap(measureName, measuresRefMap));
+							
+						} else {
+							
+							valueObjectList.add(PafExcelValueObject.createFromString(measureName));
+							
+						}
+						
+					}
+					
+					excelRow.addRowItem(6, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
+					
+				}
+				
 				//version filter
 				if ( plannerConfig.getVersionFilter() != null && plannerConfig.getVersionFilter().length > 0 ) {
 				
@@ -464,17 +497,17 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 						
 					}
 					
-					excelRow.addRowItem(6, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
+					excelRow.addRowItem(7, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
 					
 				}	
 				
 				//isUserFilteredUow
-				excelRow.addRowItem(7, PafExcelValueObject.createFromBoolean(plannerConfig.getIsUserFilteredUow()));
+				excelRow.addRowItem(8, PafExcelValueObject.createFromBoolean(plannerConfig.getIsUserFilteredUow()));
 				
 				//user filter spec
 				if ( plannerConfig.getUserFilterSpec() != null ) {
 				
-					excelRow.addRowItem(8, PafExcelUtil.getDelimValueObjectFromStringAr(plannerConfig.getUserFilterSpec().getAttrDimNames()));
+					excelRow.addRowItem(9, PafExcelUtil.getDelimValueObjectFromStringAr(plannerConfig.getUserFilterSpec().getAttrDimNames()));
 												
 				}
 				
@@ -505,7 +538,7 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 						
 					}
 					
-					excelRow.addRowItem(9, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
+					excelRow.addRowItem(10, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
 										
 				}
 				
@@ -514,7 +547,7 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 												
 					valueObjectList = PafExcelValueObjectUtil.createListOfDynamicReferencePafExcelValueObjects(plannerConfig.getMenuItemNames(), dynamicRefProjectElementMap.get(ProjectElementId.CustomMenus));
 					
-					excelRow.addRowItem(10, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
+					excelRow.addRowItem(11, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
 					
 				}	
 				
@@ -523,18 +556,18 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 												
 					valueObjectList = PafExcelValueObjectUtil.createListOfDynamicReferencePafExcelValueObjects(plannerConfig.getAutoRunOnSaveMenuItemNames(), dynamicRefProjectElementMap.get(ProjectElementId.CustomMenus));
 					
-					excelRow.addRowItem(11, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
+					excelRow.addRowItem(12, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
 					
 				}	
 				
 				//replicate enabled
-				excelRow.addRowItem(12, PafExcelValueObject.createFromBoolean(plannerConfig.getReplicateEnabled()));
+				excelRow.addRowItem(13, PafExcelValueObject.createFromBoolean(plannerConfig.getReplicateEnabled()));
 				
 				//replicate all enabled
-				excelRow.addRowItem(13, PafExcelValueObject.createFromBoolean(plannerConfig.getReplicateAllEnabled()));
+				excelRow.addRowItem(14, PafExcelValueObject.createFromBoolean(plannerConfig.getReplicateAllEnabled()));
 				
 				//is data filtered uow
-				excelRow.addRowItem(14, PafExcelValueObject.createFromBoolean(plannerConfig.getIsDataFilteredUow()));
+				excelRow.addRowItem(15, PafExcelValueObject.createFromBoolean(plannerConfig.getIsDataFilteredUow()));
 				
 				//data filter spec
 				if ( plannerConfig.getDataFilterSpec() != null && plannerConfig.getDataFilterSpec().getDimSpec() != null && 
@@ -567,15 +600,15 @@ public class RoleConfigsExcelElementItem<T extends List<PafPlannerConfig>> exten
 						
 					}
 					
-					excelRow.addRowItem(15, PafExcelValueObject.createFromString(strBuff.toString()));					
+					excelRow.addRowItem(16, PafExcelValueObject.createFromString(strBuff.toString()));					
 					
 				}
 				
 				//uow size large
-				excelRow.addRowItem(16, PafExcelValueObject.createFromInteger(plannerConfig.getUowSizeLarge()));
+				excelRow.addRowItem(17, PafExcelValueObject.createFromInteger(plannerConfig.getUowSizeLarge()));
 								
 				//uow size max				
-				excelRow.addRowItem(17, PafExcelValueObject.createFromInteger(plannerConfig.getUowSizeMax()));
+				excelRow.addRowItem(18, PafExcelValueObject.createFromInteger(plannerConfig.getUowSizeMax()));
 				
 				excelRowList.add(excelRow);			
 				

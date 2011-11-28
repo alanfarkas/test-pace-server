@@ -111,7 +111,7 @@ public class ExcelPaceProject extends PaceProject {
 		projectIdDependencyMap.put(ProjectElementId.PlanCycles, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.Seasons, ProjectElementId.RoleConfigs)));
 		projectIdDependencyMap.put(ProjectElementId.Seasons, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.Roles)));
 		projectIdDependencyMap.put(ProjectElementId.Roles, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.RoleConfigs)));
-		projectIdDependencyMap.put(ProjectElementId.RoleConfigs, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.ViewGroups, ProjectElementId.RuleSets, ProjectElementId.Versions, ProjectElementId.DynamicMembers, ProjectElementId.Views, ProjectElementId.ViewGroups, ProjectElementId.CustomFunctions, ProjectElementId.CustomMenus)));
+		projectIdDependencyMap.put(ProjectElementId.RoleConfigs, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.ViewGroups, ProjectElementId.RuleSets, ProjectElementId.Versions, ProjectElementId.DynamicMembers, ProjectElementId.Views, ProjectElementId.ViewGroups, ProjectElementId.CustomFunctions, ProjectElementId.CustomMenus, ProjectElementId.Measures)));
 		projectIdDependencyMap.put(ProjectElementId.GlobalStyles, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.HierarchyFormats)));
 		projectIdDependencyMap.put(ProjectElementId.DynamicMembers, new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.ApplicationDef, ProjectElementId.RoleConfigs)));
 	}
