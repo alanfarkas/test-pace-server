@@ -21,9 +21,10 @@ package com.pace.base.project.excel.elements;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -32,7 +33,11 @@ import com.pace.base.app.CustomActionDef;
 import com.pace.base.app.DynamicMemberDef;
 import com.pace.base.app.VersionDef;
 import com.pace.base.comm.CustomMenuDef;
-import com.pace.base.project.*;
+import com.pace.base.project.ExcelPaceProjectConstants;
+import com.pace.base.project.ExcelProjectDataErrorException;
+import com.pace.base.project.PaceProjectReadException;
+import com.pace.base.project.PaceProjectWriteException;
+import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.excel.IExcelDynamicReferenceElementItem;
 import com.pace.base.project.excel.PafExcelInput;
 import com.pace.base.project.excel.PafExcelRow;
@@ -158,18 +163,16 @@ public class CustomMenusExcelElementItem<T extends List<CustomMenuDef>> extends 
 						case 6:
 
 							//will loop over the customActionClassNameAr and customActionClassParmsAr to populate a 
-							//map that will hold a custom action def and list of action parms.  Once map has been
+							//set that will hold a custom action def and list of action parms.  Once set has been
 							//populated, the actual custom action def with parms (nulls trimmed) will be created and set.
 							
 							String[] customActionClassParmsAr = PafExcelUtil.getStringAr(getProjectElementId(), rowItemList);
-																					
-							List<CustomActionDef> customActionDefList = new ArrayList<CustomActionDef>();
+							
+							Set<CustomActionDef> customActionDefSet = new LinkedHashSet<CustomActionDef>();
 														
 							if ( customActionClassNameAr != null && customActionClassParmsAr != null && 
-									customActionClassNameAr.length == customActionClassParmsAr.length ) {
-							
-								Map<CustomActionDef, List<String>> customActionDefMap = new LinkedHashMap<CustomActionDef, List<String>>();
-								
+								customActionClassNameAr.length == customActionClassParmsAr.length ) {
+																						
 								CustomActionDef lastCustomActionDef = null;
 																			
 								List<String> customActionParmList = null;
@@ -184,33 +187,31 @@ public class CustomMenusExcelElementItem<T extends List<CustomMenuDef>> extends 
 										customActionParmList = new ArrayList<String>();
 										customActionParmList.add(customActionClassParmsAr[i]);
 									
-										customActionDefMap.put(lastCustomActionDef, customActionParmList);
+										lastCustomActionDef.setActionNamedParameters(customActionParmList.toArray(new String[0]));
 										
+										customActionDefSet.add(lastCustomActionDef);
+									
 									} else {
 										
-										if ( lastCustomActionDef != null && customActionDefMap.containsKey(lastCustomActionDef)) {
-										
-											customActionParmList = customActionDefMap.get(lastCustomActionDef);
-											
-											if ( customActionParmList == null ) {
-												
-												customActionParmList = new ArrayList<String>();
-												
-											}
-											
+										if ( lastCustomActionDef != null ) {
+																					
 											customActionParmList.add(customActionClassParmsAr[i]);
 											
-											customActionDefMap.put(lastCustomActionDef, customActionParmList);
+											lastCustomActionDef.setActionNamedParameters(customActionParmList.toArray(new String[0]));
+																						
+										}
 											
-										}										
+									}										
 										
-									}
-									
 								}
 								
-								for (CustomActionDef customActionDef : customActionDefMap.keySet()) {
-									
-									customActionParmList = customActionDefMap.get(customActionDef);
+							}
+								
+							for (CustomActionDef customActionDef : customActionDefSet) {
+								
+								if ( customActionDef.getActionNamedParameters() != null ) {
+								
+									List<String> customActionParmList = Arrays.asList(customActionDef.getActionNamedParameters());
 									
 									if ( customActionParmList != null && customActionParmList.size() > 0 ) {
 										
@@ -223,18 +224,15 @@ public class CustomMenusExcelElementItem<T extends List<CustomMenuDef>> extends 
 											customActionDef.setActionNamedParameters(customActionParmList.toArray(new String[0]));
 											
 										}
-										
-									}								
-									
-									customActionDefList.add(customActionDef);
-									
-								}
-								
+									}
+								}								
+																								
 							}
-							
-							if ( customActionDefList.size() > 0 ) {
 								
-								customMenu.setCustomActionDefs(customActionDefList.toArray(new CustomActionDef[0]));
+							
+							if ( customActionDefSet.size() > 0 ) {
+								
+								customMenu.setCustomActionDefs(customActionDefSet.toArray(new CustomActionDef[0]));
 								
 							}
 							
@@ -401,15 +399,15 @@ public class CustomMenusExcelElementItem<T extends List<CustomMenuDef>> extends 
 				if ( customMenuDef.getCustomActionDefs() != null ) {
 					
 					CustomActionDef[] customActionDefs = customMenuDef.getCustomActionDefs();
-					
-					int actionParmNdx = 0;
-					
+										
 					for ( CustomActionDef cad : customActionDefs ) {
 						
 						//action class name						
 						excelRow.addRowItem(5, PafExcelValueObject.createFromString(cad.getActionClassName()));
 						
 						if ( cad.getActionNamedParameters() != null ) {
+						
+							int actionParmNdx = 0;
 							
 							for (String actionNamedParm : cad.getActionNamedParameters() ) {
 							

@@ -31,6 +31,7 @@ import java.util.Arrays;
  *
  */
 public class CustomActionDef {
+	
     String actionClassName;
     String[] actionNamedParameters;
     /**
@@ -51,6 +52,7 @@ public class CustomActionDef {
 	public void setActionNamedParameters(String[] actionNamedParameters) {
 		this.actionNamedParameters = actionNamedParameters;
 	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -63,6 +65,7 @@ public class CustomActionDef {
 		result = prime * result + Arrays.hashCode(actionNamedParameters);
 		return result;
 	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -83,6 +86,16 @@ public class CustomActionDef {
 		if (!Arrays.equals(actionNamedParameters, other.actionNamedParameters))
 			return false;
 		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "CustomActionDef [actionClassName=" + actionClassName
+				+ ", actionNamedParameters="
+				+ Arrays.toString(actionNamedParameters) + "]";
 	}
 
 	
