@@ -4,6 +4,7 @@ import java.io.File;
 
 public class PafServer implements Comparable, Cloneable {
 
+	private static final String WSDL = "?wsdl";
 	private String name;
 	private String host;
 	private Integer port;
@@ -163,12 +164,19 @@ public class PafServer implements Comparable, Cloneable {
 		
 		sb.append("://" + host + ":" + port + "/" + webappName);
 		
-		if ( wsdlServiceName != null && ! wsdlServiceName.equals("?wsdl")) {
+		if ( wsdlServiceName != null && ! wsdlServiceName.equals(WSDL)) {
 			
 			sb.append("/");
 		} 
 		
-		sb.append(wsdlServiceName);		
+		sb.append(wsdlServiceName);
+		
+		if (! wsdlServiceName.endsWith(WSDL)) {
+			
+			sb.append(WSDL);
+			
+		}
+		
 		
 		return sb.toString();
 	}
