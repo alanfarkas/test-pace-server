@@ -218,7 +218,7 @@
     </path>	
 	<path id="XStream 1.4.2.userclasspath">
 		<pathelement location="${userlib.path}/xstream-1.4.2/xstream-1.4.2.jar"/>
-<!--		<pathelement location="${userlib.path}/xstream-1.4.2/lib/xpp3-1.1.3.4d_b4_min.jar"/>  -->
+		<pathelement location="${userlib.path}/xstream-1.4.2/xstream/xpp3_min-1.1.4c.jar"/> 
 	</path>
 	<path id="pace-base.classpath">
 	    <pathelement location="${Paf Base Libraries.location}/${bin}"/>
