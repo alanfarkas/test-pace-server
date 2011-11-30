@@ -50,6 +50,7 @@ import com.pace.base.migration.CustomMenuDefActionClassNameMigrationAction;
 import com.pace.base.migration.MemberTagDefTypeClassNameMigrationAction;
 import com.pace.base.migration.MigrationAction;
 import com.pace.base.migration.MigrationActionStatus;
+import com.pace.base.migration.NewCustomFunctionMigrationAction;
 import com.pace.base.migration.PafAppsMigrationAction;
 import com.pace.base.migration.PafDTDtoXSDMigrationAction;
 import com.pace.base.migration.PafDynamicMembersMigrationAction;
@@ -279,6 +280,7 @@ public class XMLPaceProject extends PaceProject {
 		if ( upgradeProject ) {
 			
 			 new CustomFunctionDefClassNameMigrationAction(this).run();
+			 new NewCustomFunctionMigrationAction(this).run();
 		 }
 		
 		PafXStreamElementItem<CustomFunctionDef[]> pafXStreamElementItem = new PafXStreamElementItem<CustomFunctionDef[]>(getProjectInput() + PafBaseConstants.FN_CustomFunctionMetaData);
