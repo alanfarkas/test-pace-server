@@ -779,6 +779,11 @@ public class PafMetaData {
                     //do nothing                    
                 }
             }
+            
+            //close the following sessions
+            closePafDBSession();
+    		closePafExtAttrDBSession();
+    		closePafClientCacheDBSession();
         
         }
         return rowCount;

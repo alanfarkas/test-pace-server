@@ -82,6 +82,7 @@ public class PafAppService {
 
 
         applicationDefs.clear();
+        applicationStates.clear();
         
 		// update the pace project object
 		PafMetaData.updateApplicationConfig();
