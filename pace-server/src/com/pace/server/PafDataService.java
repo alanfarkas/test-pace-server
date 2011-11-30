@@ -51,7 +51,9 @@ import com.pace.base.data.ExpOperation;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
+import com.pace.base.data.PafMemberList;
 import com.pace.base.data.TimeSlice;
+import com.pace.base.data.UserMemberLists;
 import com.pace.base.db.Application;
 import com.pace.base.db.SecurityGroup;
 import com.pace.base.mdb.*;
@@ -4088,6 +4090,18 @@ public class PafDataService {
 	public boolean validateUserSecurity(PafDimSpec[] securitySpecs, List<String> validationErrors) {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+
+	public PafMemberList getUserMemberList(String umlKey) {
+		UserMemberLists uml = PafMetaData.getPaceProject().getUserMemberLists();
+		umlKey = umlKey.trim();
+		if (uml==null || uml.getMemberList(umlKey)==null) {
+			String s = String.format("No user member list found by the label [%s]", umlKey);
+			throw new IllegalArgumentException(s);
+		} else {
+			return uml.getMemberList(umlKey);
+		}
 	}
 
 

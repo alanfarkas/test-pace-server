@@ -34,6 +34,7 @@ import org.hibernate.Transaction;
 import com.Ostermiller.util.RandPass;
 import com.pace.base.*;
 import com.pace.base.app.*;
+import com.pace.base.data.PafMemberList;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.state.PafClientState;
@@ -356,8 +357,25 @@ public class PafSecurityService {
 				useAll = true;
 				break;
 			}
-			for (String msrName : rs.getMeasureList())
-				msrsToUse.add(msrName);
+			for (String msrName : rs.getMeasureList()) {
+				// process out any user member lists
+				if (msrName.startsWith("@MEMBER_LIST")) {
+					// extract out name
+					String umlKey = msrName.substring(msrName.indexOf("(")+1, msrName.lastIndexOf(")"));
+					PafMemberList memberList = PafDataService.getInstance().getUserMemberList(umlKey);
+					if (memberList.getDimName().equals(mdbDef.getMeasureDim())) {
+						for (String mbrTerm: memberList.getMemberNames() ) {
+							msrsToUse.add(mbrTerm);
+						}
+					} else {
+						String s = String.format("Only memberlists from the measures dimension can be used in rulsets. Memberlist [%s] found in ruleset [%s]", msrName, rs.getName());
+						throw new IllegalArgumentException(s);
+					}
+				} else {
+					msrsToUse.add(msrName);
+				}
+			}
+				
 		}
 
 		// setup the workunit if we made it through all rulesets without running

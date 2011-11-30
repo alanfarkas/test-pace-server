@@ -101,10 +101,17 @@ public class PafAppService {
             app.initCustomMenus(PafMetaData.getPaceProject().getCustomMenus()); 
             applicationDefs.put(app.getAppId(), app);
             
+            
+            
             // might as well load the view cache as well, it's part of the application definition
             // and requires no external dependencies
             
             viewService.loadViewCache();
+            
+			// initialize the user list
+			PafSecurityService.initUsers();
+			PafSecurityService.initPlannerRoles();
+            
         }
     }
     
@@ -120,10 +127,6 @@ public class PafAppService {
 			updateAppRunState(id, RunningState.STARTING);
 			PafMetaData.clearDataCache();
 			dataService.loadApplicationData();
-			
-			// initialize the user list
-			PafSecurityService.initUsers();
-			PafSecurityService.initPlannerRoles();
 			
 			updateAppRunState(id, RunningState.RUNNING);
 			
