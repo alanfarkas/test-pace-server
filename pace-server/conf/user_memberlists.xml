@@ -1,0 +1,14 @@
+<userMemberLists>
+  <memberLists>
+    <entry>
+      <string>MyMeasures</string>
+      <memberList>
+        <dimName>Accounts</dimName>
+        <memberNames>
+          <string>@IDESC(PacePrimary)</string>
+		  <string>@IDESC(PaceStatAccts)</string>  
+        </memberNames>
+      </memberList>
+    </entry>
+  </memberLists>
+</userMemberLists>
