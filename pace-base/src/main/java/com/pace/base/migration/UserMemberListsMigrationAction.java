@@ -35,7 +35,7 @@ public class UserMemberListsMigrationAction extends MigrationAction {
 
 	@Override
 	public MigrationActionStatus getStatus() {
-		if( this.uml.getMemberLists() == null || this.uml.getMemberLists().size() == 0 ) {
+		if(  this.uml == null || this.uml.getMemberLists() == null || this.uml.getMemberLists().size() == 0 ) {
 			return MigrationActionStatus.NotStarted;
 		}
 		return MigrationActionStatus.Completed;
