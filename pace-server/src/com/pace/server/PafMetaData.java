@@ -48,6 +48,7 @@ import com.pace.base.app.*;
 import com.pace.base.comm.PafViewTreeItem;
 import com.pace.base.comm.SessionFactoryType;
 import com.pace.base.db.RdbProps;
+import com.pace.base.mdb.PafConnectionProps;
 import com.pace.base.project.InvalidPaceProjectInputException;
 import com.pace.base.project.PaceProject;
 import com.pace.base.project.PaceProjectCreationException;
@@ -75,6 +76,8 @@ public class PafMetaData {
 	private static ApplicationContext appContext = null;
 	
 	private static ServerSettings serverSettings = null;
+	private static Map<String, PafConnectionProps> mdbDs = null;
+	private static Map<String, RdbProps> rdbDs = null;
 
 	
 	private static String paceHome = null;
@@ -89,88 +92,92 @@ public class PafMetaData {
 	private static final String lclJndiCtxt = "java:comp/env";
 	private static final String glblJndiCtxt = "java:";	
 	
-	
 	static {
-
-		// try to get PaceHome from local JNDI variable (Pace > 2.8.0.0
-		paceHome = getPaceHomeFromJNDI(lclJndiCtxt);
-		
-		// check the global JNDI variable 2.2 - 2.8
-		if (paceHome == null)
-			paceHome = getPaceHomeFromJNDI(glblJndiCtxt);
-		
-		// check for a system property, primarily for unit testing
-		if (paceHome == null)
-			paceHome = getPaceHomeFromSystemProp();
-		
-		// check for an environment variable, primarily pre 2.2
-		if (paceHome == null)
-			paceHome = getPaceHomeFromEnvVariable();
-		
-		if ( paceHome == null ) {	
-			PafErrHandler.handleException(new PafException(
-					"Error setting paceHome variable. ",
-					PafErrSeverity.Fatal));
-			
-		} else {
-			logger.info("Retrieving Pace configuration files from: [" + paceHome + "]");
-		}				
+		loadAppSettings();
 	}
 	
-
-	static {
-		
-        try {
-        	
-        	String serverConfig = paceHome + fileSep + PafBaseConstants.DN_ConfServerFldr + fileSep;
-        	String[] configFiles = new String[3];
-        	configFiles[0] = serverConfig + PafBaseConstants.FN_ServerSettings;
-        	configFiles[1] = serverConfig + PafBaseConstants.FN_MdbDataSources;
-        	configFiles[2] = serverConfig + PafBaseConstants.FN_RdbDataSources;
-        	
-        	for (int i = 0; i < configFiles.length; i++) {
-        		logger.info("Loading configuration file: [" + configFiles[i] + "]");
-        	}
-        	
-        	appContext = new FileSystemXmlApplicationContext(configFiles);  
- 
-        } catch (Throwable ex) {
-        	
-            PafErrHandler.handleException(new PafException(
-                    "Error initializing spring framework. " + ex.getMessage(),
-                    PafErrSeverity.Fatal));
-        }
-    }
 	
-      
-    static {
-        try {
-        	
-            serverSettings = (ServerSettings) appContext.getBean("appServerSettings");
-            
-            debugMode = serverSettings.isDebugMode();
-            
-            Map<String, String> temp = new HashMap<String, String>();
-            for (String key : serverSettings.getLdapSettings().getNetBiosNames().keySet()){
-            	temp.put(key.toLowerCase(), serverSettings.getLdapSettings().getNetBiosNames().get(key));
-            }
-            serverSettings.getLdapSettings().setNetBiosNames(temp);
-                               
-           
-        } catch (Throwable ex) {
-            PafErrHandler.handleException(new PafException(
-                    "Error initializing Paf Server Settings. "
-                            + ex.getMessage()
-                            + "Default values will be used!!",
-                    PafErrSeverity.Warning));
-        }
 
-    }
+
+
     
     // Wait for explicit initialization of application configuration.
 //    static {    	
 //    	updateApplicationConfig();
 //    }
+    
+    
+	public static void loadAppSettings() {
+
+
+		// try to get PaceHome from local JNDI variable (Pace > 2.8.0.0
+		paceHome = getPaceHomeFromJNDI(lclJndiCtxt);
+
+		// check the global JNDI variable 2.2 - 2.8
+		if (paceHome == null)
+			paceHome = getPaceHomeFromJNDI(glblJndiCtxt);
+
+		// check for a system property, primarily for unit testing
+		if (paceHome == null)
+			paceHome = getPaceHomeFromSystemProp();
+
+		// check for an environment variable, primarily pre 2.2
+		if (paceHome == null)
+			paceHome = getPaceHomeFromEnvVariable();
+
+		if ( paceHome == null ) {	
+			PafErrHandler.handleException(new PafException(
+					"Error setting paceHome variable. ",
+					PafErrSeverity.Fatal));
+
+		} else {
+			logger.info("Retrieving Pace configuration files from: [" + paceHome + "]");
+		}				
+
+
+		try {
+
+			String serverConfig = paceHome + fileSep + PafBaseConstants.DN_ConfServerFldr + fileSep;
+			String[] configFiles = new String[3];
+			configFiles[0] = serverConfig + PafBaseConstants.FN_ServerSettings;
+			configFiles[1] = serverConfig + PafBaseConstants.FN_MdbDataSources;
+			configFiles[2] = serverConfig + PafBaseConstants.FN_RdbDataSources;
+
+			for (int i = 0; i < configFiles.length; i++) {
+				logger.info("Loading configuration file: [" + configFiles[i] + "]");
+			}
+
+			appContext = new FileSystemXmlApplicationContext(configFiles);  
+
+		} catch (Throwable ex) {
+
+			PafErrHandler.handleException(new PafException(
+					"Error initializing spring framework. " + ex.getMessage(),
+					PafErrSeverity.Fatal));
+		}
+
+		try {
+
+			serverSettings = (ServerSettings) appContext.getBean("appServerSettings");
+
+			debugMode = serverSettings.isDebugMode();
+
+			Map<String, String> temp = new HashMap<String, String>();
+			for (String key : serverSettings.getLdapSettings().getNetBiosNames().keySet()){
+				temp.put(key.toLowerCase(), serverSettings.getLdapSettings().getNetBiosNames().get(key));
+			}
+			serverSettings.getLdapSettings().setNetBiosNames(temp);
+
+
+		} catch (Throwable ex) {
+			PafErrHandler.handleException(new PafException(
+					"Error initializing Paf Server Settings. "
+							+ ex.getMessage()
+							+ "Default values will be used!!",
+							PafErrSeverity.Warning));
+		}    	
+	}
+    
        
     public static String getConfigDirPath() {
     	return paceHome + fileSep + PafBaseConstants.DN_ConfFldr + fileSep;

@@ -18,8 +18,18 @@ public class PaceSettingsApplication extends Application {
 	
 	private Window mainWindow;
 	
+	public Window getMainWindow() {
+		return mainWindow;
+	}
+
+	private ServerSettings serverSettings;
 	
 	
+	
+	public ServerSettings getServerSettings() {
+		return serverSettings;
+	}
+
 	@Override
 	public void init() {
 		mainWindow = new Window("Pace Application Settings");
@@ -35,7 +45,7 @@ public class PaceSettingsApplication extends Application {
 	
 	private GridLayout layoutGrid() {
 		
-			PaceSettingsListener eventHandler = new PaceSettingsListener(mainWindow);
+			PaceSettingsListener eventHandler = new PaceSettingsListener(this);
 
 			// common part: create layout
 			gridLayout_1 = new GridLayout();
@@ -128,7 +138,7 @@ public class PaceSettingsApplication extends Application {
 		Table tblValue = new Table();
 		tblValue.setEditable(true);
 		PafMetaData.updateApplicationConfig();
-		ServerSettings ss = PafMetaData.getServerSettings();
+		serverSettings = PafMetaData.getServerSettings();
 		int i=1;
 		
 		tblLabel.setSortDisabled(true);
@@ -136,10 +146,10 @@ public class PaceSettingsApplication extends Application {
 		tblLabel.addContainerProperty("Setting", String.class,  null);
 		tblValue.addContainerProperty("Value",  String.class,  null);
 		
-		addStringProperty("Authorizaion Mode", ss.getAuthMode(), i++, tblLabel, tblValue );
-		addStringProperty("Calcscript Timout", ss.getCalcScriptTimeout(), i++, tblLabel, tblValue );
-		addStringProperty("Minimum Client Version", ss.getClientMinVersion(), i++, tblLabel, tblValue );
-		addStringProperty("Client Update URL", ss.getClientUpdateUrl(), i++, tblLabel, tblValue );
+		addStringProperty("Authorizaion Mode", serverSettings.getAuthMode(), i++, tblLabel, tblValue );
+		addStringProperty("Calcscript Timout", serverSettings.getCalcScriptTimeout(), i++, tblLabel, tblValue );
+		addStringProperty("Minimum Client Version", serverSettings.getClientMinVersion(), i++, tblLabel, tblValue );
+		addStringProperty("Client Update URL", serverSettings.getClientUpdateUrl(), i++, tblLabel, tblValue );
 			
 		hl.addComponent(tblLabel);
 		hl.addComponent(tblValue);
