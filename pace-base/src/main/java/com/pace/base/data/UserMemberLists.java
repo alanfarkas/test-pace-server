@@ -24,4 +24,7 @@ public class UserMemberLists {
 		return memberLists.get(alias);
 	}
 	
+	public Map<String, PafMemberList> getMemberLists() {
+		return memberLists;
+	}
 }

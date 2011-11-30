@@ -35,25 +35,28 @@ public class UserMemberListsMigrationAction extends MigrationAction {
 
 	@Override
 	public MigrationActionStatus getStatus() {
-		return MigrationActionStatus.NotStarted;
-		
+		if( this.uml.getMemberLists().size() == 0 ) {
+			return MigrationActionStatus.NotStarted;
+		}
+		return MigrationActionStatus.Completed;
 	}
 
 	@Override
 	public void run() {
-		uml = new UserMemberLists();
-		PafMemberList ml = new PafMemberList();
-		ml.setDimName("Measures");
-		ml.setMemberNames(new String[] {"@DESC(SLS_DLR)", "SLS_AUR"});
-		uml.addMemberList("MyMeasures", ml);
-		
-		xmlPaceProject.setUserMemberLists(uml);
-		try {
-			xmlPaceProject.save(ProjectElementId.UserMemberLists);
-		} catch (ProjectSaveException e) {
-			PafErrHandler.handleException(e, PafErrSeverity.Error);
+		if( getStatus().equals(MigrationActionStatus.NotStarted) ) {
+			uml = new UserMemberLists();
+			PafMemberList ml = new PafMemberList();
+			ml.setDimName("Measures");
+			ml.setMemberNames(new String[] {"@DESC(SLS_DLR)", "SLS_AUR"});
+			uml.addMemberList("MyMeasures", ml);
+			
+			xmlPaceProject.setUserMemberLists(uml);
+			try {
+				xmlPaceProject.save(ProjectElementId.UserMemberLists);
+			} catch (ProjectSaveException e) {
+				PafErrHandler.handleException(e, PafErrSeverity.Error);
+			}
 		}
-		
 	}
 
 }

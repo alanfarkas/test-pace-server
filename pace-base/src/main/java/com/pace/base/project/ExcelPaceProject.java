@@ -43,6 +43,7 @@ import com.pace.base.app.SeasonList;
 import com.pace.base.app.VersionDef;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.data.UserMemberLists;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
 import com.pace.base.project.excel.elements.ApplicationDefExcelElementItem;
@@ -61,6 +62,7 @@ import com.pace.base.project.excel.elements.RolesExcelElementItem;
 import com.pace.base.project.excel.elements.RoundingRulesExcelElementItem;
 import com.pace.base.project.excel.elements.RuleSetsExcelElementItem;
 import com.pace.base.project.excel.elements.SeasonsExcelElementItem;
+import com.pace.base.project.excel.elements.UserMemberListExcelElementItem;
 import com.pace.base.project.excel.elements.UserSecurityExcelElementItem;
 import com.pace.base.project.excel.elements.UserSelectionsExcelElementItem;
 import com.pace.base.project.excel.elements.VersionsExcelElementItem;
@@ -71,7 +73,6 @@ import com.pace.base.project.utils.PafExcelUtil;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.ui.PrintStyle;
-import com.pace.base.ui.PrintStyles;
 import com.pace.base.utility.FileUtils;
 import com.pace.base.view.HierarchyFormat;
 import com.pace.base.view.PafNumberFormat;
@@ -788,7 +789,6 @@ public class ExcelPaceProject extends PaceProject {
 
 	@Override
 	protected void readPrintStyles() throws PaceProjectReadException {
-		// TODO Auto-generated method stub
 		logger.debug("Reading print styles.");
 		
 		PrintStylesExcelElementItem<Map<String,PrintStyle>> excelElementItem = new PrintStylesExcelElementItem<Map<String,PrintStyle>>(getWorkbook());
@@ -1185,13 +1185,28 @@ public class ExcelPaceProject extends PaceProject {
 
 	@Override
 	protected void readUserMemberLists() throws PaceProjectReadException {
-		// TODO Auto-generated method stub
+		logger.debug("Reading user memberlist.");
 		
+		UserMemberListExcelElementItem<UserMemberLists> excelElementItem = new UserMemberListExcelElementItem<UserMemberLists>(getWorkbook());
+		try {
+			
+			setUserMemberLists((UserMemberLists)excelElementItem.read());
+			
+		} catch (PaceProjectReadException e) {
+
+			throw new PaceProjectReadException("Error reading Print Styles.");
+			//addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
 	}
 
 	@Override
 	protected void writeUserMemberLists() throws PaceProjectWriteException {
-		// TODO Auto-generated method stub
+		logger.debug("Writing user member list.");
+		
+		UserMemberListExcelElementItem<UserMemberLists> excelElementItem = new UserMemberListExcelElementItem<UserMemberLists>(getWorkbook());
+		UserMemberLists userMemberList = getUserMemberLists();
+		excelElementItem.write(userMemberList);
 		
 	}
 

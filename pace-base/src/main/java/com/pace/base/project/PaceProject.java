@@ -186,11 +186,6 @@ public abstract class PaceProject implements IPaceProject {
 					readUserSecurity();
 					break;
 					
-				case UserMemberLists:
-					
-					readUserMemberLists();
-					break;
-					
 				case PlanCycles:
 					
 					readPlanCycles();
@@ -261,6 +256,10 @@ public abstract class PaceProject implements IPaceProject {
 				
 				case PrintStyles:
 					readPrintStyles();
+					break;
+					
+				case UserMemberLists:
+					readUserMemberLists();
 					break;
 					
 				default:
@@ -1134,11 +1133,6 @@ public abstract class PaceProject implements IPaceProject {
 		
 	}
 	
-	public UserMemberLists getUserMemberLists() {
-		return (UserMemberLists) getProjectElement(ProjectElementId.UserMemberLists);		
-	}
-
-
 	public List<PafUserSecurity> getUserSecurity() {
 		
 		return getProjectElementList(ProjectElementId.UserSecurity);
@@ -1181,6 +1175,11 @@ public abstract class PaceProject implements IPaceProject {
 		return getProjectElementMap(ProjectElementId.PrintStyles);
 		
 	}
+
+	public UserMemberLists getUserMemberLists() {
+		return (UserMemberLists) getProjectElement(ProjectElementId.UserMemberLists);		
+	}
+
 
 	/**
 	 * 
@@ -1341,12 +1340,6 @@ public abstract class PaceProject implements IPaceProject {
 		
 	}
 
-	public void setUserMemberLists(UserMemberLists uml) {
-
-		getProjectDataMap().put(ProjectElementId.UserMemberLists, uml);			
-		
-	}	
-	
 	public void setUserSecurity(List<PafUserSecurity> userSecurityList) {
 		
 		setProjectElementList(ProjectElementId.UserSecurity, userSecurityList);
@@ -1406,6 +1399,12 @@ public abstract class PaceProject implements IPaceProject {
 		}
 	}
 
+	public void setUserMemberLists(UserMemberLists uml) {
+
+		getProjectDataMap().put(ProjectElementId.UserMemberLists, uml);			
+		
+	}	
+	
 	/**
 	 * 
 	 *  Clears the project data map.
@@ -1443,12 +1442,12 @@ public abstract class PaceProject implements IPaceProject {
 	protected abstract void readViewSections() throws PaceProjectReadException;
 	protected abstract void readViewGroups() throws PaceProjectReadException;
 	protected abstract void readMemberTags() throws PaceProjectReadException;
-	protected abstract void readUserMemberLists() throws PaceProjectReadException;
 	protected abstract void readUserSecurity() throws PaceProjectReadException;
 	protected abstract void readRoundingRules() throws PaceProjectReadException;
 	protected abstract void readRuleSets() throws PaceProjectReadException;
 	//TTN 900 - Added by Iris
 	protected abstract void readPrintStyles() throws PaceProjectReadException;
+	protected abstract void readUserMemberLists() throws PaceProjectReadException;
 
 	protected abstract void writePlanCycles() throws PaceProjectWriteException;
 	protected abstract void writeSeasons() throws PaceProjectWriteException;
@@ -1469,11 +1468,10 @@ public abstract class PaceProject implements IPaceProject {
 	protected abstract void writeViewGroups() throws PaceProjectWriteException;
 	protected abstract void writeMemberTags() throws PaceProjectWriteException;
 	protected abstract void writeUserSecurity() throws PaceProjectWriteException;
-	protected abstract void writeUserMemberLists() throws PaceProjectWriteException;	
 	protected abstract void writeRoundingRules() throws PaceProjectWriteException;
 	protected abstract void writeRuleSets() throws PaceProjectWriteException;	
 	//TTN 900 - Added by Iris
 	protected abstract void writePrintStyles() throws PaceProjectWriteException;
-
+	protected abstract void writeUserMemberLists() throws PaceProjectWriteException;	
 
 }

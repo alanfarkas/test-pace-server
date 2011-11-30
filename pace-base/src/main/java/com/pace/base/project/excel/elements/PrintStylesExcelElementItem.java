@@ -8,7 +8,6 @@ import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Workbook;
 
-import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.project.ExcelPaceProjectConstants;
 import com.pace.base.project.ExcelProjectDataErrorException;
@@ -20,28 +19,23 @@ import com.pace.base.project.excel.PafExcelInput;
 import com.pace.base.project.excel.PafExcelRow;
 import com.pace.base.project.excel.PafExcelValueObject;
 import com.pace.base.project.utils.PafExcelUtil;
-import com.pace.base.rules.RoundingRule;
 import com.pace.base.ui.PrintStyle;
 import com.pace.base.utility.GUIDUtil;
-import com.pace.base.view.PafNumberFormat;
 
 public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> extends PafExcelElementItem<T> 
 		implements IExcelDynamicReferenceElementItem {
 
 	public PrintStylesExcelElementItem(Workbook workbook) {
 		super(workbook);
-		// TODO Auto-generated constructor stub
 	}
 
 	public PrintStylesExcelElementItem(Workbook workbook,
 			boolean isCellReferencingEnabled) {
 		super(workbook, isCellReferencingEnabled);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	protected void createHeaderListMapEntries() {
-		// TODO Auto-generated method stub
 		getHeaderListMap().put(getSheetName(), Arrays.asList("GUID", "Name","Default Style?",
 				"Portait", "Landscape",  "Adjust To", "% Normal Size", "Fit To", "Page(s) Wide", "Page(s) Tall", "Paper Size", "First Page Number",//Page Tab
 				"Header Margin","Top Margin","Left Margin","Right Margin","Bottom Margin","Footer Margin","Center Horizontally","Center Vertically",//Margins Tab
@@ -51,7 +45,6 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 	
 	@Override
 	public Map<String, String> getDynamicReferenceMap() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -66,7 +59,6 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 		.excludeEmptyRows(true)
 		.sheetRequired(true)
 		.endOfSheetIdnt(ExcelPaceProjectConstants.END_OF_SHEET_IDENT)
-		.multiDataRow(true)
 		.build();
 
 		List<PafExcelRow> excelRowList = PafExcelUtil.readExcelSheet(input);
