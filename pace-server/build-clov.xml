@@ -233,7 +233,7 @@
 	    <path refid="Log4j 1.2.9.userclasspath"/>
 	    <path refid="Ostermiller Utils 1.6.0.userclasspath"/>
 	    <path refid="POI 3.5.userclasspath"/>
-		<path refid="XStream 1.1.2.userclasspath"/>
+		<path refid="XStream 1.4.2.userclasspath"/>
 		<path refid="javaee-api.userclasspath"/>
 	</path>
 	<path id="pace-prvdr-mdb-esb.classpath">
