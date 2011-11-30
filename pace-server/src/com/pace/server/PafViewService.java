@@ -39,7 +39,16 @@ import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.ViewPrintState;
-import com.pace.base.app.*;
+import com.pace.base.app.AliasMapping;
+import com.pace.base.app.AliasMemberDisplayType;
+import com.pace.base.app.MdbDef;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.SuppressZeroSettings;
+import com.pace.base.app.UnitOfWork;
+import com.pace.base.app.VersionDef;
+import com.pace.base.app.VersionFormula;
+import com.pace.base.app.VersionType;
 import com.pace.base.comm.IPafViewRequest;
 import com.pace.base.comm.PafViewTreeItem;
 import com.pace.base.comm.SimpleCoordList;
@@ -47,9 +56,20 @@ import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.db.cellnotes.SimpleCellNote;
-import com.pace.base.db.membertags.*;
-import com.pace.base.mdb.*;
+import com.pace.base.db.membertags.MemberTagCommentEntry;
+import com.pace.base.db.membertags.MemberTagCommentPosition;
+import com.pace.base.db.membertags.MemberTagData;
+import com.pace.base.db.membertags.MemberTagDef;
+import com.pace.base.db.membertags.MemberTagViewSectionData;
+import com.pace.base.db.membertags.SimpleMemberTagId;
+import com.pace.base.mdb.AttributeUtil;
+import com.pace.base.mdb.PafBaseTree;
+import com.pace.base.mdb.PafDataSliceParms;
+import com.pace.base.mdb.PafDimMember;
+import com.pace.base.mdb.PafDimMemberProps;
+import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.PafDimTree.LevelGenType;
+import com.pace.base.mdb.SortingTuple;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.state.PafClientState;
 import com.pace.base.ui.PrintStyle;
@@ -58,7 +78,18 @@ import com.pace.base.utility.CompressionUtil;
 import com.pace.base.utility.PafViewSectionUtil;
 import com.pace.base.utility.StringUtils;
 import com.pace.base.utility.UserSelectionUtil;
-import com.pace.base.view.*;
+import com.pace.base.view.Dimension;
+import com.pace.base.view.HierarchyFormat;
+import com.pace.base.view.LockedCell;
+import com.pace.base.view.PafAxis;
+import com.pace.base.view.PafMVS;
+import com.pace.base.view.PafNumberFormat;
+import com.pace.base.view.PafUserSelection;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewHeader;
+import com.pace.base.view.PafViewSection;
+import com.pace.base.view.PageTuple;
+import com.pace.base.view.ViewTuple;
 
 public class PafViewService {
 
@@ -3232,6 +3263,23 @@ public class PafViewService {
 
 		// search each tuple collection for @USER_SEL operators
 		for (PafViewSection viewSection : view.getViewSections()) {
+			// process page tuples
+			for (PageTuple pt : viewSection.getPageTuples()) {
+				if (pt.getMember().contains("@USER_SEL(")) {
+					pt
+							.setMember(replaceUserSel(pt.getMember(),
+									userSelections));
+				}
+				if (pt.getMember().contains("@UOW_ROOT")) {
+					pt.setMember(replaceUserUow(pt.getMember(), clientState, pt
+							.getAxis()));
+				}
+				if (pt.getMember().contains("@PLAN_VERSION")) {
+					pt.setMember(replaceUserVers(pt.getMember(), clientState));
+				}
+
+			}
+			
 			// process row tuples
 			for (ViewTuple vt : viewSection.getRowTuples()) {
 				int dimCnt = viewSection.getRowAxisDims().length;
@@ -3272,22 +3320,28 @@ public class PafViewService {
 
 				}
 			}
-
-			// process page tuples
-			for (PageTuple pt : viewSection.getPageTuples()) {
-				if (pt.getMember().contains("@USER_SEL(")) {
-					pt
-							.setMember(replaceUserSel(pt.getMember(),
-									userSelections));
+			
+			//TTN 609 - presorted ranking view
+			// process sorting tuples
+			for (SortingTuple st : viewSection.getSortingTuples().getSortingTupleList()) {
+				int dimCnt = st.getIntersection().getDimensions().length;
+				for (int i = 0; i < dimCnt; i++) {
+					if (st.getIntersection().getCoordinates()[i].contains("@USER_SEL(")) {
+						st.getIntersection().getCoordinates()[i] = 
+								replaceUserSel(st.getIntersection().getCoordinates()[i],
+										userSelections);
+					}
+					if (st.getIntersection().getCoordinates()[i].contains("@UOW_ROOT")) {
+						st.getIntersection().getCoordinates()[i] = 
+								replaceUserUow(st.getIntersection().getCoordinates()[i],
+										clientState, st.getIntersection().getDimensions()[i]);
+					}
+					if (st.getIntersection().getCoordinates()[i].contains("@PLAN_VERSION")) {
+						st.getIntersection().getCoordinates()[i] = 
+								replaceUserVers(st.getIntersection().getCoordinates()[i],
+										clientState);
+					}
 				}
-				if (pt.getMember().contains("@UOW_ROOT")) {
-					pt.setMember(replaceUserUow(pt.getMember(), clientState, pt
-							.getAxis()));
-				}
-				if (pt.getMember().contains("@PLAN_VERSION")) {
-					pt.setMember(replaceUserVers(pt.getMember(), clientState));
-				}
-
 			}
 		}
 
