@@ -182,9 +182,11 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                             if (measureCat.get(term).getType() == MeasureType.Recalc) {
                             	Intersection recalcComp = is.clone();
                                 recalcComp.setCoordinate(msrDim, term);
-                                if (evalState.getCurrentLockedCells().contains(recalcComp) ||
-                                        evalState.getCurrentChangedCells().contains(recalcComp)) {
-//                                if (evalState.getOrigLockedCells().contains(recalcComp)) {
+                                // TTN-1664 - Due to issues with too much recalc measure triggering, the next 2 lines were commented out,
+                                // and the 3rd line was uncommented. (This may interfere with fixes for TTN-1410 Trigger Measures).
+//                                if (evalState.getCurrentLockedCells().contains(recalcComp) ||
+//                                        evalState.getCurrentChangedCells().contains(recalcComp)) {
+                                if (evalState.getOrigLockedCells().contains(recalcComp)) {
                                 	if (measFunc != null) {
                                         calcIntersection = EvalUtil.translocateIntersection(calcIntersection, measFunc, evalState);
                                     }
