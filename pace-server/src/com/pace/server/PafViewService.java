@@ -70,6 +70,7 @@ import com.pace.base.mdb.PafDimMemberProps;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.mdb.SortingTuple;
+import com.pace.base.mdb.SortingTuples;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.state.PafClientState;
 import com.pace.base.ui.PrintStyle;
@@ -3323,23 +3324,26 @@ public class PafViewService {
 			
 			//TTN 609 - presorted ranking view
 			// process sorting tuples
-			for (SortingTuple st : viewSection.getSortingTuples().getSortingTupleList()) {
-				int dimCnt = st.getIntersection().getDimensions().length;
-				for (int i = 0; i < dimCnt; i++) {
-					if (st.getIntersection().getCoordinates()[i].contains("@USER_SEL(")) {
-						st.getIntersection().getCoordinates()[i] = 
-								replaceUserSel(st.getIntersection().getCoordinates()[i],
-										userSelections);
-					}
-					if (st.getIntersection().getCoordinates()[i].contains("@UOW_ROOT")) {
-						st.getIntersection().getCoordinates()[i] = 
-								replaceUserUow(st.getIntersection().getCoordinates()[i],
-										clientState, st.getIntersection().getDimensions()[i]);
-					}
-					if (st.getIntersection().getCoordinates()[i].contains("@PLAN_VERSION")) {
-						st.getIntersection().getCoordinates()[i] = 
-								replaceUserVers(st.getIntersection().getCoordinates()[i],
-										clientState);
+			SortingTuples sortTuples = viewSection.getSortingTuples();
+			if( sortTuples != null ) {
+				for (SortingTuple st : sortTuples.getSortingTupleList()) {
+					int dimCnt = st.getIntersection().getDimensions().length;
+					for (int i = 0; i < dimCnt; i++) {
+						if (st.getIntersection().getCoordinates()[i].contains("@USER_SEL(")) {
+							st.getIntersection().getCoordinates()[i] = 
+									replaceUserSel(st.getIntersection().getCoordinates()[i],
+											userSelections);
+						}
+						if (st.getIntersection().getCoordinates()[i].contains("@UOW_ROOT")) {
+							st.getIntersection().getCoordinates()[i] = 
+									replaceUserUow(st.getIntersection().getCoordinates()[i],
+											clientState, st.getIntersection().getDimensions()[i]);
+						}
+						if (st.getIntersection().getCoordinates()[i].contains("@PLAN_VERSION")) {
+							st.getIntersection().getCoordinates()[i] = 
+									replaceUserVers(st.getIntersection().getCoordinates()[i],
+											clientState);
+						}
 					}
 				}
 			}
