@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>pace-ext-funcs</groupId>
+  <groupId>com.ams.pace</groupId>
   <artifactId>pace-ext-funcs</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>2.8.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>pace-ext-funcs</name>
@@ -20,6 +20,7 @@
    <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-compiler-plugin</artifactId>
+   	<version>2.3.2</version>
     <configuration>
      <source>1.6</source>
      <target>1.6</target>
@@ -61,14 +62,14 @@
   </exclusions>
 </dependency>
   	<dependency>
-  		<groupId>pace-base</groupId>
+  		<groupId>com.ams.pace</groupId>
   		<artifactId>pace-base</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
+  		<version>2.8.2-SNAPSHOT</version>
   	</dependency>
   	<dependency>
-  		<groupId>pace-prvdr-mdb-esb</groupId>
+  		<groupId>com.ams.pace</groupId>
   		<artifactId>pace-prvdr-mdb-esb</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
+  		<version>2.8.2-SNAPSHOT</version>
   	</dependency>
   </dependencies>
 </project>
