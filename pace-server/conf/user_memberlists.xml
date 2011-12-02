@@ -3,10 +3,10 @@
     <entry>
       <string>MyMeasures</string>
       <memberList>
-        <dimName>Accounts</dimName>
+        <dimName>Measures</dimName>
         <memberNames>
-          <string>@IDESC(PacePrimary)</string>
-		  <string>@IDESC(PaceStatAccts)</string>  
+          <string>@DESC(SLS_DLR)</string>
+          <string>SLS_AUR</string>
         </memberNames>
       </memberList>
     </entry>

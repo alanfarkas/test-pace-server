@@ -3,16 +3,16 @@
     <wb-module deploy-name="pace">
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
         <wb-resource deploy-path="/" source-path="/WebRoot"/>
-        <dependent-module archiveName="pace-base-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-base/pace-base">
+        <dependent-module archiveName="pace-base-2.8.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-base/pace-base">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="pace-ext-cmds-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-ext-cmds/pace-ext-cmds">
+        <dependent-module archiveName="pace-ext-cmds-2.8.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-ext-cmds/pace-ext-cmds">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="pace-prvdr-mdb-esb-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-prvdr-mdb-esb/pace-prvdr-mdb-esb">
+        <dependent-module archiveName="pace-ext-funcs-2.8.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-ext-funcs/pace-ext-funcs">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="pace-ext-funcs-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-ext-funcs/pace-ext-funcs">
+        <dependent-module archiveName="pace-prvdr-mdb-esb-2.8.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-prvdr-mdb-esb/pace-prvdr-mdb-esb">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/pace-server/WebRoot/src"/>
