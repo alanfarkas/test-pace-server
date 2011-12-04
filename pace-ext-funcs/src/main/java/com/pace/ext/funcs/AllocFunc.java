@@ -131,7 +131,7 @@ public class AllocFunc extends AbstractFunction {
     	targetMsrs.clear();
     	
     	// initialize with children measures
-    	for (PafDimMember msrMbr : measureTree.getChildren(msrToAlloc)) {
+    	for (PafDimMember msrMbr : measureTree.getDescendants(msrToAlloc)) {
     		targetMsrs.add(msrMbr.getKey());      		
     	} 
     	
