@@ -4,7 +4,8 @@ public enum VersionType {
 	Calculated, 
 	ContribPct,
 	ForwardPlannable, 
-	NonPlannable, 
+	NonPlannable,
+	Offset,
 	Plannable,  
 	Variance  
 }

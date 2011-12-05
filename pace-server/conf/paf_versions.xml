@@ -378,5 +378,18 @@
 	</VersionDef>
 	-->
 
+
+
+<!-- Offset Versions  -->
+
+	<VersionDef>
+		<name>Dyn_LY</name>
+		<type>Offset</type>
+		<versionFormula>
+			<baseVersion>WF</baseVersion>
+			<yearOffset>-1</yearOffset>
+		</versionFormula>
+	</VersionDef>
+
 	
 </VersionDef-array>

@@ -41,7 +41,7 @@ public class PafBaseConstants {
 		new VersionType[] {VersionType.ForwardPlannable, VersionType.NonPlannable, VersionType.Plannable};
 	public static final List<VersionType> BASE_VERSION_TYPE_LIST = Arrays.asList(BASE_VERSION_TYPE_ARRAY);
 	public static final VersionType[] DERIVED_VERSION_TYPE_ARRAY =
-		new VersionType[] {VersionType.Calculated, VersionType.ContribPct, VersionType.Variance};
+		new VersionType[] {VersionType.Calculated, VersionType.ContribPct, VersionType.Variance, VersionType.Offset};
 	public static final List<VersionType> DERIVED_VERSION_TYPE_LIST = Arrays.asList(DERIVED_VERSION_TYPE_ARRAY);
 	
 	public static final String CONN_PROPERTY_ESB_APP = "APPLICATION";

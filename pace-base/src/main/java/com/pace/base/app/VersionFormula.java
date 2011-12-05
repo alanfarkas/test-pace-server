@@ -39,9 +39,15 @@ public class VersionFormula {
 	// Contribution percent fields
 	PafDimSpec[] compareIsSpec;
 	
+	// Offset version fields
+	private int yearOffset;
+	
+	
 	public VersionFormula() {    }
 
 	/**
+	 * Variance Version
+	 * 
 	 * @param baseVersion Base Version
 	 * @param compareVersion Comparison Version
 	 * @param varianceType Variance Type
@@ -55,6 +61,8 @@ public class VersionFormula {
 
 	
 	/**
+	 * Contribution Percent
+	 * 
 	 * @param baseVersion Base Version
 	 * @param compareMembers Comparison member specifications
 	 */
@@ -68,6 +76,21 @@ public class VersionFormula {
 			throw new IllegalArgumentException(errMsg);
 		}
 	}
+
+	
+	/**
+	 * Offset Version
+	 * 
+	 * @param baseVersion Base Version
+	 * @param yearOffset yearOffset
+	 */
+	public VersionFormula(String baseVersion, String compareVersion, int yearOffset) {
+
+		this.baseVersion = baseVersion;
+		this.yearOffset = yearOffset;
+	}
+
+	
 
 	/**
 	 * @return the baseVersion
@@ -162,6 +185,20 @@ public class VersionFormula {
 		return compareIsMembers;
 	}
 
+	/**
+	 * @return the yearOffset
+	 */
+	public int getYearOffset() {
+		return yearOffset;
+	}
+
+	/**
+	 * @param yearOffset the yearOffset to set
+	 */
+	public void setYearOffset(int yearOffset) {
+		this.yearOffset = yearOffset;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -176,6 +213,7 @@ public class VersionFormula {
 				+ ((compareVersion == null) ? 0 : compareVersion.hashCode());
 		result = prime * result
 				+ ((varianceType == null) ? 0 : varianceType.hashCode());
+		result = prime * result + yearOffset;
 		return result;
 	}
 
@@ -203,14 +241,11 @@ public class VersionFormula {
 				return false;
 		} else if (!compareVersion.equals(other.compareVersion))
 			return false;
-		if (varianceType == null) {
-			if (other.varianceType != null)
-				return false;
-		} else if (!varianceType.equals(other.varianceType))
+		if (varianceType != other.varianceType)
+			return false;
+		if (yearOffset != other.yearOffset)
 			return false;
 		return true;
 	}
-	
-	
 
 }
