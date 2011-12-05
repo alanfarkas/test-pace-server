@@ -42,6 +42,7 @@ public class AllocFunc extends AbstractFunction {
 	protected String msrToAlloc = null;
 	protected List<String> targetMsrs = new ArrayList<String>();
 	protected List<Intersection> unlockIntersections = new ArrayList<Intersection>();
+	protected List<String> excludedMsrs = new ArrayList<String>();
 	
 	private static Logger logger = Logger.getLogger(AllocFunc.class);
 
@@ -133,17 +134,32 @@ public class AllocFunc extends AbstractFunction {
     	// initialize with children measures
     	for (PafDimMember msrMbr : measureTree.getDescendants(msrToAlloc)) {
     		targetMsrs.add(msrMbr.getKey());      		
-    	} 
-    	
-    	// remove any measures specified
-    	if (parms.length > 1) {
-    		while (index<parms.length) {
-    			targetMsrs.remove(parms[index++]);
-    		}
     	}
     	
+    	// remove any measures specified as well as their descendants
+    	
+
+    	if (parms.length > 1) {
+    		// build excluded measures list
+    		while (index<parms.length) {
+    			if (measureTree.getDescendants(parms[index]) == null) {
+    				excludedMsrs.add(parms[index]);
+    			} else {
+    				for (PafDimMember msrMbr : measureTree.getDescendants(parms[index])) {
+    					excludedMsrs.add(msrMbr.getKey());      		
+    				}
+    			}
+    			index++;
+    		}
+
+    		// now remove them from the list
+    		for (String excludedMsr : excludedMsrs) {
+    			targetMsrs.remove(excludedMsr);
+    		}
+    	}
+
     	this.isValidated = true;
-	}
+    }
 
 
 	/* (non-Javadoc)
@@ -239,6 +255,7 @@ public class AllocFunc extends AbstractFunction {
 	    	String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
 	        String currentYear = evalState.getAppDef().getCurrentYear(); 
 	        String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
+	        String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
 	    	
 	    	long stepTime = System.currentTimeMillis();
 	
@@ -260,15 +277,20 @@ public class AllocFunc extends AbstractFunction {
 			if (lockedTimePeriods == null) lockedTimePeriods = new HashSet<String>(0); 
 	        
 				
-	        // add up all locked cell values
+	        // add up all locked cell values, this must include floors intersections of excluded measures
+			
 	        for (Intersection target : targets) {
 	            if (evalState.getCurrentLockedCells().contains(target) || 
 	                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
-	                            target.getCoordinate(yearDim).equals(currentYear))  ) {
+	                            target.getCoordinate(yearDim).equals(currentYear)) ||
+	                    excludedMsrs.contains(target.getCoordinate(msrDim)) 
+	            		) {
 	                lockedTotal += dataCache.getCellValue(target);
 	                lockedTargets.add(target);              
 	            }
 	        }
+	        
+
 	
 	        double allocAvailable = 0;
 	        
