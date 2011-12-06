@@ -854,7 +854,7 @@ public class PafViewService {
 			
 			sections = lockVersionIntersections(sections, clientState); //ok
 
-			sections = lockMeasureIntersections(sections); //ok
+			sections = lockMeasureIntersections(sections, clientState); //ok
 			
 			sections = addNonPlannableTuplesToClientState(sections);
 
@@ -1808,10 +1808,11 @@ public class PafViewService {
 	 *  Lock non-plannable view section measure intersections
 	 * 
 	 * @param sections View section array
+	 * @param clientState 
 	 * @return Complex view section array
 	 */
 	
-	private PafViewSection[] lockMeasureIntersections(PafViewSection[] sections) {
+	private PafViewSection[] lockMeasureIntersections(PafViewSection[] sections, PafClientState clientState) {
 
 		//get mdbdef from paf app
 		MdbDef mdbDef = pafApp.getMdbDef();
@@ -1901,10 +1902,14 @@ public class PafViewService {
 
 					// by default, measure is plannable
 					boolean measurePlannable = true;
-					if (measureMember != null
-							&& measuresPlannableCache.containsKey(measureMember)) {
+					
+					//TTN-1413: Read Only Measures
+					//if client state contains read only measure, set plannable to false
+					if ( measureMember != null && clientState.getReadOnlyMeasures().contains(measureMember) ) {
+						measurePlannable = false;
+					} else if (measureMember != null && measuresPlannableCache.containsKey(measureMember)) {
 						measurePlannable = measuresPlannableCache.get(measureMember);
-					}
+					} 
 					
 					// if measure is not plannable lock cell and intersection
 					if ( !measurePlannable ) {

@@ -668,7 +668,7 @@ public class PafDataService {
 
 			// Return version tree
 			return tree;
-		}
+		} 
 		
 		// All other dimensions - Start out by making a tree copy
 		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, uowMbrNames, mdbDef);
@@ -705,9 +705,11 @@ public class PafDataService {
 		PafDimMember parent;
 		String memberName;
 		for (PafDimMember member : treeMembers ) {
+			
 			// If this is a valid member, leave the member in the tree,
 			// unless it is a duplicate occurrence.
 			memberName = member.getKey();
+									
 			if (cacheMbrs.contains(memberName)) {
 				
 				// Check for discontiguous tree error
@@ -737,6 +739,18 @@ public class PafDataService {
 					// Remove any branches that were comprised solely
 					// of duplicates and their ancestors.
 					copy.pruneAncestors(parent);
+				}
+				
+				//TTN-1413: Read Only Measures
+				//if measures dimension
+				if ( dim.equalsIgnoreCase(measureDim) ) {
+					
+					if ( clientState.getReadOnlyMeasures().contains(memberName) && member.getMemberProps() != null ) {
+						
+						member.getMemberProps().setReadOnly(true);
+						
+					}
+					
 				}
 				
 			} else {

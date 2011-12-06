@@ -22,6 +22,7 @@ package com.pace.base.state;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -84,7 +85,7 @@ public class PafClientState implements IPafClientState {
     private boolean isUserFilteredUow = false;
     private Map<String, List<String>> roleFilterSelections = new HashMap<String, List<String>>();
     private PafUserDef userDef;
-    
+    private Set<String> readOnlyMeasuresSet = null;
     
     
     public MemberTreeSet getUowTrees() {
@@ -765,7 +766,29 @@ public class PafClientState implements IPafClientState {
 		return userDef;
 	}
 
+	/**
+	 * Returns read only measure set
+	 * 
+	 * @return
+	 */
+	public Set<String> getReadOnlyMeasures() {
+			
+		if ( readOnlyMeasuresSet == null ) {
 
+			readOnlyMeasuresSet = new HashSet<String>();
+			
+		}
+		
+		if ( readOnlyMeasuresSet.size() == 0 && plannerConfig != null && plannerConfig.getReadOnlyMeasures() != null && plannerConfig.getReadOnlyMeasures().length > 0 ) {
+			
+			readOnlyMeasuresSet.addAll(Arrays.asList(plannerConfig.getReadOnlyMeasures()));
+			
+		}
+		
+		
+		return readOnlyMeasuresSet;
+		
+	}
 
 
 
