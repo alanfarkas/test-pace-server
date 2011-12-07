@@ -5,5 +5,6 @@ package com.pace.base;
 		STOPPING, 
 		STARTING, 
 		RUNNING, 
-		FAILED 
+		FAILED,
+		LOADING
 	}

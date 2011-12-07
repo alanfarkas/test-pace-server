@@ -20,6 +20,7 @@ package com.pace.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,8 +30,19 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.pace.base.*;
-import com.pace.base.app.*;
+import com.pace.base.CustomCommandResult;
+import com.pace.base.IPafCustomCommand;
+import com.pace.base.PafBaseConstants;
+import com.pace.base.PafErrHandler;
+import com.pace.base.PafErrSeverity;
+import com.pace.base.PafException;
+import com.pace.base.RunningState;
+import com.pace.base.app.AppSettings;
+import com.pace.base.app.CustomActionDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.SuppressZeroSettings;
+import com.pace.base.app.UnitOfWork;
+import com.pace.base.app.VersionType;
 import com.pace.base.comm.ApplicationState;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
@@ -38,7 +50,6 @@ import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree.LevelGenType;
-import com.pace.base.project.ProjectElementId;
 import com.pace.base.state.IPafClientState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
@@ -54,8 +65,8 @@ public class PafAppService {
 
 	private static PafAppService _instance = null;
 
-	private static Map<String, PafApplicationDef> applicationDefs = new HashMap<String, PafApplicationDef>();
-	private static Map<String, ApplicationState> applicationStates = new HashMap<String, ApplicationState>();
+	private static Map<String, PafApplicationDef> applicationDefs =  Collections.synchronizedMap(new HashMap<String, PafApplicationDef>());
+	private static Map<String, ApplicationState> applicationStates = Collections.synchronizedMap(new HashMap<String, ApplicationState>());
         
 	//handles to the other main services
 	PafViewService viewService = PafViewService.getInstance();
@@ -80,7 +91,12 @@ public class PafAppService {
     // currently just loads all apps with the current measure/version defs
     public synchronized void loadApplicationConfigurations() {
 
-
+    	Map<String, ApplicationState> previousAppStateMap = new HashMap<String, ApplicationState>();
+    	
+    	if ( applicationStates != null ) {
+    		previousAppStateMap.putAll(applicationStates);
+    	}
+    	
         applicationDefs.clear();
         applicationStates.clear();
         
@@ -93,6 +109,9 @@ public class PafAppService {
         	
             // Initialize an application state objected (defaults to stopped)
             ApplicationState as = new ApplicationState(app.getAppId());
+            
+            as.setCurrentRunState(RunningState.LOADING);
+            
             applicationStates.put(as.getApplicationId(), as);
         	
             app.initMeasures(PafMetaData.getPaceProject().getMeasures());
@@ -112,6 +131,19 @@ public class PafAppService {
 			// initialize the user list
 			PafSecurityService.initUsers();
 			PafSecurityService.initPlannerRoles();
+			
+			if ( previousAppStateMap.containsKey(as.getApplicationId()) && previousAppStateMap.get(as.getApplicationId()).getCurrentRunState().equals(RunningState.RUNNING) ) {
+				
+				as.setCurrentRunState(RunningState.RUNNING);
+				
+			} else {
+				
+				as.setCurrentRunState(RunningState.STOPPED);
+				
+			}
+				
+			
+			applicationStates.put(as.getApplicationId(), as);
             
         }
     }

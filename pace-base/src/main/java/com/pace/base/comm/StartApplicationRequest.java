@@ -1,4 +1,4 @@
-/*
+/**
  * 
  */
 package com.pace.base.comm;
@@ -6,13 +6,14 @@ package com.pace.base.comm;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * The Class LoadApplicationRequest.
- * Communication object for requesting the server load an application.
+/**
+ * Start Application Request.
  * 
+ * @author JMilliron
+ *
  */
-public class LoadApplicationRequest extends PafRequest {
-	
+public class StartApplicationRequest extends PafRequest {
+
 	/** The app ids. */
 	private List<String> appIds = new ArrayList<String>();
 	
@@ -34,6 +35,5 @@ public class LoadApplicationRequest extends PafRequest {
 		this.appIds = appIds;
 	}
 
+	
 }
-	
-	

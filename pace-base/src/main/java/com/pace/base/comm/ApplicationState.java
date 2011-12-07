@@ -66,5 +66,17 @@ public class ApplicationState {
 	public List<Exception> getExceptions() {
 		return exceptions;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ApplicationState [applicationId=" + applicationId
+				+ ", currentRunState=" + currentRunState + ", exceptions="
+				+ exceptions + "]";
+	}
+	
+	
 	
 }

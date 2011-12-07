@@ -15,7 +15,6 @@ package com.pace.server;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import javax.jws.WebParam;
 import javax.jws.WebService;
 
 import com.pace.base.PafNotAbletoGetLDAPContext;
@@ -32,12 +31,72 @@ import com.pace.base.comm.LoadApplicationRequest;
 import com.pace.base.comm.PafRequest;
 import com.pace.base.comm.PafResponse;
 import com.pace.base.comm.PafSuccessResponse;
+import com.pace.base.comm.StartApplicationRequest;
 import com.pace.base.comm.UploadAppRequest;
 import com.pace.base.comm.UploadAppResponse;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.view.PafView;
-import com.pace.base.view.PafViewSection;
-import com.pace.server.comm.*;
+import com.pace.server.comm.PafAuthRequest;
+import com.pace.server.comm.PafAuthResponse;
+import com.pace.server.comm.PafCellNoteInformationResponse;
+import com.pace.server.comm.PafClearImportedAttrRequest;
+import com.pace.server.comm.PafClearImportedAttrResponse;
+import com.pace.server.comm.PafClientCacheBlock;
+import com.pace.server.comm.PafClientCacheRequest;
+import com.pace.server.comm.PafClientChangePasswordRequest;
+import com.pace.server.comm.PafClientSecurityPasswordResetResponse;
+import com.pace.server.comm.PafClientSecurityRequest;
+import com.pace.server.comm.PafClientSecurityResponse;
+import com.pace.server.comm.PafCommandResponse;
+import com.pace.server.comm.PafCustomCommandRequest;
+import com.pace.server.comm.PafCustomCommandResponse;
+import com.pace.server.comm.PafFilteredMbrTagRequest;
+import com.pace.server.comm.PafGetFilteredUOWSizeRequest;
+import com.pace.server.comm.PafGetFilteredUOWSizeResponse;
+import com.pace.server.comm.PafGetMemberTagDataResponse;
+import com.pace.server.comm.PafGetMemberTagDefsRequest;
+import com.pace.server.comm.PafGetMemberTagDefsResponse;
+import com.pace.server.comm.PafGetMemberTagInfoResponse;
+import com.pace.server.comm.PafGetNotesRequest;
+import com.pace.server.comm.PafGetNotesResponse;
+import com.pace.server.comm.PafGetPaceGroupsRequest;
+import com.pace.server.comm.PafGetPaceGroupsResponse;
+import com.pace.server.comm.PafGroupSecurityRequest;
+import com.pace.server.comm.PafGroupSecurityResponse;
+import com.pace.server.comm.PafImportAttrRequest;
+import com.pace.server.comm.PafImportAttrResponse;
+import com.pace.server.comm.PafImportMemberTagRequest;
+import com.pace.server.comm.PafMdbPropsRequest;
+import com.pace.server.comm.PafMdbPropsResponse;
+import com.pace.server.comm.PafPlanSessionRequest;
+import com.pace.server.comm.PafPlanSessionResponse;
+import com.pace.server.comm.PafPopulateRoleFilterResponse;
+import com.pace.server.comm.PafSaveMbrTagRequest;
+import com.pace.server.comm.PafSaveNotesRequest;
+import com.pace.server.comm.PafSaveNotesResponse;
+import com.pace.server.comm.PafServerAck;
+import com.pace.server.comm.PafSetPaceGroupsRequest;
+import com.pace.server.comm.PafSetPaceGroupsResponse;
+import com.pace.server.comm.PafSimpleCellNoteExportRequest;
+import com.pace.server.comm.PafSimpleCellNoteExportResponse;
+import com.pace.server.comm.PafSimpleCellNoteImportRequest;
+import com.pace.server.comm.PafSimpleCellNoteImportResponse;
+import com.pace.server.comm.PafTreeRequest;
+import com.pace.server.comm.PafTreeResponse;
+import com.pace.server.comm.PafTreesRequest;
+import com.pace.server.comm.PafTreesResponse;
+import com.pace.server.comm.PafUpdateDatacacheRequest;
+import com.pace.server.comm.PafUserNamesforSecurityGroupsRequest;
+import com.pace.server.comm.PafUserNamesforSecurityGroupsResponse;
+import com.pace.server.comm.PafValidAttrRequest;
+import com.pace.server.comm.PafValidAttrResponse;
+import com.pace.server.comm.PafVerifyUsersRequest;
+import com.pace.server.comm.PafVerifyUsersResponse;
+import com.pace.server.comm.PafViewRequest;
+import com.pace.server.comm.SaveWorkRequest;
+import com.pace.server.comm.ValidateUserSecurityRequest;
+import com.pace.server.comm.ValidationResponse;
+import com.pace.server.comm.ViewRequest;
 // TODO: Auto-generated Javadoc
 
 /**
@@ -68,7 +127,24 @@ public interface IPafService extends Remote {
      */
     public PafPlanSessionResponse startPlanSession( PafPlanSessionRequest planRequest)  throws RemoteException, PafSoapException; 
 	
+    /**
+     * Uploads an application
+     * 
+     * @param uploadAppReq upload request
+     * @return upload response
+     * @throws RemoteException the remote exception
+     * @throws PafSoapException the paf soap exception
+     */
     public UploadAppResponse uploadApplication(UploadAppRequest uploadAppReq)  throws RemoteException, PafSoapException; 
+    
+    /**
+     * Downloads an application
+     * 
+     * @param downAppReq download app request
+     * @return download response
+     * @throws RemoteException the remote exception
+     * @throws PafSoapException the paf soap exception
+     */
     public DownloadAppResponse downloadApplication(DownloadAppRequest downAppReq)  throws RemoteException, PafSoapException;     
     
 	/**
@@ -80,7 +156,6 @@ public interface IPafService extends Remote {
 	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafView getView(ViewRequest viewRequest) throws RemoteException, PafSoapException;
-//	public PafResponse refreshMetaDataCache() throws RemoteException;
 	
 	/**
 	 * Gets the application state.
@@ -101,6 +176,17 @@ public interface IPafService extends Remote {
 	 * @throws PafSoapException the paf soap exception
 	 */
 	public PafSuccessResponse loadApplication(LoadApplicationRequest appReq) throws RemoteException, PafSoapException;
+	
+
+	/**
+	 * Start/Restarts an application
+	 * 
+	 * @param appReq the app req
+	 * @return the paf success response
+	 * @throws RemoteException the remote exception
+	 * @throws PafSoapException hte paf soap exception
+	 */
+	public PafSuccessResponse startApplication(StartApplicationRequest appReq) throws RemoteException, PafSoapException;
 	
 	
 	/**

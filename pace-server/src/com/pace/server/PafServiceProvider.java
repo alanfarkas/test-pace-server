@@ -83,6 +83,7 @@ import com.pace.base.comm.PafResponse;
 import com.pace.base.comm.PafSuccessResponse;
 import com.pace.base.comm.PafViewTreeItem;
 import com.pace.base.comm.SimpleCoordList;
+import com.pace.base.comm.StartApplicationRequest;
 import com.pace.base.comm.UploadAppRequest;
 import com.pace.base.comm.UploadAppResponse;
 import com.pace.base.comm.UserFilterSpec;
@@ -4204,41 +4205,32 @@ public PafGetNotesResponse getCellNotes(
 		
 		String reqAppId="Unintialized";
 	
+		PafSuccessResponse psr = null;
 		
 		try {
 								
 			// initialize the application service and reload the application metadata			
 			appService.loadApplicationConfigurations();			
-
-			
-			// Now their should in all cases be an appid defined for at least the current application
-			// If the appID in req doesn't map to the currently loaded application it's probably worth a warning
-
-			if (appReq==null) {
-				reqAppId = appService.getApplications().get(0).getAppId();
-			} else {
-				reqAppId = appReq.getAppIds().get(0);
-			}			
-				
-			// initialize the data service and re/load the application data sources
-			if ( appReq==null || appReq.isLoadMdb() ) {
-				appService.loadApplicationMetaData(reqAppId);
-			}
 			
 			System.out.println(Messages.getString("PafServiceProvider.7") + logger.getLevel()); //$NON-NLS-1$
+			
 			logger.info(Messages.getString("PafServiceProvider.8")); //$NON-NLS-1$
 						
 
 		} catch (Exception ex) {
 			
 			PafErrHandler.handleException(ex, PafErrSeverity.Error);
-			PafSuccessResponse psr = new PafSuccessResponse(false);
+			psr = new PafSuccessResponse(false);
 			String s = String.format("Error loading application [%s]", reqAppId);
 			psr.addException(ex);
 			psr.setResponseMsg( s + ex.getMessage() );
 		}
 				
-		return new PafSuccessResponse(true);
+		if ( psr == null ) {
+			psr = new PafSuccessResponse(true);
+		}
+		
+		return psr;
 		
 	}
 
@@ -4382,6 +4374,46 @@ public PafGetNotesResponse getCellNotes(
 		}
 			
 		return resp;
+	}
+
+
+
+
+	@Override
+	public PafSuccessResponse startApplication(StartApplicationRequest appReq)
+			throws RemoteException, PafSoapException {
+		
+		String reqAppId="Unintialized";
+	
+		PafSuccessResponse psr = null;
+		
+		try {
+								
+			if (appReq==null) {
+				reqAppId = appService.getApplications().get(0).getAppId();
+			} else {
+				reqAppId = appReq.getAppIds().get(0);
+			}			
+				
+			
+			appService.loadApplicationMetaData(reqAppId);
+					
+
+		} catch (Exception ex) {
+			
+			PafErrHandler.handleException(ex, PafErrSeverity.Error);
+			psr = new PafSuccessResponse(false);
+			String s = String.format("Error starting application [%s]", reqAppId);
+			psr.addException(ex);
+			psr.setResponseMsg( s + ex.getMessage() );
+		}
+				
+		if ( psr == null ) {
+			psr = new PafSuccessResponse(true);
+		}
+		
+		return psr;		
+	
 	}
 	
 	
