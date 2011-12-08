@@ -2,6 +2,8 @@ package com.pace.base.ui;
 
 import java.io.File;
 
+import com.pace.base.PafBaseConstants;
+
 public class PafServer implements Comparable, Cloneable {
 
 	private static final String WSDL = "?wsdl";
@@ -151,9 +153,9 @@ public class PafServer implements Comparable, Cloneable {
 	public void setWsdlServiceName(String wsdlServiceName) {
 		this.wsdlServiceName = wsdlServiceName;
 	}
-
-	public String getCompleteWSDLService() {
-
+	
+	private String getCompleteAppUrl() {
+		
 		StringBuilder sb = new StringBuilder();
 		
 		if(https){
@@ -163,6 +165,23 @@ public class PafServer implements Comparable, Cloneable {
 		}
 		
 		sb.append("://" + host + ":" + port + "/" + webappName);
+		
+		return sb.toString();
+	}
+	
+	public String getCompleteServerSettingsUrl() {
+		
+		StringBuilder sb = new StringBuilder(getCompleteAppUrl());		
+		
+		sb.append("/");
+		sb.append(PafBaseConstants.PACE_SERVER_SETTINGS_CONTEXT_NAME);
+		
+		return sb.toString();
+	}
+
+	public String getCompleteWSDLService() {
+
+		StringBuilder sb = new StringBuilder(getCompleteAppUrl());				
 		
 		if ( wsdlServiceName != null && ! wsdlServiceName.equals(WSDL)) {
 			

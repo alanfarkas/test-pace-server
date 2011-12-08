@@ -297,7 +297,7 @@ public class PafBaseConstants {
 	public static final String PERFORMANCE_LOGGER_UOW_LOAD = "pace.performance.uow.load";
 
 	
-
+	public static final String PACE_SERVER_SETTINGS_CONTEXT_NAME = "settings";
 	
 	
 	/**
