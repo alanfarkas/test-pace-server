@@ -71,7 +71,7 @@ public class VersionsExcelElementItem<T extends List<VersionDef>> extends PafExc
 	@Override
 	protected void createHeaderListMapEntries() {
 
-		getHeaderListMap().put(getSheetName(), Arrays.asList("name", "type", "base version", "compare version", "variance type", "compare dimension", "compare member list", "numeric format name"));
+		getHeaderListMap().put(getSheetName(), Arrays.asList("name", "type", "base version", "compare version", "variance type", "compare dimension", "compare member list", "yearOffset", "numeric format name"));
 
 	}
 
@@ -311,10 +311,22 @@ public class VersionsExcelElementItem<T extends List<VersionDef>> extends PafExc
 						break;
 					
 					case 7:
-										
-						vd.setNumericFormatName(PafExcelUtil.getString(getProjectElementId(), firstValueObject));
+						if ( ! firstValueObject.isBlank() && vd != null ) {
+							Integer yrOffSet = PafExcelUtil.getInteger(getProjectElementId(), firstValueObject);
+							if( yrOffSet != null ) {
+								VersionFormula vf = vd.getVersionFormula();
+								if( vf != null ) {
+									vf.setYearOffset(yrOffSet);
+									vd.setVersionFormula(vf);
+								}
+							}
+						}
 						break;						
 					
+					case 8:
+						
+						vd.setNumericFormatName(PafExcelUtil.getString(getProjectElementId(), firstValueObject));
+						break;						
 				}
 				
 			} catch (ExcelProjectDataErrorException epdee) {
@@ -455,10 +467,15 @@ public class VersionsExcelElementItem<T extends List<VersionDef>> extends PafExc
 						
 					}
 					
+					if( vd.getType() != null && vf.getYearOffset() != null ) {
+						
+						excelRow.addRowItem(7, PafExcelValueObject.createFromInteger(vf.getYearOffset()));
+						
+					}
 				}
 				
 				//numeric format name
-				excelRow.addRowItem(7, PafExcelValueObject.createFromFormulaReferenceMap(vd.getNumericFormatName(), numericFormatDynamicRefMap));
+				excelRow.addRowItem(8, PafExcelValueObject.createFromFormulaReferenceMap(vd.getNumericFormatName(), numericFormatDynamicRefMap));
 								
 				excelRowList.add(excelRow);			
 				
