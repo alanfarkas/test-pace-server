@@ -166,7 +166,7 @@ public class VersionFormula {
 	}
 
 	/**
-	 * @return the compare intersection membes
+	 * @return the compare intersection members
 	 */
 	public String[] getCompareIsMembers() {
 		
