@@ -40,7 +40,7 @@ public class VersionFormula {
 	PafDimSpec[] compareIsSpec;
 	
 	// Offset version fields
-	private int yearOffset;
+	private Integer yearOffset;
 	
 	
 	public VersionFormula() {    }
@@ -84,7 +84,7 @@ public class VersionFormula {
 	 * @param baseVersion Base Version
 	 * @param yearOffset yearOffset
 	 */
-	public VersionFormula(String baseVersion, String compareVersion, int yearOffset) {
+	public VersionFormula(String baseVersion, String compareVersion, Integer yearOffset) {
 
 		this.baseVersion = baseVersion;
 		this.yearOffset = yearOffset;
@@ -188,14 +188,14 @@ public class VersionFormula {
 	/**
 	 * @return the yearOffset
 	 */
-	public int getYearOffset() {
+	public Integer getYearOffset() {
 		return yearOffset;
 	}
 
 	/**
 	 * @param yearOffset the yearOffset to set
 	 */
-	public void setYearOffset(int yearOffset) {
+	public void setYearOffset(Integer yearOffset) {
 		this.yearOffset = yearOffset;
 	}
 
@@ -213,7 +213,8 @@ public class VersionFormula {
 				+ ((compareVersion == null) ? 0 : compareVersion.hashCode());
 		result = prime * result
 				+ ((varianceType == null) ? 0 : varianceType.hashCode());
-		result = prime * result + yearOffset;
+		result = prime * result
+				+ ((yearOffset == null) ? 0 : yearOffset.hashCode());
 		return result;
 	}
 
@@ -241,10 +242,14 @@ public class VersionFormula {
 				return false;
 		} else if (!compareVersion.equals(other.compareVersion))
 			return false;
+		if (yearOffset == null) {
+			if (other.yearOffset != null)
+				return false;
+		}
+		else if (! yearOffset.equals(other.yearOffset) )
+			return false;
 		if (varianceType != other.varianceType)
-			return false;
-		if (yearOffset != other.yearOffset)
-			return false;
+			return false;	
 		return true;
 	}
 
