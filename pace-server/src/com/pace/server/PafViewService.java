@@ -540,15 +540,15 @@ public class PafViewService {
 
 	
 	/**
-	 * Populates the version type cache with all the versions from teh 
-	 * version cache and thier version type. If a version is derived meaning
+	 * Populates the version type cache with all the versions from the 
+	 * version cache and their version type. If a version is derived meaning
 	 * not NonPlannable, Plannable, or ForwardPlannable, then the base version
-	 * from teh version formula is used to get the base version name, then that 
+	 * from the version formula is used to get the base version name, then that 
 	 * name is used to get the base version type.  
 	 * 
 	 * For example, if the derived version is WP_vs_LY, then the base version would be
 	 * WP, and if WP was Plannable, then WP_vs_LY should be added to the version type
-	 * cache as Planable.
+	 * cache as Plannable.
 	 */
 	
 	public void populateVersionsTypeCache() {
@@ -1459,7 +1459,7 @@ public class PafViewService {
 					}
 				}
 
-				// retrieve the version type frm the cache
+				// retrieve the version type from the cache
 				VersionType versionType = versionsTypeCache.get(versionMember);
 
 				if (versionType != null) {
