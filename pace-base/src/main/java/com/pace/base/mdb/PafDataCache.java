@@ -96,6 +96,7 @@ public class PafDataCache implements IPafDataCache {
 	private PafApplicationDef appDef = null;
 	private PafMVS pafMVS = null;
 	private MemberTreeSet dimTrees = null;
+	private Map<String, PafBaseTree> mdbBaseTrees = null;
 	private EvalState evalState = null;
 	private boolean isDirty = true;					// Indicates that the data cache has been updated
 	private final static int NON_KEY_DIM_COUNT = 2;	// Measure and Time Dimension
@@ -151,6 +152,7 @@ public class PafDataCache implements IPafDataCache {
 		planVersions = new String[]{clientState.getPlanningVersion().getName()};
 		UnitOfWork expandedUowSpec = clientState.getUnitOfWork();
 		dimTrees = clientState.getUowTrees();
+		mdbBaseTrees = clientState.getMdbBaseTrees();
 
 		// Set dimension properties
 		String[] uowDims = expandedUowSpec.getDimensions();
@@ -233,6 +235,14 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public MemberTreeSet getDimTrees() {
 		return dimTrees;
+	}
+
+
+	/**
+	 * @return the mdbBaseTrees
+	 */
+	public Map<String, PafBaseTree> getMdbBaseTrees() {
+		return mdbBaseTrees;
 	}
 
 
@@ -673,6 +683,16 @@ public class PafDataCache implements IPafDataCache {
 	public String[] getPlanVersions() {
 		return planVersions;
 	}
+
+	/**
+	 * Return the plan version
+	 * 
+	 * @return Plan version
+	 */
+	public String getPlanVersion() {
+		return planVersions[0];
+	}
+
 
 	/**
 	 * Return an array containing the dimensions that are represented in the data cache
@@ -2151,7 +2171,7 @@ public class PafDataCache implements IPafDataCache {
 
 	/**
 	 * Translates a cell intersection based on a time horizon coordinate to one
-	 * that is based on time and year as seperate dimensions.
+	 * that is based on time and year as separate dimensions.
 	 * 
 	 * If a time horizon coordinate is not found, then the original intersection 
 	 * is returned.
@@ -2768,6 +2788,15 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public int getYearSize() {
 		return getAxisSize(getYearAxis());
+	}
+
+	/**
+	 *	Returns the entire list of years in the data cache 
+	 *
+	 * @return The entire list of years in the data cache
+	 */
+	public String[] getYears() {
+		return getAxisMembers(getYearAxis());
 	}
 
 	/**
@@ -3888,6 +3917,7 @@ public class PafDataCache implements IPafDataCache {
 		}
 		return stringBuffer.toString();
 	}
+
 
 
 

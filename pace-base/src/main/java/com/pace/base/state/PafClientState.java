@@ -40,6 +40,7 @@ import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.IPafConnectionProps;
+import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.rules.RuleSet;
@@ -86,7 +87,7 @@ public class PafClientState implements IPafClientState {
     private Map<String, List<String>> roleFilterSelections = new HashMap<String, List<String>>();
     private PafUserDef userDef;
     private Set<String> readOnlyMeasuresSet = null;
-    
+	private Map <String, PafBaseTree> mdbBaseTrees = new HashMap<String, PafBaseTree>();    
     
     public MemberTreeSet getUowTrees() {
 		return uowTrees;
@@ -788,6 +789,20 @@ public class PafClientState implements IPafClientState {
 		
 		return readOnlyMeasuresSet;
 		
+	}
+
+	/**
+	 * @return the mdbBaseTrees
+	 */
+	public Map<String, PafBaseTree> getMdbBaseTrees() {
+		return mdbBaseTrees;
+	}
+
+	/**
+	 * @param mdbBaseTrees the mdbBaseTrees to set
+	 */
+	public void setMdbBaseTrees(Map<String, PafBaseTree> mdbBaseTrees) {
+		this.mdbBaseTrees = mdbBaseTrees;
 	}
 
 

@@ -19,6 +19,9 @@
 package com.pace.base.app;
 
 import java.util.Arrays;
+import java.util.Properties;
+
+import com.pace.base.PafBaseConstants;
 
 /**
  * Variance Formula
@@ -105,6 +108,25 @@ public class VersionFormula {
 	public void setBaseVersion(String baseVersion) {
 		this.baseVersion = baseVersion;
 	}
+
+	/**
+	 * Return the resolved value of the baseVersion property
+	 * 
+	 * @param planVersion Plan version
+	 * @return Resolved baseVersion property
+	 */
+	public String getBaseVersionValue(String planVersion) {
+		
+		String baseVersionValue = baseVersion;
+		
+		// Check for @PLANVERSION
+		if (baseVersion.equalsIgnoreCase(PafBaseConstants.PLAN_VERSION)) {
+			baseVersionValue  = planVersion;
+		}
+
+		return baseVersionValue;
+	}
+
 
 	/**
 	 * @return Returns the compareVersion.
@@ -252,5 +274,6 @@ public class VersionFormula {
 			return false;	
 		return true;
 	}
+
 
 }

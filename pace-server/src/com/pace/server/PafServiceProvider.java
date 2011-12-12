@@ -403,6 +403,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		
 		PafClientState state = new PafClientState(clientId, pcInit, PafMetaData.getPaceHome(), PafMetaData.getTransferDirPath(), PafMetaData.isDebugMode());
 		state.setApp(paDef);
+		state.setMdbBaseTrees(dataService.getBaseTrees()); // TTN-1598
 		state.setSecurityToken(pToken);
 		
 		clients.put(clientId, state);
@@ -689,6 +690,9 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				
 				// Populate client state appDef property
 				clients.get(authReq.getClientId()).setApp(currentPafApp);
+				
+				// Populate client state baseTrees property (TTN-1598)
+				clients.get(authReq.getClientId()).setMdbBaseTrees(dataService.getBaseTrees());
 				
 				// Set application settings - if null, create a new instance
 				AppSettings appSettings = clients.get(authReq.getClientId()).getApp().getAppSettings(); 
