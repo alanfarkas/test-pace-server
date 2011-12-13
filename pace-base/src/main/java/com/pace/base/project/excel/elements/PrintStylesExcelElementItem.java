@@ -106,10 +106,8 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 						//"Landscape"
 						case 4:
 							printStyle.setLandscape(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
-							printStyle.setFitTo(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
 							if( ( printStyle.getPortrait() && printStyle.getLandscape() ) || ( ! printStyle.getPortrait() && ! printStyle.getLandscape() ) ) {
-								addProjectDataErrorToList(ProjectDataError.createRequiredProjectDataError(
-										getProjectElementId(), firstValueObject));
+								addProjectDataErrorToList(ProjectDataError.createInvalidValueProjectDataError(getProjectElementId(), firstValueObject));
 							}
 							break;
 							
@@ -127,8 +125,7 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 						case 7:
 							printStyle.setFitTo(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
 							if( ( printStyle.getAdjustTo() && printStyle.getFitTo() ) || ( ! printStyle.getAdjustTo() && ! printStyle.getFitTo() ) ) {
-								addProjectDataErrorToList(ProjectDataError.createRequiredProjectDataError(
-										getProjectElementId(), firstValueObject));
+								addProjectDataErrorToList(ProjectDataError.createInvalidValueProjectDataError(getProjectElementId(), firstValueObject));
 							}
 							break;
 							
@@ -231,8 +228,7 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 						case 27:
 							printStyle.setUserSelection(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
 							if( ( printStyle.getEntireView() && printStyle.getUserSelection() ) || ( ! printStyle.getEntireView() && ! printStyle.getUserSelection()) ) {
-								addProjectDataErrorToList(ProjectDataError.createRequiredProjectDataError(
-										getProjectElementId(), firstValueObject));
+								addProjectDataErrorToList(ProjectDataError.createInvalidValueProjectDataError(getProjectElementId(), firstValueObject));
 							}
 							break;
 							
@@ -290,8 +286,7 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 						case 38:
 							printStyle.setOverThenDown(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
 							if( ( printStyle.getDownThenOver() && printStyle.getOverThenDown()) || ( ! printStyle.getDownThenOver() && ! printStyle.getOverThenDown() ) ) {
-								addProjectDataErrorToList(ProjectDataError.createRequiredProjectDataError(
-										getProjectElementId(), firstValueObject));
+								addProjectDataErrorToList(ProjectDataError.createInvalidValueProjectDataError(getProjectElementId(), firstValueObject));
 							}
 							break;
 							

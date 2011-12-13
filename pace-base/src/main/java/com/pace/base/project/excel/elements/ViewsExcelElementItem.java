@@ -31,6 +31,7 @@ import com.pace.base.project.ExcelPaceProjectConstants;
 import com.pace.base.project.ExcelProjectDataErrorException;
 import com.pace.base.project.PaceProjectReadException;
 import com.pace.base.project.PaceProjectWriteException;
+import com.pace.base.project.ProjectDataError;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.excel.IExcelDynamicReferenceElementItem;
 import com.pace.base.project.excel.PafExcelInput;
@@ -182,6 +183,9 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 						//"Landscape"
 						case 7:
 							printStyle.setLandscape(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
+							if( ( printStyle.getPortrait() && printStyle.getLandscape() ) || ( ! printStyle.getPortrait() && ! printStyle.getLandscape() ) ) {
+								addProjectDataErrorToList(ProjectDataError.createInvalidValueProjectDataError(getProjectElementId(), firstValueObject));
+							}
 							break;
 							
 						//"Adjust To"
@@ -197,6 +201,9 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 						//"FitTo"
 						case 10:
 							printStyle.setFitTo(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
+							if( ( printStyle.getAdjustTo() && printStyle.getFitTo() ) || ( ! printStyle.getAdjustTo() && ! printStyle.getFitTo() ) ) {
+								addProjectDataErrorToList(ProjectDataError.createInvalidValueProjectDataError(getProjectElementId(), firstValueObject));
+							}
 							break;
 							
 						//"Page(s) Wide"
@@ -297,6 +304,9 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 						//"User Selection?":
 						case 30:
 							printStyle.setUserSelection(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
+							if( ( printStyle.getEntireView() && printStyle.getUserSelection() ) || ( ! printStyle.getEntireView() && ! printStyle.getUserSelection()) ) {
+								addProjectDataErrorToList(ProjectDataError.createInvalidValueProjectDataError(getProjectElementId(), firstValueObject));
+							}
 							break;
 							
 						//"User Selected Print area":
@@ -357,6 +367,9 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 						//"Print State"
 						case 42:
 							view.setViewPrintState(ViewPrintState.valueOf(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true)));
+							if( ( printStyle.getDownThenOver() && printStyle.getOverThenDown()) || ( ! printStyle.getDownThenOver() && ! printStyle.getOverThenDown() ) ) {
+								addProjectDataErrorToList(ProjectDataError.createInvalidValueProjectDataError(getProjectElementId(), firstValueObject));
+							}
 							break;
 			
 						//"Global Print Style GUID"
