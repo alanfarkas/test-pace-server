@@ -35,7 +35,7 @@ public class SumOnlyFunc extends SumFunc {
 
     	int parmIndex = 0;
     	// quick check to get out if it looks like these have been validated already
-    	if (this.isValidated) return;
+//    	if (this.isValidated) return;
     	
     	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
     	String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();

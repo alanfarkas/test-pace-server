@@ -14,6 +14,9 @@ import com.pace.base.PafException;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
+import com.pace.base.mdb.PafBaseTree;
+import com.pace.base.mdb.PafDataCache;
+import com.pace.base.mdb.PafDataCacheCalc;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
@@ -44,7 +47,7 @@ public class SumFunc extends AbstractFunction {
 
     	// convenience variables
       	String msrDim = dataCache.getMeasureDim(), timeDim = dataCache.getTimeDim();
-       	PafDimTree msrTree = evalState.getDataCacheTrees().getTree(msrDim);
+       	PafBaseTree msrTree = (PafBaseTree) evalState.getDataCacheTrees().getTree(msrDim);
 
  	
     	// Validate function parameters
@@ -60,12 +63,16 @@ public class SumFunc extends AbstractFunction {
     	double sum = 0;
 
         List<Intersection> inputs = new ArrayList<Intersection>();
-       	for (String msr : this.inputMsrs) {
-        		// for each msr in the list I need the equivalent intersection populated from the sourceIsx
-				Intersection input = sourceIs.clone();
-				input.setCoordinate(msrDim, msr);
-        		sum += dataCache.getCellValue(input);
-        	}
+//       	for (String msr : this.inputMsrs) {
+//        		// for each msr in the list I need the equivalent intersection populated from the sourceIsx
+//				Intersection input = sourceIs.clone();
+//				input.setCoordinate(msrDim, msr);
+//        		sum += dataCache.getCellValue(input);
+//        	}
+		Map<String, List<String>> filters = new HashMap<String, List<String>>();
+		filters.put(msrDim, new ArrayList<String>(this.inputMsrs));
+		
+       	PafDataCacheCalc.aggDimension(msrDim,  (PafDataCache) dataCache, msrTree, filters);
         
         return sum;
  
@@ -118,15 +125,19 @@ public class SumFunc extends AbstractFunction {
     	int index = 1;
     	inputMsrs.clear();
     	
-     	// initialize with children measures
-    	for (PafDimMember msrMbr : measureTree.getChildren(msrToSum)) {
+     	// initialize with floor measures
+    	for (PafDimMember msrMbr : measureTree.getIDescendants(msrToSum)) {
     		inputMsrs.add(msrMbr.getKey());      		
     	}
     	
      	// remove any measures specified
     	if (parms.length > 1) {
+
     		while (index<parms.length) {
-    			inputMsrs.remove(parms[index++]);
+        		List<PafDimMember> desc = measureTree.getIDescendants(parms[index]);
+        		for (PafDimMember mbr : desc) {
+        			inputMsrs.remove(mbr.getKey());
+        		}
     		}
     	}   	
     	

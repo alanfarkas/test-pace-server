@@ -90,7 +90,7 @@ public class AllocFunc extends AbstractFunction {
 
     	int parmIndex = 0;
     	// quick check to get out if it looks like these have been validated already
-    	if (this.isValidated) return;
+//    	if (this.isValidated) return;
     	
     	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
     	String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();
@@ -132,7 +132,7 @@ public class AllocFunc extends AbstractFunction {
     	targetMsrs.clear();
     	
     	// initialize with children measures
-    	for (PafDimMember msrMbr : measureTree.getDescendants(msrToAlloc)) {
+    	for (PafDimMember msrMbr : measureTree.getLowestMembers(msrToAlloc)) {
     		targetMsrs.add(msrMbr.getKey());      		
     	}
     	
@@ -141,11 +141,12 @@ public class AllocFunc extends AbstractFunction {
 
     	if (parms.length > 1) {
     		// build excluded measures list
+    		List<PafDimMember> desc = measureTree.getLowestMembers(parms[index]);
     		while (index<parms.length) {
-    			if (measureTree.getDescendants(parms[index]) == null) {
+    			if (desc == null || desc.size() == 0) {
     				excludedMsrs.add(parms[index]);
     			} else {
-    				for (PafDimMember msrMbr : measureTree.getDescendants(parms[index])) {
+    				for (PafDimMember msrMbr : desc) {
     					excludedMsrs.add(msrMbr.getKey());      		
     				}
     			}
@@ -153,9 +154,9 @@ public class AllocFunc extends AbstractFunction {
     		}
 
     		// now remove them from the list
-    		for (String excludedMsr : excludedMsrs) {
-    			targetMsrs.remove(excludedMsr);
-    		}
+//    		for (String excludedMsr : excludedMsrs) {
+//    			targetMsrs.remove(excludedMsr);
+//    		}
     	}
 
     	this.isValidated = true;
