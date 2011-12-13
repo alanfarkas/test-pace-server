@@ -3,7 +3,7 @@
 
 	<property name="proj_root" location="${basedir}" />
 	<property name="wrksp_root" location="${proj_root}\.."/>	
-	<property name="admin_wrksp_root" location="${proj_root}\.." />
+	<property name="admin_wrksp_root" location="E:\proj_wrksp_admin\eclipse" />
 	<property name="proj_wrksp" location="${wrksp_root}\.."/>
 
 	<property name="client_dir" location="${proj_root}\client" />	
@@ -201,6 +201,16 @@
 	</target>
 	-->
 
+	<target name="make-base-jar" > 
+		
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\pace-base" target="deploy"/>	
+				
+		<echo>"Copying base jar to Admin Console"</echo>		
+		<copy file="${client_dir}\dist\pace-base.jar" todir="${extra_jars_plugin}\lib" />
+		
+	</target>	
+	
 	<target name="make-client-jar" > 
 		
 		<ant antfile="build.xml"
