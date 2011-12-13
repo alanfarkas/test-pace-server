@@ -223,7 +223,7 @@ public class EsbData implements IMdbData{
 		Map<String, Map<Integer, List<String>>> loadedMdbDataSpec = new HashMap<String, Map<Integer, List<String>>>();   // Track data that was actually loaded
 		final PafDimTree mdbYearTree = dataCache.getMdbBaseTrees().get(yearDim);
 		final List<String> mdbYears = mdbYearTree.getMemberNames(mdbYearTree.getLowestLevelMembers());
-		PafDimSpec[] dcLoadMemberSpec = null;
+		Map<String, List<String>> dcLoadRemapSpec = new HashMap<String, List<String>>();
 		
     
 		EsbCubeView esbCubeView = null;
@@ -264,86 +264,76 @@ public class EsbData implements IMdbData{
 				continue;
 			}
 			
-//			// Process offset versions (TTN-1598)
-//			VersionDef vd = dataCache.getVersionDef(version);
-//			if (vd.getType() == VersionType.Offset) {
-//				
-//				// Get version formula properties
-//				VersionFormula vf = vd.getVersionFormula();
-//				String baseVersion = vf.getBaseVersionValue(dataCache.getPlanVersion());
-//				int yearOffset = 0;
-//				if (vf.getYearOffset() != null) {
-//					yearOffset = vf.getYearOffset();
-//				}
-//				
-//				// Determine the years that need to be loaded versus the year intersections that
-//				// only need to be instantiated
-//				List<String> requestedYearList = filteredMemberMap.get(yearDim);
-//				List<String> uowYearList = Arrays.asList(dataCache.getYears());
-//				List<String> yearsToExtract = new ArrayList<String>(), translatedYears = new ArrayList<String>(), aliasYears = new ArrayList<String>();
-//				List<PafDimMember> allMdbYearMbrs = dataCache.getMdbBaseTrees().get(yearDim).getLowestLevelMembers();
-//				for (String requestedYear : requestedYearList) {
-//					
-//					// Calculate the offset version source year
-//					int index = mdbYears.indexOf(requestedYear);
-//					int offsetYearInx = index + yearOffset;
-//					if (offsetYearInx < 0 ||  index < allMdbYearMbrs.size()) {
-//						logMsg = "Unable to load MDB data for Offset Version: [" + version + "] when processing Year: ["
-//								+ requestedYear +". The offset of : [" + yearOffset 
-//								+ "] results in a Year member not defined in the MDB Year Dimension"; 
-//						throw new PafException(logMsg, PafErrSeverity.Error);
-//					}
-//					String sourceYear = mdbYears.get(index + yearOffset);
-//					
-//					// Determine how each year will be processed
-//					if (uowYearList.contains(sourceYear)) {
-//						// Source year exists in UOW
-//						aliasYears.add(sourceYear);
-//					} else {
-//						// Source year is outside the UOW
-//						yearsToExtract.add(sourceYear);
-//						translatedYears.add(requestedYear);
-//					}
-//					
-//				}
-//				
-//				// Create alias intersections
-//				for (String year : aliasYears) {
-//					
-//				}
-//				
-//				// Process extraction
-//				Map<Integer, List<String>> ovExtractMemberMap = null;
-//				if (yearsToExtract.size() > 0) {
-//
-//					// Build mdx query	
-//					ovExtractMemberMap = new HashMap<Integer, List<String>> (filteredMemberMap);
-//					ovExtractMemberMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{baseVersion})));
-//					ovExtractMemberMap.put(yearAxis, yearsToExtract);
-//					mdxSelect = buildMdxSelect(ovExtractMemberMap, dataCache, true);		
-//					
-//					// Create translated member specification for data cache load
-//					dcLoadTranslationSpec = new PafDimSpec[2];
-//					PafDimSpec versionSpec = new PafDimSpec();
-//					versionSpec.setDimension(versionDim);
-//					versionSpec.setExpressionList(new String[]{version});
-//					dcLoadTranslationSpec[0] = versionSpec;
-//					PafDimSpec yearSpec = new PafDimSpec();
-//					yearSpec.setDimension(versionDim);
-//					yearSpec.setExpressionList(translatedYears.toArray(new String[0]));
-//					dcLoadTranslationSpec[1] = yearSpec;
-//					
-//				} else {
-//					// No more to do
-//					continue;
-//				}
-//				
-//			} else {
-//				// Not an offset version
-			mdxSelect = buildMdxSelect(filteredMemberMap, dataCache, true);	
-//			}
-//			
-			
+			// Process offset versions (TTN-1598)
+			VersionDef vd = dataCache.getVersionDef(version);
+			if (vd.getType() == VersionType.Offset) {
+				
+				// Get version formula properties
+				VersionFormula vf = vd.getVersionFormula();
+				String baseVersion = vf.getBaseVersionValue(dataCache.getPlanVersion());
+				int yearOffset = 0;
+				if (vf.getYearOffset() != null) {
+					yearOffset = vf.getYearOffset();
+				}
+				
+				// Determine the years that need to be loaded versus the year intersections that
+				// only need to be instantiated
+				List<String> requestedYearList = filteredMemberMap.get(yearAxis);
+				List<String> uowYearList = Arrays.asList(dataCache.getYears());
+				List<String> yearsToExtract = new ArrayList<String>(), translatedYears = new ArrayList<String>(), aliasYears = new ArrayList<String>();
+				for (String requestedYear : requestedYearList) {
+					
+					// Calculate the offset version source year
+					int index = mdbYears.indexOf(requestedYear);
+					int offsetYearInx = index + yearOffset;
+					if (offsetYearInx < 0 ||  offsetYearInx >= mdbYears.size()) {
+						logMsg = "Unable to load MDB data for Offset Version: [" + version + "] when processing Year: ["
+								+ requestedYear +"]. The Year Offset of: [" + yearOffset 
+								+ "] results in a Year member not defined in the MDB Year Dimension"; 
+						throw new PafException(logMsg, PafErrSeverity.Error);
+					}
+					String sourceYear = mdbYears.get(index + yearOffset);
+					
+					// Determine how each year will be processed
+					if (uowYearList.contains(sourceYear)) {
+						// Source year exists in UOW
+						aliasYears.add(sourceYear);
+					} else {
+						// Source year is outside the UOW
+						yearsToExtract.add(sourceYear);
+						translatedYears.add(requestedYear);
+					}
+					
+				}
+
+				// Create alias intersections
+				for (String year : aliasYears) {
+					int z = 0;
+				}
+
+				// Retrieve reference data that will source the offset version
+				Map<Integer, List<String>> ovExtractMemberMap = null;
+				if (yearsToExtract.size() > 0) {
+					// Build mdx query	
+					ovExtractMemberMap = new HashMap<Integer, List<String>> (filteredMemberMap);
+					ovExtractMemberMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{baseVersion})));
+					ovExtractMemberMap.put(yearAxis, yearsToExtract);
+					mdxSelect = buildMdxSelect(ovExtractMemberMap, dataCache, true);		
+
+					// Create re-mapping member specification for data cache load
+					dcLoadRemapSpec.put(versionDim, new ArrayList<String>(Arrays.asList(new String[]{version})));
+					dcLoadRemapSpec.put(yearDim, translatedYears);
+				} else {
+					// No external data is needed to populate offset version - skip to next version
+					continue;
+				}
+
+			} else {
+				// Not an offset version
+				mdxSelect = buildMdxSelect(filteredMemberMap, dataCache, true);	
+			}
+
+
 			// Construct MDX select statement that will extract data for selected version,
 			// suppressing missing intersection rows
 			if (mdxSelect != null) {
@@ -360,8 +350,7 @@ public class EsbData implements IMdbData{
 			String mdxQuery = mdxSelect + mdxFrom + mdxWhere; 
 
 			// Update data cache with Essbase data for selected version
-			int retrievedCells = loadCubeData(esbCubeView, mdxQuery, dataCache);
-//			int retrievedCells = loadCubeData(esbCubeView, mdxQuery, dataCache, dcLoadTranslationSpec);
+			int retrievedCells = loadCubeData(esbCubeView, mdxQuery, dataCache, dcLoadRemapSpec);
 			mdxCellCount += retrievedCells;
 
 		}
@@ -389,11 +378,12 @@ public class EsbData implements IMdbData{
 	 * @param esbCubeView Essbase cube view that points to the cube being queried
 	 * @param mdxQuery MDX retrieval query
 	 * @param dataCache Data cache
+	 * @param remappedMemberSpec Optional parameter that contains a list of members for any dimension who members are to be re-mapped when loading into the data cache.
 	 * 
 	 * @return Number of retrieved cells
 	 * @throws PafException 
 	 */
-	private int loadCubeData(EsbCubeView esbCubeView, String mdxQuery, PafDataCache dataCache) throws PafException {
+	private int loadCubeData(EsbCubeView esbCubeView, String mdxQuery, PafDataCache dataCache, Map<String, List<String>> remappedMemberSpec) throws PafException {
 		
 		int baseDimCount = dataCache.getBaseDimCount(), retrievedCellCount = 0;
 		String dimensions[] = dataCache.getBaseDimensions();
@@ -437,10 +427,17 @@ public class EsbData implements IMdbData{
 			List<String>[] memberLists = new ArrayList[baseDimCount]; 
 			for (int i = 0; i < baseDimCount; i++) {
 				int memberCount = axes[i].getTupleCount();
-				ArrayList<String> memberList  = new ArrayList<String>(memberCount);
-				for (int j = 0; j < memberCount; j++) {
-					essMdMembers = axes[i].getAllTupleMembers(j);
-					memberList.add(essMdMembers[0].getName());
+				List<String> memberList  = new ArrayList<String>(memberCount);
+				String dim = axes[i].getAllDimensions()[0].getName();
+				if (!remappedMemberSpec.containsKey(dim)) {
+					// Dimension is not re-mapped - pull list of members from Essbase mdx axis info
+					for (int j = 0; j < memberCount; j++) {
+						essMdMembers = axes[i].getAllTupleMembers(j);
+						memberList.add(essMdMembers[0].getName());
+					}
+				} else {
+					// Dimension is re-mapped - Re-map members used for loading the data cache (TTN-1598)
+					memberList = remappedMemberSpec.get(dim);
 				}
 				memberLists[i] = memberList;
 			}
