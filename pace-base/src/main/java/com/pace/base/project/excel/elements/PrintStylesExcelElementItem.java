@@ -8,11 +8,13 @@ import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Workbook;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.project.ExcelPaceProjectConstants;
 import com.pace.base.project.ExcelProjectDataErrorException;
 import com.pace.base.project.PaceProjectReadException;
 import com.pace.base.project.PaceProjectWriteException;
+import com.pace.base.project.ProjectDataError;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.excel.IExcelDynamicReferenceElementItem;
 import com.pace.base.project.excel.PafExcelInput;
@@ -104,6 +106,11 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 						//"Landscape"
 						case 4:
 							printStyle.setLandscape(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
+							printStyle.setFitTo(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
+							if( ( printStyle.getPortrait() && printStyle.getLandscape() ) || ( ! printStyle.getPortrait() && ! printStyle.getLandscape() ) ) {
+								addProjectDataErrorToList(ProjectDataError.createRequiredProjectDataError(
+										getProjectElementId(), firstValueObject));
+							}
 							break;
 							
 						//"Adjust To"
@@ -119,6 +126,10 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 						//"FitTo"
 						case 7:
 							printStyle.setFitTo(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
+							if( ( printStyle.getAdjustTo() && printStyle.getFitTo() ) || ( ! printStyle.getAdjustTo() && ! printStyle.getFitTo() ) ) {
+								addProjectDataErrorToList(ProjectDataError.createRequiredProjectDataError(
+										getProjectElementId(), firstValueObject));
+							}
 							break;
 							
 						//"Page(s) Wide"
@@ -219,6 +230,10 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 						//"User Selection?":
 						case 27:
 							printStyle.setUserSelection(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
+							if( ( printStyle.getEntireView() && printStyle.getUserSelection() ) || ( ! printStyle.getEntireView() && ! printStyle.getUserSelection()) ) {
+								addProjectDataErrorToList(ProjectDataError.createRequiredProjectDataError(
+										getProjectElementId(), firstValueObject));
+							}
 							break;
 							
 						//"User Selected Print area":
@@ -274,6 +289,10 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 						//"Over, then Down"
 						case 38:
 							printStyle.setOverThenDown(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
+							if( ( printStyle.getDownThenOver() && printStyle.getOverThenDown()) || ( ! printStyle.getDownThenOver() && ! printStyle.getOverThenDown() ) ) {
+								addProjectDataErrorToList(ProjectDataError.createRequiredProjectDataError(
+										getProjectElementId(), firstValueObject));
+							}
 							break;
 							
 						default:
@@ -283,8 +302,9 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 					addProjectDataErrorToList(epdee.getProjectDataError());
 				}
 			}
-			if( printStyle.getName() != null )
+			if( printStyle.getName() != null ) {
 				printStylesMap.put(GUIDUtil.getGUID(), printStyle);
+			}
 		}
 		return (T) printStylesMap;
 	}
