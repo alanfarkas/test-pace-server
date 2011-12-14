@@ -124,7 +124,9 @@
     <PafStyle>
       <name>Data</name>
       <fontName>Arial</fontName>
-      <alignment/>
+      <alignment>
+        <value>Right</value>
+      </alignment>
       <size>10</size>
       <fontHexColor>000000</fontHexColor>
     </PafStyle>
