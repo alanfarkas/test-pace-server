@@ -604,11 +604,12 @@ public abstract class PafDataCacheCalc {
 	 */
 	public static void calcAttributeIntersection(final PafDataCache dataCache, final Intersection attrIs, final MeasureType measureType, final MemberTreeSet memberTrees, DcTrackChangeOpt trackChanges) throws PafException {
 
-		// Alias intersections map directly to a base intersections. If this
-		// is an alias intersection then just add the intersection to the
+		// Attribute alias intersections map directly to a base intersections. If this
+		// is an attribute alias intersection then just add the intersection to the
 		// data cache, since no calculation is needed, and exit method. 
-		if (dataCache.isAliasIntersection(attrIs)) {
-			Intersection baseIs = dataCache.generatePrimaryIntersection(attrIs);
+		List<DataBlockKeyAliasType> aliasTypeProps = new ArrayList<DataBlockKeyAliasType>();
+		if (dataCache.isAliasIntersection(attrIs, aliasTypeProps)) {
+			Intersection baseIs = dataCache.generatePrimaryIntersection(attrIs, aliasTypeProps);
 			// To avoid created unneeded data blocks, only add attribute 
 			// intersection to data cache if its corresponding base
 			// intersection exists.

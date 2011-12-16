@@ -19,9 +19,12 @@
 package com.pace.base.app;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import com.pace.base.PafBaseConstants;
+import com.pace.base.PafErrSeverity;
+import com.pace.base.PafException;
 
 /**
  * Variance Formula
@@ -220,6 +223,40 @@ public class VersionFormula {
 	public void setYearOffset(Integer yearOffset) {
 		this.yearOffset = yearOffset;
 	}
+
+	/**
+	 * Return the equivalent value of the yearOffset property, replacing
+	 * any null values with 0.
+	 * 
+	 * @return Resolved yearOffset property
+	 */
+	public int getYearOffsetValue() {
+		return (yearOffset != null) ? yearOffset : 0;
+	}
+
+	/**
+	 * @param baseYear
+	 * @param yearList
+	 * 
+	 * @return
+	 */
+	public String calcOffsetVersionSourceYear(String baseYear, List<String> yearList) {
+
+		String sourceYear = null;
+		
+		// Calculate the offset version source year
+		int index = yearList.indexOf(baseYear);
+		int offsetYearInx = index + yearOffset;
+		if (offsetYearInx < 0 ||  offsetYearInx >= yearList.size()) {
+			String logMsg = "The Year Offset of: [" + yearOffset + "] applied to the base year: [" 
+					+ baseYear + "] results in a Year member not defined in the MDB Year Dimension"; 
+			throw new IllegalArgumentException(logMsg);
+		}
+		sourceYear = yearList.get(index + yearOffset);
+		
+		return sourceYear;
+	}
+	
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()

@@ -221,8 +221,7 @@ public class EsbData implements IMdbData{
 		final int versionAxis = dataCache.getVersionAxis(), yearAxis = dataCache.getYearAxis();
 		final String versionDim = dataCache.getVersionDim(), yearDim = dataCache.getYearDim();
 		Map<String, Map<Integer, List<String>>> loadedMdbDataSpec = new HashMap<String, Map<Integer, List<String>>>();   // Track data that was actually loaded
-		final PafDimTree mdbYearTree = dataCache.getMdbBaseTrees().get(yearDim);
-		final List<String> mdbYears = mdbYearTree.getMemberNames(mdbYearTree.getLowestLevelMembers());
+		final List<String> mdbYears = dataCache.getMdbYears();
 		Map<String, List<String>> dcLoadRemapSpec = new HashMap<String, List<String>>();
 		
     
@@ -271,50 +270,37 @@ public class EsbData implements IMdbData{
 				// Get version formula properties
 				VersionFormula vf = vd.getVersionFormula();
 				String baseVersion = vf.getBaseVersionValue(dataCache.getPlanVersion());
-				int yearOffset = 0;
-				if (vf.getYearOffset() != null) {
-					yearOffset = vf.getYearOffset();
-				}
 				
 				// Determine the years that need to be loaded versus the year intersections that
 				// only need to be instantiated
 				List<String> requestedYearList = filteredMemberMap.get(yearAxis);
 				List<String> uowYearList = Arrays.asList(dataCache.getYears());
-				List<String> yearsToExtract = new ArrayList<String>(), translatedYears = new ArrayList<String>(), aliasYears = new ArrayList<String>();
+				List<String> yearsToExtract = new ArrayList<String>(), translatedYears = new ArrayList<String>();
 				for (String requestedYear : requestedYearList) {
-					
-					// Calculate the offset version source year
-					int index = mdbYears.indexOf(requestedYear);
-					int offsetYearInx = index + yearOffset;
-					if (offsetYearInx < 0 ||  offsetYearInx >= mdbYears.size()) {
-						logMsg = "Unable to load MDB data for Offset Version: [" + version + "] when processing Year: ["
-								+ requestedYear +"]. The Year Offset of: [" + yearOffset 
-								+ "] results in a Year member not defined in the MDB Year Dimension"; 
-						throw new PafException(logMsg, PafErrSeverity.Error);
+
+					// Calculate the offset version source year		
+					String sourceYear = null;
+					try {
+						sourceYear = vf.calcOffsetVersionSourceYear(requestedYear, mdbYears);
+					} catch (Exception e) {
+						logMsg = "Unable to load MDB data for Offset Version: [" + version + "]. " + e.getMessage();
+						throw new PafException(logMsg, PafErrSeverity.Error);					
 					}
-					String sourceYear = mdbYears.get(index + yearOffset);
 					
-					// Determine how each year will be processed
-					if (uowYearList.contains(sourceYear)) {
-						// Source year exists in UOW
-						aliasYears.add(sourceYear);
-					} else {
-						// Source year is outside the UOW
+					// Data for any source years outside the UOW needs to be extracted from Essbase.
+					if (!uowYearList.contains(sourceYear)) {
+						// Source year is outside the UOW. Add it and requested year to collections
+						// for later processing.
 						yearsToExtract.add(sourceYear);
 						translatedYears.add(requestedYear);
 					}
 					
 				}
 
-				// Create alias intersections
-				for (String year : aliasYears) {
-					int z = 0;
-				}
-
-				// Retrieve reference data that will source the offset version
+				// Build the mdx select query that will source the offset version
 				Map<Integer, List<String>> ovExtractMemberMap = null;
 				if (yearsToExtract.size() > 0) {
-					// Build mdx query	
+					// Build mdx query
 					ovExtractMemberMap = new HashMap<Integer, List<String>> (filteredMemberMap);
 					ovExtractMemberMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{baseVersion})));
 					ovExtractMemberMap.put(yearAxis, yearsToExtract);
@@ -329,13 +315,12 @@ public class EsbData implements IMdbData{
 				}
 
 			} else {
-				// Not an offset version
+				// Not an offset version - just build select query using original member mapping
 				mdxSelect = buildMdxSelect(filteredMemberMap, dataCache, true);	
 			}
 
 
-			// Construct MDX select statement that will extract data for selected version,
-			// suppressing missing intersection rows
+			// Extract the data for the selected version, suppressing any missing intersection rows
 			if (mdxSelect != null) {
 				// Track loaded data intersections
 				loadedMdbDataSpec.put(version, filteredMemberMap);

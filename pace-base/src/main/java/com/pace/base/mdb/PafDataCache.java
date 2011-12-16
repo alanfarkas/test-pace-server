@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -58,6 +59,10 @@ import com.pace.base.view.PafMVS;
  * to a "unit of work"
  *
  * @version	x.xx
+ * @author Alan Farkas
+ *
+ */
+/**
  * @author Alan Farkas
  *
  */
@@ -245,6 +250,16 @@ public class PafDataCache implements IPafDataCache {
 		return mdbBaseTrees;
 	}
 
+	/**
+	 * Return list of years in the current multi-dimensional database 
+	 * 
+	 * @return
+	 */
+	public List<String> getMdbYears() {
+		final PafDimTree mdbYearTree = mdbBaseTrees.get(this.getYearDim());
+		final List<String> mdbYears = mdbYearTree.getLowestMemberNames(mdbYearTree.getRootNode().getKey());
+		return mdbYears;
+	}
 
 	/**
 	 * @return the evalState
@@ -965,14 +980,14 @@ public class PafDataCache implements IPafDataCache {
 			
 			// Data block exists
 			if (isAttrIs && isEmptyIntersection(intersection)) {
-				// Unpopulated attribute intersection - calculate missing value
+				// Un-populated attribute intersection - calculate missing value
 				String measure = intersection.getCoordinate(getMeasureDim());
 				PafDataCacheCalc.calcAttributeIntersection(this, intersection, getMeasureType(measure), getDimTrees(), DcTrackChangeOpt.NONE);
 			}
 			cellValue = dataBlock.getCellValue(cellAddress);
 			
 		} else {
-			
+
 			// Data block does not exist - check if intersection is valid
 			if (isValidIntersection(translatedIs)) {
 				// Valid intersection
@@ -1006,8 +1021,10 @@ public class PafDataCache implements IPafDataCache {
 	 *
 	 * @param coords Array of dimension members that define a single base intersection
 	 * @param value Value to put into cell
+	 * 
+	 * @throws PafException 
 	 */
-	public void setBaseCellValue(String[] coords, double value) {
+	public void setBaseCellValue(String[] coords, double value) throws PafException {
 
 		Intersection intersection = new Intersection(getBaseDimensions(), coords);
 		setCellValue(intersection, value);
@@ -1021,8 +1038,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param value Value to put into cell
 	 * 
 	 * @return Returns the cell value.
+	 * @throws PafException 
 	 */
-	public void setCellValue(String[] dimensions, String[] coords, double value) {
+	public void setCellValue(String[] dimensions, String[] coords, double value) throws PafException {
 
 		Intersection intersection = new Intersection(dimensions, coords);
 		setCellValue(intersection, value);
@@ -1077,8 +1095,10 @@ public class PafDataCache implements IPafDataCache {
 	 *
 	 * @param intersection Cell intersection
 	 * @param value Value to put into cell
+	 * 
+	 * @throws PafException 
 	 */
-	public void setCellValue(Intersection intersection, double value) {
+	public void setCellValue(Intersection intersection, double value) throws PafException {
 		
 		// Convert time horizon based intersection to time-year intersection
 		Intersection translatedIs = translateTimeHorizonIs(intersection);
@@ -1541,8 +1561,10 @@ public class PafDataCache implements IPafDataCache {
 	 * @param intersection Cell intersection
 	 * @param propertyType Cell property type
 	 * @param value Cell property value
+	 * 
+	 * @throws PafException 
 	 */
-	private void setCellProperty(Intersection intersection, CellPropertyType propertyType, Object value) {
+	private void setCellProperty(Intersection intersection, CellPropertyType propertyType, Object value) throws PafException {
 		
 		// Add intersection if it doesn't already exist
 		DataCacheCellAddress cellAddress = addCell(intersection);
@@ -1558,8 +1580,10 @@ public class PafDataCache implements IPafDataCache {
 	 * @param intersections Cell intersections
 	 * @param propertyType Cell property type
 	 * @param value Cell property values
+	 * 
+	 * @throws PafException 
 	 */
-	private void setCellsProperty(List<Intersection> intersections, CellPropertyType propertyType, List<Object> values) {
+	private void setCellsProperty(List<Intersection> intersections, CellPropertyType propertyType, List<Object> values) throws PafException {
 		
 		// Verify that intersections and values lists are the same size
 		if (intersections.size() != values.size()) {
@@ -1580,8 +1604,10 @@ public class PafDataCache implements IPafDataCache {
 	 *
 	 * @param intersection Cell intersection
 	 * @return DataCacheCellAddress Cell's internal address
+	 * 
+	 * @throws PafException 
 	 */
-	public DataCacheCellAddress addCell(Intersection intersection) {
+	public DataCacheCellAddress addCell(Intersection intersection) throws PafException {
 		
 		// Validate intersection
 		if (!isValidIntersection(intersection)) {
@@ -1606,9 +1632,11 @@ public class PafDataCache implements IPafDataCache {
 	 *	Add a new data block to the data cache.
 	 *
 	 * @param key Data block key
+	 * 
 	 * @return DataBlockResponse Data block response
+	 * @throws PafException 
 	 */
-	private DataBlockResponse addDataBlock(Intersection key) {
+	private DataBlockResponse addDataBlock(Intersection key) throws PafException {
 
 		int surrogateKey = 0;
 		DataBlock dataBlock = null;
@@ -1633,9 +1661,10 @@ public class PafDataCache implements IPafDataCache {
 		
 		// If alias data block key, add key to index. Also check for
 		// corresponding primary data block. If the primary data
-		// block doesn't already exists, then create it.  
-		if (isAliasDataBlockKey(key)) {
-			Intersection primaryKey = generatePrimaryKey(key);
+		// block doesn't already exists, then create it.
+		List<DataBlockKeyAliasType> aliasTypeProps = new ArrayList<DataBlockKeyAliasType>();
+		if (isAliasDataBlockKey(key, aliasTypeProps)) {
+			Intersection primaryKey = generatePrimaryKey(key, aliasTypeProps);
 			DataBlockResponse aliasDataBlockResp =  getDataBlock(primaryKey);
 			if (aliasDataBlockResp.getDataBlock() == null) {
 				aliasDataBlockResp = addDataBlock(primaryKey);
@@ -1695,35 +1724,96 @@ public class PafDataCache implements IPafDataCache {
 
 	/**
 	 * Convert an alias data block key to its corresponding primary 
-	 * data block key
+	 * data block key. An data block key can simultaneously fall into
+	 * one or more alias categories.
 	 *  
 	 * @param aliasKey Alias data block key
+	 * @param aliasTypeProps Data block key alias type properties
+	 * 
 	 * @return Primary data block key.
+	 * @throws PafException 
 	 */
-	private Intersection generatePrimaryKey(Intersection aliasKey) {
-		
-		// Strip off non-core dimension elements. The non-core
-		// dimension elements will always appear after the core
-		// dimension elements.
-		Intersection primaryKey = aliasKey.createSubIntersection(coreKeyDims.length);
+	private Intersection generatePrimaryKey(Intersection aliasKey, List<DataBlockKeyAliasType> aliasTypeProps) throws PafException {
+
+		Intersection primaryKey = aliasKey;
+
+		// If the key is an attribute alias, strip off non-core dimension elements. The non-core
+		// dimension elements will always appear after the core dimension elements.
+		if (aliasTypeProps.contains(DataBlockKeyAliasType.Attribute)) {
+			primaryKey = aliasKey.createSubIntersection(coreKeyDims.length);
+		}
+
+		// In the case of an offset version alias, convert the version and year reference to
+		// the corresponding source year and version (TTN-1598) 
+		if (aliasTypeProps.contains(DataBlockKeyAliasType.OffsetVersion)) {
+			primaryKey = this.resolveOffsetVersionRef(primaryKey);
+		}
+
+
 		return primaryKey;
+	}
+		
+	/**
+	 * Resolve offset version coordinates in the alias data cache reference
+	 * 
+	 * @param aliasDataCacheRef An alias data cache intersection or data block key
+	 * 
+	 * @return Updated data cache reference
+	 * @throws PafException 
+	 */
+	private Intersection resolveOffsetVersionRef(Intersection aliasDataCacheRef) throws PafException {
+
+		final String versionDim = this.getVersionDim(), yearDim = this.getYearDim(), planVersion = this.getPlanVersion();
+		List<String> mdbYears = this.getMdbYears();
+		Intersection resolvedDcRef = aliasDataCacheRef;
+		
+
+		// Convert the version coordinate
+		String version = resolvedDcRef.getCoordinate(versionDim);
+		VersionFormula vf = this.getVersionDef(version).getVersionFormula();
+		String sourceVersion = vf.getBaseVersionValue(planVersion);
+		resolvedDcRef.setCoordinate(versionDim, sourceVersion);
+
+		// Convert the year coordinate
+		String yearCoord = aliasDataCacheRef.getCoordinate(yearDim), sourceYear = null;
+		try {
+			sourceYear = vf.calcOffsetVersionSourceYear(yearCoord, mdbYears);
+			resolvedDcRef.setCoordinate(yearDim, sourceYear);
+		} catch (Exception e) {
+			String logMsg = "Unable to access Data Dache intersection containing Offset Version: [" + version + "]. " + e.getMessage();
+			throw new PafException(logMsg, PafErrSeverity.Error);					
+		}
+
+		return resolvedDcRef;
 	}
 
 
+	
 	/**
 	 * Builds the primary intersection corresponding to the specified alias 
 	 * intersection
 	 * 
 	 * @param aliasIs Alias intersection
 	 * @return Corresponding primary intersection
+	 * 
+	 * @throws PafException 
 	 */
-	public Intersection generatePrimaryIntersection(Intersection aliasIs) {
+	public Intersection generatePrimaryIntersection(Intersection aliasIs, List<DataBlockKeyAliasType> aliasTypeProps) throws PafException {
 		
-		// Convert the alias intersection into its corresponding primary
-		// intersection by striping off the non-core dimension elements. 
-		// The non-core dimension elements will always appear after the 
-		// core dimension elements.
-		Intersection primaryIs = aliasIs.createSubIntersection(coreDimensions.size());
+		Intersection primaryIs = aliasIs;
+
+		// If the intersection is an attribute alias, strip off non-core dimension elements. The 
+		// non-core dimension elements will always appear after the core dimension elements.
+		if (aliasTypeProps.contains(DataBlockKeyAliasType.Attribute)) {
+			primaryIs = aliasIs.createSubIntersection(coreDimensions.size());
+		}
+		
+		// In the case of an offset version alias, convert the version and year reference to
+		// the corresponding source year and version (TTN-1598) 
+		if (aliasTypeProps.contains(DataBlockKeyAliasType.OffsetVersion)) {
+			primaryIs = this.resolveOffsetVersionRef(primaryIs);
+		}
+
 		return primaryIs;
 	}
 
@@ -1731,7 +1821,7 @@ public class PafDataCache implements IPafDataCache {
 	/**
 	 *  Add data block key to lookup collections
 	 *  
-	 * @param key
+	 * @param key Data block key
 	 */
 	private void addDataBlockKey(Intersection key) {
 	
@@ -1753,8 +1843,9 @@ public class PafDataCache implements IPafDataCache {
 	 *	Delete a data block from the data cache.
 	 *
 	 * @param key Data block key	
+	 * @throws PafException 
 	 */
-	private void deleteDataBlock(Intersection key) {
+	private void deleteDataBlock(Intersection key) throws PafException {
 		
 		// Retrieve the data block being deleted
 		DataBlockResponse dataBlockResp = getDataBlock(key);
@@ -1820,27 +1911,6 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * Returns true if the data block key is not the primary
-	 * key
-	 * 
-	 * @param Returns true if the data block key is not the
-	 * @return
-	 */
-	private boolean isAliasDataBlockKey(Intersection dataBlockKey) {
-		return !isPrimaryDataBlockKey(dataBlockKey);
-	}
-
-	/**
-	 * Returns true if the intersection in an alias of a base intersection
-	 * 
-	 * @param intersection Cell intersection
-	 * @return True if the intersection is an alias of a base  intersection 
-	 */
-	public boolean isAliasIntersection(Intersection intersection) {
-		return !isPrimaryIntersection(intersection);
-	}
-
-	/**
 	 * Returns true if the intersection in an attribute intersection
 	 * 
 	 * @param intersection Cell intersection
@@ -1869,38 +1939,71 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	
-	
 	/**
-	 * Returns true if the data block key maps directly
-	 * to a unique data block in the data cache. 
+	 * Returns true if the data block key is an alias key. 
 	 * 
-	 * A key is considered to be a primary key if it meets one
-	 * of the following two conditions:
+	 * A key is considered to be an alias key (can be
+	 * directly mapped to a primary data block key) if
+	 * it meets at least one of the following conditions:
 	 * 
-	 * 1) Comprised of only core key dimensions
-	 * 2) Does not map directly to a base member intersection -
-	 *    Specifically, the key contains at least one non-level 0
-	 *    attribute member or an attribute member with an 
-	 *    associated non-level 0 base member.
+	 * 1) Attribute Alias - The key contains one of more 
+	 *    attribute member coordinates, all of which are 
+	 *    at level 0, and all of which are associated with 
+	 *    base members at the attribute mapping level.
+	 * 2) Offset Version Alias - The key's Version dimension
+	 *    coordinate contains an offset version reference 
+	 *    whose source year falls inside the UOW.
 	 * 
 	 * @param key Data block key
-	 * @return boolean
+	 * @param aliasTypeProps Data block key alias type properties
+	 *
+	 * @return boolean	  
+	 * @throws PafException 
 	 */
-	private boolean isPrimaryDataBlockKey(Intersection key) {
+	private boolean isAliasDataBlockKey(Intersection key) throws PafException {
+		return isAliasDataBlockKey(key, null);
+		
+	}
+
+	/**
+	 * Returns true if the data block key is an alias key. 
+	 * 
+	 * A key is considered to be an alias key (can be
+	 * directly mapped to a primary data block key) if
+	 * it meets at least one of the following conditions:
+	 * 
+	 * 1) Attribute Alias - The key contains one of more 
+	 *    attribute member coordinates, all of which are 
+	 *    at level 0, and all of which are associated with 
+	 *    base members at the attribute mapping level.
+	 * 2) Offset Version Alias - The key's Version dimension
+	 *    coordinate contains an offset version reference 
+	 *    whose source year falls inside the UOW.
+	 * 
+	 * @param key Data block key
+	 * @param aliasTypeProps Data block key alias type properties
+	 *
+	 * @return boolean	  
+	 * @throws PafException 
+	 */
+	private boolean isAliasDataBlockKey(Intersection key, List<DataBlockKeyAliasType> aliasTypeProps) throws PafException {
 		
 		final int coreKeyDimCount = coreKeyDims.length;
 		final int dataBlockKeySize = key.getSize();
-		boolean isPrimaryKey = true;
+		final String versionDim = this.getVersionDim(), yearDim = this.getYearDim();
+		final List<String> uowYearList = Arrays.asList(this.getYears());
+		final List<String> mdbYears = this.getMdbYears();
+		boolean isAliasKey = false;
 
-		// Check if the key contains any attribute dimension
-		// coordinates.
+
+		// Check if the key is an attribute alias
 		if (dataBlockKeySize != coreKeyDimCount) {
 
 			// The key does contain one or more attribute dimension coordinates, 
 			// which need to be analyzed. These attribute dimension coordinates, 
 			// when they exist, always appear after all the core key dimension 
 			// coordinates.
-			isPrimaryKey = false;
+			isAliasKey = true;
 			validation:
 				for (int index = coreKeyDimCount; index < dataBlockKeySize; index++) {
 
@@ -1908,58 +2011,130 @@ public class PafDataCache implements IPafDataCache {
 					String attrMember = key.getCoordinate(attrDim);
 
 					// Check level of attribute coordinate member - if not at level 0,
-					// then this is a primary key
+					// then this key is a not an attribute alias
 					PafAttributeTree attrDimTree = (PafAttributeTree) dimTrees.getTree(attrDim);
 					int attrMbrLevel = attrDimTree.getMember(attrMember).getMemberProps().getLevelNumber();
 					if (attrMbrLevel > 0) {
-						isPrimaryKey = true;
+						isAliasKey = false;
 						break validation;
 					}
 
 					// Check level of associated base member - if above attribute mapping level,
-					// then this is a primary key
+					// then the key is not an attribute alias
 					String assocBaseDim = attrDimTree.getBaseDimName();
 					PafBaseTree baseDimTree = (PafBaseTree) dimTrees.getTree(assocBaseDim);
 					String baseMember = key.getCoordinate(assocBaseDim);
 					int baseMbrLevel = baseDimTree.getMember(baseMember).getMemberProps().getLevelNumber();
 					if (baseMbrLevel > baseDimTree.getAttributeMappingLevel(attrDim)) {
-						isPrimaryKey = true;
+						isAliasKey = false;
 						break validation;
 					}
 				}
 		}
+		
+		// If this is an attribute alias, add the attribute alias property
+		// to collection for later use. (TTN-1598)
+		if (isAliasKey && aliasTypeProps != null) {
+			aliasTypeProps.add(DataBlockKeyAliasType.Attribute);
+		}
+		
 
+		// Check for offset version reference (TTN-1598)
+		String version = key.getCoordinate(versionDim);
+		VersionDef vd = getVersionDef(version);
+		if (vd.getType() == VersionType.Offset) {
 
+			// Calculate the offset version source year
+			String yearCoord = key.getCoordinate(yearDim), sourceYear = null;
+			try {
+				sourceYear = vd.getVersionFormula().calcOffsetVersionSourceYear(yearCoord, mdbYears);
+			} catch (Exception e) {
+				String logMsg = "Unable to access Data Dache intersection containing Offset Version: [" + version + "]. " + e.getMessage();
+				throw new PafException(logMsg, PafErrSeverity.Error);					
+			}
+
+			// If source year falls inside the uow, then the key is an offset alias
+			if (uowYearList.contains(sourceYear)) {
+				isAliasKey = true;
+				if (aliasTypeProps != null) {
+					aliasTypeProps.add(DataBlockKeyAliasType.OffsetVersion);
+				}
+			}
+		}
+
+		
 		// Return status
-		return isPrimaryKey;
+		return isAliasKey;
 	}
 
+
+	/**
+	 * Returns true if the data block key is a primary key
+	 *
+	 * @param dataBlockKey Data block key
+	 * 
+	 * @return True if the data block key is a primary key
+	 * @throws PafException
+	 */
+	private boolean isPrimaryDataBlockKey(Intersection dataBlockKey) throws PafException {
+		return isPrimaryDataBlockKey(dataBlockKey, null);
+	}
+
+	/**
+	 * Returns true if the data block key is a primary key
+	 *
+	 * @param dataBlockKey Data block key
+	 * @param aliasTypeProps Collection that will pass back any matched data block key alias type properties (optional parameter)
+	 * 
+	 * @return True if the data block key is a primary key
+	 * @throws PafException
+	 */
+	private boolean isPrimaryDataBlockKey(Intersection dataBlockKey, List<DataBlockKeyAliasType> aliasTypeProps) throws PafException {
+		return !isAliasDataBlockKey(dataBlockKey, aliasTypeProps);
+	}
+
+	/**
+	 * Returns true if the intersection in an alias of a base intersection
+	 * 
+	 * @param intersection Cell intersection
+	 * @param aliasTypeProps Data block key alias type properties
+
+	 * @return True if the intersection is an alias of a base  intersection 
+	 * 
+	 * @throws PafException 
+	 */
+	public boolean isAliasIntersection(Intersection intersection, List<DataBlockKeyAliasType> aliasTypeProps) throws PafException {
+		return !isPrimaryIntersection(intersection, aliasTypeProps);
+	}
 
 	/**
 	 * Returns true if the intersection is not alias of a base intersection
 	 * 
 	 * @param intersection Cell intersection
+	 * @param aliasTypeProps Optional parameter that can be used to pass back any matching alias key types. Alias key type is a non-mutually exclusive property.
+	 *
 	 * @return True if the intersection is not an alias of a base  intersection 
+	 * @throws PafException 
 	 */
-	public boolean isPrimaryIntersection(Intersection intersection) {
+	public boolean isPrimaryIntersection(Intersection intersection, List<DataBlockKeyAliasType> aliasTypeProps) throws PafException {
 	
 		// Get the data block key of the specified intersection
 		Intersection dataBlockKey = generateCellAddress(intersection).getDataBlockKey();
 		
 		// The intersection is a primary intersection if its corresponding
 		// data block key is a primary key
-		return isPrimaryDataBlockKey(dataBlockKey);
+		return isPrimaryDataBlockKey(dataBlockKey, aliasTypeProps);
 	}
 
 	
-
 	/**
 	 *  Remove data blocks for the specified versions. If the version
 	 *  filter is empty or null then no data will be removed.
 	 *  
 	 * @param versionFilter Specifies the versions to clear
+	 * @throws PafException 
 	 */
-	public int clearVersionData(List<String> versionFilter) {
+	public int clearVersionData(List<String> versionFilter) throws PafException {
 
 		long startTime = System.currentTimeMillis();
 		int deletedBlockCount = 0;
@@ -3484,8 +3659,9 @@ public class PafDataCache implements IPafDataCache {
 	 *	Clears the dirty property on the specified cell intersection 
 	 *
 	 * @param intersection Cell intersection
+	 * @throws PafException 
 	 */
-	public void clearDirtyIntersection(Intersection intersection) {
+	public void clearDirtyIntersection(Intersection intersection) throws PafException {
 		setCellProperty(intersection, CellPropertyType.Dirty, false);
 	}
 
@@ -3493,8 +3669,9 @@ public class PafDataCache implements IPafDataCache {
 	 *	Clears the dirty property on the specified cell intersections 
 	 *
 	 * @param intersections Cell intersections
+	 * @throws PafException 
 	 */
-	public void clearDirtyIntersections(List<Intersection> intersections) {
+	public void clearDirtyIntersections(List<Intersection> intersections) throws PafException {
 	
 		for (Intersection intersection : intersections) {
 			clearDirtyIntersection(intersection);
@@ -3529,8 +3706,9 @@ public class PafDataCache implements IPafDataCache {
 	 *	Marks the specified cell intersection as empty
 	 *
 	 * @param intersection Cell intersection
+	 * @throws PafException 
 	 */
-	public void setEmptyIntersection(Intersection intersection) {
+	public void setEmptyIntersection(Intersection intersection) throws PafException {
 		
 		setCellProperty(intersection, CellPropertyType.Empty, true);
 		setCellValue(intersection, 0); // Initialize cell value
@@ -3540,8 +3718,9 @@ public class PafDataCache implements IPafDataCache {
 	 *	Marks the specified cell intersection as empty
 	 *
 	 * @param intersections Cell intersections
+	 * @throws PafException 
 	 */
-	public void setEmptyIntersections(List<Intersection> intersections) {
+	public void setEmptyIntersections(List<Intersection> intersections) throws PafException {
 		
 		for (Intersection intersection : intersections) {
 			setEmptyIntersection(intersection);
