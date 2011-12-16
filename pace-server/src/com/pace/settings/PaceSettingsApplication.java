@@ -1,165 +1,160 @@
 package com.pace.settings;
 
-import com.pace.server.PafMetaData;
-import com.pace.server.ServerSettings;
+import com.pace.settings.ui.ServerSettingsForm;
+import com.pace.settings.ui.ServerSettingsView;
+import com.pace.settings.ui.SettingsList;
+import com.pace.settings.ui.SettingsTree;
 import com.vaadin.Application;
-import com.vaadin.ui.*;
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Tree;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.Reindeer;
 
-public class PaceSettingsApplication extends Application {
-	private GridLayout gridLayout_1;
+public class PaceSettingsApplication extends Application implements
+		ItemClickListener, Button.ClickListener, Property.ValueChangeListener {
 
-	private Table tblDetail;
+	private static final long serialVersionUID = -3106115489087842180L;
 
-	private Tree treeRdbs;
-	
-	private Tree treeMdbs;
-	
-	private Table tblSettings;
-	
-	private Window mainWindow;
-	
-	public Window getMainWindow() {
-		return mainWindow;
-	}
+	protected static final String TREE_NODE_WITHOUT_CHILDREN_STYLE = "no-children";
 
-	private ServerSettings serverSettings;
-	
-	
-	
-	public ServerSettings getServerSettings() {
-		return serverSettings;
-	}
+	private static final String PACE_SETTINGS_APPLICATION = "Pace Settings Application";
+
+	private Label headingLabel = new Label(PACE_SETTINGS_APPLICATION);
+
+	private HorizontalSplitPanel horizontalSplit = new HorizontalSplitPanel();
+
+	private SettingsTree tree = new SettingsTree(this);
+
+	private ServerSettingsView serverSettingsView;
+
+	ServerSettingsForm form = new ServerSettingsForm(this);
+
+	SettingsList settingsList = new SettingsList(this);
 
 	@Override
 	public void init() {
-		mainWindow = new Window("Pace Application Settings");
-	
-		mainWindow.addComponent(layoutGrid());
-		setMainWindow(mainWindow);
 
+		setMainWindow(new Window(PACE_SETTINGS_APPLICATION));
+
+		VerticalLayout vl = new VerticalLayout();
+		vl.setSizeFull();
+
+		// remove arrow if tree itme doesn't have children
+		Tree.ItemStyleGenerator itemStyleGenerator = new Tree.ItemStyleGenerator() {
+
+			private static final long serialVersionUID = -1268456420627465539L;
+
+			public String getStyle(Object itemId) {
+
+				if (tree.getChildren(itemId) == null
+						|| tree.getChildren(itemId).size() == 0) {
+					return TREE_NODE_WITHOUT_CHILDREN_STYLE;
+				} else {
+					return null;
+				}
+
+			}
+		};
+
+		tree.setItemStyleGenerator(itemStyleGenerator);
+
+		horizontalSplit.setFirstComponent(tree);
+
+		vl.addComponent(createToolbar());
+		vl.addComponent(horizontalSplit);
+
+		vl.setExpandRatio(horizontalSplit, 1);
+		horizontalSplit.setSplitPosition(250, HorizontalSplitPanel.UNITS_PIXELS);
+
+		setTheme("pace");
+
+		getMainWindow().setContent(vl);
+
+		tree.select(SettingsTree.SERVER_SETTINGS);
+
+		showServerSettingsView();
 	}
-	
-	private void initForm() {
-		
+
+	public HorizontalLayout createToolbar() {
+
+		HorizontalLayout lo = new HorizontalLayout();
+
+		headingLabel.setStyleName(Reindeer.LABEL_H1);
+
+		lo.addComponent(headingLabel);
+		lo.addComponent(headingLabel);
+		lo.addComponent(headingLabel);
+
+		lo.setWidth("100%");
+		lo.setMargin(true);
+		lo.setSpacing(true);
+
+		return lo;
 	}
-	
-	private GridLayout layoutGrid() {
-		
-			PaceSettingsListener eventHandler = new PaceSettingsListener(this);
 
-			// common part: create layout
-			gridLayout_1 = new GridLayout();
-			gridLayout_1.setImmediate(false);
-			gridLayout_1.setWidth("100.0%");
-			gridLayout_1.setHeight("100.0%");
-			gridLayout_1.setMargin(false);
-			gridLayout_1.setColumns(2);
-			gridLayout_1.setRows(4);
+	private void setPropertiesView(Component c) {
+		horizontalSplit.setSecondComponent(c);
+	}
 
-			
-			// Panels for Settings
-			Panel pnlSettings = new Panel("Application Settings");
-			pnlSettings.setHeight("100.0%");
-			pnlSettings.setWidth("90.0%");			
+	@Override
+	public void itemClick(ItemClickEvent event) {
 
+		if (event.getSource() == tree) {
 
+			Object itemId = event.getItemId();
 			
-			
-			// Settings grid
-			HorizontalLayout hlSettings = createSettingsLayout();
-			
-
-			//pnlSettings.addComponent(tblSettings);
-			gridLayout_1.addComponent(hlSettings, 0, 1, 0, 2);
-			
-			// treeMdbs
-			treeMdbs = new Tree();
-			treeMdbs.setImmediate(false);
-			treeMdbs.setWidth("-1px");
-			treeMdbs.setHeight("100.0%");
-			treeMdbs.addItem("Titan");
-			treeMdbs.getItem("Titan");
-			VerticalLayout vlMdbs = new VerticalLayout();
-			vlMdbs.setHeight("150px");
-			vlMdbs.addComponent(treeMdbs);
-			
-			TabSheet tabDataSources = new TabSheet();
-			tabDataSources.addTab(vlMdbs);
-			tabDataSources.getTab(vlMdbs).setCaption("Multidimensional Connections");
-			
-
-			
-			// treeRdbs
-			treeRdbs = new Tree();
-			treeRdbs.setImmediate(false);
-			treeRdbs.setWidth("-1px");
-			treeRdbs.setHeight("100.0%");
-			treeRdbs.addItem("Cacheing Database");
-
-			VerticalLayout vlRdbs = new VerticalLayout();
-			vlRdbs.setHeight("150px");
-			vlRdbs.addComponent(treeRdbs);
-			
-			vlRdbs.addComponent(treeRdbs);
-			tabDataSources.addTab(vlRdbs);
-			tabDataSources.getTab(vlRdbs).setCaption("Relatonal Connections");
-
-			
-			
-			// table_1
-			tblDetail = new Table();
-			tblDetail.setImmediate(false);
-			tblDetail.setWidth("90%");
-			tblDetail.setHeight("-1px");
-			gridLayout_1.addComponent(tblDetail, 1, 2);
-
-			gridLayout_1.addComponent(tabDataSources, 1, 1);			
-			
-			Button btnSave = new Button("Save");
-			Button btnCancel = new Button("Cancel");
-//			btnSave.addListener(eventHandler);
-			btnSave.addListener(Button.ClickEvent.class, eventHandler, "handleSave");
-			btnCancel.addListener(Button.ClickEvent.class, eventHandler, "handleCancel");
-			
-			HorizontalLayout hl = new HorizontalLayout();
-			hl.addComponent(btnSave);
-			hl.addComponent(btnCancel);
-			
-			gridLayout_1.addComponent(hl, 0, 3, 1, 3);
-		
-			
-			return gridLayout_1;
+			if (itemId != null) {
 				
+				if (SettingsTree.SERVER_SETTINGS.equals(itemId)) {
+
+					showServerSettingsView();
+					
+				} 
+			}
+
+		}
+
 	}
 
-	private HorizontalLayout createSettingsLayout() {
-		HorizontalLayout hl = new HorizontalLayout();
-		Table tblLabel = new Table();
-		Table tblValue = new Table();
-		tblValue.setEditable(true);
-		PafMetaData.updateApplicationConfig();
-		serverSettings = PafMetaData.getServerSettings();
-		int i=1;
-		
-		tblLabel.setSortDisabled(true);
-		tblValue.setSortDisabled(true);
-		tblLabel.addContainerProperty("Setting", String.class,  null);
-		tblValue.addContainerProperty("Value",  String.class,  null);
-		
-		addStringProperty("Authorizaion Mode", serverSettings.getAuthMode(), i++, tblLabel, tblValue );
-		addStringProperty("Calcscript Timout", serverSettings.getCalcScriptTimeout(), i++, tblLabel, tblValue );
-		addStringProperty("Minimum Client Version", serverSettings.getClientMinVersion(), i++, tblLabel, tblValue );
-		addStringProperty("Client Update URL", serverSettings.getClientUpdateUrl(), i++, tblLabel, tblValue );
-			
-		hl.addComponent(tblLabel);
-		hl.addComponent(tblValue);
-		return hl;
-	}
-	
-	private void addStringProperty(String key, String value, int index, Table tblLabel, Table tblValue) {
-		tblLabel.addItem(new Object[] { key }, index);
-		tblValue.addItem(new Object[] { value }, index);
+	private void showServerSettingsView() {
+
+		setPropertiesView(getServerSettingsView());
+
 	}
 
+	@Override
+	public void buttonClick(ClickEvent event) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void valueChange(ValueChangeEvent event) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * @return the serverSettingsView
+	 */
+	public ServerSettingsView getServerSettingsView() {
+
+		if (serverSettingsView == null) {
+
+			serverSettingsView = new ServerSettingsView(form);
+		}
+
+		return serverSettingsView;
+	}
 
 }
