@@ -1,0 +1,56 @@
+<com.pace.server.ServerSettings>
+  <debugMode>false</debugMode>
+  <evaluationStepLogging>false</evaluationStepLogging>
+  <changedCellLogging>false</changedCellLogging>
+  <clearOutlineCache>true</clearOutlineCache>
+  <autoLoadAttributes>true</autoLoadAttributes>
+  <pafSecurityUser>pafsys</pafSecurityUser>
+  <pafSecurityPassword>pafsys123</pafSecurityPassword>
+  <pafSecurityBootupPassword>xIdk82723Sdfke83</pafSecurityBootupPassword>
+  <calcScriptTimeout>30</calcScriptTimeout>
+  <enableServerPasswordReset>false</enableServerPasswordReset>
+  <enableClientPasswordReset>false</enableClientPasswordReset>
+  <autoConvertProject>true</autoConvertProject>
+  <enableRounding>false</enableRounding>
+  <clearCellNotes>false</clearCellNotes>
+  <clearAllCellNotes>false</clearAllCellNotes>
+  <ldapSettings>
+    <ldapProviderName>ADG</ldapProviderName>
+    <securityPrincipal>CORP\ADG</securityPrincipal>
+    <securityCredentials></securityCredentials>
+    <providerURLGC>ldap://PALCHA02:3268</providerURLGC>
+    <securityAuthentication>simple</securityAuthentication>
+    <securityProtocol>none</securityProtocol>
+    <searchBase></searchBase>
+    <domainController>DC=CORP,DC=THINKFAST,DC=COM</domainController>
+    <ldapPagesize>1000</ldapPagesize>
+    <ignoreBuiltInGroups>true</ignoreBuiltInGroups>
+    <ignoreExpiredAccounts>true</ignoreExpiredAccounts>
+    <ignoreLockedOutAccounts>true</ignoreLockedOutAccounts>
+    <ignoreExpiredPWAccounts>true</ignoreExpiredPWAccounts>
+    <ignoreDisabledAccounts>true</ignoreDisabledAccounts>
+    <kerberosRealm> </kerberosRealm>
+    <kerberosKDC> </kerberosKDC>
+    <kerberosLoginConf> </kerberosLoginConf>
+    <sslKeyStore>c:/Program Files (x86)/Java/jdk1.5.0_08/jre/lib/security/cacerts</sslKeyStore>
+    <netBiosNames>
+      <entry>
+        <string>adg</string>
+        <string>adg.com</string>
+      </entry>
+      <entry>
+        <string>corp</string>
+        <string>corp.thinkfast.com</string>
+      </entry>
+      <entry>
+        <string>child1</string>
+        <string>child1.adg.com</string>
+      </entry>
+    </netBiosNames>
+    <connectTimeout>30000</connectTimeout>
+  </ldapSettings>
+  <authMode>nativeMode</authMode>
+  <clientUpdateUrl>http://localhost:8080/installs/client/setup.exe</clientUpdateUrl>
+  <clientMinVersion>2.8.1.1</clientMinVersion>
+  <pafServerHome>..\..\</pafServerHome>
+</com.pace.server.ServerSettings>
