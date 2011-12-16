@@ -3,9 +3,8 @@
  */
 package com.pace.settings.ui;
 
+import java.util.Arrays;
 import java.util.List;
-
-import scala.actors.threadpool.Arrays;
 
 import com.pace.base.PafConfigFileNotFoundException;
 import com.pace.server.ServerSettings;
