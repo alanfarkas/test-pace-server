@@ -22,7 +22,7 @@ public class TimeSlice {
 
 
 	/**
-	 * @param period Time dimesion coordinate
+	 * @param period Time dimension coordinate
 	 * @param year Year dimension coordinate
 	 */
 	public TimeSlice(String period, String year) {
@@ -47,7 +47,7 @@ public class TimeSlice {
 	}
 
 	/**
-	 * Don't allow instansiation whithout any parameters
+	 * Don't allow instantiation without any parameters
 	 */
 	@SuppressWarnings("unused")
 	private TimeSlice() {}
@@ -83,6 +83,8 @@ public class TimeSlice {
 	 * Update the cell intersection using the specified time horizon coordinate
 	 * 
 	 * @param cellIs Cell intersection
+	 * @param timeHorizonCoord Time horizon coordinate
+	 * @param mdbDef Mdb dimension definition
 	 */
 	public static void applyTimeHorizonCoord(Intersection cellIs, String timeHorizonCoord, MdbDef mdbDef) {
 		
@@ -109,13 +111,31 @@ public class TimeSlice {
 		return year + PafBaseConstants.TIME_HORIZON_MBR_DELIM + period;
 	}
 	
+		
+	/**
+	 * Generate a time horizon coordinate from the supplied cell intersection
+	 *
+	 * @param cellIs Cell intersection
+	 * @param timeHorizonCoord Time horizon coordinate
+	 * @param mdbDef Mdb dimension definition
+	 * 
+	 * @return Time horizon coordinate
+	 */
+	public static String buildTimeHorizonCoord(Intersection cellIs, MdbDef mdbDef) {
+
+		String timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
+		String timeCoord = cellIs.getCoordinate(timeDim), yearCoord = cellIs.getCoordinate(yearDim);
+		
+		return buildTimeHorizonCoord(timeCoord, yearCoord);
+	}
+
 	
 	/**
-	 * Translate time horizon intersection coordinates to time/year coordinats
+	 * Translate time horizon intersection coordinates to time/year coordinates
 	 * 
 	 * @param coords Intersection coordinates
 	 * @param peridIndex Period coordinate index
-	 * @param yearIndex Year coorindate index
+	 * @param yearIndex Year coordinate index
 	 */
 	public static void translateTimeHorizonCoords(String[] coords, int periodIndex, int yearIndex) {
 		
@@ -130,6 +150,26 @@ public class TimeSlice {
 		}
 	
 	}
+
+
+	/**
+	 * Translate the time/year intersection into a time/horizon intersection
+	 * 
+	 * @param cellIs Cell intersection
+	 */
+	public static void translateTimeYearIs(Intersection cellIs, MdbDef mdbDef) {
+		
+		String timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
+		String yearCoord = cellIs.getCoordinate(yearDim);
+		
+		// Ensure that this is a time/year coordinate before doing translation
+		if (!yearCoord.equals(PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR)) {
+			String timeHorizonCoord = buildTimeHorizonCoord(cellIs.getCoordinate(timeDim), yearCoord);
+			cellIs.setCoordinate(timeDim, timeHorizonCoord);
+			cellIs.setCoordinate(yearDim, PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR);
+		}
+	}
+	
 
 	/**
 	 * Return the position of the time horizon delimiter in a time horizon coordinate

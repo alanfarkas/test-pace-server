@@ -16,6 +16,7 @@ import com.pace.base.mdb.PafDimTree.DimTreeType;
 public class MemberTreeSet {
 	
 	private Map<String, PafDimTree> memberTrees = new HashMap<String, PafDimTree>(10);
+	private List<String> allDimensions = new ArrayList<String>();
 	private List<String> attributeDims = new ArrayList<String>();
 	private List<String> baseDims = new ArrayList<String>();
 	
@@ -29,6 +30,7 @@ public class MemberTreeSet {
 	
 	public void addTree(String dim, PafDimTree tree) {
 		memberTrees.put(dim, tree);
+		allDimensions.add(dim);
 		if (tree.getTreeType().equals(DimTreeType.Base)) {
 			baseDims.add(dim);
 		} else {
@@ -92,7 +94,15 @@ public class MemberTreeSet {
 		return baseDims;
 	}
     
-    public Collection<PafDimTree> getTrees() {
+	/**
+	 * @return the allDimensions
+	 */
+	public List<String> getAllDimensions() {
+		return allDimensions;
+	}
+
+	public Collection<PafDimTree> getTrees() {
         return memberTrees.values();
     }
+
 }

@@ -33,6 +33,7 @@ import org.apache.log4j.Logger;
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.app.MdbDef;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafApplicationDef;
@@ -61,10 +62,18 @@ import com.pace.base.view.PafMVS;
  * @version	x.xx
  * @author Alan Farkas
  *
- */
-/**
- * @author Alan Farkas
- *
+ *-----------------------------------------------------------------------------------------------
+ * Notes:
+ * 	1) 	By default all cell intersections are comprised of a separate time and year coordinate.
+ * 
+ *  2) 	For time-based operations and functions, the time coordinate will be temporarily 
+ *  	converted to a time horizon tree member format (combined time & year), and the year 
+ *  	coordinate will be set to a dummy value (ex: "**YEAR.NA**").
+ *  
+ *  3)  For better scalability and more efficient data storage, each data block will incorporate
+ *  	the time horizon tree into its dense dimension structure. Therefore, the year coordinate
+ *  	on each data block key will be set to the dummy time horizon year value.
+ *------------------------------------------------------------------------------------------------  
  */
 public class PafDataCache implements IPafDataCache {
 
@@ -88,6 +97,7 @@ public class PafDataCache implements IPafDataCache {
 	private String[] attributeDims = null;			// Valid attribute dimensions
 	private String[] baseDimensions = null; 		// Valid base dimensions
 	private List<String> allDimensions = null; 		// Valid intersection dimensions
+	private List<String> treeDims = null; 			// All dimension tree entries (include Time Horizon Tree)
 	private Set<String> coreDimensions = null;		// The required cell intersection dimensions (base dimensions)
 	private Set<String> nonCoreDims = null;			// The optional cell intersection dimensions (attribute dimensions)
 	private String[][] memberCatalog = null;		// Defined members by dimension axis
@@ -167,15 +177,16 @@ public class PafDataCache implements IPafDataCache {
 		nonCoreDims = new HashSet<String>(Arrays.asList(attributeDims));
 		allDimensions = new ArrayList<String>(Arrays.asList(baseDimensions));
 		allDimensions.addAll(Arrays.asList(attributeDims));
-		axisCount = allDimensions.size();
-	
+		treeDims = dimTrees.getAllDimensions(); 	// Includes time horizon tree (TTN-1595)
+		axisCount = treeDims.size();				// Pick up time horizon dim too (TTN-1595)
+		
 		// Add all dimensions members to member catalog. For proper member aggregation,
 		// the members will be added in POST ORDER so that all children are calculated
 		// before their parents.
 		axisSizes = new int[axisCount];
 		memberCatalog = new String[(axisCount)][];
 		for (int axis = 0; axis < axisCount; axis++) {
-			String dim = allDimensions.get(axis);
+			String dim = treeDims.get(axis);							// Pull dim name fro tree dim collection (TTN-1595)
 			PafDimTree dimTree = dimTrees.getTree(dim);
 			String[] members;
 			if (!dim.equals(versionDim)) {
@@ -329,7 +340,7 @@ public class PafDataCache implements IPafDataCache {
 		logger.debug("Creating axisIndexMap ...");
 		axisIndexMap = new HashMap<String, Integer>();
 		for (int i = 0; i < axisCount; i++) {
-			axisIndexMap.put(allDimensions.get(i), i);
+			axisIndexMap.put(treeDims.get(i), i); 	// Include time horizon dim (TTN-1595)
 		}
 		return axisIndexMap;
 	}
@@ -367,7 +378,7 @@ public class PafDataCache implements IPafDataCache {
 		// Create an array that will be used to isolate the intersection coordinates
 		// that comprise the data block key for each intersection size. The arrays
 		// for each intersection size contains the axis for each intersection 
-		// intersection dimnension except Measure & Time.
+		// intersection dimension except Measure & Time.
 		//
 		// 	Example:  	
 		//	Intersection Size		indexedAxes
@@ -1689,7 +1700,9 @@ public class PafDataCache implements IPafDataCache {
 		dataBlockCount++;
 		
 		// Create new data block and add it to data block pool
-		dataBlock = new DataBlock(getMeasureSize(), getTimeSize(), this.cellPropsBitCount);
+//		dataBlock = new DataBlock(getMeasureSize(), getTimeSize(), this.cellPropsBitCount);
+		//--DCUPDATE
+		dataBlock = new DataBlock(this.getMeasureSize(), this.getTimeHorizonSize(), this.cellPropsBitCount);
 		dataBlockPool.add(dataBlock);
 		
 		// Add data block key to lookup collections
@@ -1763,7 +1776,8 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	private Intersection resolveOffsetVersionRef(Intersection aliasDataCacheRef) throws PafException {
 
-		final String versionDim = this.getVersionDim(), yearDim = this.getYearDim(), planVersion = this.getPlanVersion();
+		final String versionDim = this.getVersionDim(), timeDim = this.getTimeDim(), yearDim = this.getYearDim();
+		final String planVersion = this.getPlanVersion();
 		List<String> mdbYears = this.getMdbYears();
 		Intersection resolvedDcRef = aliasDataCacheRef;
 		
@@ -1774,8 +1788,19 @@ public class PafDataCache implements IPafDataCache {
 		String sourceVersion = vf.getBaseVersionValue(planVersion);
 		resolvedDcRef.setCoordinate(versionDim, sourceVersion);
 
-		// Convert the year coordinate
-		String yearCoord = aliasDataCacheRef.getCoordinate(yearDim), sourceYear = null;
+		// Get the year coordinate 
+		String yearCoord = null;
+		if (isTimeHorizonIs(aliasDataCacheRef)) {
+			// Get the year coordinate Extract the year from the time horizon coordinate
+			String timeHorizonCoord = aliasDataCacheRef.getCoordinate(timeDim);
+			TimeSlice timeSlice = new TimeSlice(timeHorizonCoord);
+			yearCoord = timeSlice.getYear();
+		} else {			
+			yearCoord = aliasDataCacheRef.getCoordinate(yearDim);
+		}
+		
+		// Resolve the year coordinate to the appropriate source year
+		String sourceYear = null;
 		try {
 			sourceYear = vf.calcOffsetVersionSourceYear(yearCoord, mdbYears);
 			resolvedDcRef.setCoordinate(yearDim, sourceYear);
@@ -1990,7 +2015,7 @@ public class PafDataCache implements IPafDataCache {
 		
 		final int coreKeyDimCount = coreKeyDims.length;
 		final int dataBlockKeySize = key.getSize();
-		final String versionDim = this.getVersionDim(), yearDim = this.getYearDim();
+		final String timeDim = this.getTimeDim(), versionDim = this.getVersionDim();
 		final List<String> uowYearList = Arrays.asList(this.getYears());
 		final List<String> mdbYears = this.getMdbYears();
 		boolean isAliasKey = false;
@@ -2044,8 +2069,13 @@ public class PafDataCache implements IPafDataCache {
 		VersionDef vd = getVersionDef(version);
 		if (vd.getType() == VersionType.Offset) {
 
+			// Extract the year from the time horizon coordinate
+			String timeHorizonCoord = key.getCoordinate(timeDim);
+			TimeSlice timeSlice = new TimeSlice(timeHorizonCoord);
+			String yearCoord = timeSlice.getYear();
+
 			// Calculate the offset version source year
-			String yearCoord = key.getCoordinate(yearDim), sourceYear = null;
+			String sourceYear = null;
 			try {
 				sourceYear = vd.getVersionFormula().calcOffsetVersionSourceYear(yearCoord, mdbYears);
 			} catch (Exception e) {
@@ -2326,7 +2356,8 @@ public class PafDataCache implements IPafDataCache {
 	private DataCacheCellAddress generateCellAddress(final Intersection cellIs) {
 		
 		int measureAxis = getMeasureAxis();
-		int timeAxis = getTimeAxis();
+		int timeHorizonAxis = getTimeHorizonAxis();
+		MdbDef mdbDef = this.getAppDef().getMdbDef();
 		DataCacheCellAddress cellAddress = new DataCacheCellAddress();
 
 		// Generate data block key that corresponds to the cell intersection
@@ -2336,7 +2367,8 @@ public class PafDataCache implements IPafDataCache {
 		// Set x and y coordinates (measure, time)
 		int measureIndex = getMemberIndex(cellIs.getCoordinates()[measureAxis], measureAxis);
 		cellAddress.setCoordX(measureIndex);
-		int timeIndex = getMemberIndex(cellIs.getCoordinates()[timeAxis], timeAxis);
+		String timeHorizonCoord = TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef);
+		int timeIndex = getMemberIndex(timeHorizonCoord, timeHorizonAxis);
 		cellAddress.setCoordY(timeIndex);
 
 		// Return cell address
@@ -2440,6 +2472,11 @@ public class PafDataCache implements IPafDataCache {
 		// given intersection size.  
 		int[] keyDimIndexes = keyIndexesByIsSize[intersection.getSize()];
 		dataBlockKey = intersection.createSubIntersection(keyDimIndexes);
+		
+		// Translate year coordinate to default time horizon year 
+		// coordinate to match internal data block structure. (TTN-1595)
+		dataBlockKey.setCoordinate(this.getYearDim(), TimeSlice.getTimeHorizonYear());
+		
 		return dataBlockKey;
 	}
 
@@ -2727,7 +2764,6 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public String getTimeHorizonDim() {
 		return PafBaseConstants.TIME_HORIZON_DIM;
-//		return getTimeDim();
 	}
 
 	/**
@@ -3571,7 +3607,7 @@ public class PafDataCache implements IPafDataCache {
 		} else { 
 			// Member not found
 			String errMsg = "Member to index conversion error - member ["
-				+ member + "] not found in axis [" + axis + "] (dimension [" + allDimensions.get(axis)  + "])";
+				+ member + "] not found in axis [" + axis + "] (dimension [" + treeDims.get(axis)  + "])";
 			logger.error(errMsg);
 			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
 			throw iae;          			
@@ -3784,6 +3820,7 @@ public class PafDataCache implements IPafDataCache {
 
 		int minKeyDims = coreDimensions.size() - NON_KEY_DIM_COUNT;
 		int maxKeyDims = allDimensions.size() - NON_KEY_DIM_COUNT;
+		String yearDim = this.getYearDim(), defaultTimeHorizonYear = TimeSlice.getTimeHorizonYear();
 
 		
 		// Key can't be null
@@ -3805,19 +3842,28 @@ public class PafDataCache implements IPafDataCache {
 			
 			// Lookup the axis number
 			int axis = coreKeyAxes[i];
-			
+
 			// Validate dimension name and dimension order
 			String dim = key.getDimensions()[i];
 			if (!dim.equals(this.getDimension(axis))) {
 				return false;
 			}
-			
-			// Validate member name
+
+			// Validate member name. When validating the year dimension
+			// coordinate, validate against the default time horizon
+			// year.
 			String member = key.getCoordinate(dim);
-			if (!this.isMember(dim, member)) {
+			if (!dim.equals(yearDim)) {
+				if (!this.isMember(dim, member)) {
+					return false;
+				} 
+			// Year Dim
+			} else if (!member.equals(defaultTimeHorizonYear)){
 				return false;
 			}
 		}
+
+
 
 		
 		// Check any remaining key dimensions to ensure that they are valid
