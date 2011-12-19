@@ -168,6 +168,18 @@
           <name>Sales Planning - Member and Alias Test</name>
           <viewGroup>false</viewGroup>
         </PafViewGroupItem>
+        <PafViewGroupItem>
+          <name>Sales Planning - Offset Version Test</name>
+          <viewGroup>false</viewGroup>
+        </PafViewGroupItem>
+        <PafViewGroupItem>
+          <name>Sales Planning - Offset Version Test - Attribute (L0)</name>
+          <viewGroup>false</viewGroup>
+        </PafViewGroupItem>
+        <PafViewGroupItem>
+          <name>Sales Planning - Offset Version Test - Attribute (Season)</name>
+          <viewGroup>false</viewGroup>
+        </PafViewGroupItem>
       </pafViewGroupItems>
     </PafViewGroup>
   </entry>
@@ -182,22 +194,6 @@
         </PafViewGroupItem>
         <PafViewGroupItem>
           <name>ROUNDING - SLS &amp; MD</name>
-          <viewGroup>false</viewGroup>
-        </PafViewGroupItem>
-      </pafViewGroupItems>
-    </PafViewGroup>
-  </entry>
-  <entry>
-    <string>Multi-Year Testing</string>
-    <PafViewGroup>
-      <name>Multi-Year Testing</name>
-      <pafViewGroupItems>
-        <PafViewGroupItem>
-          <name>Multi-Year - Sales Dollar Unit Planning</name>
-          <viewGroup>false</viewGroup>
-        </PafViewGroupItem>
-        <PafViewGroupItem>
-          <name>Multi-Year  - Inv Flow APS, U, AUR</name>
           <viewGroup>false</viewGroup>
         </PafViewGroupItem>
       </pafViewGroupItems>

@@ -270,7 +270,7 @@
     </viewTreeItemNames>
     <menuItemNames>
       <string>mnuSubmitPlan</string>
-	  <string>mnuGeneratePlan</string>	  
+      <string>mnuGeneratePlan</string>
     </menuItemNames>
     <ruleSetNames/>
     <defaultRulesetName>InventoryReact</defaultRulesetName>
@@ -300,7 +300,7 @@
     </viewTreeItemNames>
     <menuItemNames>
       <string>mnuSubmitPlan</string>
-      <string>mnuGeneratePlan</string>	  
+      <string>mnuGeneratePlan</string>
     </menuItemNames>
     <ruleSetNames/>
     <defaultRulesetName>InventoryReact</defaultRulesetName>
@@ -310,6 +310,7 @@
     <versionFilter>
       <string>WP</string>
       <string>LY</string>
+      <string>Dyn_LY</string>
       <string>LY_%_Prod_Parent</string>
       <string>WP_%_Prod_Parent</string>
       <string>WP_%_Prod_Total</string>
@@ -317,7 +318,9 @@
       <string>WP_%_Time_Total</string>
       <string>WP_%_Sales</string>
       <string>WP_vs_LY</string>
+      <string>WP_vs_DLY</string>
       <string>WP_vs_LY_%</string>
+      <string>WP_vs_DLY_%</string>
     </versionFilter>
   </PafPlannerConfig>
 </PafPlannerConfig-array>
