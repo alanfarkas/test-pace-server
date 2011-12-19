@@ -20,7 +20,7 @@ package com.palladium.paf.validator;
 
 import org.apache.log4j.Logger;
 
-import com.palladium.paf.PafConfigFileNotFoundException;
+import com.pace.base.PafConfigFileNotFoundException;
 import com.palladium.paf.utils.FileUtility;
 
 
@@ -58,7 +58,7 @@ public class PafXmlValidator {
 		
 		try {
 			
-			com.palladium.utility.PafXStream.importObjectFromXml(fileName);
+			com.pace.base.utility.PafXStream.importObjectFromXml(fileName);
 			
 		} catch (PafConfigFileNotFoundException e) {
 			

@@ -30,11 +30,11 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.palladium.paf.PafBaseConstants;
-import com.palladium.paf.PafConfigFileNotFoundException;
-import com.palladium.paf.app.PafApplicationDef;
+import com.pace.base.PafBaseConstants;
+import com.pace.base.PafConfigFileNotFoundException;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.utility.PafXStream;
 import com.palladium.paf.utils.model.ElapsedPeriod;
-import com.palladium.utility.PafXStream;
 
 /**
  * Used to update the elapsed periods
