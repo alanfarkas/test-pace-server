@@ -1,0 +1,14 @@
+<PafView>
+  <viewSectionNames>
+    <string>Sales Planning - Offset Version Test - Attribute (Season)</string>
+  </viewSectionNames>
+  <name>Sales Planning - Offset Version Test - Attribute (Season)</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <printStyle/>
+  <viewPrintState>DEFAULT</viewPrintState>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>

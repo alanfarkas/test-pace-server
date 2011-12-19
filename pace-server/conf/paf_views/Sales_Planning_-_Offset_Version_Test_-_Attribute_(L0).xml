@@ -1,0 +1,14 @@
+<PafView>
+  <viewSectionNames>
+    <string>Sales Planning - Offset Version Test - Attribute (L0)</string>
+  </viewSectionNames>
+  <name>Sales Planning - Offset Version Test - Attribute (L0)</name>
+  <desc></desc>
+  <headers/>
+  <userSelections/>
+  <printStyle/>
+  <viewPrintState>DEFAULT</viewPrintState>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>
