@@ -1,33 +1,28 @@
 package com.pace.settings.ui;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.pace.base.AuthMode;
+import com.pace.settings.PaceSettingsConstants;
 import com.vaadin.data.Item;
 import com.vaadin.data.validator.IntegerValidator;
 import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.TextField;
 
 /**
- *  The server settings field factory overloads the default behavior for the 
- *  form fields.  It overrides the captions and in some cases widgets.
- *  
+ * The server settings field factory overloads the default behavior for the form
+ * fields. It overrides the captions and in some cases widgets.
+ * 
  * @author JMilliron
- *
+ * 
  */
-public class ServerSettingsFieldFactory extends DefaultFieldFactory {
-	
+public class ServerSettingsFieldFactory extends PaceSettingsDefaultFieldFactory {
+
 	private static final long serialVersionUID = 8662372484558509574L;
-	
-	private static final String COMMON_FIELD_WIDTH = "20em";
-	
+
+	private ComboBox authModeComboBox = new ComboBox();
+
 	public static final String ENABLE_ROUNDING = "enableRounding";
 	public static final String ENABLE_CLIENT_PASSWORD_RESET = "enableClientPasswordReset";
 	public static final String ENABLE_SERVER_PASSWORD_RESET = "enableServerPasswordReset";
@@ -50,26 +45,34 @@ public class ServerSettingsFieldFactory extends DefaultFieldFactory {
 	public static final String PAF_SECURITY_BOOTUP_PASSWORD = "pafSecurityBootupPassword";
 	public static final String PAF_SECURITY_PASSWORD = "pafSecurityPassword";
 	public static final String PAF_SECURITY_USER = "pafSecurityUser";
-	
-	//form order
-	public static final Object[] NATURAL_COL_ORDER = new Object[] {
-			PAF_SECURITY_USER, PAF_SECURITY_PASSWORD, PAF_SECURITY_BOOTUP_PASSWORD, AUTH_MODE, CALC_SCRIPT_TIMEOUT, CLIENT_UPDATE_URL, CLIENT_MIN_VERSION,
-			MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH, SMTP_MAIL_HOST, SMTP_USER_EMAIL_ACCOUNT, 
-			AUTO_CONVERT_PROJECT, AUTO_LOAD_ATTRIBUTES, CLEAR_OUTLINE_CACHE, CLEAR_CELL_NOTES, CLEAR_ALL_CELL_NOTES,
-			DEBUG_MODE, EVALUATION_STEP_LOGGING, CHANGED_CELL_LOGGING, ENABLE_SERVER_PASSWORD_RESET, ENABLE_CLIENT_PASSWORD_RESET, ENABLE_ROUNDING 
-		  };
 
-	//override caption map
-	private static Map<String, String> captionMap = new HashMap<String, String>();
-	
-	//required field set
-	private static Set<String> requiredFieldSet = new HashSet<String>();
-	
-	ComboBox authModeComboBox = new ComboBox();
-	
-	 static {
-	    	
-		 //captions
+	public ServerSettingsFieldFactory() {
+
+		// form order
+		formOrderList.add(PAF_SECURITY_USER);
+		formOrderList.add(PAF_SECURITY_PASSWORD);
+		formOrderList.add(PAF_SECURITY_BOOTUP_PASSWORD);
+		formOrderList.add(AUTH_MODE);
+		formOrderList.add(CALC_SCRIPT_TIMEOUT);
+		formOrderList.add(CLIENT_UPDATE_URL);
+		formOrderList.add(CLIENT_MIN_VERSION);
+		formOrderList.add(MIN_PASSWORD_LENGTH);
+		formOrderList.add(MAX_PASSWORD_LENGTH);
+		formOrderList.add(SMTP_MAIL_HOST);
+		formOrderList.add(SMTP_USER_EMAIL_ACCOUNT);
+		formOrderList.add(AUTO_CONVERT_PROJECT);
+		formOrderList.add(AUTO_LOAD_ATTRIBUTES);
+		formOrderList.add(CLEAR_OUTLINE_CACHE);
+		formOrderList.add(CLEAR_CELL_NOTES);
+		formOrderList.add(CLEAR_ALL_CELL_NOTES);
+		formOrderList.add(DEBUG_MODE);
+		formOrderList.add(EVALUATION_STEP_LOGGING);
+		formOrderList.add(CHANGED_CELL_LOGGING);
+		formOrderList.add(ENABLE_SERVER_PASSWORD_RESET);
+		formOrderList.add(ENABLE_CLIENT_PASSWORD_RESET);
+		formOrderList.add(ENABLE_ROUNDING);
+
+		// captions
 		captionMap.put(PAF_SECURITY_USER, "Security Database User");
 		captionMap.put(PAF_SECURITY_PASSWORD, "Security Database Password");
 		captionMap.put(PAF_SECURITY_BOOTUP_PASSWORD, "Security Database Bootup Password");
@@ -85,15 +88,19 @@ public class ServerSettingsFieldFactory extends DefaultFieldFactory {
 		captionMap.put(AUTO_LOAD_ATTRIBUTES, "Auto Load Attributes");
 		captionMap.put(CLEAR_OUTLINE_CACHE, "Clear Outline Cache");
 		captionMap.put(CLEAR_CELL_NOTES, "Clear Application Cell Notes");
-		captionMap.put(CLEAR_ALL_CELL_NOTES, "Clear All Applications Cell Notes");
+		captionMap.put(CLEAR_ALL_CELL_NOTES,
+				"Clear All Applications Cell Notes");
 		captionMap.put(DEBUG_MODE, "Debug Mode");
-		captionMap.put(EVALUATION_STEP_LOGGING, "Enable Evaluation Step Logging");
+		captionMap.put(EVALUATION_STEP_LOGGING,
+				"Enable Evaluation Step Logging");
 		captionMap.put(CHANGED_CELL_LOGGING, "Enabled Changed Cell Logging");
-		captionMap.put(ENABLE_SERVER_PASSWORD_RESET, "Enable Server Password Reset");
-		captionMap.put(ENABLE_CLIENT_PASSWORD_RESET, "Enable Client Password Reset");
+		captionMap.put(ENABLE_SERVER_PASSWORD_RESET,
+				"Enable Server Password Reset");
+		captionMap.put(ENABLE_CLIENT_PASSWORD_RESET,
+				"Enable Client Password Reset");
 		captionMap.put(ENABLE_ROUNDING, "Enable Rounding");
-		
-		//required fields
+
+		// required fields
 		requiredFieldSet.add(PAF_SECURITY_USER);
 		requiredFieldSet.add(PAF_SECURITY_PASSWORD);
 		requiredFieldSet.add(PAF_SECURITY_BOOTUP_PASSWORD);
@@ -104,80 +111,53 @@ public class ServerSettingsFieldFactory extends DefaultFieldFactory {
 		requiredFieldSet.add(CALC_SCRIPT_TIMEOUT);
 		requiredFieldSet.add(MIN_PASSWORD_LENGTH);
 		requiredFieldSet.add(MAX_PASSWORD_LENGTH);
-	        
-	}
 
-	public ServerSettingsFieldFactory() {
-		
 		authModeComboBox.setNewItemsAllowed(false);
 		authModeComboBox.setNullSelectionAllowed(false);
 		authModeComboBox.addItem(AuthMode.nativeMode.toString());
 		authModeComboBox.addItem(AuthMode.mixedMode.toString());
-		
+
 	}
-	
+
 	@Override
-    public Field createField(Item item, Object propertyId, Component uiContext) {
-       
-		 Field field = super.createField(item, propertyId, uiContext);
-		 
-		 //add catpion
-	     if ( captionMap.containsKey(propertyId) ) {
-	        
-	    	 field.setCaption(captionMap.get(propertyId));
-	        	
-	     }
+	public Field createField(Item item, Object propertyId, Component uiContext) {
+
+		Field field = super.createField(item, propertyId, uiContext);
 		
-	     //add if required and set error message
-	     if ( requiredFieldSet.contains(propertyId)) {
-	    
-	    	//add required field	     
-		     field.setRequired(true);
-		     field.setRequiredError(field.getCaption() + " is a required field.");
-		    
-	     }
-	     
-	     //if auth mode, return combo instad of text field
-	     if (propertyId.equals(AUTH_MODE)) {
-				
+		// if auth mode, return combo instad of text field
+		if (propertyId.equals(AUTH_MODE)) {
+
 			authModeComboBox.setCaption(field.getCaption());
 			authModeComboBox.setRequired(requiredFieldSet.contains(propertyId));
-			authModeComboBox.setWidth(COMMON_FIELD_WIDTH);
+			authModeComboBox.setWidth(PaceSettingsConstants.COMMON_FIELD_WIDTH);
 			return authModeComboBox;
-	    }
-	     
-	    //if text field, change nulls to empty strings and set the common width
-		if ( field instanceof TextField ) {
-			
-			((TextField) field).setNullRepresentation("");
-			((TextField) field).setWidth(COMMON_FIELD_WIDTH);
-			
 		}
-        
-		//add validators
-        if (propertyId.equals(CALC_SCRIPT_TIMEOUT)) {
-        	
-            TextField tf = (TextField) field;
 
-            tf.addValidator(new RegexpValidator("[1-9][0-9]*",
-                "Calculateion Script Timeout must be an whole number and can't start with 0."));
-            
-        } else if ( propertyId.equals(MIN_PASSWORD_LENGTH)) {
-        	
-            TextField tf = (TextField) field;
+		// add validators
+		if (propertyId.equals(CALC_SCRIPT_TIMEOUT)) {
 
-            tf.addValidator(new IntegerValidator("Minimum User Password Length must be a whole number."));
-            
-        } else if ( propertyId.equals(MAX_PASSWORD_LENGTH)) {
-        	
-            TextField tf = (TextField) field;
+			TextField tf = (TextField) field;
 
-            tf.addValidator(new RegexpValidator("[1-9][0-9]*",
-                "Maximum User Password Length must be a whole number and can't start with 0."));
-        	
-        }
+			tf.addValidator(new RegexpValidator("[1-9][0-9]*",
+					"Calculateion Script Timeout must be an whole number and can't start with 0."));
 
-        return field;
-    }
+		} else if (propertyId.equals(MIN_PASSWORD_LENGTH)) {
+
+			TextField tf = (TextField) field;
+
+			tf.addValidator(new IntegerValidator(
+					"Minimum User Password Length must be a whole number."));
+
+		} else if (propertyId.equals(MAX_PASSWORD_LENGTH)) {
+
+			TextField tf = (TextField) field;
+
+			tf.addValidator(new RegexpValidator("[1-9][0-9]*",
+					"Maximum User Password Length must be a whole number and can't start with 0."));
+
+		}
+
+		return field;
+	}
 
 }

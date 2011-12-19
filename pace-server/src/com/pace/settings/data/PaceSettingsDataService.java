@@ -1,10 +1,8 @@
 package com.pace.settings.data;
 
-import java.io.File;
-
-import com.pace.base.PafBaseConstants;
 import com.pace.base.PafConfigFileNotFoundException;
 import com.pace.base.utility.PafXStream;
+import com.pace.server.PafLDAPSettings;
 import com.pace.server.PafMetaData;
 import com.pace.server.ServerSettings;
 
@@ -16,7 +14,8 @@ import com.pace.server.ServerSettings;
  */
 public class PaceSettingsDataService {
 
-	private static String serverSettingsFile = PafMetaData.getServerConfDirPath() + ".." + File.separator + PafBaseConstants.DN_ConfServerFldr + File.separator + "paceServerSettings.xml";
+	private static String serverSettingsFile = PafMetaData.getConfigServerDirPath()  + "paceServerSettings.xml";
+	private static String ldapSettingsFile = PafMetaData.getConfigServerDirPath()  + "paceLDAPSettings.xml";
 	
 	/**
 	 * @return the serverSettingsFile
@@ -37,11 +36,25 @@ public class PaceSettingsDataService {
 		
 	}
 	
+	public static PafLDAPSettings getLDAPSettings() throws PafConfigFileNotFoundException {
+		
+		return (PafLDAPSettings) PafXStream.importObjectFromXml(ldapSettingsFile);
+		
+	}
+	
+	public static void setLDAPSettings(PafLDAPSettings ss) {
+				
+		PafXStream.exportObjectToXml(ss, ldapSettingsFile);		
+		
+	}
+	
 	public static void main(String[] args) {
 		
 		ServerSettings ss = PafMetaData.getServerSettings();
 		
-		setServerSettings(ss);
+		//setServerSettings(ss);
+		
+		setLDAPSettings(ss.getLdapSettings());
 		
 	}
 	

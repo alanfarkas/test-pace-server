@@ -1,5 +1,7 @@
 package com.pace.settings;
 
+import com.pace.settings.ui.LDAPSettingsForm;
+import com.pace.settings.ui.LDAPSettingsView;
 import com.pace.settings.ui.ServerSettingsForm;
 import com.pace.settings.ui.ServerSettingsView;
 import com.pace.settings.ui.SettingsList;
@@ -36,10 +38,14 @@ public class PaceSettingsApplication extends Application implements
 	private SettingsTree tree = new SettingsTree(this);
 
 	private ServerSettingsView serverSettingsView;
+	
+	private LDAPSettingsView ldapSettingsView;
 
-	ServerSettingsForm form = new ServerSettingsForm(this);
+	private ServerSettingsForm serverSettingsForm = new ServerSettingsForm(this);
+	
+	private LDAPSettingsForm ldapSettingsForm = new LDAPSettingsForm(this);
 
-	SettingsList settingsList = new SettingsList(this);
+	private SettingsList settingsList = new SettingsList(this);
 
 	@Override
 	public void init() {
@@ -119,7 +125,11 @@ public class PaceSettingsApplication extends Application implements
 
 					showServerSettingsView();
 					
-				} 
+				} else if ( SettingsTree.LDAP_SETTINGS.equals(itemId)) {
+					
+					showLDAPSettingsView();
+					
+				}
 			}
 
 		}
@@ -129,6 +139,12 @@ public class PaceSettingsApplication extends Application implements
 	private void showServerSettingsView() {
 
 		setPropertiesView(getServerSettingsView());
+
+	}
+	
+	private void showLDAPSettingsView() {
+
+		setPropertiesView(getLDAPSettingsView());
 
 	}
 
@@ -151,10 +167,22 @@ public class PaceSettingsApplication extends Application implements
 
 		if (serverSettingsView == null) {
 
-			serverSettingsView = new ServerSettingsView(form);
+			serverSettingsView = new ServerSettingsView(serverSettingsForm);
 		}
 
 		return serverSettingsView;
+	}
+	
+	public LDAPSettingsView getLDAPSettingsView() {
+		
+		if ( ldapSettingsView == null ) {
+			
+			ldapSettingsView = new LDAPSettingsView(ldapSettingsForm);
+			
+		}
+		
+		return ldapSettingsView;
+		
 	}
 
 }

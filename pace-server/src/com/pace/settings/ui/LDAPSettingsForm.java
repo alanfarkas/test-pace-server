@@ -4,39 +4,37 @@
 package com.pace.settings.ui;
 
 import com.pace.base.PafConfigFileNotFoundException;
-import com.pace.server.ServerSettings;
+import com.pace.server.PafLDAPSettings;
 import com.pace.settings.PaceSettingsApplication;
 import com.pace.settings.data.PaceSettingsDataService;
 import com.vaadin.data.util.BeanItem;
 
 /**
- * 
- * Server Settings form
+ * LDAP Settings form
  * 
  * @author JMilliron
  *
  */
-public class ServerSettingsForm extends PaceSettingsForm {
+public class LDAPSettingsForm extends PaceSettingsForm {
 		
+	public LDAPSettingsForm(PaceSettingsApplication serverSettingsApplication) {
+		super(serverSettingsApplication);
+	}
 
-	private static final long serialVersionUID = -1856367965196923345L;
-	
-	public ServerSettingsForm(PaceSettingsApplication serverSettingsApplication) {
-    	super(serverSettingsApplication);    	    	                
-    }
-   
+	private static final long serialVersionUID = -3760996903039086588L;
+
 	@Override
 	protected void setupForm() {
 
 		setWriteThrough(false);
 		
-		setPaceSettingsDefaultFactory(new ServerSettingsFieldFactory());
+		setPaceSettingsDefaultFactory(new LDAPSettingsFieldFactory());
         
         setFormFieldFactory(getPaceSettingsDefaultFactory());
         
         loadSettings();
       
-  		setItemDataSource(new BeanItem<ServerSettings>((ServerSettings) inputObject));
+  		setItemDataSource(new BeanItem<PafLDAPSettings>((PafLDAPSettings) inputObject));
     
   		setImmediate(true);
   		
@@ -45,7 +43,7 @@ public class ServerSettingsForm extends PaceSettingsForm {
 	@Override
 	protected void saveForm() {
 
-		PaceSettingsDataService.setServerSettings((ServerSettings) inputObject);
+		PaceSettingsDataService.setLDAPSettings((PafLDAPSettings) inputObject);
 		
 	}
 
@@ -54,7 +52,7 @@ public class ServerSettingsForm extends PaceSettingsForm {
 
 		loadSettings();
 		
- 	    setItemDataSource(new BeanItem<ServerSettings>((ServerSettings) inputObject));
+ 	    setItemDataSource(new BeanItem<PafLDAPSettings>((PafLDAPSettings) inputObject));
 		
 	}
 
@@ -63,14 +61,13 @@ public class ServerSettingsForm extends PaceSettingsForm {
 
 		try {
         	
-			inputObject = PaceSettingsDataService.getServerSettings();
+			inputObject = PaceSettingsDataService.getLDAPSettings();
 					    	
 		} catch (PafConfigFileNotFoundException e) {
 			
-			inputObject = new ServerSettings();
+			inputObject = new PafLDAPSettings();
 			
 		}
 		
 	}	
-	
 }
