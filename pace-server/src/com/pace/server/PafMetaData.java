@@ -182,6 +182,10 @@ public class PafMetaData {
     public static String getConfigDirPath() {
     	return paceHome + fileSep + PafBaseConstants.DN_ConfFldr + fileSep;
     }
+    
+    public static String getConfigServerDirPath() {
+    	return paceHome + fileSep + PafBaseConstants.DN_ConfServerFldr + fileSep;
+    }
 
     
     /**
