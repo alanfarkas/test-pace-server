@@ -32,44 +32,46 @@ import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * Implements a next function. It looks up the value of the a particular intersection in the data cache
- * ie. @Next(BOP_DLR, Time, 1)
- * would return the value of at the intersection, that starts at the source intersection, but is invoked
- * for the measure BOP_DLR, and is offset in the Time dimension + 1
+ * Implements a beginning of period function for the specified measure and time dimension. 
+ * ie. @BOP(SLS_DLR, Time)
+ * 
+ * This function would return the intersection for SLS_DLR that is at the first floor member, 
+ * within the current UOW, of the Time dimension (or whatever dimension is supplied).
+ * 
+ * Other dimensions besides Time can be supplied to this function. If no dimension is supplied, 
+ * then the Time dimension will be used by default. 
  *
  * @version	x.xx
  * @author jim
  *
  */
 
-// TODO add support for multiple offset increments in next function
 public class F_Bop extends AbstractFunction {
+	
 	Map<String, Set<String>> filterMap = new HashMap<String, Set<String>>(); 
+	
 	public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
-    	double result;
-    	PafApplicationDef app = evalState.getAppDef();
 
-    	Intersection dataIs = sourceIs.clone();
-    	
-        
-    	if ( parms.length > 0 )
-    		dataIs.setCoordinate(app.getMdbDef().getMeasureDim(), parms[0]);
-    	
-    	String offsetDim;
-    	if (parms.length > 1 ) 
-    		offsetDim = parms[1];
-    	else 
-    		offsetDim = app.getMdbDef().getTimeDim();
-    	
-        
-    	PafDimTree offsetTree = evalState.getDataCacheTrees().getTree(offsetDim);
-        PafDimMember firstMbr = offsetTree.getLowestLevelMembers().get(0);
+		double result;
+		PafApplicationDef app = evalState.getAppDef();
 
-		dataIs.setCoordinate(offsetDim, firstMbr.getKey());
+		Intersection dataIs = sourceIs.clone();
+
+
+		if ( parms.length > 0 )
+			dataIs.setCoordinate(app.getMdbDef().getMeasureDim(), parms[0]);
+
+		String offsetDim;
+		if (parms.length > 1 ) 
+			offsetDim = parms[1];
+		else 
+			offsetDim = app.getMdbDef().getTimeDim();
+
+		dataIs = dataCache.getFirstFloorIs(dataIs, offsetDim);
 		result = dataCache.getCellValue(dataIs);
 
-    	return result;
-    }
+		return result;
+	}
 
 	@Override
 	public Set<Intersection> getTriggerIntersections(IPafEvalState evalState) throws PafException {

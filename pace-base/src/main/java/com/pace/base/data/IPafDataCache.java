@@ -44,5 +44,7 @@ public interface IPafDataCache {
 	public Intersection getFirstDescendantIs(Intersection cellIs, String dim, int level);
 	public Intersection getLastDescendantIs(Intersection cellIs, String dim, int level);
 	public List<Intersection> getDescIntersectionsAtLevel(Intersection cellIs, String dim, int level);
+	public Intersection getFirstFloorIs(Intersection cellIs, String dim);
+	public Intersection getLastFloorIs(Intersection cellIs, String dim);
 
 }

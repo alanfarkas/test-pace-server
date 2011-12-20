@@ -2,7 +2,6 @@ package com.pace.ext.funcs;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,7 +12,6 @@ import com.pace.base.PafException;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
-import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
@@ -46,24 +44,6 @@ public class IWOSFunc extends AbstractFunction {
     	// Validate function parameters
     	parseParms(evalState);
     	
-//    	// PRE MULTI-YEAR CODE
-//      	// Get the list of periods at bottom level or selected level, whichever is higher
-//       	PafDimTree timeTree = evalState.getDataCacheTrees().getTree(timeDim);
-//       	int timeFloor = timeTree.getLowestAbsLevelInTree();
-//       	int validPeriodLevel = Math.max(timeFloor, periodLevel);
-//       	List<PafDimMember> periods = timeTree.getMembersByLevel().get(validPeriodLevel);
-//       	
-//       	// Get current period attributes
-//       	PafDimMember currTimeMbr = timeTree.getMember(currentPeriod);
-//        int currPeriodNo = periods.indexOf(currTimeMbr);     	
-//      	
-//        // TBFirst Logic - If time dimension intersection not at bottom/selected level, 
-//        // set period number to first descendant period.
-//        if (currPeriodNo == -1) {
-//        	currTimeMbr = timeTree.getFirstDescendant(currTimeMbr.getKey(), (short) validPeriodLevel);
-//        	currPeriodNo = periods.indexOf(currTimeMbr);           
-//       }               
-        
     	// TBFirst Logic - If time dimension intersection not at bottom/selected level, 
     	// set period to first descendant period.
       	tempIs = dataCache.getFirstDescendantIs(tempIs, timeDim, periodLevel);
@@ -112,62 +92,6 @@ public class IWOSFunc extends AbstractFunction {
         // Return beginning inventory
         return beginInv;
  
-//    	// PRE MULTI-YEAR CODE
-//    	if (!bWrap) {
-//        	int tmpMax;
-//        	tmpMax = periods.size() - currPeriodNo;
-//        	posFloor = tmpMax < posFloor ? tmpMax : posFloor;
-//        }
-//    	
-//    	
-//        // If POS <= 0, return 0
-//        if (pos <= 0) {
-//        	return 0;
-//        }
-//        
-//        // Main IWOS logic - Compute cumulative sales based on the specified WOS.
-//        // Start at the current week and proceed forward, until the desired number
-//        // of whole weeks has been reached, wrapping around the time hierarchy, if 
-//        // necessary.
-//        double cumSales = 0;
-//        double weeklySales = 0;
-//        int periodInx = currPeriodNo;
-//        tempIs = sourceIs.clone();
-//    	tempIs.setCoordinate(measureDim, salesMeas);
-//        for (int weekCount = 0; weekCount < posFloor; weekCount++) {
-//
-//        	// Compute week index (0-based). Week index is adjusted to allow
-//        	// "wrap around" logic.
-//        	periodInx = periodInx % periods.size();
-//        	
-//        	// Compute cumulative sales
-//        	String weekIs = periods.get(periodInx).getKey();
-//        	tempIs.setCoordinate(timeDim, weekIs);
-//        	weeklySales = dataCache.getCellValue(tempIs);
-//        	cumSales += weeklySales;
-//        	
-//        	// Advance to next week
-//        	periodInx++;
-//        }
-//        
-//        
-//        // Initially, the beginning inventory is set to the cumulative sales
-//        // corresponding to the span of time represented by the wos floor.
-//        beginInv = cumSales;
-//        
-//        // If the wos is not a whole number, add in the fractional part of the last 
-//        // week of sales.
-//        double partialWeek = pos - posFloor;
-//        if (partialWeek > 0 && bWrap) {
-//        	int lastWeekNo = (currPeriodNo + posFloor) % periods.size();
-//        	String lastWeek = periods.get(lastWeekNo).getKey();
-//        	tempIs.setCoordinate(timeDim, lastWeek);
-//        	double lastWeekOfSales = dataCache.getCellValue(tempIs);
-//        	beginInv += partialWeek * lastWeekOfSales;
-//        }
-//        
-//        // Return beginning inventory
-//        return beginInv;
    }
     
 

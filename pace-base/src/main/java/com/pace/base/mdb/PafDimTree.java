@@ -2113,7 +2113,25 @@ public abstract class PafDimTree {
     	return membersByLevel.get(membersByLevel.firstKey());
     }
 
-    /**
+	/**
+	 * @return The first floor member
+	 */
+	public PafDimMember getFirstFloorMbr() {
+		return this.getLowestLevelMembers().get(0);
+	}
+
+	/**
+	 * @return The last floor member
+	 */
+	public PafDimMember getLastFloorMbr() {
+		
+		List<PafDimMember> floorMbrs = this.getLowestLevelMembers();
+		PafDimMember lastFloorMbr = floorMbrs.get(floorMbrs.size() -1);
+		
+		return lastFloorMbr;
+	}
+
+  /**
      *	Return lower member generation referenced in tree.
      *
      * @return int

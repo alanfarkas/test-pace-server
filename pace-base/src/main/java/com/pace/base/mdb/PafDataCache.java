@@ -1727,6 +1727,65 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 * Return the first floor intersection along the specified dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension
+	 * 
+	 * @return First floor intersection
+	 */
+	public Intersection getFirstFloorIs(Intersection cellIs, String dim) {
+
+		Intersection firstFloorIs = cellIs.clone();
+		PafDimTree dimTree = null;
+		PafDimMember firstFloorMbr = null;
+		
+		// If time dimension is selected, substitute time horizon dimension for query
+		if (dim.equals(getTimeDim())) {
+			dimTree = getDimTrees().getTree(getTimeHorizonDim());
+			firstFloorMbr = dimTree.getFirstFloorMbr();
+			TimeSlice.applyTimeHorizonCoord(firstFloorIs, firstFloorMbr.getKey(), this.getMdbDef());
+		} else {
+			dimTree = getDimTrees().getTree(dim);
+			firstFloorMbr = dimTree.getFirstFloorMbr();
+			firstFloorIs.setCoordinate(this.getTimeDim(), firstFloorMbr.getKey());
+		}
+		
+		return firstFloorIs;
+	}
+
+
+	/**
+	 * Return the last floor intersection along the specified dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension
+	 * 
+	 * @return Last floor intersection
+	 */
+	public Intersection getLastFloorIs(Intersection cellIs, String dim) {
+
+		Intersection lastFloorIs = cellIs.clone();
+		PafDimTree dimTree = null;
+		PafDimMember lastFloorMbr = null;
+		
+		// If time dimension is selected, substitute time horizon dimension for query
+		if (dim.equals(getTimeDim())) {
+			dimTree = getDimTrees().getTree(getTimeHorizonDim());
+			lastFloorMbr = dimTree.getLastFloorMbr();
+			TimeSlice.applyTimeHorizonCoord(lastFloorIs, lastFloorMbr.getKey(), this.getMdbDef());
+		} else {
+			dimTree = getDimTrees().getTree(dim);
+			lastFloorMbr = dimTree.getLastFloorMbr();
+			lastFloorIs.setCoordinate(this.getTimeDim(), lastFloorMbr.getKey());
+		}
+		
+		return lastFloorIs;
+
+	}
+
+
+	/**
 	 * Returns the value of specified cell intersection property
 	 * 
 	 * @param intersection Cell intersection
@@ -4366,6 +4425,5 @@ public class PafDataCache implements IPafDataCache {
 		}
 		return stringBuffer.toString();
 	}
-
 
 }

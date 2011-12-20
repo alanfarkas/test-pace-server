@@ -2,7 +2,6 @@ package com.pace.ext.funcs;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,10 +12,8 @@ import com.pace.base.PafException;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
-import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
-import com.pace.base.utility.StringUtils;
 
 /**
  * "Periods of Supply" Custom Function - Compute the periods of supply for the current data intersection, using
@@ -56,24 +53,6 @@ public class WOSFunc extends AbstractFunction {
     	// Parse function parameters
     	parseParms(evalState);
     	
-//    	// PRE MULTI-YEAR CODE
-//      	// Get the list of periods at bottom level or selected level, whichever is higher
-//       	PafDimTree timeTree = evalState.getDataCacheTrees().getTree(timeDim);
-//       	int timeFloor = timeTree.getLowestAbsLevelInTree();
-//       	int validPeriodLevel = Math.max(timeFloor, periodLevel);
-//       	List<PafDimMember> periods = timeTree.getMembersByLevel().get(validPeriodLevel);
-//       	
-//       	// Get current period attributes
-//       	PafDimMember currTimeMbr = timeTree.getMember(currentPeriod);
-//        int currPeriodNo = periods.indexOf(currTimeMbr);
-//      	
-//        // TBFirst Logic - If time dimension intersection not at bottom/selected level, 
-//        // set period number to first descendant period.
-//        if (currPeriodNo == -1) {
-//        	currTimeMbr = timeTree.getFirstDescendant(currTimeMbr.getKey(), (short) validPeriodLevel);
-//            currPeriodNo = periods.indexOf(currTimeMbr);   
-//       }
- 
     	// TBFirst Logic - If time dimension intersection not at bottom/selected level, 
     	// set period to first descendant period.
       	tempIs = dataCache.getFirstDescendantIs(tempIs, timeDim, periodLevel);
@@ -125,94 +104,6 @@ public class WOSFunc extends AbstractFunction {
     		pos += (beginInv - prevCumSales) / periodSales;
     	}
  
-//        // PRE MULTI-YEAR VERSION OF CODE
-//        // Get beginning inventory value at adjusted period member 
-//      	tempIs = sourceIs.clone();
-//      	tempIs.setCoordinate(measureDim, invMeas); 
-//      	tempIs.setCoordinate(timeDim, currTimeMbr.getKey()); /* TTN-1302 */
-//    	if (!dataCache.isMember(timeDim, currTimeMbr.getKey())) { /* TODO Remove this check when TTN-1269 is resolved */
-//    		errMsg = "Error in [WOSFunc] - ";
-//    		errMsg += "Unable to calculate intersection: "
-//    			+ StringUtils.arrayToString(sourceIs.getCoordinates()) 
-//    			+ " - dependent data at " + currTimeMbr.getKey() + " is not accessible.";
-//    		logger.warn(errMsg);
-//    		return 0;
-//    	}
-//       double beginInv = dataCache.getCellValue(tempIs);
-//       	
-//        // If beginning inventory <= 0, return 0
-//        if (beginInv <= 0) {
-//        	return 0;
-//        }
-//        
-//        // If not wrapping around, set maxPeriods = to distance to end of
-//        // time horizon (or leave at maxPeriods is specified and less).
-//        // Generally yields a 9999 to indicate more inventory than
-//        // sales can consume.
-//        
-//    	int tmpMax;        
-//        if (!bWrap) {
-//        	tmpMax = periods.size() - currPeriodNo;
-//        	tmpMax = tmpMax < maxPeriods ? tmpMax : maxPeriods;
-//        }
-//        else
-//        	tmpMax = maxPeriods;
-//        
-//        
-//        
-//        
-//        // Main POS logic - Start at the current week and proceed forward, until
-//        // cumulative sales > beginning inventory. Wrap around time hierarchy, if 
-//        // necessary, until goal is reached or maximum number of weeks have been 
-//        // searched.
-//        double cumSales = 0, prevCumSales = 0;
-//        double periodSales = 0;
-//        int periodInx = currPeriodNo;
-//        tempIs = sourceIs.clone();
-//    	tempIs.setCoordinate(measureDim, salesMeas);
-//        for (int periodCount = 0;; periodCount++) {
-//
-//        	// Compute week index (0-based). Week index is adjusted to allow
-//        	// "wrap around" logic.
-//        	periodInx = periodInx % periods.size();
-//        	
-//        	// Get intersection for indexed week
-//        	String timeMbr = periods.get(periodInx).getKey();
-//        	tempIs.setCoordinate(timeDim, timeMbr);
-//        	if (!dataCache.isMember(timeDim, timeMbr)) { /* TODO Remove this check when TTN-1269 is resolved */
-//        		errMsg = "Error in [WOSFunc] - ";
-//        		errMsg += "Unable to calculate intersection: "
-//        			+ StringUtils.arrayToString(sourceIs.getCoordinates()) 
-//        			+ " - dependent data at " + timeMbr + " is not accessible.";
-//        		logger.warn(errMsg);
-//        		return 0;
-//        	}
-//
-//        	// Compute cumulative sales
-//        	periodSales = dataCache.getCellValue(tempIs);
-//        	cumSales += periodSales;
-//        	
-//        	// Exit loop if cumulative sales > beginning inventory or max weeks have
-//        	// been searched
-//        	if (cumSales >=  beginInv || periodCount >= tmpMax ) {
-//        		pos = periodCount;
-//        		break;
-//        	}
-//        	
-//        	// Advance to next week
-//        	prevCumSales = cumSales;
-//        	periodInx++;
-//        }
-//        
-//        // If POS is < max count, determine if there are any fractional weeks to add
-//        // to result.
-//        if (pos < tmpMax && beginInv > prevCumSales) {
-//        	// Add in ratio of remaining inventory divided by the next week's sales
-//        	pos += (beginInv - prevCumSales) / periodSales;
-//        }
-//        
-//
-
         // Return weeks of supply
     	return pos;
     }
