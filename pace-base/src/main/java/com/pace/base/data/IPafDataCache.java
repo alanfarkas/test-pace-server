@@ -1,5 +1,7 @@
 package com.pace.base.data;
 
+import java.util.List;
+
 import com.pace.base.PafException;
 
 /**
@@ -38,5 +40,9 @@ public interface IPafDataCache {
 	public Intersection shiftIntersection(Intersection cellIs);
 	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset);
 	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap);
+	public boolean hasValidTimeHorizonCoord(Intersection cellIs);
+	public Intersection getFirstDescendantIs(Intersection cellIs, String dim, int level);
+	public Intersection getLastDescendantIs(Intersection cellIs, String dim, int level);
+	public List<Intersection> getDescIntersectionsAtLevel(Intersection cellIs, String dim, int level);
 
 }

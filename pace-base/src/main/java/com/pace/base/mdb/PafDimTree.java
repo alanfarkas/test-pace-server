@@ -204,6 +204,29 @@ public abstract class PafDimTree {
     }
 
 
+	/**
+	 * Check if the specified member is a leaf node
+	 * 
+	 * @param memberName Member name
+	 * @return True is the the specified member is a leaf node
+	 */
+	public boolean isLeaf(String memberName) {
+		return isLeaf(getMember(memberName));
+	}
+
+	/**
+	 * Check if the specified member is a leaf node
+	 * 
+	 * @param memberName Member name
+	 * @return True is the the specified member is a leaf node
+	 */
+	public boolean isLeaf(PafDimMember member) {
+		
+		// Member is a leaf node if it has no children
+		return !member.hasChildren();
+	}
+
+  
     /**
 	 * @return the isDiscontig
 	 */
@@ -1447,7 +1470,7 @@ public abstract class PafDimTree {
      * @param memberList Pending list of traversed members
      * @param traversalMethod Type of member traversal to perform
      * @param levelGen Target member level/generation
-     * @param parentFirst Indicates if parent member shold be listed before it's children (only applies only to 'descendant' traversal methods)
+     * @param parentFirst Indicates if parent member should be listed before it's children (only applies only to 'descendant' traversal methods)
      * 
      * @return Member list
      * @throws IllegalArgumentException 

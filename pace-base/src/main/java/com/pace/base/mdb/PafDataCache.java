@@ -598,6 +598,25 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 *	Determines if the intersection translates to a valid time horizon
+	 *  coordinate
+	 *
+	 * @param cellIs Cell intersection
+	 * @return true if the intersection translates to a valid time horizon
+	 */
+	public boolean hasValidTimeHorizonCoord(Intersection cellIs) {
+		
+		String period = cellIs.getCoordinate(getTimeDim()), year = cellIs.getCoordinate(getYearDim());
+		String timeHorizonCoord = TimeSlice.buildTimeHorizonCoord(period, year);
+		if (isMember(getTimeHorizonDim(), timeHorizonCoord)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
+	/**
 	 *	Get the list of Forward Plannable members for the specified year
 	 *
 	 * @param allPeriods All valid members of the time dimension
@@ -745,6 +764,13 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public PafApplicationDef getAppDef() {
 		return appDef;
+	}
+
+	/**
+	 * @return Returns the mdbDef.
+	 */
+	public MdbDef getMdbDef() {
+		return appDef.getMdbDef();
 	}
 
 	/**
@@ -1305,16 +1331,17 @@ public class PafDataCache implements IPafDataCache {
 		String currMbrName = null; 
 
 		
-//		// If time dimension is selected, use time horizon dimension for shift
-//		if (offsetDim.equals(getTimeDim())) {
-//			offsetTree = getDimTrees().getTree(getTimeHorizonDim());
-//			currMbrName = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeDim()), cellIs.getCoordinate(getYearDim()));
-//			nextMbr = offsetTree.getPeer(currMbr, offset, bWrap);		
-//			if (nextMbr != null) {
-//				TimeSlice.applyTimeHorizonCoord(cellIs, nextMbr.getKey(), getAppDef().getMdbDef());
-//			} else {
-//				cellis = null;
-//		} else {
+		// If time dimension is selected, use time horizon dimension for shift
+		if (offsetDim.equals(getTimeDim())) {
+			offsetTree = getDimTrees().getTree(getTimeHorizonDim());
+			currMbrName = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeDim()), cellIs.getCoordinate(getYearDim()));
+			nextMbr = offsetTree.getPeer(currMbrName, offset, bWrap);		
+			if (nextMbr != null) {
+				TimeSlice.applyTimeHorizonCoord(cellIs, nextMbr.getKey(), getAppDef().getMdbDef());
+			} else {
+				cellIs = null;
+			}
+		} else {
 			// Use specified dimension for shift
 			offsetTree = getDimTrees().getTree(offsetDim);
 			currMbrName = cellIs.getCoordinate(offsetDim);
@@ -1324,7 +1351,7 @@ public class PafDataCache implements IPafDataCache {
 			} else {
 				cellIs = null;
 			}
-//		}
+		}
 		
 			return cellIs;
 	}
@@ -1421,7 +1448,7 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * "Provides a count of the descendants, at the specified level, of the current intersection,
+	 * Provides a count of the descendants, at the specified level, of the current intersection,
 	 * and it's left peers along the specified dimension. 
 	 * 
 	 * The time dimension is used by default if no dimension parameter is supplied. 
@@ -1437,7 +1464,7 @@ public class PafDataCache implements IPafDataCache {
 	}
 		
 	/**
-	 * "Provides a count of the descendants, at the specified level, of  the current intersection,
+	 * Provides a count of the descendants, at the specified level, of  the current intersection,
 	 * and it's left peers along the specified dimension. 
 	 * 
 	 * The dimension floor level is used by default if no level parameter is supplied. 
@@ -1457,7 +1484,7 @@ public class PafDataCache implements IPafDataCache {
 	}
 		
 	/**
-	 * "Provides a count of the descendants, at the specified level, of  the current intersection,
+	 * Provides a count of the descendants, at the specified level, of  the current intersection,
 	 * and it's left peers along the specified dimension. 
 	 * 
 	 * @param cellIs Cell intersection
@@ -1535,12 +1562,167 @@ public class PafDataCache implements IPafDataCache {
 		// position.
 		while (lastIs != null) {
 			// To account for any cell changes that haven't yet been aggregated 
-			// (ex. perpertual inventory process), we aggregate at the floor level.
+			// (ex. perpetual inventory process), we aggregate at the floor level.
 			result += EvalUtil.sumFloorIntersections(lastIs, evalState);
 			lastIs = shiftIntersection(lastIs, cumDim, -1);
 		}
 		
 		return result;
+	}
+
+
+	/**
+	 * Return the first descendant intersection at the specified level in the specified
+	 * dimension or the floor, whichever is greater. 
+	 * 
+	 * The original intersection will be returned if it has no descendants along has no 
+	 * descendants along the specified dimension.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension to traverse
+	 * @param level Member level of requested descendant
+	 * 
+	 * @return First descendant intersection
+	 * @throws PafException 
+	 */	
+	public Intersection getFirstDescendantIs(final Intersection cellIs, final String dim, final int level) {		
+
+		final String timeDim = this.getTimeDim(); 
+		String branch = null;
+		PafDimTree dimTree = null;
+		final MdbDef mdbDef = this.getMdbDef();
+
+		
+		// If time dimension is selected, use time horizon dimension for traversal
+		if (dim.equals(getTimeDim())) {
+			dimTree = getDimTrees().getTree(getTimeHorizonDim());
+			branch = TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef);
+		} else {
+			dimTree = getDimTrees().getTree(dim);
+			branch = cellIs.getCoordinate(dim);
+		}
+
+		// If the ancestor member is a leaf node then just return the original
+		// intersection.
+		if (dimTree.isLeaf(branch)) {
+			return cellIs;
+		}
+
+		// Get the first descendant members at specified level and use it to
+		// clone the descendant intersection.
+		PafDimMember descMember = dimTree.getFirstDescendant(branch, (short) level);
+		Intersection descIs = cellIs.clone();
+		if (dim.equals(timeDim)) {
+			TimeSlice.applyTimeHorizonCoord(descIs, descMember.getKey(), mdbDef);
+		} else {
+			descIs.setCoordinate(dim, descMember.getKey());
+		}
+
+		return descIs;
+	}
+
+	/**
+	 * Return the last descendant intersection at the specified level in the specified
+	 * dimension or the floor, whichever is greater. 
+	 * 
+	 * The original intersection will be returned if it has no descendants along has no 
+	 * descendants along the specified dimension.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension to traverse
+	 * @param level Member level of requested descendant
+	 * 
+	 * @return First descendant intersection
+	 * @throws PafException 
+	 */	
+	public Intersection getLastDescendantIs(Intersection cellIs, String dim, int level) {		
+
+		String timeDim = this.getTimeDim(), branch = null;
+		PafDimTree dimTree = null;
+		MdbDef mdbDef = this.getMdbDef();
+
+		
+		// If time dimension is selected, use time horizon dimension for traversal
+		if (dim.equals(getTimeDim())) {
+			dimTree = getDimTrees().getTree(getTimeHorizonDim());
+			branch = TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef);
+		} else {
+			dimTree = getDimTrees().getTree(dim);
+			branch = cellIs.getCoordinate(dim);
+		}
+
+		// If the ancestor member is a leaf node then just return the original
+		// intersection.
+		if (dimTree.isLeaf(branch)) {
+			return cellIs;
+		}
+
+		// Get the last descendant members at specified level and use it to
+		// clone the descendant intersection.
+		PafDimMember descMember = dimTree.getLastDescendant(branch, (short) level);
+		Intersection descIs = cellIs.clone();
+		if (dim.equals(timeDim)) {
+			TimeSlice.applyTimeHorizonCoord(descIs, descMember.getKey(), mdbDef);
+		} else {
+			descIs.setCoordinate(dim, descMember.getKey());
+		}
+
+		return descIs;
+ 	}
+
+
+	/**
+	 * Return the descendant intersections at the specified level in the specified
+	 * dimension or the floor, whichever is greater. 
+	 * 
+	 * The original intersection will be returned if it has no descendants along 
+	 * the specified dimension.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension to traverse
+	 * @param level Member level of requested descendants
+	 * 
+	 * @return Descendant intersections
+	 * @throws PafException 
+	 */	
+	public List<Intersection> getDescIntersectionsAtLevel(Intersection cellIs, String dim, int level) {
+		
+		List<Intersection> descendants = new ArrayList<Intersection>();
+		String timeDim = this.getTimeDim(), branch = null;
+		PafDimTree dimTree = null;
+		MdbDef mdbDef = this.getMdbDef();
+
+		
+		// If time dimension is selected, use time horizon dimension for traversal
+		if (dim.equals(getTimeDim())) {
+			dimTree = getDimTrees().getTree(getTimeHorizonDim());
+			branch = TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef);
+		} else {
+			dimTree = getDimTrees().getTree(dim);
+			branch = cellIs.getCoordinate(dim);
+		}
+		
+		// If the ancestor member is a leaf node then just return the original
+		// intersection.
+		if (dimTree.isLeaf(branch)) {
+			descendants.add(cellIs);
+			return descendants;
+		}
+		
+		// Get descendants members at specified level and use to clone all the 
+		// descendant intersections.
+		List<PafDimMember> descMembers = dimTree.getMembersAtLevel(branch, level);
+		for (PafDimMember descMember : descMembers) {
+			Intersection descIs = cellIs.clone();
+			if (dim.equals(timeDim)) {
+				TimeSlice.applyTimeHorizonCoord(descIs, descMember.getKey(), mdbDef);
+			} else {
+				descIs.setCoordinate(dim, descMember.getKey());
+			}
+			descendants.add(descIs);
+		}
+		
+		return descendants;
 	}
 
 
@@ -4184,8 +4366,6 @@ public class PafDataCache implements IPafDataCache {
 		}
 		return stringBuffer.toString();
 	}
-
-
 
 
 }

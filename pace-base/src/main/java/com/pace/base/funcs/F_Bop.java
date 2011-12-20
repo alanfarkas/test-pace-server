@@ -32,7 +32,7 @@ import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * Implements a next function. It looks up the value of the a particular intersection in the datacache
+ * Implements a next function. It looks up the value of the a particular intersection in the data cache
  * ie. @Next(BOP_DLR, Time, 1)
  * would return the value of at the intersection, that starts at the source intersection, but is invoked
  * for the measure BOP_DLR, and is offset in the Time dimension + 1
@@ -71,7 +71,6 @@ public class F_Bop extends AbstractFunction {
     	return result;
     }
 
-	@SuppressWarnings("unused")
 	@Override
 	public Set<Intersection> getTriggerIntersections(IPafEvalState evalState) throws PafException {
 

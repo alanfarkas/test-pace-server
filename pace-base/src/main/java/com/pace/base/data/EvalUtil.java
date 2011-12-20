@@ -431,6 +431,12 @@ public class EvalUtil {
 	 */
 	public static boolean isElapsedIs(Intersection cellIs, IPafEvalState evalState, IPafDataCache dataCache) {
 		
+		// Ensure intersection maps to a valid time horizon coordinate. If not consider
+		// the intersection as elpased (TTN-1595)
+		if (!dataCache.hasValidTimeHorizonCoord(cellIs)) {
+			return true;
+		}
+		
 		// Has to be a forward plannable version for elapsed period to apply
 		if (evalState.getPlanVersion().getType() != VersionType.ForwardPlannable) {
 			return false;
