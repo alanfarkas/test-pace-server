@@ -3,10 +3,14 @@
  */
 package com.pace.settings.ui;
 
+import java.util.List;
+
 import com.vaadin.data.Item;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.validator.IntegerValidator;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 
 /**
@@ -39,7 +43,9 @@ public class LDAPSettingsFieldFactory extends PaceSettingsDefaultFieldFactory {
 	public static final String KERBEROS_LOGIN_CONF = "kerberosLoginConf";
 	public static final String SSL_KEY_STORE = "sslKeyStore";
 	public static final String CONNECT_TIMEOUT = "connectTimeout";
-	public static final String NET_BIOS_NAMES = "netBiosNames";
+	public static final String NET_BIOS_NAMES_LIST = "netBiosNamesList";
+	
+	private KeyValueTable netBiosNameTable = new KeyValueTable("Net Bios Key", "Net Bios Value");
 
 	public LDAPSettingsFieldFactory() {
 
@@ -62,8 +68,13 @@ public class LDAPSettingsFieldFactory extends PaceSettingsDefaultFieldFactory {
 		formOrderList.add(IGNORE_LOCKED_OUT_ACCOUNTS);
 		formOrderList.add(IGNORE_EXPIRED_PW_ACCOUNTS);
 		formOrderList.add(IGNORE_DISABLED_ACCOUNTS);
-		//TODO: put back
-		//formOrderList.add(NET_BIOS_NAMES);
+		formOrderList.add(NET_BIOS_NAMES_LIST);
+		
+		captionMap.put(PROVIDER_URL_GC, "Provider URL GC");
+		captionMap.put(KERBEROS_KDC, "Kerberos KDC");
+		captionMap.put(SSL_KEY_STORE, "SSL Key Store");
+		captionMap.put(NET_BIOS_NAMES_LIST, "Net Bios Names");
+		
 		
 		requiredFieldSet.add(LDAP_PROFIDER_NAME);
 		requiredFieldSet.add(SECURITY_PRINCIPAL);
@@ -87,7 +98,36 @@ public class LDAPSettingsFieldFactory extends PaceSettingsDefaultFieldFactory {
 			TextField tf = (TextField) field;
 			
 			tf.addValidator(new IntegerValidator(tf.getCaption() + " must be a whole number."));
-		} 		
+		} else if ( propertyId.equals(NET_BIOS_NAMES_LIST)) {
+			
+			/*netBiosNameTable.setCaption(captionMap.get(NET_BIOS_NAMES));
+			netBiosNameTable.setRequired(requiredFieldSet.contains(NET_BIOS_NAMES));
+			netBiosNameTable.setSelectable(true);
+			netBiosNameTable.setImmediate(true);
+			netBiosNameTable.addContainerProperty("Key", String.class, null);
+			netBiosNameTable.addContainerProperty("Value", String.class, null);*/
+			//netBiosTableTable.setData(item.getItemProperty(propertyId));
+			
+			//BeanItemContainer<List> bic = new BeanItemContainer(List.class); 
+			
+			//netBiosNameTable.setContainerDataSource(bic);
+			
+			//netBiosTableTable.setWidth(PaceSettingsConstants.COMMON_FIELD_WIDTH);
+			
+			/*for (String key : ((Map) item.getItemProperty(propertyId)).get ) ) {
+				
+			}*/
+			//if ( )
+			//netBiosTableTable.setContainerDataSource(newDataSource)
+			//netBiosTableTable.setData(data);
+			
+			String caption = captionMap.get(NET_BIOS_NAMES_LIST);
+			
+			netBiosNameTable.setCaption(caption);
+			
+			return netBiosNameTable;
+			
+		}
 		
 		return field;
 	}

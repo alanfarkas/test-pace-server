@@ -111,6 +111,8 @@ public abstract class PaceSettingsForm extends Form implements ClickListener {
 
 			serverSettingsApplication.getMainWindow().showNotification(
 					"Canceled");
+			
+			
 
 		}
 

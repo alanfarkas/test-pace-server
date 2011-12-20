@@ -5,8 +5,16 @@ import org.apache.log4j.Logger;
 import java.util.*;
 
 import com.pace.base.PafBaseConstants;
+import com.pace.base.misc.KeyValue;
 
+/**
+ * LDAP Settings
+ * 
+ * @author PMack
+ *
+ */
 public class PafLDAPSettings {
+	
 	private String ldapProviderName = "";
 	private String securityPrincipal = "1";
 	private String securityCredentials = "1";
@@ -26,6 +34,7 @@ public class PafLDAPSettings {
 	private String kerberosLoginConf = "";
 	private String sslKeyStore = "";
 	private Map<String, String> netBiosNames = new HashMap<String, String>();
+	private List<KeyValue> netBiosNamesList = new ArrayList<KeyValue>();
 	private String connectTimeout = PafBaseConstants.DEFAULT_SERVER_URL_TIMEOUT_IN_MILLISECONDS;
 	
 	private static Logger logger = Logger.getLogger(PafLDAPSettings.class);
@@ -168,6 +177,41 @@ public class PafLDAPSettings {
 	public String getConnectTimeout() {
 		return connectTimeout;
 	}
+	/**
+	 * @return the netBiosNamesList
+	 */
+	public List<KeyValue> getNetBiosNamesList() {
+		return netBiosNamesList;
+	}
+	/**
+	 * @param netBiosNamesList the netBiosNamesList to set
+	 */
+	public void setNetBiosNamesList(List<KeyValue> netBiosNamesList) {
+		this.netBiosNamesList = netBiosNamesList;
+	}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "PafLDAPSettings [ldapProviderName=" + ldapProviderName
+				+ ", securityPrincipal=" + securityPrincipal
+				+ ", securityCredentials=" + securityCredentials
+				+ ", providerURLGC=" + providerURLGC
+				+ ", securityAuthentication=" + securityAuthentication
+				+ ", securityProtocol=" + securityProtocol + ", searchBase="
+				+ searchBase + ", domainController=" + domainController
+				+ ", ldapPagesize=" + ldapPagesize + ", ignoreBuiltInGroups="
+				+ ignoreBuiltInGroups + ", ignoreExpiredAccounts="
+				+ ignoreExpiredAccounts + ", ignoreLockedOutAccounts="
+				+ ignoreLockedOutAccounts + ", ignoreExpiredPWAccounts="
+				+ ignoreExpiredPWAccounts + ", ignoreDisabledAccounts="
+				+ ignoreDisabledAccounts + ", kerberosRealm=" + kerberosRealm
+				+ ", kerberosKDC=" + kerberosKDC + ", kerberosLoginConf="
+				+ kerberosLoginConf + ", sslKeyStore=" + sslKeyStore
+				+ ", netBiosNames=" + netBiosNames + ", netBiosNamesList="
+				+ netBiosNamesList + ", connectTimeout=" + connectTimeout + "]";
+	}
 
-
+	
 }

@@ -53,7 +53,11 @@ public class LDAPSettingsForm extends PaceSettingsForm {
 		loadSettings();
 		
  	    setItemDataSource(new BeanItem<PafLDAPSettings>((PafLDAPSettings) inputObject));
-		
+ 	    
+ 	    //fixes scroll issue
+ 	    serverSettingsApplication.showBlankView();
+ 	    serverSettingsApplication.showLDAPSettingsView();
+ 	    
 	}
 
 	@Override

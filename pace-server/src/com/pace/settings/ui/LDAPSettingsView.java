@@ -35,6 +35,8 @@ public class LDAPSettingsView extends Panel {
 		
 		addComponent(form);
 		
+		setHeight("100%");
+		
 	}
 	
 }

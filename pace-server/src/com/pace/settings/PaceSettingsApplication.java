@@ -1,5 +1,7 @@
 package com.pace.settings;
 
+import java.awt.Canvas;
+
 import com.pace.settings.ui.LDAPSettingsForm;
 import com.pace.settings.ui.LDAPSettingsView;
 import com.pace.settings.ui.ServerSettingsForm;
@@ -17,6 +19,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -136,16 +139,22 @@ public class PaceSettingsApplication extends Application implements
 
 	}
 
-	private void showServerSettingsView() {
+	public void showServerSettingsView() {
 
 		setPropertiesView(getServerSettingsView());
 
 	}
 	
-	private void showLDAPSettingsView() {
+	public void showLDAPSettingsView() {
 
 		setPropertiesView(getLDAPSettingsView());
 
+	}
+	
+	public void showBlankView() {
+		
+		setPropertiesView(new Panel());
+		
 	}
 
 	@Override

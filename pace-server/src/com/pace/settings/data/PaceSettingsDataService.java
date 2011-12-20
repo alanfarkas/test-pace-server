@@ -1,6 +1,12 @@
 package com.pace.settings.data;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.pace.base.PafConfigFileNotFoundException;
+import com.pace.base.misc.KeyValue;
 import com.pace.base.utility.PafXStream;
 import com.pace.server.PafLDAPSettings;
 import com.pace.server.PafMetaData;
@@ -32,19 +38,61 @@ public class PaceSettingsDataService {
 	
 	public static void setServerSettings(ServerSettings ss) {
 				
-		PafXStream.exportObjectToXml(ss, serverSettingsFile);		
+		if ( ss != null ) {
+			
+			PafXStream.exportObjectToXml(ss, serverSettingsFile);
+			
+		}
 		
 	}
 	
 	public static PafLDAPSettings getLDAPSettings() throws PafConfigFileNotFoundException {
 		
-		return (PafLDAPSettings) PafXStream.importObjectFromXml(ldapSettingsFile);
+		PafLDAPSettings ldapSettings = (PafLDAPSettings) PafXStream.importObjectFromXml(ldapSettingsFile);
+		
+		if ( ldapSettings != null && ldapSettings.getNetBiosNames() != null ) {
+			
+			List<KeyValue> keyValueList = new ArrayList<KeyValue>();
+			
+			for (String key : ldapSettings.getNetBiosNames().keySet()) {
+											
+				keyValueList.add(new KeyValue(key, ldapSettings.getNetBiosNames().get(key)));
+				
+			}
+			
+			ldapSettings.setNetBiosNamesList(keyValueList);
+			
+		}
+				
+		return ldapSettings;
 		
 	}
 	
-	public static void setLDAPSettings(PafLDAPSettings ss) {
+	public static void setLDAPSettings(PafLDAPSettings ldapSettings) {
+		
+		if ( ldapSettings != null ) {
+
+			if ( ldapSettings.getNetBiosNamesList() != null && ldapSettings.getNetBiosNamesList().size() > 0 ) {
 				
-		PafXStream.exportObjectToXml(ss, ldapSettingsFile);		
+				Map<String, String> netBiosNameMap = new HashMap<String, String>();
+				
+				for (KeyValue kv : ldapSettings.getNetBiosNamesList() ) {
+					
+					netBiosNameMap.put(kv.getKey(), kv.getValue());
+					
+				}
+				
+				ldapSettings.setNetBiosNames(netBiosNameMap);
+				ldapSettings.setNetBiosNamesList(null);
+				
+			} else {
+				
+				ldapSettings.setNetBiosNames(null);
+			}
+			
+			PafXStream.exportObjectToXml(ldapSettings, ldapSettingsFile);
+		
+		}
 		
 	}
 	
@@ -54,7 +102,8 @@ public class PaceSettingsDataService {
 		
 		//setServerSettings(ss);
 		
-		setLDAPSettings(ss.getLdapSettings());
+		
+		PafXStream.exportObjectToXml(ss.getLdapSettings(), ldapSettingsFile);
 		
 	}
 	
