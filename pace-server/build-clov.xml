@@ -178,7 +178,11 @@
 	</path>	
 	<path id="Vaadin 6.7.2.userclasspath">		
         <pathelement location="${userlib.path}/vaadin-6.7.2/lib/vaadin-6.7.2.jar"/>
-	</path>		
+	</path>
+	<path id="Vaadin Customfield 0.9.3.userclasspath">		
+	    <pathelement location="${userlib.path}/vaadin-customfield-0.9.3/customfield-0.9.3.jar"/>
+	</path>	
+	
 	
 	<path id="JavaMail.userclasspath">
 	    <pathelement location="${userlib.path}/JavaMail/smtp.jar"/>
@@ -260,6 +264,7 @@
         <path refid="Derby 10.2.2.userclasspath"/> 
         <path refid="Spring 3.0.5.userclasspath"/>
     	<path refid="Vaadin 6.7.2.userclasspath"/>
+    	<path refid="Vaadin Customfield 0.9.3.userclasspath"/>
         <path refid="Hibernate 3.2.userclasspath"/> 
     	<path refid="LdapBp 1.0.userclasspath"/>
         <path refid="servlet-api.userclasspath"/>
