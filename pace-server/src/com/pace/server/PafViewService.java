@@ -677,10 +677,12 @@ public class PafViewService {
 	public PafView getView(IPafViewRequest viewRequest, PafClientState clientState)
 			throws PafException {
 
-		logger.info("View Requested: " + viewRequest.getViewName()
+		PafView definedView = null, renderedView = null;
+		String viewName = viewRequest.getViewName();
+
+		logger.info("View Requested: " + viewName
 				+ " by client: " + viewRequest.getClientId());
 
-		PafView definedView = null, renderedView = null;
 
 		try {
 			// reload view cache every time if in debug mode. always reload
@@ -694,8 +696,6 @@ public class PafViewService {
 
 			// try to find the view by name in the view cache
 			for (int i = 0; i < viewCache.length; i++) {
-				
-				String viewName = viewRequest.getViewName();
 				
 				if ( invalidViewsMap.containsKey(viewName)) {
 					
@@ -714,7 +714,7 @@ public class PafViewService {
 			// if no view found, throw a paf exception
 			if (definedView == null) {
 				throw new PafException("View not found: "
-						+ viewRequest.getViewName(), PafErrSeverity.Warning);
+						+ viewName, PafErrSeverity.Warning);
 			}
 
 			// get current paf app
@@ -744,7 +744,7 @@ public class PafViewService {
 			pafDataService.expandView(renderedView, clientState);
 			
 			// Populate each view section with required data
-			logger.info("Fetching view data: " + viewRequest.getViewName());
+			logger.info("Fetching view data: " + viewName);
 			for (PafViewSection viewSection : renderedView.getViewSections()) {
 				
 				boolean isViewSectionChanged = false;
@@ -879,7 +879,7 @@ public class PafViewService {
 				viewSection = populateMemberTagComments(viewSection, memberTags);
 				
 				//Resolve page headers
-				viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), clientState.generateTokenCatalog(new Properties()));		
+				viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), clientState.generateTokenCatalog(new Properties()), viewName);		
 				
 			}
 			
@@ -2570,7 +2570,7 @@ public class PafViewService {
 	 * @return PafViewSection
 	 * @throws PafException 
 	 */
-	private PafViewSection resolvePageHeaders(PafViewSection viewSection, String planVersion, PafUserSelection[] userSelections, Properties tokenCatalog) throws PafException {
+	private PafViewSection resolvePageHeaders(PafViewSection viewSection, String planVersion, PafUserSelection[] userSelections, Properties tokenCatalog, String viewName) throws PafException {
 
 		final String TOKEN_START = PafBaseConstants.HEADER_TOKEN_START_CHAR;
         final String MEMBER_TAG_TOKEN = PafBaseConstants.HEADER_TOKEN_MEMBER_TAG;
@@ -2579,6 +2579,7 @@ public class PafViewService {
         final String ROLE_FILTER_SEL_TOKEN = PafBaseConstants.HEADER_TOKEN_ROLE_FILTER_SEL;
 		final String TOKEN_PARM_START = PafBaseConstants.HEADER_TOKEN_PARM_START_CHAR;
 		final String TOKEN_PARM_END = PafBaseConstants.HEADER_TOKEN_PARM_END_CHAR;
+        final String VIEW_NAME_TOKEN = PafBaseConstants.HEADER_TOKEN_VIEW_NAME;
         PafViewHeader[] viewHeaders = viewSection.getPafViewHeaders();
         AliasMapping[] aliasMappings = viewSection.getAliasMappings();
         Map<String, AliasMapping> aliasMappingByDim = new HashMap<String, AliasMapping>();
@@ -2622,6 +2623,21 @@ public class PafViewService {
 				headerText = StringUtils.replaceAllIgnoreCase(headerText, token, tokenValue);
 			}   
 			
+      		// Resolve @VIEW_NAME references, where @VIEW_NAME is a reference to viewname in ViewSection header
+     		token = VIEW_NAME_TOKEN;
+			// Resolve token if used in header
+			if (headerText.toUpperCase().indexOf(token) >= 0) {
+
+				// Get token value from token catalog. If not found then replace token with a blank.
+				String tokenValue = viewName;
+				if (tokenValue == null) {
+					tokenValue = "";
+				}
+
+				// Replace token with resolved value
+				headerText = StringUtils.replaceAllIgnoreCase(headerText, token, tokenValue);							
+			}
+
 			// Resolve @DIMNAME references, where @DIMNAME is a reference to a view
         	// section page dimension member. 
         	for (int i = 0; i < pageDims.length; i++) {

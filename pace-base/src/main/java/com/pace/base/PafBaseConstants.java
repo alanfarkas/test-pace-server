@@ -168,6 +168,8 @@ public class PafBaseConstants {
 	public static final String HEADER_TOKEN_USER_SEL = "@USER_SEL";
 	public static final String HEADER_TOKEN_PARM_START_CHAR = "(";
 	public static final String HEADER_TOKEN_PARM_END_CHAR = ")";
+	//TTN 1544 add ViewName Token
+	public static final String HEADER_TOKEN_VIEW_NAME = "@VIEW_NAME";
 
 	// version formula tokens
 	public static final String VF_TOKEN_PARENT = "@PARENT";
