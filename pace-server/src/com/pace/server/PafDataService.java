@@ -3734,8 +3734,9 @@ public class PafDataService {
 	 *  Primarily loads pafBaseMember trees for a particular application
 	 *
 	 */
-	public void loadApplicationData() {
+	public void loadApplicationData() throws PafException {
 
+		String appId = "[Unspecified]";
 		initDataMaps();
 		
 		// assumes a single application at this point
@@ -3750,7 +3751,8 @@ public class PafDataService {
 			
 			for (PafApplicationDef pafApp : pafApps ) {
 				
-				String appId = pafApp.getAppId();
+				
+				appId = pafApp.getAppId();
 				String appString = "for application [" + appId + "]";
 				IPafConnectionProps connProps = (IPafConnectionProps) 
 					PafMetaData.getAppContext().getBean(pafApp.getMdbDef().getDataSourceId());
@@ -3801,7 +3803,9 @@ public class PafDataService {
 				this.initCellNotes(pafApp);
 			}
 		} catch (Exception ex) {
-			PafErrHandler.handleException(ex, PafErrSeverity.Error);
+			String s = String.format("Error loading application [%s]", appId);
+			throw new PafException(s, ex, PafErrSeverity.Error);
+
 		}
 	}
 
