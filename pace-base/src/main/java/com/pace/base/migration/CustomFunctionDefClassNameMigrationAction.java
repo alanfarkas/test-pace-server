@@ -131,13 +131,13 @@ public class CustomFunctionDefClassNameMigrationAction extends MigrationAction {
 			//if fill color is not null, migration hasn't started yet
 			if ( function.getClassName().substring(0, SEARCH_NS_1.length()).equalsIgnoreCase(SEARCH_NS_1) ) {
 				s = function.getClassName().replace(SEARCH_NS_1, REPLACE_NS_1);
+				function.setClassName(s);
 				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to '" + s + "'");
 			} else if ( function.getClassName().substring(0, SEARCH_NS_2.length()).equalsIgnoreCase(SEARCH_NS_2) ) {
 				s = function.getClassName().replace(SEARCH_NS_2, REPLACE_NS_2);
+				function.setClassName(s);
 				logger.info("Converting CustomFunctionDef className: '" + function.getClassName() +  "' to '" + s + "'");
 			}
-			
-			function.setClassName(s);
 			
 			customFunctionsToSet.add(function);
 		}
