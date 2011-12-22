@@ -16,7 +16,7 @@
  xx/xx/xx		xxxxxxxx		x.xx			..............
  * 
  */
-package com.palladium.paf.utils;
+package com.pace.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,7 +34,7 @@ import com.pace.base.PafBaseConstants;
 import com.pace.base.PafConfigFileNotFoundException;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.utility.PafXStream;
-import com.palladium.paf.utils.model.ElapsedPeriod;
+import com.pace.utils.model.ElapsedPeriod;
 
 /**
  * Used to update the elapsed periods

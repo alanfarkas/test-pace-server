@@ -16,7 +16,7 @@
  xx/xx/xx		xxxxxxxx		x.xx			..............
  * 
  */
-package com.palladium.paf.utils;
+package com.pace.utils;
 
 import java.io.File;
 import org.apache.log4j.Logger;

@@ -16,12 +16,12 @@
  xx/xx/xx		xxxxxxxx		x.xx			..............
  * 
  */
-package com.palladium.paf.validator;
+package com.pace.utiils.validator;
 
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafConfigFileNotFoundException;
-import com.palladium.paf.utils.FileUtility;
+import com.pace.utils.FileUtility;
 
 
 /**

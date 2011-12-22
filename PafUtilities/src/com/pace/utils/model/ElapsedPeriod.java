@@ -1,4 +1,4 @@
-package com.palladium.paf.utils.model;
+package com.pace.utils.model;
 
 
 public class ElapsedPeriod {
