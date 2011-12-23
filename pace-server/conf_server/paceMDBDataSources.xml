@@ -1,0 +1,8 @@
+<list>
+  <ConnectionProps>
+    <name>Titan</name>
+    <connectionString>EDSDomain=Essbase;EDSUrl=http://localhost:13080/aps/JAPI;Server=localhost;User=admin;Password=password;Application=Titan;Database=Titan</connectionString>
+    <metaDataServiceProvider>com.pace.mdb.essbase.EsbMetaData</metaDataServiceProvider>
+    <dataServiceProvider>com.pace.mdb.essbase.EsbData</dataServiceProvider>
+  </ConnectionProps>
+</list>

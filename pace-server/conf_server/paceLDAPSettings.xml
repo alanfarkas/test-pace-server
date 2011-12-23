@@ -1,0 +1,47 @@
+<com.pace.server.PafLDAPSettings>
+  <ldapProviderName>ADG</ldapProviderName>
+  <securityPrincipal>CORP\ADG</securityPrincipal>
+  <securityCredentials></securityCredentials>
+  <providerURLGC>ldap://PALCHA02:3268</providerURLGC>
+  <securityAuthentication>simple</securityAuthentication>
+  <securityProtocol>none</securityProtocol>
+  <searchBase></searchBase>
+  <domainController>DC=CORP,DC=THINKFAST,DC=COM</domainController>
+  <ldapPagesize>1000</ldapPagesize>
+  <ignoreBuiltInGroups>true</ignoreBuiltInGroups>
+  <ignoreExpiredAccounts>true</ignoreExpiredAccounts>
+  <ignoreLockedOutAccounts>true</ignoreLockedOutAccounts>
+  <ignoreExpiredPWAccounts>true</ignoreExpiredPWAccounts>
+  <ignoreDisabledAccounts>true</ignoreDisabledAccounts>
+  <kerberosRealm> </kerberosRealm>
+  <kerberosKDC> </kerberosKDC>
+  <kerberosLoginConf> </kerberosLoginConf>
+  <sslKeyStore>c:/Program Files (x86)/Java/jdk1.5.0_08/jre/lib/security/cacerts</sslKeyStore>
+  <netBiosNames>
+    <entry>
+      <string>3</string>
+      <string>4</string>
+    </entry>
+    <entry>
+      <string>66</string>
+      <string>66</string>
+    </entry>
+    <entry>
+      <string>2</string>
+      <string>2</string>
+    </entry>
+    <entry>
+      <string>1</string>
+      <string>1</string>
+    </entry>
+    <entry>
+      <string>0</string>
+      <string>0</string>
+    </entry>
+    <entry>
+      <string>55</string>
+      <string>55</string>
+    </entry>
+  </netBiosNames>
+  <connectTimeout>30000</connectTimeout>
+</com.pace.server.PafLDAPSettings>
