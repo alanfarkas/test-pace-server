@@ -58,6 +58,7 @@ import com.pace.base.data.UserMemberLists;
 import com.pace.base.db.membertags.MemberTagCommentEntry;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
+import com.pace.base.mdb.PafConnectionProps;
 import com.pace.base.rules.MemberSet;
 import com.pace.base.rules.RoundingRule;
 import com.pace.base.rules.Rule;
@@ -233,6 +234,8 @@ public class PafXStream {
 		xs.processAnnotations(UserMemberLists.class);
 		xs.processAnnotations(PafMemberList.class);
 		xs.alias("memberList", PafMemberList.class);
+		
+		xs.alias("ConnectionProps", PafConnectionProps.class);
 
 		namespaceHeaderMap = new HashMap<String, String>();
 		namespaceHeaderMap.put(PAF_APPLICATION_DEF_ARRAY, PAF_APPLICATION_DEF_ARRAY + " " + PafBaseConstants.HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_APPS);

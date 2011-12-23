@@ -2,23 +2,61 @@ package com.pace.base.mdb;
 
 import java.util.Properties;
 
-
-public class PafConnectionProps implements IPafConnectionProps {
-    String connString;
-    Properties properties;
-    String metaDataServiceProvider;
-    String dataServiceProvider;
-    String mdbClassLoader;
+/**
+ * 
+ * @author JMilliron
+ *
+ */
+public class PafConnectionProps implements IPafConnectionProps, Cloneable {
+	
+	private String name;
+    private String connectionString;
+    private transient Properties properties;
+    private String metaDataServiceProvider;
+    private String dataServiceProvider;
+    private String mdbClassLoader;
 
     public PafConnectionProps() {
     }
+        
     
-    public void setConnectionString(String connString) {
-        this.connString = connString;
-        this.properties = parseConnString(connString); 
-    }
+    /**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
 
-    public Properties getProperties() {
+
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	/**
+	 * 
+	 */
+	public void setConnectionString(String connectionString) {
+        this.connectionString = connectionString;
+        this.properties = parseConnString(connectionString); 
+    }
+	
+	
+
+    /**
+	 * @return the connectionString
+	 */
+	public String getConnectionString() {
+		return connectionString;
+	}
+
+
+
+	public Properties getProperties() {
         return properties;
     }
     
@@ -27,18 +65,24 @@ public class PafConnectionProps implements IPafConnectionProps {
      * 
      * @param properties
      */
-    protected void setProperties(Properties properties) {
+    public void setProperties(Properties properties) {
         this.properties = properties; 
     }
 
-    private static Properties parseConnString(String str) {
+    public static Properties parseConnString(String str) {
+    	
         Properties p = new Properties();
-        String[] terms = str.split(";");
-        String[] kvPair;
-        for (String term : terms) {
-            kvPair = term.split("=");
-            if (kvPair.length != 2) throw new IllegalArgumentException ("Invalid Connection String Term: " + term + " in: " + str);
-            p.put(kvPair[0].toUpperCase(), kvPair[1]);
+        
+        if ( str != null ) {
+	        String[] terms = str.split(";");
+	        String[] kvPair;
+	        for (String term : terms) {
+	            kvPair = term.split("=");
+	            if (kvPair.length != 2) { 
+	            	throw new IllegalArgumentException ("Invalid Connection String Term: " + term + " in: " + str);            
+	            }
+	            p.put(kvPair[0].toUpperCase(), kvPair[1]);
+	        }
         }
         return p;
     }
@@ -84,5 +128,30 @@ public class PafConnectionProps implements IPafConnectionProps {
 	public void setMdbClassLoader(String mdbClassLoader) {
 		this.mdbClassLoader = mdbClassLoader;
 	}
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "PafConnectionProps [name=" + name + ", connectionString="
+				+ connectionString + ", metaDataServiceProvider="
+				+ metaDataServiceProvider + ", dataServiceProvider="
+				+ dataServiceProvider + ", mdbClassLoader=" + mdbClassLoader
+				+ ", properties=" + properties + "]";
+	}
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public PafConnectionProps clone() throws CloneNotSupportedException {
+
+		return (PafConnectionProps) super.clone();
+	}
+	
+	
 
 }
