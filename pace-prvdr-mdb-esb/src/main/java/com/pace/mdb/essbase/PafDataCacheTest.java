@@ -547,7 +547,8 @@ public class PafDataCacheTest extends TestCase {
 			esbData = new EsbData(props);
 			
 			// Get Data Cache
-			dataCache = new PafDataCache(clientState, lockedPeriodMap);
+			clientState.setLockedPeriodMap(lockedPeriodMap);
+			dataCache = new PafDataCache(clientState);
 			esbData.updateDataCache(dataCache, dataSpecByVersion);
 			
 			// Get Forward Plannable Periods

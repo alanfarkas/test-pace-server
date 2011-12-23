@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.VersionDef;
@@ -842,32 +843,30 @@ public class EvalState implements IPafEvalState, Cloneable {
 		return timeDim;
 	}
 
-	//pmack
+	public String getTimeHorizonDim() {
+		return PafBaseConstants.TIME_HORIZON_DIM;
+	}
+
 	public void setRoundingRules(Map<String, RoundingRule> rRules) {
 		roundingRules = rRules;
 	}
 
-	//pmack
 	public Map<String, RoundingRule> getRoundingRules() {
 		return roundingRules;
 	}
 
-	//pmack
 	public void setRoundingResourcePass(boolean roundingResourcePass) {
 		this.roundingResourcePass = roundingResourcePass;
 	}
 
-	//pmack
 	public boolean isRoundingResourcePass() {
 		return roundingResourcePass;
 	}
 
-	//pmack
 	public void setSkipRounding(boolean skipRounding) {
 		this.skipRounding = skipRounding;
 	}
 
-	//pmack
 	public boolean isSkipRounding() {
 		return skipRounding;
 	}

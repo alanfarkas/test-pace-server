@@ -1402,8 +1402,7 @@ public class PafViewService {
 	 * 
 	 * @return Complex view section array
 	 */
-	private PafViewSection[] lockVersionIntersections(
-			PafViewSection[] sections, PafClientState clientState) {
+	private PafViewSection[] lockVersionIntersections(PafViewSection[] sections, PafClientState clientState) {
 
 		Set<String> activeVersions = clientState.getActiveVersions();
 		
@@ -1415,7 +1414,6 @@ public class PafViewService {
 		
 		String baseVersion = clientState.getPlanningVersion().getName();
 		
-		//pmack
 		String[] serverDimensionOrder;
 //		String[] serverDimensionOrder = mdbDef.getAllDims();
 
@@ -1427,7 +1425,6 @@ public class PafViewService {
 			// index counters for both row and column
 			int rowId = 0;
 			
-			//pmack
 			serverDimensionOrder = section.getDimensionsPriority();
 
 			ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
@@ -1494,8 +1491,7 @@ public class PafViewService {
 				int rowMemberIndex = 0;
 
 				for (String dimension : section.getRowAxisDims()) {
-					mappedDimsWithMembers.put(dimension, rowMembers
-							.get(rowMemberIndex++));
+					mappedDimsWithMembers.put(dimension, rowMembers.get(rowMemberIndex++));
 				}
 
 				int colId = 0;
@@ -1530,44 +1526,32 @@ public class PafViewService {
 							//add to locked cell
 							notPlannableList.add(new LockedCell(rowId, colId));
 							continue;
-						}
-						
+						}					
 						break;
 
 					case PafAxis.COL:
 
-						versionMember = getVersionMember(section
-								.getColAxisDims(), colTuple);
-						
-						if ( ! activeVersions.contains(versionMember)) {
-						
+						versionMember = getVersionMember(section.getColAxisDims(), colTuple);					
+						if ( ! activeVersions.contains(versionMember)) {				
 							colTuple.setPlannable(false);
 							notPlannableList.add(new LockedCell(rowId, colId));
 							continue;
-						}
-						
+						}					
 						break;
 
 					case PafAxis.ROW:
 
-						versionMember = getVersionMember(section
-								.getRowAxisDims(), rowTuple);
-						
-						if ( ! activeVersions.contains(versionMember)) {
-							
+						versionMember = getVersionMember(section.getRowAxisDims(), rowTuple);					
+						if ( ! activeVersions.contains(versionMember)) {					
 							rowTuple.setPlannable(false);
 							notPlannableList.add(new LockedCell(rowId, colId));
-							continue;
-							
-						}
-						
+							continue;					
+						}				
 						break;
-
 					}
 
 					// get version type from cache
-					VersionType versionType = versionsTypeCache
-							.get(versionMember);
+					VersionType versionType = versionsTypeCache.get(versionMember);
 					
 					// if null, loop
 					if (versionType == null) {
@@ -1576,16 +1560,14 @@ public class PafViewService {
 					
 					// if plannable, then continue to next tuple.
 					if (versionType.equals(VersionType.Plannable)) {
-
 						continue;
-
 					}
 
 					ArrayList<String> colMembers = getTupleMemberDefs(colTuple);
 
 					/*
 					 * if version is not plannable, then add row and column
-					 * indexes to approiate arrays and add intersection to
+					 * indexes to appropriate arrays and add intersection to
 					 * locked intersection set.
 					 */
 
@@ -1593,8 +1575,7 @@ public class PafViewService {
 
 					// map dimensions with members
 					for (String dimension : section.getColAxisDims()) {
-						mappedDimsWithMembers.put(dimension, colMembers
-								.get(colMemberIndex++));
+						mappedDimsWithMembers.put(dimension, colMembers.get(colMemberIndex++));
 					}
 
 					// holds the order of the members based on server dimension
@@ -1605,10 +1586,7 @@ public class PafViewService {
 
 					// populate the members
 					for (String dimension : serverDimensionOrder) {
-
-						coordMemberOrder[coordMemberIndex++] = mappedDimsWithMembers
-								.get(dimension);
-
+						coordMemberOrder[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
 					}
 
 					// if version is non plannable
@@ -1641,9 +1619,9 @@ public class PafViewService {
 						}
 
 						/*
-						 * if forward planable, determine if member year is less
+						 * if forward plannable, determine if member year is less
 						 * than or equal to elapsed year. if member year is less
-						 * than elapsed year, lock intersection. if member year
+						 * than elapsed year, lock intersection. if member year-- /// PULL FROM CLIENT STATE PERIODS COLLECTION
 						 * is equal to elapsed year, compare time member with
 						 * elapsed time. if time member is less than or equal to
 						 * elapsed time, lock intersection.
@@ -1656,36 +1634,30 @@ public class PafViewService {
 						
 						// /get time axis
 						PafAxis timeAxis = section.getAxis(mdbDef.getTimeDim());
-
+//----------- // simplify logic to use client state collection
 						// if the dimension map contains year dimension
 						if (mappedDimensions.containsKey(yearDim)) {
 
 							// get year member
-							yearMember = getMember(yearDim, section, rowTuple,
-									colTuple);
+							yearMember = getMember(yearDim, section, rowTuple, colTuple);
 
 							// get year member index from list of year members
-							int yearMemberIndex = listOfYearMembers
-									.indexOf(yearMember);
+							int yearMemberIndex = listOfYearMembers.indexOf(yearMember);
 
 							// get elapsed year member index
-							int elapasedYearMemberIndex = listOfYearMembers
-									.indexOf(elapsedYear);
+							int elapasedYearMemberIndex = listOfYearMembers.indexOf(elapsedYear);
 
 							// if year member index is less than elapsed year,
 							// lock
 							if (yearMemberIndex < elapasedYearMemberIndex) {
 
-								forwardPlannableList.add(new LockedCell(rowId,
-										colId));
+								forwardPlannableList.add(new LockedCell(rowId, colId));
 
 								//only add the forward plannable intersections for planning version
 								if ( versionMember.equals(baseVersion)) {
 									
 									lockedForwardPlannableIntersectionsSet
-											.add(new Intersection(
-													serverDimensionOrder,
-													coordMemberOrder));
+											.add(new Intersection(serverDimensionOrder, coordMemberOrder));
 								}
 								
 								// lock the tuple based on time axis. if time is
@@ -1731,19 +1703,14 @@ public class PafViewService {
 									if (lockedTimeSet.contains(timeMember)) {
 
 										// add to forward plannable list
-										forwardPlannableList
-												.add(new LockedCell(rowId,
-														colId));
+										forwardPlannableList.add(new LockedCell(rowId, colId));
 
 //										only add the forward plannable intersections for planning version
 										if ( versionMember.equals(baseVersion)) {
 										
 											// add to locked forward plannable
 											// intersection set
-											lockedForwardPlannableIntersectionsSet
-													.add(new Intersection(
-															serverDimensionOrder,
-															coordMemberOrder));
+											lockedForwardPlannableIntersectionsSet.add(new Intersection(serverDimensionOrder, coordMemberOrder));
 											
 										}
 
@@ -1790,8 +1757,7 @@ public class PafViewService {
 
 			}
 
-			clientState.addLockedForwardPlannableInterMap(section.getName(),
-					lockedForwardPlannableIntersectionsSet);
+			clientState.addLockedForwardPlannableInterMap(section.getName(), lockedForwardPlannableIntersectionsSet);
 						
 			section.setNotPlannableLockedCells(notPlannableList
 					.toArray(new LockedCell[0]));

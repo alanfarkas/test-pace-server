@@ -848,6 +848,11 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			// Get subtrees representative of the hierarchy in the data cache
 			MemberTreeSet treeSet = dataService.getUowCacheTrees(clientState);
 			clientState.setUowTrees(treeSet);
+			
+			// Create locked period collections (TTN-1595)
+			clientState.setLockedPeriodMap(appService.createLockedPeriodMap(clientState));
+			clientState.setLockedTimeHorizPeriods(appService.createLockedTimeHorizPeriods(clientState));
+			
 
 			// Create member index lists on each dimension - used to sort allocation
 			// intersections in evaluation processing (TTN-1391)
@@ -863,11 +868,11 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			List<RuleSet> clientRuleSetList = new ArrayList<RuleSet>();
 			List<RuleSet> ruleSetList = new ArrayList<RuleSet>();
 
-			// 1st remove any rulsesets that the user doesn't have access too
+			// 1st remove any rule sets that the user doesn't have access too
 			// based upon the planner configuration
 
 			for (RuleSet rs : fullRuleSets) {
-				// prune out protProcSkip rulegroups frome measure's ruleset
+				// prune out protProcSkip rule groups from measure's rule set
 
 				if (rs.getDimension().equals(app.getMdbDef().getMeasureDim())) {
 					RuleSet msrCopy = (RuleSet) rs.clone();
@@ -2973,7 +2978,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				//set is authorized to true
 				isAuthorized = true;
 			}
-		}			
+		}
 								
 		//if not authorized, create a paf exception, then throw a not authorized exception
 		if ( ! isAuthorized ) {
@@ -4083,14 +4088,15 @@ public PafGetNotesResponse getCellNotes(
 				pushToNDCStack(validateUserSecurityReq.getClientId());
 				
 				// Validate the user security configuration
-				success =  dataService.validateUserSecurity(validateUserSecurityReq.getSecuritySpecs(), validationErrors);
+				PafClientState clientState = clients.get(validateUserSecurityReq.getClientId());
+				success =  dataService.validateUserSecurity(validateUserSecurityReq.getSecuritySpecs(), validationErrors, clientState);
 			}
 			
 		}catch (RuntimeException re) {
 			handleRuntimeException(re);
-//		}catch (PafException pex) {
-//			PafErrHandler.handleException(pex);
-//			throw pex.getPafSoapException();
+		}catch (PafException pex) {
+			PafErrHandler.handleException(pex);
+			throw pex.getPafSoapException();
 		}finally{
 			// Pop logger client id from stack and format response object
 			popFromNDCStack(validateUserSecurityReq.getClientId());

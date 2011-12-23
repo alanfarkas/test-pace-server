@@ -107,6 +107,7 @@ public class PafDataCache implements IPafDataCache {
 	private String[] planVersions = null; 								// Plan version 
 //	private Set<String> lockedPeriods = null;							// Locked planning periods
 	private Map<String, Set<String>> lockedPeriodMap = null; 			// Locked planning periods by year
+	private Set<String> lockedTimeHorizPeriods = null; 					// Locked time horizon periods
 	private PafDataCacheCells changedCells = new PafDataCacheCells();	// Optionally tracks changed cells
 	private PafApplicationDef appDef = null;
 	private PafMVS pafMVS = null;
@@ -129,22 +130,11 @@ public class PafDataCache implements IPafDataCache {
 	 * @param clientState Client State
 	 * @param lockedPeriodMap Collection of locked periods by year
 	 */
-	public PafDataCache(PafClientState clientState, Map<String, Set<String>> lockedPeriodMap) {
-		this.lockedPeriodMap = lockedPeriodMap;
+	public PafDataCache(PafClientState clientState) {
 		initDataCache(clientState);		
 	}
 
 			
-	/**
-	 * Convenience constructor for testing purposes
-	 * 
-	 * @param clientState Client State
-	 */
-	public PafDataCache(PafClientState clientState) {
-		this(clientState, new HashMap<String, Set<String>>());
-	}
-	
-	
 	protected PafDataCache() {
 		// For testing purposes
 	}
@@ -168,6 +158,9 @@ public class PafDataCache implements IPafDataCache {
 		UnitOfWork expandedUowSpec = clientState.getUnitOfWork();
 		dimTrees = clientState.getUowTrees();
 		mdbBaseTrees = clientState.getMdbBaseTrees();
+		lockedPeriodMap = clientState.getLockedPeriodMap();
+		lockedTimeHorizPeriods = clientState.getLockedTimeHorizPeriods();
+
 
 		// Set dimension properties
 		String[] uowDims = expandedUowSpec.getDimensions();
@@ -186,7 +179,7 @@ public class PafDataCache implements IPafDataCache {
 		axisSizes = new int[axisCount];
 		memberCatalog = new String[(axisCount)][];
 		for (int axis = 0; axis < axisCount; axis++) {
-			String dim = treeDims.get(axis);							// Pull dim name fro tree dim collection (TTN-1595)
+			String dim = treeDims.get(axis);		// Pull dim name from dim tree collection (TTN-1595)
 			PafDimTree dimTree = dimTrees.getTree(dim);
 			String[] members;
 			if (!dim.equals(versionDim)) {

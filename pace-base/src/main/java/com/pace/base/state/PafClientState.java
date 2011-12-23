@@ -87,7 +87,9 @@ public class PafClientState implements IPafClientState {
     private Map<String, List<String>> roleFilterSelections = new HashMap<String, List<String>>();
     private PafUserDef userDef;
     private Set<String> readOnlyMeasuresSet = null;
-	private Map <String, PafBaseTree> mdbBaseTrees = new HashMap<String, PafBaseTree>();    
+	private Map <String, PafBaseTree> mdbBaseTrees = null;   
+	private Map <String, Set<String>> lockedPeriodMap = null;
+	private Set<String> lockedTimeHorizPeriods = null;
     
     public MemberTreeSet getUowTrees() {
 		return uowTrees;
@@ -97,7 +99,14 @@ public class PafClientState implements IPafClientState {
 		this.uowTrees = uowTrees;
 	}
 
-
+	public String getTimeHorizonDim() {
+		return PafBaseConstants.TIME_HORIZON_DIM;
+	}
+	
+	public PafDimTree getTimeHorizonTree() {
+		return uowTrees.getTree(this.getTimeHorizonDim());
+	}
+	
 	/**
 	 *	Returns the memberIndexList for the specified dimension
 	 *
@@ -805,7 +814,33 @@ public class PafClientState implements IPafClientState {
 		this.mdbBaseTrees = mdbBaseTrees;
 	}
 
+	/**
+	 * @return the lockedPeriodMap
+	 */
+	public Map<String, Set<String>> getLockedPeriodMap() {
+		return lockedPeriodMap;
+	}
 
+	/**
+	 * @param lockedPeriodMap the lockedPeriodMap to set
+	 */
+	public void setLockedPeriodMap(Map<String, Set<String>> lockedPeriodMap) {
+		this.lockedPeriodMap = lockedPeriodMap;
+	}
+
+	/**
+	 * @return the lockedTimeHorizPeriods
+	 */
+	public Set<String> getLockedTimeHorizPeriods() {
+		return lockedTimeHorizPeriods;
+	}
+
+	/**
+	 * @param lockedTimeHorizPeriods the lockedTimeHorizPeriods to set
+	 */
+	public void setLockedTimeHorizPeriods(Set<String> lockedTimeHorizPeriods) {
+		this.lockedTimeHorizPeriods = lockedTimeHorizPeriods;
+	}
 
 
 }
