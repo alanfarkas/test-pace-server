@@ -26,6 +26,8 @@ public abstract class PaceSettingsForm extends Form implements ClickListener {
 	protected PaceSettingsApplication serverSettingsApplication;
 
 	protected Object inputObject;
+	
+	protected String isValidNotificationOverrideError = null;
 
 	public PaceSettingsForm(PaceSettingsApplication serverSettingsApplication) {
 
@@ -88,9 +90,12 @@ public abstract class PaceSettingsForm extends Form implements ClickListener {
 
 			if (!isValid()) {
 
-				serverSettingsApplication.getMainWindow().showNotification(
-						"Errors on the form.  Check required fields.");
-
+				if ( isValidNotificationOverrideError == null ) {
+					serverSettingsApplication.getMainWindow().showNotification(	"Errors on the form.  Check required fields.");
+				} else {
+					serverSettingsApplication.getMainWindow().showNotification(isValidNotificationOverrideError);
+				}
+				isValidNotificationOverrideError = null;
 				return;
 			}
 

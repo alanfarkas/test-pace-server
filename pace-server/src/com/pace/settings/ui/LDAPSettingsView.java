@@ -27,7 +27,7 @@ public class LDAPSettingsView extends Panel {
 	 */
 	public LDAPSettingsView(LDAPSettingsForm form) {
 		
-		Label heading = new Label(SettingsList.LDAP_SETTINGS + " - please refer to the LDAP Integration Overview document");
+		Label heading = new Label(SettingsTree.LDAP_SETTINGS + " - please refer to the LDAP Integration Overview document");
 		
 		heading.setStyleName(Reindeer.LABEL_H2);
 		

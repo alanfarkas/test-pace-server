@@ -68,7 +68,7 @@ public class KeyValueTable extends CustomField implements Button.ClickListener {
                 if ("key".equals(propertyId) || "value".equals(propertyId) ) {
                 	                	
                 	field.setNullRepresentation("");
-                	field.setWidth(PaceSettingsConstants.COMMON_FIELD_WIDTH);	
+                	field.setWidth(PaceSettingsConstants.COMMON_FIELD_WIDTH_20_EM);	
                 } else if ( "Delete".equals(propertyId)) {
                 	
                 	field.setWidth(PaceSettingsConstants.COMMON_BUTTON_WIDTH);
@@ -117,6 +117,7 @@ public class KeyValueTable extends CustomField implements Button.ClickListener {
 		table.setWidth(PaceSettingsConstants.COMMON_TABLE_WIDTH);
 		table.setSelectable(true);
 		table.setWriteThrough(true);
+		table.setImmediate(true);
 		
 		
 		//table.setEditable(true);
@@ -195,16 +196,19 @@ public class KeyValueTable extends CustomField implements Button.ClickListener {
 					
 				} else {
 				
-					Object itemId = table.addItem(kv);
+					table.addItem(kv);
 					
 					int pageLength = table.getPageLength();
 					
 					table.setPageLength(pageLength + 1);
 					
-					table.select(itemId);
+					table.select(kv);
 									
 					keyInput.setValue("");
 					valueInput.setValue("");
+					
+					//table.requestRepaintAll();
+					requestRepaintAll();
 				}
 				 				
 			}

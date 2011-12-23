@@ -24,7 +24,7 @@ public class ServerSettingsView extends Panel {
 	 */
 	public ServerSettingsView(ServerSettingsForm form) {
 		
-		Label heading = new Label(SettingsList.SERVER_SETTINGS);
+		Label heading = new Label(SettingsTree.SERVER_SETTINGS.toString());
 		
 		heading.setStyleName(Reindeer.LABEL_H2);
 		

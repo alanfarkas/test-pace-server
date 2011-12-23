@@ -16,13 +16,18 @@ import com.vaadin.data.util.BeanItem;
  *
  */
 public class LDAPSettingsForm extends PaceSettingsForm {
-		
+
+	private static final long serialVersionUID = -3760996903039086588L;
+	
+	/**
+	 * Constructor 
+	 * 
+	 * @param serverSettingsApplication application
+	 */
 	public LDAPSettingsForm(PaceSettingsApplication serverSettingsApplication) {
 		super(serverSettingsApplication);
 	}
-
-	private static final long serialVersionUID = -3760996903039086588L;
-
+	
 	@Override
 	protected void setupForm() {
 

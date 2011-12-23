@@ -15,8 +15,8 @@ public class SettingsTree extends Tree {
 
 	public static final Object SERVER_SETTINGS = "Server Settings";
 	public static final Object LDAP_SETTINGS = "LDAP Settings";
-	public static final Object RELATIONAL_SETTINGS = "Relational Database Settings";
-	public static final Object MULTIDIMENSIONAL_DATABASE_SETTINGS = "Multidimensional Database Settings";
+	public static final Object RELATIONAL_DATABASE_DATASOURCES = "Relational DB Datasources";
+	public static final Object MULTIDIMENSIONAL_DATABASE_DATASOURCES = "Multidimensional DB Datasources";
 
 	public SettingsTree(PaceSettingsApplication app) {
 
@@ -31,8 +31,8 @@ public class SettingsTree extends Tree {
 		
 		addItem(SERVER_SETTINGS);
 		addItem(LDAP_SETTINGS);
-		addItem(RELATIONAL_SETTINGS);
-		addItem(MULTIDIMENSIONAL_DATABASE_SETTINGS);
+		addItem(RELATIONAL_DATABASE_DATASOURCES);
+		addItem(MULTIDIMENSIONAL_DATABASE_DATASOURCES);
 
 		setSelectable(true);
 		setNullSelectionAllowed(false);

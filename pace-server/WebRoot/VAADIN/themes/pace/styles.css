@@ -46,3 +46,8 @@
    -moz-box-shadow: none;
    box-shadow:
 } */
+
+/* .v-table-focus-table-text-wrap .v-table-cell-wrapper-table-text-wrap {
+	white-space: normal;
+	overflow: hidden;
+} */

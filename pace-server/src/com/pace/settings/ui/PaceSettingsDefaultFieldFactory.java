@@ -62,7 +62,7 @@ public abstract class PaceSettingsDefaultFieldFactory extends DefaultFieldFactor
 
 			((TextField) field).setNullRepresentation("");
 			((TextField) field)
-					.setWidth(PaceSettingsConstants.COMMON_FIELD_WIDTH);
+					.setWidth(PaceSettingsConstants.COMMON_FIELD_WIDTH_20_EM);
 
 		}
 		
@@ -77,4 +77,21 @@ public abstract class PaceSettingsDefaultFieldFactory extends DefaultFieldFactor
 		return new ArrayList<Object>(formOrderList);
 
 	}
+
+	/**
+	 * @return the captionMap
+	 */
+	public Map<String, String> getCaptionMap() {
+		return new HashMap<String, String>(captionMap);
+	}
+
+	/**
+	 * @return the requiredFieldSet
+	 */
+	public Set<String> getRequiredFieldSet() {
+		return new HashSet<String>(requiredFieldSet);
+	}
+	
+	
+	
 }

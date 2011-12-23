@@ -1,14 +1,18 @@
 package com.pace.settings;
 
-import java.awt.Canvas;
-
+import com.pace.server.ServerSettings;
+import com.pace.settings.data.MDBDatasourceContainer;
 import com.pace.settings.ui.LDAPSettingsForm;
 import com.pace.settings.ui.LDAPSettingsView;
+import com.pace.settings.ui.MDBDatasourceFieldFactory;
+import com.pace.settings.ui.MDBDatasourceForm;
+import com.pace.settings.ui.MDBDatasourceTable;
+import com.pace.settings.ui.MDBDatasourcesView;
 import com.pace.settings.ui.ServerSettingsForm;
 import com.pace.settings.ui.ServerSettingsView;
-import com.pace.settings.ui.SettingsList;
 import com.pace.settings.ui.SettingsTree;
 import com.vaadin.Application;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.event.ItemClickEvent;
@@ -44,11 +48,19 @@ public class PaceSettingsApplication extends Application implements
 	
 	private LDAPSettingsView ldapSettingsView;
 
-	private ServerSettingsForm serverSettingsForm = new ServerSettingsForm(this);
+	private MDBDatasourcesView mdbDatasourcesView;
 	
-	private LDAPSettingsForm ldapSettingsForm = new LDAPSettingsForm(this);
-
-	private SettingsList settingsList = new SettingsList(this);
+	private ServerSettingsForm serverSettingsForm = null;
+	
+	private LDAPSettingsForm ldapSettingsForm = null;
+	
+	private MDBDatasourceForm mdbDatasourceForm = null;
+	
+	private MDBDatasourceTable mdbDatasourceTable = null;
+	
+	private MDBDatasourceContainer mdbDatasourceContainer = new MDBDatasourceContainer();
+	
+	private MDBDatasourceFieldFactory mdbDatasourceFieldFactory = new MDBDatasourceFieldFactory();
 
 	@Override
 	public void init() {
@@ -132,12 +144,28 @@ public class PaceSettingsApplication extends Application implements
 					
 					showLDAPSettingsView();
 					
+				} else if ( SettingsTree.MULTIDIMENSIONAL_DATABASE_DATASOURCES.equals(itemId)) {
+					
+					showMDBDatasourcesView();
+					
 				}
 			}
 
+		} else if ( event.getSource() == mdbDatasourceTable ) {
+			
+			
+			Item item = mdbDatasourceTable.getItem(event.getItemId());
+			
+			if ( item != mdbDatasourceForm.getItemDataSource() ) {
+				
+				mdbDatasourceForm.setItemDataSource(item);
+				
+			}
+			
 		}
 
 	}
+	
 
 	public void showServerSettingsView() {
 
@@ -151,6 +179,12 @@ public class PaceSettingsApplication extends Application implements
 
 	}
 	
+	public void showMDBDatasourcesView() {
+				
+		setPropertiesView(getMdbDatasourcesView());
+		
+	}
+	
 	public void showBlankView() {
 		
 		setPropertiesView(new Panel());
@@ -159,13 +193,61 @@ public class PaceSettingsApplication extends Application implements
 
 	@Override
 	public void buttonClick(ClickEvent event) {
-		// TODO Auto-generated method stub
+
+		if ( event.getButton() == getMdbDatasourcesView().getNewButton() ) {
+		
+			mdbDatasourceForm.addMDBDatasource();
+			
+		} else if ( event.getButton() == getMdbDatasourcesView().getCopyButton() ) {
+			
+			mdbDatasourceForm.copyMDBDatasource();
+			
+		} else if ( event.getButton() == getMdbDatasourcesView().getDeleteButton() ) {
+			
+			getMdbDatasourcesView().removeMDBDatasource();
+			
+			this.getMainWindow().showNotification("Deleted item");
+			
+		} else if ( event.getButton() == getMdbDatasourcesView().getSaveAllButton() ) {
+					
+			boolean isSuccessful = mdbDatasourceContainer.saveData();
+			
+			if ( isSuccessful ) {
+			
+				this.getMainWindow().showNotification(SettingsTree.MULTIDIMENSIONAL_DATABASE_DATASOURCES.toString() + " Saved Successfully");
+
+			} else {
+			
+				this.getMainWindow().showNotification(SettingsTree.MULTIDIMENSIONAL_DATABASE_DATASOURCES.toString() + " NOT Saved Successfully");
+				
+			}			
+			
+		} else if ( event.getButton() == getMdbDatasourcesView().getCancelAllButton() ) {
+		
+			mdbDatasourceContainer.readData();
+			getMdbDatasourcesView().removeSelectionFromTable();
+			this.getMainWindow().showNotification(SettingsTree.MULTIDIMENSIONAL_DATABASE_DATASOURCES.toString() + " Cancelled Successfully");
+			
+		}
 
 	}
 
 	@Override
 	public void valueChange(ValueChangeEvent event) {
-		// TODO Auto-generated method stub
+
+		/*Property property = event.getProperty();
+		
+		if ( property == mdbDatasourceTable ) {
+			
+			Item item = mdbDatasourceTable.getItem(mdbDatasourceTable.getValue());
+			
+			if ( item != mdbDatasourceForm.getItemDataSource() ) {
+				
+				mdbDatasourceForm.setItemDataSource(item);
+				
+			}
+			
+		}*/
 
 	}
 
@@ -176,6 +258,7 @@ public class PaceSettingsApplication extends Application implements
 
 		if (serverSettingsView == null) {
 
+			serverSettingsForm = new ServerSettingsForm(this);
 			serverSettingsView = new ServerSettingsView(serverSettingsForm);
 		}
 
@@ -186,6 +269,7 @@ public class PaceSettingsApplication extends Application implements
 		
 		if ( ldapSettingsView == null ) {
 			
+			ldapSettingsForm = new LDAPSettingsForm(this); 
 			ldapSettingsView = new LDAPSettingsView(ldapSettingsForm);
 			
 		}
@@ -193,5 +277,44 @@ public class PaceSettingsApplication extends Application implements
 		return ldapSettingsView;
 		
 	}
+
+	/**
+	 * @return the mdbDatasourcesView
+	 */
+	public MDBDatasourcesView getMdbDatasourcesView() {
+		
+		if ( mdbDatasourcesView == null ) {
+			
+			mdbDatasourceForm = new MDBDatasourceForm(this);
+			mdbDatasourceTable = new MDBDatasourceTable(this);
+			mdbDatasourcesView = new MDBDatasourcesView(this, mdbDatasourceTable, mdbDatasourceForm);
+						
+		}
+		
+		return mdbDatasourcesView;
+	}
+
+	/**
+	 * @return the mdbDatasourceContainer
+	 */
+	public MDBDatasourceContainer getMdbDatasourceContainer() {
+		return mdbDatasourceContainer;
+	}
+
+	/**
+	 * @return the mdbDatasourceFieldFactory
+	 */
+	public MDBDatasourceFieldFactory getMdbDatasourceFieldFactory() {
+		return mdbDatasourceFieldFactory;
+	}
+
+	/**
+	 * @return the mdbDatasourceTable
+	 */
+	public MDBDatasourceTable getMdbDatasourceTable() {
+		return mdbDatasourceTable;
+	}
+	
+	
 
 }

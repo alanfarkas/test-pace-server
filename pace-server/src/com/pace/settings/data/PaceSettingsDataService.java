@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.pace.base.PafConfigFileNotFoundException;
+import com.pace.base.mdb.PafConnectionProps;
 import com.pace.base.misc.KeyValue;
 import com.pace.base.utility.PafXStream;
 import com.pace.server.PafLDAPSettings;
@@ -22,6 +23,8 @@ public class PaceSettingsDataService {
 
 	private static String serverSettingsFile = PafMetaData.getConfigServerDirPath()  + "paceServerSettings.xml";
 	private static String ldapSettingsFile = PafMetaData.getConfigServerDirPath()  + "paceLDAPSettings.xml";
+	private static String rdbDataSourcesFile = PafMetaData.getConfigServerDirPath()  + "paceRDBDataSources.xml";
+	private static String mdbDataSourcesFile = PafMetaData.getConfigServerDirPath()  + "paceMDBDataSources.xml";
 	
 	/**
 	 * @return the serverSettingsFile
@@ -96,14 +99,50 @@ public class PaceSettingsDataService {
 		
 	}
 	
+	/**
+	 * MDB Settings file. 
+	 * 
+	 * @param mdbSettings
+	 */
+	public static void setMDBSettings(List<PafConnectionProps> mdbSettings) {
+		
+		if ( mdbSettings != null ) {
+									
+			PafXStream.exportObjectToXml(mdbSettings, mdbDataSourcesFile);
+		}
+		
+	}
+	
+	public static List<PafConnectionProps> getMDBSettings() throws PafConfigFileNotFoundException {
+		
+		return (List<PafConnectionProps>) PafXStream.importObjectFromXml(mdbDataSourcesFile);
+		
+	}
+	
 	public static void main(String[] args) {
 		
-		ServerSettings ss = PafMetaData.getServerSettings();
+		//ServerSettings ss = PafMetaData.getServerSettings();
+		
+		//Map<String, PafConnectionProps> mdbConnectionPropMap = PafMetaData.getMDBSettings();
+	
+		
+		List<PafConnectionProps> list = new ArrayList<PafConnectionProps>();
+		
+		PafConnectionProps prop1 = new PafConnectionProps();
+		prop1.setName("Titan");
+		prop1.setConnectionString("EDSDomain=Essbase;EDSUrl=http://localhost:13080/aps/JAPI;Server=localhost;User=admin;Password=password;Application=Titan;Database=Titan");
+		prop1.setDataServiceProvider("com.pace.mdb.essbase.EsbData");
+		prop1.setMetaDataServiceProvider("com.pace.mdb.essbase.EsbMetaData");
+		prop1.setProperties(null);
+		
+		list.add(prop1);
+		
+		PafXStream.exportObjectToXml(list, mdbDataSourcesFile);
 		
 		//setServerSettings(ss);
 		
 		
-		PafXStream.exportObjectToXml(ss.getLdapSettings(), ldapSettingsFile);
+		//PafXStream.exportObjectToXml(ss.getLdapSettings(), ldapSettingsFile);
 		
 	}
 	

@@ -129,7 +129,7 @@ public class ServerSettingsFieldFactory extends PaceSettingsDefaultFieldFactory 
 
 			authModeComboBox.setCaption(field.getCaption());
 			authModeComboBox.setRequired(requiredFieldSet.contains(propertyId));
-			authModeComboBox.setWidth(PaceSettingsConstants.COMMON_FIELD_WIDTH);
+			authModeComboBox.setWidth(PaceSettingsConstants.COMMON_FIELD_WIDTH_20_EM);
 			return authModeComboBox;
 		}
 
