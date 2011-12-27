@@ -5,6 +5,7 @@ package com.pace.settings.ui;
 
 import com.pace.base.mdb.PafConnectionProps;
 import com.pace.settings.PaceSettingsApplication;
+import com.pace.settings.PaceSettingsConstants;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItem;
@@ -17,11 +18,6 @@ import com.vaadin.data.util.BeanItem;
  */
 public class MDBDatasourceForm extends PaceSettingsForm implements Property.ValueChangeListener {
 		
-
-	private static final String UPDATE = "Update";
-
-	private static final String ADD = "Add";
-
 	private static final long serialVersionUID = -679608093955614805L;
 	
 	private boolean newMdbDatasource = false;
@@ -104,7 +100,7 @@ public class MDBDatasourceForm extends PaceSettingsForm implements Property.Valu
 			
 			serverSettingsApplication.getMdbDatasourceTable().getValue();
 			
-	  		save.setCaption(UPDATE);
+	  		save.setCaption(PaceSettingsConstants.UPDATE_BUTTON_LABEL);
 	  		
 			
 		} else {
@@ -183,7 +179,7 @@ public class MDBDatasourceForm extends PaceSettingsForm implements Property.Valu
 		pafConnectionProps = new PafConnectionProps();
 		setItemDataSource(new BeanItem<PafConnectionProps>(pafConnectionProps));
 		newMdbDatasource = true;
-		save.setCaption(ADD);
+		save.setCaption(PaceSettingsConstants.ADD_BUTTON_LABEL);
 	}
 	
 	public void copyMDBDatasource() {		
@@ -197,7 +193,7 @@ public class MDBDatasourceForm extends PaceSettingsForm implements Property.Valu
 				pafConnectionProps.setName("Copy of " +selectedConnectionProps.getName());
 				
 				setItemDataSource(new BeanItem<PafConnectionProps>(pafConnectionProps));				
-				save.setCaption(ADD);
+				save.setCaption(PaceSettingsConstants.ADD_BUTTON_LABEL);
 				newMdbDatasource = true;
 			} catch (CloneNotSupportedException e) {
 				e.printStackTrace();

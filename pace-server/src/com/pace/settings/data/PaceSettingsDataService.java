@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import com.pace.base.PafConfigFileNotFoundException;
+import com.pace.base.db.RdbProps;
 import com.pace.base.mdb.PafConnectionProps;
 import com.pace.base.misc.KeyValue;
 import com.pace.base.utility.PafXStream;
-import com.pace.server.PafLDAPSettings;
 import com.pace.server.PafMetaData;
-import com.pace.server.ServerSettings;
+import com.pace.base.server.ServerSettings;
+import com.pace.base.server.PafLDAPSettings;
 
 /**
  * Pace Settings Data Service.  Wraps XStream functionality.  Read/writes setting file to/from disk.
@@ -100,22 +102,98 @@ public class PaceSettingsDataService {
 	}
 	
 	/**
-	 * MDB Settings file. 
+	 * MDB Datasources file
 	 * 
-	 * @param mdbSettings
+	 * @param mdbDataSources
 	 */
-	public static void setMDBSettings(List<PafConnectionProps> mdbSettings) {
+	public static void setMDBDatasources(List<PafConnectionProps> mdbDataSources) {
 		
-		if ( mdbSettings != null ) {
+		if ( mdbDataSources != null ) {
 									
-			PafXStream.exportObjectToXml(mdbSettings, mdbDataSourcesFile);
+			PafXStream.exportObjectToXml(mdbDataSources, mdbDataSourcesFile);
 		}
 		
 	}
 	
-	public static List<PafConnectionProps> getMDBSettings() throws PafConfigFileNotFoundException {
+	/**
+	 * Reads MDB Datasources file
+	 * 
+	 * @return List of mdb connection properties
+	 * @throws PafConfigFileNotFoundException
+	 */
+	public static List<PafConnectionProps> getMDBDatasources() throws PafConfigFileNotFoundException {
 		
 		return (List<PafConnectionProps>) PafXStream.importObjectFromXml(mdbDataSourcesFile);
+		
+	}
+	
+	/**
+	 * Writes RDB Datasources file
+	 * 
+	 * @param rdbDataSources
+	 */
+	public static void setRDBDatasources(List<RdbProps> rdbDataSources) {
+		
+		if ( rdbDataSources != null ) {
+			
+			for (RdbProps rdbProps : rdbDataSources ) {
+				
+				Properties props = new Properties();
+				
+				if ( rdbProps.getHibernatePropertyList() != null ) {
+					
+					for ( KeyValue kv : rdbProps.getHibernatePropertyList()) {
+						
+						props.put(kv.getKey(), kv.getValue());
+						
+					}
+					
+					//rdbProps.setHibernatePropertyList(null);
+					rdbProps.setHibernateProperties(props);
+					
+				}
+				
+			}
+									
+			PafXStream.exportObjectToXml(rdbDataSources, rdbDataSourcesFile);
+		}
+		
+	}
+	
+	/**
+	 * Reads RDB Datasources file
+	 * 
+	 * @return List of rdb connection properties
+	 * @throws PafConfigFileNotFoundException
+	 */
+	public static List<RdbProps> getRDBDatasources() throws PafConfigFileNotFoundException {
+		
+		List<RdbProps> rdbDatasourceList = (List<RdbProps>) PafXStream.importObjectFromXml(rdbDataSourcesFile);
+		
+		if ( rdbDatasourceList != null ) {
+			
+			for ( RdbProps rdbProps : rdbDatasourceList ) {
+				
+				if ( rdbProps != null && rdbProps.getHibernateProperties() != null ) {
+					
+					for ( Object objKey : rdbProps.getHibernateProperties().keySet()) {
+						
+						Object objValue = rdbProps.getHibernateProperties().get(objKey);
+						
+						rdbProps.getHibernatePropertyList().add(new KeyValue(objKey.toString(), objValue.toString()));
+						
+					}
+					
+										
+				}
+				
+				
+			}
+			
+			
+		}
+		
+		return rdbDatasourceList;
 		
 	}
 	
@@ -126,7 +204,7 @@ public class PaceSettingsDataService {
 		//Map<String, PafConnectionProps> mdbConnectionPropMap = PafMetaData.getMDBSettings();
 	
 		
-		List<PafConnectionProps> list = new ArrayList<PafConnectionProps>();
+		/*List<PafConnectionProps> list = new ArrayList<PafConnectionProps>();
 		
 		PafConnectionProps prop1 = new PafConnectionProps();
 		prop1.setName("Titan");
@@ -138,11 +216,13 @@ public class PaceSettingsDataService {
 		list.add(prop1);
 		
 		PafXStream.exportObjectToXml(list, mdbDataSourcesFile);
-		
+		*/
 		//setServerSettings(ss);
 		
 		
 		//PafXStream.exportObjectToXml(ss.getLdapSettings(), ldapSettingsFile);
+		
+		//setRDBDatasources(PafMetaData.getRDBProps());
 		
 	}
 	

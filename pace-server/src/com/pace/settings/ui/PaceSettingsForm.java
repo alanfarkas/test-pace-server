@@ -1,6 +1,7 @@
 package com.pace.settings.ui;
 
 import com.pace.settings.PaceSettingsApplication;
+import com.pace.settings.PaceSettingsConstants;
 import com.vaadin.data.Item;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -19,9 +20,9 @@ public abstract class PaceSettingsForm extends Form implements ClickListener {
 
 	private PaceSettingsDefaultFieldFactory paceSettingsDefaultFactory;
 
-	protected Button save = new Button("Save", (ClickListener) this);
+	protected Button save = new Button(PaceSettingsConstants.SAVE_BUTTON_LABEL, (ClickListener) this);
 
-	protected Button cancel = new Button("Cancel", (ClickListener) this);
+	protected Button cancel = new Button(PaceSettingsConstants.CANCEL_BUTTON_LABEL, (ClickListener) this);
 
 	protected PaceSettingsApplication serverSettingsApplication;
 
@@ -104,7 +105,7 @@ public abstract class PaceSettingsForm extends Form implements ClickListener {
 
 			saveForm();
 
-			serverSettingsApplication.getMainWindow().showNotification("Saved");
+			serverSettingsApplication.getMainWindow().showNotification(save.getCaption() + "d");
 
 			// on cancel
 		} else if (source == cancel) {
@@ -139,4 +140,5 @@ public abstract class PaceSettingsForm extends Form implements ClickListener {
 		this.paceSettingsDefaultFactory = paceSettingsDefaultFactory;
 	}
 
+	
 }

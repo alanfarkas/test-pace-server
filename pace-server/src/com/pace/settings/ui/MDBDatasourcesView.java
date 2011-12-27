@@ -5,6 +5,7 @@ package com.pace.settings.ui;
 
 import com.pace.base.mdb.PafConnectionProps;
 import com.pace.settings.PaceSettingsApplication;
+import com.pace.settings.PaceSettingsConstants;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
@@ -52,19 +53,19 @@ public class MDBDatasourcesView extends VerticalSplitPanel implements Property.V
 		this.mdbDsTable = mdbDsTable;
 		this.mdbDatasourceForm = mdbDatasourceForm;
 		
-		newButton = new Button("New", (ClickListener) paceSettingsApplication);
+		newButton = new Button(PaceSettingsConstants.NEW_BUTTON_LABEL, (ClickListener) paceSettingsApplication);
 		
-		copyButton = new Button("Copy", (ClickListener) paceSettingsApplication);
+		copyButton = new Button(PaceSettingsConstants.COPY_BUTTON_LABEL, (ClickListener) paceSettingsApplication);
 		
 		copyButton.setEnabled(false);
 		
-		deleteButton = new Button("Delete", (ClickListener) paceSettingsApplication);
+		deleteButton = new Button(PaceSettingsConstants.DELETE_BUTTON_LABEL, (ClickListener) paceSettingsApplication);
 		
 		deleteButton.setEnabled(false);
 		
-		saveAllButton = new Button("Save", (ClickListener) paceSettingsApplication);
+		saveAllButton = new Button(PaceSettingsConstants.SAVE_BUTTON_LABEL, (ClickListener) paceSettingsApplication);
 		
-		cancelAllButton = new Button("Cancel", (ClickListener) paceSettingsApplication);
+		cancelAllButton = new Button(PaceSettingsConstants.CANCEL_BUTTON_LABEL, (ClickListener) paceSettingsApplication);
 		
 		VerticalLayout vl = new VerticalLayout();
 		
@@ -201,18 +202,5 @@ public class MDBDatasourcesView extends VerticalSplitPanel implements Property.V
 		mdbDatasourceForm.setItemDataSource(null);
 		
 	}
-
-	/*@Override
-	public void buttonClick(ClickEvent event) {
-		
-		if ( event.getButton() == addButton ) {
-			addButton.getApplication().getMainWindow().showNotification("ADD");
-		} else if ( event.getButton() == copyButton ) {
-			addButton.getApplication().getMainWindow().showNotification("COPY");
-		}
-		
-	}*/
-	
-	
 	
 }

@@ -1,13 +1,17 @@
 package com.pace.settings;
 
-import com.pace.server.ServerSettings;
 import com.pace.settings.data.MDBDatasourceContainer;
+import com.pace.settings.data.RDBDatasourceContainer;
 import com.pace.settings.ui.LDAPSettingsForm;
 import com.pace.settings.ui.LDAPSettingsView;
 import com.pace.settings.ui.MDBDatasourceFieldFactory;
 import com.pace.settings.ui.MDBDatasourceForm;
 import com.pace.settings.ui.MDBDatasourceTable;
 import com.pace.settings.ui.MDBDatasourcesView;
+import com.pace.settings.ui.RDBDatasourceFieldFactory;
+import com.pace.settings.ui.RDBDatasourceForm;
+import com.pace.settings.ui.RDBDatasourceTable;
+import com.pace.settings.ui.RDBDatasourcesView;
 import com.pace.settings.ui.ServerSettingsForm;
 import com.pace.settings.ui.ServerSettingsView;
 import com.pace.settings.ui.SettingsTree;
@@ -47,12 +51,12 @@ public class PaceSettingsApplication extends Application implements
 	private ServerSettingsView serverSettingsView;
 	
 	private LDAPSettingsView ldapSettingsView;
-
-	private MDBDatasourcesView mdbDatasourcesView;
 	
 	private ServerSettingsForm serverSettingsForm = null;
 	
 	private LDAPSettingsForm ldapSettingsForm = null;
+	
+	private MDBDatasourcesView mdbDatasourcesView;
 	
 	private MDBDatasourceForm mdbDatasourceForm = null;
 	
@@ -61,6 +65,16 @@ public class PaceSettingsApplication extends Application implements
 	private MDBDatasourceContainer mdbDatasourceContainer = new MDBDatasourceContainer();
 	
 	private MDBDatasourceFieldFactory mdbDatasourceFieldFactory = new MDBDatasourceFieldFactory();
+	
+	private RDBDatasourcesView rdbDatasourcesView;
+	
+	private RDBDatasourceForm rdbDatasourceForm = null;
+	
+	private RDBDatasourceTable rdbDatasourceTable = null;
+	
+	private RDBDatasourceContainer rdbDatasourceContainer = new RDBDatasourceContainer();
+	
+	private RDBDatasourceFieldFactory rdbDatasourceFieldFactory = new RDBDatasourceFieldFactory();
 
 	@Override
 	public void init() {
@@ -148,17 +162,30 @@ public class PaceSettingsApplication extends Application implements
 					
 					showMDBDatasourcesView();
 					
+				} else if ( SettingsTree.RELATIONAL_DATABASE_DATASOURCES.equals(itemId)) {
+					
+					showRDBDatasourcesView();
+					
 				}
 			}
 
-		} else if ( event.getSource() == mdbDatasourceTable ) {
-			
+		} else if ( event.getSource() == mdbDatasourceTable ) {			
 			
 			Item item = mdbDatasourceTable.getItem(event.getItemId());
 			
 			if ( item != mdbDatasourceForm.getItemDataSource() ) {
 				
 				mdbDatasourceForm.setItemDataSource(item);
+				
+			}
+			
+		} else if ( event.getSource() == rdbDatasourceTable ) {			
+			
+			Item item = rdbDatasourceTable.getItem(event.getItemId());
+			
+			if ( item != rdbDatasourceForm.getItemDataSource() ) {
+				
+				rdbDatasourceForm.setItemDataSource(item);
 				
 			}
 			
@@ -183,6 +210,10 @@ public class PaceSettingsApplication extends Application implements
 				
 		setPropertiesView(getMdbDatasourcesView());
 		
+	}
+	
+	public void showRDBDatasourcesView() {
+		setPropertiesView(getRdbDatasourcesView());
 	}
 	
 	public void showBlankView() {
@@ -227,6 +258,26 @@ public class PaceSettingsApplication extends Application implements
 			mdbDatasourceContainer.readData();
 			getMdbDatasourcesView().removeSelectionFromTable();
 			this.getMainWindow().showNotification(SettingsTree.MULTIDIMENSIONAL_DATABASE_DATASOURCES.toString() + " Cancelled Successfully");
+			
+		} else if ( event.getButton() == getRdbDatasourcesView().getSaveAllButton() ) {
+			
+			boolean isSuccessful = rdbDatasourceContainer.saveData();
+			
+			if ( isSuccessful ) {
+			
+				this.getMainWindow().showNotification(SettingsTree.RELATIONAL_DATABASE_DATASOURCES.toString() + " Saved Successfully");
+
+			} else {
+			
+				this.getMainWindow().showNotification(SettingsTree.RELATIONAL_DATABASE_DATASOURCES.toString() + " NOT Saved Successfully");
+				
+			}			
+			
+		} else if ( event.getButton() == getRdbDatasourcesView().getCancelAllButton() ) {
+		
+			rdbDatasourceContainer.readData();
+			getRdbDatasourcesView().removeSelectionFromTable();
+			this.getMainWindow().showNotification(SettingsTree.RELATIONAL_DATABASE_DATASOURCES.toString() + " Cancelled Successfully");
 			
 		}
 
@@ -278,6 +329,7 @@ public class PaceSettingsApplication extends Application implements
 		
 	}
 
+
 	/**
 	 * @return the mdbDatasourcesView
 	 */
@@ -292,6 +344,19 @@ public class PaceSettingsApplication extends Application implements
 		}
 		
 		return mdbDatasourcesView;
+	}
+	
+	public RDBDatasourcesView getRdbDatasourcesView() {
+		
+		if ( rdbDatasourcesView == null ) {
+			
+			rdbDatasourceForm = new RDBDatasourceForm(this);
+			rdbDatasourceTable = new RDBDatasourceTable(this);
+			rdbDatasourcesView = new RDBDatasourcesView(this, rdbDatasourceTable, rdbDatasourceForm);
+			
+		}
+		
+		return rdbDatasourcesView;		
 	}
 
 	/**
@@ -314,7 +379,20 @@ public class PaceSettingsApplication extends Application implements
 	public MDBDatasourceTable getMdbDatasourceTable() {
 		return mdbDatasourceTable;
 	}
-	
-	
 
+	/**
+	 * @return the rdbDatasourceContainer
+	 */
+	public RDBDatasourceContainer getRdbDatasourceContainer() {
+		return rdbDatasourceContainer;
+	}
+
+	/**
+	 * @return the rdbDatasourceFieldFactory
+	 */
+	public RDBDatasourceFieldFactory getRdbDatasourceFieldFactory() {
+		return rdbDatasourceFieldFactory;
+	}
+	
+	
 }

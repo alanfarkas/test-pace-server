@@ -21,7 +21,6 @@ public class MDBDatasourceContainer extends BeanItemContainer<PafConnectionProps
 	private static final long serialVersionUID = -1411854235540811035L;
 	
 	private static final Logger logger = Logger.getLogger(MDBDatasourceContainer.class);
-
 	
 	/**
 	 * Creates container
@@ -46,7 +45,7 @@ public class MDBDatasourceContainer extends BeanItemContainer<PafConnectionProps
 			
 		}
 				
-		PaceSettingsDataService.setMDBSettings(pafConnectionPropsList);
+		PaceSettingsDataService.setMDBDatasources(pafConnectionPropsList);
 		
 		isSaved = true;
 		
@@ -62,7 +61,7 @@ public class MDBDatasourceContainer extends BeanItemContainer<PafConnectionProps
 		
 		try {
 			
-			data = PaceSettingsDataService.getMDBSettings();
+			data = PaceSettingsDataService.getMDBDatasources();
 
 		} catch (PafConfigFileNotFoundException e) {
 			logger.info(e);

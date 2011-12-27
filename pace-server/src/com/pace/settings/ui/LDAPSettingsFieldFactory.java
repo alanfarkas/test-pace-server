@@ -3,14 +3,10 @@
  */
 package com.pace.settings.ui;
 
-import java.util.List;
-
 import com.vaadin.data.Item;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.validator.IntegerValidator;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 
 /**
@@ -98,32 +94,10 @@ public class LDAPSettingsFieldFactory extends PaceSettingsDefaultFieldFactory {
 			TextField tf = (TextField) field;
 			
 			tf.addValidator(new IntegerValidator(tf.getCaption() + " must be a whole number."));
+			
 		} else if ( propertyId.equals(NET_BIOS_NAMES_LIST)) {
-			
-			/*netBiosNameTable.setCaption(captionMap.get(NET_BIOS_NAMES));
-			netBiosNameTable.setRequired(requiredFieldSet.contains(NET_BIOS_NAMES));
-			netBiosNameTable.setSelectable(true);
-			netBiosNameTable.setImmediate(true);
-			netBiosNameTable.addContainerProperty("Key", String.class, null);
-			netBiosNameTable.addContainerProperty("Value", String.class, null);*/
-			//netBiosTableTable.setData(item.getItemProperty(propertyId));
-			
-			//BeanItemContainer<List> bic = new BeanItemContainer(List.class); 
-			
-			//netBiosNameTable.setContainerDataSource(bic);
-			
-			//netBiosTableTable.setWidth(PaceSettingsConstants.COMMON_FIELD_WIDTH);
-			
-			/*for (String key : ((Map) item.getItemProperty(propertyId)).get ) ) {
-				
-			}*/
-			//if ( )
-			//netBiosTableTable.setContainerDataSource(newDataSource)
-			//netBiosTableTable.setData(data);
-			
-			String caption = captionMap.get(NET_BIOS_NAMES_LIST);
-			
-			netBiosNameTable.setCaption(caption);
+									
+			netBiosNameTable.setCaption(captionMap.get(NET_BIOS_NAMES_LIST));
 			
 			return netBiosNameTable;
 			

@@ -4,7 +4,7 @@
 package com.pace.settings.ui;
 
 import com.pace.base.PafConfigFileNotFoundException;
-import com.pace.server.PafLDAPSettings;
+import com.pace.base.server.PafLDAPSettings;
 import com.pace.settings.PaceSettingsApplication;
 import com.pace.settings.data.PaceSettingsDataService;
 import com.vaadin.data.util.BeanItem;
