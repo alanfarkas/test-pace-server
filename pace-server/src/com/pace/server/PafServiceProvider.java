@@ -3009,7 +3009,6 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 	 * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
 	 * @throws PafSoapException the paf soap exception
 	 */
-	@SuppressWarnings("unused") //$NON-NLS-1$
 	public PafMdbPropsResponse getMdbProps(PafMdbPropsRequest mdbRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException {
 		PafMdbPropsResponse resp = new PafMdbPropsResponse();
 		boolean success = false;
