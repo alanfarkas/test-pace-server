@@ -1,4 +1,4 @@
-<com.pace.server.PafLDAPSettings>
+<PafLDAPSettings>
   <ldapProviderName>ADG</ldapProviderName>
   <securityPrincipal>CORP\ADG</securityPrincipal>
   <securityCredentials></securityCredentials>
@@ -19,29 +19,17 @@
   <sslKeyStore>c:/Program Files (x86)/Java/jdk1.5.0_08/jre/lib/security/cacerts</sslKeyStore>
   <netBiosNames>
     <entry>
-      <string>3</string>
-      <string>4</string>
+      <string>CORP</string>
+      <string>corp.thinkfast.com</string>
     </entry>
     <entry>
-      <string>66</string>
-      <string>66</string>
+      <string>ADG</string>
+      <string>adg.com</string>
     </entry>
     <entry>
-      <string>2</string>
-      <string>2</string>
-    </entry>
-    <entry>
-      <string>1</string>
-      <string>1</string>
-    </entry>
-    <entry>
-      <string>0</string>
-      <string>0</string>
-    </entry>
-    <entry>
-      <string>55</string>
-      <string>55</string>
+      <string>CHILD1</string>
+      <string>child1.adg.com</string>
     </entry>
   </netBiosNames>
   <connectTimeout>30000</connectTimeout>
-</com.pace.server.PafLDAPSettings>
+</PafLDAPSettings>

@@ -1,0 +1,184 @@
+<list>
+  <com.pace.base.db.RdbProps>
+    <name>pafDB</name>
+    <hibernateProperties>
+      <property name="hibernate.connection.username" value="PAFSYS"/>
+      <property name="hibernate.connection.password" value="PAFSYS"/>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
+      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/..\data\pafdb"/>
+      <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
+      <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
+    </hibernateProperties>
+    <mappingResources>
+      <string>com/pace/server/maps/PafBaseMember.hbm.xml</string>
+      <string>com/pace/server/maps/PafBaseTree.hbm.xml</string>
+      <string>com/pace/server/maps/PafAttributeTree.hbm.xml</string>
+      <string>com/pace/server/maps/PafAttributeMember.hbm.xml</string>
+    </mappingResources>
+    <hibernatePropertyList>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.username</key>
+        <value>PAFSYS</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.password</key>
+        <value>PAFSYS</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.dialect</key>
+        <value>org.hibernate.dialect.DerbyDialect</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.url</key>
+        <value>jdbc:derby://localhost:1527/..\data\pafdb</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.bytecode.use_reflection_optimizer</key>
+        <value>false</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.driver_class</key>
+        <value>org.apache.derby.jdbc.ClientDriver</value>
+      </com.pace.base.misc.KeyValue>
+    </hibernatePropertyList>
+  </com.pace.base.db.RdbProps>
+  <com.pace.base.db.RdbProps>
+    <name>pafClientCache</name>
+    <hibernateProperties>
+      <property name="hibernate.connection.username" value="pafsys"/>
+      <property name="hibernate.use_identifier_rollback" value="true"/>
+      <property name="hibernate.connection.password" value="pafsys123"/>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/..\data\pafclientcache"/>
+      <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
+      <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
+    </hibernateProperties>
+    <mappingResources>
+      <string>com/pace/server/maps/Application.hbm.xml</string>
+      <string>com/pace/server/maps/CellNote.hbm.xml</string>
+      <string>com/pace/server/maps/DataSource.hbm.xml</string>
+      <string>com/pace/server/maps/Dimension.hbm.xml</string>
+      <string>com/pace/server/maps/CellNoteMapping.hbm.xml</string>
+      <string>com/pace/server/maps/MemberTagCoord.hbm.xml</string>
+      <string>com/pace/server/maps/MemberTagData.hbm.xml</string>
+      <string>com/pace/server/maps/MemberTagId.hbm.xml</string>
+      <string>com/pace/server/maps/SecurityGroups.hbm.xml</string>
+    </mappingResources>
+    <hibernatePropertyList>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.username</key>
+        <value>pafsys</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.use_identifier_rollback</key>
+        <value>true</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.password</key>
+        <value>pafsys123</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.dialect</key>
+        <value>org.hibernate.dialect.DerbyDialect</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.url</key>
+        <value>jdbc:derby://localhost:1527/..\data\pafclientcache</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.show_sql</key>
+        <value>false</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.bytecode.use_reflection_optimizer</key>
+        <value>false</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.driver_class</key>
+        <value>org.apache.derby.jdbc.ClientDriver</value>
+      </com.pace.base.misc.KeyValue>
+    </hibernatePropertyList>
+  </com.pace.base.db.RdbProps>
+  <com.pace.base.db.RdbProps>
+    <name>pafExtAttr</name>
+    <hibernateProperties>
+      <property name="hibernate.connection.username" value="PAFSYS"/>
+      <property name="hibernate.connection.password" value="PAFSYS"/>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
+      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/..\data\pafextattr"/>
+      <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
+      <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
+    </hibernateProperties>
+    <mappingResources>
+      <string>com/pace/server/maps/PafAttributeTree.hbm.xml</string>
+      <string>com/pace/server/maps/PafAttributeMember.hbm.xml</string>
+    </mappingResources>
+    <hibernatePropertyList>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.username</key>
+        <value>PAFSYS</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.password</key>
+        <value>PAFSYS</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.dialect</key>
+        <value>org.hibernate.dialect.DerbyDialect</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.url</key>
+        <value>jdbc:derby://localhost:1527/..\data\pafextattr</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.bytecode.use_reflection_optimizer</key>
+        <value>false</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.driver_class</key>
+        <value>org.apache.derby.jdbc.ClientDriver</value>
+      </com.pace.base.misc.KeyValue>
+    </hibernatePropertyList>
+  </com.pace.base.db.RdbProps>
+  <com.pace.base.db.RdbProps>
+    <name>pafSecurity</name>
+    <hibernateProperties>
+      <property name="hibernate.connection.username" value="pafsys"/>
+      <property name="hibernate.connection.password" value="pafsys123"/>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
+      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/..\data\pafsecurity;bootPassword=xIdk82723Sdfke83"/>
+      <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
+      <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
+    </hibernateProperties>
+    <mappingResources>
+      <string>com/pace/server/maps/PafUserDef.hbm.xml</string>
+    </mappingResources>
+    <hibernatePropertyList>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.username</key>
+        <value>pafsys</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.password</key>
+        <value>pafsys123</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.dialect</key>
+        <value>org.hibernate.dialect.DerbyDialect</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.url</key>
+        <value>jdbc:derby://localhost:1527/..\data\pafsecurity;bootPassword=xIdk82723Sdfke83</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.bytecode.use_reflection_optimizer</key>
+        <value>false</value>
+      </com.pace.base.misc.KeyValue>
+      <com.pace.base.misc.KeyValue>
+        <key>hibernate.connection.driver_class</key>
+        <value>org.apache.derby.jdbc.ClientDriver</value>
+      </com.pace.base.misc.KeyValue>
+    </hibernatePropertyList>
+  </com.pace.base.db.RdbProps>
+</list>

@@ -1,4 +1,4 @@
-<com.pace.server.ServerSettings>
+<ServerSettings>
   <debugMode>false</debugMode>
   <evaluationStepLogging>false</evaluationStepLogging>
   <changedCellLogging>false</changedCellLogging>
@@ -10,6 +10,8 @@
   <calcScriptTimeout>30</calcScriptTimeout>
   <enableServerPasswordReset>false</enableServerPasswordReset>
   <enableClientPasswordReset>false</enableClientPasswordReset>
+  <minPasswordLength>6</minPasswordLength>
+  <maxPasswordLength>16</maxPasswordLength>
   <autoConvertProject>true</autoConvertProject>
   <enableRounding>false</enableRounding>
   <clearCellNotes>false</clearCellNotes>
@@ -53,4 +55,4 @@
   <clientUpdateUrl>http://localhost:8080/installs/client/setup.exe</clientUpdateUrl>
   <clientMinVersion>2.8.1.1</clientMinVersion>
   <pafServerHome>..\..\</pafServerHome>
-</com.pace.server.ServerSettings>
+</ServerSettings>
