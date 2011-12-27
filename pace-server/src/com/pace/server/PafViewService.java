@@ -1634,7 +1634,7 @@ public class PafViewService {
 						
 						// /get time axis
 						PafAxis timeAxis = section.getAxis(mdbDef.getTimeDim());
-//----------- // simplify logic to use client state collection
+//----------- //TODO TTN-1595 simplify logic to use client state collection
 						// if the dimension map contains year dimension
 						if (mappedDimensions.containsKey(yearDim)) {
 
@@ -1698,7 +1698,7 @@ public class PafViewService {
 									timeMember = getMember(timeDim, section, rowTuple, colTuple);
 
 									// if time member is in locked Set of times
-									Map<String, Set<String>> lockedPeriodMap = PafAppService.getInstance().getLockedPeriodMap(clientState);
+									Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
 									Set<String> lockedTimeSet = lockedPeriodMap.get(yearMember);
 									if (lockedTimeSet.contains(timeMember)) {
 

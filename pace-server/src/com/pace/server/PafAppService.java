@@ -46,6 +46,7 @@ import com.pace.base.app.VersionType;
 import com.pace.base.comm.ApplicationState;
 import com.pace.base.comm.CustomMenuDef;
 import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDimMember;
@@ -580,7 +581,8 @@ public class PafAppService {
 						Set<String> lockedPeriods = new HashSet<String>();
 						if (year.equalsIgnoreCase(elapsedYear)) {
 							// Current year - add only elapsed periods
-							lockedPeriods.addAll(PafAppService.getInstance().getLockedList(clientState));
+							lockedPeriods.addAll(PafAppService.getInstance().getLockedList(clientState, true));
+							clientState.setLockedPeriods(lockedPeriods);  // Not the right place for this, but will do for now.
 						} else {
 							// Historical year - mark all periods as locked
 							lockedPeriods.addAll(Arrays.asList(uow.getDimMembers(timeDim)));
@@ -612,64 +614,6 @@ public class PafAppService {
 
 
 	/**
-	 * Create a map of elapsed periods by year
-	 * 
-	 * @param clientState Client State
-	 * @return Map of elapsed periods by year
-	 */
-	public Map<String, Set<String>> getLockedPeriodMap(PafClientState clientState) {
-		
-		Map<String, Set<String>> lockedPeriodMap = new HashMap<String, Set<String>>();
-		UnitOfWork uow = clientState.getUnitOfWork();
-		boolean isCalcElapsedPeriods = clientState.getPlannerConfig().isCalcElapsedPeriods();
-		PafApplicationDef pafApp = clientState.getApp(); 
-		String elapsedYear = pafApp.getCurrentYear();
-		String timeDim = pafApp.getMdbDef().getTimeDim();
-		String yearDim = pafApp.getMdbDef().getYearDim();
-		
-		
-		// Initialize map
-		String[] years = uow.getDimMembers(yearDim);
-			for (String year : years) {
-			lockedPeriodMap.put(year, new HashSet<String>());
-		}
-		
-		// Set the locked periods by year. This step will be skipped if
-		// elapsed periods are to be calculated.
-		if (!isCalcElapsedPeriods) {
-			
-			String currentVersion = clientState.getPlanningVersion().getName();
-			Map<String, VersionType> versionsTypeMap = PafMetaData.getVersionTypeMap();
-			VersionType versionType = versionsTypeMap.get(currentVersion);
-			boolean isYearElapsed = false;
-			
-			// Processing years in backwards order makes it easier to determine 
-			// which years are elapsed.
-			for (int i = years.length -1; i >=0; i--) {
-				String year = years[i];
-				if (year.equalsIgnoreCase(elapsedYear)) {
-					isYearElapsed = true;
-				}
-				if (versionType.equals(VersionType.ForwardPlannable)) {
-					if (isYearElapsed) {
-						Set<String> lockedPeriods = new HashSet<String>();
-						if (year.equalsIgnoreCase(elapsedYear)) {
-							// Current year - add only elapsed periods
-							lockedPeriods.addAll(getLockedList(clientState));
-						} else {
-							// Historical year - mark all periods as locked
-							lockedPeriods.addAll(Arrays.asList(uow.getDimMembers(timeDim)));
-						}
-						lockedPeriodMap.put(year, lockedPeriods);
-					}
-				
-				}
-			}
-		}
-		return lockedPeriodMap;
-	}
-    
-	/**
 	 * Create a set of locked time horizon periods
 	 * 
 	 * @param clientState Client state
@@ -677,7 +621,7 @@ public class PafAppService {
 	 * 
 	 * @return List of time horizon periods
 	 */
-	public Set<String> getLockedTimeHorizonPeriods(PafClientState clientState, Map<String, Set<String>> lockedPeriodMap) {
+	public Set<String> getLockedTimeHorizPeriods(PafClientState clientState, Map<String, Set<String>> lockedPeriodMap) {
 		
 		Set<String> lockedTimHorizPeriods = new HashSet<String>();
 		final PafDimTree timeHorizTree = clientState.getTimeHorizonTree();
@@ -710,22 +654,38 @@ public class PafAppService {
 		
 	}
 	
-    public Set<String> getLockedList(PafClientState clientState) {
+    /**
+     * Returns the set of locked level 0 and upper-level periods in the 
+     * time tree.
+     * 
+     * @param clientState Client state
+     * @param useTimeTree Flag that indicates if time horizon tree should be used, instead of the time horizon tree  
+     * 
+     * @return The set of locked level 0 and upper-level periods in the time
+     */
+    public Set<String> getLockedList(PafClientState clientState, boolean useTimeTree) {
 
 		Set<String> lockedPeriods = clientState.getLockedPeriods();
 
-		if (lockedPeriods == null) {
+		if (lockedPeriods == null) {	
 			
 			lockedPeriods = new HashSet<String>();
-
 			PafApplicationDef pafApp = clientState.getApp();
+			String lastPeriod = pafApp.getLastPeriod();
+			String currentYear = pafApp.getCurrentYear();
+			String elapsedTimeMember = null;
+			PafDimTree timeTree = null;
+			
+			if (useTimeTree) {
+				String timeDim = pafApp.getMdbDef().getTimeDim();
+				timeTree = dataService.getBaseTree(timeDim);
+				elapsedTimeMember = lastPeriod;
+			} else {
+				timeTree = clientState.getTimeHorizonTree();
+				elapsedTimeMember = TimeSlice.buildTimeHorizonCoord(lastPeriod, currentYear);
+			}
 
-			String elapsedTimeMember = pafApp.getLastPeriod();
-
-			PafBaseTree periodTree = PafDataService.getInstance().getBaseTree(pafApp.getMdbDef().getTimeDim());
-
-			List<PafDimMember> members = periodTree.getDescendants(periodTree
-					.getRootNode().getKey(), LevelGenType.LEVEL, 0);
+			List<PafDimMember> members = timeTree.getDescendants(timeTree.getRootNode().getKey(), LevelGenType.LEVEL, 0);
 
 			PafDimMember elapsedMember = null;
 
@@ -733,7 +693,7 @@ public class PafAppService {
 			// Period
 			for (PafDimMember member : members) {
 
-				logger.info(Messages.getString("PafAppService.2") + member.getKey() + Messages.getString("PafAppService.3") //$NON-NLS-1$ //$NON-NLS-2$
+				logger.debug(Messages.getString("PafAppService.2") + member.getKey() + Messages.getString("PafAppService.3") //$NON-NLS-1$ //$NON-NLS-2$
 						+ member.getParent().getKey());
 
 				lockedPeriods.add(member.getKey());
@@ -747,10 +707,6 @@ public class PafAppService {
 
 			resolveLockedMember(elapsedMember, lockedPeriods);
 
-			clientState.setLockedPeriods(lockedPeriods);
-
-//			logger.info(Messages.getString("PafAppService.4") + lockedPeriods); //$NON-NLS-1$
-			
 		}
 		
 		return lockedPeriods;

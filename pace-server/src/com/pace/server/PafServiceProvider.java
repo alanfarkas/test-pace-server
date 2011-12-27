@@ -219,9 +219,9 @@ public class PafServiceProvider implements IPafService {
 	private static Logger logger = Logger.getLogger(PafServiceProvider.class);
 	
 	/** The log audit. */
-	private static Logger logAudit = Logger.getLogger("pace.audit");
+	private static Logger logAudit = Logger.getLogger(Messages.getString("PafServiceProvider.12")); //$NON-NLS-1$
 	
-	private static Logger logPerf = Logger.getLogger("pace.performance");
+	private static Logger logPerf = Logger.getLogger(Messages.getString("PafServiceProvider.14")); //$NON-NLS-1$
 	
 	/** The clients. */
 	private static ConcurrentHashMap<String, PafClientState> clients = new ConcurrentHashMap<String, PafClientState>();
@@ -238,7 +238,7 @@ public class PafServiceProvider implements IPafService {
 				+ System.getProperty(Messages.getString("PafServiceProvider.4")) + Messages.getString("PafServiceProvider.5") //$NON-NLS-1$ //$NON-NLS-2$
 				+ System.getProperty(Messages.getString("PafServiceProvider.6")); //$NON-NLS-1$
 			
-				logger.info("Pace Service Provider Instantiated");
+				logger.info(Messages.getString("PafServiceProvider.21")); //$NON-NLS-1$
 			}
 			
 			
@@ -246,7 +246,7 @@ public class PafServiceProvider implements IPafService {
 		} catch (Throwable t) {
 			// don't do anything as all error handling should have been handled elsewhere
 			// otherwise the app server thinks something went wrong.
-			logger.fatal("Error initializing service framework");
+			logger.fatal(Messages.getString("PafServiceProvider.24")); //$NON-NLS-1$
 		}
 	}
 	
@@ -291,8 +291,8 @@ public class PafServiceProvider implements IPafService {
 			
 			// Verify client id is good
 			if ( ! clients.containsKey( viewRequest.getClientId() ) ) {
-				logger.error("ClientID not found: " + viewRequest.getClientId());
-				throw new PafSoapException(new PafException(Messages.getString("PafServiceProvider.InvalidClientIdReInit"), PafErrSeverity.Error));			
+				logger.error(Messages.getString("PafServiceProvider.25") + viewRequest.getClientId()); //$NON-NLS-1$
+				throw new PafSoapException(new PafException(Messages.getString(Messages.getString("PafServiceProvider.31")), PafErrSeverity.Error));			 //$NON-NLS-1$
 			}		
 			
 			
@@ -323,7 +323,7 @@ public class PafServiceProvider implements IPafService {
 				compressedView = pf.clone();
 //				logger.info(LogUtil.timedStep("View Cloned...", stepTime));  
 			} catch (CloneNotSupportedException ex) {
-				String errMsg = "Error encountered while cloning view";
+				String errMsg = Messages.getString("PafServiceProvider.34"); //$NON-NLS-1$
 				logger.error(errMsg);
 				throw new PafException(errMsg, PafErrSeverity.Error);
 			}
@@ -334,7 +334,7 @@ public class PafServiceProvider implements IPafService {
 					try {
 						viewSection.compressData();
 					} catch (IOException e) {
-						String errMsg = "Error encountered while compressing view section";
+						String errMsg = Messages.getString("PafServiceProvider.35"); //$NON-NLS-1$
 						logger.error(errMsg);
 						throw new PafException(errMsg, PafErrSeverity.Error);
 					}
@@ -445,7 +445,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			
 			// check for app service to have started.
 			if (appService == null) {
-				PafException pexFailedAppInit = new PafException("The Pace application failed to initialize.", PafErrSeverity.Fatal);
+				PafException pexFailedAppInit = new PafException(Messages.getString("PafServiceProvider.37"), PafErrSeverity.Fatal); //$NON-NLS-1$
 				PafErrHandler.handleException(pexFailedAppInit);
 				throw pexFailedAppInit.getPafSoapException();
 			}
@@ -556,8 +556,8 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			
 			// Verify client id is good
 			if ( ! clients.containsKey( clientId ) ) {
-				logger.error("ClientID not found: " + clientId);
-				throw new PafSoapException(new PafException(Messages.getString("PafServiceProvider.InvalidClientIdReInit"), PafErrSeverity.Error));			
+				logger.error(Messages.getString("PafServiceProvider.39") + clientId); //$NON-NLS-1$
+				throw new PafSoapException(new PafException(Messages.getString(Messages.getString("PafServiceProvider.40")), PafErrSeverity.Error));			 //$NON-NLS-1$
 			}				
 
 			//Reset the client state to the state it is in after ClientInit
@@ -850,8 +850,14 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			clientState.setUowTrees(treeSet);
 			
 			// Create locked period collections (TTN-1595)
+//			clientState.setLockedPeriods(appService.getLockedList(clientState, true));
 			clientState.setLockedPeriodMap(appService.createLockedPeriodMap(clientState));
 			clientState.setLockedTimeHorizPeriods(appService.createLockedTimeHorizPeriods(clientState));
+			Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
+			for (String year : lockedPeriodMap.keySet()) {
+				Set<String> lockedPeriods = lockedPeriodMap.get(year);
+				logger.info(Messages.getString("PafServiceProvider.48") + year + Messages.getString("PafServiceProvider.49") + lockedPeriods); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			
 
 			// Create member index lists on each dimension - used to sort allocation
@@ -1537,8 +1543,8 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			
 			// Verify client id is good
 			if ( ! clients.containsKey( evalRequest.getClientId() ) ) {
-				logger.error("ClientID not found: " + evalRequest.getClientId());
-				throw new PafSoapException(new PafException(Messages.getString("PafServiceProvider.InvalidClientIdReInit"), PafErrSeverity.Error));			
+				logger.error(Messages.getString("PafServiceProvider.50") + evalRequest.getClientId()); //$NON-NLS-1$
+				throw new PafSoapException(new PafException(Messages.getString(Messages.getString("PafServiceProvider.51")), PafErrSeverity.Error));			 //$NON-NLS-1$
 			}		
 			
 			// Get client state
@@ -1550,8 +1556,8 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			//dataSlice = dataService.evaluateView(evalRequest, clientState);
 			if (logAudit.isInfoEnabled() && evalRequest.getChangedCells() != null && evalRequest.getChangedCells().getCompressedData() != null) {
 				logAudit.info(
-						"User: " + clientState.getClientId() + 
-						" changed cells " + evalRequest.getChangedCells().toString());
+						Messages.getString("PafServiceProvider.53") + clientState.getClientId() +  //$NON-NLS-1$
+						Messages.getString("PafServiceProvider.56") + evalRequest.getChangedCells().toString()); //$NON-NLS-1$
 			}
 			
 			
@@ -2003,11 +2009,11 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		//if succesfully removed uow and remove client id form clients
 		if ( isSuccessful ) {
 			
-			logger.info(Messages.getString("PafServiceProvider.SuccessEndPlanSession"));
+			logger.info(Messages.getString(Messages.getString("PafServiceProvider.57"))); //$NON-NLS-1$
 			
 		} else {
 			
-			logger.info(Messages.getString("PafServiceProvider.FailEndPlanSession"));
+			logger.info(Messages.getString(Messages.getString("PafServiceProvider.60"))); //$NON-NLS-1$
 			
 		}
 		
@@ -2372,7 +2378,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			List<String> invalidUserList = new ArrayList<String>();
 			for (String domain : invalidDomainUsers.keySet()){
 				for(String user : invalidDomainUsers.get(domain)){
-					invalidUserList.add(user + "@" + domain);
+					invalidUserList.add(user + Messages.getString("PafServiceProvider.63") + domain); //$NON-NLS-1$
 				}
 			}
 
@@ -2482,7 +2488,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				try {
 					pafUserDef = (PafUserDef) pafUserDef.clone();
 				} catch (CloneNotSupportedException e1) {
-					logger.warn("Couldn't clone pafUserDef.");
+					logger.warn(Messages.getString("PafServiceProvider.64")); //$NON-NLS-1$
 				}
 				
 				//encrypt email
@@ -2493,7 +2499,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 					}
 				}
 		  		catch(Exception e){
-		  			email = "";
+		  			email = Messages.getString("PafServiceProvider.65"); //$NON-NLS-1$
 	    			logger.error(e.getMessage());
 	    		}
 				pafUserDef.setEmail(email);
@@ -2506,7 +2512,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 					}
 				}
 		  		catch(Exception e){
-		  			firstName = "";
+		  			firstName = Messages.getString("PafServiceProvider.66"); //$NON-NLS-1$
 	    			logger.error(e.getMessage());
 	    		}
 				pafUserDef.setFirstName(firstName);
@@ -2519,7 +2525,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 					}
 				}
 		  		catch(Exception e){
-		  			lastName = "";
+		  			lastName = Messages.getString("PafServiceProvider.67"); //$NON-NLS-1$
 	    			logger.error(e.getMessage());
 	    		}
 				pafUserDef.setLastName(lastName);
@@ -2532,11 +2538,11 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 							password = AESEncryptionUtil.encrypt(password, generatedIV);
 						}
 					}else{
-						password = "";
+						password = Messages.getString("PafServiceProvider.68"); //$NON-NLS-1$
 					}
 				}
 		  		catch(Exception e){
-		  			password = "";
+		  			password = Messages.getString("PafServiceProvider.69"); //$NON-NLS-1$
 	    			logger.error(e.getMessage());
 	    		}
 				pafUserDef.setPassword(password);
@@ -2549,7 +2555,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 					}
 				}
 		  		catch(Exception e){
-		  			userName = "";
+		  			userName = Messages.getString("PafServiceProvider.70"); //$NON-NLS-1$
 	    			logger.error(e.getMessage());
 	    		}
 				pafUserDef.setUserName(userName);
@@ -2582,7 +2588,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 					}
 				}
 				
-				String app = "";
+				String app = Messages.getString("PafServiceProvider.71"); //$NON-NLS-1$
 				boolean isSuccess;
 				if (paceGroupRequest.getApplication() != null){
 					app = paceGroupRequest.getApplication();
@@ -3299,7 +3305,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 							// De-tokenize the expressions
 							for(PafDimSpec pafDimSpec : nonHierDimSpecs){
 								if (pafDimSpec.getExpressionList() == null || pafDimSpec.getExpressionList()[0].length() == 0){
-									throw new PafException("Invalid Data Filter Spec Expression for " + pafDimSpec.getDimension() + " .", PafErrSeverity.Error);
+									throw new PafException(Messages.getString("PafServiceProvider.72") + pafDimSpec.getDimension() + Messages.getString("PafServiceProvider.73"), PafErrSeverity.Error); //$NON-NLS-1$ //$NON-NLS-2$
 								}
 								
 								if (pafDimSpec.getExpressionList()[0].contains(com.pace.base.PafBaseConstants.UOW_ROOT)){
@@ -3982,7 +3988,7 @@ public PafGetNotesResponse getCellNotes(
 
 				// Import member tag data
 				PafMemberTagManager mtManager = PafMemberTagManager.getInstance();
-				logger.info("Importing member tag data...");
+				logger.info(Messages.getString("PafServiceProvider.74")); //$NON-NLS-1$
 				mtManager.importMemberTagData(importMemberTags);
 				response.setSuccess(true);
 			}			
@@ -4124,7 +4130,7 @@ public PafGetNotesResponse getCellNotes(
 						
 			if ( clients != null && clients.containsKey(clientId) ) {
 				
-				logger.info("Closing client connection for client id "+ clientId +".");
+				logger.info(Messages.getString("PafServiceProvider.75")+ clientId +Messages.getString("PafServiceProvider.76")); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				clients.remove(clientId);
 				
@@ -4179,13 +4185,13 @@ public PafGetNotesResponse getCellNotes(
 
 	   Cookie cookies[] = req.getCookies();
 	   if (cookies != null) {
-		   logger.debug("Listing Cookies in Session (" + clientId + ")");		   
+		   logger.debug(Messages.getString("PafServiceProvider.77") + clientId + Messages.getString("PafServiceProvider.78"));		    //$NON-NLS-1$ //$NON-NLS-2$
 		   for (Cookie c : cookies) {
-			   logger.debug( c.getName() + ":" + c.getValue() );
+			   logger.debug( c.getName() + Messages.getString("PafServiceProvider.79") + c.getValue() ); //$NON-NLS-1$
 		   }
 	   }
 	   else {
-		   logger.debug("Cookies are null in session");
+		   logger.debug(Messages.getString("PafServiceProvider.80")); //$NON-NLS-1$
 	   }		
 	}
 
@@ -4213,7 +4219,7 @@ public PafGetNotesResponse getCellNotes(
 			throws RemoteException, PafSoapException {
 
 		
-		String reqAppId="Unintialized";
+		String reqAppId=Messages.getString("PafServiceProvider.81"); //$NON-NLS-1$
 	
 		PafSuccessResponse psr = null;
 		
@@ -4231,7 +4237,7 @@ public PafGetNotesResponse getCellNotes(
 			
 			PafErrHandler.handleException(ex, PafErrSeverity.Error);
 			psr = new PafSuccessResponse(false);
-			String s = String.format("Error loading application [%s]", reqAppId);
+			String s = String.format(Messages.getString("PafServiceProvider.82"), reqAppId); //$NON-NLS-1$
 			psr.addException(ex);
 			psr.setResponseMsg( s + ex.getMessage() );
 		}
@@ -4393,7 +4399,7 @@ public PafGetNotesResponse getCellNotes(
 	public PafSuccessResponse startApplication(StartApplicationRequest appReq)
 			throws RemoteException, PafSoapException {
 		
-		String reqAppId="Unintialized";
+		String reqAppId=Messages.getString("PafServiceProvider.83"); //$NON-NLS-1$
 	
 		PafSuccessResponse psr = null;
 		
@@ -4413,7 +4419,7 @@ public PafGetNotesResponse getCellNotes(
 			
 			PafErrHandler.handleException(ex, PafErrSeverity.Error);
 			psr = new PafSuccessResponse(false);
-			String s = String.format("Error starting application [%s]", reqAppId);
+			String s = String.format(Messages.getString("PafServiceProvider.84"), reqAppId); //$NON-NLS-1$
 			psr.addException(ex);
 			psr.setResponseMsg( s + ex.getMessage() );
 		}
