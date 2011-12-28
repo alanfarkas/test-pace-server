@@ -1057,7 +1057,7 @@ public class PafDataService {
 		logger.info(LogUtil.timedStep(stepDesc, startTime));
 
 		// Get data slice corresponding to this view section
-		dataSlice = dataCache.getDataSlice(sliceParms);
+		dataSlice = dataCache.getDataSlice(sliceParms, clientState.getInvalidTimeSlices());
 
 		if (compressData == true){
 			// compress slice for return.

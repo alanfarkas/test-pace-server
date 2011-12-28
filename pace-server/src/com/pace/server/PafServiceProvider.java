@@ -89,6 +89,7 @@ import com.pace.base.comm.UploadAppResponse;
 import com.pace.base.comm.UserFilterSpec;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.db.SecurityGroup;
 import com.pace.base.db.cellnotes.CellNote;
 import com.pace.base.db.cellnotes.CellNotesInformation;
@@ -850,10 +851,13 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			clientState.setUowTrees(treeSet);
 			
 			// Create locked period collections (TTN-1595)
-//			clientState.setLockedPeriods(appService.getLockedList(clientState, true));
-			clientState.setLockedPeriodMap(appService.createLockedPeriodMap(clientState));
-			clientState.setLockedTimeHorizPeriods(appService.createLockedTimeHorizPeriods(clientState));
-			Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
+			Set<TimeSlice> lockedTimeSlices = new HashSet<TimeSlice>(), invalidTimeSlices = new HashSet<TimeSlice>();
+			Map<String, Set<String>> lockedPeriodMap = new HashMap<String, Set<String>>();	
+			appService.createLockedPeriodCollections(clientState, lockedTimeSlices, invalidTimeSlices, lockedPeriodMap);
+			clientState.setLockedTimeSlices(lockedTimeSlices);
+			clientState.setInvalidTimeSlices(invalidTimeSlices);
+			clientState.setLockedPeriodMap(lockedPeriodMap);
+			clientState.setLockedPeriods(appService.getLockedList(clientState, true));
 			for (String year : lockedPeriodMap.keySet()) {
 				Set<String> lockedPeriods = lockedPeriodMap.get(year);
 				logger.info(Messages.getString("PafServiceProvider.48") + year + Messages.getString("PafServiceProvider.49") + lockedPeriods); //$NON-NLS-1$ //$NON-NLS-2$

@@ -105,9 +105,9 @@ public class PafDataCache implements IPafDataCache {
 	private Map<String, Integer>[] memberIndexMap = null;				// Resolves member name to an index (currently only
 																		// 		used to lookup Measures and Time dimension members)
 	private String[] planVersions = null; 								// Plan version 
-//	private Set<String> lockedPeriods = null;							// Locked planning periods
 	private Map<String, Set<String>> lockedPeriodMap = null; 			// Locked planning periods by year
-	private Set<String> lockedTimeHorizPeriods = null; 					// Locked time horizon periods
+	private Set<TimeSlice> lockedTimeSlices = null; 					// Locked time slices (time slice holds both period & year and period/year time coords)
+	private Set<TimeSlice> invalidTimeSlices = null; 					// Potential time slices that don't exist in current uow
 	private PafDataCacheCells changedCells = new PafDataCacheCells();	// Optionally tracks changed cells
 	private PafApplicationDef appDef = null;
 	private PafMVS pafMVS = null;
@@ -159,7 +159,8 @@ public class PafDataCache implements IPafDataCache {
 		dimTrees = clientState.getUowTrees();
 		mdbBaseTrees = clientState.getMdbBaseTrees();
 		lockedPeriodMap = clientState.getLockedPeriodMap();
-		lockedTimeHorizPeriods = clientState.getLockedTimeHorizPeriods();
+		lockedTimeSlices = clientState.getLockedTimeSlices();
+		invalidTimeSlices = clientState.getInvalidTimeSlices();
 
 
 		// Set dimension properties
@@ -264,6 +265,7 @@ public class PafDataCache implements IPafDataCache {
 		final List<String> mdbYears = mdbYearTree.getLowestMemberNames(mdbYearTree.getRootNode().getKey());
 		return mdbYears;
 	}
+
 
 	/**
 	 * @return the evalState
@@ -2888,6 +2890,14 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	/**
+	 * @return the lockedTimeSlices
+	 */
+	public Set<TimeSlice> getLockedTimeSlices() {
+		return lockedTimeSlices;
+	}
+
+
+	/**
 	 * Returns true if the data cache contains any locked periods
 	 * 
 	 * @return True if the data cache contains any locked periods
@@ -3408,14 +3418,33 @@ public class PafDataCache implements IPafDataCache {
 	 *  via other objects and processes outside of this method.
 	 *
 	 * @param parms Object containing required PafDataSlice parameters
-	 * @param dimSequence Dimension sequence for data cache intersections associated with the corresponding view section
 	 * 
 	 * @return Returns "Data Slice" - a subset of cells in the UowCache
 	 * @throws PafException
 	 */
 	public PafDataSlice getDataSlice(PafDataSliceParms parms) throws PafException {
+		return getDataSlice(parms, invalidTimeSlices);
+	}
+
+	/**
+	 * 	Get "data slice" using dimensional and member specifications
+	 *  defined in supplied parameter object. The "data slice"
+	 *  contains all of the cell values that are needed to populate
+	 *  a client view section. Meta-data is passed down to the client 
+	 *  via other objects and processes outside of this method.
+	 *
+	 *  Intersections with invalid time horizon intersections are 
+	 *  skipped.
+	 * @param parms Object containing required PafDataSlice parameters
+	 * @param invalidTimeHorizPeriods Invalid time horizon periods
+	 * 
+	 * @return Returns "Data Slice" - a subset of cells in the UowCache
+	 * @throws PafException
+	 */
+	public PafDataSlice getDataSlice(PafDataSliceParms parms, Set<TimeSlice> invalidTimeSlices) throws PafException {
 
 		boolean hasPageDimensions = false;
+		String timeDim = this.getTimeDim(), yearDim = this.getYearDim();
 		int cellCount = 0, cols = 0, rows = 0, sliceIndex = 0;
 		double[] dataSlice = null;
 		String[] rowDims = parms.getRowDimensions();
@@ -3471,6 +3500,14 @@ public class PafDataCache implements IPafDataCache {
 						cellIs.setCoordinate(colDims[i], colTuple[i]);
 					}
 	
+					// Skip any intersection containing an invalid time horizon period
+					if (invalidTimeSlices != null && invalidTimeSlices.size() > 0) {
+						TimeSlice timeSlice = new TimeSlice(cellIs.getCoordinate(timeDim),cellIs.getCoordinate(yearDim));
+						if (invalidTimeSlices.contains(timeSlice)) {
+							continue;
+						}
+					}
+
 					// Copy selected cell to data slice
 					try {
 						dataSlice[sliceIndex++] = getCellValue(cellIs);

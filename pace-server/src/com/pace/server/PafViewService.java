@@ -1471,7 +1471,7 @@ public class PafViewService {
 
 			// map dimensions to axis. key = dimensions name, value = actual
 			// axis obj
-			Map<String, PafAxis> mappedDimensions = mapDimensionsToAxis(section);
+//			Map<String, PafAxis> mappedDimensions = mapDimensionsToAxis(section);
 
 			Map<String, String> mappedDimsWithMembers = new HashMap<String, String>();
 
@@ -1580,13 +1580,13 @@ public class PafViewService {
 
 					// holds the order of the members based on server dimension
 					// order
-					String[] coordMemberOrder = new String[serverDimensionOrder.length];
+					String[] coords = new String[serverDimensionOrder.length];
 
 					int coordMemberIndex = 0;
 
 					// populate the members
 					for (String dimension : serverDimensionOrder) {
-						coordMemberOrder[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
+						coords[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
 					}
 
 					// if version is non plannable
@@ -1619,146 +1619,62 @@ public class PafViewService {
 						}
 
 						/*
-						 * if forward plannable, determine if member year is less
-						 * than or equal to elapsed year. if member year is less
-						 * than elapsed year, lock intersection. if member year-- /// PULL FROM CLIENT STATE PERIODS COLLECTION
-						 * is equal to elapsed year, compare time member with
-						 * elapsed time. if time member is less than or equal to
-						 * elapsed time, lock intersection.
+						 * if forward plannable, lock each tuple intersection
+						 * that contains a locked period (TTN-1595).
 						 */
 
 					} else if (versionType.equals(VersionType.ForwardPlannable)) {
 
-						String timeMember = null;
-						String yearMember = null;
-						
-						// /get time axis
-						PafAxis timeAxis = section.getAxis(mdbDef.getTimeDim());
-//----------- //TODO TTN-1595 simplify logic to use client state collection
-						// if the dimension map contains year dimension
-						if (mappedDimensions.containsKey(yearDim)) {
+						String timeMember = getMember(timeDim, section, rowTuple, colTuple);
+						String yearMember = getMember(yearDim, section, rowTuple, colTuple);
+						Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
+						Set<String> lockedPeriods = lockedPeriodMap.get(yearMember);
+						if (lockedPeriods.contains(timeMember)) {
 
-							// get year member
-							yearMember = getMember(yearDim, section, rowTuple, colTuple);
+							forwardPlannableList.add(new LockedCell(rowId, colId));
 
-							// get year member index from list of year members
-							int yearMemberIndex = listOfYearMembers.indexOf(yearMember);
-
-							// get elapsed year member index
-							int elapasedYearMemberIndex = listOfYearMembers.indexOf(elapsedYear);
-
-							// if year member index is less than elapsed year,
-							// lock
-							if (yearMemberIndex < elapasedYearMemberIndex) {
-
-								forwardPlannableList.add(new LockedCell(rowId, colId));
-
-								//only add the forward plannable intersections for planning version
-								if ( versionMember.equals(baseVersion)) {
-									
-									lockedForwardPlannableIntersectionsSet
-											.add(new Intersection(serverDimensionOrder, coordMemberOrder));
-								}
-								
-								// lock the tuple based on time axis. if time is
-								// on page, use
-								// primary formatting axis, if on col axis, lock
-								// column tuple
-								// if on row axis, lock row tuple
-								switch (timeAxis.getValue()) {
-								case PafAxis.PAGE:
-
-									switch (section.getPrimaryFormattingAxis()) {
-									case (PafAxis.COL):
-										colTuple.setPlannable(false);
-										break;
-									case (PafAxis.ROW):
-										rowTuple.setPlannable(false);
-										break;
-									}
-
-								case PafAxis.COL:
-
-									colTuple.setPlannable(false);
-									break;
-
-								case PafAxis.ROW:
-
-									rowTuple.setPlannable(false);
-									break;
-
-								}
-
-								// if year member and elapsed year =
-							} else if (yearMemberIndex == elapasedYearMemberIndex) {
-
-								if (mappedDimensions.containsKey(timeDim)) {
-
-									// get time member
-									timeMember = getMember(timeDim, section, rowTuple, colTuple);
-
-									// if time member is in locked Set of times
-									Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
-									Set<String> lockedTimeSet = lockedPeriodMap.get(yearMember);
-									if (lockedTimeSet.contains(timeMember)) {
-
-										// add to forward plannable list
-										forwardPlannableList.add(new LockedCell(rowId, colId));
-
-//										only add the forward plannable intersections for planning version
-										if ( versionMember.equals(baseVersion)) {
-										
-											// add to locked forward plannable
-											// intersection set
-											lockedForwardPlannableIntersectionsSet.add(new Intersection(serverDimensionOrder, coordMemberOrder));
-											
-										}
-
-										// lock the tuple based on time axis. if
-										// time is on page, use
-										// primary formatting axis, if on col
-										// axis, lock column tuple
-										// if on row axis, lock row tuple
-										switch (timeAxis.getValue()) {
-										case PafAxis.PAGE:
-
-											switch (section
-													.getPrimaryFormattingAxis()) {
-											case (PafAxis.COL):
-												colTuple.setPlannable(false);
-												break;
-											case (PafAxis.ROW):
-												rowTuple.setPlannable(false);
-											}
-
-											break;
-
-										case PafAxis.COL:
-
-											colTuple.setPlannable(false);
-											break;
-
-										case PafAxis.ROW:
-
-											rowTuple.setPlannable(false);
-											break;
-
-										}
-
-									}
-
-								}
+							//only add the forward plannable intersections for planning version
+							if ( versionMember.equals(baseVersion)) {
+								lockedForwardPlannableIntersectionsSet.add(new Intersection(serverDimensionOrder, coords));
 							}
 
-						}
+							// lock the tuple based on time axis. if time is
+							// on page, use primary formatting axis, if on
+							// col axis, lock column tuple. if on row axis, 
+							// lock row tuple.
+							PafAxis timeAxis = section.getAxis(mdbDef.getTimeDim());
+							switch (timeAxis.getValue()) {
+							case PafAxis.PAGE:
 
+								switch (section.getPrimaryFormattingAxis()) {
+								case (PafAxis.COL):
+									colTuple.setPlannable(false);
+								break;
+								case (PafAxis.ROW):
+									rowTuple.setPlannable(false);
+								break;
+								}
+
+							case PafAxis.COL:
+
+								colTuple.setPlannable(false);
+								break;
+
+							case PafAxis.ROW:
+
+								rowTuple.setPlannable(false);
+								break;
+
+							}
+						}
 					}
 				}
-
 			}
 
+
+
 			clientState.addLockedForwardPlannableInterMap(section.getName(), lockedForwardPlannableIntersectionsSet);
-						
+
 			section.setNotPlannableLockedCells(notPlannableList
 					.toArray(new LockedCell[0]));
 			section.setForwardPlannableLockedCell(forwardPlannableList
@@ -1769,13 +1685,13 @@ public class PafViewService {
 		return sections;
 	}
 
-	/**
-	 *  
-	 *  Lock non-plannable view section measure intersections
-	 * 
-	 * @param sections View section array
-	 * @param clientState 
-	 * @return Complex view section array
+/**
+ *  
+ *  Lock non-plannable view section measure intersections
+ * 
+ * @param sections View section array
+ * @param clientState 
+ * @return Complex view section array
 	 */
 	
 	private PafViewSection[] lockMeasureIntersections(PafViewSection[] sections, PafClientState clientState) {

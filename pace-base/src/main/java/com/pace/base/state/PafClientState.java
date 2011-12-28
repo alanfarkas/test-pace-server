@@ -39,6 +39,7 @@ import com.pace.base.comm.ClientInitRequest;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.IPafConnectionProps;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDimMember;
@@ -58,6 +59,7 @@ import com.pace.base.view.PafView;
  *
  */
 public class PafClientState implements IPafClientState {
+	
     private String clientId;
     private ClientInitRequest initRequest = null;
     private String clientLanguage;
@@ -87,9 +89,10 @@ public class PafClientState implements IPafClientState {
     private Map<String, List<String>> roleFilterSelections = new HashMap<String, List<String>>();
     private PafUserDef userDef;
     private Set<String> readOnlyMeasuresSet = null;
-	private Map <String, PafBaseTree> mdbBaseTrees = null;   
-	private Map <String, Set<String>> lockedPeriodMap = null;
-	private Set<String> lockedTimeHorizPeriods = null;
+	private Map<String, PafBaseTree> mdbBaseTrees = null;   
+	private Map<String, Set<String>> lockedPeriodMap = null;
+	private Set<TimeSlice> lockedTimeSlices = null;
+	private Set<TimeSlice> invalidTimeSlices = null;
     
     public MemberTreeSet getUowTrees() {
 		return uowTrees;
@@ -831,15 +834,29 @@ public class PafClientState implements IPafClientState {
 	/**
 	 * @return the lockedTimeHorizPeriods
 	 */
-	public Set<String> getLockedTimeHorizPeriods() {
-		return lockedTimeHorizPeriods;
+	public Set<TimeSlice> getLockedTimeSlices() {
+		return lockedTimeSlices;
 	}
 
 	/**
-	 * @param lockedTimeHorizPeriods the lockedTimeHorizPeriods to set
+	 * @param lockedTimeSlices the lockedTimeSlices to set
 	 */
-	public void setLockedTimeHorizPeriods(Set<String> lockedTimeHorizPeriods) {
-		this.lockedTimeHorizPeriods = lockedTimeHorizPeriods;
+	public void setLockedTimeSlices(Set<TimeSlice> lockedTimeSlices) {
+		this.lockedTimeSlices = lockedTimeSlices;
+	}
+
+	/**
+	 * @return the invalidTimeHorizPeriods
+	 */
+	public Set<TimeSlice> getInvalidTimeSlices() {
+		return invalidTimeSlices;
+	}
+
+	/**
+	 * @param invalidTimeSlices the invalidTimeSlices to set
+	 */
+	public void setInvalidTimeSlices(Set<TimeSlice> invalidTimeSlices) {
+		this.invalidTimeSlices = invalidTimeSlices;
 	}
 
 
