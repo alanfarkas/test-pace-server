@@ -24,8 +24,6 @@ public class RdbProps implements Serializable {
 	
 	private Properties hibernateProperties;
 	
-	private List<String> mappingResources;
-	
 	private transient List<KeyValue> hibernatePropertyList;
 	
 	public RdbProps() {
@@ -61,20 +59,6 @@ public class RdbProps implements Serializable {
 	}
 
 	/**
-	 * @return the mappingResources
-	 */
-	public List<String> getMappingResources() {
-		return mappingResources;
-	}
-
-	/**
-	 * @param mappingResources the mappingResources to set
-	 */
-	public void setMappingResources(List<String> mappingResources) {
-		this.mappingResources = mappingResources;
-	}
-
-	/**
 	 * @return the hibernatePropertyList
 	 */
 	public List<KeyValue> getHibernatePropertyList() {
@@ -101,12 +85,10 @@ public class RdbProps implements Serializable {
 	@Override
 	public String toString() {
 		return "RdbProps [name=" + name + ", hibernateProperties="
-				+ hibernateProperties + ", mappingResources="
-				+ mappingResources + ", hibernatePropertyList="
+				+ hibernateProperties + ", hibernatePropertyList="
 				+ hibernatePropertyList + "]";
 	}
 
-	
 	
 
 }

@@ -9,12 +9,6 @@
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
-    <mappingResources>
-      <string>com/pace/server/maps/PafBaseMember.hbm.xml</string>
-      <string>com/pace/server/maps/PafBaseTree.hbm.xml</string>
-      <string>com/pace/server/maps/PafAttributeTree.hbm.xml</string>
-      <string>com/pace/server/maps/PafAttributeMember.hbm.xml</string>
-    </mappingResources>
   </com.pace.base.db.RdbProps>
   <com.pace.base.db.RdbProps>
     <name>pafClientCache</name>
@@ -28,17 +22,6 @@
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
-    <mappingResources>
-      <string>com/pace/server/maps/Application.hbm.xml</string>
-      <string>com/pace/server/maps/CellNote.hbm.xml</string>
-      <string>com/pace/server/maps/DataSource.hbm.xml</string>
-      <string>com/pace/server/maps/Dimension.hbm.xml</string>
-      <string>com/pace/server/maps/CellNoteMapping.hbm.xml</string>
-      <string>com/pace/server/maps/MemberTagCoord.hbm.xml</string>
-      <string>com/pace/server/maps/MemberTagData.hbm.xml</string>
-      <string>com/pace/server/maps/MemberTagId.hbm.xml</string>
-      <string>com/pace/server/maps/SecurityGroups.hbm.xml</string>
-    </mappingResources>
   </com.pace.base.db.RdbProps>
   <com.pace.base.db.RdbProps>
     <name>pafExtAttr</name>
@@ -50,10 +33,6 @@
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
-    <mappingResources>
-      <string>com/pace/server/maps/PafAttributeTree.hbm.xml</string>
-      <string>com/pace/server/maps/PafAttributeMember.hbm.xml</string>
-    </mappingResources>
   </com.pace.base.db.RdbProps>
   <com.pace.base.db.RdbProps>
     <name>pafSecurity</name>
@@ -65,8 +44,5 @@
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
-    <mappingResources>
-      <string>com/pace/server/maps/PafUserDef.hbm.xml</string>
-    </mappingResources>
   </com.pace.base.db.RdbProps>
 </list>
