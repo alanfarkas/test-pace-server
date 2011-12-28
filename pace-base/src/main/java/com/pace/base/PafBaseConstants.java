@@ -8,6 +8,11 @@ import java.util.Locale;
 import com.pace.base.app.VersionType;
 
 public class PafBaseConstants {
+	
+	public static final String DB_NAME_PAF_SECURITY = "pafsecurity";
+	public static final String DB_NAME_PAF_DB = "pafdb";
+	public static final String DB_NAME_PAF_EXT_ATTR = "pafextattr";
+	public static final String DB_NAME_PAF_CLIENT_CACHE = "pafclientcache";
 
 	//Java is better than .NET
 	public static Locale AppLocal = Locale.ENGLISH;
@@ -15,10 +20,10 @@ public class PafBaseConstants {
 	public static final String LINE_TERM = "\n";
 	public static final String NOT_INITIALIZED = "[Not Initialized]";
 	public static final String PAF_BLANK = "PAFBLANK";
-	public static final String PAF_SECURITY_DB = "db" + File.separator + "data" + File.separator + "pafsecurity";
-    public static final String PAF_CACHE_DB = "db" + File.separator + "data" + File.separator + "pafdb";
-    public static final String PAF_EXT_ATTR_DB = "db" + File.separator + "data" + File.separator + "pafextattr";
-    public static final String PAF_CLIENT_CACHE_DB = "db" + File.separator + "data" + File.separator + "pafclientcache";
+	public static final String PAF_SECURITY_DB = "db" + File.separator + "data" + File.separator + DB_NAME_PAF_SECURITY;
+    public static final String PAF_CACHE_DB = "db" + File.separator + "data" + File.separator + DB_NAME_PAF_DB;
+    public static final String PAF_EXT_ATTR_DB = "db" + File.separator + "data" + File.separator + DB_NAME_PAF_EXT_ATTR;
+    public static final String PAF_CLIENT_CACHE_DB = "db" + File.separator + "data" + File.separator + DB_NAME_PAF_CLIENT_CACHE;
     
     public static final String PACE_SERVER_HOME_ENV = "PaceHome";
 	public static final String UOW_ROOT = "@UOW_ROOT";
@@ -99,9 +104,10 @@ public class PafBaseConstants {
 	public static final String FN_PrintStyles = "paf_print_styles.xml";
 	public static final String FN_UserMemberLists = "user_memberlists.xml";
 	
-	public static final String FN_ServerSettings = "serverSettings.xml";
-	public static final String FN_MdbDataSources = "mdbDs.xml";	
-	public static final String FN_RdbDataSources = "rdbDs.xml";
+	public static final String FN_ServerSettings = "paceServerSettings.xml";
+	public static final String FN_LdapSettings = "paceLDAPSettings.xml";
+	public static final String FN_MdbDataSources = "paceMDBDataSources.xml";	
+	public static final String FN_RdbDataSources = "paceRDBDataSources.xml";
 	
     
     public static final String DN_ConfFldr = "conf";

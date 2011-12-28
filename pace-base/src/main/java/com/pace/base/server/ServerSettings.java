@@ -51,7 +51,7 @@ public class ServerSettings {
     private boolean enableRounding;
     private boolean clearCellNotes;
     private boolean clearAllCellNotes;
-    private PafLDAPSettings ldapSettings = new PafLDAPSettings();
+    private transient PafLDAPSettings ldapSettings = new PafLDAPSettings();
     private String authMode = AuthMode.nativeMode.toString();
     private String clientUpdateUrl;
     private String clientMinVersion;
