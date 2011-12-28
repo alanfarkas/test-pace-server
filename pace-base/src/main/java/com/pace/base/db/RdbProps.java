@@ -26,7 +26,7 @@ public class RdbProps implements Serializable {
 	
 	private List<String> mappingResources;
 	
-	private List<KeyValue> hibernatePropertyList;
+	private transient List<KeyValue> hibernatePropertyList;
 	
 	public RdbProps() {
 		

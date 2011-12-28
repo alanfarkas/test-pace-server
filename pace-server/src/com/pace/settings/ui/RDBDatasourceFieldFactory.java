@@ -25,7 +25,7 @@ public class RDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 		formOrderList.add(NAME);
 		formOrderList.add(HIBERNATE_PROPERTY_LIST);
 		
-		captionMap.put(NAME, "Name");
+		captionMap.put(NAME, "Database Name");
 		captionMap.put(HIBERNATE_PROPERTY_LIST, "Properties");
 		
 		
