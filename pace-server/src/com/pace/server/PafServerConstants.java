@@ -18,6 +18,8 @@
  */
 package com.pace.server;
 
+import com.pace.base.PafBaseConstants;
+
 /**
  * Application server constants
  *
@@ -28,5 +30,10 @@ package com.pace.server;
 public class PafServerConstants {
 
 	public static final String SERVER_VERSION = "2.8.2.0 DEV-SNAPSHOT";
-//  public static final String SERVER_HOME_ENV = "PafServerHome";	
+
+	public static String SERVER_SETTINGS_FILE = PafMetaData.getConfigServerDirPath()  + PafBaseConstants.FN_ServerSettings;
+	public static String LDAP_SETTINGS_FILE = PafMetaData.getConfigServerDirPath()  + PafBaseConstants.FN_LdapSettings;
+	public static String RDB_DATASOURCES_FILE = PafMetaData.getConfigServerDirPath()  + PafBaseConstants.FN_RdbDataSources;
+	public static String MDB_DATASOURCES_FILE = PafMetaData.getConfigServerDirPath()  + PafBaseConstants.FN_MdbDataSources;
+
 }

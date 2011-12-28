@@ -114,6 +114,7 @@ import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.rules.RuleGroup;
 import com.pace.base.rules.RuleSet;
+import com.pace.base.server.PafLDAPSettings;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.AESEncryptionUtil;
 import com.pace.base.utility.CompressionUtil;
@@ -3024,8 +3025,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				pushToNDCStack(mdbRequest.getClientId());
 
 				IPafConnectionProps connProps = (IPafConnectionProps) 
-	        		PafMetaData.getAppContext().getBean(
-	        				PafMetaData.getPaceProject().getApplicationDefinitions().get(0).getMdbDef().getDataSourceId());
+	        		PafMetaData.getMdbProp(PafMetaData.getPaceProject().getApplicationDefinitions().get(0).getMdbDef().getDataSourceId());
 				
 				// Get mdb properties
 				resp.setMdbProps(dataService.getMdbProps(connProps));

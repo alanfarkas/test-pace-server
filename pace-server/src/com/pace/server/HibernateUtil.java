@@ -36,48 +36,69 @@ public class HibernateUtil {
 			for (SessionFactoryType sessionFactoryType : SessionFactoryType
 					.values()) {
 
-				String configurationFileName = null;
+				//String configurationFileName = null;
 
-
+				List<String> resourceList = new ArrayList<String>();
 
 				if (sessionFactoryType.equals(SessionFactoryType.PafDB)) {
 
-					configurationFileName = PafBaseConstants.HIBERNATE_PAF_DB_CONFIG_FL;
+					//configurationFileName = PafBaseConstants.HIBERNATE_PAF_DB_CONFIG_FL;
 					databaseName = PafBaseConstants.PAF_CACHE_DB;
                     conSuffix = "";
-                    rdbProps = (RdbProps) PafMetaData.getAppContext().getBean("pafDB");
+                    rdbProps = (RdbProps) PafMetaData.getRdbProp(PafBaseConstants.DB_NAME_PAF_DB);
+                    
+                    resourceList.add("com/pace/server/maps/PafBaseMember.hbm.xml");
+                    resourceList.add("com/pace/server/maps/PafBaseTree.hbm.xml");
+                    resourceList.add("com/pace/server/maps/PafAttributeTree.hbm.xml");
+                    resourceList.add("com/pace/server/maps/PafAttributeMember.hbm.xml");		
                     
 				} else if (sessionFactoryType.equals(SessionFactoryType.PafSecurityDB)) {
 
-					configurationFileName = PafBaseConstants.HIBERNATE_PAF_SECURITY_DB_CONFIG_FL;
+					//configurationFileName = PafBaseConstants.HIBERNATE_PAF_SECURITY_DB_CONFIG_FL;
 					databaseName = PafBaseConstants.PAF_SECURITY_DB;
                     conSuffix = ";bootPassword=xIdk82723Sdfke83";
-                    rdbProps = (RdbProps) PafMetaData.getAppContext().getBean("pafSecurity");
+                    rdbProps = (RdbProps) PafMetaData.getRdbProp(PafBaseConstants.DB_NAME_PAF_SECURITY);
+                    
+                    resourceList.add("com/pace/server/maps/PafUserDef.hbm.xml");
                     
 				} else if (sessionFactoryType.equals(SessionFactoryType.PafExtAttrDB)) {
 
-					configurationFileName = PafBaseConstants.HIBERNATE_PAF_EXT_ATTR_DB_CONFIG_FL;
+					//configurationFileName = PafBaseConstants.HIBERNATE_PAF_EXT_ATTR_DB_CONFIG_FL;
 					databaseName = PafBaseConstants.PAF_EXT_ATTR_DB;
                     conSuffix = "";
-                    rdbProps = (RdbProps) PafMetaData.getAppContext().getBean("pafExtAttr");
+                    rdbProps = (RdbProps) PafMetaData.getRdbProp(PafBaseConstants.DB_NAME_PAF_EXT_ATTR);
+                    
+                	resourceList.add("com/pace/server/maps/PafAttributeTree.hbm.xml");
+    				resourceList.add("com/pace/server/maps/PafAttributeMember.hbm.xml");	
                     
 				} else if ( sessionFactoryType.equals(SessionFactoryType.PafClientCacheDB)) {
 
-					configurationFileName = PafBaseConstants.HIBERNATE_PAF_CLIENT_CACHE_DB_CONFIG_FL;
+					//configurationFileName = PafBaseConstants.HIBERNATE_PAF_CLIENT_CACHE_DB_CONFIG_FL;
 					databaseName = PafBaseConstants.PAF_CLIENT_CACHE_DB;
                     conSuffix = "";
-                    rdbProps = (RdbProps) PafMetaData.getAppContext().getBean("pafClientCache");
+                    rdbProps = (RdbProps) PafMetaData.getRdbProp(PafBaseConstants.DB_NAME_PAF_CLIENT_CACHE);
+                    
+                    resourceList.add("com/pace/server/maps/Application.hbm.xml");
+    				resourceList.add("com/pace/server/maps/CellNote.hbm.xml");
+    				resourceList.add("com/pace/server/maps/DataSource.hbm.xml");
+    				resourceList.add("com/pace/server/maps/Dimension.hbm.xml");	
+    				resourceList.add("com/pace/server/maps/CellNoteMapping.hbm.xml");	
+    				resourceList.add("com/pace/server/maps/MemberTagCoord.hbm.xml");	
+    				resourceList.add("com/pace/server/maps/MemberTagData.hbm.xml");	
+    				resourceList.add("com/pace/server/maps/MemberTagId.hbm.xml");	
+    				resourceList.add("com/pace/server/maps/SecurityGroups.hbm.xml");			
 					
 				}
 				
-				if (configurationFileName != null && databaseName != null) {
+				//if (configurationFileName != null && databaseName != null) {
+				if (databaseName != null) {
 
 					Configuration conf = new Configuration();
 					conf.setProperties(rdbProps.getHibernateProperties());
-					for (String r: rdbProps.getMappingResources() )
-						conf.addResource(r);
-
-                    
+					for (String resource: resourceList ) {
+						conf.addResource(resource);
+					}
+						                    
                     if (conf.getProperty(propKey) == null || conf.getProperty(propKey).trim().equals("")) {
                         String propVal = conPrefix + PafMetaData.getServerSettings().getPafServerHome() 
                             + databaseName + conSuffix;

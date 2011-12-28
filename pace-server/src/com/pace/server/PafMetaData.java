@@ -37,14 +37,18 @@ import javax.naming.InitialContext;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import com.pace.base.PafBaseConstants;
+import com.pace.base.PafConfigFileNotFoundException;
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
-import com.pace.base.app.*;
+import com.pace.base.app.AliasMapping;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.VersionDef;
+import com.pace.base.app.VersionFormula;
+import com.pace.base.app.VersionType;
 import com.pace.base.comm.PafViewTreeItem;
 import com.pace.base.comm.SessionFactoryType;
 import com.pace.base.db.RdbProps;
@@ -55,7 +59,13 @@ import com.pace.base.project.PaceProjectCreationException;
 import com.pace.base.project.ProjectElementId;
 import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
-import com.pace.base.utility.*;
+import com.pace.base.server.PafLDAPSettings;
+import com.pace.base.server.ServerSettings;
+import com.pace.base.utility.LogUtil;
+import com.pace.base.utility.PafImportExportUtility;
+import com.pace.base.utility.PafViewGroupUtil;
+import com.pace.base.utility.PafXStream;
+import com.pace.base.utility.PropertyLoader;
 import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewGroup;
 import com.pace.base.view.PafViewSection;
@@ -73,7 +83,7 @@ public class PafMetaData {
 
 	private static Properties props = null;
 
-	private static ApplicationContext appContext = null;
+	//private static ApplicationContext appContext = null;
 	
 	private static ServerSettings serverSettings = null;
 	private static Map<String, PafConnectionProps> mdbDs = null;
@@ -135,7 +145,7 @@ public class PafMetaData {
 		}				
 
 
-		try {
+		/*try {
 
 			String serverConfig = paceHome + fileSep + PafBaseConstants.DN_ConfServerFldr + fileSep;
 			String[] configFiles = new String[3];
@@ -155,10 +165,14 @@ public class PafMetaData {
 					"Error initializing spring framework. " + ex.getMessage(),
 					PafErrSeverity.Fatal));
 		}
-
+*/
 		try {
-
-			serverSettings = (ServerSettings) appContext.getBean("appServerSettings");
+			
+			String serverConfig = paceHome + fileSep + PafBaseConstants.DN_ConfServerFldr + fileSep;
+			
+			serverSettings = (ServerSettings) PafXStream.importObjectFromXml(serverConfig + PafBaseConstants.FN_ServerSettings);
+			
+			serverSettings.setLdapSettings((PafLDAPSettings) PafXStream.importObjectFromXml(serverConfig + PafBaseConstants.FN_LdapSettings));
 
 			debugMode = serverSettings.isDebugMode();
 
@@ -197,11 +211,7 @@ public class PafMetaData {
     public static String getTransferDirPath() {
     	return paceHome + fileSep + PafBaseConstants.DN_TransferFldr + fileSep;
     }
-    
-    public static String getServerConfDirPath() {
-    	return paceHome + fileSep + PafBaseConstants.DN_ConfFldr + fileSep;
-    }
-
+   
     static {
     	    	    	
         try {
@@ -320,7 +330,126 @@ public class PafMetaData {
 		return paceHome;
 	}	
 	
+	public static List<RdbProps> getRdbProps() {
+		
+		List<RdbProps> rdbPropsList = new ArrayList<RdbProps>();
+		
+		/*for (String rdbName : new String[] { "pafDB", "pafClientCache", "pafExtAttr", "pafSecurity" }) {
+			
+			RdbProps rdbProp = (RdbProps) appContext.getBean(rdbName);
+			rdbProp.setName(rdbName);			
+			rdbPropsList.add(rdbProp);
+		}*/
+		
+		try {
+			
+			rdbPropsList = (List<RdbProps>) PafXStream.importObjectFromXml(getConfigServerDirPath()  + PafBaseConstants.FN_RdbDataSources);
+			
+		} catch (PafConfigFileNotFoundException e) {
+			
+			PafErrHandler.handleException(e, PafErrSeverity.Error);
+			
+		}
+		
+		
+		return rdbPropsList;
+		
+	}
+		
+	/**
+	 * Finds a RDB Prop
+	 * 
+	 * @param rdbPropName name of RDB Prop
+	 * @return RdbProps if found
+	 */
+	public static RdbProps getRdbProp(String rdbPropName) {
+		
+		RdbProps rdbProp = null;
+		
+		if ( rdbPropName != null ) {
+			
+			List<RdbProps> rdbPropList = getRdbProps();
+			
+			if ( rdbPropList != null ) {
+				
+				for (RdbProps rdbPropListItem : rdbPropList) {
+					
+					if ( rdbPropListItem.getName().equalsIgnoreCase(rdbPropName)) {
+						
+						rdbProp = rdbPropListItem;
+						break;
+						
+					}
+					
+				}
+				
+			}
+		}
+		
+		return rdbProp;
+		
+	}
 	
+	public static List<PafConnectionProps> getMdbProps() {
+		
+		List<PafConnectionProps> mdbPropsList = new ArrayList<PafConnectionProps>();
+			
+		try {
+			
+			mdbPropsList = (List<PafConnectionProps>) PafXStream.importObjectFromXml(getConfigServerDirPath()  + PafBaseConstants.FN_MdbDataSources);
+			
+			if ( mdbPropsList != null ) {
+				
+				for ( PafConnectionProps pafConnectionProps : mdbPropsList ) {
+					
+					if ( pafConnectionProps.getConnectionString() != null ) {
+						
+						pafConnectionProps.setProperties(PafConnectionProps.parseConnString(pafConnectionProps.getConnectionString()));
+						
+					}
+					
+				}
+				
+			}
+			
+		} catch (PafConfigFileNotFoundException e) {
+			
+			PafErrHandler.handleException(e, PafErrSeverity.Error);
+			
+		}
+		
+		
+		return mdbPropsList;
+		
+	}
+	
+	public static PafConnectionProps getMdbProp(String mdbPropName) {
+		
+		PafConnectionProps mdbProp = null;
+		
+		if ( mdbPropName != null ) {
+			
+			List<PafConnectionProps> mdbPropList = getMdbProps();
+			
+			if ( mdbPropList != null ) {
+				
+				for (PafConnectionProps mdbPropListItem : mdbPropList) {
+					
+					if ( mdbPropListItem.getName().equalsIgnoreCase(mdbPropName)) {
+						
+						mdbProp = mdbPropListItem;
+						break;
+						
+					}
+					
+				}
+				
+			}
+		}
+		
+		return mdbProp;
+		
+	}
 
 	/**
      *  Exports the paf views and paf view sections to xml.  For each paf view that has 
@@ -423,7 +552,7 @@ public class PafMetaData {
 	
 	public static void updateApplicationConfig() {
         try {
-			paceProject = new XMLPaceProject(getServerConfDirPath(), PafMetaData.getServerSettings().isAutoConvertProject());
+			paceProject = new XMLPaceProject(getConfigDirPath(), PafMetaData.getServerSettings().isAutoConvertProject());
 		} catch (InvalidPaceProjectInputException e) {
 			logger.error(e.getMessage());
 		} catch (PaceProjectCreationException e) {
@@ -442,7 +571,7 @@ public class PafMetaData {
 		if ( newPaceProject != null ) {
 			
 			//TODO: add filter set to partially save
-			newPaceProject.saveTo(getServerConfDirPath(), filterList);
+			newPaceProject.saveTo(getConfigDirPath(), filterList);
 			
 		}
 	}
@@ -471,9 +600,9 @@ public class PafMetaData {
      *
      * @return ApplicationContext	The application context.
      */
-	public static ApplicationContext getAppContext() {
+	/*public static ApplicationContext getAppContext() {
 		return appContext;
-	}
+	}*/
 	
 	public static void exportMeasures(MeasureDef[] measures) {
 		PafXStream.exportObjectToXml(measures, getConfigDirPath()
@@ -680,8 +809,7 @@ public class PafMetaData {
 
         int rowCount = 0;
         
-        RdbProps rdbProps = null;
-        rdbProps = (RdbProps) PafMetaData.getAppContext().getBean("pafDB");
+        RdbProps rdbProps = (RdbProps) getRdbProp(PafBaseConstants.DB_NAME_PAF_DB);
             				
 		final String sDriver = "hibernate.connection.driver_class";
 		final String sUrl = "hibernate.connection.url";

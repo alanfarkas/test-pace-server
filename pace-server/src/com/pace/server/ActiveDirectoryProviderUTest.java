@@ -1,22 +1,17 @@
 package com.pace.server;
 
-import javax.naming.ldap.LdapContext;
-
 import java.io.File;
-import java.util.*;
+
+import javax.naming.ldap.LdapContext;
 
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import com.pace.base.PafBaseConstants;
-import com.pace.base.app.PafSecurityDomainUserNames;
-import com.pace.base.app.PafSecurityGroup;
-import com.pace.base.app.PafUserDef;
-import com.pace.base.app.PafUserNamesSecurityGroup;
+import com.pace.base.server.ServerSettings;
 
 public class ActiveDirectoryProviderUTest extends TestCase {
 	

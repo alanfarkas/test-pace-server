@@ -19,18 +19,17 @@
 package com.pace.server;
 
 //import javax.naming.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import com.pace.base.*;
+import javax.naming.ldap.LdapContext;
+
+import com.pace.base.PafInvalidLogonInformation;
+import com.pace.base.PafNotAbletoGetLDAPContext;
 import com.pace.base.app.PafSecurityDomainUserNames;
 import com.pace.base.app.PafUserDef;
-import com.pace.base.app.PafUserNamesSecurityGroup;
-
-import javax.naming.ldap.*;
-//import javax.naming.directory.*;
+import com.pace.base.server.ServerSettings;
 
 /**
  * @author PMack

@@ -109,7 +109,7 @@ public class PafDataService {
 
 		// at this point save the connection props for this application id into the client state
 		String dsId = appDef.getMdbDef().getDataSourceId();
-		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getAppContext().getBean(dsId);
+		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getMdbProp(dsId);
 		clientState.getDataSources().put(dsId, connProps);
 
 //		TTN-1406
@@ -1379,7 +1379,7 @@ public class PafDataService {
 				
 		IMdbMetaData metaData = null;
 		MdbDef mdbDef = pafApp.getMdbDef();
-		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getAppContext().getBean(mdbDef.getDataSourceId());
+		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getMdbProp(mdbDef.getDataSourceId());
 		String[] dims = mdbDef.getAllDims();
 		String measureDim = mdbDef.getMeasureDim(), versionDim = mdbDef.getVersionDim();
 		Set<String> validMeasures = pafApp.getMeasureDefs().keySet();
@@ -1718,8 +1718,7 @@ public class PafDataService {
 		IMdbMetaData metaData = null;
 		PafMdbProps mdbProps = null;
 		
-		IPafConnectionProps connProps = (IPafConnectionProps) 
-		PafMetaData.getAppContext().getBean(appDef.getMdbDef().getDataSourceId());
+		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getMdbProp(appDef.getMdbDef().getDataSourceId());
 				
 		try{
 //			TTN-1406
@@ -3753,8 +3752,7 @@ public class PafDataService {
 				
 				appId = pafApp.getAppId();
 				String appString = "for application [" + appId + "]";
-				IPafConnectionProps connProps = (IPafConnectionProps) 
-					PafMetaData.getAppContext().getBean(pafApp.getMdbDef().getDataSourceId());
+				IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getMdbProp(pafApp.getMdbDef().getDataSourceId());
 
 // 	TTN-1406 Commented out this code for the time being until we figure out a way to get custom class loader to work.	
 				
@@ -3840,8 +3838,7 @@ public class PafDataService {
 			
 		}
 		
-		IPafConnectionProps connProps = (IPafConnectionProps) 
-					PafMetaData.getAppContext().getBean(pafApp.getMdbDef().getDataSourceId());
+		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getMdbProp(pafApp.getMdbDef().getDataSourceId());
 		
 		PafMdbProps mdbProps = this.getMdbProps(connProps);
 		
@@ -3957,7 +3954,7 @@ public class PafDataService {
 		
 		//Save the connection props for this application id into the clientstate
 		String dsId = appDef.getMdbDef().getDataSourceId();
-		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getAppContext().getBean(dsId);
+		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getMdbProp(dsId);
 		clientState.getDataSources().put(dsId, connProps);
 
 //		TTN-1406		

@@ -10,10 +10,10 @@ import com.pace.base.PafConfigFileNotFoundException;
 import com.pace.base.db.RdbProps;
 import com.pace.base.mdb.PafConnectionProps;
 import com.pace.base.misc.KeyValue;
-import com.pace.base.utility.PafXStream;
-import com.pace.server.PafMetaData;
-import com.pace.base.server.ServerSettings;
 import com.pace.base.server.PafLDAPSettings;
+import com.pace.base.server.ServerSettings;
+import com.pace.base.utility.PafXStream;
+import com.pace.server.PafServerConstants;
 
 /**
  * Pace Settings Data Service.  Wraps XStream functionality.  Read/writes setting file to/from disk.
@@ -23,21 +23,16 @@ import com.pace.base.server.PafLDAPSettings;
  */
 public class PaceSettingsDataService {
 
-	private static String serverSettingsFile = PafMetaData.getConfigServerDirPath()  + "paceServerSettings.xml";
-	private static String ldapSettingsFile = PafMetaData.getConfigServerDirPath()  + "paceLDAPSettings.xml";
-	private static String rdbDataSourcesFile = PafMetaData.getConfigServerDirPath()  + "paceRDBDataSources.xml";
-	private static String mdbDataSourcesFile = PafMetaData.getConfigServerDirPath()  + "paceMDBDataSources.xml";
-	
 	/**
 	 * @return the serverSettingsFile
 	 */
 	public static String getServerSettingsFile() {
-		return serverSettingsFile;
+		return PafServerConstants.SERVER_SETTINGS_FILE;
 	}
 
 	public static ServerSettings getServerSettings() throws PafConfigFileNotFoundException {
 		
-		return (ServerSettings) PafXStream.importObjectFromXml(serverSettingsFile);
+		return (ServerSettings) PafXStream.importObjectFromXml(PafServerConstants.SERVER_SETTINGS_FILE);
 		
 	}
 	
@@ -45,7 +40,7 @@ public class PaceSettingsDataService {
 				
 		if ( ss != null ) {
 			
-			PafXStream.exportObjectToXml(ss, serverSettingsFile);
+			PafXStream.exportObjectToXml(ss, PafServerConstants.SERVER_SETTINGS_FILE);
 			
 		}
 		
@@ -53,7 +48,7 @@ public class PaceSettingsDataService {
 	
 	public static PafLDAPSettings getLDAPSettings() throws PafConfigFileNotFoundException {
 		
-		PafLDAPSettings ldapSettings = (PafLDAPSettings) PafXStream.importObjectFromXml(ldapSettingsFile);
+		PafLDAPSettings ldapSettings = (PafLDAPSettings) PafXStream.importObjectFromXml(PafServerConstants.LDAP_SETTINGS_FILE);
 		
 		if ( ldapSettings != null && ldapSettings.getNetBiosNames() != null ) {
 			
@@ -95,7 +90,7 @@ public class PaceSettingsDataService {
 				ldapSettings.setNetBiosNames(null);
 			}
 			
-			PafXStream.exportObjectToXml(ldapSettings, ldapSettingsFile);
+			PafXStream.exportObjectToXml(ldapSettings, PafServerConstants.LDAP_SETTINGS_FILE);
 		
 		}
 		
@@ -110,7 +105,7 @@ public class PaceSettingsDataService {
 		
 		if ( mdbDataSources != null ) {
 									
-			PafXStream.exportObjectToXml(mdbDataSources, mdbDataSourcesFile);
+			PafXStream.exportObjectToXml(mdbDataSources, PafServerConstants.MDB_DATASOURCES_FILE);
 		}
 		
 	}
@@ -123,7 +118,7 @@ public class PaceSettingsDataService {
 	 */
 	public static List<PafConnectionProps> getMDBDatasources() throws PafConfigFileNotFoundException {
 		
-		return (List<PafConnectionProps>) PafXStream.importObjectFromXml(mdbDataSourcesFile);
+		return (List<PafConnectionProps>) PafXStream.importObjectFromXml(PafServerConstants.MDB_DATASOURCES_FILE);
 		
 	}
 	
@@ -155,7 +150,7 @@ public class PaceSettingsDataService {
 				
 			}
 									
-			PafXStream.exportObjectToXml(rdbDataSources, rdbDataSourcesFile);
+			PafXStream.exportObjectToXml(rdbDataSources, PafServerConstants.RDB_DATASOURCES_FILE);
 		}
 		
 	}
@@ -168,7 +163,7 @@ public class PaceSettingsDataService {
 	 */
 	public static List<RdbProps> getRDBDatasources() throws PafConfigFileNotFoundException {
 		
-		List<RdbProps> rdbDatasourceList = (List<RdbProps>) PafXStream.importObjectFromXml(rdbDataSourcesFile);
+		List<RdbProps> rdbDatasourceList = (List<RdbProps>) PafXStream.importObjectFromXml(PafServerConstants.RDB_DATASOURCES_FILE);
 		
 		if ( rdbDatasourceList != null ) {
 			

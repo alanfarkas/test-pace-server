@@ -14,6 +14,8 @@ import java.util.regex.*;
 
 import com.pace.base.*;
 import com.pace.base.app.*;
+import com.pace.base.server.PafLDAPSettings;
+import com.pace.base.server.ServerSettings;
 import com.pace.base.utility.*;
 
 public class ActiveDirectoryProvider implements IPafLDAPProvider {

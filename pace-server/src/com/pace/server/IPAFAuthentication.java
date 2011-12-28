@@ -8,7 +8,7 @@ import com.pace.base.PafInvalidLogonInformation;
 import com.pace.base.PafNotAbletoGetLDAPContext;
 import com.pace.base.app.PafSecurityDomainUserNames;
 import com.pace.base.app.PafUserDef;
-import com.pace.base.app.PafUserNamesSecurityGroup;
+import com.pace.base.server.ServerSettings;
 
 
 public interface IPAFAuthentication {
