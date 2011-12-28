@@ -21,8 +21,7 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 	public static final String CONNECTION_STRING = "connectionString";
 	public static final String META_DATA_SERVICE_PROVIDER = "metaDataServiceProvider";
 	public static final String DATA_SERVICE_PROVIDER = "dataServiceProvider";
-	public static final String MDB_CLASS_LOADER = "mdbClassLoader";
-	
+		
 	private ComboBox metaDataServiceProviderComboBox = new ComboBox();
 	
 	private ComboBox dataServiceProviderComboBox = new ComboBox();
@@ -33,8 +32,7 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 		formOrderList.add(CONNECTION_STRING);
 		formOrderList.add(META_DATA_SERVICE_PROVIDER);
 		formOrderList.add(DATA_SERVICE_PROVIDER);		
-		formOrderList.add(MDB_CLASS_LOADER);
-		
+			
 		requiredFieldSet.add(NAME);
 		requiredFieldSet.add(META_DATA_SERVICE_PROVIDER);
 		requiredFieldSet.add(DATA_SERVICE_PROVIDER);
@@ -44,8 +42,7 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 		captionMap.put(META_DATA_SERVICE_PROVIDER, "Meta Data Service Provider");
 		captionMap.put(DATA_SERVICE_PROVIDER, "Data Service Provider");
 		captionMap.put(CONNECTION_STRING, "Connection String");
-		captionMap.put(MDB_CLASS_LOADER, "MDB Class Loader");
-		
+			
 		metaDataServiceProviderComboBox.setNewItemsAllowed(false);
 		metaDataServiceProviderComboBox.setNullSelectionAllowed(false);
 		metaDataServiceProviderComboBox.addItem("com.pace.mdb.essbase.EsbMetaData");

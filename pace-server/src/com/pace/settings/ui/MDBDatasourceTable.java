@@ -78,10 +78,10 @@ public class MDBDatasourceTable extends Table {
 		});
         
         setColumnExpandRatio(MDBDatasourceFieldFactory.NAME, 10);
-        setColumnExpandRatio(MDBDatasourceFieldFactory.CONNECTION_STRING, 35);
-        setColumnExpandRatio(MDBDatasourceFieldFactory.META_DATA_SERVICE_PROVIDER, 20);
+        setColumnExpandRatio(MDBDatasourceFieldFactory.CONNECTION_STRING, 45);
+        setColumnExpandRatio(MDBDatasourceFieldFactory.META_DATA_SERVICE_PROVIDER, 25);
         setColumnExpandRatio(MDBDatasourceFieldFactory.DATA_SERVICE_PROVIDER, 20);
-        setColumnExpandRatio(MDBDatasourceFieldFactory.MDB_CLASS_LOADER, 15);
+        
         
         
 	}
