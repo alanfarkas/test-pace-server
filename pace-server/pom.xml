@@ -150,6 +150,11 @@
 		<version>1.6.3</version>
 	</dependency>
 	<dependency>
+	  <groupId>org.slf4j</groupId>
+	  <artifactId>slf4j-api</artifactId>
+	  <version>1.6.3</version>
+	</dependency>
+	<dependency>
 		<groupId>org.neo4j</groupId>
 		<artifactId>neo4j</artifactId>
 		<version>1.5</version>
@@ -211,6 +216,11 @@
         <configuration>
           <webappDirectory>${basedir}/WebRoot</webappDirectory>
           <warSourceDirectory>${basedir}/WebRoot</warSourceDirectory>
+    	<archive>
+      	<manifestEntries>
+        	<Dependencies>org.slf4j</Dependencies>
+      	</manifestEntries>
+    	</archive>          
         </configuration>
       </plugin>
       <plugin>

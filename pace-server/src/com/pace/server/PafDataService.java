@@ -82,6 +82,7 @@ import com.pace.server.eval.RuleBasedEvalStrategy;
 public class PafDataService {
 	private static Logger logger = Logger.getLogger(PafDataService.class);
 	private static Logger evalPerfLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_EVAL);
+	private static Logger auditLogger = Logger.getLogger(PafBaseConstants.LOGGER_AUDIT_EVAL);
 
 	private static PafDataService _instance = null;
 	private ConcurrentHashMap <String, PafDataCache> uowCache = new ConcurrentHashMap <String, PafDataCache>();
@@ -3415,7 +3416,7 @@ public class PafDataService {
 		// option is set.
 		if (plannerConfig.isMdbSaveWorkingVersionOnUowLoad()) {
 			String dsId = clientState.getApp().getMdbDef().getDataSourceId();
-			logger.info("Saving datacache to data provider: [" + dsId + "]" );           
+			logger.info(String.format("Saving datacache to data provider: [%s]", dsId));           
 			this.saveDataCache(clientState);
 		}
 	}
@@ -3433,7 +3434,9 @@ public class PafDataService {
 	public void evaluateView(EvaluateViewRequest evalRequest, PafClientState clientState, PafDataCache dataCache, PafDataSliceParms sliceParms) throws PafException {
 
 		PafView currentView = clientState.getView(evalRequest.getViewName());
-		logger.info("Evaluating view: " + currentView.getName() + " for client " + evalRequest.getClientId() + " using measure set " + evalRequest.getMeasureSetKey());
+		String s = String.format("Evaluating view [%s] for client [%s] using measure set [%s]", currentView.getName(), clientState.getUserName(), evalRequest.getRuleSetName() );
+		auditLogger.info(s);
+		logger.info(s);
 		PafDataSlice newSlice = evalRequest.getDataSlice();
 		PafMVS pafMVS = dataCache.getPafMVS();
 		PafApplicationDef appDef = clientState.getApp();
@@ -3443,9 +3446,11 @@ public class PafDataService {
 		boolean hasAttributes = currentViewSection.hasAttributes();
 
 		if (newSlice.isCompressed()) {
-			logger.info("Uncompressing data slice\n" );
+			logger.info("Uncompressing data slice" );
 			newSlice.uncompressData();
 		}
+		
+		
 
 		// Calculate attribute intersections for off-screen measures. This 
 		// step is only needed during the first evaluation pass for a each
@@ -3467,7 +3472,7 @@ public class PafDataService {
 			evalPerfLogger.info(logMsg);
 		}
 		
-		logger.info("Updating data cache with client data\n" + sliceParms.toString() );
+		logger.info("Updating data cache with client data: " + sliceParms.toString() );
 		dataCache.updateDataCache(newSlice, sliceParms);
 
 		IEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
@@ -3501,6 +3506,11 @@ public class PafDataService {
 				break;
 			}
 		}
+		
+		// log user change request, performed here as request objects have been converted to richer intersection objects at this point
+		auditLogger.info("Changes: " + evalState.getOrigChangedCells().toString() );
+		auditLogger.info("Locks: " +  evalState.getOrigLockedCells().toString() );
+
 		
 		
 		// Perform evaluation strategy
