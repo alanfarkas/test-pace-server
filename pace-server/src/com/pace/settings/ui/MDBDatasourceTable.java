@@ -32,7 +32,7 @@ public class MDBDatasourceTable extends Table {
 		
 		setContainerDataSource(paceSettingsApplication.getMdbDatasourceContainer());
         setVisibleColumns(paceSettingsApplication.getMdbDatasourceFieldFactory().getFormOrderList().toArray());
-        
+        setPageLength(paceSettingsApplication.getMdbDatasourceContainer().size());
         List<String> captionHeaderList = new ArrayList<String>();
         
         for (Object formOrder : paceSettingsApplication.getMdbDatasourceFieldFactory().getFormOrderList()) {
@@ -52,12 +52,9 @@ public class MDBDatasourceTable extends Table {
 		
         setSelectable(true);
         setImmediate(true);
-        //addListener((Property.ValueChangeListener) paceSettingsApplication);
         addListener((ItemClickListener) paceSettingsApplication);
-        
         setNullSelectionAllowed(false);
-        
-        setTableFieldFactory(new TableFieldFactory() {
+      /*  setTableFieldFactory(new TableFieldFactory() {
 			
 			@Override
 			public Field createField(Container container, Object itemId,
@@ -66,16 +63,14 @@ public class MDBDatasourceTable extends Table {
 				
 				if ( propertyId.equals(MDBDatasourceFieldFactory.CONNECTION_STRING)) {
 					
-					//setColumnWidth(propertyId, 100);
 					setStyleName("table-text-wrap");
-					
 					
 				}
 				
 				
 				return null;
 			}
-		});
+		});*/
         
         setColumnExpandRatio(MDBDatasourceFieldFactory.NAME, 10);
         setColumnExpandRatio(MDBDatasourceFieldFactory.CONNECTION_STRING, 45);
@@ -84,6 +79,37 @@ public class MDBDatasourceTable extends Table {
         
         
         
+	}
+	
+	public void resizeTable() {
+		
+		if ( getContainerDataSource() != null ) {
+			
+			setPageLength(getContainerDataSource().size());
+			
+		}
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see com.vaadin.ui.Table#setPageLength(int)
+	 */
+	@Override
+	public void setPageLength(int pageLength) {
+	
+		int maxSize = 8;
+		
+		if ( pageLength <= maxSize ) {
+		
+			super.setPageLength(pageLength);
+			
+		} else {
+			
+			super.setPageLength(maxSize);
+			
+		}
+		
+		
 	}
 
 	

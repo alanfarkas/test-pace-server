@@ -56,8 +56,10 @@ public class MDBDatasourceForm extends PaceSettingsForm implements
 
 			serverSettingsApplication.getMdbDatasourceTable().select(
 					pafConnectionProps);
-			newMdbDatasource = false;
+			
 			pafConnectionProps = null;
+			
+			newMdbDatasource = false;
 
 		} else {
 
@@ -66,9 +68,11 @@ public class MDBDatasourceForm extends PaceSettingsForm implements
 			pafConnectionProps = null;
 		}
 
-		((PaceSettingsApplication) getApplication())
-				.getMdbDatasourceContainer().saveData();
-
+		((PaceSettingsApplication) getApplication()).getMdbDatasourceContainer().saveData();		
+			
+		((PaceSettingsApplication) getApplication()).getMdbDatasourceTable().resizeTable();	
+		
+		
 	}
 
 	@Override

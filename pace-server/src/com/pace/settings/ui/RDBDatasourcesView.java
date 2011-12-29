@@ -10,6 +10,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.Reindeer;
@@ -59,14 +60,21 @@ public class RDBDatasourcesView extends VerticalSplitPanel {
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.addComponent(saveAllButton);
 		hl.addComponent(cancelAllButton);
-		
 		hl.setSpacing(true);
 		
 		vl.addComponent(hl);
 						
-		setFirstComponent(vl);
+		Panel topPanel = new Panel();
+		topPanel.addComponent(vl);
+		topPanel.setSizeFull();
+						
+		setFirstComponent(topPanel);
 		
-		setSecondComponent(rdbDatasourceForm);
+		Panel bottomPanel = new Panel();
+		bottomPanel.addComponent(rdbDatasourceForm);
+		bottomPanel.setSizeFull();
+		
+		setSecondComponent(bottomPanel);
 		
 		setSplitPosition(30);
 		

@@ -13,6 +13,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.Reindeer;
@@ -90,12 +91,20 @@ public class MDBDatasourcesView extends VerticalSplitPanel implements Property.V
 		
 		vl.addComponent(hl);
 		//vl.setSizeFull();
-						
-		setFirstComponent(vl);
 		
-		setSecondComponent(mdbDatasourceForm);
+		Panel topPanel = new Panel();
+		topPanel.addComponent(vl);
+		topPanel.setSizeFull();
 		
-		setSplitPosition(50);
+		setFirstComponent(topPanel);
+		
+		Panel bottomPanel = new Panel();
+		bottomPanel.addComponent(mdbDatasourceForm);
+		bottomPanel.setSizeFull();
+		
+		setSecondComponent(bottomPanel);
+		
+		setSplitPosition(40);
 		
 		setHeight("100%");
 		
