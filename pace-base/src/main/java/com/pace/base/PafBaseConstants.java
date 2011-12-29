@@ -306,6 +306,7 @@ public class PafBaseConstants {
 
 	
 	public static final String PACE_SERVER_SETTINGS_CONTEXT_NAME = "settings";
+	public static final String LOGGER_AUDIT_EVAL = "pace.audit.eval";
 	
 	
 	/**
