@@ -1,9 +1,17 @@
 package com.pace.settings;
 
+import com.pace.base.InvalidPasswordException;
+import com.pace.base.InvalidUserNameException;
+import com.pace.base.PafErrHandler;
+import com.pace.base.PafException;
+import com.pace.base.app.PafUserDef;
+import com.pace.server.PafSecurityService;
+import com.pace.server.PafServerConstants;
 import com.pace.settings.data.MDBDatasourceContainer;
 import com.pace.settings.data.RDBDatasourceContainer;
 import com.pace.settings.ui.LDAPSettingsForm;
 import com.pace.settings.ui.LDAPSettingsView;
+import com.pace.settings.ui.LoginView;
 import com.pace.settings.ui.MDBDatasourceFieldFactory;
 import com.pace.settings.ui.MDBDatasourceForm;
 import com.pace.settings.ui.MDBDatasourceTable;
@@ -17,10 +25,9 @@ import com.pace.settings.ui.ServerSettingsView;
 import com.pace.settings.ui.SettingsTree;
 import com.vaadin.Application;
 import com.vaadin.data.Item;
-import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
@@ -31,10 +38,18 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
+/**
+ * Pace Settings Application.  The Pace Settings Application class holds the main components for logging in,
+ * viewing and modifying server settings.
+ * 
+ * @author JMilliron
+ *
+ */
 public class PaceSettingsApplication extends Application implements
-		ItemClickListener, Button.ClickListener, Property.ValueChangeListener {
+		ItemClickListener, Button.ClickListener {
 
 	private static final long serialVersionUID = -3106115489087842180L;
 
@@ -75,6 +90,12 @@ public class PaceSettingsApplication extends Application implements
 	private RDBDatasourceContainer rdbDatasourceContainer = new RDBDatasourceContainer();
 	
 	private RDBDatasourceFieldFactory rdbDatasourceFieldFactory = new RDBDatasourceFieldFactory();
+	
+	private LoginView loginView = null;
+	
+	private PafUserDef pafUserDef = null;
+	
+	private Button logoutButton = new Button(PaceSettingsConstants.LOGOUT_BUTTON_LABEL, this);
 
 	@Override
 	public void init() {
@@ -127,9 +148,18 @@ public class PaceSettingsApplication extends Application implements
 		headingLabel.setStyleName(Reindeer.LABEL_H1);
 
 		lo.addComponent(headingLabel);
-		lo.addComponent(headingLabel);
-		lo.addComponent(headingLabel);
-
+		//lo.addComponent(headingLabel);
+		//lo.addComponent(headingLabel);
+		
+		logoutButton.setStyleName(BaseTheme.BUTTON_LINK);		
+		
+		lo.addComponent(logoutButton);
+		lo.setExpandRatio(headingLabel, 95);
+		lo.setExpandRatio(logoutButton, 5);
+		lo.setComponentAlignment(logoutButton, Alignment.BOTTOM_RIGHT);
+						
+		logoutButton.setVisible(false);
+		
 		lo.setWidth("100%");
 		lo.setMargin(true);
 		lo.setSpacing(true);
@@ -138,7 +168,18 @@ public class PaceSettingsApplication extends Application implements
 	}
 
 	private void setPropertiesView(Component c) {
-		horizontalSplit.setSecondComponent(c);
+		
+		if ( c != getLoginView() && pafUserDef == null ) {
+			
+			showLoginView();
+			
+		} else {
+		
+			horizontalSplit.setSecondComponent(c);
+			
+		}
+		
+		
 	}
 
 	@Override
@@ -200,6 +241,13 @@ public class PaceSettingsApplication extends Application implements
 
 	}
 	
+	public void showLoginView() {
+				
+		setPropertiesView(getLoginView());
+		getLoginView().getUsername().focus();
+		
+	}
+	
 	public void showLDAPSettingsView() {
 
 		setPropertiesView(getLDAPSettingsView());
@@ -225,7 +273,15 @@ public class PaceSettingsApplication extends Application implements
 	@Override
 	public void buttonClick(ClickEvent event) {
 
-		if ( event.getButton() == getMdbDatasourcesView().getNewButton() ) {
+		if ( event.getButton() == getLoginView().getLoginButton()) {
+			
+			loginUser();
+			
+		} else if ( event.getButton() == logoutButton) {
+			
+			logoutUser();
+			
+		} else if ( event.getButton() == getMdbDatasourcesView().getNewButton() ) {
 		
 			mdbDatasourceForm.addMDBDatasource();
 			
@@ -285,23 +341,72 @@ public class PaceSettingsApplication extends Application implements
 
 	}
 
-	@Override
-	public void valueChange(ValueChangeEvent event) {
+	/**
+	 * Logins user.  Shows error notifications if problem logging in.
+	 */
+	private void loginUser() {
 
-		/*Property property = event.getProperty();
+		String userName = (String) getLoginView().getUsername().getValue();
+		String password = (String) getLoginView().getPassword().getValue();
 		
-		if ( property == mdbDatasourceTable ) {
-			
-			Item item = mdbDatasourceTable.getItem(mdbDatasourceTable.getValue());
-			
-			if ( item != mdbDatasourceForm.getItemDataSource() ) {
+		if ( userName != null && password != null ) {
+		
+			userName = userName.trim();
+						
+			if ( userName.equals("")) {
+				getMainWindow().showNotification(PaceSettingsConstants.USERNAME_IS_A_REQUIRED_FIELD);
+				getLoginView().getUsername().focus();
+			} else {
 				
-				mdbDatasourceForm.setItemDataSource(item);
+				try {
+					
+					PafUserDef pafUserDef = PafSecurityService.authenticate(userName, password);
+					
+					if ( pafUserDef == null ) {
+						getMainWindow().showNotification(PaceSettingsConstants.INVALID_USERNAME_OR_PASSWORD);
+					} else {
+						
+						if ( pafUserDef.getAdmin() ) {
+							
+							this.pafUserDef = pafUserDef;
+							
+							logoutButton.setVisible(true);
+							
+							showServerSettingsView();
+							
+							//set trimmed value
+							getLoginView().getUsername().setValue(userName);
+							
+							//clear password
+							getLoginView().getPassword().setValue("");
+							
+						} else {
+					
+							getMainWindow().showNotification("User " + userName + " doesn't have access to view or modify settings");
+							
+						}
+						
+					}
+					
+				} catch (InvalidUserNameException e) {
+					getMainWindow().showNotification(PaceSettingsConstants.INVALID_USERNAME_OR_PASSWORD);
+				} catch (InvalidPasswordException e) {
+					getMainWindow().showNotification(PaceSettingsConstants.INVALID_USERNAME_OR_PASSWORD);
+				} catch (PafException e) {
+					PafErrHandler.handleException(e);
+				}
 				
 			}
-			
-		}*/
-
+		}
+		
+	}
+	
+	private void logoutUser() {
+		
+		pafUserDef = null;
+		logoutButton.setVisible(false);
+		showLoginView();
+		
 	}
 
 	/**
@@ -394,6 +499,20 @@ public class PaceSettingsApplication extends Application implements
 	 */
 	public RDBDatasourceFieldFactory getRdbDatasourceFieldFactory() {
 		return rdbDatasourceFieldFactory;
+	}
+
+	/**
+	 * @return the loginView
+	 */
+	public LoginView getLoginView() {
+		
+		if ( loginView == null ) {
+			
+			loginView = new LoginView(this);
+			
+		}
+		
+		return loginView;
 	}
 	
 	

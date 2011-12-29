@@ -21,5 +21,12 @@ public class PaceSettingsConstants {
 	public static final String DELETE_BUTTON_LABEL = "Delete";
 	public static final String COPY_BUTTON_LABEL = "Copy";
 	public static final String NEW_BUTTON_LABEL = "New";	
+	public static final String LOGOUT_BUTTON_LABEL = "Logout";
+	public static final String USERNAME_BUTTON_LABEL = "Username";
+	public static final String PASSWORD_BUTTON_LABEL = "Password";
+	
+	//error messages
+	public static final String INVALID_USERNAME_OR_PASSWORD = "Invalid " + USERNAME_BUTTON_LABEL + " or " + PASSWORD_BUTTON_LABEL;
+	public static final String USERNAME_IS_A_REQUIRED_FIELD = USERNAME_BUTTON_LABEL + " is a required field";
 	
 }
