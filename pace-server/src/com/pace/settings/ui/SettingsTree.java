@@ -13,6 +13,7 @@ import com.vaadin.ui.Tree;
  */
 public class SettingsTree extends Tree {
 
+	public static final Object SERVER_INFO = "Server Information";
 	public static final Object SERVER_SETTINGS = "Server Settings";
 	public static final Object LDAP_SETTINGS = "LDAP Settings";
 	public static final Object RELATIONAL_DATABASE_DATASOURCES = "Relational DB Datasources";
@@ -29,6 +30,7 @@ public class SettingsTree extends Tree {
 		
 		setChildrenAllowed(parent, true);*/
 		
+		addItem(SERVER_INFO);
 		addItem(SERVER_SETTINGS);
 		addItem(LDAP_SETTINGS);
 		addItem(RELATIONAL_DATABASE_DATASOURCES);
@@ -40,5 +42,5 @@ public class SettingsTree extends Tree {
 		addListener((ItemClickListener) app);
 
 	}
-
+	
 }

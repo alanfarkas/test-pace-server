@@ -6,7 +6,6 @@ import com.pace.base.PafErrHandler;
 import com.pace.base.PafException;
 import com.pace.base.app.PafUserDef;
 import com.pace.server.PafSecurityService;
-import com.pace.server.PafServerConstants;
 import com.pace.settings.data.MDBDatasourceContainer;
 import com.pace.settings.data.RDBDatasourceContainer;
 import com.pace.settings.ui.LDAPSettingsForm;
@@ -20,6 +19,7 @@ import com.pace.settings.ui.RDBDatasourceFieldFactory;
 import com.pace.settings.ui.RDBDatasourceForm;
 import com.pace.settings.ui.RDBDatasourceTable;
 import com.pace.settings.ui.RDBDatasourcesView;
+import com.pace.settings.ui.ServerInfoView;
 import com.pace.settings.ui.ServerSettingsForm;
 import com.pace.settings.ui.ServerSettingsView;
 import com.pace.settings.ui.SettingsTree;
@@ -54,15 +54,15 @@ public class PaceSettingsApplication extends Application implements
 	private static final long serialVersionUID = -3106115489087842180L;
 
 	protected static final String TREE_NODE_WITHOUT_CHILDREN_STYLE = "no-children";
-
-	private static final String PACE_SETTINGS_APPLICATION = "Pace Settings Application";
-
-	private Label headingLabel = new Label(PACE_SETTINGS_APPLICATION);
+	
+	private Label headingLabel = new Label(PaceSettingsConstants.PACE_APP_HEADING);
 
 	private HorizontalSplitPanel horizontalSplit = new HorizontalSplitPanel();
 
 	private SettingsTree tree = new SettingsTree(this);
 
+	private ServerInfoView serverInfoView;
+	
 	private ServerSettingsView serverSettingsView;
 	
 	private LDAPSettingsView ldapSettingsView;
@@ -100,7 +100,7 @@ public class PaceSettingsApplication extends Application implements
 	@Override
 	public void init() {
 
-		setMainWindow(new Window(PACE_SETTINGS_APPLICATION));
+		setMainWindow(new Window(PaceSettingsConstants.PACE_APP_HEADING));
 
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSizeFull();
@@ -136,9 +136,11 @@ public class PaceSettingsApplication extends Application implements
 
 		getMainWindow().setContent(vl);
 
-		tree.select(SettingsTree.SERVER_SETTINGS);
+		/*tree.select(SettingsTree.SERVER_INFO);
 
-		showServerSettingsView();
+		showServerInfoView();*/
+		
+		showLoginView();
 	}
 
 	public HorizontalLayout createToolbar() {
@@ -191,7 +193,11 @@ public class PaceSettingsApplication extends Application implements
 			
 			if (itemId != null) {
 				
-				if (SettingsTree.SERVER_SETTINGS.equals(itemId)) {
+				if (SettingsTree.SERVER_INFO.equals(itemId)) {
+
+					showServerInfoView();
+				
+				} else if (SettingsTree.SERVER_SETTINGS.equals(itemId)) {
 
 					showServerSettingsView();
 					
@@ -234,6 +240,14 @@ public class PaceSettingsApplication extends Application implements
 
 	}
 	
+
+	private void showServerInfoView() {
+		
+		getServerInfoView().refreshServerInfo();
+		
+		setPropertiesView(getServerInfoView());
+		
+	}
 
 	public void showServerSettingsView() {
 
@@ -372,7 +386,9 @@ public class PaceSettingsApplication extends Application implements
 							
 							logoutButton.setVisible(true);
 							
-							showServerSettingsView();
+							tree.select(SettingsTree.SERVER_INFO);
+							
+							showServerInfoView();
 							
 							//set trimmed value
 							getLoginView().getUsername().setValue(userName);
@@ -499,6 +515,18 @@ public class PaceSettingsApplication extends Application implements
 	 */
 	public RDBDatasourceFieldFactory getRdbDatasourceFieldFactory() {
 		return rdbDatasourceFieldFactory;
+	}
+	
+	public ServerInfoView getServerInfoView() {
+		
+		if ( serverInfoView == null ) {
+			
+			serverInfoView = new ServerInfoView();
+			
+		}
+		
+		return serverInfoView;		
+		
 	}
 
 	/**

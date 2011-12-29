@@ -5,6 +5,7 @@ package com.pace.settings.ui;
 
 import com.pace.settings.PaceSettingsApplication;
 import com.pace.settings.PaceSettingsConstants;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
@@ -78,6 +79,7 @@ public class LoginView extends Panel {
 			
 		mainLayout.addComponent(loginButton);
 		
+		loginButton.setClickShortcut(KeyCode.ENTER);
 		loginButton.addListener((ClickListener) app);
 		
 		mainLayout.setSpacing(true);
