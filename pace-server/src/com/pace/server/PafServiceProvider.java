@@ -427,20 +427,12 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		PafServerAck ack = null;
 	
 		try {
-			
+
 			String clientId = String.valueOf(Math.random());
 			
-			// Display client initialization message (TTN-
-			char[] banner = new char[90];
-			Arrays.fill (banner, '*');
-			logger.info(String.valueOf(banner));
-			logger.info(Messages.getString("PafServiceProvider.13") //$NON-NLS-1$
-					+ Messages.getString("PafServiceProvider.15") + pcInit.getIpAddress()); //$NON-NLS-1$
-			logger.info(Messages.getString("PafServiceProvider.19") + pcInit.getClientType()); //$NON-NLS-1$
-			logger.info(Messages.getString("PafServiceProvider.20") + pcInit.getClientVersion()); //$NON-NLS-1$
-			logger.info(String.valueOf(banner));
-			logger.info(""); //$NON-NLS-1$
-
+			// Display client initialization message
+			String s = String.format(Messages.getString("PafServiceProvider.15"), pcInit.getIpAddress(), pcInit.getClientType(), pcInit.getClientVersion()); //$NON-NLS-1$
+			logger.info(s);
 						
 			// block to debug load balancer cookies.
 			listCookies(clientId);
