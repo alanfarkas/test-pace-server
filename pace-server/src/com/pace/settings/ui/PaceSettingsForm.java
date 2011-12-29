@@ -105,7 +105,21 @@ public abstract class PaceSettingsForm extends Form implements ClickListener {
 
 			saveForm();
 
-			serverSettingsApplication.getMainWindow().showNotification(save.getCaption() + "d");
+			StringBuilder messageBuilder = new StringBuilder(save.getCaption());
+			
+			if ( save.getCaption().equals(PaceSettingsConstants.ADD_BUTTON_LABEL)) {
+				
+				//e.g. Added
+				messageBuilder.append("ed");
+				
+			} else {
+				
+				//e.g. Saved, Updated, etc
+				messageBuilder.append("d");
+				
+			}
+			
+			serverSettingsApplication.getMainWindow().showNotification(messageBuilder.toString());
 
 			// on cancel
 		} else if (source == cancel) {

@@ -44,8 +44,10 @@ public class RDBDatasourceForm extends PaceSettingsForm {
 
 	@Override
 	protected void saveForm() {
-
+				
 		setItemDataSource(null);
+		
+		((PaceSettingsApplication) getApplication()).getRdbDatasourceContainer().saveData();
 		
 	}
 

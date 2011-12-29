@@ -181,8 +181,6 @@ public class MDBDatasourcesView extends VerticalSplitPanel implements Property.V
 		
 		if ( mdbDsTable.firstItemId() != null ) {
 		
-			//mdbDsTable.select(mdbDsTable.firstItemId());
-			
 			mdbDsTable.setValue(mdbDsTable.firstItemId());
 			
 			mdbDatasourceForm.setItemDataSource(new BeanItem<PafConnectionProps>((PafConnectionProps) mdbDsTable.getValue()));

@@ -237,7 +237,7 @@ public class PaceSettingsApplication extends Application implements
 			
 			getMdbDatasourcesView().removeMDBDatasource();
 			
-			this.getMainWindow().showNotification("Deleted item");
+			//this.getMainWindow().showNotification(SettingsTree.MULTIDIMENSIONAL_DATABASE_DATASOURCES + " Deleted Item Successfully");
 			
 		} else if ( event.getButton() == getMdbDatasourcesView().getSaveAllButton() ) {
 					
