@@ -37,6 +37,8 @@ public class LDAPSettingsView extends Panel {
 		
 		setHeight("100%");
 		
+		setSizeFull();
+		
 	}
 	
 }

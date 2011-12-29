@@ -32,6 +32,8 @@ public class ServerSettingsView extends Panel {
 		
 		addComponent(form);
 		
+		setSizeFull();
+		
 	}
 	
 }
