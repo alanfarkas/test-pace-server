@@ -5,6 +5,7 @@ import com.vaadin.data.Item;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
+import com.vaadin.ui.TextField;
 
 /**
  * MDB Datasource Field Factory
@@ -15,6 +16,8 @@ import com.vaadin.ui.Field;
 public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 
 	
+	private static final String CONNECTION_STRING_INPUT_PROMPT = "EDSDomain=Essbase;EDSUrl=http://localhost:13080/aps/JAPI;Server=?;User=?;Password=?;Application=?;Database=?";
+
 	private static final long serialVersionUID = 2885762876258153110L;
 	
 	public static final String NAME = "name";
@@ -25,6 +28,8 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 	private ComboBox metaDataServiceProviderComboBox = new ComboBox();
 	
 	private ComboBox dataServiceProviderComboBox = new ComboBox();
+	
+	private String connectionStringTooltip = null;
 	
 	public MDBDatasourceFieldFactory() {
 		
@@ -51,6 +56,24 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 		dataServiceProviderComboBox.setNullSelectionAllowed(false);
 		dataServiceProviderComboBox.addItem("com.pace.mdb.essbase.EsbData");
 		
+		String tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
+		
+		StringBuilder connectionStringTooltipStringBuilder = new StringBuilder("=================================<p>");
+		connectionStringTooltipStringBuilder.append("EDS/APS/HPS connection url examples<p>");
+		connectionStringTooltipStringBuilder.append("=================================<p><p>");
+		connectionStringTooltipStringBuilder.append("EDS 7.x, APS 9.0.x to 9.2.x:<p>");
+		connectionStringTooltipStringBuilder.append(tab + "EDSUrl=tcpip://pchiadg1:5001<p>");
+		connectionStringTooltipStringBuilder.append(tab + "EDSUrl=http://localhost:11080/eds/EssbaseEnterprise<p><p>");
+		connectionStringTooltipStringBuilder.append("APS 9.3.x:<p>");
+		connectionStringTooltipStringBuilder.append(tab + "EDSUrl=http://localhost:13080/aps/JAPI<p><p>");
+		connectionStringTooltipStringBuilder.append("HPS 11.1.x and above:<p>");
+		connectionStringTooltipStringBuilder.append(tab + "EDSUrl=Embedded<p>");
+		connectionStringTooltipStringBuilder.append("EDSUrl=http://localhost:13080/aps/JAPI<p><p>");
+		connectionStringTooltipStringBuilder.append("Connection String Example:<p>");
+		connectionStringTooltipStringBuilder.append(tab + "EDSDomain=Essbase;EDSUrl=http://localhost:13080/aps/JAPI;Server=localhost;User=admin;Password=password;Application=Titan;Database=Titan<p>");
+		
+		connectionStringTooltip = connectionStringTooltipStringBuilder.toString();
+		
 	}
 	
 	@Override
@@ -62,6 +85,13 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 			
 			field.setHeight("3em");
 			field.setWidth("95%");
+			
+			TextField tf = (TextField) field;
+			
+			tf.setInputPrompt(CONNECTION_STRING_INPUT_PROMPT);
+					
+			tf.setDescription(connectionStringTooltip);	
+			
 			
 		} else if ( propertyId.equals(META_DATA_SERVICE_PROVIDER) ) {
 			
