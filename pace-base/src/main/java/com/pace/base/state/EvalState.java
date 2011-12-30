@@ -134,8 +134,8 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private String msrDim;
 	private String timeDim;
 	private String versionDim;
-	private String[] axisAllocPriority;		// axisSortPriority less year dimension
-	private String[] axisSortPriority;
+	private String[] axisAllocPriority;		// The dimensions to use for allocation
+	private String[] axisSortPriority;		// The dimensions to use for intersection sorting
 	private String[] dimSequence;
 	
 
@@ -242,7 +242,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 			timePeriods.removeAll(clientState.getLockedPeriods());
 		}
 		
-		// Set useful objects in evalstate object
+		// Set useful objects in eval state object
 		this.setTimePeriodList(timePeriods);  
 
 		//build a list of variance version names

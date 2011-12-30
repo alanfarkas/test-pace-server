@@ -3487,9 +3487,8 @@ public class PafDataService {
 		evalState.setAttributeEval(hasAttributes);
 
 		// Set the axisAllocPriority property on eval state. The axisAlocPriority
-		// is equal to the axisSortPriority less the year dimension. The year
-		// dimension is skipped since it's embedded in the time horizon tree
-		// (TTN-1595).
+		// is equal to the axisSortPriority, except that the time and year 
+		// dimensions are replaced with time horizon dimension (TTN-1595).
 		List<String> axisPriorityList = new ArrayList<String>(Arrays.asList(evalState.getAxisSortPriority()));
 		axisPriorityList.remove(yearDim);
 		int timeDimIndex = axisPriorityList.indexOf(timeDim);

@@ -1182,8 +1182,8 @@ public class EvalUtil {
 	}
 
 	/**
-	 * Return the coordinate for the specified dimension. In the case of the time
-	 * dimension, the time horizon coordinate will be returned.
+	 * Return the intersection coordinate for the specified dimension. In the case of 
+	 * the time dimension, the time horizon coordinate will be returned.
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param dim Dimension name
@@ -1207,9 +1207,8 @@ public class EvalUtil {
 	}
 
 	/**
-	 * Set the coordinate for the specified dimension. In the case of the time
-	 * dimension, this method assumes that the time horizon coordinate is being 
-	 * set.
+	 * Set the intersection coordinate for the specified dimension. In the case of the time
+	 * dimension, this method assumes that the time horizon coordinate is being set.
 	 *
 	 * @param cellIs Cell intersection
 	 * @param dim Dimension name

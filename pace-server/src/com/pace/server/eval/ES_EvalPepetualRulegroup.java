@@ -228,7 +228,8 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
         // setup some local variables
         PafDimTree timeTree = evalState.getTimeSubTree();
         String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
-        String isTime = calcIntersection.getCoordinate(timeDim);
+//        String isTime = calcIntersection.getCoordinate(timeDim);
+        String isTime = EvalUtil.getIsCoord(calcIntersection, timeDim, evalState); 	// TTN-1595
         
         // dump out of no previous sibling
         PafDimMember prevSibling = timeTree.getPrevSibling(timeTree.getMember(isTime)); 
@@ -242,7 +243,8 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
         Intersection isCopy;
         for (PafDimMember m : prevMembers) {
             isCopy = calcIntersection.clone();
-            isCopy.setCoordinate(timeDim, m.getKey());
+//            isCopy.setCoordinate(timeDim, m.getKey());
+            EvalUtil.setIsCoord(isCopy, timeDim, m.getKey(), evalState);		// TTN-1595
             locks.addAll(EvalUtil.buildFloorIntersections(isCopy, evalState));
         }
                 
