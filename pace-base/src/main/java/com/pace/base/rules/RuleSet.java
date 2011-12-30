@@ -68,7 +68,7 @@ public class RuleSet implements Cloneable {
 			
 	        Map<String, Set<String>> impactMemberMap = new HashMap<String, Set<String>>();
 			String measureDim = evalState.getMsrDim();
-			String[] dimensions = evalState.getAxisPriority();
+			String[] dimensions = evalState.getAxisSortPriority();
 			
 			// Initialize member dependency map
 			for (String dimension : dimensions) {

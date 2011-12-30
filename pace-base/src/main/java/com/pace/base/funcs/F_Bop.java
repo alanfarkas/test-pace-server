@@ -77,7 +77,7 @@ public class F_Bop extends AbstractFunction {
 	public Set<Intersection> getTriggerIntersections(IPafEvalState evalState) throws PafException {
 
 		String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim(); 
-		String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
+		String timeDim = evalState.getTimeDim();
 		filterMap.put(msrDim, new HashSet<String>());
 		filterMap.put(timeDim, new HashSet<String>()); 
 
@@ -85,7 +85,7 @@ public class F_Bop extends AbstractFunction {
 		filterMap.get(msrDim).add(this.measureName); 
 
 		Set<Intersection> iSet;
-		iSet = findIntersections(filterMap, evalState.getCurrentChangedCells()); 
+		iSet = findIntersections(filterMap, evalState.getCurrentChangedCells(), evalState); 
 		return iSet;
 
 	}

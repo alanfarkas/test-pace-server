@@ -28,8 +28,10 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.app.MdbDef;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.funcs.IPafFunction;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -58,8 +60,8 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 		long startTime = System.currentTimeMillis();
 		long stepTime;
 		PafDataCache dataCache = evalState.getDataCache();
-        String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();
-        String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
+		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
+        String measureDim = mdbDef.getMeasureDim();
         
 		HashSet<Intersection> newChngCells = new HashSet<Intersection>();
 		HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>();
@@ -76,11 +78,11 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 		stepTime = System.currentTimeMillis();
 		Rule leadingRule;
 		
-		// if the rule currently being examined isn't a measure function, then only changes within the current timeslice need to be
+		// if the rule currently being examined isn't a measure function, then only changes within the current time slice need to be
 		// examined
 		if (measFunc == null) {
 			
-			// if any lookback function is used on the right side of the equation then that timeslice must also
+			// if any lookback function is used on the right side of the equation then that time slice must also
 			// be added to the pool
 			
             chngCells = impactingChangeList(evalState.getRule(), evalState);
@@ -97,7 +99,8 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 					if (leadingRule != null && leadingRule.equals(evalState.getRule())) {
 						calcIntersection = is.clone();
 						calcIntersection.setCoordinate(measureDim, leadingRule.getFormula().getResultTerm());
-						calcIntersection.setCoordinate(timeDim, evalState.getCurrentTimeSlice());
+//						calcIntersection.setCoordinate(timeDim, evalState.getCurrentTimeSlice());
+						TimeSlice.applyTimeHorizonCoord(calcIntersection, evalState.getCurrentTimeSlice(), mdbDef);		// TTN-1595
                         
                         // handle lockAllPrior tag.
                         // this tag indicates that when an intersection is calculated, all prior periods level 0
@@ -162,7 +165,8 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 					calcIntersection = EvalUtil.translocateIntersection(is, measFunc, evalState);
 					// emergency exit, not sure I need this anymore
 					// TODO Make time evaluation boundary check more generic
-					if ((calcIntersection != null) && (evalState.getClientState().getUowTrees().getTree(timeDim).hasMember(calcIntersection.getCoordinate(timeDim)) == true)) {
+//					if ((calcIntersection != null) && (evalState.getClientState().getUowTrees().getTree(timeDim).hasMember(calcIntersection.getCoordinate(timeDim)) == true)) {
+					if ((calcIntersection != null) && (dataCache.hasValidTimeHorizonCoord(calcIntersection))) {		// TTN-1595
 						calcIntersection.setCoordinate(measureDim, measFunc.getMeasureName());                        
                         if ( // override locks set or not locked to begin with and not already specified as having a formula
                                 (evalState.getRule().getEvalLockedIntersections() || !evalState.getCurrentLockedCells().contains(calcIntersection))
@@ -203,7 +207,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 			
 			// any cell that is changed from formula evaluation is a potential target for allocation
 			// Normally evaluation results are not locked or allocated to preserve shape
-			// However this can be overriden by a rule flag
+			// However this can be overridden by a rule flag
 			if (evalState.getRule().isLockSystemEvaluationResult()) {
 				evalState.getCurrentLockedCells().addAll(newChngCells);
 				evalState.addAllAllocations(newChngCells);

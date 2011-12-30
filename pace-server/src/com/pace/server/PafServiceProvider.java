@@ -843,14 +843,9 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			MemberTreeSet treeSet = dataService.getUowCacheTrees(clientState);
 			clientState.setUowTrees(treeSet);
 			
-			// Create locked period collections (TTN-1595)
-			Set<TimeSlice> lockedTimeSlices = new HashSet<TimeSlice>(), invalidTimeSlices = new HashSet<TimeSlice>();
-			Map<String, Set<String>> lockedPeriodMap = new HashMap<String, Set<String>>();	
-			appService.createLockedPeriodCollections(clientState, lockedTimeSlices, invalidTimeSlices, lockedPeriodMap);
-			clientState.setLockedTimeSlices(lockedTimeSlices);
-			clientState.setInvalidTimeSlices(invalidTimeSlices);
-			clientState.setLockedPeriodMap(lockedPeriodMap);
-			clientState.setLockedPeriods(appService.getLockedList(clientState, true));
+			// Create client state locked period collections (TTN-1595)
+			appService.createLockedPeriodCollections(clientState);
+			Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
 			for (String year : lockedPeriodMap.keySet()) {
 				Set<String> lockedPeriods = lockedPeriodMap.get(year);
 				logger.info(Messages.getString("PafServiceProvider.48") + year + Messages.getString("PafServiceProvider.49") + lockedPeriods); //$NON-NLS-1$ //$NON-NLS-2$
@@ -859,8 +854,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 			// Create member index lists on each dimension - used to sort allocation
 			// intersections in evaluation processing (TTN-1391)
-			Map<String, HashMap<String, Integer>> memberIndexLists = 
-				dataService.getUowMemberIndexLists(treeSet);
+			Map<String, HashMap<String, Integer>> memberIndexLists = dataService.getUowMemberIndexLists(treeSet);
 			clientState.setMemberIndexLists(memberIndexLists);
 			
 			// calculate dynamic rule sets for the client

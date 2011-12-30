@@ -81,7 +81,7 @@ public class F_Prev extends AbstractFunction {
     		}
 
     		// Check for invalid measure
-    		PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
+    		PafDimTree measureTree = evalState.getEvaluationTree(measureDim);		// TTN-1595
     		if (!measureTree.hasMember(measureName)) {
     			String errMsg = "Illegal measure name: [" + measureName + "] used in @Prev function";
     			throw new IllegalArgumentException(errMsg);
@@ -127,7 +127,7 @@ public class F_Prev extends AbstractFunction {
 			filterMap.put(this.measureDim, mbrList);
 			Set<Intersection> filteredDirty = new HashSet<Intersection>(dirty.size() * 2);
 			
-			filteredDirty = this.findIntersections(filterMap, dirty);
+			filteredDirty = this.findIntersections(filterMap, dirty, evalState);
 			
 			return filteredDirty;
 		}
@@ -163,9 +163,9 @@ public class F_Prev extends AbstractFunction {
     	else 
     		offsetDim = app.getMdbDef().getTimeDim();
     	
-		offsetTree = evalState.getDataCacheTrees().getTree(offsetDim);
-     	
-    	if (parms.length > 2 )  {
+		offsetTree = evalState.getEvaluationTree(offsetDim);
+	
+		if (parms.length > 2 )  {
 			index = parms[2];
     		try {
         		offset = Integer.valueOf(index) * -1;

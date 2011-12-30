@@ -109,7 +109,7 @@ public class ES_EvaluateContribPctVersions implements IEvalStep {
 		}
 		
 		// Sort contribution percent changed cells in target intersection order 
-		String[] axisSeq = evalState.getAxisPriority();
+		String[] axisSeq = evalState.getAxisSortPriority();
 		Intersection[] orderedTargetIntersections = EvalUtil.sortIntersectionsByAxis(changedContribPctCellsByTarget.keySet().toArray(new Intersection[0]), 
 				evalState.getClientState().getMemberIndexLists(), axisSeq, SortOrder.Descending);            
 

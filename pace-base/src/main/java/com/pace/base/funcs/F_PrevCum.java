@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDimTree;
@@ -110,7 +111,7 @@ public class F_PrevCum extends AbstractFunction {
    	
     	
     	// Check validity of measure arguments for existence in measures dimension
-    	PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
+    	PafDimTree measureTree = evalState.getEvaluationTree(measureDim);			// TTN-1595
     	if (!measureTree.hasMember(this.measureName)){
     		errMsg += "[" + this.measureName + "] is not a valid member of the [" + measureDim + "] dimension.";
     		logger.error(errMsg);
@@ -124,7 +125,7 @@ public class F_PrevCum extends AbstractFunction {
 		if (parms.length > 1) {
 			offsetDim = parms[1];
 			// Check validity of dimension argument for existing dimension
-			offsetTree = evalState.getDataCacheTrees().getTree(offsetDim);
+			offsetTree = evalState.getEvaluationTree(offsetDim);		// TTN-1595
 			if (offsetTree == null) {
 				errMsg += "[" + this.measureName
 						+ "] is not a valid member of the [" + measureDim
@@ -134,7 +135,7 @@ public class F_PrevCum extends AbstractFunction {
 			}
 		} else {
 			offsetDim = evalState.getTimeDim();
-			offsetTree = evalState.getDataCacheTrees().getTree(offsetDim);
+			offsetTree = evalState.getEvaluationTree(offsetDim);		// TTN-1595
 		}
 		
 		// be default the offset amount is 1, however if a 3rd parameter is
@@ -179,7 +180,8 @@ public class F_PrevCum extends AbstractFunction {
         	iSet = new HashSet<Intersection>(chngBaseMsrs.size() * 2);   
             for (Intersection is : chngBaseMsrs) {
                 currentChange = is.clone();
-                currentChange.setCoordinate(timeDim, evalState.getCurrentTimeSlice());
+//                currentChange.setCoordinate(timeDim, evalState.getCurrentTimeSlice());
+                EvalUtil.setIsCoord(is, timeDim, evalState.getCurrentTimeSlice(), evalState);			// TTN-1595
                 iSet.add(currentChange);
             }
         }

@@ -33,6 +33,7 @@ import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
@@ -58,7 +59,7 @@ public class F_CrossDim extends AbstractFunction {
 
 	private static Logger logger = Logger.getLogger(F_CrossDim.class);
 	
-	// These variables will hold pre-parsed information, for peformance reasons
+	// These variables will hold pre-parsed information, for performance reasons
 	private Intersection overrideParms = null;
 	private List<String> functionDims = null;
 	
@@ -221,7 +222,6 @@ public class F_CrossDim extends AbstractFunction {
 		List<String> floorDims = new ArrayList<String>();
 		String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();
 		String versionDim = evalState.getAppDef().getMdbDef().getVersionDim();
-		MemberTreeSet dimTrees = evalState.getDataCacheTrees();
 
 		// Create dimension driven data items
 		for (int i = 0; i < overrideParms.getDimensions().length; i++) {
@@ -240,7 +240,7 @@ public class F_CrossDim extends AbstractFunction {
 		}
 
 		// Find the intersections that match the overridden dimensions passed to this function
-		Set<Intersection> matchingChangedCells = findIntersections(filterMap, evalState.getCurrentChangedCells()); 
+		Set<Intersection> matchingChangedCells = findIntersections(filterMap, evalState.getCurrentChangedCells(), evalState); 
 
 		
 		// Get the potential impact list for each matching intersection and add to trigger set
@@ -251,7 +251,7 @@ public class F_CrossDim extends AbstractFunction {
 		} else {
 			// Clone each matching changed intersection across the floor of each floor dimension
 			for (Intersection matchingChangedCell : matchingChangedCells) {
-				triggerSet.addAll(cloneIntersections(matchingChangedCell, floorDims, dimTrees));
+				triggerSet.addAll(cloneIntersections(matchingChangedCell, floorDims, evalState));
 			}
 		}
 		
@@ -289,7 +289,8 @@ public class F_CrossDim extends AbstractFunction {
 				members.add(memberSpec);
 			} else {
 				// Token is specified, add all dimension members
-				PafDimTree dimTree = evalState.getDataCacheTrees().getTree(dim);
+				PafDimTree dimTree = evalState.getEvaluationTree(dim);
+				members = new HashSet<String>();
 				members.addAll(Arrays.asList(dimTree.getMemberKeys()));
 			}
 			dependencyMap.put(dim, members);
@@ -305,14 +306,15 @@ public class F_CrossDim extends AbstractFunction {
 	 *
 	 * @param intersection Intersection
 	 * @param floorDims Floor dimensions
-	 * @param dimTrees Dimension trees
+	 * @param evalState Evaluation state
 	 * 
 	 * @return ArrayList<Intersection>
 	 */
-	private ArrayList<Intersection> cloneIntersections(Intersection intersection, List<String> floorDims, MemberTreeSet dimTrees) {
+	private ArrayList<Intersection> cloneIntersections(Intersection intersection, List<String> floorDims, IPafEvalState evalState) {
 
 		String[] allDims = intersection.getDimensions();
 		ArrayList[] memberArrays = new ArrayList[allDims.length];
+		
 
 		// Build member lists for clone process
 		int i = 0;
@@ -320,14 +322,14 @@ public class F_CrossDim extends AbstractFunction {
 			ArrayList<String> memberList = new ArrayList<String>();
 			if (floorDims.contains(dim)) {
 				// Floor dimension - Member list equals dimension floor
-				PafDimTree dimTree = dimTrees.getTree(dim);
+				PafDimTree dimTree = evalState.getEvaluationTree(dim);			// TTN-1595
 				List<PafDimMember> floorMembers = dimTree.getLowestLevelMembers();
 				for (PafDimMember floorMember:floorMembers) {
 					memberList.add(floorMember.getKey());
 				}
 			} else {
 				// Else member list equals current coordinate
-				memberList.add(intersection.getCoordinate(dim));
+				memberList.add(EvalUtil.getIsCoord(intersection, dim, evalState));	// TTN-1595
 			}
 			memberArrays[i++] = memberList;
 		}
@@ -339,7 +341,11 @@ public class F_CrossDim extends AbstractFunction {
 		Intersection clonedIntersection;
 		while (odom.hasNext()) {
 			clonedIntersection = new Intersection(allDims, (String[])odom.nextValue().toArray(new String[0]));
-			clonedIntersections.add(clonedIntersection);
+//			// Filter out any intersections whose time coordinates are not valid in the
+//			// time horizon tree (TTN-1595).
+//			if (EvalUtil.hasValidTimeCoord(clonedIntersection, evalState)) {
+				clonedIntersections.add(clonedIntersection);
+//			}
 		}
 
 		return clonedIntersections;

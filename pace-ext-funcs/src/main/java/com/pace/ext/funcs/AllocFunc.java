@@ -49,7 +49,7 @@ public class AllocFunc extends AbstractFunction {
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 
     	// convenience variables
-      	String msrDim = dataCache.getMeasureDim(), timeDim = dataCache.getTimeDim();
+      	String msrDim = dataCache.getMeasureDim();
  	
     	// Validate function parameters
     	validateParms(evalState);
@@ -57,7 +57,7 @@ public class AllocFunc extends AbstractFunction {
     	
         // targets holds all intersections to allocate into.
     	// The lists have been processed by validateParms
-    	// initialize it off the list of target measures and the evalstate collections
+    	// initialize it off the list of target measures and the eval state collections
     	
 
         Set<Intersection> allocTargets = new HashSet<Intersection>();
@@ -112,7 +112,7 @@ public class AllocFunc extends AbstractFunction {
    	
     	
     	// Check validity of all arguments for existence in measures dimension
-    	PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
+    	PafDimTree measureTree = evalState.getEvaluationTree(measureDim);
     	for (parmIndex = 0; parmIndex < parms.length; parmIndex++) {
     		String member = parms[parmIndex];
     		if (!measureTree.hasMember(member)){
@@ -235,7 +235,7 @@ public class AllocFunc extends AbstractFunction {
     }
     
     /**
-     * This takes an arbitray intersection and allocates it across a potential pool of intersections. No restrictions are initially
+     * This takes an arbitrary intersection and allocates it across a potential pool of intersections. No restrictions are initially
      * placed on the validity of this pool as it's used to do measure to measure allocations. The math however won't work if the parent
      * doesn't total the children as thats assumed the base condition for allocation.
      * 
@@ -253,9 +253,9 @@ public class AllocFunc extends AbstractFunction {
 	    	// if (logger.isDebugEnabled()) logger.debug("Allocating change for :" + intersection.toString() + " = " + allocTotal);
 	
 	    	// convenience variables
-	    	String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
-	        String currentYear = evalState.getAppDef().getCurrentYear(); 
-	        String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
+//	    	String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
+//	        String currentYear = evalState.getAppDef().getCurrentYear(); 
+//	        String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
 	        String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
 	    	
 	    	long stepTime = System.currentTimeMillis();
@@ -282,8 +282,9 @@ public class AllocFunc extends AbstractFunction {
 			
 	        for (Intersection target : targets) {
 	            if (evalState.getCurrentLockedCells().contains(target) || 
-	                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
-	                            target.getCoordinate(yearDim).equals(currentYear)) ||
+//	                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
+//	                            target.getCoordinate(yearDim).equals(currentYear)) ||
+	    	            (EvalUtil.isElapsedIs(target, evalState, dataCache)) || 			// TTN-1595
 	                    excludedMsrs.contains(target.getCoordinate(msrDim)) 
 	            		) {
 	                lockedTotal += dataCache.getCellValue(target);
@@ -319,8 +320,9 @@ public class AllocFunc extends AbstractFunction {
 	//            	
 	
 	                // total elapsed period locks and add them to a specific collection
-	                if (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
-	                                target.getCoordinate(yearDim).equals(currentYear) ) {
+//	                if (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
+//	                                target.getCoordinate(yearDim).equals(currentYear) ) {
+	            	if (EvalUtil.isElapsedIs(target, evalState, dataCache)) {			// TTN-1595
 	                	elapsedTotal += dataCache.getCellValue(target);
 	                	elapsedTargets.add(target);              
 	                }  

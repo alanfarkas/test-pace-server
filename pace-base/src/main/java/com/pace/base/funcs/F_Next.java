@@ -35,7 +35,7 @@ import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * Implements a next function. It looks up the value of the a particular intersection in the datacache
+ * Implements a next function. It looks up the value of the a particular intersection in the data cache
  * ie. @Next(BOP_DLR, Time, 1)
  * would return the value of at the intersection, that starts at the source intersection, but is invoked
  * for the measure BOP_DLR, and is offset in the Time dimension + 1
@@ -74,14 +74,14 @@ public class F_Next extends AbstractFunction {
     		
     	} catch (RuntimeException e) {
 			
-			// Check for absense of parameters
+			// Check for absence of parameters
 			if (parms.length == 0) {
 				String errMsg = "@Next function requires at least one parameter";
 				throw new IllegalArgumentException(errMsg);
 			}
 			
 			// Check for invalid measure
-			PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
+			PafDimTree measureTree = evalState.getEvaluationTree(measureDim);
 			if (!measureTree.hasMember(measureName)) {
 				String errMsg = "Illegal measure name: [" + measureName + "] used in @Next function";
 				throw new IllegalArgumentException(errMsg);
@@ -126,7 +126,7 @@ public class F_Next extends AbstractFunction {
 			filterMap.put(this.measureDim, mbrList);
 			Set<Intersection> filteredDirty = new HashSet<Intersection>(dirty.size() * 2);
 			
-			filteredDirty = this.findIntersections(filterMap, dirty);
+			filteredDirty = this.findIntersections(filterMap, dirty, evalState);
 			
 			return filteredDirty;
 		}
@@ -162,7 +162,7 @@ public class F_Next extends AbstractFunction {
     	else 
     		offsetDim = app.getMdbDef().getTimeDim();
     	
-		offsetTree = evalState.getDataCacheTrees().getTree(offsetDim);
+		offsetTree = evalState.getEvaluationTree(offsetDim);		// TTN-1595
      	
 		
     	if (parms.length > 2 )  {

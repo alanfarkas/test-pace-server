@@ -33,6 +33,7 @@ import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.VersionDef;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
@@ -133,7 +134,8 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private String msrDim;
 	private String timeDim;
 	private String versionDim;
-	private String[] axisPriority;
+	private String[] axisAllocPriority;		// axisSortPriority less year dimension
+	private String[] axisSortPriority;
 	private String[] dimSequence;
 	
 
@@ -192,7 +194,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 		}
 
 		// initialize default axis priority
-		this.axisPriority = appDef.getMdbDef().getAxisPriority();
+		this.axisSortPriority = appDef.getMdbDef().getAxisPriority();
 		
 		// process protected cell formulas into formula objects
 		// each protected cell maps to it's formula object
@@ -233,7 +235,8 @@ public class EvalState implements IPafEvalState, Cloneable {
 		// initialize time structures.
 		// Get a post order version of the time dimension for the data cache
 		// and filter out any locked periods
-		this.timeSubTree = dataCacheTrees.getTree(timeDim);
+//		this.timeSubTree = dataCacheTrees.getTree(timeDim);
+		this.timeSubTree = dataCacheTrees.getTree(this.getTimeHorizonDim());	// TTN-1595
 		List<String> timePeriods = timeSubTree.getMemberNames(TreeTraversalOrder.POST_ORDER);
 		if (clientState.getLockedPeriods() != null) {
 			timePeriods.removeAll(clientState.getLockedPeriods());
@@ -563,7 +566,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 	}
 
 	private void addChangedCellByTime(Intersection is) {
-		String timeName = is.getCoordinate(getTimeDim());
+		String timeName = TimeSlice.buildTimeHorizonCoord(is, appDef.getMdbDef());	// TTN-1595
 		if (!changedCellsByTime.containsKey(timeName)) {
 			changedCellsByTime.put(timeName, new HashSet<Intersection>(LG_CHNG_LOAD));
 		}
@@ -572,14 +575,14 @@ public class EvalState implements IPafEvalState, Cloneable {
 	}
 	
 	private void removeChangedCellByTime(Intersection is) {
-		String timeName = is.getCoordinate(getTimeDim());
+		String timeName = TimeSlice.buildTimeHorizonCoord(is, appDef.getMdbDef());	// TTN-1595
 		if (changedCellsByTime.containsKey(timeName)) {
 			changedCellsByTime.get(timeName).remove(is);
 		}
 	}
 	
 	private void addOrigLockedCellByTime(Intersection is) {
-		String timeName = is.getCoordinate(getTimeDim());
+		String timeName = TimeSlice.buildTimeHorizonCoord(is, appDef.getMdbDef());	// TTN-1595
 		if (!origLockedCellsByTime.containsKey(timeName)) {
 			origLockedCellsByTime.put(timeName, new HashSet<Intersection>(LG_CHNG_LOAD));
 		}
@@ -587,7 +590,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 	}
 	
 	private void removeOrigLockedCellByTime(Intersection is) {
-		String timeName = is.getCoordinate(getTimeDim());
+		String timeName = TimeSlice.buildTimeHorizonCoord(is, appDef.getMdbDef());	// TTN-1595
 		if (origLockedCellsByTime.containsKey(timeName)) {
 			origLockedCellsByTime.get(timeName).remove(is);
 		}
@@ -761,7 +764,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private void addChangedContribPctCellByTime(Intersection is) {
 		
 		// Initialize time entries
-		String periodName = is.getCoordinate(getTimeDim());
+		String periodName = TimeSlice.buildTimeHorizonCoord(is, appDef.getMdbDef());	// TTN-1595
 		if (!changedContribPctCellsByTime.containsKey(periodName)) {
 			changedContribPctCellsByTime.put(periodName, new HashSet<Intersection>());
 		}
@@ -779,7 +782,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private void removeChangedContribPctCellByTime(Intersection is) {
 		
 		// Get periods name
-		String periodName = is.getCoordinate(getTimeDim());
+		String periodName = TimeSlice.buildTimeHorizonCoord(is, appDef.getMdbDef());	// TTN-1595
 		
 		// Remove intersection
 		if (changedContribPctCellsByTime.containsKey(periodName)) {
@@ -1050,17 +1053,33 @@ public class EvalState implements IPafEvalState, Cloneable {
 
 
 	/**
-	 * @return the axisPriority
+	 * @return the axisAllocPriority
 	 */
-	public String[] getAxisPriority() {
-		return axisPriority;
+	public String[] getAxisAllocPriority() {
+		return axisAllocPriority;
+	}
+
+
+	/**
+	 * @param axisAllocPriority the axisAllocPriority to set
+	 */
+	public void setAxisAllocPriority(String[] axisAllocPriority) {
+		this.axisAllocPriority = axisAllocPriority;
+	}
+
+
+	/**
+	 * @return the axisSortPriority
+	 */
+	public String[] getAxisSortPriority() {
+		return axisSortPriority;
 	}
 
 	/**
-	 * @param axisPriority the axisPriority to set
+	 * @param axisSortPriority the axisSortPriority to set
 	 */
-	public void setAxisPriority(String[] axisPriority) {
-		this.axisPriority = axisPriority;
+	public void setAxisSortPriority(String[] axisSortPriority) {
+		this.axisSortPriority = axisSortPriority;
 	}
 
 
@@ -1108,6 +1127,30 @@ public class EvalState implements IPafEvalState, Cloneable {
 
 	public List<String> getTriggeredAggMsrs() {
 		return this.triggeredAggMsrs;
+	}
+
+
+	
+	/**
+	 * Returns the proper evaluation tree to use for the specified
+	 * uow dimension. 
+	 * 
+	 * @param dim Dimension name
+	 * @return Dim Tree
+	 */
+	public PafDimTree getEvaluationTree(String dim) {
+
+		PafDimTree evalTree = null;
+		
+		// Substitute the time horizon tree when the time dimension
+		// is specified, else return the specified dimension tree
+		if (!dim.equalsIgnoreCase(timeDim)) {
+			evalTree = this.getClientState().getUowTrees().getTree(dim);
+		} else {
+			evalTree =  this.getTimeSubTree();
+		}
+
+		return evalTree;
 	}
 	
 

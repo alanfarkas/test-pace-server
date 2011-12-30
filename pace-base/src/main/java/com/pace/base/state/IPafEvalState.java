@@ -17,7 +17,8 @@ import com.pace.base.rules.Rule;
 
 public interface IPafEvalState {
     public String getPlanningVersionName();
-    public MemberTreeSet getDataCacheTrees();
+//    public MemberTreeSet getDataCacheTrees();
+	public PafDimTree getEvaluationTree(String string);				// Substitutes time horizon tree for time dim 
     public PafApplicationDef getAppDef();
 	public PafClientState getClientState();
     public Map<String, Set<Intersection>> getChangedCellsByTime();
@@ -45,4 +46,5 @@ public interface IPafEvalState {
 	public void addChangedCell(Intersection target);
 	public String getTimeDim();
 	public List<String> getTriggeredAggMsrs();
+	public String getTimeHorizonDim();
 }

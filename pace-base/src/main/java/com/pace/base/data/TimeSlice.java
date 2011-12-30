@@ -22,6 +22,24 @@ public class TimeSlice {
 
 
 	/**
+	 * Generate a time horizon coordinate from the supplied cell intersection
+	 *
+	 * @param cellIs Cell intersection
+	 * @param timeHorizonCoord Time horizon coordinate
+	 * @param mdbDef Mdb dimension definition
+	 * 
+	 * @return Time horizon coordinate
+	 */
+	public TimeSlice(Intersection cellIs, MdbDef mdbDef) {
+
+		String timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
+		String period = cellIs.getCoordinate(timeDim), year = cellIs.getCoordinate(yearDim);
+		
+		this.period = period;
+		this.year = year;
+	}
+	
+	/**
 	 * @param period Time dimension coordinate
 	 * @param year Year dimension coordinate
 	 */
@@ -116,7 +134,6 @@ public class TimeSlice {
 	 * Generate a time horizon coordinate from the supplied cell intersection
 	 *
 	 * @param cellIs Cell intersection
-	 * @param timeHorizonCoord Time horizon coordinate
 	 * @param mdbDef Mdb dimension definition
 	 * 
 	 * @return Time horizon coordinate

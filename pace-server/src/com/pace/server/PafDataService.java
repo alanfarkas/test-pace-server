@@ -1058,7 +1058,7 @@ public class PafDataService {
 		logger.info(LogUtil.timedStep(stepDesc, startTime));
 
 		// Get data slice corresponding to this view section
-		dataSlice = dataCache.getDataSlice(sliceParms, clientState.getInvalidTimeSlices());
+		dataSlice = dataCache.getDataSlice(sliceParms);
 
 		if (compressData == true){
 			// compress slice for return.
@@ -3440,9 +3440,9 @@ public class PafDataService {
 		PafDataSlice newSlice = evalRequest.getDataSlice();
 		PafMVS pafMVS = dataCache.getPafMVS();
 		PafApplicationDef appDef = clientState.getApp();
+		MdbDef mdbDef = appDef.getMdbDef();
 		PafViewSection currentViewSection = pafMVS.getViewSection();
-		String measureDim = appDef.getMdbDef().getMeasureDim();
-		String versionDim = appDef.getMdbDef().getVersionDim();
+		String measureDim = mdbDef.getMeasureDim(), versionDim = mdbDef.getVersionDim(), timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
 		boolean hasAttributes = currentViewSection.hasAttributes();
 
 		if (newSlice.isCompressed()) {
@@ -3482,10 +3482,21 @@ public class PafDataService {
 		SliceState sliceState = new SliceState(evalRequest);
 		sliceState.setDataSliceParms(sliceParms);
 		EvalState evalState = new EvalState(sliceState, clientState, dataCache);
-		evalState.setAxisPriority(currentViewSection.getDimensionCalcSequence());
+		evalState.setAxisSortPriority(currentViewSection.getDimensionCalcSequence());
 		evalState.setDimSequence(currentViewSection.getDimensionsPriority());
 		evalState.setAttributeEval(hasAttributes);
 
+		// Set the axisAllocPriority property on eval state. The axisAlocPriority
+		// is equal to the axisSortPriority less the year dimension. The year
+		// dimension is skipped since it's embedded in the time horizon tree
+		// (TTN-1595).
+		List<String> axisPriorityList = new ArrayList<String>(Arrays.asList(evalState.getAxisSortPriority()));
+		axisPriorityList.remove(yearDim);
+		int timeDimIndex = axisPriorityList.indexOf(timeDim);
+		axisPriorityList.remove(timeDim);
+		axisPriorityList.add(timeDimIndex, dataCache.getTimeHorizonDim());
+		evalState.setAxisAllocPriority(axisPriorityList.toArray(new String[0]));
+		
 		// Set the measure rule set. If a measure rule set name is specified,
 		// use that rule set, else just use the default rule set.
 		RuleSet measureRuleset;

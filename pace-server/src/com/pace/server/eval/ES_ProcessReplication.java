@@ -97,7 +97,7 @@ public class ES_ProcessReplication implements IEvalStep {
 		// This is done to allow lower level replicated intersections to be created.
     	// Else their targets will get locked out by upper level intersections. 
 		Intersection[] sortedReplicatedIx =  EvalUtil.sortIntersectionsByAxis(replicatedIx, 
-				evalState.getClientState().getMemberIndexLists(), evalState.getAxisPriority(), 
+				evalState.getClientState().getMemberIndexLists(), evalState.getAxisSortPriority(), 
 				SortOrder.Ascending);            
 
 

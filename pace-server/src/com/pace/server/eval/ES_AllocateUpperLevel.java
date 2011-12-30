@@ -28,12 +28,14 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
 import com.pace.base.SortOrder;
+import com.pace.base.app.MdbDef;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.VersionType;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
@@ -58,7 +60,8 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         long startTime = System.currentTimeMillis();
         long stepTime;
         PafDataCache dataCache = evalState.getDataCache();
-        String timeDim = evalState.getTimeDim();
+        final String timeDim = evalState.getTimeHorizonDim();
+        final MdbDef mdbDef = evalState.getAppDef().getMdbDef();
        
         // don't do non-aggregate or recalc measures
         if ( evalState.getMeasureType() == MeasureType.Recalc 
@@ -94,10 +97,12 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 	            // Assert: only 1 change will exist that satisfies all these conditions
 	            Intersection chngedTBFirst = null;
 	            for (Intersection is : allocIntersections) {
-	                if ( ancNames.contains(is.getCoordinate(timeDim))) {
+//	                if ( ancNames.contains(is.getCoordinate(timeDim))) {
+	                if (ancNames.contains(TimeSlice.buildTimeHorizonCoord(is, mdbDef))) {	// TTN-1595
 	                    chngedTBFirst = is;
 	                }
 	            }
+	            
 	            if (chngedTBFirst != null) {
 	            	// set all intersections to the changed intersections value
 	            	
@@ -105,12 +110,14 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 	            	double chngVal = dataCache.getCellValue( chngedTBFirst );
 	            	
 	            	// remove change from list
-	            	ancNames.remove(chngedTBFirst.getCoordinate(timeDim));
+//	            	ancNames.remove(chngedTBFirst.getCoordinate(timeDim));
+	            	ancNames.remove(TimeSlice.buildTimeHorizonCoord(chngedTBFirst, mdbDef)); // TTN-1595
 	            	
 	            	// for each remaining time period update the data value and put in changed cell stack
 	            	for (String name : ancNames) {
 		            	Intersection tmp = chngedTBFirst.clone();	            		
-	            		tmp.setCoordinate(timeDim, name);
+//	            		tmp.setCoordinate(timeDim, name);
+	            		TimeSlice.applyTimeHorizonCoord(tmp, name, mdbDef);
 	            		dataCache.setCellValue(tmp, chngVal);
 	            		evalState.addChangedCell(tmp);
 	            	}
@@ -122,7 +129,8 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         
         else if ( evalState.isTimeSliceMode() ) {
             for (Intersection is : allocIntersections) {
-                if ( !is.getCoordinate(timeDim).equalsIgnoreCase(evalState.getCurrentTimeSlice())) skipIS.add(is);
+//              if ( !is.getCoordinate(timeDim).equalsIgnoreCase(evalState.getCurrentTimeSlice())) skipIS.add(is);
+            	if (TimeSlice.buildTimeHorizonCoord(is, mdbDef).equals(evalState.getCurrentTimeSlice())) skipIS.add(is);	// TTN-1595
             }
         }
 
@@ -140,12 +148,12 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         }
         
         
-        String[] axisSeq = evalState.getAxisPriority();
+        String[] axisSortSeq = evalState.getAxisSortPriority();
         Intersection[] allocCells;
 
         stepTime = System.currentTimeMillis();
         allocCells = EvalUtil.sortIntersectionsByAxis(allocIntersections.toArray(new Intersection[0]), 
-        		evalState.getClientState().getMemberIndexLists(),axisSeq, SortOrder.Ascending);            
+        		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);            
 //        if (logger.isDebugEnabled()) logger.debug(LogUtil.timedStep("Sorting intersections in axis sequence", stepTime));
 
         stepTime = System.currentTimeMillis();
@@ -179,14 +187,11 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
      */
     public PafDataCache allocateChange(Intersection intersection, EvalState evalState, PafDataCache dataCache) throws PafException {
 
-    	double allocTotal = dataCache.getCellValue(intersection);
-//  	if (logger.isDebugEnabled()) logger.debug("Allocating change for :" + intersection.toString() + " = " + allocTotal);
+ //  	if (logger.isDebugEnabled()) logger.debug("Allocating change for :" + intersection.toString() + " = " + allocTotal);
 
     	// useful values
-    	String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();
-    	String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
-        String currentYear = evalState.getAppDef().getCurrentYear(); 
-        String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
+  //   	String timeDim = mdbDef.getTimeDim(), currentYear = evalState.getAppDef().getCurrentYear(); 
+  //    String yearDim = mdbDef.getYearDim();
      	
     	long stepTime = System.currentTimeMillis();
 
@@ -196,13 +201,14 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         Set<String> lockedTimePeriods = null;
 
         if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
-            lockedTimePeriods = evalState.getClientState().getLockedPeriods();
+            lockedTimePeriods = evalState.getClientState().getLockedTimeHorizonPeriods();
         }
         if (lockedTimePeriods == null)
             lockedTimePeriods = new HashSet<String>(0);  
         
         // dump out if current intersection is in an elapsed period
-        if (lockedTimePeriods.contains(intersection.getCoordinate(timeDim))) return dataCache;
+//        if (lockedTimePeriods.contains(intersection.getCoordinate(timeDim))) return dataCache;
+        if (EvalUtil.isElapsedIs(intersection, evalState, dataCache)) return dataCache;		// TTN-1595 
     	
         
     	List<Intersection> targetList = EvalUtil.buildFloorIntersections(intersection, evalState);
@@ -218,20 +224,21 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         stepTime = System.currentTimeMillis();    
         
 
-        
         double lockedTotal = 0;
         Set<Intersection> lockedTargets = new HashSet<Intersection>(evalState.getLoadFactor());
         
         // add up all locked cell values
         for (Intersection target : targets) {
             if (evalState.getCurrentLockedCells().contains(target) || 
-                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
-                            target.getCoordinate(yearDim).equals(currentYear))  ) {
+//                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
+//                           target.getCoordinate(yearDim).equals(currentYear))  ) {
+            		(EvalUtil.isElapsedIs(target, evalState, dataCache))) {		// TTN-1595
                 lockedTotal += dataCache.getCellValue(target);
                 lockedTargets.add(target);              
             }
         }
 
+        double allocTotal = dataCache.getCellValue(intersection);      
         double allocAvailable = 0;
         
         // normal routine, remove locked intersections from available allocation targets
@@ -258,8 +265,9 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 //            	
 
                 // total elapsed period locks and add them to a specific collection
-                if (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
-                                target.getCoordinate(yearDim).equals(currentYear) ) {
+ //               if (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
+ //                               target.getCoordinate(yearDim).equals(currentYear) ) {
+            	if (EvalUtil.isElapsedIs(target, evalState, dataCache))	{	// TTN-1595
                 	elapsedTotal += dataCache.getCellValue(target);
                 	elapsedTargets.add(target);              
                 }  

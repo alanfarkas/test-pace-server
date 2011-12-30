@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
@@ -165,7 +166,7 @@ public class WOSFunc extends AbstractFunction {
     	}	
   	
        	// Check validity of measure arguments
-    	PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
+    	PafDimTree measureTree = evalState.getEvaluationTree(measureDim);
     	for (parmIndex = 0; parmIndex < MEASURE_ARGS; parmIndex++) {
     		String member = parms[parmIndex];
     		if (!measureTree.hasMember(member)){
@@ -194,13 +195,14 @@ public class WOSFunc extends AbstractFunction {
 		Set<Intersection> triggerIntersections = null; 
 		Map<String, Set<Intersection>> changedCellsByMsr = evalState.getChangedCellsByMsr();
      	String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
-     	String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
+       	String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
+       	String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
     	
     	// Parse function parameters
      	parseParms(evalState);
     	   			
       	// Get all periods in tree
-        PafDimTree timeTree = evalState.getDataCacheTrees().getTree(timeDim);
+        PafDimTree timeTree = evalState.getEvaluationTree(timeDim);
        	String[] periods = timeTree.getMemberKeys();
 
        	
@@ -224,11 +226,11 @@ public class WOSFunc extends AbstractFunction {
     	if (allSalesIntersections != null) {
     	
 	    	// Find 1 intersection from set / unique dimensionality excluding time.
-	    	// Generate a dimension match set ( all dimensions excluding measures and time )   	
+	    	// Generate a dimension match set ( all dimensions excluding measures and time and year)   	
 	    	
 	    	Set<String> matchDims = new HashSet<String> (10);
 	    	for (String dim : evalState.getAppDef().getMdbDef().getAllDims() ) {
-	    		if ( !(dim.equals(timeDim) || dim.equals(msrDim)) ) matchDims.add(dim);
+	    		if ( !(dim.equals(timeDim) || dim.equals(msrDim)) || dim.equals(yearDim) ) matchDims.add(dim);
 	    	}
 	    	
 	    	// This structure will hold an intersection unique by all dimensions except time and measure
@@ -237,7 +239,8 @@ public class WOSFunc extends AbstractFunction {
 	    	
 	    	for (Intersection is : allSalesIntersections) {
 	    		// if haven't already found an intersection for that dimensionality add
-	    		// generate unique key for this intersection based upon all other dims besides time & measure ( measure assumed constant in this set )
+	    		// generate unique key for this intersection based upon all other dims besides time & measure  & year
+	    		// ( measure assumed constant in this set, year is contained in time coordinate)
 	    		String matchStr = is.getMatchString(matchDims);
 	    		if (!uniqueChangesByTime.containsKey(matchStr)) uniqueChangesByTime.put(matchStr, is);
 	    	}
@@ -253,7 +256,7 @@ public class WOSFunc extends AbstractFunction {
     	
      	Set<Intersection> invIntersections = changedCellsByMsr.get(invMeas);
     	
-     	// Calculate size of appropriate hashmap to initialize for trigger intersections
+     	// Calculate size of appropriate hash map to initialize for trigger intersections
      	int salesSz = salesIntersections == null? 0 : salesIntersections.size() ;
      	int invSz = invIntersections == null? 0 : invIntersections.size() ;
      	
@@ -265,7 +268,8 @@ public class WOSFunc extends AbstractFunction {
     		for (Intersection salesIs : salesIntersections) {
     			for (String period : periods) {
     				Intersection periodIs = salesIs.clone();
-    				periodIs.setCoordinate(timeDim, period);
+ //   				periodIs.setCoordinate(timeDim, period);
+    				EvalUtil.setIsCoord(periodIs, timeDim, period, evalState);		// TTN-1595
     				triggerIntersections.add(periodIs);       				
     			}
     		}

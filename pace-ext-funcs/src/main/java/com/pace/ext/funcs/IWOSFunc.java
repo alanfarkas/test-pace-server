@@ -130,7 +130,7 @@ public class IWOSFunc extends AbstractFunction {
     	}
     	
     	// Check validity of measure arguments
-    	PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
+    	PafDimTree measureTree = evalState.getEvaluationTree(measureDim);
     	for (parmIndex = 0; parmIndex < MEASURE_ARGS; parmIndex++) {
     		String member = parms[parmIndex];
     		if (!measureTree.hasMember(member)){

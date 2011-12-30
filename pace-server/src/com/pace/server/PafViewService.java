@@ -1407,18 +1407,12 @@ public class PafViewService {
 		Set<String> activeVersions = clientState.getActiveVersions();
 		
 		MdbDef mdbDef = pafApp.getMdbDef();
-
-		String elapsedYear = pafApp.getCurrentYear();
 		String timeDim = mdbDef.getTimeDim();
-		String yearDim = mdbDef.getYearDim();
-		
+		String yearDim = mdbDef.getYearDim();		
 		String baseVersion = clientState.getPlanningVersion().getName();
-		
 		String[] serverDimensionOrder;
 //		String[] serverDimensionOrder = mdbDef.getAllDims();
 
-		// the year list from the years dimension in an ordered list
-		List<String> listOfYearMembers = getListofYearMembers();
 
 		for (PafViewSection section : sections) {
 
@@ -1618,10 +1612,11 @@ public class PafViewService {
 
 						}
 
-						/*
-						 * if forward plannable, lock each tuple intersection
-						 * that contains a locked period (TTN-1595).
-						 */
+				   /*
+					* if forward plannable, lock each tuple intersection
+					* that contains a locked period, using the locked period
+					* infomration from the client state (TTN-1595).
+					*/
 
 					} else if (versionType.equals(VersionType.ForwardPlannable)) {
 

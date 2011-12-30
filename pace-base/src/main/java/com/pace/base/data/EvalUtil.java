@@ -31,9 +31,11 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.SortOrder;
+import com.pace.base.app.MdbDef;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafApplicationDef;
@@ -431,19 +433,19 @@ public class EvalUtil {
 	 */
 	public static boolean isElapsedIs(Intersection cellIs, IPafEvalState evalState, IPafDataCache dataCache) {
 		
-		// Ensure intersection maps to a valid time horizon coordinate. If not consider
-		// the intersection as elapsed (TTN-1595)
-		if (!dataCache.hasValidTimeHorizonCoord(cellIs)) {
-			return true;
-		}
+//		// Ensure intersection maps to a valid time horizon coordinate. If not consider
+//		// the intersection as elapsed (TTN-1595)
+//		if (!dataCache.hasValidTimeHorizonCoord(cellIs)) {
+//			return true;
+//		}
 		
 		// Has to be a forward plannable version for elapsed period to apply
 		if (evalState.getPlanVersion().getType() != VersionType.ForwardPlannable) {
 			return false;
-			}
+		}
 		
 		// Must be forward plannable so get locked periods
-		Set<String> lockedTimePeriods = evalState.getClientState().getLockedPeriods();
+		Set<String> lockedTimePeriods = evalState.getClientState().getLockedTimeHorizonPeriods();
 
 		// If no locked periods can't be elapsed.
 		if (lockedTimePeriods == null) {
@@ -451,7 +453,8 @@ public class EvalUtil {
 		}
 		
 		// Check on time dim match
-		if (lockedTimePeriods.contains(cellIs.getCoordinate(dataCache.getTimeDim())))
+		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
+		if (lockedTimePeriods.contains(TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef)))
 			return true;
 		else
 			return false;
@@ -768,8 +771,8 @@ public class EvalUtil {
 //		} else {
 			timeTree = mts.getTree(dataCache.getTimeHorizonDim());			
 //		}
-		String timeHorizonDim = TimeSlice.buildTimeHorizonCoord(is.getCoordinate(timeDim), is.getCoordinate(yearDim));
-		desc = timeTree.getLowestMembers(timeHorizonDim);
+		String timeHorizonCoord = TimeSlice.buildTimeHorizonCoord(is.getCoordinate(timeDim), is.getCoordinate(yearDim));
+		desc = timeTree.getLowestMembers(timeHorizonCoord);
 	
 		// the time dimension floor members vary by time balance attribute of the
 		// current measure
@@ -1178,7 +1181,58 @@ public class EvalUtil {
 		return getBaseIntersections(dataCache, attrIntersections, memberTrees, explodedBaseDims, false);
 	}
 
-    //pmack
+	/**
+	 * Return the coordinate for the specified dimension. In the case of the time
+	 * dimension, the time horizon coordinate will be returned.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension name
+	 * @param evalState Evaluation state
+	 * 
+	 * @return Intersection coordinate
+	 */
+	public static String getIsCoord(Intersection cellIs, String dim, IPafEvalState evalState) {
+		
+		String timeHorizonDim = evalState.getTimeHorizonDim();
+		String timeDim = evalState.getTimeDim();
+		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
+		String coord = null;
+
+		if (!dim.equals(timeDim) && !dim.equalsIgnoreCase(timeHorizonDim)) {
+			coord = cellIs.getCoordinate(dim); 
+		} else {
+			coord = TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef);
+		}
+		return coord;
+	}
+
+	/**
+	 * Set the coordinate for the specified dimension. In the case of the time
+	 * dimension, this method assumes that the time horizon coordinate is being 
+	 * set.
+	 *
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension name
+	 * @param coord Intersection coordinate
+	 * @param evalState Evaluation state
+	 * 
+	 */
+	public static void setIsCoord(Intersection cellIs, String dim, String coord, IPafEvalState evalState) {
+
+		String timeHorizonDim = evalState.getTimeHorizonDim();
+		String timeDim = evalState.getTimeDim();
+		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
+
+		if (!dim.equals(timeDim) && !dim.equalsIgnoreCase(timeHorizonDim)) {
+			cellIs.setCoordinate(dim, coord); 
+		} else {
+			TimeSlice.applyTimeHorizonCoord(cellIs, coord, mdbDef);
+		}
+	
+	}
+
+ 
+	//pmack
     //pmack
 //    public static HashMap<String, RoundingRule> loadRoundingRules(EvalState evalState)
 //    {

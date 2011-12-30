@@ -69,7 +69,7 @@ public class AllocOnlyFunc extends AllocFunc {
    	
     	
     	// Check validity of all arguments for existence in measures dimension
-    	PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
+    	PafDimTree measureTree = evalState.getEvaluationTree(measureDim);
     	for (parmIndex = 0; parmIndex < parms.length; parmIndex++) {
     		String member = parms[parmIndex];
     		if (!measureTree.hasMember(member)){

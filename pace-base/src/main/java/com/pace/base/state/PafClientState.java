@@ -91,7 +91,9 @@ public class PafClientState implements IPafClientState {
     private Set<String> readOnlyMeasuresSet = null;
 	private Map<String, PafBaseTree> mdbBaseTrees = null;   
 	private Map<String, Set<String>> lockedPeriodMap = null;
+	private Set<String> lockedTimeHorizonPeriods = null;
 	private Set<TimeSlice> lockedTimeSlices = null;
+	private Set<String> invalidTimeHorizonPeriods = null;
 	private Set<TimeSlice> invalidTimeSlices = null;
     
     public MemberTreeSet getUowTrees() {
@@ -832,6 +834,20 @@ public class PafClientState implements IPafClientState {
 	}
 
 	/**
+	 * @return the lockedTimeHorizonPeriods
+	 */
+	public Set<String> getLockedTimeHorizonPeriods() {
+		return lockedTimeHorizonPeriods;
+	}
+
+	/**
+	 * @param lockedTimeHorizonPeriods the lockedTimeHorizonPeriods to set
+	 */
+	public void setLockedTimeHorizonPeriods(Set<String> lockedTimeHorizonPeriods) {
+		this.lockedTimeHorizonPeriods = lockedTimeHorizonPeriods;
+	}
+
+	/**
 	 * @return the lockedTimeHorizPeriods
 	 */
 	public Set<TimeSlice> getLockedTimeSlices() {
@@ -843,6 +859,20 @@ public class PafClientState implements IPafClientState {
 	 */
 	public void setLockedTimeSlices(Set<TimeSlice> lockedTimeSlices) {
 		this.lockedTimeSlices = lockedTimeSlices;
+	}
+
+	/**
+	 * @return the invalidTimeHorizonPeriods
+	 */
+	public Set<String> getInvalidTimeHorizonPeriods() {
+		return invalidTimeHorizonPeriods;
+	}
+
+	/**
+	 * @param invalidTimeHorizonPeriods the invalidTimeHorizonPeriods to set
+	 */
+	public void setInvalidTimeHorizonPeriods(Set<String> invalidTimeHorizonPeriods) {
+		this.invalidTimeHorizonPeriods = invalidTimeHorizonPeriods;
 	}
 
 	/**

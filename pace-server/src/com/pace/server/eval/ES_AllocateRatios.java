@@ -36,6 +36,7 @@ import com.pace.base.app.*;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.AttributeUtil;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -70,25 +71,21 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 
 //		long startTime = System.currentTimeMillis();
 //		long stepTime;
-		boolean isBaseDim = true;
 		String currMemberName = null;
 		
-		String[] axisSeq = evalState.getAxisPriority();
-		SortedMap<Integer, List<String>> genTree = null;
-		SortedMap<Integer, List<String>> lvlTree = null;
+		String[] axisAllocSeq = evalState.getAxisAllocPriority();
+		String[] axisSortSeq = evalState.getAxisSortPriority();
 		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
 		PafDataCache dataCache = evalState.getDataCache();
 		PafDimMember currMember = null;
-		PafMVS pafMVS = dataCache.getPafMVS();
 		tempAllocLocks = new HashSet<Intersection>(evalState.getLoadFactor());
 		String msrDim = evalState.getMsrDim();
 		String timeDim = evalState.getTimeDim();
 
 
-
 		// Sort locked intersections resulting from user locks and cell changes
 		Intersection[] lockList = EvalUtil.sortIntersectionsByAxis(evalState.getUserLocksAndChangedCells().toArray(new Intersection[0]), 
-				evalState.getClientState().getMemberIndexLists(), axisSeq, SortOrder.Ascending); 
+				evalState.getClientState().getMemberIndexLists(), axisSortSeq, SortOrder.Ascending); 
 
 		// remove all intersections that are non aggregate or exist in elapsed periods
 		List<Intersection> tempList = new ArrayList<Intersection>();
@@ -131,7 +128,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		
 
 		// process in dimension priority sequence
-		for (String dim : axisSeq ) {        	
+		for (String dim : axisAllocSeq ) {        	
 
 
 			// convenience variable to hold client tree for current dimension
@@ -143,16 +140,18 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 			
 			// check each locked intersection for ratio allocation scenario
 			// list must be processed in top down order in order to waterfall down the ratio allocations
-			lockList = EvalUtil.sortIntersectionsByAxis(tempList.toArray(new Intersection[0]), evalState.getClientState().getMemberIndexLists(), evalState.getAxisPriority(), SortOrder.Ascending);
+			lockList = EvalUtil.sortIntersectionsByAxis(tempList.toArray(new Intersection[0]), evalState.getClientState().getMemberIndexLists(), evalState.getAxisSortPriority(), SortOrder.Ascending);
 			List<String> targetNames = new ArrayList<String>();
 			
 			for (Intersection is : lockList ) {
-				// convenience variables to hold current dim/is value
-				currMemberName = is.getCoordinate(dim);
+				// Get the member coordinate corresponding to the allocated dimension. Time
+				// dimension allocation requires special logic (TTN-1595).
+				currMemberName = EvalUtil.getIsCoord(is, dim, evalState);
+//				currMemberName = is.getCoordinate(dim);
 				currMember = dimTree.getMember(currMemberName);
-				targetNames.clear();
-
+				
 				// if no children along this dimension, no possibility for a ratio allocation
+				targetNames.clear();
 				if (currMember.hasChildren()) {
 					
 					// traverse children, returning true if all legs of traversal result in a locked intersection.
@@ -194,7 +193,8 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 	private boolean isRatioLock(String dim, Intersection is, EvalState evalState,
 			List<String> targetsToAllocate) {
 		// get subtree from client state rooted at test intersection
-		String rootMbrName = is.getCoordinate(dim);
+//		String rootMbrName = is.getCoordinate(dim);
+		String rootMbrName = EvalUtil.getIsCoord(is, dim, evalState); // TTN-1595
 		PafDimTree subTree = evalState.getClientState().getUowTrees().getTree(dim);
 		PafDimMember rootMbr = subTree.getMember(rootMbrName);
 		List<String> targets = new ArrayList<String>();
@@ -234,7 +234,8 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		
 		// construct test intersection
 		Intersection testIs = rootIs.clone();
-		testIs.setCoordinate(dim, memberName);
+		//testIs.setCoordinate(dim, memberName);
+		EvalUtil.setIsCoord(testIs, dim, memberName, evalState); 	// TTN-1595
 		
 		if ( evalState.getOrigLockedCells().contains(testIs) ) {
 			//this node is locked and represents a potential allocation target
@@ -406,9 +407,10 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		// Ideally these could be moved to the class level (but that has multi-threading implications) or
 		// into the evalState
 		
-		Set<String> assocAttrDims = null, baseDims = dataService.getBaseDimNames(), viewAttributes = new HashSet<String>();
+		Set<String> assocAttrDims = null,  viewAttributes = new HashSet<String>();
+		MemberTreeSet uowTrees = evalState.getDataCacheTrees();
+		List<String> baseDims = uowTrees.getBaseDimensions();
 		String baseDim = null;
-		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
 
 		// set dimensional convenience variables 
 		if (evalState.isAttributeEval()) {
@@ -418,11 +420,11 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 				baseDim = dim;
 			} else {
 				// attribute dimension
-				baseDim = dataService.getAttributeTree(dim).getBaseDimName();
+				baseDim = uowTrees.getAttributeTree(dim).getBaseDimName();
 			}
 
 			// Set associated attribute dimensions for current base dimension
-			assocAttrDims = new HashSet<String>(dataService.getBaseTree(baseDim).getAttributeDimNames());
+			assocAttrDims = new HashSet<String>(uowTrees.getBaseTree(baseDim).getAttributeDimNames());
 			assocAttrDims.retainAll(viewAttributes);
 		} else {
 		}
@@ -433,7 +435,8 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		Intersection isTarget;
 		for (String mbrName : targetNames) {
 			isTarget = is.clone();
-			isTarget.setCoordinate(dim, mbrName);
+			//isTarget.setCoordinate(dim, mbrName);
+			EvalUtil.setIsCoord(isTarget, dim, mbrName, evalState);		// TTN-1595
 			// add target to list if regular view or allocation dimension has not associated attributes on view
 			//	 or if target is a valid attribute intersection
 			if (!evalState.isAttributeEval() || assocAttrDims.isEmpty()) {
@@ -448,7 +451,8 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 				}
 
 				// if attribute intersection is valid - add target to list
-				String baseMember = isTarget.getCoordinate(baseDim);
+//				String baseMember = isTarget.getCoordinate(baseDim);
+				String baseMember = EvalUtil.getIsCoord(isTarget, baseDim, evalState);		// TTN-1595
 
 				Set<Intersection> validAttrIntersections = AttributeUtil.getValidAttributeCombos(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);									
 				if (validAttrIntersections.contains(attrIs)) {

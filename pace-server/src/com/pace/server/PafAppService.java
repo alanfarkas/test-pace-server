@@ -540,78 +540,15 @@ public class PafAppService {
 
 
 	/**
-	 * Create the map of elapsed periods by year in the client UOW 
-	 * 
-	 * @param clientState Client state
-	 * @return Map of elapsed periods by year
-	 */
-	public Map<String, Set<String>> createLockedPeriodMap(PafClientState clientState) {
-
-		Map<String, Set<String>> lockedPeriodMap = new HashMap<String, Set<String>>();
-		UnitOfWork uow = clientState.getUnitOfWork();
-		boolean isCalcElapsedPeriods = clientState.getPlannerConfig().isCalcElapsedPeriods();
-		PafApplicationDef pafApp = clientState.getApp(); 
-		String elapsedYear = pafApp.getCurrentYear();
-		String timeDim = pafApp.getMdbDef().getTimeDim();
-		String yearDim = pafApp.getMdbDef().getYearDim();
-		
-		
-		// Initialize map
-		String[] years = uow.getDimMembers(yearDim);
-			for (String year : years) {
-			lockedPeriodMap.put(year, new HashSet<String>());
-		}
-		
-		// Set the locked periods by year. This step will be skipped if
-		// elapsed periods are to be calculated or the version is not
-	    // forward plannable.
-		if (!isCalcElapsedPeriods) {
-			
-			String currentVersion = clientState.getPlanningVersion().getName();
-			Map<String, VersionType> versionsTypeMap = PafMetaData.getVersionTypeMap();
-			VersionType versionType = versionsTypeMap.get(currentVersion);
-			boolean isYearElapsed = false;
-			
-			// Processing years in backwards order makes it easier to determine 
-			// which years are elapsed.
-			if (versionType.equals(VersionType.ForwardPlannable)) {
-				for (int i = years.length -1; i >=0; i--) {
-					String year = years[i];
-					if (year.equalsIgnoreCase(elapsedYear)) {
-						isYearElapsed = true;
-					}
-					if (isYearElapsed) {
-						Set<String> lockedPeriods = new HashSet<String>();
-						if (year.equalsIgnoreCase(elapsedYear)) {
-							// Current year - add only elapsed periods
-							lockedPeriods.addAll(PafAppService.getInstance().getLockedList(clientState, true));
-							clientState.setLockedPeriods(lockedPeriods);  // TTN-1595 - Not the right place for this, but will do for now.
-						} else {
-							// Historical year - mark all periods as locked
-							lockedPeriods.addAll(Arrays.asList(uow.getDimMembers(timeDim)));
-						}
-						lockedPeriodMap.put(year, lockedPeriods);
-					}
-
-				}
-			}
-		}
-		return lockedPeriodMap;
-	}
-    
-
-
-
-	/**
-	 * Create required locked period collections corresponding to the current uow
+	 * Populate the client state's locked and invalid period collections corresponding 
+	 * to the current uow.
 	 * 
 	 * @param clientState Client state
 	 * @param lockedTimeSlices Locked time slice coordinates
 	 * @param invalidTimeSlices Invalid time slice coordinates
 	 * @param lockedPeriodMap Locked time periods by year
 	 */
-	public void createLockedPeriodCollections(PafClientState clientState, Set<TimeSlice> lockedTimeSlices, Set<TimeSlice> invalidTimeSlices, 
-			Map<String, Set<String>> lockedPeriodMap) {
+	public void createLockedPeriodCollections(PafClientState clientState) {
 
 		final PafApplicationDef pafApp = clientState.getApp(); 
 		final MdbDef mdbDef = pafApp.getMdbDef();
@@ -621,6 +558,9 @@ public class PafAppService {
 		final PafDimTree timeHorizTree = clientState.getTimeHorizonTree();	
 		final UnitOfWork uow = clientState.getUnitOfWork();
 		final boolean isCalcElapsedPeriods = clientState.getPlannerConfig().isCalcElapsedPeriods();
+		Set<TimeSlice> lockedTimeSlices = new HashSet<TimeSlice>(), invalidTimeSlices = new HashSet<TimeSlice>();
+		Set<String> lockedTimeHorizPeriods = new HashSet<String>(), invalidTimeHorizPeriods = new HashSet<String>();
+		Map<String, Set<String>> lockedPeriodMap = new HashMap<String, Set<String>>();	
 		
 		
 		// Initialize locked period map
@@ -642,6 +582,7 @@ public class PafAppService {
 			VersionType versionType = versionsTypeMap.get(currentVersion);
 			if (versionType.equals(VersionType.ForwardPlannable)) {
 				for (String lockedTimeHorizPeriod : this.getLockedList(clientState, false)) {
+					lockedTimeHorizPeriods.add(lockedTimeHorizPeriod);
 					TimeSlice timeSlice = new TimeSlice(lockedTimeHorizPeriod);
 					lockedTimeSlices.add(timeSlice);
 					lockedPeriodMap.get(timeSlice.getYear()).add(timeSlice.getPeriod());
@@ -658,17 +599,28 @@ public class PafAppService {
 			for (String period : uowPeriods) {
 				String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
 				if (!timeHorizTree.hasMember(timeHorizCoord)) {
+					invalidTimeHorizPeriods.add(timeHorizCoord);
 					TimeSlice timeSlice = new TimeSlice(timeHorizCoord);
 					invalidTimeSlices.add(timeSlice);
 					lockedPeriodMap.get(timeSlice.getYear()).add(timeSlice.getPeriod());
 				}
 			}
 		}
+		lockedTimeHorizPeriods.addAll(invalidTimeHorizPeriods);
 		lockedTimeSlices.addAll(invalidTimeSlices);
-				
+	
+		// Store client state collections
+		clientState.setLockedTimeSlices(lockedTimeSlices);
+		clientState.setInvalidTimeSlices(invalidTimeSlices);
+		clientState.setLockedPeriodMap(lockedPeriodMap);
+		clientState.setLockedPeriods(this.getLockedList(clientState, true));
+		clientState.setLockedTimeHorizonPeriods(lockedTimeHorizPeriods);
+		clientState.setInvalidTimeHorizonPeriods(invalidTimeHorizPeriods);
+
 	}
 
-    /**
+
+	/**
      * Returns the set of locked level 0 and upper-level periods in the 
      * time tree.
      * 

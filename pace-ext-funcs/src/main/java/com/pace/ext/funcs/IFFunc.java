@@ -152,7 +152,7 @@ public class IFFunc extends AbstractFunction {
 		for (int i = 0; i < expressionTerms.length; i++) {
 			String term = expressionTerms[i];
 			if (!formula.getFunctionTermFlags()[i]) {
-				// simple measure, search for it in evalstate at end
+				// simple measure, search for it in eval state at end
 				msrNames.add(term);				
 			}
 			else {
@@ -163,7 +163,7 @@ public class IFFunc extends AbstractFunction {
 		
 		if (msrNames.size() > 0) {
 			filterMap.put(msrDim, msrNames);		
-			isTriggers.addAll(findIntersections(filterMap, evalState.getCurrentChangedCells()));
+			isTriggers.addAll(findIntersections(filterMap, evalState.getCurrentChangedCells(), evalState));
 		}
 		
 		return isTriggers;
@@ -235,7 +235,7 @@ public class IFFunc extends AbstractFunction {
     for (String term : formula.getTermMeasures()) {                      	
 
 	    	// skip function components, this is specifically for the IF function which is currently 
-	    	// undeterminable as a recalc dependency, however this is true for most functions at this time.
+	    	// Indeterminable as a recalc dependency, however this is true for most functions at this time.
 	    	if (formula.getFunctionTermFlags()[tCount++]) continue;
 	    	                      	
 	        if (measureCat.get(term).getType() == MeasureType.Recalc) {

@@ -47,7 +47,7 @@ public class SumFunc extends AbstractFunction {
 
     	// convenience variables
       	String msrDim = dataCache.getMeasureDim(), timeDim = dataCache.getTimeDim();
-       	PafBaseTree msrTree = (PafBaseTree) evalState.getDataCacheTrees().getTree(msrDim);
+       	PafBaseTree msrTree = (PafBaseTree) evalState.getEvaluationTree(msrDim);
 
  	
     	// Validate function parameters
@@ -107,7 +107,7 @@ public class SumFunc extends AbstractFunction {
     	}
     	
     	// Check validity of all arguments for existence in measures dimension
-    	PafDimTree measureTree = evalState.getDataCacheTrees().getTree(measureDim);
+    	PafDimTree measureTree = evalState.getEvaluationTree(measureDim);
     	for (parmIndex = 0; parmIndex < parms.length; parmIndex++) {
     		String member = parms[parmIndex];
     		if (!measureTree.hasMember(member)){

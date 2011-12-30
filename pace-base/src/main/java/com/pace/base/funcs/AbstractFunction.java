@@ -10,6 +10,7 @@ import java.util.Set;
 import com.pace.base.PafException;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.state.IPafEvalState;
@@ -182,13 +183,14 @@ public abstract class AbstractFunction implements IPafFunction {
 		return parms;
 	}
 	
-    protected Set<Intersection> findIntersections(Map <String, Set<String>> filterMap, Set<Intersection> set ) {
+    protected Set<Intersection> findIntersections(Map <String, Set<String>> filterMap, Set<Intersection> set, IPafEvalState evalState ) {
         Set<Intersection> list = new HashSet<Intersection>( set.size() );
         boolean matchesFilter;
         for (Intersection is : set) {
             matchesFilter = true;
             for (String dim : filterMap.keySet()) {
-                if (!filterMap.get(dim).contains(is.getCoordinate(dim))) {
+ //               if (!filterMap.get(dim).contains(is.getCoordinate(dim))) {
+                  if (!filterMap.get(dim).contains(EvalUtil.getIsCoord(is, dim, evalState))) {		// TTN-1595
                     matchesFilter = false;
                     break;
                 }

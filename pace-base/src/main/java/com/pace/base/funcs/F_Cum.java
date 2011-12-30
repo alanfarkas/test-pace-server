@@ -25,6 +25,7 @@ import java.util.Set;
 
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.state.IPafEvalState;
@@ -99,7 +100,8 @@ public class F_Cum extends AbstractFunction {
 			iSet = new HashSet<Intersection>( chngBaseMsrs.size() * 2);
 			for (Intersection is : chngBaseMsrs) {
 				currentChange = is.clone();
-				currentChange.setCoordinate(timeDim, evalState.getCurrentTimeSlice());
+//				currentChange.setCoordinate(timeDim, evalState.getCurrentTimeSlice());
+				EvalUtil.setIsCoord(currentChange, timeDim, evalState.getCurrentTimeSlice(), evalState);		// TTN-1595
 				iSet.add(currentChange);
 			}
 		}

@@ -106,8 +106,10 @@ public class PafDataCache implements IPafDataCache {
 																		// 		used to lookup Measures and Time dimension members)
 	private String[] planVersions = null; 								// Plan version 
 	private Map<String, Set<String>> lockedPeriodMap = null; 			// Locked planning periods by year
-	private Set<TimeSlice> lockedTimeSlices = null; 					// Locked time slices (time slice holds both period & year and period/year time coords)
-	private Set<TimeSlice> invalidTimeSlices = null; 					// Potential time slices that don't exist in current uow
+	private Set<String> lockedTimeHorizonPeriods = null;				// Locked time horizon coordinates
+	private Set<String> invalidTimeHorizonPeriods = null;				// Invalid time horizon coordinates within possible set of uow time/year coordinates
+//	private Set<TimeSlice> lockedTimeSlices = null; 					// Locked time slices (time slice holds both period & year and period/year time coords)
+//	private Set<TimeSlice> invalidTimeSlices = null; 					// Potential time slices that don't exist in current uow
 	private PafDataCacheCells changedCells = new PafDataCacheCells();	// Optionally tracks changed cells
 	private PafApplicationDef appDef = null;
 	private PafMVS pafMVS = null;
@@ -159,8 +161,8 @@ public class PafDataCache implements IPafDataCache {
 		dimTrees = clientState.getUowTrees();
 		mdbBaseTrees = clientState.getMdbBaseTrees();
 		lockedPeriodMap = clientState.getLockedPeriodMap();
-		lockedTimeSlices = clientState.getLockedTimeSlices();
-		invalidTimeSlices = clientState.getInvalidTimeSlices();
+		lockedTimeHorizonPeriods = clientState.getLockedTimeHorizonPeriods();
+		invalidTimeHorizonPeriods = clientState.getInvalidTimeHorizonPeriods();
 
 
 		// Set dimension properties
@@ -2469,10 +2471,6 @@ public class PafDataCache implements IPafDataCache {
 		String [] attributeDims = parms.getAttributeDims();
 		boolean hasAttributes = false;
 
-		// Had to move this method over from the PafDataCache object so I could get access
-		// to the "isValidAttributeIntersection()" method (AF - 8/23/2011)
-		//TODO If possible, move this this method and all the attribute validation methods to PafDataCache
-		// --- Might not be possible because of data filtering calls in PafServiceProvider.startPlanSession()
 		
 		try {
 			// Validate data slice parms
@@ -2522,9 +2520,12 @@ public class PafDataCache implements IPafDataCache {
 					}
 
 					// Copy current data slice cell to data cache, skipping any
-					// invalid attribute intersections
+					// invalid attribute intersections and invalid time slice
+					// coordinates
 					if (!hasAttributes || isValidAttributeIntersection(cellIs, attributeDims)) {
-						setCellValue(cellIs, dataSlice[sliceIndex]);
+						if (hasValidTimeHorizonCoord(cellIs)) {
+							setCellValue(cellIs, dataSlice[sliceIndex]);
+						}
 					}
 					sliceIndex++;
 				}
@@ -2890,11 +2891,20 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	/**
-	 * @return the lockedTimeSlices
+	 * @return the lockedTimeHorizonPeriods
 	 */
-	public Set<TimeSlice> getLockedTimeSlices() {
-		return lockedTimeSlices;
+	public Set<String> getLockedTimeHorizonPeriods() {
+		return lockedTimeHorizonPeriods;
 	}
+
+
+	/**
+	 * @return the invalidTimeHorizonPeriods
+	 */
+	public Set<String> getInvalidTimeHorizonPeriods() {
+		return invalidTimeHorizonPeriods;
+	}
+
 
 
 	/**
@@ -3423,7 +3433,7 @@ public class PafDataCache implements IPafDataCache {
 	 * @throws PafException
 	 */
 	public PafDataSlice getDataSlice(PafDataSliceParms parms) throws PafException {
-		return getDataSlice(parms, invalidTimeSlices);
+		return getDataSlice(parms, invalidTimeHorizonPeriods);
 	}
 
 	/**
@@ -3435,13 +3445,14 @@ public class PafDataCache implements IPafDataCache {
 	 *
 	 *  Intersections with invalid time horizon intersections are 
 	 *  skipped.
+	 *  
 	 * @param parms Object containing required PafDataSlice parameters
 	 * @param invalidTimeHorizPeriods Invalid time horizon periods
 	 * 
 	 * @return Returns "Data Slice" - a subset of cells in the UowCache
 	 * @throws PafException
 	 */
-	public PafDataSlice getDataSlice(PafDataSliceParms parms, Set<TimeSlice> invalidTimeSlices) throws PafException {
+	public PafDataSlice getDataSlice(PafDataSliceParms parms, Set<String> invalidTimeHorizonPeriods) throws PafException {
 
 		boolean hasPageDimensions = false;
 		String timeDim = this.getTimeDim(), yearDim = this.getYearDim();
@@ -3501,11 +3512,8 @@ public class PafDataCache implements IPafDataCache {
 					}
 	
 					// Skip any intersection containing an invalid time horizon period
-					if (invalidTimeSlices != null && invalidTimeSlices.size() > 0) {
-						TimeSlice timeSlice = new TimeSlice(cellIs.getCoordinate(timeDim),cellIs.getCoordinate(yearDim));
-						if (invalidTimeSlices.contains(timeSlice)) {
-							continue;
-						}
+					if (!hasValidTimeHorizonCoord(cellIs)) {
+						continue;
 					}
 
 					// Copy selected cell to data slice
