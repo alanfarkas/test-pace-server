@@ -196,19 +196,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
     	long stepTime = System.currentTimeMillis();
 
     	// initial check, don't allocate any intersection that is "elapsed" during forward plannable sessions
-        // if current plan is forward plannable, also don't allow
-        // allocation into any intersections containing protected time periods
-        Set<String> lockedTimePeriods = null;
-
-        if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
-            lockedTimePeriods = evalState.getClientState().getLockedTimeHorizonPeriods();
-        }
-        if (lockedTimePeriods == null)
-            lockedTimePeriods = new HashSet<String>(0);  
-        
-        // dump out if current intersection is in an elapsed period
-//        if (lockedTimePeriods.contains(intersection.getCoordinate(timeDim))) return dataCache;
-        if (EvalUtil.isElapsedIs(intersection, evalState, dataCache)) return dataCache;		// TTN-1595 
+        if (EvalUtil.isElapsedIs(intersection, evalState)) return dataCache;		// TTN-1595 
     	
         
     	List<Intersection> targetList = EvalUtil.buildFloorIntersections(intersection, evalState);
@@ -230,9 +218,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         // add up all locked cell values
         for (Intersection target : targets) {
             if (evalState.getCurrentLockedCells().contains(target) || 
-//                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
-//                           target.getCoordinate(yearDim).equals(currentYear))  ) {
-            		(EvalUtil.isElapsedIs(target, evalState, dataCache))) {		// TTN-1595
+            		(EvalUtil.isElapsedIs(target, evalState))) {		// TTN-1595
                 lockedTotal += dataCache.getCellValue(target);
                 lockedTargets.add(target);              
             }
@@ -265,9 +251,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 //            	
 
                 // total elapsed period locks and add them to a specific collection
- //               if (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
- //                               target.getCoordinate(yearDim).equals(currentYear) ) {
-            	if (EvalUtil.isElapsedIs(target, evalState, dataCache))	{	// TTN-1595
+            	if (EvalUtil.isElapsedIs(target, evalState))	{	// TTN-1595
                 	elapsedTotal += dataCache.getCellValue(target);
                 	elapsedTargets.add(target);              
                 }  

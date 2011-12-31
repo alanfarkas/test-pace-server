@@ -67,7 +67,6 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 		PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
 		String measureDim = dataCache.getMeasureDim();
 		String timeDim = dataCache.getTimeDim();
-		String timeHorizonDim = dataCache.getTimeHorizonDim();
 		String versionDim = dataCache.getVersionDim();
 		String yearDim = dataCache.getYearDim();
 

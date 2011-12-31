@@ -425,13 +425,15 @@ public class EvalUtil {
     }
     
 	/**
-	 * @param cellIs
-	 * @param evalState
-	 * @param dataCache
+	 * Returns true if the specified intersection is elapsed (assumes that the 
+	 * intersection contains the active plan version)
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param evalState Evaluation state
 	 * 
 	 * @return True is the specified intersection is elapsed
 	 */
-	public static boolean isElapsedIs(Intersection cellIs, IPafEvalState evalState, IPafDataCache dataCache) {
+	public static boolean isElapsedIs(Intersection cellIs, IPafEvalState evalState) {
 		
 //		// Ensure intersection maps to a valid time horizon coordinate. If not consider
 //		// the intersection as elapsed (TTN-1595)

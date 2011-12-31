@@ -861,6 +861,11 @@ public abstract class PafDataCacheCalc {
 						intersection.setCoordinate(versionDim, version);
 						intersection.setCoordinate(yearDim, year);
 	
+						// Skip any invalid time intersections
+						if (!dataCache.hasValidTimeHorizonCoord(intersection)) {
+							continue;
+						}
+						
 						// Calculate version formula on current cell
 						double cellValue = 0;
 						switch (versionType) {

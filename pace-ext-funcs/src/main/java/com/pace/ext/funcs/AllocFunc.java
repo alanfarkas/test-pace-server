@@ -264,7 +264,7 @@ public class AllocFunc extends AbstractFunction {
 	        // if current plan is forward plannable, also don't allow
 	        // allocation into any intersections containing protected time periods
 	        
-	        if (EvalUtil.isElapsedIs(allocSrcIsx, evalState, dataCache)) return dataCache;
+	        if (EvalUtil.isElapsedIs(allocSrcIsx, evalState)) return dataCache;
 	
 	        
 	        
@@ -284,7 +284,7 @@ public class AllocFunc extends AbstractFunction {
 	            if (evalState.getCurrentLockedCells().contains(target) || 
 //	                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
 //	                            target.getCoordinate(yearDim).equals(currentYear)) ||
-	    	            (EvalUtil.isElapsedIs(target, evalState, dataCache)) || 			// TTN-1595
+	    	            (EvalUtil.isElapsedIs(target, evalState)) || 			// TTN-1595
 	                    excludedMsrs.contains(target.getCoordinate(msrDim)) 
 	            		) {
 	                lockedTotal += dataCache.getCellValue(target);
@@ -322,7 +322,7 @@ public class AllocFunc extends AbstractFunction {
 	                // total elapsed period locks and add them to a specific collection
 //	                if (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
 //	                                target.getCoordinate(yearDim).equals(currentYear) ) {
-	            	if (EvalUtil.isElapsedIs(target, evalState, dataCache)) {			// TTN-1595
+	            	if (EvalUtil.isElapsedIs(target, evalState)) {			// TTN-1595
 	                	elapsedTotal += dataCache.getCellValue(target);
 	                	elapsedTargets.add(target);              
 	                }  

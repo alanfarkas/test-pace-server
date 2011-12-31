@@ -57,7 +57,7 @@ public class ES_RecalcMeasures extends ES_EvalBase implements IEvalStep {
   
             	// skip over elapsed time periods if there are any
 //            	if (evalState.getDataCache().getLockedPeriods().contains(is.getCoordinate(evalState.getTimeDim()))) {
-                if (EvalUtil.isElapsedIs(is, evalState, dataCache)) {
+                if (EvalUtil.isElapsedIs(is, evalState)) {
             		continue;
             	}
 

@@ -238,8 +238,8 @@ public class EvalState implements IPafEvalState, Cloneable {
 //		this.timeSubTree = dataCacheTrees.getTree(timeDim);
 		this.timeSubTree = dataCacheTrees.getTree(this.getTimeHorizonDim());	// TTN-1595
 		List<String> timePeriods = timeSubTree.getMemberNames(TreeTraversalOrder.POST_ORDER);
-		if (clientState.getLockedPeriods() != null) {
-			timePeriods.removeAll(clientState.getLockedPeriods());
+		if (clientState.getLockedTimeHorizonPeriods() != null) {
+			timePeriods.removeAll(clientState.getLockedTimeHorizonPeriods());
 		}
 		
 		// Set useful objects in eval state object

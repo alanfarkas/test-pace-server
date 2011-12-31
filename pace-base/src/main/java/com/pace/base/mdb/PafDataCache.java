@@ -49,6 +49,7 @@ import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.data.TimeSlice;
 import com.pace.base.state.EvalState;
+import com.pace.base.state.IPafEvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
 import com.pace.base.utility.Odometer;
@@ -2520,10 +2521,10 @@ public class PafDataCache implements IPafDataCache {
 					}
 
 					// Copy current data slice cell to data cache, skipping any
-					// invalid attribute intersections and invalid time slice
-					// coordinates
+					// elapsed period intersections (TTN-1595)
 					if (!hasAttributes || isValidAttributeIntersection(cellIs, attributeDims)) {
-						if (hasValidTimeHorizonCoord(cellIs)) {
+//						if (hasValidTimeHorizonCoord(cellIs)) {
+						if (!this.isElapsedIs(cellIs)) {
 							setCellValue(cellIs, dataSlice[sliceIndex]);
 						}
 					}
@@ -2543,6 +2544,51 @@ public class PafDataCache implements IPafDataCache {
 		}
 
 	}
+
+
+	/**
+	 * Returns true if the specified intersection is elapsed
+	 * 
+	 * @param cellIs Cell intersection
+	 * @return True is the specified intersection is elapsed
+	 */
+	private boolean isElapsedIs(Intersection cellIs) {
+
+
+		String version = cellIs.getCoordinate(this.getVersionDim());
+		VersionType versionType = getVersionDef(version).getType();
+		
+		
+		// For the plan version, this has to be a forward plannable version 
+		// for elapsed period logic to apply
+		if (this.getPlanVersion().equals(version)) {
+			if (versionType != VersionType.ForwardPlannable) {
+				return false;
+			}
+		} else if (this.getBaseVersions().contains(version)) {
+			// Reference version - assume all periods are elapsed
+			return true;
+		}
+
+		// Either the intersection contains the plan version, which is 
+		// forward plannable, or this is a dynamic version, so check
+		// if the time coordinate is elapsed.
+		if (lockedTimeHorizonPeriods.contains(TimeSlice.buildTimeHorizonCoord(cellIs, this.getMdbDef()))) {
+			return true;
+		} else {
+			return false;
+		}
+		
+		//			// Ensure intersection maps to a valid time horizon coordinate. If not consider
+		//			// the intersection as elapsed (TTN-1595)
+		//			if (!dataCache.hasValidTimeHorizonCoord(cellIs)) {
+		//				return true;
+		//			}
+
+
+	}
+
+	
 
 
 	/**
