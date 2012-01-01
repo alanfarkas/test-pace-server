@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -49,7 +48,6 @@ import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.data.TimeSlice;
 import com.pace.base.state.EvalState;
-import com.pace.base.state.IPafEvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
 import com.pace.base.utility.Odometer;
@@ -2523,7 +2521,6 @@ public class PafDataCache implements IPafDataCache {
 					// Copy current data slice cell to data cache, skipping any
 					// elapsed period intersections (TTN-1595)
 					if (!hasAttributes || isValidAttributeIntersection(cellIs, attributeDims)) {
-//						if (hasValidTimeHorizonCoord(cellIs)) {
 						if (!this.isElapsedIs(cellIs)) {
 							setCellValue(cellIs, dataSlice[sliceIndex]);
 						}
@@ -2651,7 +2648,7 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	private Intersection translateOffsetVersionAliasIs(Intersection cellIs) throws PafException {
 
-		final String versionDim = this.getVersionDim(), timeDim = this.getTimeDim(), yearDim = this.getYearDim();
+		final String versionDim = this.getVersionDim(), yearDim = this.getYearDim();
 		final String planVersion = this.getPlanVersion();
 		final List<String> uowYearList = Arrays.asList(this.getYears());
 		final List<String> mdbYearList = this.getMdbYears();
@@ -3473,22 +3470,6 @@ public class PafDataCache implements IPafDataCache {
 	 *  a client view section. Meta-data is passed down to the client 
 	 *  via other objects and processes outside of this method.
 	 *
-	 * @param parms Object containing required PafDataSlice parameters
-	 * 
-	 * @return Returns "Data Slice" - a subset of cells in the UowCache
-	 * @throws PafException
-	 */
-	public PafDataSlice getDataSlice(PafDataSliceParms parms) throws PafException {
-		return getDataSlice(parms, invalidTimeHorizonPeriods);
-	}
-
-	/**
-	 * 	Get "data slice" using dimensional and member specifications
-	 *  defined in supplied parameter object. The "data slice"
-	 *  contains all of the cell values that are needed to populate
-	 *  a client view section. Meta-data is passed down to the client 
-	 *  via other objects and processes outside of this method.
-	 *
 	 *  Intersections with invalid time horizon intersections are 
 	 *  skipped.
 	 *  
@@ -3498,10 +3479,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @return Returns "Data Slice" - a subset of cells in the UowCache
 	 * @throws PafException
 	 */
-	public PafDataSlice getDataSlice(PafDataSliceParms parms, Set<String> invalidTimeHorizonPeriods) throws PafException {
+	public PafDataSlice getDataSlice(PafDataSliceParms parms) throws PafException {
 
 		boolean hasPageDimensions = false;
-		String timeDim = this.getTimeDim(), yearDim = this.getYearDim();
 		int cellCount = 0, cols = 0, rows = 0, sliceIndex = 0;
 		double[] dataSlice = null;
 		String[] rowDims = parms.getRowDimensions();
@@ -3557,8 +3537,9 @@ public class PafDataCache implements IPafDataCache {
 						cellIs.setCoordinate(colDims[i], colTuple[i]);
 					}
 	
-					// Skip any intersection containing an invalid time horizon period
+					// Skip any intersection containing an invalid time horizon period (TTN-1595)
 					if (!hasValidTimeHorizonCoord(cellIs)) {
+						sliceIndex++;
 						continue;
 					}
 
@@ -4312,8 +4293,14 @@ public class PafDataCache implements IPafDataCache {
 						
 		}
 
+		
+		// Lastly, check for valid time horizon coordinate (TTN-1595)
+		if (!this.hasValidTimeHorizonCoord(intersection)) {
+			return false;
+		}
+		
 
-		// Return status
+		// Passed all checks - must be valid
 		return true;
 	}
 

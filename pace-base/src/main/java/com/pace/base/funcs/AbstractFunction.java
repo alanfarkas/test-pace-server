@@ -189,8 +189,8 @@ public abstract class AbstractFunction implements IPafFunction {
         for (Intersection is : set) {
             matchesFilter = true;
             for (String dim : filterMap.keySet()) {
- //               if (!filterMap.get(dim).contains(is.getCoordinate(dim))) {
-                  if (!filterMap.get(dim).contains(EvalUtil.getIsCoord(is, dim, evalState))) {		// TTN-1595
+               if (!filterMap.get(dim).contains(is.getCoordinate(dim))) {
+ //                 if (!filterMap.get(dim).contains(EvalUtil.getIsCoord(is, dim, evalState))) {		// TTN-1595
                     matchesFilter = false;
                     break;
                 }

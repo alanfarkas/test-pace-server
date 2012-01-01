@@ -129,7 +129,7 @@ public class PafDataService {
 		uowCache.put(clientId, dataCache);           
 
 		// Calculate synthetic member intersections
-		calculateSyntheticMembers(clientState, dataCache, loadedMdbDataSpec);
+		PafDataCacheCalc.calculateSyntheticMembers(clientState, dataCache, loadedMdbDataSpec);
 		
 		// Initialize attribute eval initialization property
 		for (PafMVS pafMVS : clientState.getAllMVS()) {
@@ -270,7 +270,7 @@ public class PafDataService {
 		logger.info("Cached object count: " + uowCache.size());
 
 		// Calculate synthetic member intersections
-		calculateSyntheticMembers(clientState, cache, loadedMdbDataSpec);
+		PafDataCacheCalc.calculateSyntheticMembers(clientState, cache, loadedMdbDataSpec);
 		
 		return loadedMdbDataSpec;
 	}
@@ -296,7 +296,7 @@ public class PafDataService {
 		logger.info("Data cache updated for versions: " + StringUtils.setToString(updatedMdbDataSpec.keySet()));
 		
 		// Calculate synthetic member intersections
-		calculateSyntheticMembers(clientState, dataCache, updatedMdbDataSpec);
+		PafDataCacheCalc.calculateSyntheticMembers(clientState, dataCache, updatedMdbDataSpec);
 			
 	}
 
@@ -1241,7 +1241,7 @@ public class PafDataService {
 		Map<String, Map<Integer, List<String>>> loadedMdbDataSpec = mdbData.updateDataCache(dataCache, dataSpecByVersion);
 
 		// Calculate any synthetic member intersections
-		calculateSyntheticMembers(clientState, dataCache, loadedMdbDataSpec);
+		PafDataCacheCalc.calculateSyntheticMembers(clientState, dataCache, loadedMdbDataSpec);
 		
 	}
 
@@ -3200,182 +3200,6 @@ public class PafDataService {
 	}
 
 
-	/**
-	 *	Calculate synthetic member intersections
-	 *
-	 * @param clientState Client state object
-	 * @param dataCache Data cache
-	 * @param dataSpecByVersion Specifies the intersections to calculate over, by version
-	 * 
-	 * @throws PafException
-	 */
-	public void calculateSyntheticMembers(PafClientState clientState, PafDataCache dataCache, Map<String, Map<Integer, List<String>>> dataSpecByVersion) throws PafException {
-		
-		long startTime = System.currentTimeMillis();
-		int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
-		String activePlanVersion = clientState.getPlanningVersion().getName();
-		String measureDim = dataCache.getMeasureDim();
-		String timeDim = dataCache.getTimeDim();
-		String timeHorizonDim = dataCache.getTimeHorizonDim();
-		String versionDim = dataCache.getVersionDim();
-		String yearDim = dataCache.getYearDim();
-		String[] hierDims = clientState.getApp().getMdbDef().getHierDims();
-		String[] baseDims = dataCache.getBaseDimensions();
-		List<String> recalcMeasures = dataCache.getRecalcMeasures();
-		Set<String> versions = new HashSet<String>();
-		Map<String, List<String>> timeFilter = new HashMap<String, List<String>>(), baseDimCalcFilter = null;
-		MemberTreeSet uowTrees = clientState.getUowTrees();
-		PafDimTree timeHorizonTree = uowTrees.getTree(timeHorizonDim);
-		List<String> defEvalVersions = new ArrayList<String>();
-		
-		//TODO TTN-1644 Refactor this into PafDataCacheCalc or Evaluation Package
-
-
-		// Exit if no synthetic members to process
-		List<String> dimsToCalc = new ArrayList<String>();
-		for (String dim : hierDims) {
-			PafDimTree dimTree = uowTrees.getTree(dim);
-			if (dimTree.hasSyntheticMembers()) {
-				dimsToCalc.add(dim);
-			}
-		}
-		if (timeHorizonTree.hasSyntheticMembers()) dimsToCalc.add(timeDim);
-		if (dimsToCalc.isEmpty()) return;
-		
-		// Exit if no data to calculate
-		if (dataSpecByVersion.isEmpty()) return;
-	
-
-		// Get a list of any versions that are being calculated in a default evaluation
-		// as these versions will be skipped.
-		PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
-		if (plannerConfig.isDefaultEvalEnabledWorkingVersion()) {
-			defEvalVersions.add(activePlanVersion);
-		}
-		String[] evalRefVersions = plannerConfig.getDefaultEvalRefVersions();
-    	if (evalRefVersions != null && evalRefVersions.length> 0) {
-    		List<String> evalRefVersionList = Arrays.asList(plannerConfig.getDefaultEvalRefVersions());
-     		defEvalVersions.addAll(evalRefVersionList);
-    	}
-		
-		// Apply version filter. If no version filter is supplied than use the active
-		// planning version.
-		if (dataSpecByVersion != null && !dataSpecByVersion.isEmpty()) {
-			versions = dataSpecByVersion.keySet();
-		} else {
-			versions.add(activePlanVersion);
-			
-		}
-		
-		// Create a time/year filter. Select all uow time horizon periods, as synthetic members
-		// need to be populated across elapsed and no-elapsed periods.
-		timeFilter.put(yearDim, Arrays.asList(TimeSlice.getTimeHorizonYear()));
-		List<String> openTimeHorizonPeriods = timeHorizonTree.getMemberNames(TreeTraversalOrder.POST_ORDER);
-		timeFilter.put(timeDim, openTimeHorizonPeriods);
-		
-		
-		// Process each version separately as they each may be populated across varying sets
-		// of intersections;
-        for (String version : versions) {
-        	
-        	// Skip processing, if default eval is enabled on this version, since any synthetic
-        	// members will also get calculated during default eval.
-        	if (defEvalVersions.contains(version)) {
-        		continue;
-        	}
-        	
-        	// Set version specific filters. Skip year & time dimensions as these will be 
-        	// the same values for all versions.
-			baseDimCalcFilter = new HashMap<String, List<String>>(timeFilter);
-			baseDimCalcFilter.put(versionDim, new ArrayList<String>(Arrays.asList(new String[]{version})));
-			Map<Integer, List<String>> axisDataSpecs = dataSpecByVersion.get(version);
-			for (int axis : axisDataSpecs.keySet()) {
-				if (axis != timeAxis && axis!= yearAxis) {
-					String dim = dataCache.getDimension(axis);
-					List<String> members = new ArrayList<String>(axisDataSpecs.get(axis));
-					// Filter out any recalc measures
-					if (dim.equals(measureDim)) {
-						members.removeAll(recalcMeasures);
-					}
-					if (!members.isEmpty()) {
-						baseDimCalcFilter.put(dim, members);
-					}					
-				}
-			}
-
-
-			// Cycle through each hierarchical dimension and perform the necessary 
-			// calculations.
-			//
-			// Each dimension aggregation pass is grouped together with a recalc
-			// measure pass. This is necessary to ensure that the required 
-			// synthetic member intersections are calculated and only synthetic 
-			// member intersections are calculated.
-			for (String dim : dimsToCalc) {
-
-				// Aggregate hierarchical or time horizon dimension
-				PafDimTree dimTree;
-				if (!dim.equals(timeDim)) {
-					dimTree = uowTrees.getTree(dim);
-				} else {
-					dimTree = timeHorizonTree;
-				}
-				Map<String,List<String>> dimFilter = new HashMap<String, List<String>>(baseDimCalcFilter);
-				dimFilter.put(dim, new ArrayList<String>(dimTree.getSyntheticMemberNames()));
-				PafDataCacheCalc.aggDimension(dim, dataCache, dimTree, dimFilter, DcTrackChangeOpt.NONE);
-
-				// Calculate re-calc measure intersections using the default rule set
-				if (!recalcMeasures.isEmpty()) {
-
-					// Initialization
-					long recalcStartTime = System.currentTimeMillis();
-					EvalState evalState = new EvalState(null, clientState, dataCache);
-					RuleSet ruleSet = clientState.getDefaultMsrRuleset();
-					Intersection is = new Intersection(baseDims);
-
-					// Create an intersection iterator. To reduce overhead, this iterator is 
-					// reused for each calculated measure. So, it must be initialized with a 
-					// dummy measure.
-					dimFilter.put(measureDim, new ArrayList<String>(Arrays.asList(new String[]{"[DUMMY]"})));
-					Odometer cellIterator = dataCache.getCellIterator(baseDims, dimFilter);
-	
-					// Process each recalc measure formula in the each rule group
-					for (RuleGroup rg : ruleSet.getRuleGroups()) {
-						for (Rule r : rg.getRules()) {
-
-							// Evaluation any formula whose result term is a recalc measure across
-							// the required synthetic intersections
-							String msrName = r.getFormula().getResultMeasure();						
-							if (recalcMeasures.contains(msrName)) {							
-
-								// Iterate over required synthetic intersections and calculate them.
-								while (cellIterator.hasNext()) {
-									@SuppressWarnings("unchecked")
-									String[] coords = (String[]) cellIterator.nextValue().toArray(new String[0]);
-									TimeSlice.translateTimeHorizonCoords(coords, timeAxis, yearAxis);
-									is.setCoordinates(coords);
-									is.setCoordinate(measureDim, msrName);
-									EvalUtil.evalFormula(r.getFormula(), measureDim, is, dataCache, evalState);
-								}
-								cellIterator.reset();
-							}
-						}
-					}
-			        String logMsg = LogUtil.timedStep("Synthetic Member - Recalc Measure Calculation Pass", recalcStartTime);
-			        evalPerfLogger.info(logMsg);
-				}
-
-			}  // Next dim
-
-        }  // Next version
-
-        
-        dataCache.clearDirty();
-        String logMsg = LogUtil.timedStep("Synthetic Member Calculation", startTime);
-        evalPerfLogger.info(logMsg);
-	}
-	
-	
 	/**
 	 *	Evaluate the default rule set if warranted by the client state paf
 	 *  planner configuration settings.

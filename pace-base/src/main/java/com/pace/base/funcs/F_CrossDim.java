@@ -217,7 +217,7 @@ public class F_CrossDim extends AbstractFunction {
 			overrideParms = parseCrossDimParms(null, null);
 //		}
 		
-
+int alan = 0;
 		Map<String, Set<String>> filterMap = new HashMap<String, Set<String>>(); 
 		List<String> floorDims = new ArrayList<String>();
 		String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();
@@ -314,22 +314,28 @@ public class F_CrossDim extends AbstractFunction {
 
 		String[] allDims = intersection.getDimensions();
 		ArrayList[] memberArrays = new ArrayList[allDims.length];
+		MemberTreeSet memberTrees = evalState.getClientState().getUowTrees();		// TTN-1595
 		
 
-		// Build member lists for clone process
+		// Build member lists for clone process. 
+		// 
+		// Use original time tree and year trees, versus time horizon tree
+		// for intersection cloning. This is done to support the scenario 
+		// where a specified cross dimension is the time dimension or 
+		// the year dimension, but not necessarily both (TTN-1595)
 		int i = 0;
 		for (String dim:allDims) { 
 			ArrayList<String> memberList = new ArrayList<String>();
 			if (floorDims.contains(dim)) {
 				// Floor dimension - Member list equals dimension floor
-				PafDimTree dimTree = evalState.getEvaluationTree(dim);			// TTN-1595
+				PafDimTree dimTree = memberTrees.getTree(dim);						// TTN-1595
 				List<PafDimMember> floorMembers = dimTree.getLowestLevelMembers();
 				for (PafDimMember floorMember:floorMembers) {
 					memberList.add(floorMember.getKey());
 				}
 			} else {
 				// Else member list equals current coordinate
-				memberList.add(EvalUtil.getIsCoord(intersection, dim, evalState));	// TTN-1595
+				memberList.add(intersection.getCoordinate(dim));					
 			}
 			memberArrays[i++] = memberList;
 		}
@@ -341,11 +347,11 @@ public class F_CrossDim extends AbstractFunction {
 		Intersection clonedIntersection;
 		while (odom.hasNext()) {
 			clonedIntersection = new Intersection(allDims, (String[])odom.nextValue().toArray(new String[0]));
-//			// Filter out any intersections whose time coordinates are not valid in the
-//			// time horizon tree (TTN-1595).
-//			if (EvalUtil.hasValidTimeCoord(clonedIntersection, evalState)) {
+			// Filter out any intersections whose time coordinates are not valid in the
+			// time horizon tree (TTN-1595).
+			if (EvalUtil.hasValidTimeCoord(clonedIntersection, evalState)) {
 				clonedIntersections.add(clonedIntersection);
-//			}
+			}
 		}
 
 		return clonedIntersections;

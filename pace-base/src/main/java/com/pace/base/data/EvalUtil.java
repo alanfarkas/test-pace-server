@@ -1232,6 +1232,28 @@ public class EvalUtil {
 	
 	}
 
+	/**
+	 * Returns true if the specified intersection contains a valid time coordinate
+	 * as validated against the time horizon tree.
+	 * 
+	 * @param cellIs cell intersection
+	 * @param evalState
+	 * @return
+	 */
+	public static boolean hasValidTimeCoord(Intersection cellIs, IPafEvalState evalState) {
+		
+		PafDimTree timeHorizonTree = evalState.getTimeSubTree();
+		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
+		String timeHorizonCoord = TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef);
+		
+		if (timeHorizonTree.hasMember(timeHorizonCoord)) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+
  
 	//pmack
     //pmack
