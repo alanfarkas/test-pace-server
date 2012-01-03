@@ -217,7 +217,6 @@ public class F_CrossDim extends AbstractFunction {
 			overrideParms = parseCrossDimParms(null, null);
 //		}
 		
-int alan = 0;
 		Map<String, Set<String>> filterMap = new HashMap<String, Set<String>>(); 
 		List<String> floorDims = new ArrayList<String>();
 		String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();

@@ -155,7 +155,7 @@ public abstract class PafDataCacheCalc {
 		MdbDef mdbDef = dataCache.getAppDef().getMdbDef();
 		Odometer cellIterator = null;
 
-
+int alan=1;
 		// The fun starts now
 		calcStart = System.currentTimeMillis();
 		logger.info("Aggregating dimension [" + aggDimension + "]"); 	

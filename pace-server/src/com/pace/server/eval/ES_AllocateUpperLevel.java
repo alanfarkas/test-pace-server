@@ -21,7 +21,6 @@ package com.pace.server.eval;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -29,12 +28,9 @@ import org.apache.log4j.Logger;
 import com.pace.base.PafException;
 import com.pace.base.SortOrder;
 import com.pace.base.app.MdbDef;
-import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
-import com.pace.base.app.VersionType;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -74,8 +70,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         unlockIntersections.clear();
         
         allocIntersections.addAll(evalState.getAllocationsByMsr(evalState.getMeasureName()));
-        // if in time slice mode, 1st filter down to only allocations in the current time slice
-
+ 
         // special tag to sync all time balance first changes changes. Any change that would allocate
         // TBFirst fashion into week one need to allocate here also. perform no other allocations
         if ( evalState.getRule().isInitialTBFirstAllocation() ) {
@@ -128,9 +123,10 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         }
         
         else if ( evalState.isTimeSliceMode() ) {
+            // if in time slice mode, 1st filter down to only allocations in the current time slice
             for (Intersection is : allocIntersections) {
 //              if ( !is.getCoordinate(timeDim).equalsIgnoreCase(evalState.getCurrentTimeSlice())) skipIS.add(is);
-            	if (TimeSlice.buildTimeHorizonCoord(is, mdbDef).equals(evalState.getCurrentTimeSlice())) skipIS.add(is);	// TTN-1595
+            	if (!TimeSlice.buildTimeHorizonCoord(is, mdbDef).equals(evalState.getCurrentTimeSlice())) skipIS.add(is);	// TTN-1595
             }
         }
 

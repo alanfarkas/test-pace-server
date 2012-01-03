@@ -668,7 +668,7 @@ public class PafDataCache implements IPafDataCache {
 	 * @return List of open time horizon periods
 	 */
 	public List<String> getOpenTimeHorizonPeriods() {
-		return getOpenTimeHorizonPeriods(getPlanVersions()[0]);		
+		return getOpenTimeHorizonPeriods(getPlanVersion());		
 	}
 
 
@@ -682,17 +682,12 @@ public class PafDataCache implements IPafDataCache {
 		List<String> openPeriods = new ArrayList<String>();
 		PafDimTree yearTree = getDimTrees().getTree(getYearDim());
 		
-		// Add in the open time horizon periods for each level 0 year
-		List<PafDimMember> yearMbrs = yearTree.getLowestLevelMembers();
+		// Add in the open time horizon periods for each year
+		List<PafDimMember> yearMbrs = yearTree.getMembers(TreeTraversalOrder.POST_ORDER);
 		for (PafDimMember yearMbr : yearMbrs) {
 			openPeriods.addAll(getOpenTimeHorizonPeriods(version, yearMbr.getKey()));
 		}
 
-		// Add in time horizon root
-		if (!openPeriods.isEmpty()) {
-			PafDimTree timeHorizonTree = getDimTrees().getTree(getTimeHorizonDim());
-			openPeriods.add(timeHorizonTree.getRootNode().getKey());
-		}
 		return openPeriods;
 		
 		

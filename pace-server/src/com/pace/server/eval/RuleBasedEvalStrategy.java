@@ -516,7 +516,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		// quickly consider only relevant intersections, and the master loop will skip 
 		// over empty lists
 
-
+int alan=0;
 		List<String> timePeriods = evalState.getTimePeriodList();
 		evalState.setTimeSliceMode(true);
 

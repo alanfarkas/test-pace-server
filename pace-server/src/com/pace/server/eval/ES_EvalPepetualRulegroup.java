@@ -56,7 +56,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 	PafDataService dataService = PafDataService.getInstance();
 	
 	public void performEvaluation(EvalState evalState) throws PafException {
-	int alan = 6;	
+		
 		long startTime = System.currentTimeMillis();
 		long stepTime;
 		PafDataCache dataCache = evalState.getDataCache();
