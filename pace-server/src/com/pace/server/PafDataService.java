@@ -743,12 +743,9 @@ public class PafDataService {
 				
 				//TTN-1413: Read Only Measures
 				//if measures dimension
-				if ( dim.equalsIgnoreCase(measureDim) ) {
-					
-					if ( clientState.getReadOnlyMeasures().contains(memberName) && member.getMemberProps() != null ) {
-						
-						member.getMemberProps().setReadOnly(true);
-						
+				if ( dim.equalsIgnoreCase(measureDim) ) {					
+					if ( clientState.getReadOnlyMeasures().contains(memberName) && member.getMemberProps() != null ) {						
+						member.getMemberProps().setReadOnly(true);					
 					}
 					
 				}

@@ -164,7 +164,13 @@ public abstract class PafDimTree {
     	// was pulled directly from hibernate instead of being re-pulled from the 
     	// multidimensional database.
     	//
-     	rebuildMemberPropCollections();    		
+     	rebuildMemberPropCollections();  
+     	
+     	// If no read only members were found, initialize collection to avoid
+     	// subsequent rebuilds when read only members are requested
+     	if (readOnlyMembers == null) {
+     		readOnlyMembers = new ArrayList<PafDimMember>();
+     	}
  
      	return readOnlyMembers;
     }
@@ -183,6 +189,12 @@ public abstract class PafDimTree {
     	//
     	rebuildMemberPropCollections();    		
  
+     	// If no shared members were found, initialize collection to avoid
+     	// subsequent rebuilds when shared members are requested
+     	if (sharedMembers == null) {
+     		sharedMembers = new ArrayList<PafDimMember>();
+     	}
+ 
     	return sharedMembers;
     }
 
@@ -199,6 +211,12 @@ public abstract class PafDimTree {
     	// multidimensional database.
     	//
     	rebuildMemberPropCollections();    		
+ 
+     	// If no synthetic members were found, initialize collection to avoid
+     	// subsequent rebuilds when synthetic members are requested
+     	if (syntheticMembers == null) {
+     		syntheticMembers = new ArrayList<PafDimMember>();
+     	}
  
     	return syntheticMembers;
     }
@@ -276,16 +294,10 @@ public abstract class PafDimTree {
 	 */
 	public void initMemberPropCollections() {
 		
-		// Initialize member property collections as needed.
-		if (readOnlyMembers == null ) {
-			readOnlyMembers = new ArrayList<PafDimMember>();
-		}
-		if (sharedMembers == null) {
-			sharedMembers = new ArrayList<PafDimMember>();
-		}
-		if (syntheticMembers == null) {
-			syntheticMembers = new ArrayList<PafDimMember>();
-		}
+		// Initialize member property collections
+		readOnlyMembers = null;
+		sharedMembers = null;
+		syntheticMembers = null;
 
 }
 
@@ -302,8 +314,6 @@ public abstract class PafDimTree {
 			logger.debug("Rebuilding the member property collections members list for tree rooted at: "
 					+ this.getRootNode().getKey() + " in dimension: " + this.getId());
 			
-			// Initialize member property collections
-			this.initMemberPropCollections();
 
 			// The entire list of dim members must be pulled using a tree traversal 
 			// since shared members aren't contained in the primary members hash map.
@@ -713,9 +723,6 @@ public abstract class PafDimTree {
      */
     protected void addToMbrPropCollections(PafDimMember member) {
     	
-    	// Check if collections need initializing
-    	initMemberPropCollections();
-    	
     	// Add member to property collections
     	addToReadOnlyMembers(member);
     	addToSharedMembers(member);
@@ -730,8 +737,10 @@ public abstract class PafDimTree {
      */
     protected void addToReadOnlyMembers(PafDimMember member) {
     	
-		// Use a hash set to track members by selected property for fast lookup 
     	if (member.isReadOnly()) {
+    		if (readOnlyMembers == null ) {
+    			readOnlyMembers = new ArrayList<PafDimMember>();
+    		}
     		readOnlyMembers.add(member); 
     	}
     	
@@ -746,6 +755,9 @@ public abstract class PafDimTree {
     	
 		// Use a hash set to track members by selected property for fast lookup 
     	if (member.isShared()) {
+    		if (sharedMembers == null) {
+    			sharedMembers = new ArrayList<PafDimMember>();
+    		}
     		sharedMembers.add(member); 
     	}
      	
@@ -760,6 +772,9 @@ public abstract class PafDimTree {
     	
 		// Use a hash set to track members by selected property for fast lookup 
     	if (member.isSynthetic()) {
+    		if (syntheticMembers == null) {
+    			syntheticMembers = new ArrayList<PafDimMember>();
+    		}
     		syntheticMembers.add(member);
     	}
     	

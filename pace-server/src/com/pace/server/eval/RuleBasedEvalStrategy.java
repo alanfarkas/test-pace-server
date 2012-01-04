@@ -506,7 +506,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 	 */
 	private void processPerpetualRuleGroups(List<RuleGroup> ruleGroups, EvalState evalState)  throws PafException {  
 		// enter time slice mode
-		// process intersections in equivalent to a postorder traveral of 
+		// process intersections in equivalent to a post order traversal of 
 		// the time tree. The eval step is only allowed to process changes for
 		// the current time slice, however, it can pull from other time slices to 
 		// resolve it's needs. Primarily this supports updating bop from eop.
@@ -516,7 +516,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		// quickly consider only relevant intersections, and the master loop will skip 
 		// over empty lists
 
-int alan=0;
+
 		List<String> timePeriods = evalState.getTimePeriodList();
 		evalState.setTimeSliceMode(true);
 

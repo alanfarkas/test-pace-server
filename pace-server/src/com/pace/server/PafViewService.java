@@ -3551,7 +3551,7 @@ public class PafViewService {
 			PafNumberFormat versionNumericFormat,
 			PafNumberFormat measureNumericFormat) {
 
-		// if override label exist for numberic format, then use, otherwise
+		// if override label exist for numeric format, then use, otherwise
 		// use version/measure logic
 		if (tuple.getNumberFormatOverrideLabel() != null) {
 			String key = tuple.getNumberFormatOverrideLabel();
