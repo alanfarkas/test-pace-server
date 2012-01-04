@@ -3272,26 +3272,29 @@ public class PafDataService {
 		}
 		
 		
-
-		// Calculate attribute intersections for off-screen measures. This 
-		// step is only needed during the first evaluation pass for a each
-		// view, and after the data cache has been refreshed.
-		if (hasAttributes && !pafMVS.isInitializedForAttrEval()) {
-
-			// Create member filter containing list of off-screen measures
-			Map<String, List<String>> memberFilter = new HashMap<String, List<String>>();
-			List<String> measureList = new ArrayList<String>(Arrays.asList(dataCache.getDimMembers(measureDim)));
-			measureList.removeAll(Arrays.asList(sliceParms.getMembers(measureDim)));
-			memberFilter.put(measureDim, measureList);
-
-			// Calculate attribute intersections
-			long attrInitStart = System.currentTimeMillis();
-			PafDataCacheCalc.calcAttributeIntersections(dataCache, clientState, sliceParms,
-					memberFilter, DcTrackChangeOpt.NONE);
-			pafMVS.setInitializedForAttrEval(true);
-			String logMsg = LogUtil.timedStep("Attribute Eval Initialization", attrInitStart);
-			evalPerfLogger.info(logMsg);
-		}
+		// 	Non-existent attribute intersections are now calculated as needed. Therefore
+		// 	the following block of code is no longer needed.
+		//
+		
+//		// Calculate attribute intersections for off-screen measures. This 
+//		// step is only needed during the first evaluation pass for a each
+//		// view, and after the data cache has been refreshed.
+//		if (hasAttributes && !pafMVS.isInitializedForAttrEval()) {
+//
+//			// Create member filter containing list of off-screen measures
+//			Map<String, List<String>> memberFilter = new HashMap<String, List<String>>();
+//			List<String> measureList = new ArrayList<String>(Arrays.asList(dataCache.getDimMembers(measureDim)));
+//			measureList.removeAll(Arrays.asList(sliceParms.getMembers(measureDim)));
+//			memberFilter.put(measureDim, measureList);
+//
+//			// Calculate attribute intersections
+//			long attrInitStart = System.currentTimeMillis();
+//			PafDataCacheCalc.calcAttributeIntersections(dataCache, clientState, sliceParms,
+//					memberFilter, DcTrackChangeOpt.NONE);
+//			pafMVS.setInitializedForAttrEval(true);
+//			String logMsg = LogUtil.timedStep("Attribute Eval Initialization", attrInitStart);
+//			evalPerfLogger.info(logMsg);
+//		}
 		
 		logger.info("Updating data cache with client data: " + sliceParms.toString() );
 		dataCache.updateDataCache(newSlice, sliceParms);

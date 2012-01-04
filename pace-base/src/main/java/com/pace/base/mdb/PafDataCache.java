@@ -3941,8 +3941,9 @@ public class PafDataCache implements IPafDataCache {
 			memberIndex = memberIndexMap[axis].get(member);
 		} else { 
 			// Member not found
-			String errMsg = "Member to index conversion error - member ["
-				+ member + "] not found in axis [" + axis + "] (dimension [" + treeDims.get(axis)  + "])";
+			String errMsg = "Invalid cell coordinate reference - member ["
+				+ member + "] not found in axis [" + axis + "] (dimension [" + treeDims.get(axis) 
+				+ "]). This usually indicates that the specified member is not defined in the current Unit of Work.";
 			logger.error(errMsg);
 			IllegalArgumentException iae = new IllegalArgumentException(errMsg);    
 			throw iae;          			
