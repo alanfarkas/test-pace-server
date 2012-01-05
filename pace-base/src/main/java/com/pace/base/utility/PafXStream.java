@@ -235,7 +235,6 @@ public class PafXStream {
 		
 		xs.processAnnotations(UserMemberLists.class);
 		xs.processAnnotations(PafMemberList.class);
-		xs.alias("memberList", PafMemberList.class);
 		
 		xs.alias("ConnectionProps", PafConnectionProps.class);
 		xs.alias("PafLDAPSettings", PafLDAPSettings.class);

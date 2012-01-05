@@ -28,7 +28,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * @author jim
  *
  */
-@XStreamAlias("memberLists")
+@XStreamAlias("memberList")
 public class PafMemberList {
 	String dimName;
 	String memberNames[];
