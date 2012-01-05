@@ -7,6 +7,8 @@
     <string>SLS_AUR</string>
     <string>MDPERM_%</string>
     <string>MDPERM_DLR</string>            
+    <string>MDTTL_DLR</string>      <!-- Added this measure on 1/5/2012 to account for new measure hierarchies in Titan outline -->          
+    <string>MDTTL_%</string>      	<!-- Added this measure on 1/5/2012 to account for new measure hierarchies in Titan outline -->          
   </measureList>
   
   <!-- Used in TTH on 4/26/08 Do not update -->   
