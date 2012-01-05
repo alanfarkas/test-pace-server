@@ -1513,6 +1513,7 @@ public class PafDataService {
 
 		Map <String, PafAttributeTree> attrTrees = getAttributeTrees(); 
 		Map<String, Integer> attributeDimInfo = new HashMap<String, Integer>();
+		List<String> skippedAttrTrees = new ArrayList<String>();
 
 
 		// Iterate through all attribute trees and identify the ones 
@@ -1579,13 +1580,16 @@ public class PafDataService {
 				}
 
 				// Ensure that the attribute current attribute dimension has at least one 
-				// attribute mapped to a base member
+				// attribute mapped to a base member. Remove any attribute trees that don't.
 				if (attrBaseMemberLevel == null) {
-					String errMsg = "Error loading associated attributes - no base member mappings were found for attribute dimension: "
+					String errMsg = "Error loading associated attributes - no base member mappings were found for attribute dimension: ["
 						+ attrDimName;
+					errMsg += "]. This attribute dimension will not be loaded.";
 					logger.error(errMsg);
-					IllegalArgumentException iae = new IllegalArgumentException(errMsg);
-					throw (iae);
+					skippedAttrTrees.add(attrDimName);
+					continue;
+//					IllegalArgumentException iae = new IllegalArgumentException(errMsg);
+//					throw (iae);
 				}
 
 				
@@ -1610,6 +1614,12 @@ public class PafDataService {
 		// base dimension mapping level, at the root of base tree
 		baseTree.setAttributeDimInfo(attributeDimInfo);
 
+		
+		// Remove any skipped attribute trees
+		for (String attrTree : skippedAttrTrees) {
+			this.attributeTrees.remove(attrTree);
+		}
+		
 		// Return update base trees
 		return baseTree;
 	}
@@ -3088,9 +3098,7 @@ public class PafDataService {
 		// base dimensions to base dimension name set
 		for (PafAttributeTree attrTree:attrTrees.values()) {
 			String baseDimName = attrTree.getBaseDimName();
-			if (!baseDimNames.contains(baseDimName)) {
-				baseDimNames.add(baseDimName);
-			}			
+			baseDimNames.add(baseDimName);			
 		}
 
 		// Return all base dimensions that have been assigned one or more attribute dimensions
@@ -3637,8 +3645,7 @@ public class PafDataService {
 				logger.info("Loading attribute trees " + appString);
 				this.initAttributeMemberTreeStore();
 
-				logger.info("Loading base trees " + appString);				
-				
+				logger.info("Loading base trees " + appString);							
 				this.initDimTreeStore(pafApp);
 																
 				this.initCellNotes(pafApp);
