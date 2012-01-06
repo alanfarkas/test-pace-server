@@ -78,7 +78,7 @@ public class PafAppService {
 	
 	
 	private static Logger logger = Logger.getLogger(PafAppService.class);
-	private static Logger logPerf = Logger.getLogger("pace.performance");
+	private static Logger logPerf = Logger.getLogger("pace.performance"); //$NON-NLS-1$
 
 	private PafAppService() { }
 
@@ -169,11 +169,11 @@ public class PafAppService {
 			
 		} catch (Exception e) {
 			updateAppRunState(id, RunningState.FAILED);
-			String s = String.format("Failed to start application [%s]", id);
+			String s = String.format(Messages.getString("PafAppService.21"), id); //$NON-NLS-1$
 			throw new PafException(s, PafErrSeverity.Error, e);
 		}
     	
-		String stepDesc = String.format("Application [%s] Loaded", id);
+		String stepDesc = String.format(Messages.getString("PafAppService.24"), id); //$NON-NLS-1$
 		logPerf.info(LogUtil.timedStep(stepDesc, startTime));		
     }
     
@@ -220,7 +220,7 @@ public class PafAppService {
     
     public synchronized void updateAppRunState(String id, RunningState state) {
     	if ( ! applicationStates.containsKey(id) ) {
-    		String s = String.format("No application with ID [%s] defined", id);
+    		String s = String.format(Messages.getString("PafAppService.25"), id); //$NON-NLS-1$
     		throw new IllegalArgumentException(s);
     	} else {
     		applicationStates.get(id).setCurrentRunState(state);
@@ -229,7 +229,7 @@ public class PafAppService {
     
     public synchronized RunningState getAppRunState(String id) {
     	if ( ! applicationStates.containsKey(id) ) {
-    		String s = String.format("No application with ID [%s] defined", id);
+    		String s = String.format(Messages.getString("PafAppService.26"), id); //$NON-NLS-1$
     		throw new IllegalArgumentException(s);
     	} else {
     		return applicationStates.get(id).getCurrentRunState();
@@ -672,7 +672,7 @@ public class PafAppService {
 
     	// Check if specified elapsed period was found
     	if (elapsedMember == null) {
-    		String errMsg = String.format("Unable to resolve the application settings of Current Year: [%s] and Last Elapsed Period: [%s] against the current client trees",
+    		String errMsg = String.format(Messages.getString("PafAppService.27"), //$NON-NLS-1$
     							currentYear, lastPeriod); 
     		logger.fatal(errMsg);
     		throw new IllegalArgumentException(errMsg);
