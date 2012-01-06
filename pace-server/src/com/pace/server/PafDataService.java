@@ -3587,11 +3587,14 @@ public class PafDataService {
 	public void loadApplicationData() throws PafException {
 
 		String appId = "[Unspecified]";
+		String dataSourceId = "[Unspecified]";
+		String errMsg = null;
 		initDataMaps();
 		
+		
 		// assumes a single application at this point
-		// loads all dimensions into the tree hashmap, so at the very least
-		// multipls apps couldn't share dimensions
+		// loads all dimensions into the tree hash map, so at the very least
+		// multiple apps couldn't share dimensions
 
 		// Attribute trees must be loaded first, since attribute info is needed 
 		// to populate the base trees
@@ -3604,8 +3607,13 @@ public class PafDataService {
 				
 				appId = pafApp.getAppId();
 				String appString = "for application [" + appId + "]";
-				IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getMdbProp(pafApp.getMdbDef().getDataSourceId());
-
+				dataSourceId = pafApp.getMdbDef().getDataSourceId();
+				IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getMdbProp(dataSourceId);
+				if (connProps == null) {
+					errMsg = String.format(". The data source id [%s] is undefined.", dataSourceId);
+					throw new IllegalArgumentException(errMsg);
+				}
+				
 // 	TTN-1406 Commented out this code for the time being until we figure out a way to get custom class loader to work.	
 				
 //				// Add multi-dimensional database libraries to classpath
@@ -3651,9 +3659,9 @@ public class PafDataService {
 				this.initCellNotes(pafApp);
 			}
 		} catch (Exception ex) {
-			String s = String.format("Error loading application [%s]", appId);
-			throw new PafException(s, ex, PafErrSeverity.Error);
-
+			errMsg = String.format("Error loading application [%s]", appId) + errMsg;
+			logger.fatal(errMsg);
+			throw new PafException(errMsg, ex, PafErrSeverity.Error);
 		}
 	}
 
@@ -3765,7 +3773,7 @@ public class PafDataService {
 		
 	/**
 	 *	Returns a List with an expanded expressionList.
-	 *  The Filtering is done within the current UOW
+	 *  The Filtering is done against the current UOW
 	 *
 	 * @param PafDimSpec 
 	 *
