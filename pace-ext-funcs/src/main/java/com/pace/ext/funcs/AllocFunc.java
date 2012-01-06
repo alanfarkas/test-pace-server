@@ -274,8 +274,8 @@ public class AllocFunc extends AbstractFunction {
 	        
 	        double lockedTotal = 0;
 	        Set<Intersection> lockedTargets = new HashSet<Intersection>(evalState.getLoadFactor());
-			Set<String> lockedTimePeriods = evalState.getClientState().getLockedPeriods();		
-			if (lockedTimePeriods == null) lockedTimePeriods = new HashSet<String>(0); 
+//			Set<String> lockedTimePeriods = evalState.getClientState().getLockedPeriods();		
+//			if (lockedTimePeriods == null) lockedTimePeriods = new HashSet<String>(0); 
 	        
 				
 	        // add up all locked cell values, this must include floors intersections of excluded measures

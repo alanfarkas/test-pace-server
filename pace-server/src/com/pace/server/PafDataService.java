@@ -336,7 +336,7 @@ public class PafDataService {
 		List<String> dimMemberList = new ArrayList<String>();
 		for (String term : terms) {
 
-			List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
+			List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, clientState)));
 			dimMemberList.addAll(expandedMbrs);
 
 			// Additional processing for discontiguous dimension hierarchy (TTN-1644)
@@ -357,12 +357,22 @@ public class PafDataService {
 			dimMemberList.remove(versionDim);
 		}
 
+		
 		// Check for duplicate members
-		Set<String> uniqueMembers = new HashSet<String>(dimMemberList);
+		Set<String> dupMembers = new HashSet<String>();
+		Set<String> uniqueMembers = new HashSet<String>();
+		for (String member : dimMemberList) {
+			if (!uniqueMembers.contains(member)) {
+				uniqueMembers.add(member);
+			} else {
+				dupMembers.add(member);
+			}
+		}
+		
 		int dupMbrCount = dimMemberList.size() - uniqueMembers.size();
 		if (dupMbrCount != 0) {
-			String errMsg = dupMbrCount + " duplicate member(s) found in UOW definition for dimension: "
-			+ dim + ". User security or underlying dimensional hierarchies need to be adjusted.";
+			String errMsg = String.format("%d duplicate member(s) found in UOW definition for dimension: [%s]. These members are: %s. User security or underlying dimensional hierarchies need to be adjusted.",
+				dupMbrCount, dim, StringUtils.setToString(dupMembers));
 			logger.error(errMsg);
 		}
 
@@ -2637,7 +2647,7 @@ public class PafDataService {
 	private String[] resolveExpOperation(ExpOperation expOp, Boolean parentFirst, String dim, PafClientState clientState) throws PafException {
 
 		PafDimTree tree; 
-		if (clientState == null)
+		if (clientState == null || clientState.getUowTrees() == null)
 			tree = baseTrees.get(dim);
 		else
 			tree = clientState.getUowTrees().getTree(dim);

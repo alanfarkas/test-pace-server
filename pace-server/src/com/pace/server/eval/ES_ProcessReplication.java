@@ -87,11 +87,11 @@ public class ES_ProcessReplication implements IEvalStep {
     	String timeDim = evalState.getTimeDim();
     	String versionDim = evalState.getVersionDim();
 
-    	// Get the list of locked periods on the view
-    	Set<String> lockedPeriods = evalState.getClientState().getLockedPeriods();
-    	if (lockedPeriods == null) {
-    		lockedPeriods = new HashSet<String>(0);  
-    	}
+//    	// Get the list of locked periods on the view
+//    	Set<String> lockedPeriods = evalState.getClientState().getLockedPeriods();
+//    	if (lockedPeriods == null) {
+//    		lockedPeriods = new HashSet<String>(0);  
+//    	}
 
 		// Sort replicated cells so that lower level intersections are handled first. 
 		// This is done to allow lower level replicated intersections to be created.
@@ -147,7 +147,8 @@ public class ES_ProcessReplication implements IEvalStep {
  	    			if(!evalState.getCurrentChangedCells().contains(tempIx) &&
 	    					!evalState.getCurrentLockedCells().contains(tempIx) &&
 	    					!isIntersectionUnderProtection(evalState, tempIx) &&
-	    					!lockedPeriods.contains(tempIx.getCoordinate(timeDim))){
+//	    					!lockedPeriods.contains(tempIx.getCoordinate(timeDim))){
+	    					!EvalUtil.isElapsedIs(tempIx, evalState)){		//TTN-1595
 	    				
 	    				boolean cellChanged = true;
 	    				

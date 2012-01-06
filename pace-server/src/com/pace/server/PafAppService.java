@@ -581,8 +581,8 @@ public class PafAppService {
 			Map<String, VersionType> versionsTypeMap = PafMetaData.getVersionTypeMap();
 			VersionType versionType = versionsTypeMap.get(currentVersion);
 			if (versionType.equals(VersionType.ForwardPlannable)) {
-				Set<String> lockedTimeHorizPeriods2 = this.getLockedList(clientState, false);
-				for (String lockedTimeHorizPeriod : lockedTimeHorizPeriods2) {
+				Set<String> lockedTimeHorizFloorPeriods = this.getLockedList(clientState, false);
+				for (String lockedTimeHorizPeriod : lockedTimeHorizFloorPeriods) {
 					lockedTimeHorizPeriods.add(lockedTimeHorizPeriod);
 					TimeSlice timeSlice = new TimeSlice(lockedTimeHorizPeriod);
 					lockedTimeSlices.add(timeSlice);

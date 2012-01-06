@@ -94,13 +94,13 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		String timeName;
 		
 		
-        Set<String> lockedTimePeriods = null;
-
-        if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
-            lockedTimePeriods = evalState.getClientState().getLockedPeriods();
-        }
-        if (lockedTimePeriods == null)
-            lockedTimePeriods = new HashSet<String>(0);  
+//        Set<String> lockedTimePeriods = null;
+//
+//        if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
+//            lockedTimePeriods = evalState.getClientState().getLockedPeriods();
+//        }
+//        if (lockedTimePeriods == null)
+//            lockedTimePeriods = new HashSet<String>(0);  
 		
 		
 		
@@ -115,8 +115,9 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 //				continue;			
 			
 			// also eliminate if currently in an elapsed period
-			timeName = i.getCoordinate(timeDim);
-			if (lockedTimePeriods.contains(timeName))
+//			timeName = i.getCoordinate(timeDim);
+//			if (lockedTimePeriods.contains(timeName))
+			if (EvalUtil.isElapsedIs(i, evalState))
 				continue;
 			
 			// good enough, add to finalist list
@@ -488,18 +489,18 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		double allocAvailable = dataCache.getCellValue(intersection);
 
 
-        Set<String> lockedTimePeriods = null;
+//       Set<String> lockedTimePeriods = null;
 
-        if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
-            lockedTimePeriods = evalState.getClientState().getLockedPeriods();
-        }
-        if (lockedTimePeriods == null)
-            lockedTimePeriods = new HashSet<String>(0);  
+//        if (evalState.getPlanVersion().getType() == VersionType.ForwardPlannable) {
+//            lockedTimePeriods = evalState.getClientState().getLockedPeriods();
+//       }
+//        if (lockedTimePeriods == null)
+//           lockedTimePeriods = new HashSet<String>(0);  
 		
 		
 		// total up locked and unlocked targets
 		// the only locks considered by this process are previous allocations within this pass, and elapsed periods
-		// wich are not allowed to be changed under any circumstances
+		// which are not allowed to be changed under any circumstances
 		double lockedTargetTotal = 0; 
 		double origTargetSum = 0;
 		List<Intersection> elapsedLocks = new ArrayList<Intersection>();
@@ -507,7 +508,8 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 			if (tempAllocLocks.contains(target)) {
 				lockedTargetTotal += dataCache.getCellValue(target);
 			}
-			else if (lockedTimePeriods.contains(target.getCoordinate(timeDim))) {
+//			else if (lockedTimePeriods.contains(target.getCoordinate(timeDim))) {
+			else if (EvalUtil.isElapsedIs(target, evalState)) {		// TTN-1595
 				lockedTargetTotal += dataCache.getCellValue(target);
 				elapsedLocks.add(target);
 			}
