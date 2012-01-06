@@ -581,7 +581,8 @@ public class PafAppService {
 			Map<String, VersionType> versionsTypeMap = PafMetaData.getVersionTypeMap();
 			VersionType versionType = versionsTypeMap.get(currentVersion);
 			if (versionType.equals(VersionType.ForwardPlannable)) {
-				for (String lockedTimeHorizPeriod : this.getLockedList(clientState, false)) {
+				Set<String> lockedTimeHorizPeriods2 = this.getLockedList(clientState, false);
+				for (String lockedTimeHorizPeriod : lockedTimeHorizPeriods2) {
 					lockedTimeHorizPeriods.add(lockedTimeHorizPeriod);
 					TimeSlice timeSlice = new TimeSlice(lockedTimeHorizPeriod);
 					lockedTimeSlices.add(timeSlice);
@@ -669,6 +670,13 @@ public class PafAppService {
     		}
     	}
 
+    	// Check if specified elapsed period was found
+    	if (elapsedMember == null) {
+    		String errMsg = String.format("Unable to resolve the application settings of Current Year: [%s] and Last Elapsed Period: [%s] against the current client trees",
+    							currentYear, lastPeriod); 
+    		logger.fatal(errMsg);
+    		throw new IllegalArgumentException(errMsg);
+    	}
     	resolveLockedMember(elapsedMember, lockedPeriods);
 
 
