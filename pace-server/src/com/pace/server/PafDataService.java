@@ -332,11 +332,11 @@ public class PafDataService {
 			}			
 		}
 
-		// Expand each member specification
+		// Expand each member specification - always use full mdb trees, not client trees
 		List<String> dimMemberList = new ArrayList<String>();
 		for (String term : terms) {
 
-			List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, clientState)));
+			List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
 			dimMemberList.addAll(expandedMbrs);
 
 			// Additional processing for discontiguous dimension hierarchy (TTN-1644)
@@ -529,25 +529,37 @@ public class PafDataService {
 		if (dimTree.hasSharedMembers() &&
 				(dimType == DimType.Hier || dimType == DimType.Measure || dimType == DimType.Time) ) {
 			
-			// Determine which dimension member is the intended root of the UOW branch
+			// Determine which dimension member is the intended root of the UOW branch. It's
+			// also possible that this is a set of peer members with no root.
 			String root = null;
 			if (dimType != DimType.Measure) {
-				// Look for candidate root by first discounting any shared members
-				Set<String> candidateRoots = new HashSet<String>(Arrays.asList(dimMembers));
-				Set<String> sharedMemberNames = dimTree.getSharedMemberNames();
-				candidateRoots.removeAll(sharedMemberNames);
-
-				// Root is the non-shared member with lowest generation (if all UOW members
-				// in dimension are shared then no pruning is needed).
-				int lowestGen = 9999;
-				for (String candidateRoot : candidateRoots) {
-					PafDimMember candidateRootMember = dimTree.getMember(candidateRoot);
-					int candidateGen = candidateRootMember.getMemberProps().getGenerationNumber();
-					if (candidateGen  < lowestGen) {
-						lowestGen = candidateGen;
-						root = candidateRoot;
+				// Assume that is root exits, it's the first member in the list
+				String candidateRoot = dimMembers[0];
+				if (dimMembers.length > 0) {
+					// If the second member is not descendant of the first member, then the
+					// first member is not the root
+					if (dimTree.getMemberNames(dimTree.getDescendants(candidateRoot)).contains(candidateRoot)) {
+						candidateRoot = null;
 					}
-				}
+				} 
+				root = candidateRoot;
+		
+//				// Look for candidate root by first discounting any shared members
+//				Set<String> candidateRoots = new HashSet<String>(Arrays.asList(dimMembers));
+//				Set<String> sharedMemberNames = dimTree.getSharedMemberNames();
+//				candidateRoots.removeAll(sharedMemberNames);
+//
+//				// Root is the non-shared member with lowest generation (if all UOW members
+//				// in dimension are shared then no pruning is needed).
+//				int lowestGen = 9999;
+//				for (String candidateRoot : candidateRoots) {
+//					PafDimMember candidateRootMember = dimTree.getMember(candidateRoot);
+//					int candidateGen = candidateRootMember.getMemberProps().getGenerationNumber();
+//					if (candidateGen  < lowestGen) {
+//						lowestGen = candidateGen;
+//						root = candidateRoot;
+//					}
+//				}
 
 			} else {
 				// Measure dimension - use the measure root
@@ -679,7 +691,7 @@ public class PafDataService {
 			// Return version tree
 			return tree;
 		} 
-		
+int alan = 0;		
 		// All other dimensions - Start out by making a tree copy
 		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, uowMbrNames, mdbDef);
 		PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);

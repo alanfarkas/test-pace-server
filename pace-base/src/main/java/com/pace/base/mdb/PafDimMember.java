@@ -277,8 +277,21 @@ public abstract class PafDimMember implements Cloneable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((children == null) ? 0 : children.hashCode());
+	
+		// Since it's the ancestor path the really defines uniqueness within
+		// the PafDimTree, the hash of the child members is ignored. To avoid
+		// the creation of duplicate members in the PafDimTree, the occurrence
+		// of a given PafDimMember without children compared to the same 
+		// PafDimMember with children is considered to be the same member since
+		// they should both point to the same location in the PafDimTree.
+		
+//		// Custom child logic to avoid recursion error
+//		if (children != null) {
+//			result = prime * result;
+//			for (PafDimMember child : children) {
+//				result += child.getKey().hashCode();
+//			}
+//		}
 		result = prime * result + ((key == null) ? 0 : key.hashCode());
 		result = prime * result
 				+ ((memberProps == null) ? 0 : memberProps.hashCode());

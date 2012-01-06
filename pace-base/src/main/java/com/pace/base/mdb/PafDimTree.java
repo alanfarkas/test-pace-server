@@ -37,9 +37,9 @@ public abstract class PafDimTree {
     private Map<String, PafDimMember> members = null;
     private SortedMap<Integer, List<PafDimMember>> membersByLevel = new TreeMap<Integer, List<PafDimMember>>();   
     private SortedMap<Integer, List<PafDimMember>> membersByGen = new TreeMap<Integer, List<PafDimMember>>();       
-    private List<PafDimMember> readOnlyMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no read-only members
-    private List<PafDimMember> sharedMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no shared members
-    private List<PafDimMember> syntheticMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no synthetic members
+    private Set<PafDimMember> readOnlyMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no read-only members
+    private Set<PafDimMember> sharedMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no shared members
+    private Set<PafDimMember> syntheticMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no synthetic members
     private PafDimMember rootNode = null;
     private boolean isDiscontig = false;
 
@@ -157,7 +157,7 @@ public abstract class PafDimTree {
      *
      * @return List<PafDimMember>
      */
-    public List<PafDimMember> getReadOnlyMembers() {
+    public Set<PafDimMember> getReadOnlyMembers() {
     	
     	// Rebuild this collection as needed. This list of read-only members does not get 
     	// preserved in the tree cache, so it may be necessary to reproduce if the tree 
@@ -169,7 +169,7 @@ public abstract class PafDimTree {
      	// If no read only members were found, initialize collection to avoid
      	// subsequent rebuilds when read only members are requested
      	if (readOnlyMembers == null) {
-     		readOnlyMembers = new ArrayList<PafDimMember>();
+     		readOnlyMembers = new HashSet<PafDimMember>();
      	}
  
      	return readOnlyMembers;
@@ -180,7 +180,7 @@ public abstract class PafDimTree {
      *
      * @return List<PafDimMember>
      */
-    public List<PafDimMember> getSharedMembers() {
+    public Set<PafDimMember> getSharedMembers() {
     	
     	// Rebuild this collection as needed. This list of shared members does not get 
     	// preserved in the tree cache, so it may be necessary to reproduce if the tree 
@@ -192,7 +192,7 @@ public abstract class PafDimTree {
      	// If no shared members were found, initialize collection to avoid
      	// subsequent rebuilds when shared members are requested
      	if (sharedMembers == null) {
-     		sharedMembers = new ArrayList<PafDimMember>();
+     		sharedMembers = new HashSet<PafDimMember>();
      	}
  
     	return sharedMembers;
@@ -203,7 +203,7 @@ public abstract class PafDimTree {
      *
      * @return List<PafDimMember>
      */
-    public List<PafDimMember> getSyntheticMembers() {
+    public Set<PafDimMember> getSyntheticMembers() {
     	
     	// Rebuild this collection as needed. This list of synthetic members does not get 
     	// preserved in the tree cache, so it may be necessary to reproduce if the tree 
@@ -215,7 +215,7 @@ public abstract class PafDimTree {
      	// If no synthetic members were found, initialize collection to avoid
      	// subsequent rebuilds when synthetic members are requested
      	if (syntheticMembers == null) {
-     		syntheticMembers = new ArrayList<PafDimMember>();
+     		syntheticMembers = new HashSet<PafDimMember>();
      	}
  
     	return syntheticMembers;
@@ -309,32 +309,23 @@ public abstract class PafDimTree {
 		
 		// Reload all member property collections simultaneously to avoid multiple passes through
 		// the tree.
-   		if (readOnlyMembers == null || sharedMembers == null || syntheticMembers == null) {
-   			
+		if (readOnlyMembers == null || sharedMembers == null || syntheticMembers == null) {
+
 			logger.debug("Rebuilding the member property collections members list for tree rooted at: "
 					+ this.getRootNode().getKey() + " in dimension: " + this.getId());
-			
+
 
 			// The entire list of dim members must be pulled using a tree traversal 
 			// since shared members aren't contained in the primary members hash map.
 			List<PafDimMember> allMembers = getMembers(TreeTraversalOrder.PRE_ORDER);
 			for (PafDimMember dimMember : allMembers) {
-				// Only add member to shared members collection, if it is not 
-				// contained in the members collection. In the case of sub-trees,
-				// a member that is defined in Essbase as shared could be contained
-				// in the members collection, and considered to be a "stored member",
-				// if it was the only occurrence of that member in the sub-tree.
-				if (members.get(dimMember.getKey()) != dimMember) {
-					addToSharedMembers(dimMember);
-				}
-				addToReadOnlyMembers(dimMember);
-				addToSyntheticMembers(dimMember);
+				this.addToMbrPropCollections(dimMember);
 			}
 		}
 
- 	}
+	}
 
- 
+
 
 	/**
      *  Return the children of the specified paf tree member,
@@ -739,7 +730,7 @@ public abstract class PafDimTree {
     	
     	if (member.isReadOnly()) {
     		if (readOnlyMembers == null ) {
-    			readOnlyMembers = new ArrayList<PafDimMember>();
+    			readOnlyMembers = new HashSet<PafDimMember>();
     		}
     		readOnlyMembers.add(member); 
     	}
@@ -749,18 +740,26 @@ public abstract class PafDimTree {
     /**
      *  Add member to shared member property collections
      *
-     * @param member Dimension member
+     * @param dimMember Dimension member
      */
     protected void addToSharedMembers(PafDimMember member) {
     	
-		// Use a hash set to track members by selected property for fast lookup 
-    	if (member.isShared()) {
-    		if (sharedMembers == null) {
-    			sharedMembers = new ArrayList<PafDimMember>();
+    	// Only add member to shared members collection, if it is not 
+    	// contained in the members collection. In the case of sub-trees,
+    	// a member that is defined in Essbase as shared could be contained
+    	// in the members collection, and considered to be a "stored member",
+    	// if it was the only occurrence of that member in the sub-tree.
+    	if (members.get(member.getKey()) != member) {
+    		
+    		// Use a hash set to track members by selected property for fast lookup 
+    		if (member.isShared()) {
+    			if (sharedMembers == null) {
+    				sharedMembers = new HashSet<PafDimMember>();
+    			}
+    			sharedMembers.add(member); 
     		}
-    		sharedMembers.add(member); 
     	}
-     	
+
     }
 
     /**
@@ -773,7 +772,7 @@ public abstract class PafDimTree {
 		// Use a hash set to track members by selected property for fast lookup 
     	if (member.isSynthetic()) {
     		if (syntheticMembers == null) {
-    			syntheticMembers = new ArrayList<PafDimMember>();
+    			syntheticMembers = new HashSet<PafDimMember>();
     		}
     		syntheticMembers.add(member);
     	}
