@@ -677,6 +677,9 @@ public class PafAppService {
     		logger.fatal(errMsg);
     		throw new IllegalArgumentException(errMsg);
     	}
+    	
+    	
+    	// Resolve locked status of upper level locked time periods
     	resolveLockedMember(elapsedMember, lockedPeriods);
 
 
