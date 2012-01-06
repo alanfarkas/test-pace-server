@@ -514,24 +514,9 @@ public class PafViewService {
 	}
 
 	public void loadVersionsCache() {
-
-		if ( versionsCache == null || PafMetaData.isDebugMode()) {
-			
-			//if debug enabled, reload versions
-			if ( PafMetaData.isDebugMode()) {
-				
-				try {
-					PafMetaData.getPaceProject().loadData(ProjectElementId.Versions);
-				} catch (PafException e) {
-					logger.error(e.getMessage());
-				}
-				
-			}
 		
-			versionsCache = PafMetaData.getPaceProject().getVersions().toArray(new VersionDef[0]);
-			
-		}
-						
+		versionsCache = PafMetaData.getPaceProject().getVersions().toArray(new VersionDef[0]);
+
 		versionsTypeCache = PafMetaData.getVersionTypeMap();
 		
 		populateVersionsMapCache();

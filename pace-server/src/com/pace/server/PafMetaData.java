@@ -225,7 +225,7 @@ public class PafMetaData {
             
         } catch (Throwable ex) {
             PafErrHandler.handleException(new PafException(
-                    "Error clearing datacache. " + ex.getMessage(),
+                    "Error clearing outline cache. " + ex.getMessage(),
                     PafErrSeverity.Fatal));
         } 
     }
