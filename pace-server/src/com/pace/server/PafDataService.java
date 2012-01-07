@@ -538,7 +538,8 @@ public class PafDataService {
 				if (dimMembers.length > 0) {
 					// If the second member is not descendant of the first member, then the
 					// first member is not the root
-					if (dimTree.getMemberNames(dimTree.getDescendants(candidateRoot)).contains(candidateRoot)) {
+					String nextMember = dimMembers[1];
+					if (!dimTree.getMemberNames(dimTree.getDescendants(candidateRoot)).contains(nextMember)) {
 						candidateRoot = null;
 					}
 				} 
@@ -691,7 +692,7 @@ public class PafDataService {
 			// Return version tree
 			return tree;
 		} 
-int alan = 0;		
+	
 		// All other dimensions - Start out by making a tree copy
 		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, uowMbrNames, mdbDef);
 		PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);
