@@ -517,6 +517,7 @@ public class PafDataService {
 		// Get base tree for selected dimension in order to look up generation
 		// property by member. 
 		dimTree = baseTrees.get(dim);
+		PafBaseMember treeRoot = dimTree.getRootNode();
 		
 		// To support shared hierarchies, we need to get a subtree that only contains
 		// the branch that is part of the selected UOW. We need to weed out multiple
@@ -531,19 +532,26 @@ public class PafDataService {
 			
 			// Determine which dimension member is the intended root of the UOW branch. It's
 			// also possible that this is a set of peer members with no root.
-			String root = null;
+			String branchRootName = null;
 			if (dimType != DimType.Measure) {
-				// Assume that is root exits, it's the first member in the list
+
+				// If the member list contains the new branch root, our candidate root will be
+				// the first name in the member list
 				String candidateRoot = dimMembers[0];
-				if (dimMembers.length > 0) {
-					// If the second member is not descendant of the first member, then the
-					// first member is not the root
-					String nextMember = dimMembers[1];
-					if (!dimTree.getMemberNames(dimTree.getDescendants(candidateRoot)).contains(nextMember)) {
-						candidateRoot = null;
+				if (treeRoot.getKey().equals(candidateRoot)) {
+					// If the candidate root is the top of the dimension tree, then we're found
+					// our branch root.
+					branchRootName = candidateRoot;
+				} else {
+					// Else, the candidate root is the branch root if it is the ancestor of all
+					// the other members in the branch
+					List<String> nonDescendants = new ArrayList<String>(Arrays.asList(dimMembers));
+					List<String> descendants = dimTree.getMemberNames(dimTree.getIDescendants(candidateRoot));
+					nonDescendants.removeAll(descendants);
+					if (nonDescendants.size() == 0) {
+						branchRootName = candidateRoot;
 					}
-				} 
-				root = candidateRoot;
+				}
 		
 //				// Look for candidate root by first discounting any shared members
 //				Set<String> candidateRoots = new HashSet<String>(Arrays.asList(dimMembers));
@@ -564,12 +572,12 @@ public class PafDataService {
 
 			} else {
 				// Measure dimension - use the measure root
-				root = mdbDef.getMeasureRoot();
+				branchRootName = mdbDef.getMeasureRoot();
 			}
 
-			// Prune tree (if root was found)
-			if (root != null) {
-				dimTree = dimTree.getSubTreeCopy(root);
+			// Prune tree (if branch root was found and it's not the root of the tree)
+			if (branchRootName != null && !branchRootName.equals(treeRoot.getKey())) {
+				dimTree = dimTree.getSubTreeCopy(branchRootName);
 			}
 		}
 		
@@ -586,7 +594,7 @@ public class PafDataService {
 		// "Special" logic for version dimension. Add in version dimension root 
 		//  as it is not contained in the data cache
 		if (dimType == DimType.Version) {
-			PafBaseMember versionRoot = dimTree.getRootNode();
+			PafBaseMember versionRoot = treeRoot;
 			gen = versionRoot.getMemberProps().getGenerationNumber();
 			membersByGen.put(gen, new ArrayList<PafBaseMember>());
 			membersByGen.get(gen).add(versionRoot);  
