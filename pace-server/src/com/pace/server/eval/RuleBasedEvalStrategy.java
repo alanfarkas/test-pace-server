@@ -187,6 +187,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		PafDataCache dataCache = evalState.getDataCache();
 		PafClientState clientState = evalState.getClientState();
 		MemberTreeSet memberTrees = clientState.getUowTrees();
+		String initialDCStats = dataCache.getCurrentUsageStatsString();
 
 		long startTime = System.currentTimeMillis(), stepTime = 0;
 		evalState.setStartTime(startTime);
@@ -293,6 +294,8 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		logger.info(Messages.getString("RuleBasedEvalStrategy.29"));              //$NON-NLS-1$
          
 
+		logger.info(LogUtil.dcStats(dataCache, initialDCStats));
+		
 		return dataCache;
 	}
 

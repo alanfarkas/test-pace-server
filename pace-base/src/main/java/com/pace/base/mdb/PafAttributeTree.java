@@ -318,7 +318,7 @@ public class PafAttributeTree extends PafDimTree {
 		PafSimpleDimMember simpleRoot = null;
         PafSimpleAttributeTree simpleAttributeTree = null;
         
-        logger.info ("Getting 'simple' version of " + this.getClass().getSimpleName() + "...");
+        logger.debug ("Getting 'simple' version of " + this.getClass().getSimpleName() + "...");
 
         // Create Paf Simple Root Member
         root = getRootNode();
@@ -354,7 +354,7 @@ public class PafAttributeTree extends PafDimTree {
 	    simpleAttributeTree.setTraversedMembers(traversedMembers);
 	    
 	    // Return PafSimpleAttributeTree
-		logger.info("Returning PafSimpleAttributeTree (Process Complete)");
+		logger.debug("Returning PafSimpleAttributeTree (Process Complete)");
 	    return simpleAttributeTree;
        
     }

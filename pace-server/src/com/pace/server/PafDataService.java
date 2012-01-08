@@ -82,6 +82,7 @@ import com.pace.server.eval.RuleBasedEvalStrategy;
 public class PafDataService {
 	private static Logger logger = Logger.getLogger(PafDataService.class);
 	private static Logger evalPerfLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_EVAL);
+	private static Logger uowPerfLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_UOW_LOAD);
 	private static Logger auditLogger = Logger.getLogger(PafBaseConstants.LOGGER_AUDIT_EVAL);
 
 	private static PafDataService _instance = null;
@@ -122,7 +123,7 @@ public class PafDataService {
 		Map<String, Map<Integer, List<String>>> mdbDataSpecByVersion = buildUowLoadDataSpec(uow, clientState);
 		
 		// Load data cache
-		logger.info("Building the unit of work...");
+		logger.info("Building the unit of work..."); //$NON-NLS-1$
 		PafDataCache dataCache = new PafDataCache(clientState);
 		Map<String, Map<Integer, List<String>>>loadedMdbDataSpec = mdbData.updateDataCache(dataCache, mdbDataSpecByVersion);
 		logger.info("UOW intialized with version(s): " + StringUtils.setToString(loadedMdbDataSpec.keySet()));
@@ -136,7 +137,10 @@ public class PafDataService {
 			pafMVS.setInitializedForAttrEval(false);
 		}
 		
-		
+		String stats = dataCache.getStatsString();
+		logger.info(stats);
+		uowPerfLogger.info(stats);
+
 		logger.info("Data cache loaded, cached object count: " + uowCache.size());
 
 	}
@@ -271,7 +275,12 @@ public class PafDataService {
 
 		// Calculate synthetic member intersections
 		PafDataCacheCalc.calculateSyntheticMembers(clientState, cache, loadedMdbDataSpec);
-		
+	
+		// Log data cache statistics
+		String stats = cache.getStatsString();
+		logger.info(stats);
+		uowPerfLogger.info(stats);
+
 		return loadedMdbDataSpec;
 	}
 
@@ -371,7 +380,7 @@ public class PafDataService {
 		
 		int dupMbrCount = dimMemberList.size() - uniqueMembers.size();
 		if (dupMbrCount != 0) {
-			String errMsg = String.format("%d duplicate member(s) found in UOW definition for dimension: [%s]. These members are: %s. User security or underlying dimensional hierarchies need to be adjusted.",
+			String errMsg = String.format("%d duplicate member(s) found in UOW definition for dimension: [%s]. These members are: %s. User security or underlying dimensional hierarchies need to be adjusted.", //$NON-NLS-1$
 				dupMbrCount, dim, StringUtils.setToString(dupMembers));
 			logger.error(errMsg);
 		}
@@ -553,23 +562,6 @@ public class PafDataService {
 					}
 				}
 		
-//				// Look for candidate root by first discounting any shared members
-//				Set<String> candidateRoots = new HashSet<String>(Arrays.asList(dimMembers));
-//				Set<String> sharedMemberNames = dimTree.getSharedMemberNames();
-//				candidateRoots.removeAll(sharedMemberNames);
-//
-//				// Root is the non-shared member with lowest generation (if all UOW members
-//				// in dimension are shared then no pruning is needed).
-//				int lowestGen = 9999;
-//				for (String candidateRoot : candidateRoots) {
-//					PafDimMember candidateRootMember = dimTree.getMember(candidateRoot);
-//					int candidateGen = candidateRootMember.getMemberProps().getGenerationNumber();
-//					if (candidateGen  < lowestGen) {
-//						lowestGen = candidateGen;
-//						root = candidateRoot;
-//					}
-//				}
-
 			} else {
 				// Measure dimension - use the measure root
 				branchRootName = mdbDef.getMeasureRoot();
@@ -750,7 +742,7 @@ public class PafDataService {
 						+ " One possibility is that a discontiguous [" + dim
 						+ "] tree was defined";
 					if (dim.equalsIgnoreCase(measureDim)) {
-						errMsg += " via Rule Set Measure Filters.";
+						errMsg += Messages.getString("PafDataService.19"); //$NON-NLS-1$
 					} else {
 						errMsg += ".";
 					}
@@ -1771,7 +1763,7 @@ public class PafDataService {
 			boolean varyingAttributesExist = metaData.varyingAttributesExist(dims, mdbProps, appDef.getEssNetTimeOut());
 			
 			if(varyingAttributesExist == true){
-				logger.error("Varying Attributes exist in the Essbase outline - no attributes will be loaded");
+				logger.error(Messages.getString("PafDataService.75")); //$NON-NLS-1$
 			}
 			else{
 				for(String dim : dims){
@@ -2207,7 +2199,7 @@ public class PafDataService {
 		String[] prevHeader = new String[dimCount];
 		ViewTuple[] updatedViewTuples = viewTuples.clone();
 
-		logger.info("Generating Header Group Numbers");
+		logger.info(Messages.getString("PafDataService.85")); //$NON-NLS-1$
 
 		//    	Sample View Tuples        	Header Group Info	Order
 		//    	-----------------------------------------------------------
@@ -2878,6 +2870,7 @@ public class PafDataService {
 		Set<PafSimpleDimTree> allSimpleTrees = new HashSet<PafSimpleDimTree>();
 
 		// Get simple version of each dimension tree
+		logger.info(Messages.getString("PafDataService.98"));  //$NON-NLS-1$
 		for (String dimension:getAllDimTrees().keySet()) {
 			allSimpleTrees.add(getSimpleTree(dimension));
 		}

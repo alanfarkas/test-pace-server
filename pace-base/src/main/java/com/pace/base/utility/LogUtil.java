@@ -18,6 +18,8 @@
  */
 package com.pace.base.utility;
 
+import com.pace.base.mdb.PafDataCache;
+
 /**
  * Class_description_goes_here
  *
@@ -30,4 +32,26 @@ public class LogUtil {
     public static String timedStep(String stepDesc, long startTime) {
         return (stepDesc + " completed in " + StringUtils.decimalFormat((System.currentTimeMillis() - startTime), "#,###") + " ms");
     }
+
+	/**
+	 * Generate a message that compares pre and post evaluation data cache statistics
+	 * 
+	 * @param dataCache Data cache statistics
+	 * @param initialDCStats Pre-evaluation data cache statistics
+	 * 
+	 * @return Comparison of pre- and post-evaluation data cache statistics
+	 */
+	public static String dcStats(PafDataCache dataCache, String initialDCStats) {
+		
+		StringBuffer sb = new StringBuffer("\n\nData Cache Stats [Pre-Evaluation]:\n");
+		sb.append(initialDCStats);
+		sb.append("\nData Cache Stats [Post-Evaluation]:\n");
+		sb.append(dataCache.getCurrentUsageStatsString());
+		//sb.append("\n");
+		
+		return sb.toString();
+		
+		
+		
+	}
 }

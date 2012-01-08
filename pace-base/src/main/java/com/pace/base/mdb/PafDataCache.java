@@ -117,6 +117,10 @@ public class PafDataCache implements IPafDataCache {
 	private EvalState evalState = null;
 	private boolean isDirty = true;					// Indicates that the data cache has been updated
 	private final static int NON_KEY_DIM_COUNT = 3;	// Measure, Time, and Year Dimensions are dense dimensions
+	private final static int MB = 1048576; 			// 1024*1024
+	private final static int GB = 1073741824; 		// 1024*1024 * 1024
+	private final static int BYTES = 8; 			// Number of bytes allocated to a data cell (double)
+
 
 	// Lazy-loaded collection of component base member names, indexed by base member intersection
 	private Map<Intersection, List<String>> componentBaseMemberMap = new HashMap<Intersection, List<String>>();
@@ -210,10 +214,10 @@ public class PafDataCache implements IPafDataCache {
 		// Initialize data block index and data block pool. To minimize the
 		// the time it takes to initially populate the data cache, the index
 		// and pool are pre-allocated to hold all initially defined blocks.
-		blockSize = getMeasureSize() * getTimeSize();
-		int initialBlockCount = getMaxCoreDataBlockCount();
-		dataBlockIndexMap = new HashMap<Intersection, Integer>(initialBlockCount);
-		dataBlockPool = new ArrayList<DataBlock>(initialBlockCount);
+		blockSize = getMeasureSize() * getTimeHorizonSize();
+		int maxCoreBlockCount = getMaxCoreDataBlockCount();
+		dataBlockIndexMap = new HashMap<Intersection, Integer>(maxCoreBlockCount);
+		dataBlockPool = new ArrayList<DataBlock>(maxCoreBlockCount);
 		
 		// Initialize various data block housekeeping objects
 		dataBlocksByVersion = new HashMap<String, Set<Intersection>>(getVersionSize());
@@ -221,11 +225,7 @@ public class PafDataCache implements IPafDataCache {
 		deletedBlockIndexes = new LinkedList<Integer>();
 
 		// Log data cache statistics
-		long maxCellCount = initialBlockCount * getBlockSize();
-		String stepDesc = "Data Cache intialized with a potential base intersection count of : [" 
-			+ StringUtils.commaFormat(maxCellCount) + "] ";
-		logger.info(stepDesc);
-		String logMsg = LogUtil.timedStep(stepDesc, startTime);
+		String logMsg = LogUtil.timedStep("UOW creation and initialization", startTime);
 		performanceLogger.info(logMsg);
 
 	}
@@ -442,6 +442,21 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	/**
+	 *	Returns the existing number of data blocks corresponding to the specified version
+	 *
+	 * @param version Version dimension member
+	 * @return The existing number of data blocks corresponding to the specified version
+	 */
+	public int getDataBlockCount(String version) {
+
+		int dataBlockCount = 0;
+		if (dataBlocksByVersion.containsKey(version)) {
+			dataBlockCount = dataBlocksByVersion.get(version).size();
+		}
+		return dataBlockCount;
+	}
+
+	/**
 	 *	Returns the maximum number of addressable data blocks across the core
 	 *	dimensions
 	 *
@@ -451,10 +466,30 @@ public class PafDataCache implements IPafDataCache {
 
 		int memberCombinations = 1;
 
-		// Multiply the number of members in each core dimension by
+		// Multiply the number of members in each core key dimension by
 		// each other.
 		for (int axisIndex = 0; axisIndex < coreKeyAxes.length; axisIndex++) {
-			memberCombinations = memberCombinations * getAxisSize(axisIndex);
+			memberCombinations = memberCombinations * getAxisSize(coreKeyAxes[axisIndex]);
+		}
+
+		// 
+		return memberCombinations;
+	}
+
+	/**
+	 *	Returns the maximum number of addressable data blocks in the data cache
+	 *
+	 * @return The maximum number of addressable data blocks in the data cache
+	 */
+	public int getMaxDataBlockCount() {
+
+		int memberCombinations = getMaxCoreDataBlockCount();
+
+		// Multiply the number of members in each non-core dimension by
+		// each other and the number of max core data black
+		for (String nonCoreDim : nonCoreDims) {
+			int axisIndex = this.getAxisIndex(nonCoreDim);
+			memberCombinations = memberCombinations * getAxisSize(axisIndex);			
 		}
 
 		return memberCombinations;
@@ -467,6 +502,92 @@ public class PafDataCache implements IPafDataCache {
 	public int getBlockSize() {
 		return blockSize;
 	}
+
+
+	/**
+	 * Generate a string containing essential data cache statistics
+	 * 
+	 * @return a string containing essential data cache statistics
+	 */
+	public String getStatsString() {
+		
+		long blocks = 0;
+		
+		StringBuffer sb = new StringBuffer("\n\nData Cache Statistics: \n\n");
+	
+		// Block size stats
+		sb.append(String.format("Data Cache Blocksize: %,d cells (%,d bytes)\n\n", blockSize, blockSize * BYTES));
+		
+		// Current usage stats
+		sb.append(this.getCurrentUsageStatsString());
+		sb.append("\n");
+		
+		// Max usage stats
+		blocks = this.getMaxCoreDataBlockCount() / this.getVersionSize();
+		sb.append(this.getUsageStatsString(blocks, "Max Data Cache Mem Usage [Plannable UOW]:"));
+		blocks = this.getMaxCoreDataBlockCount();
+		sb.append(this.getUsageStatsString(blocks, "Max Data Cache Mem Usage [Entire UOW]:"));
+		blocks = this.getMaxDataBlockCount();
+		sb.append(this.getUsageStatsString(blocks, "Max Data Cache Mem Usage [Entire UOW + Attributes]:"));
+
+		//sb.append("\n");
+		
+		return sb.toString();
+	}
+
+	/**
+	 * Generate a string containing current data cache usage statistics
+	 * 
+	 * @return a string containing current data cache usage statistics
+	 */
+	public String getCurrentUsageStatsString() {
+		
+		long blocks = 0, maxBlocks = 0;
+		StringBuffer sb = new StringBuffer();
+		String usageText = null;
+
+		// Current memory usage (plannable uow)
+		blocks = this.getDataBlockCount(this.getPlanVersion());
+		maxBlocks = this.getMaxCoreDataBlockCount() / this.getVersionSize();
+		usageText = String.format("Current Data Cache Mem Usage [Plannable UOW] (%.1f%% of Max Non-Attribute Cells):", (float) (100.0 * blocks / maxBlocks));
+		sb.append(this.getUsageStatsString(blocks, usageText));
+
+		// Current memory usage (entire uow)
+		blocks = this.getDataBlockCount();
+		maxBlocks = this.getMaxCoreDataBlockCount();
+		usageText = String.format("Current Data Cache Mem Usage [Entire UOW] (%.1f%% of Max Non-Attribute Cells):", (float) (100.0 * blocks / maxBlocks));
+		sb.append(this.getUsageStatsString(blocks, usageText));
+
+		return sb.toString();
+	}
+	
+	/**
+	 * Generate a memory usage statistics string for the specified block count
+	 * 
+	 * @param blockCount Block count
+	 * @return a memory usage statistics string for the specified block count
+	 */
+	private String getUsageStatsString(long blockCount, String usageText) {
+		
+		final long cellCount = blockCount * blockSize;;
+		float memUsage = (float) cellCount * BYTES / MB;
+		String scale = "MB";
+		
+		// Set memory usage to appropriate scale (MB/GB/TB)
+		if (memUsage > MB) {
+			scale = "TB";
+			memUsage /= (float) MB;
+		} else if (memUsage > 1024) {
+			scale = "GB";
+			memUsage /= (float) 1024;
+		}
+
+		final String usageStats = String.format("%s %,d blocks / %,d cells / %,.1f %s)\n", 
+				usageText, blockCount, cellCount, memUsage, scale);
+		
+		return usageStats;
+	}
+
 
 
 	/**
@@ -893,10 +1014,28 @@ public class PafDataCache implements IPafDataCache {
 	 * @return Returns the data cache cell count.
 	 */
 	public int getCellCount() {
-		return getDataBlockCount() * blockSize;
+		return this.getDataBlockCount() * blockSize;
 	}
 
+	/**
+	 *	Return the maximum core dimension cell count
+	 *
+	 * @return Returns the maximum data cache core dimension cell count.
+	 */
+	public int getMaxCoreCellCount() {
+		return this.getMaxCoreDataBlockCount() * blockSize;
+	}
 
+	/**
+	 *	Return the maximum data cache cell count
+	 *
+	 * @return Returns the maximum data cache cell count.
+	 */
+	public int getMaxCellCount() {
+		return this.getMaxDataBlockCount() * blockSize;
+	}
+
+	
 	/**
 	 * 	Returns an iterator that will iterate through all valid
 	 * 	intersections comprising the specified dimensions. The 
@@ -958,6 +1097,7 @@ public class PafDataCache implements IPafDataCache {
 		
 		return updatedMemberFilter;
 	}
+
 
 	/**
 	 *	Return the cell value for the specified non-attribute intersection coordinates
@@ -1948,7 +2088,6 @@ public class PafDataCache implements IPafDataCache {
 		dataBlockPool.add(dataBlock);
 		
 		// Add data block key to lookup collections
-		//TODO only primary block key should be added
 		addDataBlockKey(key);
 		
 		// Return data block response
