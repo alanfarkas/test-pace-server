@@ -516,7 +516,7 @@ public class PafDataCache implements IPafDataCache {
 		StringBuffer sb = new StringBuffer("\n\nData Cache Statistics: \n\n");
 	
 		// Block size stats
-		sb.append(String.format("Data Cache Blocksize: %,d cells (%,d bytes)\n\n", blockSize, blockSize * BYTES));
+		sb.append(String.format("Data Cache Blocksize: %,d cells (%,d bytes)", blockSize, blockSize * BYTES));
 		
 		// Current usage stats
 		sb.append(this.getCurrentUsageStatsString());
@@ -549,7 +549,7 @@ public class PafDataCache implements IPafDataCache {
 		// Current memory usage (plannable uow)
 		blocks = this.getDataBlockCount(this.getPlanVersion());
 		maxBlocks = this.getMaxCoreDataBlockCount() / this.getVersionSize();
-		usageText = String.format("Current Data Cache Mem Usage [Plannable UOW] (%.1f%% of Max Non-Attribute Cells):", (float) (100.0 * blocks / maxBlocks));
+		usageText = String.format("\n\nCurrent Data Cache Mem Usage [Plannable UOW] (%.1f%% of Max Non-Attribute Cells):", (float) (100.0 * blocks / maxBlocks));
 		sb.append(this.getUsageStatsString(blocks, usageText));
 
 		// Current memory usage (entire uow)
@@ -582,7 +582,7 @@ public class PafDataCache implements IPafDataCache {
 			memUsage /= (float) 1024;
 		}
 
-		final String usageStats = String.format("%s %,d blocks / %,d cells / %,.1f %s)\n", 
+		final String usageStats = String.format("%s %,d block(s) / %,d cells / %,.1f %s)\n", 
 				usageText, blockCount, cellCount, memUsage, scale);
 		
 		return usageStats;
@@ -1178,7 +1178,14 @@ public class PafDataCache implements IPafDataCache {
 					String measure = intersection.getCoordinate(getMeasureDim());
 					PafDataCacheCalc.calcAttributeIntersection(this, intersection, getMeasureType(measure), getDimTrees(), DcTrackChangeOpt.NONE);
 					dataBlock = getDataBlock(dataBlockKey).getDataBlock();
-					cellValue = dataBlock.getCellValue(cellAddress);
+					
+					// Get value of attribute intersection. If it still doesn't
+					// exist, that would indicate that the underlying base 
+					// intersections don't exist. In that case the returned
+					// value should just be zero.
+					if (dataBlock != null) {
+						cellValue = dataBlock.getCellValue(cellAddress);
+					}
 				}
 
 			} else {
@@ -1279,11 +1286,11 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public void setCellValue(Intersection intersection, double value) throws PafException {
 		
+		DataCacheCellAddress cellAddress = null;
+		
+		
 		// Convert time horizon based intersection to time-year intersection
 		Intersection translatedIs = translateTimeHorizonIs(intersection);
-		
-		// Add intersection if it doesn't already exist
-		DataCacheCellAddress cellAddress = addCell(translatedIs);
 		
 		// Round updated cell value to a predefined number of digits to mask any potential precision errors
 		long longValue = (long) value;
@@ -1291,6 +1298,18 @@ public class PafDataCache implements IPafDataCache {
 		double roundedMantissa = Math.round(signedMantissa * PafBaseConstants.DC_ROUNDING_CONSTANT)
 								/ PafBaseConstants.DC_ROUNDING_CONSTANT;
 		double roundedValue = longValue + roundedMantissa;
+		
+		// To avoid the creation of unneeded data blocks, zero values will
+		// not be set if the intersection doesn't already exist.
+		if (roundedValue == 0) {
+			cellAddress = generateCellAddress(intersection);
+			if (!isExistingDataBlock(cellAddress.getDataBlockKey())) {
+				return;
+			}
+		} else {
+			// Add intersection if it doesn't already exist
+			cellAddress = addCell(translatedIs);			
+		}
 		
 		// Update cell value
 		DataBlock dataBlock = getDataBlock(cellAddress.getDataBlockKey()).getDataBlock();

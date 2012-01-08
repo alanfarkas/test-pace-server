@@ -123,9 +123,10 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 	public PafDataCache executeDefaultStrategy(EvalState evalState) throws PafException {
 
 		// Initialization
-		PafDataCache uowCache = evalState.getDataCache();
+		PafDataCache dataCache = evalState.getDataCache();
 		long startTime = System.currentTimeMillis(), stepTime = 0;
 		evalState.setStartTime(startTime);
+		String initialDcStats = dataCache.getCurrentUsageStatsString();
 		
 		logger.info(Messages.getString("RuleBasedEvalStrategy.0")); //$NON-NLS-1$
 
@@ -168,8 +169,9 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		logger.info(Messages.getString("RuleBasedEvalStrategy.10"));              //$NON-NLS-1$
 		logger.info(Messages.getString("RuleBasedEvalStrategy.11") + evalState.getCurrentChangedCells().size());              //$NON-NLS-1$
 
+		logger.info(LogUtil.dcStats(dataCache, initialDcStats));
 
-		return uowCache;
+		return dataCache;
 	}
 
 
@@ -187,7 +189,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		PafDataCache dataCache = evalState.getDataCache();
 		PafClientState clientState = evalState.getClientState();
 		MemberTreeSet memberTrees = clientState.getUowTrees();
-		String initialDCStats = dataCache.getCurrentUsageStatsString();
+		String initialDcStats = dataCache.getCurrentUsageStatsString();
 
 		long startTime = System.currentTimeMillis(), stepTime = 0;
 		evalState.setStartTime(startTime);
@@ -294,7 +296,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		logger.info(Messages.getString("RuleBasedEvalStrategy.29"));              //$NON-NLS-1$
          
 
-		logger.info(LogUtil.dcStats(dataCache, initialDCStats));
+		logger.info(LogUtil.dcStats(dataCache, initialDcStats));
 		
 		return dataCache;
 	}

@@ -1080,6 +1080,9 @@ public class PafDataService {
 		// Get data slice corresponding to this view section
 		dataSlice = dataCache.getDataSlice(sliceParms);
 
+		// Display data cache statistics
+		logger.info(dataCache.getCurrentUsageStatsString());
+		
 		if (compressData == true){
 			// compress slice for return.
 			try {

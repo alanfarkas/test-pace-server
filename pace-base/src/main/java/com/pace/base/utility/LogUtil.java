@@ -43,9 +43,9 @@ public class LogUtil {
 	 */
 	public static String dcStats(PafDataCache dataCache, String initialDCStats) {
 		
-		StringBuffer sb = new StringBuffer("\n\nData Cache Stats [Pre-Evaluation]:\n");
+		StringBuffer sb = new StringBuffer("\n\nData Cache Stats [Pre-Evaluation]:");
 		sb.append(initialDCStats);
-		sb.append("\nData Cache Stats [Post-Evaluation]:\n");
+		sb.append("\nData Cache Stats [Post-Evaluation]:");
 		sb.append(dataCache.getCurrentUsageStatsString());
 		//sb.append("\n");
 		
