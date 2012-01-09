@@ -712,7 +712,7 @@ public class PafViewService {
 			// replace operators used in tuple definitions
 			renderedView = replaceUserOperators(renderedView, viewRequest.getUserSelections(), clientState);
 		
-			//TTN 900 - Print Settings - populate PrintStyle object if the view is not using the embeded print style
+			//TTN 900 - Print Settings - populate PrintStyle object if the view is not using the embedded print style
 			if( renderedView.getViewPrintState() != null && globalPrintStyleCache != null ) {
 				if( renderedView.getViewPrintState() == ViewPrintState.GLOBAL )
 					renderedView.setPrintStyle(globalPrintStyleCache.get(renderedView.getGlobalPrintStyleGUID()));

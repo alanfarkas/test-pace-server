@@ -582,8 +582,8 @@ public class PafDataCache implements IPafDataCache {
 			memUsage /= (float) 1024;
 		}
 
-		final String usageStats = String.format("%s %,d block(s) / %,d cells / %,.1f %s)\n", 
-				usageText, blockCount, cellCount, memUsage, scale);
+		final String usageStats = String.format("%s %.2g block(s) / %.2g cells / %,.1f %s\n", 
+				usageText, (float) blockCount, (float) cellCount, memUsage, scale);
 		
 		return usageStats;
 	}

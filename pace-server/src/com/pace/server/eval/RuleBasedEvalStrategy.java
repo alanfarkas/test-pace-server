@@ -169,7 +169,9 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		logger.info(Messages.getString("RuleBasedEvalStrategy.10"));              //$NON-NLS-1$
 		logger.info(Messages.getString("RuleBasedEvalStrategy.11") + evalState.getCurrentChangedCells().size());              //$NON-NLS-1$
 
-		logger.info(LogUtil.dcStats(dataCache, initialDcStats));
+		String dcStats = LogUtil.dcStats(dataCache, initialDcStats);
+		logger.info(dcStats);
+		performanceLogger.info(dcStats);
 
 		return dataCache;
 	}
@@ -296,7 +298,9 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		logger.info(Messages.getString("RuleBasedEvalStrategy.29"));              //$NON-NLS-1$
          
 
-		logger.info(LogUtil.dcStats(dataCache, initialDcStats));
+		String dcStats = LogUtil.dcStats(dataCache, initialDcStats);
+		logger.info(dcStats);
+		performanceLogger.info(dcStats);
 		
 		return dataCache;
 	}
