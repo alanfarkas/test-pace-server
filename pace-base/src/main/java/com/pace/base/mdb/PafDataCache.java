@@ -516,7 +516,7 @@ public class PafDataCache implements IPafDataCache {
 		StringBuffer sb = new StringBuffer("\n\nData Cache Statistics: \n\n");
 	
 		// Block size stats
-		sb.append(String.format("Data Cache Blocksize: %,d cells (%,d bytes)", blockSize, blockSize * BYTES));
+		sb.append(String.format("Data Cache Blocksize: %,d cells (%,.1f KB)", blockSize, (float) (blockSize * BYTES / 1024)));
 		
 		// Current usage stats
 		sb.append(this.getCurrentUsageStatsString());
@@ -1735,7 +1735,7 @@ public class PafDataCache implements IPafDataCache {
 	 * @return First descendant intersection
 	 * @throws PafException 
 	 */	
-	public Intersection getFirstDescendantIs(final Intersection cellIs, final String dim, final int level) {		
+	public Intersection getFirstDescendantIs(final Intersection cellIs, final String dim, int level) {		
 
 		final String timeDim = this.getTimeDim(); 
 		String branch = null;
@@ -1760,6 +1760,7 @@ public class PafDataCache implements IPafDataCache {
 
 		// Get the first descendant members at specified level and use it to
 		// clone the descendant intersection.
+		level = Math.max(level, dimTree.getLowestAbsLevelInTree());
 		PafDimMember descMember = dimTree.getFirstDescendant(branch, (short) level);
 		Intersection descIs = cellIs.clone();
 		if (dim.equals(timeDim)) {

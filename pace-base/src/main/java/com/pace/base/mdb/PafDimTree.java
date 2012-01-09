@@ -1303,12 +1303,27 @@ public abstract class PafDimTree {
 		if (index < (siblings.size() - 1))
 			return siblings.get(index+1);		
 		
-		// boundary condition, if wraparound return last term
+		// boundary condition, if wrap around return last term
 		if (wrapAround) return siblings.get(0);
 		
 		return null;
 	}
 
+	/**
+     *  Return all descendant members of the selected branch, as well as the 
+     *  selected branch. This method is a convenience method that calls 
+     *  getIDescendants(branchName) with the branch name set "root.getKey()".
+     *
+     * @param branchName Name of tree branch to get descendants for
+     * @return ArrayList of descendant paf dim members
+     */
+    public ArrayList<PafDimMember> getIDescendants() {
+        
+        // Return list of descendants
+        return getIDescendants(rootNode.getKey());       
+        
+    }
+    
 	/**
      *  Return all descendant members of the selected branch, as well as the 
      *  selected branch. This method is a convenience method that calls 
@@ -1584,7 +1599,9 @@ public abstract class PafDimTree {
     }
        
     /**
-     *  Return the first descendant of the specified paf dim tree member at the specified level
+     *  Return the first descendant of the specified paf dim tree member at 
+     *  the specified level. If the member has no descendants, then it will
+     *  be returned.
      *
      * @param memberName Name of member to return the first descendant for
      * @param level Level number of descendant
@@ -1596,20 +1613,24 @@ public abstract class PafDimTree {
  		PafDimMember firstDescendant = null;
  		
  		logger.debug("Getting first descendant of member [" + memberName + "] at level [" + level +"]");
- 		
- 		// Get descendants
- 		List<PafDimMember> descendants = getMembersAtLevel(memberName, level);
- 		
- 		// Return first descendant
- 		if (descendants.size() > 0) {
- 			firstDescendant = descendants.get(0);
- 		}
+ 		 		
+ 		// Walk left side tree until we reached the floor or we've found
+ 		// a descendant with the desired level. This method allows us to
+ 		// support unbalanced trees.
+ 		firstDescendant = getMember(memberName);
+ 		while (firstDescendant.hasChildren() 
+ 				&& firstDescendant.getMemberProps().getLevelNumber() > level) {
+ 			firstDescendant = getFirstChild(firstDescendant.getKey());
+  		}
+ 		 		
  		return firstDescendant;  
  	}
 
     /**
-     *  Return the last descendant of the specified paf dim tree member at the specified level
-     *
+     *  Return the last descendant of the specified paf dim tree member at 
+     *  the specified level. If the member has no descendants, then it will
+     *  be returned.
+     *  
      * @param memberName Name of member to return the first descendant for
      * @param level Level number of descendant
      * 
@@ -1621,13 +1642,15 @@ public abstract class PafDimTree {
  		
  		logger.debug("Getting last descendant of member [" + memberName + "] at level [" + level +"]");
  		
- 		// Get descendants
- 		List<PafDimMember> descendants = getMembersAtLevel(memberName, level);
- 		
- 		// Return last descendant
- 		if (descendants.size() > 0) {
- 			lastDescendant = descendants.get(descendants.size() - 1);
- 		}
+  		// Walk left side tree until we reached the floor or we've found
+ 		// a descendant with the desired level. This method allows us to
+ 		// support unbalanced trees.
+ 		lastDescendant = getMember(memberName);
+  		while (lastDescendant.hasChildren() 
+  				&& lastDescendant.getMemberProps().getLevelNumber() > level) {
+ 			lastDescendant = getLastChild(lastDescendant.getKey());
+  		}
+ 		 		
  		return lastDescendant;  
  	}
  

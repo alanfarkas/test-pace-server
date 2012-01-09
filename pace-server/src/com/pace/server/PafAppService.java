@@ -548,7 +548,7 @@ public class PafAppService {
 	 * @param invalidTimeSlices Invalid time slice coordinates
 	 * @param lockedPeriodMap Locked time periods by year
 	 */
-	public void createLockedPeriodCollections(PafClientState clientState) {
+	public void populateLockedPeriodCollections(PafClientState clientState) {
 
 		final PafApplicationDef pafApp = clientState.getApp(); 
 		final MdbDef mdbDef = pafApp.getMdbDef();
@@ -581,7 +581,7 @@ public class PafAppService {
 			Map<String, VersionType> versionsTypeMap = PafMetaData.getVersionTypeMap();
 			VersionType versionType = versionsTypeMap.get(currentVersion);
 			if (versionType.equals(VersionType.ForwardPlannable)) {
-				Set<String> lockedTimeHorizFloorPeriods = this.getLockedList(clientState, false);
+				Set<String> lockedTimeHorizFloorPeriods = this.getLockedList(clientState);
 				for (String lockedTimeHorizPeriod : lockedTimeHorizFloorPeriods) {
 					lockedTimeHorizPeriods.add(lockedTimeHorizPeriod);
 					TimeSlice timeSlice = new TimeSlice(lockedTimeHorizPeriod);
@@ -614,7 +614,6 @@ public class PafAppService {
 		clientState.setLockedTimeSlices(lockedTimeSlices);
 		clientState.setInvalidTimeSlices(invalidTimeSlices);
 		clientState.setLockedPeriodMap(lockedPeriodMap);
-		clientState.setLockedPeriods(this.getLockedList(clientState, true));
 		clientState.setLockedTimeHorizonPeriods(lockedTimeHorizPeriods);
 		clientState.setInvalidTimeHorizonPeriods(invalidTimeHorizPeriods);
 
@@ -626,36 +625,56 @@ public class PafAppService {
      * time tree.
      * 
      * @param clientState Client state
-     * @param useTimeTree Flag that indicates if time horizon tree should be used, instead of the time horizon tree  
-     * 
      * @return The set of locked level 0 and upper-level periods in the time
      */
-    public Set<String> getLockedList(PafClientState clientState, boolean useTimeTree) {
+    public Set<String> getLockedList(PafClientState clientState) {
 
+    	final PafApplicationDef pafApp = clientState.getApp();
+    	final String lastPeriod = pafApp.getLastPeriod();
+    	final String currentYear = pafApp.getCurrentYear();
+		final String timeDim = pafApp.getMdbDef().getTimeDim();
+    	final PafDimTree timeTree = clientState.getTimeHorizonTree(), mdbTimeTree = dataService.getBaseTree(timeDim);
     	Set<String> lockedPeriods = new HashSet<String>();
+    	String elapsedPeriod = null;
 
-    	lockedPeriods = new HashSet<String>();
-    	PafApplicationDef pafApp = clientState.getApp();
-    	String lastPeriod = pafApp.getLastPeriod();
-    	String currentYear = pafApp.getCurrentYear();
-    	String elapsedTimeMember = null;
-    	PafDimTree timeTree = null;
 
-    	if (useTimeTree) {
-    		String timeDim = pafApp.getMdbDef().getTimeDim();
-    		timeTree = dataService.getBaseTree(timeDim);
-    		elapsedTimeMember = lastPeriod;
+    	// Ensure that the elapsed period is at the uow floor (TTN-1686)
+    	elapsedPeriod = TimeSlice.buildTimeHorizonCoord(lastPeriod, currentYear);
+    	PafDimMember elapsedPeriodMember = null;
+    	if (timeTree.hasMember(elapsedPeriod)) {
+    		// The elapsed period does exist in the uow. Get it's last descendant.
+    		elapsedPeriodMember = timeTree.getLastDescendant(elapsedPeriod, (short) 0);
+    		elapsedPeriod = elapsedPeriodMember.getKey();
     	} else {
-    		timeTree = clientState.getTimeHorizonTree();
-    		elapsedTimeMember = TimeSlice.buildTimeHorizonCoord(lastPeriod, currentYear);
+    		// Elapsed period is outside uow. Check if the last period component exists
+    		// in the mdb time tree.
+    		if (mdbTimeTree.hasMember(lastPeriod)) {
+    			// Found last period member. Now look for the first ancestor that when
+    			// combined with the current year, is a valid member in the uow time tree.
+    			List<PafDimMember> mdbTimeMembers = mdbTimeTree.getAncestors(lastPeriod);
+    			for (PafDimMember timeMember : mdbTimeMembers) {
+    				elapsedPeriod = TimeSlice.buildTimeHorizonCoord(timeMember.getKey(), currentYear);
+    				if (timeTree.hasMember(elapsedPeriod)) {
+    					elapsedPeriodMember = timeTree.getMember(elapsedPeriod);
+    					break;
+    				}
+    			}
+    		}
+    	}
+    	  	
+		// Throw error if elapsed period can't be resolved
+    	if (elapsedPeriodMember == null){
+    		String errMsg = String.format(Messages.getString("PafAppService.27"), //$NON-NLS-1$
+    				currentYear, lastPeriod); 
+    		logger.fatal(errMsg);
+    		throw new IllegalArgumentException(errMsg);
     	}
 
-    	List<PafDimMember> members = timeTree.getDescendants(timeTree.getRootNode().getKey(), LevelGenType.LEVEL, 0);
 
-    	PafDimMember elapsedMember = null;
-
-    	// add all members to the Set until a match is found on Elapsed
-    	// Period
+    	// Traverse all time tree descendant members (parent first) until the elapsed
+    	// period member is reached. All members up through the current elapsed period
+    	// will initially be considered locked.
+    	List<PafDimMember> members = timeTree.getDescendants();
     	for (PafDimMember member : members) {
 
     		logger.debug(Messages.getString("PafAppService.2") + member.getKey() + Messages.getString("PafAppService.3") //$NON-NLS-1$ //$NON-NLS-2$
@@ -663,26 +682,15 @@ public class PafAppService {
 
     		lockedPeriods.add(member.getKey());
 
-    		// if elapsed time is found, break out of loop
-    		if (member.getKey().equals(elapsedTimeMember)) {
-    			elapsedMember = member;
+    		// if elapsed period is found, break out of loop
+    		if (member.getKey().equals(elapsedPeriod)) {
     			break;
     		}
     	}
 
-    	// Check if specified elapsed period was found
-    	if (elapsedMember == null) {
-    		String errMsg = String.format(Messages.getString("PafAppService.27"), //$NON-NLS-1$
-    							currentYear, lastPeriod); 
-    		logger.fatal(errMsg);
-    		throw new IllegalArgumentException(errMsg);
-    	}
-    	
-    	
+    		
     	// Resolve locked status of upper level locked time periods
-    	resolveLockedMember(elapsedMember, lockedPeriods);
-
-
+    	resolveLockedMember(elapsedPeriodMember, lockedPeriods);
 
 		return lockedPeriods;
 	}

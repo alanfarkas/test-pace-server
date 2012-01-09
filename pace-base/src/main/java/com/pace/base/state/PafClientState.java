@@ -73,7 +73,6 @@ public class PafClientState implements IPafClientState {
 	private UnitOfWork unitOfWork;
     private Map<String, List<RuleSet>> ruleSets;
     private String currentMsrRulesetName;
-	private Set<String> lockedPeriods = null;
 	private Map<String, Set<Intersection>> lockedNotPlannableInterMap = new HashMap<String, Set<Intersection>>();
 	private Map<String, Set<Intersection>> lockedForwardPlannableInterMap = new HashMap<String, Set<Intersection>>();
 	private PafPlannerRole plannerRole;
@@ -303,14 +302,6 @@ public class PafClientState implements IPafClientState {
     public void setRuleSets(Map<String, List<RuleSet>> ruleSets) {
         this.ruleSets = ruleSets;
     }
-
-	public Set<String> getLockedPeriods() {
-		return lockedPeriods;
-	}
-
-	public void setLockedPeriods(Set<String> lockedPeriods) {
-		this.lockedPeriods = lockedPeriods;
-	}
 
 	public Map<String, Set<Intersection>> getLockedForwardPlannableInterMap() {
 		return lockedForwardPlannableInterMap;

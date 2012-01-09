@@ -844,7 +844,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			clientState.setUowTrees(treeSet);
 			
 			// Create client state locked period collections (TTN-1595)
-			appService.createLockedPeriodCollections(clientState);
+			appService.populateLockedPeriodCollections(clientState);
 			
 			// Echo locked periods to server log (TTN-1595)
 			Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
