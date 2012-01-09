@@ -55,6 +55,7 @@ import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.comm.PafViewTreeItem;
 import com.pace.base.data.PafMemberList;
 import com.pace.base.data.UserMemberLists;
+import com.pace.base.db.RdbProps;
 import com.pace.base.db.membertags.MemberTagCommentEntry;
 import com.pace.base.db.membertags.MemberTagDef;
 import com.pace.base.funcs.CustomFunctionDef;
@@ -239,6 +240,7 @@ public class PafXStream {
 		xs.alias("ConnectionProps", PafConnectionProps.class);
 		xs.alias("PafLDAPSettings", PafLDAPSettings.class);
 		xs.alias("ServerSettings", ServerSettings.class);
+		xs.alias("RdbProps", RdbProps.class);
 
 		namespaceHeaderMap = new HashMap<String, String>();
 		namespaceHeaderMap.put(PAF_APPLICATION_DEF_ARRAY, PAF_APPLICATION_DEF_ARRAY + " " + PafBaseConstants.HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_APPS);
