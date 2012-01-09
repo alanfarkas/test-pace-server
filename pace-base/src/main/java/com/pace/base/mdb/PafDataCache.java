@@ -542,7 +542,7 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public String getCurrentUsageStatsString() {
 		
-		long blocks = 0, maxBlocks = 0;
+		long blocks = 0L, maxBlocks = 0L;
 		StringBuffer sb = new StringBuffer();
 		String usageText = null;
 
@@ -569,7 +569,7 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	private String getUsageStatsString(long blockCount, String usageText) {
 		
-		final long cellCount = blockCount * blockSize;;
+		final long cellCount = blockCount * blockSize;
 		float memUsage = (float) cellCount * BYTES / MB;
 		String scale = "MB";
 		
