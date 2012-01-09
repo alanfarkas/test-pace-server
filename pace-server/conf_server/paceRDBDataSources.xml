@@ -1,5 +1,5 @@
 <list>
-  <com.pace.base.db.RdbProps>
+  <RdbProps>
     <name>pafDB</name>
     <hibernateProperties>
       <property name="hibernate.connection.username" value="PAFSYS"/>
@@ -9,8 +9,8 @@
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
-  </com.pace.base.db.RdbProps>
-  <com.pace.base.db.RdbProps>
+  </RdbProps>
+  <RdbProps>
     <name>pafClientCache</name>
     <hibernateProperties>
       <property name="hibernate.connection.username" value="pafsys"/>
@@ -22,8 +22,8 @@
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
-  </com.pace.base.db.RdbProps>
-  <com.pace.base.db.RdbProps>
+  </RdbProps>
+  <RdbProps>
     <name>pafExtAttr</name>
     <hibernateProperties>
       <property name="hibernate.connection.username" value="PAFSYS"/>
@@ -33,8 +33,8 @@
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
-  </com.pace.base.db.RdbProps>
-  <com.pace.base.db.RdbProps>
+  </RdbProps>
+  <RdbProps>
     <name>pafSecurity</name>
     <hibernateProperties>
       <property name="hibernate.connection.username" value="pafsys"/>
@@ -44,5 +44,5 @@
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
-  </com.pace.base.db.RdbProps>
+  </RdbProps>
 </list>
