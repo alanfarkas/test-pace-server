@@ -20,7 +20,7 @@ public class LDAPSettingsFieldFactory extends PaceSettingsDefaultFieldFactory {
 
 	private static final long serialVersionUID = -33689708703686950L;
 
-	public static final String LDAP_PROFIDER_NAME = "ldapProviderName";
+	public static final String LDAP_PROVIDER_NAME = "ldapProviderName";
 	public static final String SECURITY_PRINCIPAL = "securityPrincipal";
 	public static final String SECURITY_CREDENTIALS = "securityCredentials";
 	public static final String PROVIDER_URL_GC = "providerURLGC";
@@ -45,7 +45,7 @@ public class LDAPSettingsFieldFactory extends PaceSettingsDefaultFieldFactory {
 
 	public LDAPSettingsFieldFactory() {
 
-		formOrderList.add(LDAP_PROFIDER_NAME);
+		formOrderList.add(LDAP_PROVIDER_NAME);
 		formOrderList.add(SECURITY_PRINCIPAL);
 		formOrderList.add(SECURITY_CREDENTIALS);
 		formOrderList.add(PROVIDER_URL_GC);
@@ -66,13 +66,14 @@ public class LDAPSettingsFieldFactory extends PaceSettingsDefaultFieldFactory {
 		formOrderList.add(IGNORE_DISABLED_ACCOUNTS);
 		formOrderList.add(NET_BIOS_NAMES_LIST);
 		
+		captionMap.put(LDAP_PROVIDER_NAME, "LDAP Provider Name");
 		captionMap.put(PROVIDER_URL_GC, "Provider URL GC");
 		captionMap.put(KERBEROS_KDC, "Kerberos KDC");
 		captionMap.put(SSL_KEY_STORE, "SSL Key Store");
 		captionMap.put(NET_BIOS_NAMES_LIST, "Net Bios Names");
 		
 		
-		requiredFieldSet.add(LDAP_PROFIDER_NAME);
+		requiredFieldSet.add(LDAP_PROVIDER_NAME);
 		requiredFieldSet.add(SECURITY_PRINCIPAL);
 		requiredFieldSet.add(PROVIDER_URL_GC);
 		requiredFieldSet.add(SECURITY_AUTHENTICATION);
