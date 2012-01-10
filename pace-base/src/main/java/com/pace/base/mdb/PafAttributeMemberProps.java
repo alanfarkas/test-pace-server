@@ -24,7 +24,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.essbase.api.base.EssException;
-import com.essbase.api.metadata.IEssMember.EEssShareOption;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 

@@ -426,7 +426,8 @@ public class PafBaseMemberProps extends PafDimMemberProps  implements Cloneable{
      * @see java.lang.Object#toString()
      */
     public String toString() {
-    	return super.toString() + PafBaseConstants.LINE_TERM + shareOption;
+    	String text = super.toString() + String.format("Share Option: %s\nMember Num: %d\n", shareOption, memberNumber);
+    	return text;
      }
 
 

@@ -50,6 +50,7 @@ import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.TimeSlice;
 import com.pace.base.db.membertags.MemberTagDef;
+import com.pace.base.mdb.PafBaseMember;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
@@ -633,7 +634,9 @@ public class PafAppService {
     	final String lastPeriod = pafApp.getLastPeriod();
     	final String currentYear = pafApp.getCurrentYear();
 		final String timeDim = pafApp.getMdbDef().getTimeDim();
-    	final PafDimTree timeTree = clientState.getTimeHorizonTree(), mdbTimeTree = dataService.getBaseTree(timeDim);
+    	final PafDimTree timeHorizonTree = clientState.getTimeHorizonTree();
+       	final PafDimTree timeTree = clientState.getUowTrees().getTree(timeDim);
+       	final PafBaseTree mdbTimeTree = dataService.getBaseTree(timeDim);
     	Set<String> lockedPeriods = new HashSet<String>();
     	String elapsedPeriod = null;
 
@@ -641,28 +644,49 @@ public class PafAppService {
     	// Ensure that the elapsed period is at the uow floor (TTN-1686)
     	elapsedPeriod = TimeSlice.buildTimeHorizonCoord(lastPeriod, currentYear);
     	PafDimMember elapsedPeriodMember = null;
-    	if (timeTree.hasMember(elapsedPeriod)) {
+    	if (timeHorizonTree.hasMember(elapsedPeriod)) {
     		// The elapsed period does exist in the uow. Get it's last descendant.
-    		elapsedPeriodMember = timeTree.getLastDescendant(elapsedPeriod, (short) 0);
+    		elapsedPeriodMember = timeHorizonTree.getLastDescendant(elapsedPeriod, (short) 0);
     		elapsedPeriod = elapsedPeriodMember.getKey();
     	} else {
     		// Elapsed period is outside uow. Check if the last period component exists
-    		// in the mdb time tree.
-    		if (mdbTimeTree.hasMember(lastPeriod)) {
+    		// in the regular client time tree.
+    		if (timeTree.hasMember(lastPeriod)) {
     			// Found last period member. Now look for the first ancestor that when
     			// combined with the current year, is a valid member in the uow time tree.
     			List<PafDimMember> mdbTimeMembers = mdbTimeTree.getAncestors(lastPeriod);
     			for (PafDimMember timeMember : mdbTimeMembers) {
     				elapsedPeriod = TimeSlice.buildTimeHorizonCoord(timeMember.getKey(), currentYear);
-    				if (timeTree.hasMember(elapsedPeriod)) {
-    					elapsedPeriodMember = timeTree.getMember(elapsedPeriod);
+    				if (timeHorizonTree.hasMember(elapsedPeriod)) {
+    					elapsedPeriodMember = timeHorizonTree.getMember(elapsedPeriod);
     					break;
+    				}
+    			}
+    			
+    		} else {
+
+    			// Not in client time tree - check mdb time tree
+    			if (mdbTimeTree.hasMember(lastPeriod)) {
+    				// If last period parameter appears in mdb time tree before the
+    				// start of the client time tree, then no periods in this uow
+    				// should be locked.
+    				PafBaseMember firstUowTimeMbr = (PafBaseMember) timeTree.getFirstFloorMbr();
+    				int firstUowTimeMbrNo = firstUowTimeMbr.getMemberProps().getMemberNumber();
+    				PafBaseMember lastPeriodMbr = mdbTimeTree.getMember(lastPeriod);
+    				int lastPeriodMbrNo = lastPeriodMbr.getMemberProps().getMemberNumber();
+    				if (lastPeriodMbrNo < firstUowTimeMbrNo) {
+    					return lockedPeriods;
+    				} else {
+    					// Last period parameter must point a future period. This
+    					// entire uow should be locked.
+    					elapsedPeriodMember = timeHorizonTree.getLastFloorMbr();
+    					elapsedPeriod = elapsedPeriodMember.getKey();
     				}
     			}
     		}
     	}
-    	  	
-		// Throw error if elapsed period can't be resolved
+
+    	// Throw error if elapsed period can't be resolved
     	if (elapsedPeriodMember == null){
     		String errMsg = String.format(Messages.getString("PafAppService.27"), //$NON-NLS-1$
     				currentYear, lastPeriod); 
@@ -674,11 +698,11 @@ public class PafAppService {
     	// Traverse all time tree descendant members (parent first) until the elapsed
     	// period member is reached. All members up through the current elapsed period
     	// will initially be considered locked.
-    	List<PafDimMember> members = timeTree.getDescendants();
+    	List<PafDimMember> members = timeHorizonTree.getIDescendants();
     	for (PafDimMember member : members) {
 
     		logger.debug(Messages.getString("PafAppService.2") + member.getKey() + Messages.getString("PafAppService.3") //$NON-NLS-1$ //$NON-NLS-2$
-    				+ member.getParent().getKey());
+    				+ (member.getParent() != null ? member.getParent().getKey() : "[NONE]"));
 
     		lockedPeriods.add(member.getKey());
 
@@ -688,7 +712,7 @@ public class PafAppService {
     		}
     	}
 
-    		
+
     	// Resolve locked status of upper level locked time periods
     	resolveLockedMember(elapsedPeriodMember, lockedPeriods);
 
@@ -707,23 +731,20 @@ public class PafAppService {
 			Set<String> lockedPeriods) {
 
 		PafDimMember parent = member.getParent();
+		List<PafDimMember> children = parent.getChildren();
 
-		if (parent.getParent() != null) {
+		if (children != null) {
+			for (PafDimMember child : children) {
 
-			List<PafDimMember> children = parent.getChildren();
-
-			if (children != null) {
-				for (PafDimMember child : children) {
-
-					if (!lockedPeriods.contains(child.getKey())) {
-						lockedPeriods.remove(parent.getKey());
-						break;
-					}
+				if (!lockedPeriods.contains(child.getKey())) {
+					lockedPeriods.remove(parent.getKey());
+					break;
 				}
 			}
+		}
 
+		if (parent.getParent() != null) {
 			resolveLockedMember(parent, lockedPeriods);
-
 		}
 
 	}

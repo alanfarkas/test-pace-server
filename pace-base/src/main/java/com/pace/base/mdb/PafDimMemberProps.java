@@ -276,11 +276,17 @@ public abstract class PafDimMemberProps implements Cloneable {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-    	return "Alias: " + getMemberAlias() + PafBaseConstants.LINE_TERM
-    		+ "Gen: " +  generationNumber + PafBaseConstants.LINE_TERM
-    		+ "Lvl: " + levelNumber + PafBaseConstants.LINE_TERM
-    		+ "Read Only: " + isReadOnly + PafBaseConstants.LINE_TERM
-    		+ "Alias: " + isSynthetic;
+    	StringBuffer sb = new StringBuffer();
+    	String text = String.format("Alias: %s\nGen: %d\nLvl: %d\nRead Only: %s\nSynthetic: %s\n", 
+    			getMemberAlias(), generationNumber, levelNumber, isReadOnly, isSynthetic);
+ 
+    	return text;
+//    	sb.append("Alias: " + getMemberAlias() + PafBaseConstants.LINE_TERM
+//    		+ "Gen: " +  generationNumber + PafBaseConstants.LINE_TERM
+//    		+ "Lvl: " + levelNumber + PafBaseConstants.LINE_TERM
+//    		+ "Read Only: " + isReadOnly + PafBaseConstants.LINE_TERM
+//    		+ "Synthetic: " + isSynthetic;
+//    	return sb.toString();
      }
 
 }
