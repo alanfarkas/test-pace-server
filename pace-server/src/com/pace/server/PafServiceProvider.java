@@ -914,7 +914,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 			// Get simple versions of each client member trees (Regular member trees
 			// can't be passed across the soap layer).
-			logger.info("Populating simple dimension trees....."); 
+			logger.info(Messages.getString("PafServiceProvider.19"));  //$NON-NLS-1$
 			int i = 0;
 			for (String memberTreeDim : treeSet.getTreeDimensions()) {
 				// Get simple version of current tree
