@@ -3892,10 +3892,10 @@ int alan;
 			String dim = dimSpec.getDimension();
 			if(dim != null && dimSpec.getExpressionList() != null){
 				
-				// Apply a post-order sort to members in expression list (default reporting order)
+				// Apply a post-order sort to members in expression list (default reporting order) (TTN-1644)
 				ArrayList<String> expressionList =  new ArrayList<String>(Arrays.asList(dimSpec.getExpressionList()));
 				PafDimTree dimTree = uowTrees.getTree(dim);
-				dimTree.sortMemberList(expressionList, TreeTraversalOrder.PRE_ORDER);
+				dimTree.sortMemberList(expressionList, TreeTraversalOrder.POST_ORDER);
 				userSelectionsMap.put(dim, expressionList);
 
 				// Place any orphan members at the end of the expression list. This is 

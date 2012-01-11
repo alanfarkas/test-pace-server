@@ -3333,7 +3333,7 @@ int alan;
 							// Update the Unit of Work with the data filtered hierachical dim metadata
 							for(PafDimSpec dimSpec : hierDimSpecs){
 								
-								// Expand hierarchy dim members to include ancestors that were in orignal uow
+								// Expand hierarchy dim members to include ancestors that were in uow
 								List<PafDimMember> ancestors = new ArrayList<PafDimMember>();
 								Set<String> uniqueMembers = new HashSet<String>();
 								String dim = dimSpec.getDimension();
@@ -3342,24 +3342,57 @@ int alan;
 									uniqueMembers.add(memberName);
 									ancestors = dimTree.getAncestors(memberName);
 									for(PafDimMember ancestor : ancestors){
-										uniqueMembers.add(ancestor.getKey());
+											uniqueMembers.add(ancestor.getKey());
 									}
 								}
+								
+								// 
 								List<String> sortedMemberList = new ArrayList<String>(uniqueMembers);
 								dimTree.sortMemberList(sortedMemberList, TreeTraversalOrder.PRE_ORDER);
 								
 								// If this dimension is filtered, the discontiguous member group collection needs to be
 								// populated for this dimension, so that the corresponding uow tree is built properly as
 								// a discontiguous tree. The root member must appear first, its own list, followed
-								// by the remaining base members in their own list, in  a pre-ordered sort (TTN-1644).
-								if (sortedMemberList.size() < workUnit.getDimMembers(dim).length) {
-									List<List<String>> discontigMbrGrps = new ArrayList<List<String>>();
+								// by the remaining base members, grouped by branh, each in their own list (TTN-1644).
+								List<String> uowMembers = new ArrayList<String>(Arrays.asList(workUnit.getDimMembers(dim)));
+								if (sortedMemberList.size() < uowMembers.size()) {
+
+									// Group members by tree branch
+									List<List<String>> discontigMbrLists = new ArrayList<List<String>>();
 									String rootMember = sortedMemberList.get(0);
-									discontigMbrGrps.add(new ArrayList<String>(Arrays.asList(new String[]{ rootMember })));
+									discontigMbrLists.add(new ArrayList<String>(Arrays.asList(new String[]{rootMember})));
 									if (sortedMemberList.size() > 1) {
-										discontigMbrGrps.add(new ArrayList<String>(sortedMemberList.subList(1,sortedMemberList.size())));
+										List<String> filteredMembers = new ArrayList<String>(sortedMemberList.subList(1,sortedMemberList.size()));
+										List<String> discontigMbrList = new ArrayList<String>();
+										List<String> branchMbrList = new ArrayList<String>();
+										for (String member : filteredMembers) {
+
+											// Add member to discontiguous member list
+											if (branchMbrList.contains(member)) {
+												discontigMbrList.add(member);
+												continue;
+											}
+
+											// New branch - add discontiguous member list to 
+											// collection and create new discontiguous member list.
+											if (!discontigMbrList.isEmpty()) {
+												discontigMbrLists.add(discontigMbrList);
+												discontigMbrList = new ArrayList<String>();
+											}
+
+											// Start new branch
+											if (discontigMbrList.isEmpty()) {
+												discontigMbrList.add(member);
+												branchMbrList = dimTree.getMemberNames(dimTree.getDescendants(member));
+											}
+
+										}
+										
+										// Add remaning members to discontiguous member groups
+										discontigMbrLists.add(discontigMbrList);
+
 									}
-									workUnit.getDiscontigMemberGroups().put(dim, discontigMbrGrps);
+									workUnit.getDiscontigMemberGroups().put(dim, discontigMbrLists);
 								}	
 								
 								// Update unit of work
