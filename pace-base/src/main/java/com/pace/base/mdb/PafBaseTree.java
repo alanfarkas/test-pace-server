@@ -506,7 +506,7 @@ public class PafBaseTree extends PafDimTree {
 	 * @throws PafException 
 	 */
 	public PafBaseTree getDiscSubTreeCopy(List<List<String>> discontigMemberLists, String rootAlias) throws PafException {
-		
+	
 		PafBaseTree newTree = null;
 		List<String> discontigMemberList = discontigMemberLists.get(0);
 		String newRootName = null;

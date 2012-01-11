@@ -692,7 +692,7 @@ public class PafDataService {
 			// Return version tree
 			return tree;
 		} 
-	
+int alan;	
 		// All other dimensions - Start out by making a tree copy
 		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, uowMbrNames, mdbDef);
 		PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);
@@ -3867,11 +3867,12 @@ public class PafDataService {
 	protected UnitOfWork createUserFilteredWorkSpec(PafClientState clientState, PafDimSpec[] userSelections) throws PafException {
 
 		/*
-		 * This method was built to hold code that was originally part of PafService.getfilteredUowSize(). 
+		 * This method was built to hold code that was originally part of PafServerProvider.getfilteredUowSize(). 
 		 * This method was created to make the PafService layer more manageable.
 		 */
 		
 		UnitOfWork workUnit = clientState.getUnitOfWork().clone();
+		MemberTreeSet uowTrees = clientState.getUowTrees();
 		
 		
 		//Get all possible hierarchical base dimension with attributes
@@ -3890,11 +3891,32 @@ public class PafDataService {
 		for(PafDimSpec dimSpec : pafDimSpecs){
 			String dim = dimSpec.getDimension();
 			if(dim != null && dimSpec.getExpressionList() != null){
+				
 				// Apply a post-order sort to members in expression list (default reporting order)
-				List<String> expressionList =  Arrays.asList(dimSpec.getExpressionList());
-				PafDimTree dimTree = this.getDimTree(dim);
+				ArrayList<String> expressionList =  new ArrayList<String>(Arrays.asList(dimSpec.getExpressionList()));
+				PafDimTree dimTree = uowTrees.getTree(dim);
 				dimTree.sortMemberList(expressionList, TreeTraversalOrder.PRE_ORDER);
 				userSelectionsMap.put(dim, expressionList);
+
+				// Place any orphan members at the end of the expression list. This is 
+				// purely a presentation issue. This will prevent it appearing as 
+				// if these orphan members are contained in one of the other branches,
+				// and make it clearer the they roll up directly under the synthetic
+				// root.
+				List<String> orphanMembers = new ArrayList<String>();
+				String root = dimTree.getRootNode().getKey();
+				for (String member : expressionList) {
+					// An orphan is any member who's parent is not the root of the tree
+					PafDimMember parentNode = dimTree.getMember(member).getParent();
+					if (parentNode != null && parentNode.getKey() != root) {
+						orphanMembers.add(member);
+					}
+				}
+				for (String orphanMember : orphanMembers) {
+					expressionList.remove(orphanMember);
+					expressionList.add(orphanMember);
+				}
+
 			}
 		}
 		

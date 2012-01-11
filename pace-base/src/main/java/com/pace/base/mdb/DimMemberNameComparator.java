@@ -39,7 +39,7 @@ public class DimMemberNameComparator implements Comparator<String> {
 			throw new IllegalArgumentException(errMsg);
 		}
 		
-		// Compare member indexes. Members are sorted in ascending order by index.
+		// Compare member indexes. Members will be sorted in ascending index order.
 		if (index1 < index2) {
 			return -1;		// memberName1 comes before memberName2
 		} else if (index1 > index2) {

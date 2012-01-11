@@ -902,7 +902,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 			planResponse.getClientCacheBlock().setRuleSets(
 					clientRuleSetList.toArray(new RuleSet[0]));
-
+int alan;
 			// Load data cache based on unit of work
 			dataService.loadUowCache(clientState);
 			
@@ -3333,7 +3333,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 							// Update the Unit of Work with the data filtered hierachical dim metadata
 							for(PafDimSpec dimSpec : hierDimSpecs){
 								
-								// Expand hierarchy dim members to include ancestors
+								// Expand hierarchy dim members to include ancestors that were in orignal uow
 								List<PafDimMember> ancestors = new ArrayList<PafDimMember>();
 								Set<String> uniqueMembers = new HashSet<String>();
 								String dim = dimSpec.getDimension();
@@ -3345,7 +3345,8 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 										uniqueMembers.add(ancestor.getKey());
 									}
 								}
-								List<String> sortedMemberList = dimTree.getSortedMemberNames(new ArrayList<String>(uniqueMembers), TreeTraversalOrder.PRE_ORDER);
+								List<String> sortedMemberList = new ArrayList<String>(uniqueMembers);
+								dimTree.sortMemberList(sortedMemberList, TreeTraversalOrder.PRE_ORDER);
 								
 								// If this dimension is filtered, the discontiguous member group collection needs to be
 								// populated for this dimension, so that the corresponding uow tree is built properly as

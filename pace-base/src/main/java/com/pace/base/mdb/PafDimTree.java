@@ -1977,6 +1977,7 @@ public abstract class PafDimTree {
 	 * @param traversalOrder Tree traversal order
 	 * 
 	 * @return List of sorted members names
+	 * @deprecated
 	 */
 	public List<String> getSortedMemberNames(List<String> memberNames, TreeTraversalOrder traversalOrder) {
 		List<String> sortedMemberNames = getMemberNames(traversalOrder);
@@ -2349,7 +2350,6 @@ public abstract class PafDimTree {
 			memberSortIndexMap.put(sortOrder, memberIndexes);
 		}
 
-		// TODO Auto-generated method stub
 		return memberSortIndexMap.get(sortOrder);
 	}
 
