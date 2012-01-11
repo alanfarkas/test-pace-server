@@ -2,6 +2,8 @@ package com.pace.base.mdb;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,7 @@ public abstract class PafDimTree {
     private Set<PafDimMember> syntheticMembers = null; // Null value indicates collection is uninitialized, Empty list indicates no synthetic members
     private PafDimMember rootNode = null;
     private boolean isDiscontig = false;
+    private Map<TreeTraversalOrder, Map<String, Integer>> memberSortIndexMap = new HashMap<TreeTraversalOrder, Map<String, Integer>>();
 
 	// static logger
     private static Logger logger = Logger.getLogger(PafDimTree.class);
@@ -125,7 +128,7 @@ public abstract class PafDimTree {
 	public abstract PafDimTree getSubTreeCopyByGen(String root, int lowestGen) throws PafException;
 
 
- 	/**
+	/**
 	 *	Return the Alias table name for the specified index (0 to n-1)
 	 *
 	 * @param tableNo Essbase alias table index number  
@@ -198,6 +201,19 @@ public abstract class PafDimTree {
     	return sharedMembers;
     }
 
+    /**
+     * Returns true if the member is shared in this tree. A member is not considered
+     * shared if it appears in this tree only once, even if it has the "shared" 
+     * property.
+     * 
+     * @param member PafDimMember
+     * @return True if the member is shared in this tree
+     */
+    public boolean isSharedMember(PafDimMember member) {
+    	return getSharedMembers().contains(member);
+    }
+    
+    
     /**
      *  Get the list of synthetic members
      *
@@ -2292,6 +2308,50 @@ public abstract class PafDimTree {
     	}
     }
 
+
+ 
+    
+	/**
+     * Sort the specified list of member names against the tree in the specified sort order
+     * 
+     * @param memberList List of member names to be sorted
+     * @param sortOrder Tree member sort order (post order or pre order)
+     */
+    public void sortMemberList(List<String> memberList, TreeTraversalOrder sortOrder) {
+    	
+    	Collections.sort(memberList, new DimMemberNameComparator(getMemberSortIndexes(sortOrder)));
+    }
+
+    
+   
+	/**
+	 * Get the map of member indexes corresponding to the specified sort order
+	 * 
+     * @param sortOrder Tree member sort order (post order or pre order)
+	 * @return The map of member indexes corresponding to the specified sort order
+	 */
+	public Map<String, Integer> getMemberSortIndexes(TreeTraversalOrder sortOrder) {
+	
+		// Lazy loaded collection
+		if (!memberSortIndexMap.containsKey(sortOrder)) {
+			Map<String, Integer> memberIndexes = new HashMap<String, Integer>();
+			List<PafDimMember> memberList = getMembers(sortOrder);
+			int i = 0;
+			for (PafDimMember member : memberList) {
+				// Ignore shared members Shared hierarchies cause inconsistencies 
+				// with the index numbers.
+				if (!isSharedMember(member)) {
+					if (!memberIndexes.containsKey(member.getKey())) {
+						memberIndexes.put(member.getKey(), i++);
+					}
+				}
+			}
+			memberSortIndexMap.put(sortOrder, memberIndexes);
+		}
+
+		// TODO Auto-generated method stub
+		return memberSortIndexMap.get(sortOrder);
+	}
 
 
     /*

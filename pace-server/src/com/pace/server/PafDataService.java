@@ -2787,7 +2787,7 @@ public class PafDataService {
 
 		int i = 0;
 		for (String member : memberNames) {
-			// Don't overwrite any existing member entries. Shared hiearchies
+			// Don't overwrite any existing member entries. Shared hierarchies
 			// cause inconsistencies with the index numbers.
 			if (memberList.get(member) == null) {
 				memberList.put(member, i++);
@@ -3882,14 +3882,19 @@ public class PafDataService {
 			//Get all possible attributes for the hierarchical base dimension
 			hierDimsMap.put(baseDim, getBaseTree(baseDim).getAttributeDimNames());
 		}
-			
+		
 		//Get the role filter user selections
 		PafDimSpec[] pafDimSpecs = userSelections;
 		//Convert to Map
 		Map<String, List<String>> userSelectionsMap = new HashMap<String, List<String>>();
 		for(PafDimSpec dimSpec : pafDimSpecs){
-			if(dimSpec.getDimension() != null && dimSpec.getExpressionList() != null){
-				userSelectionsMap.put(dimSpec.getDimension(),  Arrays.asList(dimSpec.getExpressionList()));
+			String dim = dimSpec.getDimension();
+			if(dim != null && dimSpec.getExpressionList() != null){
+				// Apply a post-order sort to members in expression list (default reporting order)
+				List<String> expressionList =  Arrays.asList(dimSpec.getExpressionList());
+				PafDimTree dimTree = this.getDimTree(dim);
+				dimTree.sortMemberList(expressionList, TreeTraversalOrder.PRE_ORDER);
+				userSelectionsMap.put(dim, expressionList);
 			}
 		}
 		
@@ -3905,7 +3910,7 @@ public class PafDataService {
 				expressionList = userSelectionsMap.get(baseDim);
 				// Wrap each selected member in @IDESC([member name], 0). This 
 				// will force all descendants of each selected member to be included
-				// int the UOW. This section of code has been modified to handle 
+				// in the UOW. This section of code has been modified to handle 
 				// multiple selections per base dimension (TTN-1644).
 				for (int i = 0; i < expressionList.size(); i++) {
 					expressionList.set(i, ExpOperation.I_DESC_TAG + "(" +  expressionList.get(i) + ", 0)");
