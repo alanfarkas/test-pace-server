@@ -260,6 +260,7 @@ public class PafBaseConstants {
 	public static final String HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_ROUNDING_RULES = createXMLNamespace("paf_rounding_rules");	
 	public static final String HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_RULE_SET = createXMLNamespace("paf_rule_set");
 	public static final String HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_VERSIONS = createXMLNamespace("paf_versions");
+	public static final String HTTP_WWW_THEPALLADIUMGROUP_COM_USER_MEMBER_LISTS = createXMLNamespace("user_memberlists");
 	
 	public static final String SVN_HIDDEN_DIR_NAME = ".svn";
 	

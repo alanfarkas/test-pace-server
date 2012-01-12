@@ -140,6 +140,7 @@ public class PafXStream {
 	
 	public static final String VIEW_SECTION_DEF = "ViewSection";
 	
+	public static final String USER_MEMBERLISTS = "userMemberLists";
 	// protected constructor to control access
 	protected PafXStream() {
 	}
@@ -250,7 +251,8 @@ public class PafXStream {
 		namespaceHeaderMap.put(ROUNDING_RULE_ARRAY, ROUNDING_RULE_ARRAY + " " + PafBaseConstants.HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_ROUNDING_RULES);
 		namespaceHeaderMap.put(RULE_SET, RULE_SET + " " + PafBaseConstants.HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_RULE_SET);
 		namespaceHeaderMap.put(VERSION_DEF_ARRAY, VERSION_DEF_ARRAY + " " + PafBaseConstants.HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_VERSIONS);
-
+		namespaceHeaderMap.put(PAF_APPLICATION_DEF_ARRAY, PAF_APPLICATION_DEF_ARRAY + " " + PafBaseConstants.HTTP_WWW_THEPALLADIUMGROUP_COM_PAF_APPS);
+		namespaceHeaderMap.put(USER_MEMBERLISTS, USER_MEMBERLISTS + " " + PafBaseConstants.HTTP_WWW_THEPALLADIUMGROUP_COM_USER_MEMBER_LISTS);
 	}
 
 	public static Object importObjectFromXml(String fullFilePath, boolean validateFileContents) throws PafConfigFileNotFoundException {
