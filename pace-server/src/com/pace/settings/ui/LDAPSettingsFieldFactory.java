@@ -68,9 +68,11 @@ public class LDAPSettingsFieldFactory extends PaceSettingsDefaultFieldFactory {
 		
 		captionMap.put(LDAP_PROVIDER_NAME, "LDAP Provider Name");
 		captionMap.put(PROVIDER_URL_GC, "Provider URL GC");
+		captionMap.put(LDAP_PAGE_SIZE, "LDAP Pagesize");
 		captionMap.put(KERBEROS_KDC, "Kerberos KDC");
 		captionMap.put(SSL_KEY_STORE, "SSL Key Store");
 		captionMap.put(NET_BIOS_NAMES_LIST, "Net Bios Names");
+		captionMap.put(IGNORE_EXPIRED_PW_ACCOUNTS, "Ignore Expired Password Accounts");
 		
 		
 		requiredFieldSet.add(LDAP_PROVIDER_NAME);
