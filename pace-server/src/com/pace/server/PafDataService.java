@@ -464,6 +464,67 @@ public class PafDataService {
 	}
 
 
+	/**
+	 * Split a list of dimension members into separate member lists, one for each tree branch. The first member
+	 * in the sortedMemberList must be the root member.
+	 * 	
+	 * @param sortedMemberList List of dimension members whose are grouped together by branch, each branch's members organized in a post-order sort
+	 * @param uowTree UOW dimension tree that will be used to organize the members by branch
+	 * 
+	 * @return Lists of member branches
+	 */
+	public List<List<String>> getBranchLists(List<String> sortedMemberList, PafDimTree uowTree) {
+		
+		
+		List<List<String>> branchLists = new ArrayList<List<String>>();
+
+		// Put the root into it's own branch
+		String rootMember = sortedMemberList.get(0);
+		branchLists.add(new ArrayList<String>(Arrays.asList(new String[]{rootMember})));
+		
+		if (sortedMemberList.size() > 1) {
+			List<String> filteredMembers = new ArrayList<String>(sortedMemberList.subList(1,sortedMemberList.size()));
+			List<String> branchList = new ArrayList<String>(),  fullTreeBranch = new ArrayList<String>();
+			for (String member : filteredMembers) {
+
+				// Add member to branch member list
+				if (fullTreeBranch.contains(member)) {
+					branchList.add(member);
+					continue;
+				}
+
+				// New branch - add branch member list to 
+				// collection and create new branch member list.
+				if (!branchList.isEmpty()) {
+					branchLists.add(branchList);
+					branchList = new ArrayList<String>();
+				}
+
+				// Start new branch
+				if (branchList.isEmpty()) {
+					branchList.add(member);
+					fullTreeBranch = uowTree.getMemberNames(uowTree.getDescendants(member));
+				}
+
+			}
+			
+			// Add any remaining members to branch Lists
+			branchLists.add(branchList);
+			
+		}
+		
+		return branchLists;
+	}
+
+
+	
+	/**
+	 * @param clientState
+	 * @param dim
+	 * @param uow
+	 * @return
+	 * @deprecated
+	 */
 	public PafBaseMember getUowRoot(PafClientState clientState, String dim, UnitOfWork uow) {
 		TreeMap<Integer, ArrayList<PafBaseMember>> treeMap = getMembersByLevel(clientState, dim);
 		PafBaseMember root = treeMap.get(treeMap.lastKey()).get(0);
@@ -692,7 +753,7 @@ public class PafDataService {
 			// Return version tree
 			return tree;
 		} 
-int alan;	
+	
 		// All other dimensions - Start out by making a tree copy
 		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, uowMbrNames, mdbDef);
 		PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);
@@ -703,7 +764,7 @@ int alan;
 			} else {
 				rootAlias = PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS;			
 			}
-			copy = baseTree.getDiscSubTreeCopy(expandedUow.getDiscontigMemberGroups(dim), rootAlias);
+			copy = baseTree.getDiscSubTreeCopy(expandedUow.getDiscontigMemberGroups(dim), root.getKey(), rootAlias);
 		} else if (baseTree.hasSharedMembers()) {
 			// Shared members exist, get whole branch since generations on 
 			// shared members may be higher than original member
@@ -3838,7 +3899,7 @@ int alan;
 			expandedUOW.put(uowDimCount++, members);
 		}
 		
-		//Save the connection props for this application id into the clientstate
+		//Save the connection props for this application id into the client state
 		String dsId = appDef.getMdbDef().getDataSourceId();
 		IPafConnectionProps connProps = (IPafConnectionProps) PafMetaData.getMdbProp(dsId);
 		clientState.getDataSources().put(dsId, connProps);
@@ -3868,7 +3929,7 @@ int alan;
 
 		/*
 		 * This method was built to hold code that was originally part of PafServerProvider.getfilteredUowSize(). 
-		 * This method was created to make the PafService layer more manageable.
+		 * This method was created to make the PafService layer more manageable (TTN-1644).
 		 */
 		
 		UnitOfWork workUnit = clientState.getUnitOfWork().clone();
@@ -3879,12 +3940,12 @@ int alan;
 		String[] hierDims = clientState.getApp().getMdbDef().getHierDims();
 		Map<String,Set<String>> hierDimsMap = new HashMap<String,Set<String>>();
 		for(String baseDim : hierDims){
-
 			//Get all possible attributes for the hierarchical base dimension
 			hierDimsMap.put(baseDim, getBaseTree(baseDim).getAttributeDimNames());
 		}
 		
-		//Get the role filter user selections
+		// Get the role filter user selections. Each selection is the root 
+		// of an individual branch to include in the UOW.
 		PafDimSpec[] pafDimSpecs = userSelections;
 		//Convert to Map
 		Map<String, List<String>> userSelectionsMap = new HashMap<String, List<String>>();
@@ -3892,17 +3953,19 @@ int alan;
 			String dim = dimSpec.getDimension();
 			if(dim != null && dimSpec.getExpressionList() != null){
 				
-				// Apply a post-order sort to members in expression list (default reporting order) (TTN-1644)
+				// Apply a post-order sort (default reporting order) to members in expression
+				// since the user selections are sorted in the ordered in selection order,
+				// not tree order.  (TTN-1644)
 				ArrayList<String> expressionList =  new ArrayList<String>(Arrays.asList(dimSpec.getExpressionList()));
 				PafDimTree dimTree = uowTrees.getTree(dim);
 				dimTree.sortMemberList(expressionList, TreeTraversalOrder.POST_ORDER);
 				userSelectionsMap.put(dim, expressionList);
 
 				// Place any orphan members at the end of the expression list. This is 
-				// purely a presentation issue. This will prevent it appearing as 
-				// if these orphan members are contained in one of the other branches,
-				// and make it clearer the they roll up directly under the synthetic
-				// root.
+				// purely a presentation issue. This will help to prevent it appearing
+				// as if these orphan members are contained in one of the other 
+				// branches, and make it clearer the they roll up directly under the 
+				// synthetic root (TTN-1644).
 				List<String> orphanMembers = new ArrayList<String>();
 				String root = dimTree.getRootNode().getKey();
 				for (String member : expressionList) {
@@ -3983,16 +4046,11 @@ int alan;
 						}
 					}
 					
-					// Since this dimension is filtered, the uow discontiguous collection needs to be
+					// Since this dimension is filtered, the discontiguous member group collection needs to be
 					// populated for this dimension, so that the corresponding uow tree is built properly as
 					// a discontiguous tree. The root member must appear first, its own list, followed
-					// by the remaining base members in their own list (TTN-1644).
-					discontigMbrGrps = new ArrayList<List<String>>();
-					String rootMember = validBaseMemberList.get(0);
-					discontigMbrGrps.add(new ArrayList<String>(Arrays.asList(new String[]{rootMember})));
-					if (validBaseMemberList.size() > 1) {
-						discontigMbrGrps.add(new ArrayList<String>(validBaseMemberList.subList(1, validBaseMemberList.size())));
-					}
+					// by the remaining base members, grouped by branch, each in their own list (TTN-1644).
+					discontigMbrGrps = getBranchLists(validBaseMemberList, uowTrees.getTree(baseDim));
 					workUnit.getDiscontigMemberGroups().put(baseDim, discontigMbrGrps);					
 				}
 				
@@ -4106,6 +4164,7 @@ int alan;
 			return uml.getMemberList(umlKey);
 		}
 	}
+
 
  
 }

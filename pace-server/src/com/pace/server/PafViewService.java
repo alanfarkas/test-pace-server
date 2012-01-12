@@ -3235,15 +3235,15 @@ public class PafViewService {
 		return view;
 	}
 
-	public String replaceUserUow(String member, PafClientState clientState,
-			String dim) {
+	public String replaceUserUow(String member, PafClientState clientState, String dim) {
 
-		UnitOfWork uow = clientState.getUnitOfWork();
-		PafDimMember uowRoot = pafDataService.getUowRoot(
-				clientState, dim, uow);
+		//UnitOfWork uow = clientState.getUnitOfWork();
+		//PafDimMember uowRoot = pafDataService.getUowRoot(clientState, dim, uow);
+		final PafDimTree dimTree = clientState.getUowTrees().getTree(dim);
+		final String uowRoot = dimTree.getRootNode().getKey();
 		
 		//Matcher.quoteReplacement replaces all $ with \$
-		member = member.replaceAll("@UOW_ROOT", Matcher.quoteReplacement(uowRoot.getKey()));
+		member = member.replaceAll("@UOW_ROOT", Matcher.quoteReplacement(uowRoot));
 		return member.trim();
 	}
 

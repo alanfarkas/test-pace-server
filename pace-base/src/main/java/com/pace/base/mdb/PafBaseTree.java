@@ -500,30 +500,18 @@ public class PafBaseTree extends PafDimTree {
 	 * Create a discontiguous copy of this tree containing the supplied member lists
 	 * 
 	 * @param discontigMemberLists List of discontiguous member lists that map to members in this tree
+	 * @param rootName Name of root member
 	 * @param rootAlias Alias of synthetic root member
 	 * 
 	 * @return Discontiguous tree
 	 * @throws PafException 
 	 */
-	public PafBaseTree getDiscSubTreeCopy(List<List<String>> discontigMemberLists, String rootAlias) throws PafException {
+	public PafBaseTree getDiscSubTreeCopy(List<List<String>> discontigMemberLists, String rootName, String rootAlias) throws PafException {
 	
 		PafBaseTree newTree = null;
-		List<String> discontigMemberList = discontigMemberLists.get(0);
-		String newRootName = null;
-		int begSearchInx = 0;
-		
-		// Find the root member - it should be a single item on the first list
-		if (discontigMemberList.size() == 1) {
-			newRootName = discontigMemberList.get(0);
-			begSearchInx = 1;
-		} else {
-			// Root not found - use root of this tree
-			newRootName = getRootNode().getKey();
-			begSearchInx = 0;
-		}
-		
+
 		// Create new root node
-		PafBaseMember newRootNode = getMember(newRootName).getShallowDiscCopy();
+		PafBaseMember newRootNode = getMember(rootName).getShallowDiscCopy();
 		PafDimMemberProps memberProps = newRootNode.getMemberProps();		
 		memberProps.setSynthetic(true);
 		memberProps.setAllAliases(getAliasTableNames(), rootAlias);
@@ -534,11 +522,16 @@ public class PafBaseTree extends PafDimTree {
         newTree.setDiscontig(true);
 		
 		// Add all discontiguous branches - assume the members in each list are 
-        // sorted in ascending generation order
-        for (int i = begSearchInx; i < discontigMemberLists.size(); i++) {
+        // arranged in a post-order sort. Filter out any occurrence of the 
+        // tree root, since it's already added.
+        for (int i = 0; i < discontigMemberLists.size(); i++) {
         	List<String> memberList = discontigMemberLists.get(i);
         	String branchRootName = memberList.get(0);
-            newTree.addChildCopies(newTree, getMember(branchRootName).getParent(), newRootNode, 0, memberList );
+        	if (branchRootName.equals(rootName)) {
+        		memberList.remove(memberList.indexOf(rootName));
+        		if (memberList.isEmpty()) continue;
+        	}
+        	newTree.addChildCopies(newTree, getMember(branchRootName).getParent(), newRootNode, 0, memberList );
         }
 
         return newTree;
