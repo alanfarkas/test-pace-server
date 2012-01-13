@@ -43,10 +43,14 @@ import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
-import com.pace.base.app.*;
+import com.pace.base.app.DimType;
+import com.pace.base.app.MdbDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PafDimSpec;
+import com.pace.base.app.UnitOfWork;
+import com.pace.base.app.VersionDef;
 import com.pace.base.comm.EvaluateViewRequest;
 import com.pace.base.comm.PafPlannerConfig;
-import com.pace.base.data.EvalUtil;
 import com.pace.base.data.ExpOperation;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
@@ -56,16 +60,40 @@ import com.pace.base.data.TimeSlice;
 import com.pace.base.data.UserMemberLists;
 import com.pace.base.db.Application;
 import com.pace.base.db.SecurityGroup;
-import com.pace.base.mdb.*;
-import com.pace.base.mdb.PafDimTree.LevelGenType;
-import com.pace.base.rules.Rule;
-import com.pace.base.rules.RuleGroup;
+import com.pace.base.mdb.AttributeUtil;
+import com.pace.base.mdb.DcTrackChangeOpt;
+import com.pace.base.mdb.IMdbClassLoader;
+import com.pace.base.mdb.IMdbData;
+import com.pace.base.mdb.IMdbMetaData;
+import com.pace.base.mdb.IPafConnectionProps;
+import com.pace.base.mdb.PafAttributeMember;
+import com.pace.base.mdb.PafAttributeMemberProps;
+import com.pace.base.mdb.PafAttributeTree;
+import com.pace.base.mdb.PafBaseMember;
+import com.pace.base.mdb.PafBaseMemberProps;
+import com.pace.base.mdb.PafBaseTree;
+import com.pace.base.mdb.PafDataCache;
+import com.pace.base.mdb.PafDataCacheCalc;
+import com.pace.base.mdb.PafDataSliceParms;
+import com.pace.base.mdb.PafDimMember;
+import com.pace.base.mdb.PafDimMemberProps;
+import com.pace.base.mdb.PafDimTree;
+import com.pace.base.mdb.PafMdbProps;
+import com.pace.base.mdb.PafSimpleDimTree;
+import com.pace.base.mdb.TreeTraversalOrder;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.state.SliceState;
-import com.pace.base.utility.*;
-import com.pace.base.view.*;
+import com.pace.base.utility.LevelGenParamUtil;
+import com.pace.base.utility.LogUtil;
+import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringUtils;
+import com.pace.base.view.PafMVS;
+import com.pace.base.view.PafView;
+import com.pace.base.view.PafViewSection;
+import com.pace.base.view.PageTuple;
+import com.pace.base.view.ViewTuple;
 import com.pace.server.eval.IEvalStrategy;
 import com.pace.server.eval.RuleBasedEvalStrategy;
 
@@ -2047,7 +2075,8 @@ public class PafDataService {
 
 		Transaction tx = null;
 
-		java.util.List list;
+		@SuppressWarnings("rawtypes")
+		List list;
 
 		try {
 

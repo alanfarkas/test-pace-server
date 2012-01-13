@@ -1819,7 +1819,7 @@ public abstract class PafDimTree {
      * @param dimMembers List of paf dim members
      * @return List of member names
      */
-    public List<String> getMemberNames(List<PafDimMember> dimMembers) {
+    public static List<String> getMemberNames(List<PafDimMember> dimMembers) {
     	
     	List<String> memberList = new ArrayList<String>();
     	for (PafDimMember dimMember : dimMembers) {
@@ -2353,7 +2353,75 @@ public abstract class PafDimTree {
 		return memberSortIndexMap.get(sortOrder);
 	}
 
+		
+	/**
+	 * Find the pre-order sort index for the specified tree member
+	 * 
+	 * @param member Member name
+	 * @return Member sort index
+	 */
+	public int getMemberSortIndex(String member) {
+		
+		Integer sortIndex = getMemberSortIndexes(TreeTraversalOrder.PRE_ORDER).get(member);
+		if (sortIndex == null) {
+			String errMsg = String.format("Unable to find sort index for member: [%s]", member);
+			logger.error(errMsg);
+			throw new IllegalArgumentException(errMsg);
+		}
+		
+		return sortIndex;
+	}
 
+	
+	/**
+	 * Create the highest sub-tree that contains the specified member without including any duplicate members
+	 * 
+	 * @param memberName Member name
+	 * 
+	 * @return Sub tree
+	 * @throws PafException 
+	 */
+	public PafDimTree getHighestUniqueSubTreeCopy(String memberName) throws PafException {
+		
+		PafDimTree ancestorTree = null, prevAncestorTree = null;
+		PafDimMember member = null;
+		List<PafDimMember> ancestors = null;
+
+		if (!hasMember(memberName)) {
+			String errMsg = String.format("Unable to get unique sub tree copy for member: [%s]. This member is not in the tree rooted at: [%s].",
+					member, rootNode.getKey());
+			logger.error(errMsg);
+			throw new IllegalArgumentException(errMsg);			
+		}
+		
+		// Just return a copy of this entire tree if it doesn't contain any shared members
+		if (!hasSharedMembers()) {
+			ancestorTree = getSubTreeCopy(getRootNode().getKey());
+			return ancestorTree;
+		}
+	
+		// Use the brute force method. Keep building higher ancestor trees until
+		// shared members are generated or the top of the tree is reached.
+		prevAncestorTree = getSubTreeCopy(memberName);
+		ancestors = getAncestors(memberName);
+		for (PafDimMember ancestor : ancestors) {
+			ancestorTree = getSubTreeCopy(ancestor.getKey());
+			if (ancestorTree.hasSharedMembers()) {
+				return prevAncestorTree;
+			}
+			prevAncestorTree = ancestorTree;
+		}
+
+		// If no ancestor tree can be found, just return a sub copy using the
+		// specified member name as the root.
+		if (ancestorTree == null) {
+			ancestorTree = getSubTreeCopy(memberName);
+		}
+		
+		return ancestorTree;
+	}
+	
+	
     /*
      *	Return the members of the PafDimTree using a pre-order traversal
      *

@@ -548,8 +548,10 @@ public class PafAppService {
 	 * @param lockedTimeSlices Locked time slice coordinates
 	 * @param invalidTimeSlices Invalid time slice coordinates
 	 * @param lockedPeriodMap Locked time periods by year
+	 * 
+	 * @throws PafException 
 	 */
-	public void populateLockedPeriodCollections(PafClientState clientState) {
+	public void populateLockedPeriodCollections(PafClientState clientState) throws PafException {
 
 		final PafApplicationDef pafApp = clientState.getApp(); 
 		final MdbDef mdbDef = pafApp.getMdbDef();
@@ -626,70 +628,111 @@ public class PafAppService {
      * time tree.
      * 
      * @param clientState Client state
+     * 
      * @return The set of locked level 0 and upper-level periods in the time
+	 * @throws PafException 
      */
-    public Set<String> getLockedList(PafClientState clientState) {
+    public Set<String> getLockedList(PafClientState clientState) throws PafException {
 
     	final PafApplicationDef pafApp = clientState.getApp();
-    	final String lastPeriod = pafApp.getLastPeriod();
-    	final String currentYear = pafApp.getCurrentYear();
-		final String timeDim = pafApp.getMdbDef().getTimeDim();
+    	final String lastPeriodParm = pafApp.getLastPeriod();
+    	final String currentYearParm = pafApp.getCurrentYear();
+		final String timeDim = pafApp.getMdbDef().getTimeDim(), yearDim = pafApp.getMdbDef().getYearDim();
     	final PafDimTree timeHorizonTree = clientState.getTimeHorizonTree();
        	final PafDimTree timeTree = clientState.getUowTrees().getTree(timeDim);
-       	final PafBaseTree mdbTimeTree = dataService.getBaseTree(timeDim);
+       	final PafDimMember timeRootNode = timeTree.getRootNode();
+       	final PafDimTree yearTree = clientState.getUowTrees().getTree(yearDim);
+       	final PafDimTree mdbTimeTree = dataService.getDimTree(timeDim);
     	Set<String> lockedPeriods = new HashSet<String>();
     	String elapsedPeriod = null;
 
 
-    	// Ensure that the elapsed period is at the uow floor (TTN-1686)
-    	elapsedPeriod = TimeSlice.buildTimeHorizonCoord(lastPeriod, currentYear);
-    	PafDimMember elapsedPeriodMember = null;
-    	if (timeHorizonTree.hasMember(elapsedPeriod)) {
-    		// The elapsed period does exist in the uow. Get it's last descendant.
-    		elapsedPeriodMember = timeHorizonTree.getLastDescendant(elapsedPeriod, (short) 0);
-    		elapsedPeriod = elapsedPeriodMember.getKey();
-    	} else {
-    		// Elapsed period is outside uow. Check if the last period component exists
-    		// in the regular client time tree.
-    		if (timeTree.hasMember(lastPeriod)) {
-    			// Found last period member. Now look for the first ancestor that when
-    			// combined with the current year, is a valid member in the uow time tree.
-    			List<PafDimMember> mdbTimeMembers = mdbTimeTree.getAncestors(lastPeriod);
-    			for (PafDimMember timeMember : mdbTimeMembers) {
-    				elapsedPeriod = TimeSlice.buildTimeHorizonCoord(timeMember.getKey(), currentYear);
-    				if (timeHorizonTree.hasMember(elapsedPeriod)) {
-    					elapsedPeriodMember = timeHorizonTree.getMember(elapsedPeriod);
-    					break;
-    				}
-    			}
-    			
-    		} else {
+    	// Resolve the lastPeriod & currentYear parameters, preferably, against
+    	// the current time horizon tree. 
+    	// 
+    	// This code has been updated to support alternate time hierarchies and
+    	// a last period setting that is above or below the uow floor. (TTN-1686)
+    	PafDimMember elapsedPeriodMember;
+    	ExitDo:
+    	do {
+			elapsedPeriod = TimeSlice.buildTimeHorizonCoord(lastPeriodParm, currentYearParm);
+			elapsedPeriodMember = null;
+			if (timeHorizonTree.hasMember(elapsedPeriod)) {
+				// The derived elapsed period does exist in the uow. Ensure that it
+				// corresponds to a member at the time horizon floor, by using its
+				// last descendant.
+				elapsedPeriodMember = timeHorizonTree.getLastDescendant(elapsedPeriod, (short) 0);
+				elapsedPeriod = elapsedPeriodMember.getKey();
+				break;
+			}
+			
+			// The derived elapsed period is outside uow. At a minimum, the 
+			// current year needs to exist in the uow year tree, and the last
+			// period needs to exist in the mdb time tree. If not, then we 
+			// can't resolve the elapsed period parameters.
+			if (!yearTree.hasMember(currentYearParm) || !mdbTimeTree.hasMember(lastPeriodParm)) break;
+			
+			
+			// Now comes the hard part. There are a feww scenarios that need to
+			// be tested, complicated by the need to support shared hierarchies.
 
-    			// Not in client time tree - check mdb time tree
-    			if (mdbTimeTree.hasMember(lastPeriod)) {
-    				// If last period parameter appears in mdb time tree before the
-    				// start of the client time tree, then no periods in this uow
-    				// should be locked.
-    				PafBaseMember firstUowTimeMbr = (PafBaseMember) timeTree.getFirstFloorMbr();
-    				int firstUowTimeMbrNo = firstUowTimeMbr.getMemberProps().getMemberNumber();
-    				PafBaseMember lastPeriodMbr = mdbTimeTree.getMember(lastPeriod);
-    				int lastPeriodMbrNo = lastPeriodMbr.getMemberProps().getMemberNumber();
-    				if (lastPeriodMbrNo < firstUowTimeMbrNo) {
-    					return lockedPeriods;
-    				} else {
-    					// Last period parameter must point a future period. This
-    					// entire uow should be locked.
-    					elapsedPeriodMember = timeHorizonTree.getLastFloorMbr();
-    					elapsedPeriod = elapsedPeriodMember.getKey();
-    				}
-    			}
-    		}
-    	}
+			// Scenario 1 - in the mdb time tree, the last period is a 
+			// descendant of one of the uow time tree floor members.
+			List<String> timeFloorMbrs = PafDimTree.getMemberNames(timeTree.getLowestMembers(timeTree.getRootNode().getKey()));
+			for (String timeFloorMbr : timeFloorMbrs) {
+				List<String> floorDescendants = PafDimTree.getMemberNames(mdbTimeTree.getDescendants(timeFloorMbr));
+				if (floorDescendants.contains(lastPeriodParm)) {
+					// The last period was found in one of the descendants of the
+					// current time floor member. Validate that its valid with
+					// the current year.
+					elapsedPeriod = TimeSlice.buildTimeHorizonCoord(timeFloorMbr, currentYearParm);
+					if (timeHorizonTree.hasMember(elapsedPeriod)) {
+						// Valid time horizon member
+						elapsedPeriodMember = timeHorizonTree.getMember(elapsedPeriod);
+						break ExitDo;
+					} else {
+						// Can't be resolved
+						break ExitDo;
+					}
+				}
+			}
 
-    	// Throw error if elapsed period can't be resolved
+			// Scenario 2 - the last period is part of a sibling branch, outside the uow,
+			// and corresponds to a time period that comes before or after the current
+			// time horizon. The trick will be to find the sibling time hierarchy branch
+			// that is related to this uow. Because of alternate time hierarchies, this
+			// is not a trivial task.
+			
+			// Attempt to build a tree that contains the current uow time members plus all
+			// the related time members outside this uow. If this tree doesn't contain a
+			// member corresponding to the last period parm, then it can't be resolved.
+			PafDimTree fullYearTree = mdbTimeTree.getHighestUniqueSubTreeCopy(timeRootNode.getKey());
+			if (!fullYearTree.hasMember(lastPeriodParm)) break;
+			
+			// The last period member has finally been found. Now determine if it comes
+			// before or after the current uow.
+			PafDimMember firstUowTimeMbr = timeTree.getFirstFloorMbr();
+			int firstUowTimeMbrInx = fullYearTree.getMemberSortIndex(firstUowTimeMbr.getKey());
+			int lastPeriodMbrInx = fullYearTree.getMemberSortIndex(lastPeriodParm);
+			if (lastPeriodMbrInx < firstUowTimeMbrInx) {
+				// Last period points to a period that occurs before the start of
+				// the uow. Don't lock any periods.
+				return lockedPeriods;
+			} else {
+				// Last period points to a future period. This entire uow should
+				// be locked.
+				elapsedPeriodMember = timeHorizonTree.getLastFloorMbr();
+				elapsedPeriod = elapsedPeriodMember.getKey();
+				break;
+			}
+
+		} while (false);
+    	
+ 
+    	// Throw error if elapsed period can't be resolved (TTN-1686)
     	if (elapsedPeriodMember == null){
     		String errMsg = String.format(Messages.getString("PafAppService.27"), //$NON-NLS-1$
-    				currentYear, lastPeriod); 
+    				currentYearParm, lastPeriodParm); 
     		logger.fatal(errMsg);
     		throw new IllegalArgumentException(errMsg);
     	}
@@ -727,8 +770,7 @@ public class PafAppService {
 	 * @param current
 	 *            tree member
 	 */
-	private void resolveLockedMember(PafDimMember member,
-			Set<String> lockedPeriods) {
+	private void resolveLockedMember(PafDimMember member, Set<String> lockedPeriods) {
 
 		PafDimMember parent = member.getParent();
 		List<PafDimMember> children = parent.getChildren();
