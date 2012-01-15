@@ -35,6 +35,7 @@ public interface IPafDataCache {
 	public String getTimeDim();
 	public String getTimeHorizonDim();
 	public String getVersionDim();
+	public String getYearDim();
 	public boolean isMember(String dimension, String member);
 	public void setCellValue(Intersection target, double allocValue) throws PafException;
 	public Intersection shiftIntersection(Intersection cellIs);

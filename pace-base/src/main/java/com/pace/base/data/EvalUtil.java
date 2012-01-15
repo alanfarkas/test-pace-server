@@ -1195,13 +1195,15 @@ public class EvalUtil {
 	 */
 	public static String getIsCoord(Intersection cellIs, String dim, IPafEvalState evalState) {
 		
-		String timeHorizonDim = evalState.getTimeHorizonDim();
-		String timeDim = evalState.getTimeDim();
 		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
+		String timeHorizonDim = evalState.getTimeHorizonDim();
+		String timeDim = evalState.getTimeDim(), yearDim = mdbDef.getYearDim();
 		String coord = null;
 
-		if (!dim.equals(timeDim) && !dim.equalsIgnoreCase(timeHorizonDim)) {
+		if (!dim.equals(timeDim) && !dim.equals(timeHorizonDim)) {
 			coord = cellIs.getCoordinate(dim); 
+		} else if (!dim.equals(yearDim)) {
+			coord = TimeSlice.getTimeHorizonYear();
 		} else {
 			coord = TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef);
 		}

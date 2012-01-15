@@ -75,12 +75,12 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		
 		String[] axisAllocSeq = evalState.getAxisAllocPriority();
 		String[] axisSortSeq = evalState.getAxisSortPriority();
-		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
+//		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
 		PafDataCache dataCache = evalState.getDataCache();
 		PafDimMember currMember = null;
 		tempAllocLocks = new HashSet<Intersection>(evalState.getLoadFactor());
 		String msrDim = evalState.getMsrDim();
-		String timeDim = evalState.getTimeDim();
+//		String timeDim = evalState.getTimeDim();
 
 
 		// Sort locked intersections resulting from user locks and cell changes
@@ -133,7 +133,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 
 
 			// convenience variable to hold client tree for current dimension
-			PafDimTree dimTree = uowTrees.getTree(dim);
+			PafDimTree dimTree = evalState.getEvaluationTree(dim);
 
 			// temporary allocation locks are dimensionally specific, and can be cleared 
 			// during each dimensional pass.
@@ -196,7 +196,8 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		// get subtree from client state rooted at test intersection
 //		String rootMbrName = is.getCoordinate(dim);
 		String rootMbrName = EvalUtil.getIsCoord(is, dim, evalState); // TTN-1595
-		PafDimTree subTree = evalState.getClientState().getUowTrees().getTree(dim);
+//		PafDimTree subTree = evalState.getClientState().getUowTrees().getTree(dim);
+		PafDimTree subTree = evalState.getEvaluationTree(dim);
 		PafDimMember rootMbr = subTree.getMember(rootMbrName);
 		List<String> targets = new ArrayList<String>();
 //		targetsToAllocate = new ArrayList<String>();

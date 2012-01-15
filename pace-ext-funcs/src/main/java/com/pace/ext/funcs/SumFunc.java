@@ -1,6 +1,7 @@
 package com.pace.ext.funcs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
@@ -47,6 +49,7 @@ public class SumFunc extends AbstractFunction {
 
     	// convenience variables
       	String msrDim = dataCache.getMeasureDim(), timeDim = dataCache.getTimeDim();
+      	String yearDim = dataCache.getYearDim();
        	PafBaseTree msrTree = (PafBaseTree) evalState.getEvaluationTree(msrDim);
 
  	
@@ -69,10 +72,25 @@ public class SumFunc extends AbstractFunction {
 //				input.setCoordinate(msrDim, msr);
 //        		sum += dataCache.getCellValue(input);
 //        	}
+        
+        // Create member filter for aggregation process and add in measures to be aggregated
 		Map<String, List<String>> filters = new HashMap<String, List<String>>();
 		filters.put(msrDim, new ArrayList<String>(this.inputMsrs));
 		
+		// Filter on the remaining intersection dimensions. Since we only want to  aggregate 
+		// the current intersection across the selected measures, we need filter on each
+		// remaining dimension's coordinate.
+		for (String dim : sourceIs.getDimensions()) {
+			if (!dim.equals(msrDim)) {
+				String coord = EvalUtil.getIsCoord(sourceIs, dim, evalState);
+				filters.put(dim, Arrays.asList(new String[]{coord}));
+			}
+			
+		}
+		
+		// Aggregate the measure children
        	PafDataCacheCalc.aggDimension(msrDim,  (PafDataCache) dataCache, msrTree, filters);
+       	
         
         return sum;
  
