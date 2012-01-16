@@ -805,11 +805,11 @@ public class PafViewService {
 				}
 				
 				// Build data slice parameters after the suppression
-				if (isViewSectionChanged) {
+//				if (isViewSectionChanged) {
 					PafDataSliceParms sliceParms = pafDataService.buildDataSliceParms(viewSection);
 					pafMVS.setDataSliceParms(sliceParms);
 					pafMVS.setInitializedForAttrEval(false);
-				}
+//				}
 				
 				// Populate cell note data
 				CellNoteCache noteCache = CellNoteCacheManager.getInstance().getNoteCache(viewRequest.getClientId() );
