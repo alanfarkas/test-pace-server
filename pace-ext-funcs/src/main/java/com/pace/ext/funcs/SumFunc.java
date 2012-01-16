@@ -48,8 +48,7 @@ public class SumFunc extends AbstractFunction {
 
 
     	// convenience variables
-      	String msrDim = dataCache.getMeasureDim(), timeDim = dataCache.getTimeDim();
-      	String yearDim = dataCache.getYearDim();
+      	String msrDim = dataCache.getMeasureDim();
        	PafBaseTree msrTree = (PafBaseTree) evalState.getEvaluationTree(msrDim);
 
  	
@@ -61,7 +60,7 @@ public class SumFunc extends AbstractFunction {
     	// if additional parameters are passed then the aggregation is limited to the included measures
     	
         // inputs holds all intersections to sum.
-    	// initialize it off the list of target measures and the evalstate collections
+    	// initialize it off the list of target measures and the eval state collections
     	
     	double sum = 0;
 

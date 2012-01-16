@@ -158,7 +158,7 @@ public abstract class PafDataCacheCalc {
 
 		// The fun starts now
 		calcStart = System.currentTimeMillis();
-		logger.info("Aggregating dimension [" + aggDimension + "]"); 	
+		logger.debug(String.format("Starting aggregation process for dimension [%s]", aggDimension)); 	
 
 		
 		// Clone member filter so that it can be updated and used to drive the aggregation
@@ -1132,11 +1132,10 @@ public abstract class PafDataCacheCalc {
 		long startTime = System.currentTimeMillis();
 		int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
 		String activePlanVersion = clientState.getPlanningVersion().getName();
-		String measureDim = dataCache.getMeasureDim();
-		String timeDim = dataCache.getTimeDim();
+		String measureDim = dataCache.getMeasureDim(), timeDim = dataCache.getTimeDim();
 		String timeHorizonDim = dataCache.getTimeHorizonDim();
-		String versionDim = dataCache.getVersionDim();
-		String yearDim = dataCache.getYearDim();
+		String versionDim = dataCache.getVersionDim(), yearDim = dataCache.getYearDim();
+		String logMsg = null;
 		String[] hierDims = clientState.getApp().getMdbDef().getHierDims();
 		String[] baseDims = dataCache.getBaseDimensions();
 		List<String> recalcMeasures = dataCache.getRecalcMeasures();
@@ -1231,6 +1230,9 @@ public abstract class PafDataCacheCalc {
 			// member intersections are calculated.
 			for (String dim : dimsToCalc) {
 
+				logMsg = String.format("Calculating synthetic member(s) on dimension: [%s]", dim); 
+				logger.info(logMsg);
+
 				// Aggregate hierarchical or time horizon dimension
 				PafDimTree dimTree;
 				if (!dim.equals(timeDim)) {
@@ -1279,7 +1281,7 @@ public abstract class PafDataCacheCalc {
 							}
 						}
 					}
-					String logMsg = LogUtil.timedStep("Synthetic Member - Recalc Measure Calculation Pass", recalcStartTime);
+					logMsg = LogUtil.timedStep("Synthetic Member - Recalc Measure Calculation Pass", recalcStartTime);
 					evalPerfLogger.info(logMsg);
 				}
 
@@ -1289,7 +1291,7 @@ public abstract class PafDataCacheCalc {
 
 
 		dataCache.clearDirty();
-		String logMsg = LogUtil.timedStep("Synthetic Member Calculation", startTime);
+		logMsg = LogUtil.timedStep("Synthetic Member Calculation", startTime);
 		evalPerfLogger.info(logMsg);
 	}
 

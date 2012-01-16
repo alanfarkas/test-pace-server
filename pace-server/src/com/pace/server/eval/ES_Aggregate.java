@@ -38,7 +38,6 @@ import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataCacheCalc;
-import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
@@ -227,6 +226,7 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 			aggTree = treeSet.getTree(dataCache.getTimeHorizonDim());
 		}
 		
+		logger.info(String.format("Aggregating dimension [%s]", dim)); 	
 		PafDataCacheCalc.aggDimension(dim, dataCache, aggTree, aggFilter, trackChanges);
 	}
 
