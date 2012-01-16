@@ -1202,7 +1202,7 @@ public class EvalUtil {
 
 		if (!dim.equals(timeDim) && !dim.equals(timeHorizonDim)) {
 			coord = cellIs.getCoordinate(dim); 
-		} else if (!dim.equals(yearDim)) {
+		} else if (dim.equals(yearDim)) {
 			coord = TimeSlice.getTimeHorizonYear();
 		} else {
 			coord = TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef);
