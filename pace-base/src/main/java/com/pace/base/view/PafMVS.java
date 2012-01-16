@@ -36,7 +36,6 @@ public class PafMVS {
 	private PafViewSection viewSection = null;
 	private PafDataCache dataCache = null;
 	private PafDataSliceParms dataSliceParms = null;
-	private boolean isInitializedForAttrEval = false;
 	
 	/**
 	 * @param view Paf View object
@@ -92,20 +91,6 @@ public class PafMVS {
 	 */
 	public void setDataCache(PafDataCache dataCache) {
 		this.dataCache = dataCache;
-	}
-
-	/**
-	 * @param isInitializedForAttrEval the isInitializedForAttrEval to set
-	 */
-	public void setInitializedForAttrEval(boolean isInitializedForAttrEval) {
-		this.isInitializedForAttrEval = isInitializedForAttrEval;
-	}
-
-	/**
-	 * @return the isInitializedForAttrEval
-	 */
-	public boolean isInitializedForAttrEval() {
-		return isInitializedForAttrEval;
 	}
 
 	/**

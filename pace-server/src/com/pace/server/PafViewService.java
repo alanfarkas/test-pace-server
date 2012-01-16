@@ -808,7 +808,6 @@ public class PafViewService {
 //				if (isViewSectionChanged) {
 					PafDataSliceParms sliceParms = pafDataService.buildDataSliceParms(viewSection);
 					pafMVS.setDataSliceParms(sliceParms);
-					pafMVS.setInitializedForAttrEval(false);
 //				}
 				
 				// Populate cell note data

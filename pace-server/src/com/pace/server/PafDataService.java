@@ -160,11 +160,6 @@ public class PafDataService {
 		// Calculate synthetic member intersections
 		PafDataCacheCalc.calculateSyntheticMembers(clientState, dataCache, loadedMdbDataSpec);
 		
-		// Initialize attribute eval initialization property
-		for (PafMVS pafMVS : clientState.getAllMVS()) {
-			pafMVS.setInitializedForAttrEval(false);
-		}
-		
 		String stats = dataCache.getStatsString();
 		logger.info(stats);
 		uowPerfLogger.info(stats);
