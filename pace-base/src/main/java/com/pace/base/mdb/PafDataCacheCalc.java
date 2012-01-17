@@ -142,7 +142,6 @@ public abstract class PafDataCacheCalc {
 	public static PafDataCache aggDimension(String aggDimension, PafDataCache dataCache, PafDimTree memberTree, Map<String, List<String>> memberFilter, DcTrackChangeOpt trackChanges) throws PafException {
 
 		boolean isTimeAggregation = false;
-		long calcStart = 0;
 		String measureDim = dataCache.getMeasureDim(), versionDim = dataCache.getVersionDim();
 		String timeDim = dataCache.getTimeDim(), yearDim = dataCache.getYearDim();
 		int timeAxis = dataCache.getAxisIndex(timeDim), yearAxis = dataCache.getAxisIndex(yearDim);
@@ -157,7 +156,6 @@ public abstract class PafDataCacheCalc {
 
 
 		// The fun starts now
-		calcStart = System.currentTimeMillis();
 		logger.debug(String.format("Starting aggregation process for dimension [%s]", aggDimension)); 	
 
 		
@@ -369,8 +367,6 @@ public abstract class PafDataCacheCalc {
 
 
 		// Return aggregated data cache
-		String stepDesc = "[" + aggDimension + "] dimension aggregation ";
-		performanceLogger.info(LogUtil.timedStep(stepDesc, calcStart));
 		return dataCache;
 	}
 

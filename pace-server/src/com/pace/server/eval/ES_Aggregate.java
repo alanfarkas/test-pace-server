@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
@@ -41,6 +42,7 @@ import com.pace.base.mdb.PafDataCacheCalc;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
+import com.pace.base.utility.LogUtil;
 import com.pace.base.utility.StringUtils;
 import com.pace.server.PafAppService;
 import com.pace.server.PafDataService;
@@ -57,6 +59,7 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 	PafDataService dataService = PafDataService.getInstance();
     PafAppService appService = PafAppService.getInstance();
 	private static Logger logger = Logger.getLogger(ES_Aggregate.class);
+	private static Logger evalPerLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_EVAL);
 
 	public void performEvaluation(EvalState evalState) throws PafException{
 		
@@ -217,6 +220,8 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 	private void aggregateDimension(EvalState evalState, PafDataCache dataCache, String dim, Map<String, List<String>> aggFilter, 
 			DcTrackChangeOpt trackChanges) throws PafException {
 
+		long calcStart  = System.currentTimeMillis();
+
 		// If time aggregation, aggregate along the time horizon hierarchy
 		PafDimTree aggTree;
 		MemberTreeSet treeSet = evalState.getDataCacheTrees();
@@ -228,6 +233,9 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 		
 		logger.info(String.format("Aggregating dimension [%s]", dim)); 	
 		PafDataCacheCalc.aggDimension(dim, dataCache, aggTree, aggFilter, trackChanges);
+		String stepDesc = String.format("[%s] dimension aggregation ", dim);
+		this.evalPerLogger.info(LogUtil.timedStep(stepDesc, calcStart));
+
 	}
 
 }
