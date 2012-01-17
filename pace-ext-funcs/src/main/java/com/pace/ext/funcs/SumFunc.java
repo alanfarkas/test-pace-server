@@ -89,7 +89,7 @@ public class SumFunc extends AbstractFunction {
 		
 		// Aggregate the measure children
        	PafDataCacheCalc.aggDimension(msrDim,  (PafDataCache) dataCache, msrTree, filters);
-       	
+       	sum = dataCache.getCellValue(sourceIs);
         
         return sum;
  
