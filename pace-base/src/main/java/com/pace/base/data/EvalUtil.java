@@ -1187,7 +1187,7 @@ public class EvalUtil {
 	 * Return the intersection coordinate for the specified dimension that is appropriate
 	 * for evaluating across the combined time/year time horizon. In the case of the time
 	 * dimension, the time horizon coordinate will be returned. In the case of the year 
-	 * dimension, the default time horizon year will be returned
+	 * dimension, the default time horizon year will be returned.
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param dim Dimension name

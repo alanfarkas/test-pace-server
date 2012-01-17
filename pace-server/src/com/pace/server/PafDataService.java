@@ -1145,10 +1145,7 @@ public class PafDataService {
 
 			}
 
-			// Compute attribute intersections on non-derived versions only. Also, 
-			// include any off-screen versions that are needed to calculate any
-			// derived version on the view. 
-			//TODO Optimize this by only calculating reference versions when the view is initially displayed, unless reference data has been refreshed. 
+			// Compute impacted attribute intersections on view
 			stepDesc = "Attribute aggregation and recalc";
 			startTime = System.currentTimeMillis();
 			dataCache = PafDataCacheCalc.calcAttributeIntersections(dataCache, clientState, sliceParms, null, DcTrackChangeOpt.NONE);

@@ -431,16 +431,19 @@ public abstract class PafDataCacheCalc {
 			}
 		}
 		
-		// Remove any derived versions from member map
-		HashSet<String> versionsToCalc = new HashSet<String>(dataSliceVersions);
-		versionsToCalc.retainAll(dataCache.getBaseVersions());
+//		// Remove any derived versions and reference versions from member map
+//		HashSet<String> versionsToCalc = new HashSet<String>(dataSliceVersions);
+//		versionsToCalc.retainAll(dataCache.getBaseVersions());
 		
-		// Add in any off-screen base versions, that are components to
-		// any derived versions on the view.
-		List<String> dsDerivedVersions = new ArrayList<String>(dataSliceVersions);
-		dsDerivedVersions.retainAll(dataCache.getDerivedVersions());
-		versionsToCalc.addAll(dataCache.getComponentVersions(dsDerivedVersions));
+//		// Add in any off-screen base versions, that are components to
+//		// any derived versions on the view.
+//		List<String> dsDerivedVersions = new ArrayList<String>(dataSliceVersions);
+//		dsDerivedVersions.retainAll(dataCache.getDerivedVersions());
+//		versionsToCalc.addAll(dataCache.getComponentVersions(dsDerivedVersions));
 
+		// Just calculate the current plan version
+		HashSet<String> versionsToCalc = new HashSet<String>(Arrays.asList(dataCache.getPlanVersions()));
+		
 		// Calculate attributes
 		memberListMap.put(versionDim,  new ArrayList<String>(versionsToCalc));
 		return PafDataCacheCalc.calcAttributeIntersections(dataCache, clientState, memberListMap, trackChanges);
