@@ -89,7 +89,6 @@ import com.pace.base.comm.UploadAppResponse;
 import com.pace.base.comm.UserFilterSpec;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
-import com.pace.base.data.TimeSlice;
 import com.pace.base.db.SecurityGroup;
 import com.pace.base.db.cellnotes.CellNote;
 import com.pace.base.db.cellnotes.CellNotesInformation;
@@ -120,6 +119,7 @@ import com.pace.base.utility.AESEncryptionUtil;
 import com.pace.base.utility.CompressionUtil;
 import com.pace.base.utility.DataHandlerPaceProjectUtil;
 import com.pace.base.utility.DomainNameParser;
+import com.pace.base.utility.LogUtil;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafStyle;
 import com.pace.base.view.PafView;
@@ -1525,8 +1525,12 @@ int alan;
 		PafView pView = null;
 		PafView pViewEmpty = null;
 		String clientId = evalRequest.getClientId();
+		String stepDesc = null, logMsg = null;
+		Long startTime;
+
 
 		// Evaluate view
+		startTime = System.currentTimeMillis();
 		try {
 
 			// Set logger client info property to user name
@@ -1598,10 +1602,17 @@ int alan;
 
 		}
 		
+		// Log processing timings
+		stepDesc = Messages.getString("PafServiceProvider.20"); //$NON-NLS-1$
+		logMsg = LogUtil.timedStep(stepDesc, startTime);
+		logger.info(logMsg);				
+		logPerf.info(logMsg);				
+
 		if (pViewEmpty != null){
 			return pViewEmpty;
 		}
 
+		
 		// Return full view
 		return pView;
 	}

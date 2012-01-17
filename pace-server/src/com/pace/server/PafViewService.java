@@ -873,6 +873,7 @@ public class PafViewService {
 			PafErrHandler.handleException(ex, PafErrSeverity.Error);
 			throw new PafException(ex);
 		}
+		logger.info(String.format("Returning rendered view: [%s]", viewName));
 		return renderedView;
 	}
 

@@ -1365,7 +1365,7 @@ public class PafDataService {
 		 * Omit member tags and paf blanks from data slice parms
 		 */
 		
-		logger.info("Building Data Slice Parms ...");
+		logger.debug("Building Data Slice Parms ...");
 		// Build data slice parms
 		PafDataSliceParms sliceParms = new PafDataSliceParms();
 		logger.debug("Building Data Slice Parms - Setting Column Dimensions");
@@ -1411,7 +1411,7 @@ public class PafDataService {
 		sliceParms.setDimSequence(section.getDimensionsPriority());
 		
 		// Return data slice parms
-		logger.info("Returning Completed Data Slice Parms");    
+		logger.debug("Returning Completed Data Slice Parms");    
 		return sliceParms;
 	}
 

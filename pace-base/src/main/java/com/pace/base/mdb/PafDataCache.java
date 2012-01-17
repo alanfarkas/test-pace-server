@@ -527,8 +527,8 @@ public class PafDataCache implements IPafDataCache {
 		sb.append(this.getUsageStatsString(blocks, "Max Data Cache Mem Usage [Plannable UOW]:"));
 		blocks = this.getMaxCoreDataBlockCount();
 		sb.append(this.getUsageStatsString(blocks, "Max Data Cache Mem Usage [Entire UOW]:"));
-		blocks = this.getMaxDataBlockCount();
-		sb.append(this.getUsageStatsString(blocks, "Max Data Cache Mem Usage [Entire UOW + Attributes]:"));
+//		blocks = this.getMaxDataBlockCount();
+//		sb.append(this.getUsageStatsString(blocks, "Max Data Cache Mem Usage [Entire UOW + Attributes]:"));
 
 		//sb.append("\n");
 		

@@ -50,7 +50,7 @@ public class PafDataSliceParms {
 	
 	public PafDataSliceParms () {
 		
-		logger.info("Creating instance of PafDataSliceParms");	
+		logger.debug("Creating instance of PafDataSliceParms");	
 		
 	}
 	
