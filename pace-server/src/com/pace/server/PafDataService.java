@@ -208,7 +208,7 @@ public class PafDataService {
     	extractedVersions.retainAll(uowVersions);
     	
     	// Add a data spec entry for each version being extracted that selects all uow
-    	// intersectons for that version
+    	// intersections for that version
 		for (String version : extractedVersions) {
 			Map<Integer, List<String>> mdbDataSpec = expandedUowSpec.buildUowMap();
 			mdbDataSpec.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
@@ -2262,7 +2262,7 @@ public class PafDataService {
 			}
 			
 		}
-		logger.info("Completed exapanding tuples for view: " + view.getName());        
+		logger.debug("Completed exapanding tuples for view: " + view.getName());        
 		return view;
 	}
 
@@ -2284,7 +2284,7 @@ public class PafDataService {
 		String[] prevHeader = new String[dimCount];
 		ViewTuple[] updatedViewTuples = viewTuples.clone();
 
-		logger.info(Messages.getString("PafDataService.85")); //$NON-NLS-1$
+		logger.debug(Messages.getString("PafDataService.85")); //$NON-NLS-1$
 
 		//    	Sample View Tuples        	Header Group Info	Order
 		//    	-----------------------------------------------------------
@@ -2363,7 +2363,7 @@ public class PafDataService {
 		
 		// Initialization
 		for (String a : axes) {axisList += a + " "; }
-		logger.info("Expanding tuples for axis: " + axisList);  
+		logger.debug("Expanding tuples for axis: " + axisList);  
 
 		// Expand inner axis
 		for (ViewTuple vt:origViewTuples) {               
@@ -2392,7 +2392,7 @@ public class PafDataService {
 		}
 
 		//If any tuple member is set to PAFBLANK, set the remaining members to PAFBLANK as well
-		logger.info("Converting Paf Blank Tuples");
+		logger.debug("Converting Paf Blank Tuples");
 		for (ViewTuple viewTuple:expandedTuples) {
 			if (isBlankViewTuple(viewTuple)) {
 				String[] memberAr = viewTuple.getMemberDefs();
@@ -2403,7 +2403,7 @@ public class PafDataService {
 			}
 		}
 	
-		logger.info("Completed expanding tuples.");
+		logger.debug("Completed expanding tuples.");
 		return expandedTuples.toArray(new ViewTuple[0]);
 	}
 

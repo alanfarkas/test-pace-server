@@ -776,14 +776,14 @@ public abstract class PafDataCacheCalc {
 		Odometer cellIterator = null;
 
 
-		logger.info("Calculating dimension [" + versionDim + "]");
+		logger.info(String.format("Calculating version dimension: [%s]", versionDim));
 		calcStart =  System.currentTimeMillis();
 
 
 		// Inspect member filter
 		if (memberFilter != null && memberFilter.size() > 0){
 			List<String> filteredDims = new ArrayList<String>(memberFilter.keySet());
-			logger.info("Calculation filters have been specified on the following dimensions: "
+			logger.debug("Calculation filters have been specified on the following dimensions: "
 					+ StringUtils.arrayListToString(filteredDims)); 		
 
 			// Validate calculation filters

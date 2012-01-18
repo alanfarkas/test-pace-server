@@ -3723,7 +3723,7 @@ public class PafDataCache implements IPafDataCache {
 			throw pfe;
 		}
 
-		logger.info("Returning pafDataSlice");
+		logger.debug("Returning pafDataSlice");
 		return pafDataSlice;
 	}
 

@@ -689,7 +689,7 @@ public class PafViewService {
 				}
 				
 				if (viewCache[i].getName().equals(viewName)) {
-					logger.info("Checking view: " + viewCache[i].getName());
+					logger.debug("Checking view: " + viewCache[i].getName());
 					definedView = viewCache[i];
 					logger.debug(viewCache[i].getDesc());
 					i = viewCache.length;

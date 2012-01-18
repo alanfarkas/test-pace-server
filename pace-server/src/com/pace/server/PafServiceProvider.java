@@ -1603,7 +1603,7 @@ int alan;
 		}
 		
 		// Log processing timings
-		stepDesc = Messages.getString("PafServiceProvider.20"); //$NON-NLS-1$
+		stepDesc = String.format(Messages.getString("PafServiceProvider.85"), pView.getName()); //$NON-NLS-1$
 		logMsg = LogUtil.timedStep(stepDesc, startTime);
 		logger.info(logMsg);				
 		logPerf.info(logMsg);				
