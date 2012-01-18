@@ -525,7 +525,7 @@ public class PafBaseTree extends PafDimTree {
         // arranged in a post-order sort. Filter out any occurrence of the 
         // tree root, since it's already added.
         for (int i = 0; i < discontigMemberLists.size(); i++) {
-        	List<String> memberList = discontigMemberLists.get(i);
+        	List<String> memberList = new ArrayList<String>(discontigMemberLists.get(i));
         	String branchRootName = memberList.get(0);
         	if (branchRootName.equals(rootName)) {
         		memberList.remove(memberList.indexOf(rootName));

@@ -639,7 +639,7 @@ public class PafDataService {
 					// Else, the candidate root is the branch root if it is the ancestor of all
 					// the other members in the branch
 					List<String> nonDescendants = new ArrayList<String>(Arrays.asList(dimMembers));
-					List<String> descendants = dimTree.getMemberNames(dimTree.getIDescendants(candidateRoot));
+					List<String> descendants = PafDimTree.getMemberNames(dimTree.getIDescendants(candidateRoot));
 					nonDescendants.removeAll(descendants);
 					if (nonDescendants.size() == 0) {
 						branchRootName = candidateRoot;
@@ -4026,9 +4026,22 @@ public class PafDataService {
 				// hierarchy, if one exists (TTN-1644)
 				List<List<String>> discontigMbrGrps = new ArrayList<List<String>>();
 				expressionList = expandUowDim(baseDim, expressionList.toArray(new String[0]), clientState, discontigMbrGrps); 
+				
+				// Update discontinuous member properties for current dimension. We also
+				// need to address the situation in which a dimension that was comprised
+				// of discontiguous branches, has been filtered down to a single branch
+				// and therefore is no longer discontiguous. (TTN-1644)
+				Map<String, List<List<String>>> uowDiscMbrGrpsMap = workUnit.getDiscontigMemberGroups();
 				if (!discontigMbrGrps.isEmpty()) {
-					workUnit.getDiscontigMemberGroups().put(baseDim, discontigMbrGrps);
+					// Dimension is discontiguous
+					uowDiscMbrGrpsMap.put(baseDim, discontigMbrGrps);
+				} else {
+					// Dimension is not discontiguous
+					if (uowDiscMbrGrpsMap.containsKey(baseDim)) {
+						uowDiscMbrGrpsMap.remove(baseDim);
+					}
 				}
+				
 				//Get a list of attribute dimensions and a list of attribute member lists
 				List<String> attrDimLists = new ArrayList<String>();
 				List<List<String>> attrMemberLists = new ArrayList<List<String>>();
