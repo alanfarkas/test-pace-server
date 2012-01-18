@@ -389,10 +389,10 @@ public class EsbData implements IMdbData{
 
 		try {
 			// Extract data from cube using supplied Mdx query
+			long qryStartTime = System.currentTimeMillis();
 			logger.info("Running Essbse data query: " + mdxQuery);
 			performanceLogger.info("Running Essbse data query: " + mdxQuery);
 			essMdDataSet = esbCubeView.runMdxQuery(mdxQuery, appDef.getEssNetTimeOut());
-			long qryStartTime = System.currentTimeMillis();
 			retrievedCellCount = essMdDataSet.getCellCount();
 			logMsg = LogUtil.timedStep("Essbase data query", qryStartTime);
 			performanceLogger.info(logMsg);

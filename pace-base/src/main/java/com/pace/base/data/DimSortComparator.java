@@ -33,7 +33,7 @@ import com.pace.base.SortOrder;
  * @author jim
  *
  */
-public class DimSortComparator implements Comparator {
+public class DimSortComparator implements Comparator<Object> {
     
     private Map<String, HashMap<String, Integer>> memberSeqs;
     private String[] axisSequence;
@@ -54,17 +54,29 @@ public class DimSortComparator implements Comparator {
         // else continue until tie is resolved.
         
         Map <String, Integer> axisSeq;
-        String axis;
+        String axis, o1Coord, o2Coord;
         for (int i = 0; i < axisSequence.length; i++) {
             axis = axisSequence[i];
-            axisSeq = memberSeqs.get(axis);        
+            axisSeq = memberSeqs.get(axis);
+            o1Coord = ((Intersection) o1).getCoordinate(axis);
+            o2Coord = ((Intersection) o2).getCoordinate(axis);
+            
+            // Allow for this comparator to use the same axis sequence for both attribute
+            // and non-attribute intersections during attribute evaluation. (TTN-1506) 
+            if (o1Coord == null || o2Coord == null) {
+            	// Just skip to the next axis, if one or both intersections don't contain
+            	// the current axis. Hopefully it's both, since the intent is to compare
+            	// like intersections to each other.
+            	continue;
+            }
+                        
             if (sortOrder == SortOrder.Ascending) {
-                if (axisSeq.get(((Intersection) o1).getCoordinate(axis)) < axisSeq.get(((Intersection) o2).getCoordinate(axis)) ) return 1;
-                else if (axisSeq.get(((Intersection) o1).getCoordinate(axis)) > axisSeq.get(((Intersection) o2).getCoordinate(axis)) ) return -1;         
+                if (axisSeq.get(o1Coord) < axisSeq.get(o2Coord)) return 1;
+                else if (axisSeq.get(o1Coord) > axisSeq.get(o2Coord)) return -1;         
             }
             else {
-                if (axisSeq.get(((Intersection) o1).getCoordinate(axis)) < axisSeq.get(((Intersection) o2).getCoordinate(axis)) ) return -1;
-                else if (axisSeq.get(((Intersection) o1).getCoordinate(axis)) > axisSeq.get(((Intersection) o2).getCoordinate(axis)) ) return 1;         
+                if (axisSeq.get(o1Coord) < axisSeq.get(o2Coord)) return -1;
+                else if (axisSeq.get(o1Coord) > axisSeq.get(o2Coord)) return 1;         
             }
         }
         
