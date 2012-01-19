@@ -73,7 +73,7 @@ public class IWOSFunc extends AbstractFunction {
         	cumSales += weeklySales;
         	
         	// Advance to next week
-     		tempIs = dataCache.getNextIntersection(tempIs, timeDim, 1, bWrap);
+     		tempIs = dataCache.shiftIntersection(tempIs, timeDim, 1, bWrap);
         }
         
         
