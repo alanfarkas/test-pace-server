@@ -287,9 +287,12 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 			processRuleGroup(balanceSets, rg, processedRuleGroups, evalState);
 		}
 
-		// Recalculate derived versions on current view if slice state exists
-		if (evalState.getSliceState() != null)     
-			dataCache = PafDataCacheCalc.calcVersionDim(dataCache,evalState.getSliceState().getDataSliceParms(), memberTrees);
+//		This should no longer be needed, since the version dims are also being calculated
+//		when the updated view is returned
+//		
+//		// Recalculate derived versions on current view if slice state exists
+//		if (evalState.getSliceState() != null)     
+//			dataCache = PafDataCacheCalc.calcVersionDim(dataCache,evalState.getSliceState().getDataSliceParms(), memberTrees);
 
 		logger.info(Messages.getString("RuleBasedEvalStrategy.25"));          //$NON-NLS-1$
 		logger.info(Messages.getString("RuleBasedEvalStrategy.26")); //$NON-NLS-1$
