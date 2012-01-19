@@ -334,19 +334,37 @@ public class PafDataService {
 
 	
 
-
 	/**
-	 *	Expand out the members in a unit of work using the base trees
+	 *	Expand out the members in a unit of work using the full mdb trees
 	 *
 	 * @param uow Unit of work object
 	 * @param clientState Client state object
-	 * @param discontigMbrGrpsByDim Discrete lists of expanded member groups by discontiguous dimension
+	 * @param discontigMbrGrps Discrete lists of expanded member groups by discontiguous dimension
+	 * @param bUseClientTrees If set to true, the expansion process will use the client trees instead of the full trees 
 	 * 
 	 * @return Hash Map containing the expanded members for each dimension
 	 * @throws PafException 
 	 */
 	private List<String> expandUowDim(String dim, String[] terms, PafClientState clientState, 
 			List<List<String>> discontigMbrGrps) throws PafException {
+		
+		return expandUowDim(dim, terms, clientState, discontigMbrGrps, false);
+	}
+
+
+	/**
+	 *	Expand out the members in a unit of work using the full mdb trees
+	 *
+	 * @param uow Unit of work object
+	 * @param clientState Client state object
+	 * @param discontigMbrGrps Discrete lists of expanded member groups by discontiguous dimension
+	 * @param bUseClientTrees If set to true, the expansion process will alternately use the current client trees
+	 * 
+	 * @return Hash Map containing the expanded members for each dimension
+	 * @throws PafException 
+	 */
+	private List<String> expandUowDim(String dim, String[] terms, PafClientState clientState, 
+			List<List<String>> discontigMbrGrps, boolean bUseClientTrees) throws PafException {
 
 		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
 		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
@@ -364,11 +382,13 @@ public class PafDataService {
 			}			
 		}
 
-		// Expand each member specification - always use full mdb trees, not client trees
+		// Expand each member specification - always use full mdb trees, unless the option to 
+		// use the client trees has been set.
 		List<String> dimMemberList = new ArrayList<String>();
+		PafClientState expansionCS = bUseClientTrees ? clientState : null;
 		for (String term : terms) {
 
-			List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, null)));
+			List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, expansionCS)));
 			dimMemberList.addAll(expandedMbrs);
 
 			// Additional processing for discontiguous dimension hierarchy (TTN-1644)
@@ -413,7 +433,7 @@ public class PafDataService {
 
 
 	/**
-	 *	Expand out the members in a unit of work using the base trees
+	 *	Expand out the members in a unit of work
 	 *
 	 * @param uow Unit of work object
 	 * @param clientState Client state object
@@ -4025,7 +4045,7 @@ public class PafDataService {
 				// Next expand the base dimension expression list and process discontiguous
 				// hierarchy, if one exists (TTN-1644)
 				List<List<String>> discontigMbrGrps = new ArrayList<List<String>>();
-				expressionList = expandUowDim(baseDim, expressionList.toArray(new String[0]), clientState, discontigMbrGrps); 
+				expressionList = expandUowDim(baseDim, expressionList.toArray(new String[0]), clientState, discontigMbrGrps, true); 
 				
 				// Update discontinuous member properties for current dimension. We also
 				// need to address the situation in which a dimension that was comprised

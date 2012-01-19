@@ -3098,8 +3098,12 @@ int alan;
 	
 	
 	/**
-	 * Provides the PafSimpleTrees to the client.
+	 * Provides, to the client, the PafSimpleTrees that reflect the user's uow
+	 * as defined by their role & security configurations.
 	 *
+	 * This method also updates the client state with the user's uow defintion 
+	 * and client trees.
+	 * 
 	 * @param planRequest the plan request
 	 * @return the paf populate role filter response
 	 * @throws RemoteException the remote exception

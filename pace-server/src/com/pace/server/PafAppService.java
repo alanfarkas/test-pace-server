@@ -705,12 +705,13 @@ public class PafAppService {
 			
 			// Attempt to build a tree that contains the current uow time members plus all
 			// the related time members outside this uow. If this tree doesn't contain a
-			// member corresponding to the last period parm, then it can't be resolved.
+			// member corresponding to the last period parm, then the elapsed time period
+			// can't be resolved.
 			PafDimTree fullYearTree = mdbTimeTree.getHighestUniqueSubTreeCopy(timeRootNode.getKey());
 			if (!fullYearTree.hasMember(lastPeriodParm)) break;
 			
 			// The last period member has finally been found. Now determine if it comes
-			// before or after the current uow.
+			// before or after the current uow's time horizon.
 			PafDimMember firstUowTimeMbr = timeTree.getFirstFloorMbr();
 			int firstUowTimeMbrInx = fullYearTree.getMemberSortIndex(firstUowTimeMbr.getKey());
 			int lastPeriodMbrInx = fullYearTree.getMemberSortIndex(lastPeriodParm);
