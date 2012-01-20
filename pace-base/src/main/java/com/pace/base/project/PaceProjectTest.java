@@ -349,7 +349,7 @@ public class PaceProjectTest extends MigrationActionTestCase {
 		assertEquals(1, pp.getLoadedProjectElementIdSet().size());
 		assertTrue(pp.getLoadedProjectElementIdSet().contains(ProjectElementId.RuleSets));
 		
-		assertEquals(15, pp.getRuleSets().size());
+		assertEquals(16, pp.getRuleSets().size());
 	}
 
 	/**

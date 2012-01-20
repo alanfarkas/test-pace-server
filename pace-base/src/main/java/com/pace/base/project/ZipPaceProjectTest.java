@@ -265,7 +265,7 @@ public class ZipPaceProjectTest extends TestCase {
 		try {
 			zipPP = new ZipPaceProject(inputFile);
 			
-			assertEquals(21, zipPP.getProjectDataMap().size());
+			assertEquals(23, zipPP.getProjectDataMap().size());
 			
 		} catch (InvalidPaceProjectInputException e) {
 			fail(e.getMessage());
@@ -277,7 +277,7 @@ public class ZipPaceProjectTest extends TestCase {
 								
 		PaceProject pp = zipPP.convertTo(ProjectSerializationType.XML);
 		
-		assertEquals(21, pp.getProjectDataMap().size());
+		assertEquals(23, pp.getProjectDataMap().size());
 		
 		assertTrue(tempDirectory.isDirectory());
 					
@@ -301,7 +301,7 @@ public class ZipPaceProjectTest extends TestCase {
 		
 		assertNotNull(xmlPP);
 		
-		assertEquals(21, xmlPP.getProjectDataMap().size());
+		assertEquals(23, xmlPP.getProjectDataMap().size());
 		
 		PaceProject zipPP2 = xmlPP.convertTo(ProjectSerializationType.PAF);		
 		
@@ -323,7 +323,7 @@ public class ZipPaceProjectTest extends TestCase {
 		
 		assertNotNull(zipPP3);
 		
-		assertEquals(21, zipPP3.getProjectDataMap().size());
+		assertEquals(23, zipPP3.getProjectDataMap().size());
 		
 		List<PafApplicationDef> pafAppList = zipPP3.getApplicationDefinitions();
 		
@@ -377,7 +377,7 @@ public class ZipPaceProjectTest extends TestCase {
 		
 		assertNotNull(zipPP4);
 		
-		assertEquals(21, zipPP4.getProjectDataMap().size());
+		assertEquals(23, zipPP4.getProjectDataMap().size());
 		
 		pafAppList = zipPP4.getApplicationDefinitions();
 		

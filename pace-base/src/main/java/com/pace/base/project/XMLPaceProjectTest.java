@@ -249,7 +249,7 @@ public class XMLPaceProjectTest extends TestCase {
 		assertEquals(CONF_DIR_2, pp.getProjectInput());
 		assertEquals(CONF_DIR_2, pp.getProjectInputDir());
 		
-		assertEquals(21, pp.getProjectDataMap().size());
+		assertEquals(23, pp.getProjectDataMap().size());
 		
 		List<PafApplicationDef> pafAppList = pp.getApplicationDefinitions();
 		
@@ -271,7 +271,7 @@ public class XMLPaceProjectTest extends TestCase {
 		Map<String, RuleSet> ruleSetMap = pp.getRuleSets();
 		
 		assertNotNull(ruleSetMap);
-		assertEquals(15, ruleSetMap.size());
+		assertEquals(16, ruleSetMap.size());
 		
 		List<PafView> viewList = pp.getViews();
 		assertNotNull(viewList);

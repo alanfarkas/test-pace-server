@@ -2113,13 +2113,13 @@ public class ExcelPaceProjectTest extends TestCase {
 		projectIdSet.add(ProjectElementId.PlanCycles);
 						
 		assertNotNull(ExcelPaceProject.getProjectIdSetDependencies(projectIdSet));
-		assertEquals(12, ExcelPaceProject.getProjectIdSetDependencies(projectIdSet).size());
+		assertEquals(13, ExcelPaceProject.getProjectIdSetDependencies(projectIdSet).size());
 		
 		projectIdSet.clear();
 		projectIdSet.add(ProjectElementId.ViewSections);
 		
 		assertNotNull(ExcelPaceProject.getProjectIdSetDependencies(projectIdSet));
-		assertEquals(13, ExcelPaceProject.getProjectIdSetDependencies(projectIdSet).size());
+		assertEquals(14, ExcelPaceProject.getProjectIdSetDependencies(projectIdSet).size());
 		
 		
 	}
