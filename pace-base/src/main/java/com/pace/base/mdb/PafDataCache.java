@@ -80,8 +80,8 @@ public class PafDataCache implements IPafDataCache {
 	private List<DataBlock> dataBlockPool = null;				// Collection of populated data blocks
 	private LinkedList<Integer> deletedBlockIndexes = null;		// Surrogate keys of deleted blocks (Linked list for performance reasons)
 	private Map<String, Set<Intersection>> dataBlocksByVersion = null;	// Data block keys organized by version
-	private Map<Intersection, Set<Intersection>> aliasKeyLookup = null; // Identifies any alias keys for a given data block
-//	private Map<Intersection, Intersection> baseKeyLookup = null; 		// Identifies the primary key for any alias key
+	private Map<Intersection, Set<Intersection>> aliasKeyLookup = null; // Identifies any alias keys for a given data block 
+	private Map<Intersection, Intersection> primaryKeyLookup = null; // Identifies the primary data block key associated with each alias key
 	private int axisCount = 0;						// Total number of defined dimensions (size of allDimensions)
 	private int blockSize = 0;						// Number of cells in a data block
 	private int dataBlockCount = 0;					// Number of existing data blocks
@@ -221,7 +221,8 @@ public class PafDataCache implements IPafDataCache {
 		
 		// Initialize various data block housekeeping objects
 		dataBlocksByVersion = new HashMap<String, Set<Intersection>>(getVersionSize());
-		aliasKeyLookup = new HashMap<Intersection, Set<Intersection>>();
+		aliasKeyLookup = new HashMap<Intersection, Set<Intersection>>(200);
+		primaryKeyLookup = new HashMap<Intersection, Intersection>(200);
 		deletedBlockIndexes = new LinkedList<Integer>();
 
 		// Log data cache statistics
@@ -2119,13 +2120,14 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * 	Add alias data block key to alias key lookup
+	 * 	Add alias data block key to lookup collections
 	 * 
 	 * @param aliasKey Alias data block key
 	 * @param primaryKey Corresponding primary data block key
 	 */
 	private void addAliasKey(Intersection aliasKey, Intersection primaryKey) {
 		
+		// Add new alias key lookup entry
 		Set<Intersection> aliasKeys = aliasKeyLookup.get(primaryKey);
 		if (aliasKeys == null) {
 			aliasKeys = new HashSet<Intersection>();
@@ -2133,6 +2135,9 @@ public class PafDataCache implements IPafDataCache {
 		aliasKeys.add(aliasKey);
 		aliasKeyLookup.put(primaryKey, aliasKeys);
 
+
+		// Add new primary key lookup entry
+		primaryKeyLookup.put(aliasKey, primaryKey);
 	}
 
 
@@ -2270,8 +2275,10 @@ public class PafDataCache implements IPafDataCache {
 		if (aliasKeys != null) {
 			for (Intersection aliasKey : aliasKeys) {
 				dataBlockIndexMap.remove(aliasKey);
+				primaryKeyLookup.remove(aliasKey);
 			}
 		}
+		
 		
 	}
 
@@ -2363,7 +2370,7 @@ public class PafDataCache implements IPafDataCache {
 		boolean isAliasKey = false;
 
 		// Check if the key is an alias of a base intersection
-		if (this.isBaseDataBlockKeyAlias(key)) {
+		if (primaryKeyLookup.containsKey(key) || isBaseDataBlockKeyAlias(key)) {
 			if (aliasTypeProps != null) {
 				aliasTypeProps.add(AliasIntersectionType.BASE_IS);
 			}
