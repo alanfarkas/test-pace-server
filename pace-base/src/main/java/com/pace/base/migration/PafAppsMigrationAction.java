@@ -335,8 +335,8 @@ public class PafAppsMigrationAction extends MigrationAction {
 				if( ( season.getYears() == null || season.getYears().length == 0 ) && season.getYear() != null ) {
 					years.add(season.getYear());
 					season.setYear(null);
+					season.setYears(years.toArray(new String[0]));
 				}
-				season.setYears(years.toArray(new String[0]));
 			}
 			
 			//set the global suppress zeros
