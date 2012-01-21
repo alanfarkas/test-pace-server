@@ -21,10 +21,10 @@ package com.pace.base.migration;
 import java.util.List;
 import java.util.Map;
 
+import com.pace.base.PafException;
 import com.pace.base.app.PafDimSpec;
 import com.pace.base.app.PafUserSecurity;
 import com.pace.base.app.PafWorkSpec;
-import com.pace.base.project.ProjectSaveException;
 
 
 /**
@@ -91,9 +91,13 @@ public class PafSecurityMigrationActionTest extends MigrationActionTestCase {
 		
 		assertEquals(MigrationActionStatus.NotStarted, action.getStatus());
 		
+		action.run();
+		
 		try {
-			pp.save();
-		} catch (ProjectSaveException e) {
+			pp.reloadData();
+		} catch (PafException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 			fail(e.getMessage());
 		}
 		

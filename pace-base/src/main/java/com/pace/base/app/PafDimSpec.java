@@ -33,13 +33,15 @@ public class PafDimSpec implements Cloneable {
 
 	private transient final static Logger logger = Logger.getLogger(PafDimSpec.class);
 	
-	private transient boolean isSelectable;
+	@Deprecated
+	private boolean isSelectable;
 	
     private String dimension;
     
     private String[] expressionList;
     
-    public PafDimSpec() { }
+    public PafDimSpec() { 
+    }
     
     /**
      * @return Returns the dimension.
