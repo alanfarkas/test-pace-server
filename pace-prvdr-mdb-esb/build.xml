@@ -12,7 +12,7 @@
 	<property name="esb_local_driver_path" location="${local_web}\${esb_driver_dir}"/>
 	<property name="install_stg_root"  location="${wrksp_root}\pace-server-installs\ia-project\server-stage" />
 	<property name="esb_redist_dir"  location="${install_stg_root}\redist\essbase" />
-	<property name="app_install" location= "C:\Program Files\Pace\PafServer" />
+	<property name="app_install" location= "C:\Program Files\AM Software\Pace Server" />
 	<!-- following properties are curently unused
 	<property name="dev_web"  location="${app_install}\server\server\default\deploy\PafServer.war" />
 	<property name="esb_deployed_driver_path" location="${dev_web}\${esb_driver_dir}"/>
@@ -64,6 +64,9 @@
 	
 	<target name="deploy" depends="check_env" description="Compile and Deploy Essbase Providers for each Essbase Version"> 
 
+		<!-- Complile pace-base.jar-->
+		<ant antfile="build.xml" dir="${Paf Base Libraries.location}/" inheritAll="false"/>
+		
 		<compile esb.ver="7.1.3">
 		</compile>
 		
