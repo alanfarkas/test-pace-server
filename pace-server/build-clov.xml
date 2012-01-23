@@ -79,7 +79,8 @@
 
 	<!--   End of Clover Properties  -->	
 
-	 
+	<!-- CXF references need to be udpated to latest version (AF - 01-23-2012) -->
+	
 	<path id="CXF 2.2.5.userclasspath">
         <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/abdera-core-0.4.0-incubating.jar"/>
         <pathelement location="${userlib.path}/apache-cxf-2.2.5/lib/abdera-extensions-json-0.4.0-incubating.jar"/>
