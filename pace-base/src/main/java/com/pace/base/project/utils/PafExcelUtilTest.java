@@ -241,7 +241,7 @@ logger.info("Full workbook name: [" + input.getFullWorkbookName().toString() + "
 			List<String> workbookNames = PafExcelUtil.getWorkbookSheetNames(projectWorkbookName);
 			
 			assertNotNull(workbookNames);
-			assertEquals(35, workbookNames.size());
+			assertEquals(36, workbookNames.size());
 			
 		} catch (PafException e) {
 			fail(e.getMessage());
