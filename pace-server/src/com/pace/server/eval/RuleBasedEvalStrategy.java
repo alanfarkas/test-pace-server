@@ -666,7 +666,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		if (evalState.getAppDef().getAppSettings() != null && evalState.getAppDef().getAppSettings().isEnableRounding()) {
 			isRoundingEnabled = true;
 		}
-		
+
 		for (RuleGroup rg : ruleGroups) {
 			logger.info(Messages.getString("RuleBasedEvalStrategy.68") + rg.toString()); //$NON-NLS-1$
 

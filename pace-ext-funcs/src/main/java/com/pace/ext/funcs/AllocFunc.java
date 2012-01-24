@@ -11,16 +11,13 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
-import com.pace.base.app.VersionType;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
-import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
-import com.pace.base.state.EvalState;
 import com.pace.base.state.IPafEvalState;
-import com.pace.base.data.EvalUtil;
 
 /**
  * "Allocation" Custom Function - 
@@ -41,6 +38,7 @@ public class AllocFunc extends AbstractFunction {
    	
 	protected String msrToAlloc = null;
 	protected List<String> targetMsrs = new ArrayList<String>();
+	protected Set<String> aggMsrs = new HashSet<String>();
 	protected List<Intersection> unlockIntersections = new ArrayList<Intersection>();
 	protected List<String> excludedMsrs = new ArrayList<String>();
 	
@@ -68,12 +66,15 @@ public class AllocFunc extends AbstractFunction {
 				allocTargets.addAll(EvalUtil.buildFloorIntersections(allocTarget, evalState));  					
         	}
 
-        
-        
+        // perform allocation	
         allocateChange(sourceIs, allocTargets, evalState, dataCache);
         
+        // aggregate allocated measures. this is necessary to support multi-tiered
+        // measure hierarchies.
+        SumFunc.aggMeasures(sourceIs, this.aggMsrs, dataCache, evalState);
+        
         // indicate additional aggregations required by this operation
-        evalState.getTriggeredAggMsrs().addAll(this.targetMsrs);
+        evalState.getTriggeredAggMsrs().addAll(this.aggMsrs);
         
     	// actual intersection in question should remain unchanged by this operation
         return dataCache.getCellValue(sourceIs);
@@ -131,14 +132,12 @@ public class AllocFunc extends AbstractFunction {
     	int index = 1;
     	targetMsrs.clear();
     	
-    	// initialize with children measures
+    	// initialize with descendant floor measures
     	for (PafDimMember msrMbr : measureTree.getLowestMembers(msrToAlloc)) {
     		targetMsrs.add(msrMbr.getKey());      		
     	}
     	
     	// remove any measures specified as well as their descendants
-    	
-
     	if (parms.length > 1) {
     		// build excluded measures list
     		List<PafDimMember> desc = measureTree.getLowestMembers(parms[index]);
@@ -158,6 +157,11 @@ public class AllocFunc extends AbstractFunction {
 //    			targetMsrs.remove(excludedMsr);
 //    		}
     	}
+
+    	// create a set of members to aggregate after the allocation takes place. this should be the
+    	// entire measure branch being allocated.
+    	aggMsrs = new HashSet<String>(PafDimTree.getMemberNames(measureTree.getIDescendants(msrToAlloc)));
+    	
 
     	this.isValidated = true;
     }

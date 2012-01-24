@@ -89,7 +89,7 @@ public class F_Bop extends AbstractFunction {
 
 		// ... and first time slice in uow. Since time slice is 
 		// comprised of a time and year component, these need 
-		// to be set seperately (TTN-1595).
+		// to be set separately (TTN-1595).
 		// filterMap.get(timeDim).add(evalState.getFirstTimeSlice());
 		String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
 		filterMap.put(yearDim, new HashSet<String>());

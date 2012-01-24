@@ -28,7 +28,7 @@ import com.pace.base.state.IPafEvalState;
  * 
  * The calling signature of this function is '@SUM(msrTotal, [msrsToExclude*] )'.
  * This function aggregates all the children of the measure specified in the 1st parameter
- * into the msrTotal. An optional list of measures to exlcude can be added.
+ * into the msrTotal. An optional list of measures to exclude can be added.
  * 
  * @version	2.8.2.0
  * @author JWatkins
@@ -47,54 +47,58 @@ public class SumFunc extends AbstractFunction {
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 
 
-    	// convenience variables
-      	String msrDim = dataCache.getMeasureDim();
-       	PafBaseTree msrTree = (PafBaseTree) evalState.getEvaluationTree(msrDim);
+    	// This function will sum a specified measure from its hierarchical descendants.
+    	// If only a measure is specified, then the aggregation occurs, by default, from 
+    	// all it's descendants. Any additional parameters passed to this function 
+    	// represent measures that should be filtered from this process. 
+     	
 
- 	
     	// Validate function parameters
     	validateParms(evalState);
-   	   	 	
-    	// this function will sum a specified measure from its hierarchical children
-    	// if only a measure is specified the aggregation occurs by default from it's children
-    	// if additional parameters are passed then the aggregation is limited to the included measures
+   	   	 	      
+    	// Aggregate current intersection across the selected measures
+    	aggMeasures(sourceIs, inputMsrs, dataCache, evalState);
     	
-        // inputs holds all intersections to sum.
-    	// initialize it off the list of target measures and the eval state collections
-    	
-    	double sum = 0;
-
-        List<Intersection> inputs = new ArrayList<Intersection>();
-//       	for (String msr : this.inputMsrs) {
-//        		// for each msr in the list I need the equivalent intersection populated from the sourceIsx
-//				Intersection input = sourceIs.clone();
-//				input.setCoordinate(msrDim, msr);
-//        		sum += dataCache.getCellValue(input);
-//        	}
-        
-        // Create member filter for aggregation process and add in measures to be aggregated
-		Map<String, List<String>> filters = new HashMap<String, List<String>>();
-		filters.put(msrDim, new ArrayList<String>(this.inputMsrs));
-		
-		// Filter on the remaining intersection dimensions. Since we only want to  aggregate 
-		// the current intersection across the selected measures, we need filter on each
-		// remaining dimension's coordinate.
-		for (String dim : sourceIs.getDimensions()) {
-			if (!dim.equals(msrDim)) {
-				String coord = EvalUtil.getIsCoord(sourceIs, dim, evalState);
-				filters.put(dim, Arrays.asList(new String[]{coord}));
-			}
-			
-		}
-		
-		// Aggregate the measure children
-       	PafDataCacheCalc.aggDimension(msrDim,  (PafDataCache) dataCache, msrTree, filters);
-       	sum = dataCache.getCellValue(sourceIs);
-        
+    	// Return the sum of the aggregated measures
+        double sum = dataCache.getCellValue(sourceIs);  
         return sum;
  
     }
     
+
+	/**
+	 * Aggregate an intersection across a set of measures
+	 * 
+	 * @param cellIs Intersection to aggregate
+	 * @param measureSet Set of measures
+	 * 
+	 * @throws PafException 
+	 */
+	protected static void aggMeasures(Intersection cellIs, Set<String> measureSet, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
+		
+    	// Convenience variables
+      	String msrDim = evalState.getMsrDim();
+       	PafBaseTree msrTree = (PafBaseTree) evalState.getEvaluationTree(msrDim);
+
+		// Create member filter for aggregation process and add in measures to be aggregated
+		Map<String, List<String>> filters = new HashMap<String, List<String>>();
+		filters.put(msrDim, new ArrayList<String>(measureSet));
+
+		// Filter on the remaining intersection dimensions. Since we only want to  aggregate 
+		// the current intersection across the selected measures, we need filter on each
+		// remaining dimension's coordinate.
+		for (String dim : cellIs.getDimensions()) {
+			if (!dim.equals(msrDim)) {
+				String coord = EvalUtil.getIsCoord(cellIs, dim, evalState);
+				filters.put(dim, Arrays.asList(new String[]{coord}));
+			}
+		}
+
+		// Aggregate the measure children
+		PafDataCacheCalc.aggDimension(msrDim, (PafDataCache) dataCache, msrTree, filters);
+
+	}
+
 
 	/**
      *  Parse and validate function parameters 
