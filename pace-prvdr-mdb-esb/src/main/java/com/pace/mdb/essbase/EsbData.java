@@ -341,7 +341,7 @@ public class EsbData implements IMdbData{
 		}
 		logMsg = "[" + StringUtils.commaFormat(mdxCellCount) + "] total cells retrieved from Essbase.";
 		logger.info(logMsg); 
-		logMsg = LogUtil.timedStep("UOW Load", loadDcStartTime);
+		logMsg = LogUtil.timedStep("Data cache load and build", loadDcStartTime);
 		logger.info(logMsg);
 		performanceLogger.info(logMsg);
 
@@ -394,10 +394,10 @@ public class EsbData implements IMdbData{
 			performanceLogger.info("Running Essbse data query: " + mdxQuery);
 			essMdDataSet = esbCubeView.runMdxQuery(mdxQuery, appDef.getEssNetTimeOut());
 			retrievedCellCount = essMdDataSet.getCellCount();
-			logMsg = LogUtil.timedStep("Essbase data query", qryStartTime);
-			performanceLogger.info(logMsg);
 			logMsg = "Essbase data query returned " + StringUtils.commaFormat(retrievedCellCount) + " cells";
 			logger.debug(logMsg);
+			performanceLogger.info(logMsg);
+			logMsg = LogUtil.timedStep("Essbase data query", qryStartTime);
 			performanceLogger.info(logMsg);
 
 			// Exit method if no data was found
@@ -442,7 +442,7 @@ public class EsbData implements IMdbData{
 				}
 				mdxCellIndex++;
 			}
-			logMsg = LogUtil.timedStep("Essbase data load", dcLoadStartTime);
+			logMsg = LogUtil.timedStep("Loading of data to cache", dcLoadStartTime);
 			performanceLogger.info(logMsg);
 
 		} catch (EssException esx) {

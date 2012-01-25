@@ -755,6 +755,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 	public PafPlanSessionResponse startPlanSession(PafPlanSessionRequest planRequest) throws RemoteException, PafSoapException {
 
 		PafPlanSessionResponse planResponse = new PafPlanSessionResponse();
+		long planSessionStart = System.currentTimeMillis();
 
 		// Get client id
 		String clientId = planRequest.getClientId();
@@ -902,7 +903,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 			planResponse.getClientCacheBlock().setRuleSets(
 					clientRuleSetList.toArray(new RuleSet[0]));
-int alan;
+
 			// Load data cache based on unit of work
 			dataService.loadUowCache(clientState);
 			
@@ -1074,7 +1075,8 @@ int alan;
 			
 			}
 						
-			
+			logger.info(LogUtil.timedStep("Plan session start" , planSessionStart));
+
 		} catch (RuntimeException re) {
 
 			handleRuntimeException(re);
@@ -1673,6 +1675,7 @@ int alan;
 			throws RemoteException, PafSoapException {
 
 		PafDataSlice dataSlices[] = null;
+		long dcLoadStart = System.currentTimeMillis();
 
 		try {
 
@@ -1692,6 +1695,7 @@ int alan;
 			// is currently open
 			if (reloadRequest.getViewName() == null ||
 					reloadRequest.getViewName().trim().equals("")) { //$NON-NLS-1$
+				logger.info(LogUtil.timedStep("UOW refresh request" , dcLoadStart));
 				return null;
 			}
 			PafView view = clientState.getView(reloadRequest.getViewName());
@@ -1709,6 +1713,8 @@ int alan;
 				throw (new PafException(Messages.getString("PafServiceProvider.36"), PafErrSeverity.Warning)).getPafSoapException(); //$NON-NLS-1$
 				
 			}
+			
+			logger.info(LogUtil.timedStep("UOW refresh request" , dcLoadStart));
 			
 		} catch (RuntimeException re) {
 

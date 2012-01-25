@@ -133,6 +133,7 @@ public class PafDataService {
 		String clientId = clientState.getClientId();
 		PafApplicationDef appDef = clientState.getApp();
 		UnitOfWork uow = clientState.getUnitOfWork();
+		long dcLoadStart = System.currentTimeMillis();
 		
 		logger.info("Loading uow cache for client: " + clientId);
 		logger.info("Unit of Work: " + uow.toString() );
@@ -165,6 +166,7 @@ public class PafDataService {
 		uowPerfLogger.info(stats);
 
 		logger.info("Data cache loaded, cached object count: " + uowCache.size());
+		uowPerfLogger.info(LogUtil.timedStep("UOW build", dcLoadStart));
 
 	}
 

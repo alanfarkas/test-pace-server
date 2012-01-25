@@ -40,7 +40,7 @@ public class CellNoteCache {
 	
 	public CellNoteCache(HashMap<String, Set<String>> uow, String dataSourceId, String appId) throws PafException {
 
-		logger.info("Creating new cell note cache.");
+		logger.debug("Creating new cell note cache.");
 		
 		cellNotes = new ConcurrentHashMap<String, CellNote>();
 		unitOfWork = uow;
@@ -167,17 +167,17 @@ public class CellNoteCache {
 	
 	public void refreshCache() throws PafException{
 								
-				logger.info("Refreshing Cache from db.");
+				logger.debug("Refreshing Cache from db.");
 		
 				CellNote [] cellNotesArray = PafCellNoteManager.getInstance().getCellNotes(appId, dataSourceId, unitOfWork);
 				
-				logger.info("\tClearing cache.");
+				logger.debug("\tClearing cache.");
 				
 				cellNotes.clear();
 				
 				if (cellNotesArray != null) {
 					
-					logger.info("\tRepopulating cache: " + cellNotesArray.length);	
+					logger.debug("\tRepopulating cache: " + cellNotesArray.length);	
 					
 					for (CellNote note : cellNotesArray) {
 						
@@ -187,14 +187,14 @@ public class CellNoteCache {
 					
 				} else {
 					
-					logger.info("\tRepopulating cache: " + 0);
+					logger.debug("\tRepopulating cache: " + 0);
 					
 				}
 	}
 	
 	public void processNotes(SimpleCellNote[] simpleCellNotesToSave, SimpleCellNote[] simpleCellNotesToDelete) throws PafException {
 		
-		logger.info("DEBUG - Start processNotes(SimpleCellNote[], SimpleCellNote[]) - " + new Date());
+		logger.debug("DEBUG - Start processNotes(SimpleCellNote[], SimpleCellNote[]) - " + new Date());
 		
 		CellNote[] cellNotesToSave = null;
 						
@@ -286,7 +286,7 @@ public class CellNoteCache {
 			
 		}
 		
-		logger.info("DEBUG - End processNotes(SimpleCellNotes[], SimpleCellNote[]" + new Date());
+		logger.debug("DEBUG - End processNotes(SimpleCellNotes[], SimpleCellNote[]" + new Date());
 		
 		
 	}
