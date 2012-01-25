@@ -71,10 +71,11 @@ public class AllocFunc extends AbstractFunction {
         
         // aggregate allocated measures. this is necessary to support multi-tiered
         // measure hierarchies.
-        SumFunc.aggMeasures(sourceIs, this.aggMsrs, dataCache, evalState);
+//        SumFunc.aggMeasures(sourceIs, this.aggMsrs, dataCache, evalState);
+//        evalState.getTriggeredAggMsrs().addAll(this.aggMsrs);
         
         // indicate additional aggregations required by this operation
-        evalState.getTriggeredAggMsrs().addAll(this.aggMsrs);
+        evalState.getTriggeredAggMsrs().addAll(this.targetMsrs);
         
     	// actual intersection in question should remain unchanged by this operation
         return dataCache.getCellValue(sourceIs);

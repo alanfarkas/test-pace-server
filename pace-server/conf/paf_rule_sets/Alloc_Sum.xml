@@ -31,6 +31,7 @@
 	    <skipProtProc>true</skipProtProc>
 	  <rules>
         <Rule>
+		  <evalLockedIntersections>true</evalLockedIntersections>
           <formula>
             <resultTerm>MDTTL_DLR</resultTerm>
             <expression>@SUM(MDTTL_DLR)</expression>
