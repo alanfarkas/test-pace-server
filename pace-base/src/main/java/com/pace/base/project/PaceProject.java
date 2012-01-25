@@ -1172,7 +1172,7 @@ public abstract class PaceProject implements IPaceProject {
 	//TTN 900 - Print Preferences - Added by Iris
 	public Map<String, PrintStyle> getPrintStyles() {
 		
-		return getProjectElementMap(ProjectElementId.PrintStyles);
+		return getProjectElementMap(ProjectElementId.PrintStyles, new TreeMap<String, PrintStyle>(String.CASE_INSENSITIVE_ORDER));
 		
 	}
 

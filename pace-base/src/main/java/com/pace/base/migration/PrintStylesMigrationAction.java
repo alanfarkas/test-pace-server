@@ -7,7 +7,6 @@ import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.ui.DefaultPrintSettings;
 import com.pace.base.ui.PrintStyle;
-import com.pace.base.ui.PrintStyles;
 import com.pace.base.utility.GUIDUtil;
 
 public class PrintStylesMigrationAction extends MigrationAction {
