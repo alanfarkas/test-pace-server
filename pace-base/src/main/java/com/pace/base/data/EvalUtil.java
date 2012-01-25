@@ -281,6 +281,7 @@ public class EvalUtil {
     public static Intersection inverseTranslocateIntersection(Intersection source, IPafFunction function, EvalState evalState) {
         Intersection newIs = source.clone();
 
+        PafDataCache dataCache = evalState.getDataCache();
         String offsetDim;
         
         if (function.getParms().length == 1) 
@@ -292,8 +293,10 @@ public class EvalUtil {
         PafDimMember member = offsetTree.getMember(source.getCoordinate(offsetDim));
         PafDimMember offsetMember;
         if (function.getOpCode().equals("@PREV"))
+//        	dataCache.shiftIntersection(newIs, offsetDim, 1, false);
             offsetMember = offsetTree.getNextSibling(member, false);
         else
+//        	dataCache.shiftIntersection(cellIs, offsetDim, -1, false);
             offsetMember = offsetTree.getPrevSibling(member, false);
         
         if (offsetMember == null) return null;
@@ -306,6 +309,7 @@ public class EvalUtil {
         Intersection newIs = source.clone();
         
         // assume time dim if not specified
+        PafDataCache dataCache = evalState.getDataCache();
         String treeDim;
         PafDimTree offsetTree;
 
@@ -321,8 +325,10 @@ public class EvalUtil {
         PafDimMember offsetMember;
         if (function.getOpCode().equals("@PREV"))
             offsetMember = offsetTree.getPrevSibling(member, false);
-        else
+ //   	dataCache.shiftIntersection(newIs, offsetDim, -1, false);
+       else
             offsetMember = offsetTree.getNextSibling(member, false);
+//    	dataCache.shiftIntersection(newIs, offsetDim, 1, false);
         
         if (offsetMember == null) return null;
         
