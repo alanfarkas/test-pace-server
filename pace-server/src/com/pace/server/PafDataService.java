@@ -39,6 +39,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.google.gwt.dev.util.collect.Sets;
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
@@ -548,7 +549,7 @@ public class PafDataService {
 				// Start new branch
 				if (branchList.isEmpty()) {
 					branchList.add(member);
-					fullTreeBranch = uowTree.getMemberNames(uowTree.getDescendants(member));
+					fullTreeBranch = PafDimTree.getMemberNames(uowTree.getDescendants(member));
 				}
 
 			}
@@ -1216,29 +1217,41 @@ public class PafDataService {
 		PafApplicationDef pafApp = clientState.getApp();
 		MdbDef mdbDef = pafApp.getMdbDef();
 		String measureDim = mdbDef.getMeasureDim(), timeDim = mdbDef.getTimeDim(), versionDim = mdbDef.getVersionDim();
+		String planVersion = dataCache.getPlanVersion();
 		int versionAxis = dataCache.getVersionAxis();
 		UnitOfWork refDataSpec = null;
 		Map<String, Map<Integer, List<String>>> dataSpecByVersion = new HashMap<String, Map<Integer, List<String>>>();
 
+		
 		// As a safeguard, filter out any versions not defined to the data cache. This
 		// prevents the attempted loading of a version the user doesn't have security 
 		// rights to, in the case of any unauthorized versions specified in the view.
 		List<String> viewVersions = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(versionDim)));
-		List<String> referenceVersions = new ArrayList<String>(dataCache.getReferenceVersions());
-		referenceVersions.retainAll(viewVersions);
-		List<String> contribPctVersions = new ArrayList<String>(pafApp.getContribPctVersions());
-		contribPctVersions.retainAll(viewVersions);
+		List<String> viewRefVersions = dataCache.getReferenceVersions();
+		viewRefVersions.retainAll(viewVersions);
+		Set<String> requiredRefVersions = null;
+		List<String> viewContribPctVersions = dataCache.getContribPctVersions();
+		viewContribPctVersions.retainAll(viewVersions);
+		List<String> viewVarVersions = dataCache.getVarianceVersions();
+		viewVarVersions.retainAll(viewVersions);
 
 		
 		// Exit if no data to update
-		if (referenceVersions.size() == 0 && contribPctVersions.size() == 0) {
+		if (viewRefVersions.isEmpty() && viewContribPctVersions.isEmpty() && viewVarVersions.isEmpty()) {
 			return;
 		}
 		
 		
-		// First process base (non-dynamic) reference versions - determine which reference 
-		// data intersections to update. Store this data specification in the format of a 
-		// uow specification and clone for each base version.
+		// First process reference and variance versions. Determine which reference 
+		// data intersections are needed to support view and any variance version
+		// calculations. 
+		requiredRefVersions = new HashSet<String>(dataCache.getComponentVersions(viewVarVersions));
+		requiredRefVersions.remove(planVersion);
+		requiredRefVersions.addAll(viewRefVersions);
+
+		
+		// Store the view's member specification in the format of a uow specification
+		// and clone for each reference version.
 		if (!isAttributeView) {
 
 			// Regular view - select all members on view, plus all uow measures 
@@ -1279,7 +1292,7 @@ public class PafDataService {
 					// mapping level.
 					int level = baseTree.getAttributeMappingLevel(associatedAttrDims.toArray(new String[0])[0]);
 					List<PafDimMember> baseMembers = baseTree.getMembersAtLevel(baseTree.getRootNode().getKey(), level);
-					refDataSpec.setDimMembers(baseDim, baseTree.getMemberNames(baseMembers).toArray(new String[0]));
+					refDataSpec.setDimMembers(baseDim, PafDimTree.getMemberNames(baseMembers).toArray(new String[0]));
 				} else {
 					// No associated attribute - just select members on the view
 					refDataSpec.setDimMembers(baseDim, viewMemberSpec.getDimMembers(baseDim));
@@ -1287,19 +1300,21 @@ public class PafDataService {
 			}
 		}
 
-		// Take data specification, convert to a map, and clone it across each reference version on the view
-		for (String version : referenceVersions) {
+	
+		// Take data specification, convert to a map, and clone it across each required 
+		// reference version.
+		for (String version : requiredRefVersions) {
 			
 			// Clone data specification for current version
 			Map <Integer, List<String>> dataSpecAsMap = refDataSpec.buildUowMap();
 			dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
 			
-			// Add filtered version-specific data spec to master map
+			// Add filtered version-specific data specification to master map
 			dataSpecByVersion.put(version, dataSpecAsMap);
 		}
 		
 		
-	
+		
 		// Contribution % versions - Populate all UOW intersections for any base reference
 		// versions (on or off the view) that meets one of the following criteria:
 		//
@@ -1319,7 +1334,7 @@ public class PafDataService {
 		// complex logic required and the chance of introducing calculation errors. However,
 		// this may have to be revisited in the future if additional data load optimizations 
 		// are required.
-		for (String contribPctVersion : contribPctVersions) {
+		for (String contribPctVersion : viewContribPctVersions) {
 			
 			// Get the formula's base version and optional comparison version
 			VersionDef versionDef = pafApp.getVersionDef(contribPctVersion);
@@ -1336,11 +1351,11 @@ public class PafDataService {
 			// Select any reference version that is specified in either the 
 			// base or comparison version.
 			Set<String> selectedVersions = new HashSet<String>();
-			if (referenceVersions.contains(compareVersion)) {
+			if (viewRefVersions.contains(compareVersion)) {
 				selectedVersions.add(compareVersion);
 			}
 //			if (referenceVersions.contains(baseVersion) && !baseVersion.equals(compareVersion)) {
-			if (referenceVersions.contains(baseVersion)) {
+			if (viewRefVersions.contains(baseVersion)) {
 				selectedVersions.add(baseVersion);
 			}
 			

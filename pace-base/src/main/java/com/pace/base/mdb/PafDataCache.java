@@ -3376,6 +3376,65 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	/**
+	 *	Return list of base versions
+	 *
+	 * @return List<String>
+	 */
+	public List<String> getBaseVersions() {
+
+		List<String> baseVersions = getVersionsByType(PafBaseConstants.BASE_VERSION_TYPE_LIST);
+		return baseVersions;
+	}
+
+	/**
+	 *	Return list of contribution percent versions
+	 *
+	 * @return List<String>
+	 */
+	public List<String> getContribPctVersions() {
+
+		List<String> contribPctVersions = getVersionsByType(VersionType.ContribPct);
+		return contribPctVersions;
+	}
+
+	/**
+	 *	Return list of derived versions
+	 *
+	 * @return List<String>
+	 */
+	public List<String> getDerivedVersions() {
+
+		// Get the list of derived versions that are defined to the data cache
+		List<String> derivedVersions = getVersionsByType(PafBaseConstants.DERIVED_VERSION_TYPE_LIST);
+		return derivedVersions;
+	}
+
+	/**
+	 *	Return list of reference versions - all non-derived versions, except the 
+	 *  active planning versions
+	 *
+	 * @return List<String>
+	 */
+	public List<String> getReferenceVersions() {
+
+		List<String> referenceVersions = getBaseVersions();
+		referenceVersions.remove(getPlanVersion());
+		
+		return referenceVersions;
+	}
+
+	/**
+	 *	Return list of variance percent versions
+	 *
+	 * @return List<String>
+	 */
+	public List<String> getVarianceVersions() {
+
+		List<String> varianceVersions = getVersionsByType(VersionType.Variance);
+		return varianceVersions;
+	}
+
+	/**
 	 *	Returns the list of Versions with the specified VersionType
 	 *
 	 * @param versionType The Version Type to match
@@ -3397,53 +3456,24 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	/**
-	 *	Return list of base versions
+	 *	Return list of versions that match the specified version type filter
 	 *
+	 * @param versionTypeFilter List of selected version type
 	 * @return List<String>
 	 */
-	public List<String> getBaseVersions() {
+	public List<String> getVersionsByType(List<VersionType> versionTypeFilter) {
 
-		List<String> baseVersions = new ArrayList<String>();
+		List<String> versions = new ArrayList<String>();
 
-		// Cycle through all defined versions and return the ones that are 
-		// base versions (ForwardPlannable, NonPlannable, or Plannable)
+		// Cycle through all defined versions and return the ones that
+		// match one of the selected version types.
 		for(String version:getVersions())  {
 			VersionType versionType = getVersionType(version);
-			if (PafBaseConstants.BASE_VERSION_TYPE_LIST.contains(versionType)) {
-				baseVersions.add(version);
+			if (versionTypeFilter.contains(versionType)) {
+				versions.add(version);
 			}
 		}
-		return baseVersions;
-	}
-
-	/**
-	 *	Return list of derived versions
-	 *
-	 * @return List<String>
-	 */
-	public List<String> getDerivedVersions() {
-
-		// Get the list of derived versions that are defined to the data cache
-		List<String> derivedVersions = new ArrayList<String>(appDef.getDerivedVersions());
-		List<String> dataCacheVersions = new ArrayList<String>(Arrays.asList(getVersions()));
-		derivedVersions.retainAll(dataCacheVersions);
-
-		return derivedVersions;
-	}
-
-	/**
-	 *	Return list of reference versions - all non-derived versions, except the 
-	 *  active planning versions
-	 *
-	 * @return List<String>
-	 */
-	public List<String> getReferenceVersions() {
-
-		List<String> referenceVersions = getBaseVersions();
-		List<String> activePlanVersions = Arrays.asList(getPlanVersions());
-		
-		referenceVersions.removeAll(activePlanVersions);
-		return referenceVersions;
+		return versions;
 	}
 
 	/**
