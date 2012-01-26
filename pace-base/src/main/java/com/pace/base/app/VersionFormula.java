@@ -249,7 +249,7 @@ public class VersionFormula {
 		int offsetYearInx = index + yearOffset;
 		if (offsetYearInx < 0 ||  offsetYearInx >= yearList.size()) {
 			String logMsg = "The Year Offset of: [" + yearOffset + "] applied to the base year: [" 
-					+ baseYear + "] results in a Year member not defined in the MDB Year Dimension"; 
+					+ baseYear + "] results in a Year member not defined in the OLAP Cube Year Dimension"; 
 			throw new IllegalArgumentException(logMsg);
 		}
 		sourceYear = yearList.get(index + yearOffset);
