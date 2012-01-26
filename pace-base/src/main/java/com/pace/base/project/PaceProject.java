@@ -1172,7 +1172,7 @@ public abstract class PaceProject implements IPaceProject {
 	//TTN 900 - Print Preferences - Added by Iris
 	public Map<String, PrintStyle> getPrintStyles() {
 		
-		return getProjectElementMap(ProjectElementId.PrintStyles, new TreeMap<String, PrintStyle>(String.CASE_INSENSITIVE_ORDER));
+		return getProjectElementMap(ProjectElementId.PrintStyles);
 		
 	}
 
@@ -1394,7 +1394,7 @@ public abstract class PaceProject implements IPaceProject {
 		} else {
 			
 			// add/replace element id and data object in map
-			getProjectDataMap().put(ProjectElementId.PrintStyles, new TreeMap<String, PrintStyle>(printStyles));
+			getProjectDataMap().put(ProjectElementId.PrintStyles, new HashMap<String, PrintStyle>(printStyles));
 			
 		}
 	}

@@ -2,13 +2,12 @@ package com.pace.base.project.excel.elements;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Workbook;
 
-import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.project.ExcelPaceProjectConstants;
 import com.pace.base.project.ExcelProjectDataErrorException;
@@ -65,7 +64,7 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 
 		List<PafExcelRow> excelRowList = PafExcelUtil.readExcelSheet(input);
 	
-		Map<String, PrintStyle> printStylesMap = new TreeMap<String, PrintStyle>();
+		Map<String, PrintStyle> printStylesMap = new HashMap<String, PrintStyle>();
 				
 		PrintStyle printStyle = null;
 		

@@ -12,7 +12,6 @@ import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.ui.DefaultPrintSettings;
 import com.pace.base.ui.PrintStyle;
-import com.pace.base.ui.PrintStyles;
 import com.pace.base.utility.GUIDUtil;
 import com.pace.base.view.PafView;
 
@@ -20,8 +19,8 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 
 	private static Logger logger = Logger.getLogger(PafViewPrintStylesMigrationAction.class);
 	private int count = 0;
-	private Map<String, PrintStyle> printStylesMap = null;
-	List<PafView> pafViews = null;
+	private Map<String, PrintStyle> printStylesMap;
+	List<PafView> pafViews;
 	private PrintStyle defaultPrintStyle = DefaultPrintSettings.getInstance().getDefaultPrintSettings();
 	
 	public PafViewPrintStylesMigrationAction() {

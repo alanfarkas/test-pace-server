@@ -1,87 +1,60 @@
 package com.pace.base.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.pace.base.project.InvalidPaceProjectInputException;
-import com.pace.base.project.PaceProjectCreationException;
-import com.pace.base.project.ProjectElementId;
-import com.pace.base.project.ProjectSaveException;
-import com.pace.base.project.XMLPaceProject;
+import com.pace.base.PafBaseConstants;
+import com.pace.base.PafConfigFileNotFoundException;
+import com.pace.base.utility.PafXStream;
 
 
 public class PrintStyles implements IPafMapModelManager {
 
 	private static Logger logger = Logger.getLogger(PrintStyles.class);
-	protected Map<String, PrintStyle> printStyles = null;
+	protected Map<String, PrintStyle> printStyles = new HashMap<String, PrintStyle>();
 	protected String projectFolder;
 	public PrintStyles() {
-		// TODO Auto-generated constructor stub
 		super();
 	}
 
 	public PrintStyles(String projectFolder) {
-		// TODO Auto-generated constructor stub
 		this.projectFolder = projectFolder;
 		load();
 	}
 	
 	@Override
 	public void load() {
-		// TODO Auto-generated method stub
 		try {
-			XMLPaceProject pp = null;
-				pp = new XMLPaceProject(
-						projectFolder, 
-						new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.PrintStyles)),
-								false); //set upgradeProject flag to true
-				printStyles = pp.getPrintStyles();
-		} catch (Exception ex) { 
-			logger.error(ex.getMessage()); 
-		}
-		
+			PrintStyles ps = (PrintStyles) PafXStream.importObjectFromXml(projectFolder + File.separator + PafBaseConstants.FN_PrintStyles);
+			printStyles = ps.getPrintStyles();
+		} catch (PafConfigFileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 	}
 
 	@Override
 	public void save() {
-		// TODO Auto-generated method stub
-		try {
-			XMLPaceProject pp = new XMLPaceProject(
-					projectFolder, 
-					new HashSet<ProjectElementId>(Arrays.asList(ProjectElementId.PrintStyles)),
-							false);
-			pp.setPrintStyles(printStyles);
-			pp.save(ProjectElementId.PrintStyles);
-		} catch (InvalidPaceProjectInputException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PaceProjectCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ProjectSaveException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		PrintStyles ps = new PrintStyles();
+		ps.setPrintStyles(printStyles);
+		PafXStream.exportObjectToXml(ps, projectFolder + File.separator + PafBaseConstants.FN_PrintStyles);
 	}
 
 	
 	@Override
 	public void add(String guid, Object object) {
-		// TODO Auto-generated method stub
-		if( printStyles != null ) {
-			printStyles.put(guid, (PrintStyle) object);
-		}
+		printStyles.put(guid, (PrintStyle) object);
 	}
 
 	@Override
 	public void remove(String guid) {
-		// TODO Auto-generated method stub
-		if (printStyles != null  && printStyles.containsKey(guid)) {
+		if ( printStyles.containsKey(guid)) {
 			logger.debug("Removing guid: " + guid + " from model");
 			printStyles.remove(guid);
 		} else {
@@ -93,79 +66,53 @@ public class PrintStyles implements IPafMapModelManager {
 
 	@Override
 	public String[] getKeys() {
-		// TODO Auto-generated method stub
 		String[] guids = null;
 		
-		if ( printStyles != null ) {
-			
-			guids = new String[printStyles.keySet().size()];
-	
-			int i = 0;
-	
-			for (Object guid : printStyles.keySet()) {
-				guids[i++] = (String) guid;
-			}
+		guids = new String[printStyles.keySet().size()];
 
+		int i = 0;
+
+		for (Object guid : printStyles.keySet()) {
+			guids[i++] = (String) guid;
 		}
+
 		return guids;
 	}
 
 	@Override
 	public Object getItem(String guid) {
-		// TODO Auto-generated method stub
-		if( printStyles != null ) {
-			return printStyles.get(guid);
-		}
-		return null;
+		return printStyles.get(guid);
 	}
 
 	@Override
 	public int getIndex(String guid) {
-		// TODO Auto-generated method stub
 		int index = 0;
 
-		if( printStyles != null ) {
-			for (Object guidValue : printStyles.keySet()) {
-				if (guidValue.equals(guid)) {
-					break;
-				} else {
-					index++;
-				}
+		for (Object guidValue : printStyles.keySet()) {
+			if (guidValue.equals(guid)) {
+				break;
+			} else {
+				index++;
 			}
 		}
+		
 		return index;
 	}
 
 	@Override
 	public boolean contains(String guid) {
-		// TODO Auto-generated method stub
-		if( printStyles != null ) {
-			return printStyles.containsKey(guid);
-		}
-		return false;
+		return printStyles.containsKey(guid);
 	}
 
 	@Override
 	public void replace(String guid, Object object) {
-		// TODO Auto-generated method stub
-		if ( printStyles != null &&  printStyles.containsKey(guid)) {
+		if ( printStyles.containsKey(guid)) {
 			printStyles.put(guid, (PrintStyle) object);
-			
 		}		
 	}
 
 	public Set<String> getKeySet() {
-		
-		Set<String> guidSet = new HashSet<String>();
-		
-		if ( printStyles != null ) {
-			
-			guidSet = printStyles.keySet();
-			
-		}
-		
-		return guidSet;
-		
+		return printStyles.keySet();
 	}
 
 	public Map<String, PrintStyle> getPrintStyles() {
@@ -177,7 +124,7 @@ public class PrintStyles implements IPafMapModelManager {
 	}
 	
 	public boolean isEmpty() {
-		if ( printStyles != null && printStyles.size() > 0 ) {
+		if ( printStyles.size() > 0 ) {
 			return false;
 		}		
 		return true;
@@ -192,15 +139,13 @@ public class PrintStyles implements IPafMapModelManager {
 	}
 
 	public boolean containsIgnoreCase(String arg0) {
-		if( printStyles != null ) {
-			Object[] objAr = printStyles.keySet().toArray();
-			if ( objAr != null ) {
-				for (Object obj : objAr) {
-					if ( obj instanceof String) {
-						String guid = (String) obj;
-						if ( guid.equalsIgnoreCase(arg0)) {
-							return true;
-						}
+		Object[] objAr = printStyles.keySet().toArray();
+		if ( objAr != null ) {
+			for (Object obj : objAr) {
+				if ( obj instanceof String) {
+					String guid = (String) obj;
+					if ( guid.equalsIgnoreCase(arg0)) {
+						return true;
 					}
 				}
 			}
@@ -210,10 +155,7 @@ public class PrintStyles implements IPafMapModelManager {
 	
 	@Override
 	public int size() {
-		if (printStyles != null ) {
-			return printStyles.size();
-		}
-		return 0;
+		return printStyles.size();
 	}
 	
 	public String[] getNames(boolean withDefaultMarker) {
@@ -276,7 +218,7 @@ public class PrintStyles implements IPafMapModelManager {
 	
 	public void setDefaultPrintStyle(String name, boolean setDefault) {
 		String guid = getGUIDByName(name);
-		if (printStyles != null && printStyles.containsKey(guid) && setDefault) {
+		if ( printStyles.containsKey(guid) && setDefault) {
 
 			//unset all of print styles
 			unsetDefaultPrintStyle();
@@ -293,52 +235,45 @@ public class PrintStyles implements IPafMapModelManager {
 	}
 	
 	private void unsetDefaultPrintStyle() {
-		
-		if( printStyles != null ) {
-			//disable old default
-			for (String guid : getKeys()) {
+		//disable old default
+		for (String guid : getKeys()) {
+			
+			if ( ((PrintStyle) printStyles.get(guid)).getDefaultStyle()) {
 				
-				if ( ((PrintStyle) printStyles.get(guid)).getDefaultStyle()) {
-					
-					((PrintStyle) printStyles.get(guid)).setDefaultStyle(false);	
-					break;
-				} 
-				
-			}
+				((PrintStyle) printStyles.get(guid)).setDefaultStyle(false);	
+				break;
+			} 
+			
 		}
 	}
 	
 	public void renamePrintStyle(String oldPrintStyleName, String newPrintStyleName) {
-		if( printStyles != null ) {
-			for (String guid : getKeys()) {			
-				if ( guid instanceof String ) {
-					//if the current key == the old view name.
-					String name = getNameByGUID(guid);
-					if ( name.equalsIgnoreCase(oldPrintStyleName) ) {
-						//get a temporary PafAdminConsoleView object for the current key 
-						PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
-						//set the new name.
-						printStyle.setName(newPrintStyleName);
-						//remove old object from map and put the new one in.
-						remove(guid);
-						//new the temporary object in the map.
-						printStyles.put(guid, printStyle);
-					} 
-				}		
-			}
-			save();
-			load();
+		for (String guid : getKeys()) {			
+			if ( guid instanceof String ) {
+				//if the current key == the old view name.
+				String name = getNameByGUID(guid);
+				if ( name.equalsIgnoreCase(oldPrintStyleName) ) {
+					//get a temporary PafAdminConsoleView object for the current key 
+					PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
+					//set the new name.
+					printStyle.setName(newPrintStyleName);
+					//remove old object from map and put the new one in.
+					remove(guid);
+					//new the temporary object in the map.
+					printStyles.put(guid, printStyle);
+				} 
+			}		
 		}
+		save();
+		load();
 	}
 
 	public PrintStyle getPrintStyleByName( String name ) {
-		if( printStyles != null ) {
-			for (String guid : getKeys()) {
-				PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
-				if ( printStyle.getName().equalsIgnoreCase(name)) {
-					return printStyle;
-				} 
-			}
+		for (String guid : getKeys()) {
+			PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
+			if ( printStyle.getName().equalsIgnoreCase(name)) {
+				return printStyle;
+			} 
 		}
 		return null;
 	}
@@ -351,14 +286,12 @@ public class PrintStyles implements IPafMapModelManager {
 	}
 	
 	public PrintStyle findDuplicatePrintStyle( PrintStyle printStyleSource ) {
-		if( printStyles != null ) {
-			for (String guid : getKeys()) {
-				PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
-				if ( ! printStyle.getGUID().equals(printStyleSource.getGUID()) 
-						&& printStyle.getName().equalsIgnoreCase(printStyleSource.getName())) {
-					return printStyle;
-				} 
-			}
+		for (String guid : getKeys()) {
+			PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
+			if ( ! printStyle.getGUID().equals(printStyleSource.getGUID()) 
+					&& printStyle.getName().equalsIgnoreCase(printStyleSource.getName())) {
+				return printStyle;
+			} 
 		}
 		return null;
 	}
