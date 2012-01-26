@@ -17,7 +17,7 @@ import com.pace.base.utility.PafXStream;
 public class PrintStyles implements IPafMapModelManager {
 
 	private static Logger logger = Logger.getLogger(PrintStyles.class);
-	protected Map<String, PrintStyle> printStyles = new HashMap<String, PrintStyle>();
+	protected Map<String, PrintStyle> printStyles;
 	protected String projectFolder;
 	public PrintStyles() {
 		super();
