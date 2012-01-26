@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
@@ -36,7 +35,6 @@ public class PrintStyles implements IPafMapModelManager {
 	public void load() {
 		// TODO Auto-generated method stub
 		try {
-			printStyles = new TreeMap<String, PrintStyle>(String.CASE_INSENSITIVE_ORDER);
 			XMLPaceProject pp = null;
 				pp = new XMLPaceProject(
 						projectFolder, 
@@ -45,7 +43,6 @@ public class PrintStyles implements IPafMapModelManager {
 				printStyles = pp.getPrintStyles();
 		} catch (Exception ex) { 
 			logger.error(ex.getMessage()); 
-			printStyles = new TreeMap<String, PrintStyle>(String.CASE_INSENSITIVE_ORDER);
 		}
 		
 	}
@@ -76,13 +73,15 @@ public class PrintStyles implements IPafMapModelManager {
 	@Override
 	public void add(String guid, Object object) {
 		// TODO Auto-generated method stub
-		printStyles.put(guid, (PrintStyle) object);
+		if( printStyles != null ) {
+			printStyles.put(guid, (PrintStyle) object);
+		}
 	}
 
 	@Override
 	public void remove(String guid) {
 		// TODO Auto-generated method stub
-		if (printStyles.containsKey(guid)) {
+		if (printStyles != null  && printStyles.containsKey(guid)) {
 			logger.debug("Removing guid: " + guid + " from model");
 			printStyles.remove(guid);
 		} else {
@@ -114,7 +113,10 @@ public class PrintStyles implements IPafMapModelManager {
 	@Override
 	public Object getItem(String guid) {
 		// TODO Auto-generated method stub
-		return printStyles.get(guid);
+		if( printStyles != null ) {
+			return printStyles.get(guid);
+		}
+		return null;
 	}
 
 	@Override
@@ -122,27 +124,31 @@ public class PrintStyles implements IPafMapModelManager {
 		// TODO Auto-generated method stub
 		int index = 0;
 
-		for (Object guidValue : printStyles.keySet()) {
-			if (guidValue.equals(guid)) {
-				break;
-			} else {
-				index++;
+		if( printStyles != null ) {
+			for (Object guidValue : printStyles.keySet()) {
+				if (guidValue.equals(guid)) {
+					break;
+				} else {
+					index++;
+				}
 			}
 		}
-
 		return index;
 	}
 
 	@Override
 	public boolean contains(String guid) {
 		// TODO Auto-generated method stub
-		return printStyles.containsKey(guid);
+		if( printStyles != null ) {
+			return printStyles.containsKey(guid);
+		}
+		return false;
 	}
 
 	@Override
 	public void replace(String guid, Object object) {
 		// TODO Auto-generated method stub
-		if ( printStyles.containsKey(guid)) {
+		if ( printStyles != null &&  printStyles.containsKey(guid)) {
 			printStyles.put(guid, (PrintStyle) object);
 			
 		}		
@@ -186,14 +192,15 @@ public class PrintStyles implements IPafMapModelManager {
 	}
 
 	public boolean containsIgnoreCase(String arg0) {
-		
-		Object[] objAr = printStyles.keySet().toArray();
-		if ( objAr != null ) {
-			for (Object obj : objAr) {
-				if ( obj instanceof String) {
-					String guid = (String) obj;
-					if ( guid.equalsIgnoreCase(arg0)) {
-						return true;
+		if( printStyles != null ) {
+			Object[] objAr = printStyles.keySet().toArray();
+			if ( objAr != null ) {
+				for (Object obj : objAr) {
+					if ( obj instanceof String) {
+						String guid = (String) obj;
+						if ( guid.equalsIgnoreCase(arg0)) {
+							return true;
+						}
 					}
 				}
 			}
@@ -203,8 +210,10 @@ public class PrintStyles implements IPafMapModelManager {
 	
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return printStyles.size();
+		if (printStyles != null ) {
+			return printStyles.size();
+		}
+		return 0;
 	}
 	
 	public String[] getNames(boolean withDefaultMarker) {
@@ -285,46 +294,51 @@ public class PrintStyles implements IPafMapModelManager {
 	
 	private void unsetDefaultPrintStyle() {
 		
-		//disable old default
-		for (String guid : getKeys()) {
-			
-			if ( ((PrintStyle) printStyles.get(guid)).getDefaultStyle()) {
+		if( printStyles != null ) {
+			//disable old default
+			for (String guid : getKeys()) {
 				
-				((PrintStyle) printStyles.get(guid)).setDefaultStyle(false);	
-				break;
-			} 
-			
+				if ( ((PrintStyle) printStyles.get(guid)).getDefaultStyle()) {
+					
+					((PrintStyle) printStyles.get(guid)).setDefaultStyle(false);	
+					break;
+				} 
+				
+			}
 		}
-		
 	}
 	
 	public void renamePrintStyle(String oldPrintStyleName, String newPrintStyleName) {
-		for (String guid : getKeys()) {			
-			if ( guid instanceof String ) {
-				//if the current key == the old view name.
-				String name = getNameByGUID(guid);
-				if ( name.equalsIgnoreCase(oldPrintStyleName) ) {
-					//get a temporary PafAdminConsoleView object for the current key 
-					PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
-					//set the new name.
-					printStyle.setName(newPrintStyleName);
-					//remove old object from map and put the new one in.
-					remove(guid);
-					//new the temporary object in the map.
-					printStyles.put(guid, printStyle);
-				} 
-			}		
+		if( printStyles != null ) {
+			for (String guid : getKeys()) {			
+				if ( guid instanceof String ) {
+					//if the current key == the old view name.
+					String name = getNameByGUID(guid);
+					if ( name.equalsIgnoreCase(oldPrintStyleName) ) {
+						//get a temporary PafAdminConsoleView object for the current key 
+						PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
+						//set the new name.
+						printStyle.setName(newPrintStyleName);
+						//remove old object from map and put the new one in.
+						remove(guid);
+						//new the temporary object in the map.
+						printStyles.put(guid, printStyle);
+					} 
+				}		
+			}
+			save();
+			load();
 		}
-		save();
-		load();
 	}
 
 	public PrintStyle getPrintStyleByName( String name ) {
-		for (String guid : getKeys()) {
-			PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
-			if ( printStyle.getName().equalsIgnoreCase(name)) {
-				return printStyle;
-			} 
+		if( printStyles != null ) {
+			for (String guid : getKeys()) {
+				PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
+				if ( printStyle.getName().equalsIgnoreCase(name)) {
+					return printStyle;
+				} 
+			}
 		}
 		return null;
 	}
@@ -337,12 +351,14 @@ public class PrintStyles implements IPafMapModelManager {
 	}
 	
 	public PrintStyle findDuplicatePrintStyle( PrintStyle printStyleSource ) {
-		for (String guid : getKeys()) {
-			PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
-			if ( ! printStyle.getGUID().equals(printStyleSource.getGUID()) 
-					&& printStyle.getName().equalsIgnoreCase(printStyleSource.getName())) {
-				return printStyle;
-			} 
+		if( printStyles != null ) {
+			for (String guid : getKeys()) {
+				PrintStyle printStyle = (PrintStyle) printStyles.get(guid);
+				if ( ! printStyle.getGUID().equals(printStyleSource.getGUID()) 
+						&& printStyle.getName().equalsIgnoreCase(printStyleSource.getName())) {
+					return printStyle;
+				} 
+			}
 		}
 		return null;
 	}
