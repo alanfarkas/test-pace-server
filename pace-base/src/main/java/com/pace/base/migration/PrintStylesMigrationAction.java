@@ -1,39 +1,36 @@
 package com.pace.base.migration;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
-import com.pace.base.PafBaseConstants;
-import com.pace.base.PafConfigFileNotFoundException;
+import com.pace.base.project.ProjectElementId;
+import com.pace.base.project.ProjectSaveException;
 import com.pace.base.project.XMLPaceProject;
 import com.pace.base.ui.DefaultPrintSettings;
 import com.pace.base.ui.PrintStyle;
-import com.pace.base.ui.PrintStyles;
 import com.pace.base.utility.GUIDUtil;
-import com.pace.base.utility.PafXStream;
 
 public class PrintStylesMigrationAction extends MigrationAction {
-	private Map<String, PrintStyle> printStyleMap = new HashMap<String, PrintStyle>();
-	private PrintStyles ps = new PrintStyles();
+	private Map<String, PrintStyle> printStyleMap= null;
 	
 	public PrintStylesMigrationAction(XMLPaceProject xmlPaceProject) {
 		// TODO Auto-generated constructor stub
 		this.xmlPaceProject = xmlPaceProject;
 		if( xmlPaceProject != null) {
+			boolean currentUpgradeProject = this.xmlPaceProject.isUpgradeProject();
+			this.xmlPaceProject.setUpgradeProject(false);
 			try {
-				ps = (PrintStyles) PafXStream.importObjectFromXml(xmlPaceProject.getProjectInput() + File.separator +  PafBaseConstants.FN_PrintStyles);
-				printStyleMap = ps.getPrintStyles();
-			} catch (PafConfigFileNotFoundException e) {
-				System.out.println("Creating a default print style because there is no global print style.");
-			} 
+				this.printStyleMap = xmlPaceProject.getPrintStyles();
+			} catch(Exception e ){
+				System.out.println("File Not Found.");
+			}
+			this.xmlPaceProject.setUpgradeProject(currentUpgradeProject);
 		}
 	}
 
 	@Override
 	public String getActionName() {
 		// TODO Auto-generated method stub
-		return "Creating a default print style because there is no global print style.";
+		return "Create a default print style if there is no any global print style.";
 	}
 
 	@Override
@@ -52,17 +49,19 @@ public class PrintStylesMigrationAction extends MigrationAction {
 
 	@Override
 	public void run() {
+		// TODO Auto-generated method stub
 		if( getStatus() == MigrationActionStatus.NotStarted ) {
 			PrintStyle defaultStyle = DefaultPrintSettings.getInstance().getDefaultPrintSettings().clone();
 			defaultStyle.setGUID(GUIDUtil.getGUID());
 			defaultStyle.setName("Print Style #1");
 			defaultStyle.setDefaultStyle(true);
 			printStyleMap.put(defaultStyle.getGUID(), defaultStyle);
-			ps.setPrintStyles(printStyleMap);
+			xmlPaceProject.setPrintStyles(printStyleMap);
 			try {
-				PafXStream.exportObjectToXml(ps, xmlPaceProject.getProjectInput() + File.separator + PafBaseConstants.FN_PrintStyles);
-			} catch(RuntimeException e) {
-				System.out.println("Error with writing PrintStyles.");
+				xmlPaceProject.save(ProjectElementId.PrintStyles);
+			} catch (ProjectSaveException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

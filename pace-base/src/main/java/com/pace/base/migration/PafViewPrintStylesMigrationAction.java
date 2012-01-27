@@ -42,7 +42,7 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 	@Override
 	public String getActionName() {
 		// TODO Auto-generated method stub
-		return "Converting view's old print settings to com.pase.base.ui.PrintStyle.";
+		return "Converting view's old print settings to new Print Style.";
 	}
 
 	@Override
