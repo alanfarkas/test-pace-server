@@ -53,6 +53,6 @@
   </ldapSettings>
   <authMode>nativeMode</authMode>
   <clientUpdateUrl>http://localhost:8080/installs/client/setup.exe</clientUpdateUrl>
-  <clientMinVersion>2.8.1.1</clientMinVersion>
+  <clientMinVersion>2.8.2.0</clientMinVersion>
   <pafServerHome>..\..\</pafServerHome>
 </ServerSettings>
