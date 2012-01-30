@@ -44,49 +44,5 @@
         <overThenDown>false</overThenDown>
       </PrintStyle>
     </entry>
-    <entry>
-      <string>bed279bd-6a2f-4fba-92bb-f422eca56fd7</string>
-      <PrintStyle>
-        <GUID>bed279bd-6a2f-4fba-92bb-f422eca56fd7</GUID>
-        <name>Migration Print Style #1</name>
-        <defaultStyle>false</defaultStyle>
-        <portrait>true</portrait>
-        <landscape>false</landscape>
-        <adjustTo>false</adjustTo>
-        <percentNormalSize>100</percentNormalSize>
-        <fitTo>true</fitTo>
-        <pageWide>1</pageWide>
-        <pageTall>2</pageTall>
-        <paperSize>Letter</paperSize>
-        <firstPageNumber>Auto</firstPageNumber>
-        <header>0.3</header>
-        <top>0.75</top>
-        <left>0.7</left>
-        <right>0.7</right>
-        <bottom>0.75</bottom>
-        <footer>0.3</footer>
-        <centerHorizontally>false</centerHorizontally>
-        <centerVertically>false</centerVertically>
-        <headerText></headerText>
-        <footerText></footerText>
-        <diffOddAndEvenPages>false</diffOddAndEvenPages>
-        <diffFirstPage>false</diffFirstPage>
-        <scaleWithDocument>true</scaleWithDocument>
-        <alignWithPageMargin>true</alignWithPageMargin>
-        <entireView>true</entireView>
-        <userSelection>false</userSelection>
-        <userSelectionText></userSelectionText>
-        <colsToRepeatAtLeft>Pace Column Headings</colsToRepeatAtLeft>
-        <rowsToRepeatAtTop>Pace Row Headings</rowsToRepeatAtTop>
-        <gridlines>false</gridlines>
-        <blackAndWhite>false</blackAndWhite>
-        <draftQuality>false</draftQuality>
-        <rowAndColHeadings>false</rowAndColHeadings>
-        <comment>(None)</comment>
-        <cellErrorsAs>displayed</cellErrorsAs>
-        <downThenOver>true</downThenOver>
-        <overThenDown>false</overThenDown>
-      </PrintStyle>
-    </entry>
   </printStyles>
 </PrintStyles>

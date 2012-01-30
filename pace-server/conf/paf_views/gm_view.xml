@@ -7,16 +7,16 @@
   <headers/>
   <userSelections/>
   <printStyle>
-    <GUID>bed279bd-6a2f-4fba-92bb-f422eca56fd7</GUID>
-    <name>Migration Print Style #1</name>
-    <defaultStyle>false</defaultStyle>
-    <portrait>true</portrait>
-    <landscape>false</landscape>
+    <GUID>efc6e74f-a1dc-4128-9848-2e8e07451892</GUID>
+    <name>Print Style #1</name>
+    <defaultStyle>true</defaultStyle>
+    <portrait>false</portrait>
+    <landscape>true</landscape>
     <adjustTo>false</adjustTo>
     <percentNormalSize>100</percentNormalSize>
     <fitTo>true</fitTo>
     <pageWide>1</pageWide>
-    <pageTall>2</pageTall>
+    <pageTall>1</pageTall>
     <paperSize>Letter</paperSize>
     <firstPageNumber>Auto</firstPageNumber>
     <header>0.3</header>
@@ -47,8 +47,7 @@
     <downThenOver>true</downThenOver>
     <overThenDown>false</overThenDown>
   </printStyle>
-  <globalPrintStyleGUID>bed279bd-6a2f-4fba-92bb-f422eca56fd7</globalPrintStyleGUID>
-  <viewPrintState>GLOBAL</viewPrintState>
+  <viewPrintState>DEFAULT</viewPrintState>
   <rowsSuppressed>false</rowsSuppressed>
   <columnsSuppressed>false</columnsSuppressed>
   <dirtyFlag>false</dirtyFlag>
