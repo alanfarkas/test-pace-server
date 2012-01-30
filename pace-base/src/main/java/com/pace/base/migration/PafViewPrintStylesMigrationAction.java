@@ -31,10 +31,10 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 		this.xmlPaceProject = xmlPaceProject;
 		if ( this.xmlPaceProject != null ) {
 			boolean currentUpgradeProject = this.xmlPaceProject.isUpgradeProject();
-			xmlPaceProject.setUpgradeProject(true);
-			printStylesMap = xmlPaceProject.getPrintStyles();
-			xmlPaceProject.setUpgradeProject(false);
-			pafViews = xmlPaceProject.getViews();
+			this.xmlPaceProject.setUpgradeProject(true);
+			printStylesMap = this.xmlPaceProject.getPrintStyles();
+			this.xmlPaceProject.setUpgradeProject(false);
+			pafViews = this.xmlPaceProject.getViews();
 			this.xmlPaceProject.setUpgradeProject(currentUpgradeProject);
 		}
 	}	

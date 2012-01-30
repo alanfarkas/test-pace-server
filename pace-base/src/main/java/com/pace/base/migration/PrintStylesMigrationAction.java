@@ -19,7 +19,7 @@ public class PrintStylesMigrationAction extends MigrationAction {
 			boolean currentUpgradeProject = this.xmlPaceProject.isUpgradeProject();
 			this.xmlPaceProject.setUpgradeProject(false);
 			try {
-				this.printStyleMap = xmlPaceProject.getPrintStyles();
+				this.printStyleMap = this.xmlPaceProject.getPrintStyles();
 			} catch(Exception e ){
 				System.out.println("File Not Found.");
 			}
