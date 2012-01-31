@@ -476,7 +476,8 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		if (rs.getMeasureList() == null || rs.getMeasureList().length < 1)
 			measuresToProcess.addAll(evalState.getAppDef().getMeasureDefs().keySet());
 		else { // only process measures specified in rule sets
-			for (String msrName : rs.getMeasureList()) measuresToProcess.add(msrName);
+			for (String msrName : rs.getMeasureList()) 
+				measuresToProcess.add(msrName);
 		}
 
 		// remove all measures used in rule set rules

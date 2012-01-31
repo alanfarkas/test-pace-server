@@ -258,7 +258,7 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
             evalState.addAllChangedCells(newChngCells);
             
             // If cells are calculated, don't allow them to trigger the recalc measure calculations that comes later.
-            // They changes required have already been absorbed by this calcultion.
+            // They changes required have already been absorbed by this calculation.
             // evalState.addConsumedByRulegroup(newChngCells);
 
 
