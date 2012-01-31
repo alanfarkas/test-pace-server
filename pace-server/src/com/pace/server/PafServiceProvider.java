@@ -861,8 +861,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			clientState.setMemberIndexLists(memberIndexLists);
 			
 			// calculate dynamic rule sets for the client
-			RuleSet[] fullRuleSets = RuleMngr.getInstance().calculateRuleSets(
-					treeSet, app, pafPlannerConfig);
+			RuleSet[] fullRuleSets = RuleMngr.getInstance().calculateRuleSets(treeSet, app, pafPlannerConfig);
 
 			Map<String, List<RuleSet>> fullRuleSetMap = new HashMap<String, List<RuleSet>>();
 			List<RuleSet> clientRuleSetList = new ArrayList<RuleSet>();

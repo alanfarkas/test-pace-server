@@ -343,6 +343,9 @@ public class PafSecurityService {
 		// rulesets available to the user uses the default list (or all) then
 		// just exit the logic and load all measures. Else
 		// add unique entries for each measure listed in all rulesets
+		//
+		// All terms in the measure list should already be expanded by the
+		// time we get here. (TTN-1698)
 
 		Set<String> msrsToUse = new HashSet<String>();
 		boolean useAll = false;
@@ -357,25 +360,10 @@ public class PafSecurityService {
 				useAll = true;
 				break;
 			}
+			
 			for (String msrName : rs.getMeasureList()) {
-				// process out any user member lists
-				if (msrName.startsWith("@MEMBER_LIST")) {
-					// extract out name
-					String umlKey = msrName.substring(msrName.indexOf("(")+1, msrName.lastIndexOf(")"));
-					PafMemberList memberList = PafDataService.getInstance().getUserMemberList(umlKey);
-					if (memberList.getDimName().equals(mdbDef.getMeasureDim())) {
-						for (String mbrTerm: memberList.getMemberNames() ) {
-							msrsToUse.add(mbrTerm);
-						}
-					} else {
-						String s = String.format("Only memberlists from the measures dimension can be used in rulsets. Memberlist [%s] found in ruleset [%s]", msrName, rs.getName());
-						throw new IllegalArgumentException(s);
-					}
-				} else {
 					msrsToUse.add(msrName);
-				}
-			}
-				
+			}				
 		}
 
 		// setup the workunit if we made it through all rulesets without running

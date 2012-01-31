@@ -39,6 +39,7 @@ import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
+import com.pace.base.data.PafMemberList;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.project.ProjectElementId;
@@ -502,12 +503,77 @@ public class RuleMngr {
             
             // post process rule set formulas using function factory
             this.parseRuleSet(rsTemp, app.getMeasureFunctionFactory());
+            
+            // expand rule set measure list (TTN-1698)
+            expandMeasureList(rsTemp, app);
+                        
         }
-        
+               
         return ruleSetList;
     }
     
-    private static String additiveFormula(List<PafDimMember> members) {
+    /**
+     * Expand rule set measure list specification
+     * 
+     * @param ruleSet Rule set
+     * @param app Application definition
+     * 
+     * @throws PafException 
+     */
+    private static void expandMeasureList(RuleSet ruleSet, PafApplicationDef app) throws PafException {
+    	
+		String measureDim = app.getMdbDef().getMeasureDim();
+    	String[] origMeasureList = ruleSet.getMeasureList();
+		List<String> updatedMeasureList = new ArrayList<String>();
+		List<String> measureTerms = new ArrayList<String>();
+		
+		
+		// This method expands all of the measure list terms. This is
+		// needs to be done whenever a rule set is read from disk,
+		// as the loose measure evaluation process ignores any measures 
+		// indirectly reference in a member expression 
+		// ex. "@IDESC(MDTTL_DRL)".  (TTN-1698)
+		
+		// no measure list - exit method
+		if (origMeasureList == null || origMeasureList.length == 0) {
+			return;
+		}
+		      
+		// Expand each measure list term
+		PafDataService dataService = PafDataService.getInstance();
+		for (String measureTerm : origMeasureList) {
+			
+			// Check for member list token
+			if (measureTerm.startsWith(PafBaseConstants.MEMBERLIST_TOKEN)) {
+				
+				// Parse out member list name
+				String umlKey = measureTerm.substring(measureTerm.indexOf("(")+1, measureTerm.lastIndexOf(")"));
+				PafMemberList memberList = PafDataService.getInstance().getUserMemberList(umlKey);
+				
+				// Add each member term to temp list
+				if (memberList.getDimName().equals(measureDim)) {
+					for (String memberTerm : memberList.getMemberNames()) {
+						measureTerms.add(memberTerm);
+					}
+				} else {
+					String s = String.format("Only memberlists from the measures dimension can be used in rulsets. Memberlist [%s] found in ruleset [%s]",
+							measureTerm, ruleSet.getName());
+					throw new IllegalArgumentException(s);
+				}
+			} else {
+				// No member list - just add measure term to temp list
+				measureTerms.add(measureTerm);
+			}
+		}
+		
+		// Expand all found measure terms and update rule set measure list
+		updatedMeasureList.addAll(dataService.expandExpressionList(measureDim, measureTerms, null));
+		ruleSet.setMeasureList(updatedMeasureList.toArray(new String[0]));
+		
+
+	}
+
+	private static String additiveFormula(List<PafDimMember> members) {
         if (members.size() < 1) return "";
         StringBuilder sb = new StringBuilder("(");
         for (PafDimMember member : members) {
