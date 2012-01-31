@@ -8,7 +8,6 @@ import java.util.Set;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.VersionDef;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;

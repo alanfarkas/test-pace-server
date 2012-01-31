@@ -4086,7 +4086,7 @@ public class PafDataCache implements IPafDataCache {
 			MeasureDef measureDef = getMeasureDef(measure);
 			if (measureDef != null) {
 				boolean isValidMeasure = false;
-				for (int i = 0; i < selMeasureTypes.length && isValidMeasure == false; i++) {
+				for (int i = 0; i < selMeasureTypes.length && !isValidMeasure; i++) {
 					MeasureType selMeasureType = selMeasureTypes[i]; 
 					if (measureDef.getType().equals(selMeasureType)) {
 						filteredMeasures.add(measure);
