@@ -284,7 +284,7 @@ public class RuleMngr {
     public static Rule findLeadingRule(RuleGroup ruleGroup, EvalState evalState, Intersection is) {
 
         Rule leadingRule = null;
-        Intersection test;
+        Intersection testIs;
         Intersection firstInx = null;
         String measureName;
         String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
@@ -293,35 +293,40 @@ public class RuleMngr {
 
         // singleton rule exit, if only 1 rule in rulegroup this has to be the leading rule
         // but this whole operation really needs a rethink
-        if (ruleGroup.getRules().length == 1) return ruleGroup.getRules()[0];
+        if (ruleGroup.getRules().length == 1) 
+        	return ruleGroup.getRules()[0];
         
         for (Rule r : ruleGroup.getRules()) {    
             measureName = r.getFormula().getResultTerm();
             if (evalState.getAppDef().isFunction(measureName)) {
             	// Measure functions don't need the same lead rule logic. Just return the rule
             	// corresponding to the currently processed measure.
-            	test = EvalUtil.translocateIntersection(is, r.getFormula().extractResultFunction(), evalState);
-            	if (test == null) continue;
-            	test.setCoordinate(msrDim, measureName);
+            	testIs = EvalUtil.translocateIntersection(is, r.getFormula().extractResultFunction(), evalState);
+            	if (testIs == null) continue;
+            	testIs.setCoordinate(msrDim, measureName);
             } else {
-            	test = is.clone(); 
-            	test.setCoordinate(msrDim, measureName );
+            	testIs = is.clone(); 
+            	testIs.setCoordinate(msrDim, measureName );
             }
             
             if (!evalState.isRoundingResourcePass()){
-		        if (!evalState.getCurrentLockedCells().contains(test)) {
+            	// Regular pass (no rounding) - select the current rule if the result term is not locked
+            	// and this is a pending change that triggers the rule. (TTN-1708)
+		        if (!evalState.getCurrentLockedCells().contains(testIs) && EvalUtil.changeTriggersFormula(is, r, evalState)) {
 		            leadingRule = r;
 		           
 		            break;
 		        }
             }
             else if (evalState.getAppDef().getAppSettings() != null && evalState.getAppDef().getAppSettings().isEnableRounding()){
-//              pmack - This is the rounding resource pass so take into consideration locks on allocated intersections
+            	// This is the rounding resource pass so take into consideration locks on allocated intersections
             	
-		        if (!evalState.getCurrentLockedCells().contains(test) && !evalState.getAllocatedLockedCells().contains(test)) {
-		            leadingRule = r;
-		           
-		            break;
+		        if (!evalState.getCurrentLockedCells().contains(testIs) && !evalState.getAllocatedLockedCells().contains(testIs)) {
+		        	// Select the current rule if it can be triggered by a pending change. (TTN-1708)
+		            if (EvalUtil.changeTriggersFormula(is, r, evalState)) {
+						leadingRule = r;
+						break;
+					}
 		        }  
 		        else  //Intersection is locked
 		        //If no unlocked intersection exists for an unrounded measure, then unlock the first unrounded measure
@@ -332,14 +337,14 @@ public class RuleMngr {
 		        		//Unrounded measure check
 			        	if (!evalState.getRoundingRules().containsKey(measureName))
 			        	{
-			        		firstUnroundedLockedMeasure = test.clone();	
+			        		firstUnroundedLockedMeasure = testIs.clone();	
 			        		firstUnroundedLockedMeasureRule = r;
 			        	}
 		        	}
 		        }
             }
             if(firstInx == null){
-            	firstInx = test.clone();
+            	firstInx = testIs.clone();
             }
         }
         
