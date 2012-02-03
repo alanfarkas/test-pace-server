@@ -640,9 +640,12 @@ public class PafAppService {
 		final String timeDim = pafApp.getMdbDef().getTimeDim(), yearDim = pafApp.getMdbDef().getYearDim();
     	final PafDimTree timeHorizonTree = clientState.getTimeHorizonTree();
        	final PafDimTree timeTree = clientState.getUowTrees().getTree(timeDim);
-       	final PafDimMember timeRootNode = timeTree.getRootNode();
        	final PafDimTree yearTree = clientState.getUowTrees().getTree(yearDim);
+       	final PafDimMember timeRootNode = timeTree.getRootNode();
        	final PafDimTree mdbTimeTree = dataService.getDimTree(timeDim);
+       	final PafDimTree mdbYearTree = dataService.getDimTree(yearDim);
+       	final PafDimMember lastTimeHorizonPeriod = timeHorizonTree.getLastFloorMbr();
+
     	Set<String> lockedPeriods = new HashSet<String>();
     	String elapsedPeriod = null;
 
@@ -662,21 +665,37 @@ public class PafAppService {
 				// corresponds to a member at the time horizon floor, by using its
 				// last descendant.
 				elapsedPeriodMember = timeHorizonTree.getLastDescendant(elapsedPeriod, (short) 0);
-				elapsedPeriod = elapsedPeriodMember.getKey();
 				break;
 			}
 			
 			// The derived elapsed period is outside uow. At a minimum, the 
-			// current year needs to exist in the uow year tree, and the last
-			// period needs to exist in the mdb time tree. If not, then we 
-			// can't resolve the elapsed period parameters.
-			if (!yearTree.hasMember(currentYearParm) || !mdbTimeTree.hasMember(lastPeriodParm)) break;
+			// current year and the last period need to exist in their
+			// respective mdb trees. If not, then we  can't resolve the 
+			// elapsed period parameters.
+			if (!mdbYearTree.hasMember(currentYearParm) || !mdbTimeTree.hasMember(lastPeriodParm)) break;
 			
-			
-			// Now comes the hard part. There are a feww scenarios that need to
-			// be tested, complicated by the need to support shared hierarchies.
 
-			// Scenario 1 - in the mdb time tree, the last period is a 
+			// Now comes the hard part. There are a few scenarios that need to
+			// be tested, complicated by the need to support shared hierarchies.
+			
+			// Scenario 1 - the current year falls outside the UOW. (TTN-1709)
+			if (!yearTree.hasMember(currentYearParm)) {
+				String firstUowYear = yearTree.getFirstFloorMbr().getKey();
+				int firstYearInx = mdbYearTree.getMemberSortIndex(firstUowYear);
+				int currentYearInx = mdbYearTree.getMemberSortIndex(currentYearParm);
+				if (currentYearInx < firstYearInx) {
+					// Current year occurs before the first year in the UOW -
+					// don't lock any periods.
+					return lockedPeriods;
+				} else {
+					// Current year points to a future year - the entire uow should
+					// be locked.
+					elapsedPeriodMember = lastTimeHorizonPeriod;
+					break;
+				}				
+			}
+
+			// Scenario 2 - in the mdb time tree, the last period is a 
 			// descendant of one of the uow time tree floor members.
 			List<String> timeFloorMbrs = PafDimTree.getMemberNames(timeTree.getLowestMembers(timeTree.getRootNode().getKey()));
 			for (String timeFloorMbr : timeFloorMbrs) {
@@ -697,7 +716,7 @@ public class PafAppService {
 				}
 			}
 
-			// Scenario 2 - the last period is part of a sibling branch, outside the uow,
+			// Scenario 3 - the last period is part of a sibling branch, outside the uow,
 			// and corresponds to a time period that comes before or after the current
 			// time horizon. The trick will be to find the sibling time hierarchy branch
 			// that is related to this uow. Because of alternate time hierarchies, this
@@ -710,20 +729,19 @@ public class PafAppService {
 			PafDimTree fullYearTree = mdbTimeTree.getHighestUniqueSubTreeCopy(timeRootNode.getKey());
 			if (!fullYearTree.hasMember(lastPeriodParm)) break;
 			
-			// The last period member has finally been found. Now determine if it comes
-			// before or after the current uow's time horizon.
+			// The last period member has finally been found. Now determine 
+			// if it comes before or after the current uow's time horizon.
 			PafDimMember firstUowTimeMbr = timeTree.getFirstFloorMbr();
 			int firstUowTimeMbrInx = fullYearTree.getMemberSortIndex(firstUowTimeMbr.getKey());
 			int lastPeriodMbrInx = fullYearTree.getMemberSortIndex(lastPeriodParm);
 			if (lastPeriodMbrInx < firstUowTimeMbrInx) {
 				// Last period points to a period that occurs before the start of
-				// the uow. Don't lock any periods.
+				// the uow - don't lock any periods.
 				return lockedPeriods;
 			} else {
-				// Last period points to a future period. This entire uow should
+				// Last period points to a future period - this entire uow should
 				// be locked.
-				elapsedPeriodMember = timeHorizonTree.getLastFloorMbr();
-				elapsedPeriod = elapsedPeriodMember.getKey();
+				elapsedPeriodMember = lastTimeHorizonPeriod;
 				break;
 			}
 
@@ -751,7 +769,7 @@ public class PafAppService {
     		lockedPeriods.add(member.getKey());
 
     		// if elapsed period is found, break out of loop
-    		if (member.getKey().equals(elapsedPeriod)) {
+    		if (member.getKey().equals(elapsedPeriodMember.getKey())) {
     			break;
     		}
     	}
