@@ -38,6 +38,7 @@ public class PafPlannerConfig implements Cloneable {
 	private Integer uowSizeLarge;
 	private Integer uowSizeMax;
 	private Boolean isUserFilteredUow;
+	private Boolean isUserFilteredMultiSelect;//	//TTN 1733 - role filter
 	private Boolean isDataFilteredUow;
 	private UserFilterSpec userFilterSpec;
 	private DataFilterSpec dataFilterSpec;
@@ -569,6 +570,14 @@ public class PafPlannerConfig implements Cloneable {
 				+ replicateEnabled + ", replicateAllEnabled="
 				+ replicateAllEnabled + ", readOnlyMeasures="
 				+ Arrays.toString(readOnlyMeasures) + "]";
+	}
+	//TTN 1733 - role filter
+	public Boolean getIsUserFilteredMultiSelect() {
+		return isUserFilteredMultiSelect;
+	}
+
+	public void setIsUserFilteredMultiSelect(Boolean isUserFilteredMultiSelect) {
+		this.isUserFilteredMultiSelect = isUserFilteredMultiSelect;
 	}
 	
 	

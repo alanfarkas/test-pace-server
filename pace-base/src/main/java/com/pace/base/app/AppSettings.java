@@ -39,6 +39,7 @@ public class AppSettings {
 	private boolean globalReplicateEnabled;	
 	private boolean globalReplicateAllEnabled;
 	private boolean isGlobalUserFilteredUow;
+	private boolean isGlobalUserFilteredMultiSelect;// TTN 1733 - multi-select 
 	private boolean isGlobalDataFilteredUow;
 	private UserFilterSpec globalUserFilterSpec;
 	private DataFilterSpec globalDataFilterSpec;
@@ -336,6 +337,15 @@ public class AppSettings {
 		if (isGlobalUserFilteredUow != other.isGlobalUserFilteredUow)
 			return false;
 		return true;
+	}
+	//TTN 1733 - role filter 
+	public boolean isGlobalUserFilteredMultiSelect() {
+		return isGlobalUserFilteredMultiSelect;
+	}
+
+	public void setGlobalUserFilteredMultiSelect(
+			boolean isGlobalUserFilteredMultiSelect) {
+		this.isGlobalUserFilteredMultiSelect = isGlobalUserFilteredMultiSelect;
 	}
 
 	
