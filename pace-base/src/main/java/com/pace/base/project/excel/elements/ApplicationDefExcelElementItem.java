@@ -71,7 +71,7 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 	@Override
 	protected void createHeaderListMapEntries() {
 
-		getHeaderListMap().put(getSheetName(), Arrays.asList("app id", "app title", "app settings - global large uow size", "app settings - global max uow size", "app settings - global replicate enabled", "app settings - global replicate all enabled", "app settings - is global user filtered uow", "app settings - is global data filtered uow", "app settings - global data filter spec - dimension name", "app settings - global data filter spec - expression list", "app settings - global user filter spec - attribute dimension names", "app settings - enable rounding", "app colors - non plannable protected color", "app colors - forward plannable protected color", "app colors - protected color", "app colors - system lock color", "app colors - user lock color", "app colors - note color", "alias mapping - dim name", "alias mapping - alias table name", "alias mapping - primary row column format", "alias mapping - additional row column format", "global suppress zero settings - enabled", "global suppress zero settings - visible", "global suppress zero settings - row suppressed", "global suppress zero settings - col suppressed", "mdb def - data source id", "mdb def - measure dim", "mdb def - measure root", "mdb def - time dim", "mdb def - plan type dim", "mdb def - version dim", "mdb def - year dim", "mdb def - hierarchy dimensions", "mdb def - axis priority dimensions", "last period", "current year", "essbase net timeout", "essbase attribute dimension filter list"));
+		getHeaderListMap().put(getSheetName(), Arrays.asList("app id", "app title", "app settings - global large uow size", "app settings - global max uow size", "app settings - global replicate enabled", "app settings - global replicate all enabled", "app settings - is global user filtered uow", "app settings - is global user filtered multi-select", "app settings - is global data filtered uow", "app settings - global data filter spec - dimension name", "app settings - global data filter spec - expression list", "app settings - global user filter spec - attribute dimension names", "app settings - enable rounding", "app colors - non plannable protected color", "app colors - forward plannable protected color", "app colors - protected color", "app colors - system lock color", "app colors - user lock color", "app colors - note color", "alias mapping - dim name", "alias mapping - alias table name", "alias mapping - primary row column format", "alias mapping - additional row column format", "global suppress zero settings - enabled", "global suppress zero settings - visible", "global suppress zero settings - row suppressed", "global suppress zero settings - col suppressed", "mdb def - data source id", "mdb def - measure dim", "mdb def - measure root", "mdb def - time dim", "mdb def - plan type dim", "mdb def - version dim", "mdb def - year dim", "mdb def - hierarchy dimensions", "mdb def - axis priority dimensions", "last period", "current year", "essbase net timeout", "essbase attribute dimension filter list"));
 		
 	}
 
@@ -159,15 +159,20 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						appSettings.setGlobalUserFilteredUow(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
 						break;
 
+					//app settings - is Global User Filtered Multi-Select
+					case 7:	
+						appSettings.setGlobalUserFilteredMultiSelect(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
+						break;
+
 					//app settings - is global data filtered uow
-					case 7:
+					case 8:
 						appSettings.setGlobalDataFilteredUow(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));
 						break;
 
 					//app settings - global data filter spec - dimension name
-					case 8:	
+					case 9:	
 					//app settings - global data filter spec - expression list
-					case 9:
+					case 10:
 						
 						if ( rowIndex == 8 && rowItemList.size() > 0 && row.getRowItem(rowIndex + 1).size() > 0) {
 							
@@ -228,7 +233,7 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						break;
 						
 					//app settings - global user filter spec - attribute dimension names
-					case 10:
+					case 11:
 						
 						List<String> attributeDimNameList = CollectionsUtil.arrayToListPruneNulls(PafExcelUtil.getStringAr(getProjectElementId(), rowItemList));
 											
@@ -245,18 +250,18 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						break;
 						
 					//app settings - enable rounding
-					case 11:
+					case 12:
 						
 						appSettings.setEnableRounding(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));						
 						break;
 						
 					//app colors
-					case 12:						
-					case 13:
+					case 13:						
 					case 14:
 					case 15:
 					case 16:
 					case 17:
+					case 18:
 						
 						AppColors appColors = appSettings.getAppColors();
 						
@@ -304,10 +309,10 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						break;
 						
 					//alias mappings
-					case 18:	
 					case 19:	
-					case 20:
+					case 20:	
 					case 21:
+					case 22:
 						
 						//alias mapping - dim name
 						if ( rowIndex == 18 ) {
@@ -424,10 +429,10 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						break;	
 						
 					//global suppress zero settings
-					case 22:	
 					case 23:	
 					case 24:	
-					case 25:
+					case 25:	
+					case 26:
 						
 						SuppressZeroSettings szs = appSettings.getGlobalSuppressZeroSettings();
 						
@@ -465,49 +470,49 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						break;
 						
 					//mdb def - data source id
-					case 26:
+					case 27:
 						mdbDef.setDataSourceId(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
 						break;
 						
 					//mdb def - measure dim
-					case 27:
+					case 28:
 						mdbDef.setMeasureDim(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
 						break;
 	
 					//mdb def - measure root
-					case 28:							
+					case 29:							
 						mdbDef.setMeasureRoot(PafExcelUtil.getString(getProjectElementId(), firstValueObject));
 						break;
 
 					//mdb def - time dim
-					case 29:	
+					case 30:	
 						mdbDef.setTimeDim(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
 						break;
 						
 					//mdb def - plan type dim
-					case 30:	
+					case 31:	
 						mdbDef.setPlanTypeDim(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
 						break;
 						
 					//mdb def - version dim
-					case 31:	
+					case 32:	
 						mdbDef.setVersionDim(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
 						break;
 						
 					//mdb def - year dim
-					case 32:
+					case 33:
 						mdbDef.setYearDim(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));
 						break;
 						
 					//mdb def - hierarchy dimensions
-					case 33:	
+					case 34:	
 						
 						List<String> hierDimList = CollectionsUtil.arrayToListPruneNulls(PafExcelUtil.getStringAr(getProjectElementId(), rowItemList, true));
 						mdbDef.setHierDims(hierDimList.toArray(new String[0]));
 						break;
 						
 					//mdb def - axis priority dimensions
-					case 34:
+					case 35:
 						
 						List<String> axisPriorityDimList = CollectionsUtil.arrayToListPruneNulls(PafExcelUtil.getStringAr(getProjectElementId(), rowItemList));
 
@@ -519,22 +524,22 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						break;
 						
 					//last period
-					case 35:	
+					case 36:	
 						pafApp.setLastPeriod(PafExcelUtil.getString(getProjectElementId(), firstValueObject));
 						break;
 						
 					//current year
-					case 36:	
+					case 37:	
 						pafApp.setCurrentYear(PafExcelUtil.getString(getProjectElementId(), firstValueObject));
 						break;
 						
 					//essbase net timeout
-					case 37:	
+					case 38:	
 						pafApp.setEssNetTimeOut(PafExcelUtil.getInteger(getProjectElementId(), firstValueObject));	
 						break;
 						
 					//essbase attribute dimension filter list
-					case 38:	
+					case 39:	
 						
 						List<String> essbaseAttDimFilterList = CollectionsUtil.arrayToListPruneNulls(PafExcelUtil.getStringAr(getProjectElementId(), rowItemList));
 						
@@ -629,8 +634,11 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 					//app settings - is global user filtered uow
 					excelRow.addRowItem(6, PafExcelValueObject.createFromBoolean(as.isGlobalUserFilteredUow()));
 					
+					//app settings - is global user filtered multi-select
+					excelRow.addRowItem(7, PafExcelValueObject.createFromBoolean(as.isGlobalUserFilteredMultiSelect()));
+					
 					//app settings - is global data filtered uow
-					excelRow.addRowItem(7, PafExcelValueObject.createFromBoolean(as.isGlobalDataFilteredUow()));
+					excelRow.addRowItem(8, PafExcelValueObject.createFromBoolean(as.isGlobalDataFilteredUow()));
 										
 					//global data filter spec
 					if ( as.getGlobalDataFilterSpec() != null ) {
@@ -650,11 +658,11 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 								//app settings - global data filter spec - dimension name
 								if ( dimName != null && dimensionRefMap != null && dimensionRefMap.containsKey(dimName) ) {
 									
-									excelRow.addRowItem(8, PafExcelValueObject.createFromFormula(dimensionRefMap.get(dimName)));
+									excelRow.addRowItem(9, PafExcelValueObject.createFromFormula(dimensionRefMap.get(dimName)));
 									
 								} else {
 								
-									excelRow.addRowItem(8, PafExcelValueObject.createFromString(dimName));
+									excelRow.addRowItem(9, PafExcelValueObject.createFromString(dimName));
 									
 								}
 								
@@ -663,12 +671,12 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 									if ( ndx++ != 0 ) {
 
 										//app settings - global data filter spec - dimension name ( create blanks for additional items)
-										excelRow.addRowItem(8, PafExcelValueObject.createBlank());
+										excelRow.addRowItem(9, PafExcelValueObject.createBlank());
 										
 									}
 									
 									//app settings - global data filter spec - expression list
-									excelRow.addRowItem(9, PafExcelValueObject.createFromString(expression));
+									excelRow.addRowItem(10, PafExcelValueObject.createFromString(expression));
 									
 								}
 								
@@ -687,7 +695,7 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 							
 							for (String attrDimName : ufs.getAttrDimNames()) {
 								
-								excelRow.addRowItem(10, PafExcelValueObject.createFromString(attrDimName));
+								excelRow.addRowItem(11, PafExcelValueObject.createFromString(attrDimName));
 								
 							}
 							
@@ -696,27 +704,27 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 					}
 					
 					//app settings - enable rounding
-					excelRow.addRowItem(11, PafExcelValueObject.createFromBoolean(as.isEnableRounding()));
+					excelRow.addRowItem(12, PafExcelValueObject.createFromBoolean(as.isEnableRounding()));
 					
 					if ( as.getAppColors() != null ) {
 						
 						//app colors - non plannable protected color
-						excelRow.addRowItem(12, PafExcelValueObject.createFromString(as.getAppColors().getNonPlannableProtectedColor()));
+						excelRow.addRowItem(13, PafExcelValueObject.createFromString(as.getAppColors().getNonPlannableProtectedColor()));
 						
 						//app colors - forward plannable protected color
-						excelRow.addRowItem(13, PafExcelValueObject.createFromString(as.getAppColors().getForwardPlannableProtectedColor()));
+						excelRow.addRowItem(14, PafExcelValueObject.createFromString(as.getAppColors().getForwardPlannableProtectedColor()));
 						
 						//app colors - protected color
-						excelRow.addRowItem(14, PafExcelValueObject.createFromString(as.getAppColors().getProtectedColor()));
+						excelRow.addRowItem(15, PafExcelValueObject.createFromString(as.getAppColors().getProtectedColor()));
 						
 						//app colors - system lock color
-						excelRow.addRowItem(15, PafExcelValueObject.createFromString(as.getAppColors().getSystemLockColor()));
+						excelRow.addRowItem(16, PafExcelValueObject.createFromString(as.getAppColors().getSystemLockColor()));
 						
 						//app colors - user lock color
-						excelRow.addRowItem(16, PafExcelValueObject.createFromString(as.getAppColors().getUserLockColor()));
+						excelRow.addRowItem(17, PafExcelValueObject.createFromString(as.getAppColors().getUserLockColor()));
 						
 						//app colors - note color
-						excelRow.addRowItem(17, PafExcelValueObject.createFromString(as.getAppColors().getNoteColor()));
+						excelRow.addRowItem(18, PafExcelValueObject.createFromString(as.getAppColors().getNoteColor()));
 					}
 
 					//alias mappings
@@ -728,22 +736,22 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 							
 							if ( am.getDimName() != null && dimensionRefMap != null && dimensionRefMap.containsKey(am.getDimName()) ) {
 														
-								excelRow.addRowItem(18, PafExcelValueObject.createFromFormula(dimensionRefMap.get(am.getDimName())));
+								excelRow.addRowItem(19, PafExcelValueObject.createFromFormula(dimensionRefMap.get(am.getDimName())));
 								
 							} else {
 							
-								excelRow.addRowItem(18, PafExcelValueObject.createFromString(am.getDimName()));
+								excelRow.addRowItem(19, PafExcelValueObject.createFromString(am.getDimName()));
 								
 							}
 														
 							//alias mapping - alias table name
-							excelRow.addRowItem(19, PafExcelValueObject.createFromString(am.getAliasTableName()));
+							excelRow.addRowItem(20, PafExcelValueObject.createFromString(am.getAliasTableName()));
 							
 							//alias mapping - primary row column format
-							excelRow.addRowItem(20, PafExcelValueObject.createFromString(am.getPrimaryRowColumnFormat()));
+							excelRow.addRowItem(21, PafExcelValueObject.createFromString(am.getPrimaryRowColumnFormat()));
 							
 							//alias mapping - additional row column format
-							excelRow.addRowItem(21, PafExcelValueObject.createFromString(am.getAdditionalRowColumnFormat()));
+							excelRow.addRowItem(22, PafExcelValueObject.createFromString(am.getAdditionalRowColumnFormat()));
 														
 						}
 						
@@ -755,16 +763,16 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						SuppressZeroSettings szs = as.getGlobalSuppressZeroSettings();
 						
 						//global suppress zero settings - enabled	
-						excelRow.addRowItem(22, PafExcelValueObject.createFromBoolean(szs.getEnabled()));
+						excelRow.addRowItem(23, PafExcelValueObject.createFromBoolean(szs.getEnabled()));
 						
 						//global suppress zero settings - visible
-						excelRow.addRowItem(23, PafExcelValueObject.createFromBoolean(szs.getVisible()));
+						excelRow.addRowItem(24, PafExcelValueObject.createFromBoolean(szs.getVisible()));
 						
 						//global suppress zero settings - row suppressed	
-						excelRow.addRowItem(24, PafExcelValueObject.createFromBoolean(szs.getRowsSuppressed()));
+						excelRow.addRowItem(25, PafExcelValueObject.createFromBoolean(szs.getRowsSuppressed()));
 						
 						//global suppress zero settings - col suppressed
-						excelRow.addRowItem(25, PafExcelValueObject.createFromBoolean(szs.getColumnsSuppressed()));
+						excelRow.addRowItem(26, PafExcelValueObject.createFromBoolean(szs.getColumnsSuppressed()));
 
 						
 					}
@@ -776,32 +784,32 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 					MdbDef mdbDef = appDef.getMdbDef();
 					
 					//mdb def - data source id	
-					excelRow.addRowItem(26, PafExcelValueObject.createFromString(mdbDef.getDataSourceId()));
+					excelRow.addRowItem(27, PafExcelValueObject.createFromString(mdbDef.getDataSourceId()));
 					
 					//mdb def - measure dim
-					excelRow.addRowItem(27, PafExcelValueObject.createFromString(mdbDef.getMeasureDim()));
+					excelRow.addRowItem(28, PafExcelValueObject.createFromString(mdbDef.getMeasureDim()));
 					
 					//mdb def - measure root
-					excelRow.addRowItem(28, PafExcelValueObject.createFromString(mdbDef.getMeasureRoot()));
+					excelRow.addRowItem(29, PafExcelValueObject.createFromString(mdbDef.getMeasureRoot()));
 					
 					//mdb def - time dim	
-					excelRow.addRowItem(29, PafExcelValueObject.createFromString(mdbDef.getTimeDim()));
+					excelRow.addRowItem(30, PafExcelValueObject.createFromString(mdbDef.getTimeDim()));
 					
 					//mdb def - plan type dim	
-					excelRow.addRowItem(30, PafExcelValueObject.createFromString(mdbDef.getPlanTypeDim()));
+					excelRow.addRowItem(31, PafExcelValueObject.createFromString(mdbDef.getPlanTypeDim()));
 					
 					//mdb def - version dim
-					excelRow.addRowItem(31, PafExcelValueObject.createFromString(mdbDef.getVersionDim()));
+					excelRow.addRowItem(32, PafExcelValueObject.createFromString(mdbDef.getVersionDim()));
 					
 					//mdb def - year dim
-					excelRow.addRowItem(32, PafExcelValueObject.createFromString(mdbDef.getYearDim()));
+					excelRow.addRowItem(33, PafExcelValueObject.createFromString(mdbDef.getYearDim()));
 					
 					//mdb def - hierarchy dimensions	
 					if ( mdbDef.getHierDims() != null ) {
 						
 						for (String hierDim : mdbDef.getHierDims()) {
 							
-							excelRow.addRowItem(33, PafExcelValueObject.createFromString(hierDim));
+							excelRow.addRowItem(34, PafExcelValueObject.createFromString(hierDim));
 							
 						}
 						
@@ -814,11 +822,11 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 							
 							if ( axisPriorityDim != null && dimensionRefMap != null && dimensionRefMap.containsKey(axisPriorityDim) ) {
 								
-								excelRow.addRowItem(34, PafExcelValueObject.createFromFormula(dimensionRefMap.get(axisPriorityDim)));
+								excelRow.addRowItem(35, PafExcelValueObject.createFromFormula(dimensionRefMap.get(axisPriorityDim)));
 								
 							} else {
 							
-								excelRow.addRowItem(34, PafExcelValueObject.createFromString(axisPriorityDim));
+								excelRow.addRowItem(35, PafExcelValueObject.createFromString(axisPriorityDim));
 								
 							}
 							
@@ -829,21 +837,21 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 				}
 
 				//last period
-				excelRow.addRowItem(35, PafExcelValueObject.createFromString(appDef.getLastPeriod()));
+				excelRow.addRowItem(36, PafExcelValueObject.createFromString(appDef.getLastPeriod()));
 				
 				//current year
-				excelRow.addRowItem(36, PafExcelValueObject.createFromString(appDef.getCurrentYear()));
+				excelRow.addRowItem(37, PafExcelValueObject.createFromString(appDef.getCurrentYear()));
 				
 				//essbase net timeout	
 				
-				excelRow.addRowItem(37, PafExcelValueObject.createFromInteger(appDef.getEssNetTimeOut()));
+				excelRow.addRowItem(38, PafExcelValueObject.createFromInteger(appDef.getEssNetTimeOut()));
 				
 				//essbase attribute dimension filter list
 				if ( appDef.getEssAttrDimFilter() != null ) {
 					
 					for (String essAttDimFilter : appDef.getEssAttrDimFilter() ) {
 						
-						excelRow.addRowItem(38, PafExcelValueObject.createFromString(essAttDimFilter));
+						excelRow.addRowItem(39, PafExcelValueObject.createFromString(essAttDimFilter));
 						
 					}
 					
