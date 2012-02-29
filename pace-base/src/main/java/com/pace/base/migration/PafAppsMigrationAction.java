@@ -94,7 +94,7 @@ public class PafAppsMigrationAction extends MigrationAction {
 								
 				//if app settings and app colors exists
 				//TODO: if ( pafApp !=null && pafApp.getAppSettings() != null && pafApp.getAppSettings().getAppColors() != null	) {
-				if ( pafApp !=null && pafApp.getAppSettings() != null) {
+				if ( pafApp.getAppSettings() != null) {
 					
 					//get global alias mappings from app settings
 					AliasMapping[] globalAliasMappings = pafApp.getAppSettings().getGlobalAliasMappings();
@@ -143,7 +143,7 @@ public class PafAppsMigrationAction extends MigrationAction {
 							|| appColors.getSystemLockColor() == null 
 							|| appColors.getUserLockColor() == null ) {
 						
-						status = MigrationActionStatus.NotStarted;
+						return MigrationActionStatus.NotStarted;
 						
 					}
 					
@@ -153,26 +153,29 @@ public class PafAppsMigrationAction extends MigrationAction {
 					if ( suppressZeros == null || suppressZeros.getColumnsSuppressed() == null || suppressZeros.getEnabled() == null
 							|| suppressZeros.getRowsSuppressed() == null || suppressZeros.getVisible() == null ) {
 						
-						status = MigrationActionStatus.NotStarted;
+						return MigrationActionStatus.NotStarted;
 					}
 					//End Suppress Zeros for null check. 
 					
-					//Begin Season check
+					//TTN 1733 - Multi-select role filter
+					if( pafApp.getAppSettings().isGlobalUserFilteredMultiSelect() == null ) {
+						
+						return MigrationActionStatus.NotStarted;
+
+					}
+					
+				}
+				
+				//Begin Season check
+				if( pafApp.getSeasonList() != null ) {
 					Set<Season> seasons = pafApp.getSeasonList().getSeasons();
 					for( Season season : seasons ) {
 						if( season.getYears() == null || season.getYears().length == 0 || season.getYear() != null ) {
 							return MigrationActionStatus.NotStarted;
 						}
 					}
-					//End Season check
-					
-					if( pafApp.getAppSettings().isGlobalUserFilteredMultiSelect() == null ) {
-						
-						status = MigrationActionStatus.NotStarted;
-
-					}
 				}
-				
+				//End Season check
 			}
 
 		}
