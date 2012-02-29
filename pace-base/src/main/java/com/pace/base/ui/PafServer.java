@@ -15,6 +15,8 @@ public class PafServer implements Comparable, Cloneable {
 	private String webappName;
 	private String wsdlServiceName;
 	private Long urlTimeoutInMilliseconds;
+	private Long serviceConnectionTimeoutInMilliseconds;
+	private Long serviceReceiveTimeoutInMilliseconds;
 	private String startupFile;
 	private String shutdownFile;
 	private Integer jndiPort;
@@ -315,8 +317,6 @@ public class PafServer implements Comparable, Cloneable {
 		return https;
 	}
 
-	
-
 	public String getOsServiceName() {
 		return osServiceName;
 	}
@@ -332,43 +332,61 @@ public class PafServer implements Comparable, Cloneable {
 	public void setJmsMessagingPort(Integer jmsMessagingPort) {
 		this.jmsMessagingPort = jmsMessagingPort;
 	}
+			
 
+	/**
+	 * @return the serviceConnectionTimeoutInMilliseconds
+	 */
+	public Long getServiceConnectionTimeoutInMilliseconds() {
+		return serviceConnectionTimeoutInMilliseconds;
+	}
+
+	/**
+	 * @param serviceConnectionTimeoutInMilliseconds the serviceConnectionTimeoutInMilliseconds to set
+	 */
+	public void setServiceConnectionTimeoutInMilliseconds(
+			Long serviceConnectionTimeoutInMilliseconds) {
+		this.serviceConnectionTimeoutInMilliseconds = serviceConnectionTimeoutInMilliseconds;
+	}
+
+	/**
+	 * @return the serviceReceieveTimeoutInMilliseconds
+	 */
+	public Long getServiceReceiveTimeoutInMilliseconds() {
+		return serviceReceiveTimeoutInMilliseconds;
+	}
+
+	/**
+	 * @param serviceReceieveTimeoutInMilliseconds the serviceReceieveTimeoutInMilliseconds to set
+	 */
+	public void setServiceReceiveTimeoutInMilliseconds(
+			Long serviceReceiveTimeoutInMilliseconds) {
+		this.serviceReceiveTimeoutInMilliseconds = serviceReceiveTimeoutInMilliseconds;
+	}
+	
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
-		return "PafServer ["
-				+ (name != null ? "name=" + name + ", " : "")
-				+ (host != null ? "host=" + host + ", " : "")
-				+ (port != null ? "port=" + port + ", " : "")
-				+ (homeDirectory != null ? "homeDirectory=" + homeDirectory
-						+ ", " : "")
-				+ "defaultServer="
-				+ defaultServer
-				+ ", "
-				+ (webappName != null ? "webappName=" + webappName + ", " : "")
-				+ (wsdlServiceName != null ? "wsdlServiceName="
-						+ wsdlServiceName + ", " : "")
-				+ (urlTimeoutInMilliseconds != null ? "urlTimeoutInMilliseconds="
-						+ urlTimeoutInMilliseconds + ", "
-						: "")
-				+ (startupFile != null ? "startupFile=" + startupFile + ", "
-						: "")
-				+ (shutdownFile != null ? "shutdownFile=" + shutdownFile + ", "
-						: "")
-				+ (jndiPort != null ? "jndiPort=" + jndiPort + ", " : "")
-				+ (serverStartupTimeoutInMilliseconds != null ? "serverStartupTimeoutInMilliseconds="
-						+ serverStartupTimeoutInMilliseconds + ", "
-						: "")
-				+ "doesNotPromptOnHotDeploy="
-				+ doesNotPromptOnHotDeploy
-				+ ", doesNotPromptOnHotRefresh="
-				+ doesNotPromptOnHotRefresh
-				+ ", https="
-				+ https
-				+ ", "
-				+ (osServiceName != null ? "osServiceName=" + osServiceName + ", "
-						: "")
-				+ (jmsMessagingPort != null ? "jmsMessagingPort="
-						+ jmsMessagingPort : "") + "]";
+		return "PafServer [name=" + name + ", host=" + host + ", port=" + port
+				+ ", homeDirectory=" + homeDirectory + ", defaultServer="
+				+ defaultServer + ", webappName=" + webappName
+				+ ", wsdlServiceName=" + wsdlServiceName
+				+ ", urlTimeoutInMilliseconds=" + urlTimeoutInMilliseconds
+				+ ", serviceConnectionTimeoutInMilliseconds="
+				+ serviceConnectionTimeoutInMilliseconds
+				+ ", serviceReceieveTimeoutInMilliseconds="
+				+ serviceReceiveTimeoutInMilliseconds + ", startupFile="
+				+ startupFile + ", shutdownFile=" + shutdownFile
+				+ ", jndiPort=" + jndiPort
+				+ ", serverStartupTimeoutInMilliseconds="
+				+ serverStartupTimeoutInMilliseconds
+				+ ", doesNotPromptOnHotDeploy=" + doesNotPromptOnHotDeploy
+				+ ", doesNotPromptOnHotRefresh=" + doesNotPromptOnHotRefresh
+				+ ", https=" + https + ", osServiceName=" + osServiceName
+				+ ", jmsMessagingPort=" + jmsMessagingPort + "]";
 	}
 
 	/* (non-Javadoc)
