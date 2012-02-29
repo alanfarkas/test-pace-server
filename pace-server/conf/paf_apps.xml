@@ -5,6 +5,7 @@
       <globalReplicateEnabled>true</globalReplicateEnabled>
       <globalReplicateAllEnabled>true</globalReplicateAllEnabled>
       <isGlobalUserFilteredUow>false</isGlobalUserFilteredUow>
+      <isGlobalUserFilteredMultiSelect>false</isGlobalUserFilteredMultiSelect>
       <isGlobalDataFilteredUow>false</isGlobalDataFilteredUow>
       <enableRounding>false</enableRounding>
       <appColors>
