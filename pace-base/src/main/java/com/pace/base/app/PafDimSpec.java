@@ -33,8 +33,9 @@ public class PafDimSpec implements Cloneable {
 
 	private transient final static Logger logger = Logger.getLogger(PafDimSpec.class);
 	
-	@Deprecated
-	private boolean isSelectable;
+	//TTN 1738 - removing isSelectable property
+//	@Deprecated
+//	private transient boolean isSelectable;
 	
     private String dimension;
     
@@ -67,18 +68,20 @@ public class PafDimSpec implements Cloneable {
     public void setExpressionList(String[] expressionList) {
         this.expressionList = expressionList;
     }
-	/**
-	 * @return Returns the isSelectable.
-	 */
-	public boolean isSelectable() {
-		return isSelectable;
-	}
-	/**
-	 * @param isSelectable The isSelectable to set.
-	 */
-	public void setSelectable(boolean isSelectable) {
-		this.isSelectable = isSelectable;
-	}
+
+	//TTN 1738 - removing isSelectable property
+//	/**
+//	 * @return Returns the isSelectable.
+//	 */
+//	public boolean isSelectable() {
+//		return isSelectable;
+//	}
+//	/**
+//	 * @param isSelectable The isSelectable to set.
+//	 */
+//	public void setSelectable(boolean isSelectable) {
+//		this.isSelectable = isSelectable;
+//	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.PafDimSpec#clone()

@@ -187,7 +187,7 @@ public class PafUserSecurityTest extends TestCase {
 		
 		pafDimSpec1.setDimension(DIM1);
 		pafDimSpec1.setExpressionList(new String[] { EXPRESSION_1, EXPRESSION_2, EXPRESSION_3 });
-		pafDimSpec1.setSelectable(true);
+//		pafDimSpec1.setSelectable(true);
 		
 		pafWorkSpec1.setDimSpec(new PafDimSpec[] { pafDimSpec1 });
 				
