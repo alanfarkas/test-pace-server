@@ -291,8 +291,8 @@ public class RuleMngr {
         Intersection firstUnroundedLockedMeasure = null;
         Rule firstUnroundedLockedMeasureRule = null;
 
-        // singleton rule exit, if only 1 rule in rulegroup this has to be the leading rule
-        // but this whole operation really needs a rethink
+        // singleton rule exit, if only 1 rule in rule group this has to be the leading rule
+        // but this whole operation really needs a re-think
         if (ruleGroup.getRules().length == 1) 
         	return ruleGroup.getRules()[0];
         
@@ -310,9 +310,10 @@ public class RuleMngr {
             }
             
             if (!evalState.isRoundingResourcePass()){
-            	// Regular pass (no rounding) - select the current rule if the result term is not locked
-            	// and this is a pending change that triggers the rule. (TTN-1708)
-		        if (!evalState.getCurrentLockedCells().contains(testIs) && EvalUtil.changeTriggersFormula(is, r, evalState)) {
+//            	// Regular pass (no rounding) - select the current rule if the result term is not locked
+                if (!evalState.getCurrentLockedCells().contains(testIs)) {
+//            	// and this is a pending change that triggers the rule. (TTN-1708)
+//		        if (!evalState.getCurrentLockedCells().contains(testIs) && EvalUtil.changeTriggersFormula(is, r, evalState)) {
 		            leadingRule = r;
 		           
 		            break;
@@ -322,11 +323,11 @@ public class RuleMngr {
             	// This is the rounding resource pass so take into consideration locks on allocated intersections
             	
 		        if (!evalState.getCurrentLockedCells().contains(testIs) && !evalState.getAllocatedLockedCells().contains(testIs)) {
-		        	// Select the current rule if it can be triggered by a pending change. (TTN-1708)
-		            if (EvalUtil.changeTriggersFormula(is, r, evalState)) {
+//		        	// Select the current rule if it can be triggered by a pending change. (TTN-1708)
+//		            if (EvalUtil.changeTriggersFormula(is, r, evalState)) {
 						leadingRule = r;
 						break;
-					}
+//					}
 		        }  
 		        else  //Intersection is locked
 		        //If no unlocked intersection exists for an unrounded measure, then unlock the first unrounded measure
