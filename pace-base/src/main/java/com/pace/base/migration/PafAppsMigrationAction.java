@@ -157,13 +157,6 @@ public class PafAppsMigrationAction extends MigrationAction {
 					}
 					//End Suppress Zeros for null check. 
 					
-					//TTN 1733 - Multi-select role filter
-					if( pafApp.getAppSettings().isGlobalUserFilteredMultiSelect() == null ) {
-						
-						return MigrationActionStatus.NotStarted;
-
-					}
-					
 				}
 				
 				//Begin Season check
