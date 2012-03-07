@@ -436,7 +436,7 @@ public class PafAppService {
 			
 		}
 		
-		//TTN 1733 - Role Filter Single Select - Design Summary
+		//TTN 1733 - Role Filter Single Select
 		if (plannerConfig.getIsUserFilteredMultiSelect() == null) {
 			// then try to use a global setting
 			if (appSet != null && appSet.isGlobalUserFilteredMultiSelect() ) {
