@@ -18,7 +18,6 @@
  */
 package com.pace.base.app;
 
-import com.pace.base.ui.PafServer;
 
 /**
  * Contains a group name and domain name.

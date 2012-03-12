@@ -20,11 +20,8 @@ package com.pace.base.app;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import com.pace.base.PafBaseConstants;
-import com.pace.base.PafErrSeverity;
-import com.pace.base.PafException;
 
 /**
  * Variance Formula
