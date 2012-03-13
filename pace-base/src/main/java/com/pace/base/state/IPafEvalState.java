@@ -46,4 +46,5 @@ public interface IPafEvalState {
 	public String getTimeDim();
 	public List<String> getTriggeredAggMsrs();
 	public String getTimeHorizonDim();
+	public String[] getAxisSortPriority();
 }

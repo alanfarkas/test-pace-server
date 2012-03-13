@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.SortOrder;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
@@ -46,30 +47,50 @@ public class AllocFunc extends AbstractFunction {
 
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 
-    	// convenience variables
+    	
+    	// This method use allocation logic cloned from the Evaluation package. Simulating the
+    	// "real" allocation logic, any locked target intersections will be allocated first
+    	// from bottom to top. Lastly, the current intersection, containing the "msrToAllocate",
+    	// is allocated.
+
+  
+    	// Convenience variables
       	String msrDim = dataCache.getMeasureDim();
+        String[] axisSortSeq = evalState.getAxisSortPriority();
+        HashSet<Intersection> allocIntersections = new HashSet<Intersection>();
+
  	
     	// Validate function parameters
     	validateParms(evalState);
    	   	 	
-    	
+    	  	
         // targets holds all intersections to allocate into.
     	// The lists have been processed by validateParms
     	// initialize it off the list of target measures and the eval state collections
     	
+    	
+    	// Get the list of intersections to allocate. (TTN-1743)
+    	allocIntersections.add(sourceIs);
+    	for (String measure : this.targetMsrs) {
+    		Intersection allocTarget = sourceIs.clone();
+			allocTarget.setCoordinate(msrDim, measure);
+			if (evalState.getCurrentLockedCells().contains(allocTarget)
+					) {
+				allocIntersections.add(allocTarget);
+			}
+    	}
+    	
+    	
+    	// Sort intersections in ascending order and allocate. (TTN-1743)
+        Intersection[] allocCells = EvalUtil.sortIntersectionsByAxis(allocIntersections.toArray(new Intersection[0]), 
+        		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);            
+    	for (Intersection allocCell : allocCells) {
+            Set<Intersection> allocTargets = new HashSet<Intersection>();
+			allocTargets.addAll(EvalUtil.buildFloorIntersections(allocCell, evalState));  					
+	        allocateChange(allocCell, allocTargets, evalState, dataCache);    		
+    	}
 
-        Set<Intersection> allocTargets = new HashSet<Intersection>();
-        	for (String msr : this.targetMsrs) {
-        		// for each msr in the list I need the equivalent intersection populated from the sourceIsx
-				Intersection allocTarget = sourceIs.clone();
-				allocTarget.setCoordinate(msrDim, msr);
-				allocTargets.addAll(EvalUtil.buildFloorIntersections(allocTarget, evalState));  					
-        	}
-
-        // perform allocation	
-        allocateChange(sourceIs, allocTargets, evalState, dataCache);
-        
-        // aggregate allocated measures. this is necessary to support multi-tiered
+         // aggregate allocated measures. this is necessary to support multi-tiered
         // measure hierarchies.
 //        SumFunc.aggMeasures(sourceIs, this.aggMsrs, dataCache, evalState);
 //        evalState.getTriggeredAggMsrs().addAll(this.aggMsrs);
