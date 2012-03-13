@@ -58,6 +58,7 @@ public class AllocFunc extends AbstractFunction {
       	String msrDim = dataCache.getMeasureDim();
         String[] axisSortSeq = evalState.getAxisSortPriority();
         HashSet<Intersection> allocIntersections = new HashSet<Intersection>();
+        PafDimTree measureTree = evalState.getClientState().getUowTrees().getTree(msrDim);
 
  	
     	// Validate function parameters
@@ -86,7 +87,14 @@ public class AllocFunc extends AbstractFunction {
         		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);            
     	for (Intersection allocCell : allocCells) {
             Set<Intersection> allocTargets = new HashSet<Intersection>();
-			allocTargets.addAll(EvalUtil.buildFloorIntersections(allocCell, evalState));  					
+            String allocMeasure = allocCell.getCoordinate(msrDim);
+            List<String> descMeasures = measureTree.getLowestMemberNames(allocMeasure);
+            descMeasures.retainAll(this.targetMsrs);
+            Intersection targetCell = allocCell.clone();
+            for (String targetMeasure : descMeasures) {
+            	targetCell.setCoordinate(msrDim, targetMeasure);
+            	allocTargets.addAll(EvalUtil.buildFloorIntersections(targetCell, evalState));  
+            }
 	        allocateChange(allocCell, allocTargets, evalState, dataCache);    		
     	}
 
