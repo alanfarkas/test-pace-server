@@ -570,6 +570,9 @@ public class PafBaseTree extends PafDimTree {
 		simpleBaseTree = new PafSimpleBaseTree(getId(), simpleRoot.getKey(), aliasTableNames);
 		simpleTraversalList.add(simpleRoot);
 
+		// Add non-complex properties. (TTN-1748)
+		simpleBaseTree.setDiscontig(isDiscontig());
+		
 		// Walk PafBaseTree and fill PafSimpleBaseTree with simplified versions of PafBaseMember descendants
 		logger.debug("Filling PafSimpleBaseTree - Walking PafBaseTree...");
 		List<PafDimMember> children = root.getChildren();

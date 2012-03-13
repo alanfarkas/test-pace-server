@@ -37,6 +37,7 @@ public class PafSimpleDimTree implements IPafCompressedObj {
     private String rootKey;
     private String[] aliasTableNames  = null;
     private PafSimpleDimMember[] memberObjects;
+    private boolean isDiscontig = false;
     
     private String compAliasTableNames;
     private String compMemberIndex;
@@ -249,6 +250,20 @@ public class PafSimpleDimTree implements IPafCompressedObj {
 	public void setMemberObjects(PafSimpleDimMember[] memberObjects) {
 		this.memberObjects = memberObjects;
 	}
+	
+	/**
+	 * @return the isDiscontig
+	 */
+	public boolean isDiscontig() {
+		return isDiscontig;
+	}
+	/**
+	 * @param isDiscontig the isDiscontig to set
+	 */
+	public void setDiscontig(boolean isDiscontig) {
+		this.isDiscontig = isDiscontig;
+	}
+
 	public String getCompAliasTableNames() {
 		return compAliasTableNames;
 	}

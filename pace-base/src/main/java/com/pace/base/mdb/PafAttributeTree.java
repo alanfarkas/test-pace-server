@@ -333,6 +333,9 @@ public class PafAttributeTree extends PafDimTree {
 		simpleAttributeTree = new PafSimpleAttributeTree(getId(), simpleRoot.getKey(), aliasTableNames);
 		simpleTraversalList.add(simpleRoot);
 
+		// Add non-complex properties. (TTN-1748)
+		simpleAttributeTree.setDiscontig(isDiscontig());
+		
 		// Walk PafAttributeTree and fill PafSimpleAttributeTree with simplified versions of PafBaseMember descendants
 		logger.debug("Filling PafSimpleAttributeTree - Walking PafAttributeTree...");
 		List<PafDimMember> children = root.getChildren();
