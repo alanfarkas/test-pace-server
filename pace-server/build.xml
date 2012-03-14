@@ -3,7 +3,7 @@
 
 	<property name="proj_root" location="${basedir}" />
 	<property name="wrksp_root" location="${proj_root}\.."/>	
-	<property name="admin_wrksp_root" location="${proj_root}\.." />
+	<property name="admin_wrksp_root" location="c:\adminconsole\plugins" />
 	<property name="proj_wrksp" location="${wrksp_root}\.."/>
 
 	<property name="client_dir" location="${proj_root}\client" />	
@@ -201,37 +201,41 @@
 	</target>
 	-->
 
-	<target name="make-base-jar" > 
+	<target name="make-basejar-wsdl-clientjar"> 
 		
-		<ant antfile="build.xml"
-			dir="${wrksp_root}\pace-base" target="deploy"/>	
-				
-		<echo>"Copying base jar to Admin Console"</echo>		
-		<copy file="${client_dir}\dist\pace-base.jar" todir="${extra_jars_plugin}\lib" />
-		
-	</target>	
-	
-	<target name="make-client-jar" > 
-		
-		<ant antfile="build.xml"
-			dir="${wrksp_root}\pace-base" target="deploy"/>	
-				
-		<echo>"Compiling client WSDL and classes"</echo>
+		<echo>"Cleaning up class and dist folders"</echo>
 		<delete dir="${client_dir}\classes" />
+		<delete dir="${client_dir}\dist" />
 		<mkdir dir="${client_dir}\classes"/>		
-		<exec executable="${proj_root}\pafwsclientcompile-cxf.bat">
+		<mkdir dir="${client_dir}\dist"/>
+				
+		<echo>"Making base jar"</echo>		
+		<ant antfile="build.xml"
+			dir="${wrksp_root}\pace-base" target="deploy"/>	
+
+		<echo>"Making wsdl"</echo>		
+		<exec executable="${proj_root}\pafwsclientcompile-cxf-java2wsdl.bat">
 			<arg line="${proj_root}" />
 		</exec>
-		
-		<echo>"Making jar"</echo>		
-		<mkdir dir="${client_dir}\dist"/>
+
+		<echo>"Making client jar"</echo>		
+		<exec executable="${proj_root}\pafwsclientcompile-cxf-wsdl2java.bat">
+			<arg line="${proj_root}" />
+		</exec>
 		<jar jarfile="${client_dir}\dist\pace-client.jar" basedir="${client_dir}\classes" excludes="*.java" />
 	
-		<copy file="${client_dir}\dist\pace-client.jar" todir="${web_service_client_plugin}\lib" />
-		<copy file="${client_dir}\dist\pace-base.jar" todir="${extra_jars_plugin}\lib" />
 		
 	</target>	
 
+	<target name="copy-jars-ac" depends="make-basejar-wsdl-clientjar"> 
+		
+		<echo>"Copying base jar to Admin Console"</echo>		
+		<copy file="${client_dir}\dist\pace-base.jar" todir="${extra_jars_plugin}\lib" />
+		<echo>"Copying client jar to Admin Console"</echo>		
+		<copy file="${client_dir}\dist\pace-client.jar" todir="${web_service_client_plugin}\lib" />
+		
+	</target>	
+	
 	
 	<target name="make-websphere61-jar" > 
 		
