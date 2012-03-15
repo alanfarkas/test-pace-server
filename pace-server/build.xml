@@ -217,17 +217,17 @@
 		<exec executable="${proj_root}\pafwsclientcompile-cxf-java2wsdl.bat">
 			<arg line="${proj_root}" />
 		</exec>
-
+		
 		<echo>"Making client jar"</echo>		
 		<exec executable="${proj_root}\pafwsclientcompile-cxf-wsdl2java.bat">
 			<arg line="${proj_root}" />
 		</exec>
 		<jar jarfile="${client_dir}\dist\pace-client.jar" basedir="${client_dir}\classes" excludes="*.java" />
-	
+		
 		
 	</target>	
 
-	<target name="copy-jars-ac" depends="make-basejar-wsdl-clientjar"> 
+	<target name="copy-jars-ac"> 
 		
 		<echo>"Copying base jar to Admin Console"</echo>		
 		<copy file="${client_dir}\dist\pace-base.jar" todir="${extra_jars_plugin}\lib" />
