@@ -227,7 +227,7 @@
 		
 	</target>	
 
-	<target name="copy-jars-ac"> 
+	<target name="copy-jars-ac" depends="make-basejar-wsdl-clientjar"> 
 		
 		<echo>"Copying base jar to Admin Console"</echo>		
 		<copy file="${client_dir}\dist\pace-base.jar" todir="${extra_jars_plugin}\lib" />
