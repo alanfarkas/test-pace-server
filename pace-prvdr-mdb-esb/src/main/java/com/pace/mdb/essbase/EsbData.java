@@ -220,11 +220,9 @@ public class EsbData implements IMdbData{
 		final int versionAxis = dataCache.getVersionAxis(), yearAxis = dataCache.getYearAxis();
 		final String versionDim = dataCache.getVersionDim(), yearDim = dataCache.getYearDim();
 		Map<String, Map<Integer, List<String>>> loadedMdbDataSpec = new HashMap<String, Map<Integer, List<String>>>();   // Track data that was actually loaded
-		final List<String> mdbYears = dataCache.getMdbYears();
-		Map<String, List<String>> dcLoadRemapSpec = new HashMap<String, List<String>>();
-		
-    
+		final List<String> mdbYears = dataCache.getMdbYears();    
 		EsbCubeView esbCubeView = null;
+		
 
 		// Exit if no data has been specified
 		if (mdbDataSpec == null || mdbDataSpec.size() == 0) {
@@ -263,6 +261,7 @@ public class EsbData implements IMdbData{
 			}
 			
 			// Process offset versions (TTN-1598)
+			Map<String, List<String>> dcLoadRemapSpec = new HashMap<String, List<String>>();
 			VersionDef vd = dataCache.getVersionDef(version);
 			if (vd.getType() == VersionType.Offset) {
 				
