@@ -4046,22 +4046,39 @@ public class PafDataService {
 		// Process the selection on each role filter dimension
 		for(String baseDim : hierDimsMap.keySet()){
 			
+			List<List<String>> discontigMbrGrps; 
 			if (userSelectionsMap.containsKey(baseDim)){
-				
-				List<String> expressionList;
-				expressionList = userSelectionsMap.get(baseDim);
-				// Wrap each selected member in @IDESC([member name], 0). This 
-				// will force all descendants of each selected member to be included
-				// in the UOW. This section of code has been modified to handle 
-				// multiple selections per base dimension (TTN-1644).
-				for (int i = 0; i < expressionList.size(); i++) {
-					expressionList.set(i, ExpOperation.I_DESC_TAG + "(" +  expressionList.get(i) + ", 0)");
+
+				// Get this list of members in the filtered dimension
+				List<String> expressionList = userSelectionsMap.get(baseDim);
+				PafDimTree dimTree = uowTrees.getTree(baseDim);
+				String root = dimTree.getRootNode().getKey();
+				if (workUnit.isDiscontigDim(baseDim) && expressionList.get(0).equals(root)) {					
+					// If this dimension is discontiguous and the UOWRoot is selected,
+					// the re-select all of the discontiguous member lists. (TTN-1748)
+					expressionList = new ArrayList<String>();
+					discontigMbrGrps = workUnit.getDiscontigMemberGroups().get(baseDim);
+					for (int i = 0; i < discontigMbrGrps.size(); i++) {
+						expressionList.addAll(discontigMbrGrps.get(i));
+					}
+					
+				} else {
+					// ELSE, wrap each selected member inside the expression - 
+					// '@IDESC([member name], 0)'. This  will force all descendants of
+					// each selected member to be included in the UOW. This section of
+					// code has been modified to handle multiple selections per base 
+					// dimension (TTN-1644).
+					for (int i = 0; i < expressionList.size(); i++) {
+						expressionList.set(i, ExpOperation.I_DESC_TAG + "(" +  expressionList.get(i) + ", 0)");
+					}
+
+					// Next expand the base dimension expression list and process discontiguous
+					// hierarchy, if one exists (TTN-1644)
+					discontigMbrGrps = new ArrayList<List<String>>();
+					expressionList = expandUowDim(baseDim, expressionList.toArray(new String[0]), clientState, discontigMbrGrps, true); 
+					
 				}
 				
-				// Next expand the base dimension expression list and process discontiguous
-				// hierarchy, if one exists (TTN-1644)
-				List<List<String>> discontigMbrGrps = new ArrayList<List<String>>();
-				expressionList = expandUowDim(baseDim, expressionList.toArray(new String[0]), clientState, discontigMbrGrps, true); 
 				
 				// Update discontinuous member properties for current dimension. We also
 				// need to address the situation in which a dimension that was comprised
