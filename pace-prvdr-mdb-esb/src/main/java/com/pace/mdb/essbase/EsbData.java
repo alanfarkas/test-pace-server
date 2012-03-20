@@ -261,7 +261,7 @@ public class EsbData implements IMdbData{
 			}
 			
 			// Process offset versions (TTN-1598)
-			Map<String, List<String>> dcLoadRemapSpec = new HashMap<String, List<String>>();
+			Map<String, List<String>> dcLoadRemapSpec = new HashMap<String, List<String>>();  //TTN-1749
 			VersionDef vd = dataCache.getVersionDef(version);
 			if (vd.getType() == VersionType.Offset) {
 				
