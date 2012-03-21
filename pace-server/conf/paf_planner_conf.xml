@@ -182,6 +182,7 @@
     <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
     <calcElapsedPeriods>false</calcElapsedPeriods>
     <versionFilter>
+      <string>WF</string>
       <string>WP</string>
       <string>LY</string>
       <string>WP_%_Prod_Parent</string>
@@ -279,8 +280,11 @@
     <calcElapsedPeriods>false</calcElapsedPeriods>
     <versionFilter>
       <string>WF</string>
+      <string>WP</string>
       <string>LY</string>
+      <string>Dyn_LY</string>
       <string>WF_vs_LY</string>
+      <string>WP_vs_DLY_%</string>
       <string>WF_vs_LY_%</string>
     </versionFilter>
     <replicateEnabled>true</replicateEnabled>
@@ -308,6 +312,7 @@
     <mdbSaveWorkingVersionOnUowLoad>false</mdbSaveWorkingVersionOnUowLoad>
     <calcElapsedPeriods>false</calcElapsedPeriods>
     <versionFilter>
+      <string>WF</string>
       <string>WP</string>
       <string>LY</string>
       <string>Dyn_LY</string>
