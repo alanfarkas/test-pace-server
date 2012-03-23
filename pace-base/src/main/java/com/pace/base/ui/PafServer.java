@@ -15,8 +15,8 @@ public class PafServer implements Comparable, Cloneable {
 	private String webappName;
 	private String wsdlServiceName;
 	private Long urlTimeoutInMilliseconds;
-	private Long serviceConnectionTimeoutInMilliseconds;
-	private Long serviceReceiveTimeoutInMilliseconds;
+	private transient Long serviceConnectionTimeoutInMilliseconds;
+	private transient Long serviceReceiveTimeoutInMilliseconds;
 	private String startupFile;
 	private String shutdownFile;
 	private Integer jndiPort;
@@ -364,7 +364,6 @@ public class PafServer implements Comparable, Cloneable {
 		this.serviceReceiveTimeoutInMilliseconds = serviceReceiveTimeoutInMilliseconds;
 	}
 	
-
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -375,12 +374,8 @@ public class PafServer implements Comparable, Cloneable {
 				+ defaultServer + ", webappName=" + webappName
 				+ ", wsdlServiceName=" + wsdlServiceName
 				+ ", urlTimeoutInMilliseconds=" + urlTimeoutInMilliseconds
-				+ ", serviceConnectionTimeoutInMilliseconds="
-				+ serviceConnectionTimeoutInMilliseconds
-				+ ", serviceReceieveTimeoutInMilliseconds="
-				+ serviceReceiveTimeoutInMilliseconds + ", startupFile="
-				+ startupFile + ", shutdownFile=" + shutdownFile
-				+ ", jndiPort=" + jndiPort
+				+ ", startupFile=" + startupFile + ", shutdownFile="
+				+ shutdownFile + ", jndiPort=" + jndiPort
 				+ ", serverStartupTimeoutInMilliseconds="
 				+ serverStartupTimeoutInMilliseconds
 				+ ", doesNotPromptOnHotDeploy=" + doesNotPromptOnHotDeploy
