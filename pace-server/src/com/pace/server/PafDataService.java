@@ -523,11 +523,11 @@ public class PafDataService {
 		
 		List<List<String>> branchLists = new ArrayList<List<String>>();
 
-		// Put the root into it's own branch
-		String rootMember = sortedMemberList.get(0);
-		branchLists.add(new ArrayList<String>(Arrays.asList(new String[]{rootMember})));
-		
 		if (sortedMemberList.size() > 1) {
+			// Put the root into it's own branch
+			String rootMember = sortedMemberList.get(0);
+			branchLists.add(new ArrayList<String>(Arrays.asList(new String[]{rootMember})));
+		
 			List<String> filteredMembers = new ArrayList<String>(sortedMemberList.subList(1,sortedMemberList.size()));
 			List<String> branchList = new ArrayList<String>(),  fullTreeBranch = new ArrayList<String>();
 			for (String member : filteredMembers) {

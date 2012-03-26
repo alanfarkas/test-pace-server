@@ -19,7 +19,6 @@
 package com.pace.server;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,11 +49,8 @@ import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.TimeSlice;
 import com.pace.base.db.membertags.MemberTagDef;
-import com.pace.base.mdb.PafBaseMember;
-import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
-import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafClientState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;

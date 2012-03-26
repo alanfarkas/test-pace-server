@@ -3287,6 +3287,9 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				workUnit = dataService.expandUOW(workUnit, clientState);
 				clientState.setUnitOfWork(workUnit.clone());
 				clientState.setPlanSeason(planSeason);
+				//to fix TTN 1745 - Getting PafException when role filter is disabled and Suppress Invalid Intersections Enabled
+				MemberTreeSet treeSet = dataService.getUowCacheTrees(clientState);
+				clientState.setUowTrees(treeSet);
 			}
 
 			//Do not data filter if one or more dimensions have been filtered to 0 members
@@ -3316,7 +3319,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 							// De-tokenize the expressions
 							for(PafDimSpec pafDimSpec : nonHierDimSpecs){
-								if (pafDimSpec.getExpressionList() == null || pafDimSpec.getExpressionList()[0].length() == 0){
+								if (pafDimSpec.getExpressionList() == null || pafDimSpec.getExpressionList().length == 0 ||  pafDimSpec.getExpressionList()[0].length() == 0){
 									throw new PafException(Messages.getString("PafServiceProvider.72") + pafDimSpec.getDimension() + Messages.getString("PafServiceProvider.73"), PafErrSeverity.Error); //$NON-NLS-1$ //$NON-NLS-2$
 								}
 								

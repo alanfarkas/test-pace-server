@@ -3239,12 +3239,15 @@ public class PafViewService {
 
 		//UnitOfWork uow = clientState.getUnitOfWork();
 		//PafDimMember uowRoot = pafDataService.getUowRoot(clientState, dim, uow);
-		final PafDimTree dimTree = clientState.getUowTrees().getTree(dim);
-		final String uowRoot = dimTree.getRootNode().getKey();
-		
-		//Matcher.quoteReplacement replaces all $ with \$
-		member = member.replaceAll("@UOW_ROOT", Matcher.quoteReplacement(uowRoot));
-		return member.trim();
+		if( clientState.getUowTrees() != null ) {
+			final PafDimTree dimTree = clientState.getUowTrees().getTree(dim);
+			final String uowRoot = dimTree.getRootNode().getKey();
+			
+			//Matcher.quoteReplacement replaces all $ with \$
+			member = member.replaceAll("@UOW_ROOT", Matcher.quoteReplacement(uowRoot));
+			return member.trim();
+		}
+		return null;
 	}
 
 	public String replaceUserVers(String member, PafClientState clientState) {
