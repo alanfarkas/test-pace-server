@@ -72,11 +72,17 @@ public class AllocFunc extends AbstractFunction {
     	// Get the list of intersections to allocate. This would include the current 
     	// intersection as well as any locked descendants along the measure hierarchy.
     	// (TTN-1743)
-    	for (String measure : this.aggMsrs) {
-    		Intersection allocTarget = sourceIs.clone();
-			allocTarget.setCoordinate(msrDim, measure);
-			if (evalState.getCurrentLockedCells().contains(allocTarget)) {
-				allocIntersections.add(allocTarget);
+//    	for (String measure : this.aggMsrs) {
+//    		Intersection allocTarget = sourceIs.clone();
+//			allocTarget.setCoordinate(msrDim, measure);
+//			if (evalState.getCurrentLockedCells().contains(allocTarget)) {
+//				allocIntersections.add(allocTarget);
+//			}
+//    	}
+    	for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
+    		String measure = lockedCell.getCoordinate(msrDim);
+			if (this.aggMsrs.contains(measure)) {
+				allocIntersections.add(lockedCell);
 			}
     	}
     	
@@ -92,9 +98,9 @@ public class AllocFunc extends AbstractFunction {
             String allocMeasure = allocCell.getCoordinate(msrDim);
             List<String> descMeasures = measureTree.getLowestMemberNames(allocMeasure);
             descMeasures.retainAll(this.targetMsrs);
-            Intersection targetCell = allocCell.clone();
             for (String targetMeasure : descMeasures) {
-            	targetCell.setCoordinate(msrDim, targetMeasure);
+                Intersection targetCell = allocCell.clone();
+                targetCell.setCoordinate(msrDim, targetMeasure);
             	allocTargets.addAll(EvalUtil.buildFloorIntersections(targetCell, evalState));  
             }
             
@@ -293,6 +299,7 @@ public class AllocFunc extends AbstractFunction {
 //	        String currentYear = evalState.getAppDef().getCurrentYear(); 
 //	        String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
 	        String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
+	        String allocMeasure = allocSrcIsx.getCoordinate(msrDim);
 	    	
 	    	long stepTime = System.currentTimeMillis();
 	
@@ -310,14 +317,17 @@ public class AllocFunc extends AbstractFunction {
 	        
 	        double lockedTotal = 0;
 	        Set<Intersection> lockedTargets = new HashSet<Intersection>(evalState.getLoadFactor());
+	        Set<Intersection> currentLockedCells = new HashSet<Intersection>(evalState.getLoadFactor());
+	        
 //			Set<String> lockedTimePeriods = evalState.getClientState().getLockedPeriods();		
 //			if (lockedTimePeriods == null) lockedTimePeriods = new HashSet<String>(0); 
 	        
 				
 	        // add up all locked cell values, this must include floors intersections of excluded measures
-			
+			currentLockedCells.addAll(evalState.getCurrentLockedCells());
+//			currentLockedCells.addAll(evalState.getAllocationsByMsr(allocMeasure));
 	        for (Intersection target : targets) {
-	            if (evalState.getCurrentLockedCells().contains(target) || 
+	            if (currentLockedCells.contains(target) || 
 //	                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
 //	                            target.getCoordinate(yearDim).equals(currentYear)) ||
 	    	            (EvalUtil.isElapsedIs(target, evalState)) || 			// TTN-1595
@@ -328,7 +338,7 @@ public class AllocFunc extends AbstractFunction {
 	            }
 	        }
 	        
-
+int alan=2;
 	
 	        double allocAvailable = 0;
 	        
@@ -419,6 +429,7 @@ public class AllocFunc extends AbstractFunction {
 	
 	//     logger.info(LogUtil.timedStep("Allocation completed ", stepTime));                
 	  
+//	    	evalState.addAllAllocations(targets);
 	        return dataCache;
 	    }
 

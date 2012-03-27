@@ -47,4 +47,5 @@ public interface IPafEvalState {
 	public List<String> getTriggeredAggMsrs();
 	public String getTimeHorizonDim();
 	public String[] getAxisSortPriority();
+	public Set<Intersection> getAllocationsByMsr(String measure);
 }
