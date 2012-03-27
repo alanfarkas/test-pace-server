@@ -45,7 +45,6 @@ import com.pace.base.app.MdbDef;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.SuppressZeroSettings;
-import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionFormula;
 import com.pace.base.app.VersionType;
@@ -3246,11 +3245,10 @@ public class PafViewService {
 			//Matcher.quoteReplacement replaces all $ with \$
 			member = member.replaceAll("@UOW_ROOT", Matcher.quoteReplacement(uowRoot));
 			return member.trim();
-		}
-		else {
-            String errMsg = "UOWTrees collections returned null";
+		} else {
+            String errMsg = "UOWTrees collection is null";
             logger.error(errMsg);
- 			throw new UnsupportedOperationException(errMsg);
+ 			throw new IllegalStateException(errMsg);
 		}
 	}
 
