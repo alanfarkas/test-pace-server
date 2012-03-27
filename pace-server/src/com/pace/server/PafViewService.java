@@ -3247,7 +3247,11 @@ public class PafViewService {
 			member = member.replaceAll("@UOW_ROOT", Matcher.quoteReplacement(uowRoot));
 			return member.trim();
 		}
-		return null;
+		else {
+            String errMsg = "UOWTrees collections returned null";
+            logger.error(errMsg);
+ 			throw new UnsupportedOperationException(errMsg);
+		}
 	}
 
 	public String replaceUserVers(String member, PafClientState clientState) {

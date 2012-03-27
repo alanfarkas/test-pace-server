@@ -523,39 +523,41 @@ public class PafDataService {
 		
 		List<List<String>> branchLists = new ArrayList<List<String>>();
 
-		if (sortedMemberList.size() > 1) {
+		if (sortedMemberList.size() > 0) {//Check if all dimension members were suppressed due to data filtering.
 			// Put the root into it's own branch
 			String rootMember = sortedMemberList.get(0);
 			branchLists.add(new ArrayList<String>(Arrays.asList(new String[]{rootMember})));
 		
-			List<String> filteredMembers = new ArrayList<String>(sortedMemberList.subList(1,sortedMemberList.size()));
-			List<String> branchList = new ArrayList<String>(),  fullTreeBranch = new ArrayList<String>();
-			for (String member : filteredMembers) {
-
-				// Add member to branch member list
-				if (fullTreeBranch.contains(member)) {
-					branchList.add(member);
-					continue;
+			if (sortedMemberList.size() > 1) {
+				List<String> filteredMembers = new ArrayList<String>(sortedMemberList.subList(1,sortedMemberList.size()));
+				List<String> branchList = new ArrayList<String>(),  fullTreeBranch = new ArrayList<String>();
+				for (String member : filteredMembers) {
+	
+					// Add member to branch member list
+					if (fullTreeBranch.contains(member)) {
+						branchList.add(member);
+						continue;
+					}
+	
+					// New branch - add branch member list to 
+					// collection and create new branch member list.
+					if (!branchList.isEmpty()) {
+						branchLists.add(branchList);
+						branchList = new ArrayList<String>();
+					}
+	
+					// Start new branch
+					if (branchList.isEmpty()) {
+						branchList.add(member);
+						fullTreeBranch = PafDimTree.getMemberNames(uowTree.getDescendants(member));
+					}
+	
 				}
-
-				// New branch - add branch member list to 
-				// collection and create new branch member list.
-				if (!branchList.isEmpty()) {
-					branchLists.add(branchList);
-					branchList = new ArrayList<String>();
-				}
-
-				// Start new branch
-				if (branchList.isEmpty()) {
-					branchList.add(member);
-					fullTreeBranch = PafDimTree.getMemberNames(uowTree.getDescendants(member));
-				}
-
+				
+				// Add any remaining members to branch Lists
+				branchLists.add(branchList);
+				
 			}
-			
-			// Add any remaining members to branch Lists
-			branchLists.add(branchList);
-			
 		}
 		
 		return branchLists;

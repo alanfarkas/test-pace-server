@@ -3319,6 +3319,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 							// De-tokenize the expressions
 							for(PafDimSpec pafDimSpec : nonHierDimSpecs){
+								//Check if all dimension members were suppressed due to data filtering.
 								if (pafDimSpec.getExpressionList() == null || pafDimSpec.getExpressionList().length == 0 ||  pafDimSpec.getExpressionList()[0].length() == 0){
 									throw new PafException(Messages.getString("PafServiceProvider.72") + pafDimSpec.getDimension() + Messages.getString("PafServiceProvider.73"), PafErrSeverity.Error); //$NON-NLS-1$ //$NON-NLS-2$
 								}
