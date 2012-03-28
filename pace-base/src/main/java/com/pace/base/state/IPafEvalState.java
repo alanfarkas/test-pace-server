@@ -48,4 +48,5 @@ public interface IPafEvalState {
 	public String getTimeHorizonDim();
 	public String[] getAxisSortPriority();
 	public Set<Intersection> getAllocationsByMsr(String measure);
+	public Set<Intersection> getCurrentProtectedCells();
 }

@@ -90,23 +90,28 @@ public class AllocFunc extends AbstractFunction {
         Intersection[] allocCells = EvalUtil.sortIntersectionsByAxis(allocIntersections.toArray(new Intersection[0]), 
         		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
         
-        // Allocate selected intersections in ascending order along the measure hierarchy. (TTN-1743)
-    	for (Intersection allocCell : allocCells) {
-    		
-    		// Find the targets of the cell to allocate
-            Set<Intersection> allocTargets = new HashSet<Intersection>();
-            String allocMeasure = allocCell.getCoordinate(msrDim);
-            List<String> descMeasures = measureTree.getLowestMemberNames(allocMeasure);
-            descMeasures.retainAll(this.targetMsrs);
-            for (String targetMeasure : descMeasures) {
-                Intersection targetCell = allocCell.clone();
-                targetCell.setCoordinate(msrDim, targetMeasure);
-            	allocTargets.addAll(EvalUtil.buildFloorIntersections(targetCell, evalState));  
-            }
-            
-            // Allocate cell
-	        allocateChange(allocCell, allocTargets, evalState, dataCache);    		
-    	}
+        for (int i = 0; i < 2; i++) {
+			// Allocate selected intersections in ascending order along the measure hierarchy. (TTN-1743)
+			for (Intersection allocCell : allocCells) {
+
+				// Find the targets of the cell to allocate
+				Set<Intersection> allocTargets = new HashSet<Intersection>();
+				String allocMeasure = allocCell.getCoordinate(msrDim);
+				List<String> descMeasures = measureTree
+						.getLowestMemberNames(allocMeasure);
+				descMeasures.retainAll(this.targetMsrs);
+				for (String targetMeasure : descMeasures) {
+					Intersection targetCell = allocCell.clone();
+					targetCell.setCoordinate(msrDim, targetMeasure);
+					allocTargets.addAll(EvalUtil.buildFloorIntersections(
+							targetCell, evalState));
+				}
+
+				// Allocate cell
+				allocateChange(allocCell, allocTargets, evalState, dataCache);
+			}
+		}
+		
 
          // aggregate allocated measures. this is necessary to support multi-tiered
         // measure hierarchies.
@@ -325,6 +330,7 @@ public class AllocFunc extends AbstractFunction {
 				
 	        // add up all locked cell values, this must include floors intersections of excluded measures
 			currentLockedCells.addAll(evalState.getCurrentLockedCells());
+			currentLockedCells.addAll(evalState.getCurrentProtectedCells());
 //			currentLockedCells.addAll(evalState.getAllocationsByMsr(allocMeasure));
 	        for (Intersection target : targets) {
 	            if (currentLockedCells.contains(target) || 

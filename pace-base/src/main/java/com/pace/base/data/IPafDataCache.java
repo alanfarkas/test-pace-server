@@ -14,6 +14,7 @@ import com.pace.base.PafException;
 public interface IPafDataCache {
 
 	public int getAxisIndex(String msrDim);
+	public double getBaseCellValue(String[] coords) throws PafException;
     public double getCellValue(Intersection intersection) throws PafException;
 	public double getCumMbrCount(Intersection cellIs);
 	public double getCumMbrCount(Intersection cellIs, String cumDim);
