@@ -42,6 +42,7 @@ public class AllocFunc extends AbstractFunction {
 	protected Set<String> aggMsrs = new HashSet<String>();
 	protected List<Intersection> unlockIntersections = new ArrayList<Intersection>();
 	protected List<String> excludedMsrs = new ArrayList<String>();
+	protected List<Intersection> tempLockedCells = new ArrayList<Intersection>();
 	
 	private static Logger logger = Logger.getLogger(AllocFunc.class);
 
@@ -63,22 +64,15 @@ public class AllocFunc extends AbstractFunction {
  	
     	// Validate function parameters
     	validateParms(evalState);
-   	   	 	
-    	  	
+   	   	 	  	
         // targets holds all intersections to allocate into.
     	// The lists have been processed by validateParms
     	
     	
-    	// Get the list of intersections to allocate. This would include the current 
+    	
+     	// Get the list of intersections to allocate. This would include the current 
     	// intersection as well as any locked descendants along the measure hierarchy.
     	// (TTN-1743)
-//    	for (String measure : this.aggMsrs) {
-//    		Intersection allocTarget = sourceIs.clone();
-//			allocTarget.setCoordinate(msrDim, measure);
-//			if (evalState.getCurrentLockedCells().contains(allocTarget)) {
-//				allocIntersections.add(allocTarget);
-//			}
-//    	}
     	for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
     		String measure = lockedCell.getCoordinate(msrDim);
 			if (this.aggMsrs.contains(measure)) {
@@ -90,29 +84,33 @@ public class AllocFunc extends AbstractFunction {
         Intersection[] allocCells = EvalUtil.sortIntersectionsByAxis(allocIntersections.toArray(new Intersection[0]), 
         		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
         
-        for (int i = 0; i < 2; i++) {
-			// Allocate selected intersections in ascending order along the measure hierarchy. (TTN-1743)
+        for (int pass = 0; pass < 2; pass++) {
+        	
+			// Unlock cells that were allocated in the last pass
+        	evalState.getCurrentLockedCells().removeAll(tempLockedCells);
+        	tempLockedCells.clear();
+
+        	// Allocate selected intersections in ascending order along the measure hierarchy. (TTN-1743)
 			for (Intersection allocCell : allocCells) {
 
 				// Find the targets of the cell to allocate
 				Set<Intersection> allocTargets = new HashSet<Intersection>();
 				String allocMeasure = allocCell.getCoordinate(msrDim);
-				List<String> descMeasures = measureTree
-						.getLowestMemberNames(allocMeasure);
+				List<String> descMeasures = measureTree.getLowestMemberNames(allocMeasure);
 				descMeasures.retainAll(this.targetMsrs);
 				for (String targetMeasure : descMeasures) {
 					Intersection targetCell = allocCell.clone();
 					targetCell.setCoordinate(msrDim, targetMeasure);
-					allocTargets.addAll(EvalUtil.buildFloorIntersections(
-							targetCell, evalState));
+					allocTargets.addAll(EvalUtil.buildFloorIntersections(targetCell, evalState));
 				}
 
 				// Allocate cell
 				allocateChange(allocCell, allocTargets, evalState, dataCache);
 			}
+			
 		}
-		
-
+		tempLockedCells.clear();
+        
          // aggregate allocated measures. this is necessary to support multi-tiered
         // measure hierarchies.
 //        SumFunc.aggMeasures(sourceIs, this.aggMsrs, dataCache, evalState);
@@ -420,22 +418,20 @@ int alan=2;
 	//		logger.info("Allocating intersection: " + intersection);
 	//		logger.info("Allocating into " + targets.size() + " targets" );          
 	        
-	    	if (origTargetSum == 0 && 
-	    			evalState.getRule().getBaseAllocateMeasure() != null
-	    					&& !evalState.getRule().getBaseAllocateMeasure().equals("")) {
-				// in this case, perform the exact same logic as the normal allocation step, however, use the "shape"
-				// from base measure to determine the allocation percentages.
-				allocateToTargets(targets, evalState.getRule().getBaseAllocateMeasure(), allocAvailable, dataCache, evalState);    				
-	    		}
-	    	else {		
-				// normal allocation to open targets
-				allocateToTargets(targets, allocAvailable, origTargetSum, dataCache, evalState);	
-	    		}
-	
-	
-	//     logger.info(LogUtil.timedStep("Allocation completed ", stepTime));                
-	  
-//	    	evalState.addAllAllocations(targets);
+	        if (origTargetSum == 0 && 
+	        		evalState.getRule().getBaseAllocateMeasure() != null
+	        		&& !evalState.getRule().getBaseAllocateMeasure().equals("")) {
+	        	// in this case, perform the exact same logic as the normal allocation step, however, use the "shape"
+	        	// from base measure to determine the allocation percentages.
+	        	allocateToTargets(targets, evalState.getRule().getBaseAllocateMeasure(), allocAvailable, dataCache, evalState);    				
+	        } else {		
+	        	// normal allocation to open targets
+	        	allocateToTargets(targets, allocAvailable, origTargetSum, dataCache, evalState);	
+	        }
+
+
+	        //     logger.info(LogUtil.timedStep("Allocation completed ", stepTime));                
+	        //	    	evalState.addAllAllocations(targets);
 	        return dataCache;
 	    }
 
@@ -477,6 +473,7 @@ int alan=2;
             
             // add cells to locks
            	evalState.getCurrentLockedCells().add(target);
+           	tempLockedCells.add(target);		// TTN-1743 ALLOC function issue
             
             // add to changed cell list
 			evalState.addChangedCell(target);
@@ -551,6 +548,7 @@ int alan=2;
             
             // add cells to locks
            	evalState.getCurrentLockedCells().add(target);
+           	tempLockedCells.add(target);		// TTN-1743 ALLOC function issue
             
             // add to changed cell list
 			evalState.addChangedCell(target);
