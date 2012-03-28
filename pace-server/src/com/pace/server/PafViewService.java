@@ -3246,7 +3246,7 @@ public class PafViewService {
 			member = member.replaceAll("@UOW_ROOT", Matcher.quoteReplacement(uowRoot));
 			return member.trim();
 		} else {
-            String errMsg = "UOWTrees collection is null";
+            String errMsg = "UOWTrees collection in clientState is null";
             logger.error(errMsg);
  			throw new IllegalStateException(errMsg);
 		}
