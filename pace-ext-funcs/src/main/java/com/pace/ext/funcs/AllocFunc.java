@@ -1,6 +1,7 @@
 package com.pace.ext.funcs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -59,7 +60,9 @@ public class AllocFunc extends AbstractFunction {
       	String msrDim = dataCache.getMeasureDim();
         String[] axisSortSeq = evalState.getAxisSortPriority();
         HashSet<Intersection> allocIntersections = new HashSet<Intersection>();
+        HashSet<Intersection> allocMsrIntersections = new HashSet<Intersection>();
         PafDimTree measureTree = evalState.getClientState().getUowTrees().getTree(msrDim);
+    	List<Intersection> allocCellList = new ArrayList<Intersection>();
 
  	
     	// Validate function parameters
@@ -76,22 +79,32 @@ public class AllocFunc extends AbstractFunction {
     	for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
     		String measure = lockedCell.getCoordinate(msrDim);
 			if (this.aggMsrs.contains(measure)) {
-				allocIntersections.add(lockedCell);
+				if (!measure.equals(msrToAlloc)) {
+					allocIntersections.add(lockedCell);
+				} else {
+					allocMsrIntersections.add(lockedCell);
+				}
 			}
     	}
     	
     	// Sort intersections in ascending order. (TTN-1743)
         Intersection[] allocCells = EvalUtil.sortIntersectionsByAxis(allocIntersections.toArray(new Intersection[0]), 
         		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
+        Intersection[] allocMsrCells = EvalUtil.sortIntersectionsByAxis(allocMsrIntersections.toArray(new Intersection[0]), 
+        		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
         
-        for (int pass = 0; pass < 2; pass++) {
+        // Add all inters
+        
+ //       for (int pass = 0; pass < 2; pass++) {
         	
 			// Unlock cells that were allocated in the last pass
-        	evalState.getCurrentLockedCells().removeAll(tempLockedCells);
-        	tempLockedCells.clear();
+ //       	evalState.getCurrentLockedCells().removeAll(tempLockedCells);
+  //      	tempLockedCells.clear();
 
         	// Allocate selected intersections in ascending order along the measure hierarchy. (TTN-1743)
-			for (Intersection allocCell : allocCells) {
+       		allocCellList.addAll(Arrays.asList(allocMsrCells));
+       		allocCellList.addAll(Arrays.asList(allocCells));
+ 			for (Intersection allocCell : allocCellList) {
 
 				// Find the targets of the cell to allocate
 				Set<Intersection> allocTargets = new HashSet<Intersection>();
@@ -108,7 +121,7 @@ public class AllocFunc extends AbstractFunction {
 				allocateChange(allocCell, allocTargets, evalState, dataCache);
 			}
 			
-		}
+//		}
 		tempLockedCells.clear();
         
          // aggregate allocated measures. this is necessary to support multi-tiered
@@ -327,8 +340,19 @@ public class AllocFunc extends AbstractFunction {
 	        
 				
 	        // add up all locked cell values, this must include floors intersections of excluded measures
-			currentLockedCells.addAll(evalState.getCurrentLockedCells());
-			currentLockedCells.addAll(evalState.getCurrentProtectedCells());
+//        	currentLockedCells.addAll(evalState.getCurrentLockedCells());
+	        for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
+	        	currentLockedCells.addAll(EvalUtil.buildFloorIntersections(lockedCell, evalState));
+	        }
+			
+			
+			// consider protected cells as locked
+//			if (allocMeasure.equals(msrToAlloc)) {
+//				for (Intersection protectedCell : evalState.getCurrentProtectedCells()) {
+//					currentLockedCells.addAll(EvalUtil.buildFloorIntersections(protectedCell, evalState));
+//				}
+//			}
+			//			currentLockedCells.addAll(evalState.getCurrentProtectedCells());
 //			currentLockedCells.addAll(evalState.getAllocationsByMsr(allocMeasure));
 	        for (Intersection target : targets) {
 	            if (currentLockedCells.contains(target) || 
