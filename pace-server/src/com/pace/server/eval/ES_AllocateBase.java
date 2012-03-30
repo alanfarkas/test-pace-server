@@ -33,7 +33,7 @@ import com.pace.server.PafDataService;
  * Performs one step in an evaluation strategy.
  * Responsible for allocating changes down hierarchical
  * dimensions. This is a base class containing utility allocation
- * methods ustilized by more complex extension classes.
+ * methods utilized by more complex extension classes.
  *
  * @version	x.xx
  * @author JWatkins

@@ -492,20 +492,33 @@ public class EvalUtil {
 //	}
     
 	/**
-	 * Explodes a cell intersection into its corresponding floor intersections 
+	 * Explodes a cell intersection into its corresponding floor intersections (measures are not exploded)
 	 * 
 	 * @param is Cell intersection
 	 * @param evalState Evaluation state
 	 * 
 	 * @return List<Intersection>
 	 */
-	public static List<Intersection> buildFloorIntersections(Intersection is, IPafEvalState evalState) {
+	public static List<Intersection> buildFloorIntersections(Intersection is, IPafEvalState evalState) {	
+		return buildFloorIntersections(is, evalState, false);
+	}
+    
+	/**
+	 * Explodes a cell intersection into its corresponding floor intersections 
+	 * 
+	 * @param is Cell intersection
+	 * @param evalState Evaluation state
+	 * @param bExplodeMeasures Indicates that measures should be exploded
+	 * 
+	 * @return List<Intersection>
+	 */
+	public static List<Intersection> buildFloorIntersections(Intersection is, IPafEvalState evalState, boolean bExplodeMeasures) {
 		
 		List<Intersection> floorIntersections = null;
 		if (evalState.getDataCache().isBaseIntersection(is)) {
-			floorIntersections = EvalUtil.buildBaseFloorIntersections (is, evalState);
+			floorIntersections = EvalUtil.buildBaseFloorIntersections(is, evalState, bExplodeMeasures);
 		} else {
-			floorIntersections = EvalUtil.buildAttrFloorIntersections (is, evalState);
+			floorIntersections = EvalUtil.buildAttrFloorIntersections(is, evalState, bExplodeMeasures);
 		}
 		return floorIntersections;
 	}
@@ -636,15 +649,17 @@ public class EvalUtil {
 		return filteredIntersections;
 	}
 
+
 	/**
 	 * Explode an attribute intersection into its corresponding base floor intersections 
 	 * 
 	 * @param is Attribute intersection
 	 * @param evalState Evaluation state
+	 * @param bExplodeMeasures Indicates that measures should be exploded
 	 * 
 	 * @return List<Intersection>
 	 */
-	static private List<Intersection> buildAttrFloorIntersections(Intersection is, IPafEvalState evalState) {
+	static private List<Intersection> buildAttrFloorIntersections(Intersection is, IPafEvalState evalState, boolean bExplodeMeasures) {
 		
 		PafDataCache dataCache = evalState.getDataCache();
 	
@@ -652,7 +667,9 @@ public class EvalUtil {
 		// allocation. Currently, allocations are not performed over the measures dimension.
 		Set<String> explodedBaseDims = new HashSet<String>(Arrays.asList(dataCache.getBaseDimensions()));
 		Set<String> omittedDims = new HashSet<String>();
-		omittedDims.add(dataCache.getMeasureDim());
+		if (!bExplodeMeasures) {
+			omittedDims.add(dataCache.getMeasureDim());
+		}
 		explodedBaseDims.removeAll(omittedDims);
 		
 		List<Intersection> floorIntersections = new ArrayList<Intersection>(
@@ -666,10 +683,11 @@ public class EvalUtil {
 	 * 
 	 * @param is Attribute intersection
 	 * @param evalState Evaluation state
+	 * @param bExplodeMeasures Indicates that measures should be exploded
 	 * 
 	 * @return List<Intersection>
 	 */
-	static private List<Intersection> buildBaseFloorIntersections(Intersection is, IPafEvalState evalState) {
+	static private List<Intersection> buildBaseFloorIntersections(Intersection is, IPafEvalState evalState, boolean bExplodeMeasures) {
 		
 		 
 	    MemberTreeSet mts = evalState.getClientState().getUowTrees();
@@ -685,8 +703,8 @@ public class EvalUtil {
 	        
 	    for ( String dim : is.getDimensions() ) {
 	
-	    	// Don't do measure dimension children for now
-	    	if (dim.equals(msrDim)) {
+	    	// Don't do measure dimension children for now (unless indicated)
+	    	if (dim.equals(msrDim) && !bExplodeMeasures) {
 	    		memberList = new ArrayList<String>();
 	    		memberList.add(is.getCoordinate(msrDim));
 	    		memberListMap.put(dim, memberList);
