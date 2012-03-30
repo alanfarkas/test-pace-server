@@ -43,7 +43,8 @@ public class AllocFunc extends AbstractFunction {
 	protected Set<String> aggMsrs = new HashSet<String>();
 	protected List<Intersection> unlockIntersections = new ArrayList<Intersection>();
 	protected List<String> excludedMsrs = new ArrayList<String>();
-	protected Set<Intersection> userLockedFloorCells = new HashSet<Intersection>();
+	protected Set<Intersection> userAllocFloorCells = new HashSet<Intersection>();   // Exploded measures
+	protected Set<Intersection> userLockFloorCells = new HashSet<Intersection>();    // Original measures
 	
 	private static Logger logger = Logger.getLogger(AllocFunc.class);
 
@@ -112,19 +113,28 @@ public class AllocFunc extends AbstractFunction {
 
         	// gather the user lock floor intersections. These are user locks "only" and
         	// don't include elapsed period locks. (TTN-1743)
-        	userLockedFloorCells.clear();
+        	userAllocFloorCells.clear();
+        	userLockFloorCells.clear();
+        	List<Intersection> allocMsrTargets = EvalUtil.buildFloorIntersections(sourceIs, evalState, true);
+//        	userLockFloorCells.retainAll(allocMsrFloor);
         	for (Intersection origLockedCell : evalState.getOrigLockedCells()) {
         		String measure = origLockedCell.getCoordinate(msrDim);
         		if (aggMsrs.contains(measure)) {
         			if (!EvalUtil.isElapsedIs(origLockedCell, evalState)) {
-        				userLockedFloorCells.addAll(EvalUtil.buildFloorIntersections(origLockedCell, evalState, true));
+        				userAllocFloorCells.addAll(EvalUtil.buildFloorIntersections(origLockedCell, evalState, true));
+        				if (allocTargets.contains(origLockedCell)) {
+							userLockFloorCells.addAll(EvalUtil.buildFloorIntersections(origLockedCell, evalState));
+						}
         			}
         		}
         	}
         	for (Intersection origChangedCell : evalState.getOrigChangedCells()) {
         		String measure = origChangedCell.getCoordinate(msrDim);
         		if (aggMsrs.contains(measure)) {
-        			userLockedFloorCells.addAll(EvalUtil.buildFloorIntersections(origChangedCell, evalState, true));
+        			userAllocFloorCells.addAll(EvalUtil.buildFloorIntersections(origChangedCell, evalState, true));
+       				if (allocTargets.contains(origChangedCell)) {
+       					userLockFloorCells.addAll(EvalUtil.buildFloorIntersections(origChangedCell, evalState));
+       				}
         		}
         	}
         	
@@ -377,7 +387,7 @@ public class AllocFunc extends AbstractFunction {
 	            }
 	        }
 	        
-
+int alan = 0;
 	        double allocAvailable = 0;
 	        
 	        // normal routine, remove locked intersections from available allocation targets
@@ -387,8 +397,12 @@ public class AllocFunc extends AbstractFunction {
 	        }
 	        else { // all targets locked so special case
 	        	// if some of the locks are original user changes
-//	            ArrayList<Intersection> userLockedTargets = new ArrayList<Intersection>(evalState.getLoadFactor());
-	            ArrayList<Intersection> userLockedTargets = new ArrayList<Intersection>(userLockedFloorCells);
+	            ArrayList<Intersection> userLockedTargets = new ArrayList<Intersection>(evalState.getLoadFactor());
+				if (allocMeasure.equals(msrToAlloc)) {
+					userLockedTargets.addAll(userLockFloorCells);
+				} else {
+					userLockedTargets.addAll(userAllocFloorCells);
+				}
 	            userLockedTargets.retainAll(targets);
 	            ArrayList<Intersection> elapsedTargets = new ArrayList<Intersection>(evalState.getLoadFactor());
 	            double userLockedTotal = 0;
