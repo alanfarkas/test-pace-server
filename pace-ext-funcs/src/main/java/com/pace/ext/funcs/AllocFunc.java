@@ -45,6 +45,7 @@ public class AllocFunc extends AbstractFunction {
 	protected List<String> excludedMsrs = new ArrayList<String>();
 	protected Set<Intersection> userAllocFloorCells = new HashSet<Intersection>();   // Exploded measures
 	protected Set<Intersection> userLockFloorCells = new HashSet<Intersection>();    // Original measures
+	protected List<Intersection> sourceIsTargetCells = new ArrayList<Intersection>();
 	
 	private static Logger logger = Logger.getLogger(AllocFunc.class);
 
@@ -72,6 +73,9 @@ public class AllocFunc extends AbstractFunction {
         // targets holds all intersections to allocate into.
     	// The lists have been processed by validateParms
     	
+    	// Get the list of the source intersection target intersections. (TTN-1743)
+    	sourceIsTargetCells.clear();
+    	sourceIsTargetCells.addAll(EvalUtil.buildFloorIntersections(sourceIs, evalState, true));
     	
      	// Get the list of intersections to allocate. This would include the current 
     	// intersection as well as any locked descendants along the measure hierarchy.
@@ -115,8 +119,6 @@ public class AllocFunc extends AbstractFunction {
         	// don't include elapsed period locks. (TTN-1743)
         	userAllocFloorCells.clear();
         	userLockFloorCells.clear();
-        	List<Intersection> allocMsrTargets = EvalUtil.buildFloorIntersections(sourceIs, evalState, true);
-//        	userLockFloorCells.retainAll(allocMsrFloor);
         	for (Intersection origLockedCell : evalState.getOrigLockedCells()) {
         		String measure = origLockedCell.getCoordinate(msrDim);
         		if (aggMsrs.contains(measure)) {
@@ -387,7 +389,7 @@ public class AllocFunc extends AbstractFunction {
 	            }
 	        }
 	        
-int alan = 0;
+int alan = 2;
 	        double allocAvailable = 0;
 	        
 	        // normal routine, remove locked intersections from available allocation targets
@@ -428,9 +430,6 @@ int alan = 0;
 //	                    userLockedTargets.add(target);              
 //	                }
 	            }
-	            for (Intersection userLockedTarget : userLockedTargets) {
-	            	userLockedTotal += dataCache.getCellValue(userLockedTarget);
-	            }
 	            
 	            // always remove elapsed periods from the allocation
 	            targets.removeAll(elapsedTargets);
@@ -438,22 +437,27 @@ int alan = 0;
 	            
 	            // ensure that potential targets of the top allocation measure are preserved (TTN-1743)
 	            if (!allocMeasure.equals(msrToAlloc)) {
-	            	Set<Intersection> msrToAllocTargets = new HashSet<Intersection>(targets);
+	            	Set<Intersection> msrToAllocTargets = new HashSet<Intersection>(evalState.getLoadFactor());
 	            	double msrToAllocTargetTotal = 0;
 	            	for (Intersection target : targets) {
-	            		String targetMeasure = target.getCoordinate(msrDim);
-	            		if (msrToAllocTargets.contains(targetMeasure)) {
+	            		if (sourceIsTargetCells.contains(target)) {
+	            			msrToAllocTargets.add(target);
 	            			msrToAllocTargetTotal += dataCache.getCellValue(target);
 	            		}
 	            	}
 	            	targets.removeAll(msrToAllocTargets);
 	            	allocAvailable -= msrToAllocTargetTotal;            	
+        			userLockedTargets.removeAll(msrToAllocTargets);
 	            }
 	            
 	            if (targets.size() != userLockedTargets.size()) {
 	            	// some targets are user locks so remove them and allocate into rest
-	            	targets.removeAll(userLockedTargets);
-	                allocAvailable -= userLockedTotal; 
+	            	for (Intersection userLockedTarget : userLockedTargets) {
+	            		if (targets.contains(userLockedTarget)) {
+	            			targets.remove(userLockedTarget);
+	            			allocAvailable -= dataCache.getCellValue(userLockedTarget); 
+	            		}
+	            	}
 	            }
 	//            else { // all potential targets are user locks, so allocate evenly into them
 	//            	allocAvailable = allocAvailable;
