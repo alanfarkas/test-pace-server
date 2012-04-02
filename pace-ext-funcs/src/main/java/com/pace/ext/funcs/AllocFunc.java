@@ -407,7 +407,6 @@ int alan = 2;
 				}
 	            userLockedTargets.retainAll(targets);
 	            ArrayList<Intersection> elapsedTargets = new ArrayList<Intersection>(evalState.getLoadFactor());
-	            double userLockedTotal = 0;
 	            double elapsedTotal = 0;
 	            for (Intersection target : targets) {
 	            	
@@ -434,11 +433,13 @@ int alan = 2;
 	            // always remove elapsed periods from the allocation
 	            targets.removeAll(elapsedTargets);
 	            allocAvailable = allocTotal - elapsedTotal;
+	            userLockedTargets.removeAll(elapsedTargets);
 	            
 	            // ensure that potential targets of the top allocation measure are preserved (TTN-1743)
+            	Set<Intersection> msrToAllocTargets = null;
+            	double msrToAllocTargetTotal = 0;
 	            if (!allocMeasure.equals(msrToAlloc)) {
-	            	Set<Intersection> msrToAllocTargets = new HashSet<Intersection>(evalState.getLoadFactor());
-	            	double msrToAllocTargetTotal = 0;
+	            	msrToAllocTargets = new HashSet<Intersection>(evalState.getLoadFactor());
 	            	for (Intersection target : targets) {
 	            		if (sourceIsTargetCells.contains(target)) {
 	            			msrToAllocTargets.add(target);
