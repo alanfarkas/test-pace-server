@@ -53,10 +53,13 @@ public class AllocFunc extends AbstractFunction {
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 
     	
-    	// This method use allocation logic cloned from the Evaluation package. Simulating the
-    	// "real" allocation logic, any locked target intersections will be allocated first
-    	// from bottom to top. Lastly, the current intersection, containing the "msrToAllocate",
-    	// is allocated.
+    	// This method use allocation logic cloned from the Evaluation package. Initially
+    	// all locked or changed "msrToAllocate" intersections will be allocated in
+    	// ascending intersection order. This will be followed by the re-allocation of any
+    	// locked or changed intersections for any valid descendant measures of "msrToAllocate".
+    	// This re-allocation step is necessary since the previous allocation of these 
+    	// descendant measures occurred before the current rule and therefore didn't
+    	// take into account the changes from the "msrToAllocate" allocations. (TTN-1743)
 
   
     	// Convenience variables
