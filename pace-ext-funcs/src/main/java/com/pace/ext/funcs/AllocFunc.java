@@ -119,8 +119,9 @@ public class AllocFunc extends AbstractFunction {
         		allocTargets.addAll(EvalUtil.buildFloorIntersections(targetCell, evalState));
         	}
 
-        	// gather the user lock floor intersections. These are user locks "only" and
-        	// don't include elapsed period locks. (TTN-1743)
+        	// gather the user lock target intersections. These are user locks "only" and
+        	// don't include elapsed period locks. Also gather the "msrToAlloc" allocation
+        	// locks that need to be preserved (TTN-1743)
         	userLockTargets.clear();
         	msrToAllocPreservedLocks.clear();
         	for (Intersection origLockedCell : evalState.getOrigLockedCells()) {
@@ -397,25 +398,11 @@ public class AllocFunc extends AbstractFunction {
 	        Set<Intersection> lockedTargets = new HashSet<Intersection>(evalState.getLoadFactor());
 	        Set<Intersection> currentLockedCells = new HashSet<Intersection>(evalState.getLoadFactor());
 	        
-//			Set<String> lockedTimePeriods = evalState.getClientState().getLockedPeriods();		
-//			if (lockedTimePeriods == null) lockedTimePeriods = new HashSet<String>(0); 
-	        
 				
 	        // add up all locked cell values, this must include floors intersections of excluded measures
-//        	currentLockedCells.addAll(evalState.getCurrentLockedCells());
 	        for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
 	        	currentLockedCells.addAll(EvalUtil.buildFloorIntersections(lockedCell, evalState));
 	        }
-			
-			
-			// consider protected cells as locked
-//			if (allocMeasure.equals(msrToAlloc)) {
-//				for (Intersection protectedCell : evalState.getCurrentProtectedCells()) {
-//					currentLockedCells.addAll(EvalUtil.buildFloorIntersections(protectedCell, evalState));
-//				}
-//			}
-			//			currentLockedCells.addAll(evalState.getCurrentProtectedCells());
-//			currentLockedCells.addAll(evalState.getAllocationsByMsr(allocMeasure));
 	        for (Intersection target : targets) {
 	            if (currentLockedCells.contains(target) || 
 //	                    (lockedTimePeriods.contains(target.getCoordinate(timeDim)) && 
@@ -455,18 +442,7 @@ public class AllocFunc extends AbstractFunction {
 	            	if (EvalUtil.isElapsedIs(target, evalState)) {			// TTN-1595
 	                	elapsedTotal += dataCache.getCellValue(target);
 	                	elapsedTargets.add(target);              
-	                }  
-	            	
-	            	// total user lock floor intersections that intersect with allocation
-	            	// targets and don't include elapsed period locks. (TTN-1743)
-//	                if (
-//	                		(evalState.getOrigLockedCells().contains(target) || evalState.getOrigChangedCells().contains(target)) // user change true
-//	                		&&
-//	                		(!elapsedTargets.contains(target)) // not already counted as an elapsed period
-//	                ) {
-//	                	userLockedTotal += dataCache.getCellValue(target);
-//	                    userLockedTargets.add(target);              
-//	                }
+	                }            	
 	            }
 	            
 	            // always remove elapsed periods from the allocation
