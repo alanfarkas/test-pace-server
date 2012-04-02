@@ -103,7 +103,7 @@ public class AllocFunc extends AbstractFunction {
         allocCellList.addAll(Arrays.asList(allocCells));
         
 
-        // Allocate selected intersections in for top allocation measure, followed by remaining
+        // Allocate selected intersections for top allocation measure, followed by remaining
         // measures to allocate. This logic assumes that any component/descendant measures were
         // already allocated in a previous rule step. (TTN-1743)
         for (Intersection allocCell : allocCellList) {
@@ -120,8 +120,8 @@ public class AllocFunc extends AbstractFunction {
         	}
 
         	// gather the user lock target intersections. These are user locks "only" and
-        	// don't include elapsed period locks. Also gather the "msrToAlloc" allocation
-        	// locks that need to be preserved (TTN-1743)
+        	// don't include elapsed period locks. Also gather the allocation locks that
+        	// need to be preserved when performing the allocation of the "msrToAlloc" (TTN-1743)
         	userLockTargets.clear();
         	msrToAllocPreservedLocks.clear();
         	for (Intersection origLockedCell : evalState.getOrigLockedCells()) {
