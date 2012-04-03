@@ -139,7 +139,7 @@ public class AllocFunc extends AbstractFunction {
 
     	// Exit if we're already called this function on the current rule
     	Intersection topMsrToAllocIs = allocCellList.get(0);
-    	if (sourceIs.equals(topMsrToAllocIs)) {
+    	if (!sourceIs.equals(topMsrToAllocIs)) {
     		// actual intersection in question should remain unchanged by this operation
     		return dataCache.getCellValue(sourceIs);
     	}
