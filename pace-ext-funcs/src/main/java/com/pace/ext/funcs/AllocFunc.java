@@ -76,10 +76,6 @@ public class AllocFunc extends AbstractFunction {
         // targets holds all intersections to allocate into.
     	// The lists have been processed by validateParms
     	
-    	// Get the list of the source intersection target intersections. (TTN-1743)
-    	sourceIsTargetCells.clear();
-    	sourceIsTargetCells.addAll(EvalUtil.buildFloorIntersections(sourceIs, evalState, true));
-    	
      	// Get the list of intersections to allocate. This would include the current 
     	// intersection as well as any non-elapsed locked intersections for the 
     	// "msrToAlloc" or any of its descendants along the measure hierarchy. 
@@ -141,7 +137,18 @@ public class AllocFunc extends AbstractFunction {
     	}
     	allocCellList.addAll(allocComponentCellList);
 
-    	
+    	// Exit if we're already called this function on the current rule
+    	Intersection topMsrToAllocIs = allocCellList.get(0);
+    	if (sourceIs.equals(topMsrToAllocIs)) {
+    		// actual intersection in question should remain unchanged by this operation
+    		return dataCache.getCellValue(sourceIs);
+    	}
+
+
+    	// Get the list of the source intersection target intersections. (TTN-1743)
+    	sourceIsTargetCells.clear();
+    	sourceIsTargetCells.addAll(EvalUtil.buildFloorIntersections(topMsrToAllocIs, evalState, true));
+
     	// Allocate the selected intersections in the optimal calculation order. This logic
     	// assumes that any component/descendant measures were already allocated in a 
     	// previous rule step. (TTN-1743)
@@ -177,23 +184,22 @@ public class AllocFunc extends AbstractFunction {
         			}
         		}
         	}
-        	for (Intersection origChangedCell : evalState.getOrigChangedCells()) {
-        		String measure = origChangedCell.getCoordinate(msrDim);
-        		if (aggMsrs.contains(measure)) {
-        			userLockTargets.addAll(EvalUtil.buildFloorIntersections(origChangedCell, evalState, true));
-    				// Determine which locks need to be preserved when allocating the current
-    				// "msrToAlloc" intersection. Pick all descendant locked intersections.
-    				if (allocMeasure.equals(msrToAlloc) && isDescendantIs(origChangedCell, allocCell, evalState)) {
-						List<Intersection> floorLocks = EvalUtil.buildFloorIntersections(origChangedCell,evalState);
-						msrToAllocPreservedLocks.addAll(floorLocks);
-					}
-        		}
-        	}
+//        	for (Intersection origChangedCell : evalState.getOrigChangedCells()) {
+//        		String measure = origChangedCell.getCoordinate(msrDim);
+//        		if (aggMsrs.contains(measure)) {
+//        			userLockTargets.addAll(EvalUtil.buildFloorIntersections(origChangedCell, evalState, true));
+//    				// Determine which locks need to be preserved when allocating the current
+//    				// "msrToAlloc" intersection. Pick all descendant locked intersections.
+//    				if (allocMeasure.equals(msrToAlloc) && isDescendantIs(origChangedCell, allocCell, evalState)) {
+//						List<Intersection> floorLocks = EvalUtil.buildFloorIntersections(origChangedCell,evalState);
+//						msrToAllocPreservedLocks.addAll(floorLocks);
+//					}
+//        		}
+//        	}
         	
         	// Allocate cell
         	allocateChange(allocCell, allocTargets, evalState, dataCache);
         }
-
 
                 
         // indicate additional aggregations required by this operation
