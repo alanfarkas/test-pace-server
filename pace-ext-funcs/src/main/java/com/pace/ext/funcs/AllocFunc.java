@@ -42,11 +42,11 @@ public class AllocFunc extends AbstractFunction {
 	protected String msrToAlloc = null;
 	protected List<String> targetMsrs = new ArrayList<String>(), validTargetMsrs = new ArrayList<String>();
 	protected Set<String> aggMsrs = new HashSet<String>();
-	protected List<Intersection> unlockIntersections = new ArrayList<Intersection>();
+	protected List<Intersection> unlockIntersections = new ArrayList<Intersection>(10000);
 	protected List<String> excludedMsrs = new ArrayList<String>();
-	protected Set<Intersection> userLockTargets = new HashSet<Intersection>();   // Exploded measures
-	protected Set<Intersection> msrToAllocPreservedLocks = new HashSet<Intersection>();    // Original measures
-	protected List<Intersection> sourceIsTargetCells = new ArrayList<Intersection>();
+	protected Set<Intersection> userLockTargets = new HashSet<Intersection>(10000);   // Exploded measures
+	protected Set<Intersection> msrToAllocPreservedLocks = new HashSet<Intersection>(10000);    // Original (non-exploded) measures
+	protected List<Intersection> sourceIsTargetCells = new ArrayList<Intersection>(10000);
 	
 	private static Logger logger = Logger.getLogger(AllocFunc.class);
 
@@ -64,10 +64,10 @@ public class AllocFunc extends AbstractFunction {
     	// Convenience variables
       	String msrDim = dataCache.getMeasureDim();
         String[] axisSortSeq = evalState.getAxisSortPriority();
-        HashSet<Intersection> allocMsrComponentIntersections = new HashSet<Intersection>();
-        HashSet<Intersection> allocMsrIntersections = new HashSet<Intersection>();
+        HashSet<Intersection> allocMsrComponentIntersections = new HashSet<Intersection>(evalState.getLoadFactor());
+        HashSet<Intersection> allocMsrIntersections = new HashSet<Intersection>(evalState.getLoadFactor());
         PafDimTree measureTree = evalState.getClientState().getUowTrees().getTree(msrDim);
-    	List<Intersection> allocCellList = new ArrayList<Intersection>();
+    	List<Intersection> allocCellList = new ArrayList<Intersection>(100);
 
  	
     	// Validate function parameters
@@ -418,9 +418,6 @@ public class AllocFunc extends AbstractFunction {
 	    	// if (logger.isDebugEnabled()) logger.debug("Allocating change for :" + intersection.toString() + " = " + allocTotal);
 	
 	    	// convenience variables
-//	    	String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
-//	        String currentYear = evalState.getAppDef().getCurrentYear(); 
-//	        String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
 	        String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
 	        String allocMeasure = allocSrcIsx.getCoordinate(msrDim);
 	    	
