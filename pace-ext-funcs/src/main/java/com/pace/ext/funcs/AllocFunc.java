@@ -53,13 +53,12 @@ public class AllocFunc extends AbstractFunction {
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 
     	
-    	// This method use allocation logic cloned from the Evaluation package. Initially
-    	// all locked or changed "msrToAllocate" intersections will be allocated in
-    	// ascending intersection order. This will be followed by the re-allocation of any
-    	// locked or changed intersections for any valid descendant measures of "msrToAllocate".
-    	// This re-allocation step is necessary since the previous allocation of these 
-    	// descendant measures occurred before the current rule and therefore didn't
-    	// take into account the changes from the "msrToAllocate" allocations. (TTN-1743)
+    	// This method uses allocation logic cloned from the Evaluation package. All
+    	// locked or changed "msrToAllocate" intersections will be allocated in
+    	// ascending intersection order. This allocation of multiple "msrToAllocate"
+    	// intersections will be interleaved with the re-allocation of any impacted
+    	// "msrToAllocate" component measure intersections, that are descendants
+    	// of the next "msrToAllocate" to be calculated. (TTN-1743)
 
   
     	// Convenience variables
@@ -83,7 +82,8 @@ public class AllocFunc extends AbstractFunction {
     	
      	// Get the list of intersections to allocate. This would include the current 
     	// intersection as well as any non-elapsed locked intersections for the 
-    	// "msrToAlloc" or any of its descendants along the measure hierarchy. (TTN-1743)
+    	// "msrToAlloc" or any of its descendants along the measure hierarchy. 
+    	// (TTN-1743)
     	for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
     		
     		// Skip elapsed periods
@@ -102,10 +102,15 @@ public class AllocFunc extends AbstractFunction {
 			}
     	}
     	
-    	// Sort intersections in ascending, but interleaved order. All component
-    	// measure intersections need to be allocated before any ancestor "msrToAlloc"
-    	// intersections, but after any "msrToAlloc" intersection that contain any
-    	// descendant targets. (TTN-1743)
+    	// Sort intersections to allocate in ascending, but interleaved order. All 
+    	// component measure intersections need to be allocated before any ancestor 
+    	// "msrToAlloc" intersections, but after any "msrToAlloc" intersection that 
+    	// contain any descendant targets. 
+    	//
+    	// The one exception is that component intersections that are descendants to 
+    	// the first "msrToAlloc" intersection, are not re-allocated, since there is
+    	// no need reason to recalculate them. 
+    	// (TTN-1743)
     	Intersection[] allocComponentCells = EvalUtil.sortIntersectionsByAxis(allocMsrComponentIntersections.toArray(new Intersection[0]), 
     			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
     	List<Intersection> allocComponentCellList = new ArrayList<Intersection>(Arrays.asList(allocComponentCells));
@@ -121,15 +126,22 @@ public class AllocFunc extends AbstractFunction {
     					allocCellList.add(componentIs);
     				}
     			} else {
+    				// Since this is the first "msrToAllocate" intersection, skip
+    				// any descendant component intersections.
     				break;
     			}
     		}
+    		// Add "msrToAlloc" intersection to list after it's descendant component
+    		// intersections.
     		allocCellList.add(allocMsrIs);
+    		
+    		// Add any remaining component intersections
     		allocComponentCellList.removeAll(processedCompIntersections);
     		bFirstAllocMsrIs = false;
     	}
     	allocCellList.addAll(allocComponentCellList);
 
+    	
     	// Allocate the selected intersections in the optimal calculation order. This logic
     	// assumes that any component/descendant measures were already allocated in a 
     	// previous rule step. (TTN-1743)
