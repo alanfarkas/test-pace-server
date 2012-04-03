@@ -57,8 +57,8 @@ public class SumFunc extends AbstractFunction {
     	validateParms(evalState);
    	   	
     	// Remove locked target cells associated with previous @ALLOC rule evaluation (TTN-1743)
-//    	List<Intersection> potentialAllocTargets = EvalUtil.buildFloorIntersections(sourceIs, evalState, true);
-//    	evalState.getCurrentLockedCells().removeAll(potentialAllocTargets);
+    	List<Intersection> potentialAllocTargets = EvalUtil.buildFloorIntersections(sourceIs, evalState, true);
+    	evalState.getCurrentLockedCells().removeAll(potentialAllocTargets);
     	
     	// Aggregate current intersection across the selected measures
     	aggMeasures(sourceIs, inputMsrs, dataCache, evalState);
