@@ -82,9 +82,16 @@ public class AllocFunc extends AbstractFunction {
     	sourceIsTargetCells.addAll(EvalUtil.buildFloorIntersections(sourceIs, evalState, true));
     	
      	// Get the list of intersections to allocate. This would include the current 
-    	// intersection as well as any locked descendants along the measure hierarchy.
-    	// (TTN-1743)
+    	// intersection as well as any non-elapsed locked intersections for the 
+    	// "msrToAlloc" or any of its descendants along the measure hierarchy. (TTN-1743)
     	for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
+    		
+    		// Skip elapsed periods
+    		if (EvalUtil.isElapsedIs(lockedCell, evalState)) continue;
+    		
+    		// Split locked intersections into two groups by measure: the ones
+    		// belonging to "msrToAlloc" and the ones belonging to the "msrToAlloc"
+    		// components.
     		String measure = lockedCell.getCoordinate(msrDim);
 			if (this.aggMsrs.contains(measure)) {
 				if (!measure.equals(msrToAlloc)) {
@@ -95,20 +102,37 @@ public class AllocFunc extends AbstractFunction {
 			}
     	}
     	
-    	// Sort intersections in ascending order by measure being allocated. The "msrToAlloc" 
-    	// intersections need to get allocated first, followed by the intersections for the
-    	// "msrToAlloc" components/descendants. (TTN-1743)
-        Intersection[] allocCells = EvalUtil.sortIntersectionsByAxis(allocMsrComponentIntersections.toArray(new Intersection[0]), 
-        		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
-        Intersection[] allocMsrCells = EvalUtil.sortIntersectionsByAxis(allocMsrIntersections.toArray(new Intersection[0]), 
-        		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
-        allocCellList.addAll(Arrays.asList(allocMsrCells));
-        allocCellList.addAll(Arrays.asList(allocCells));
-        
+    	// Sort intersections in ascending, but interleaved order. All component
+    	// measure intersections need to be allocated before any ancestor "msrToAlloc"
+    	// intersections, but after any "msrToAlloc" intersection that contain any
+    	// descendant targets. (TTN-1743)
+    	Intersection[] allocComponentCells = EvalUtil.sortIntersectionsByAxis(allocMsrComponentIntersections.toArray(new Intersection[0]), 
+    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
+    	List<Intersection> allocComponentCellList = new ArrayList<Intersection>(Arrays.asList(allocComponentCells));
+    	Intersection[] allocMsrCells = EvalUtil.sortIntersectionsByAxis(allocMsrIntersections.toArray(new Intersection[0]), 
+    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
+    	boolean bFirstAllocMsrIs = true;
+    	for (Intersection allocMsrIs : allocMsrCells) {
+    		List<Intersection> processedCompIntersections = new ArrayList<Intersection>();
+    		for (Intersection componentIs : allocComponentCellList) {
+    			if (isDescendantIs(componentIs, allocMsrIs, evalState)) {
+    				processedCompIntersections.add(componentIs);
+    				if (!bFirstAllocMsrIs) {
+    					allocCellList.add(componentIs);
+    				}
+    			} else {
+    				break;
+    			}
+    		}
+    		allocCellList.add(allocMsrIs);
+    		allocComponentCellList.removeAll(processedCompIntersections);
+    		bFirstAllocMsrIs = false;
+    	}
+    	allocCellList.addAll(allocComponentCellList);
 
-        // Allocate selected intersections for top allocation measure, followed by remaining
-        // measures to allocate. This logic assumes that any component/descendant measures were
-        // already allocated in a previous rule step. (TTN-1743)
+    	// Allocate the selected intersections in the optimal calculation order. This logic
+    	// assumes that any component/descendant measures were already allocated in a 
+    	// previous rule step. (TTN-1743)
         for (Intersection allocCell : allocCellList) {
 
         	// Find the targets of the cell to allocate
@@ -132,7 +156,9 @@ public class AllocFunc extends AbstractFunction {
         		if (aggMsrs.contains(measure)) {
         			if (!EvalUtil.isElapsedIs(origLockedCell, evalState)) {
         				userLockTargets.addAll(EvalUtil.buildFloorIntersections(origLockedCell, evalState, true));
-        				if (allocMeasure.equals(msrToAlloc) && isDescendantIs(origLockedCell, sourceIs, evalState)) {
+        				// Determine which locks need to be preserved when allocating the current
+        				// "msrToAlloc" intersection. Pick all descendant locked intersections.
+        				if (allocMeasure.equals(msrToAlloc) && isDescendantIs(origLockedCell, allocCell, evalState)) {
 							List<Intersection> floorLocks = EvalUtil.buildFloorIntersections(origLockedCell,evalState);
 							msrToAllocPreservedLocks.addAll(floorLocks);
 						}
@@ -143,7 +169,9 @@ public class AllocFunc extends AbstractFunction {
         		String measure = origChangedCell.getCoordinate(msrDim);
         		if (aggMsrs.contains(measure)) {
         			userLockTargets.addAll(EvalUtil.buildFloorIntersections(origChangedCell, evalState, true));
-    				if (allocMeasure.equals(msrToAlloc) && isDescendantIs(origChangedCell, sourceIs, evalState)) {
+    				// Determine which locks need to be preserved when allocating the current
+    				// "msrToAlloc" intersection. Pick all descendant locked intersections.
+    				if (allocMeasure.equals(msrToAlloc) && isDescendantIs(origChangedCell, allocCell, evalState)) {
 						List<Intersection> floorLocks = EvalUtil.buildFloorIntersections(origChangedCell,evalState);
 						msrToAllocPreservedLocks.addAll(floorLocks);
 					}
@@ -165,29 +193,30 @@ public class AllocFunc extends AbstractFunction {
     
 
     /**
-     * Checks to see if one intersection is a descendant of another intersection
+     * Checks if one intersection is a descendant of the other intersection
      * 
-     * @param testedIs Intersection to test
+     * @param descendantIs Descendant intersection
      * @param ancestorIs Ancestor intersection
      * @param evalState Evaluation state
-     * @return
+     * 
+     * @return true if the tested descendant intersection is a descendant of the ancestor intersection
      */
-    private boolean isDescendantIs(Intersection testedIs, Intersection ancestorIs, IPafEvalState evalState) {
+    private boolean isDescendantIs(Intersection descendantIs, Intersection ancestorIs, IPafEvalState evalState) {
     	
     	MemberTreeSet dimTrees = evalState.getClientState().getUowTrees();
     	
     	// Cycle through each dimension and check each coordinate of the tested
     	// intersection.
-    	for (String dim : testedIs.getDimensions()) {
+    	for (String dim : descendantIs.getDimensions()) {
     		
     		PafDimTree dimTree = dimTrees.getTree(dim);
-    		String coord = testedIs.getCoordinate(dim);
+    		String descCoord = descendantIs.getCoordinate(dim);
     		String ancestorCoord = ancestorIs.getCoordinate(dim);
     		List<String> descendantMbrs = PafDimTree.getMemberNames(dimTree.getIDescendants(ancestorCoord));
     		
     		// If the tested intersection's dimension coordinate is not a descendant
     		// of the ancestor intersection, then return failure status
-    		if (!descendantMbrs.contains(coord)) {
+    		if (!descendantMbrs.contains(descCoord)) {
     			return false;
     		}
     	}
