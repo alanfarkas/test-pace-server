@@ -47,6 +47,7 @@ public class AllocFunc extends AbstractFunction {
 	protected Set<Intersection> userLockTargets = new HashSet<Intersection>(10000);   // Exploded measures
 	protected Set<Intersection> msrToAllocPreservedLocks = new HashSet<Intersection>(10000);    // Original (non-exploded) measures
 	protected List<Intersection> sourceIsTargetCells = new ArrayList<Intersection>(10000);
+	protected Set<Intersection> allocatedTargets = new HashSet<Intersection>(10000);
 	
 	private static Logger logger = Logger.getLogger(AllocFunc.class);
 
@@ -80,6 +81,7 @@ public class AllocFunc extends AbstractFunction {
     	// intersection as well as any non-elapsed locked intersections for the 
     	// "msrToAlloc" or any of its descendants along the measure hierarchy. 
     	// (TTN-1743)
+    	allocMsrIntersections.add(sourceIs);
     	for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
     		
     		// Skip elapsed periods
@@ -152,6 +154,7 @@ public class AllocFunc extends AbstractFunction {
     	// Allocate the selected intersections in the optimal calculation order. This logic
     	// assumes that any component/descendant measures were already allocated in a 
     	// previous rule step. (TTN-1743)
+    	allocatedTargets.clear();
         for (Intersection allocCell : allocCellList) {
 
         	// Find the targets of the cell to allocate
@@ -201,7 +204,10 @@ public class AllocFunc extends AbstractFunction {
         	allocateChange(allocCell, allocTargets, evalState, dataCache);
         }
 
-                
+        
+        // remove locks on allocated targets
+        evalState.getCurrentLockedCells().removeAll(allocatedTargets);
+        
         // indicate additional aggregations required by this operation
         evalState.getTriggeredAggMsrs().addAll(this.targetMsrs);
         
@@ -596,7 +602,8 @@ public class AllocFunc extends AbstractFunction {
             
             // add cells to locks
            	evalState.getCurrentLockedCells().add(target);
-             
+            allocatedTargets.add(target);
+           	
             // add to changed cell list
 			evalState.addChangedCell(target);
         }        
@@ -668,6 +675,7 @@ public class AllocFunc extends AbstractFunction {
             
             // add cells to locks
            	evalState.getCurrentLockedCells().add(target);
+           	allocatedTargets.add(target);
             
             // add to changed cell list
 			evalState.addChangedCell(target);
