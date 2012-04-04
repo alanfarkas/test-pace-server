@@ -1,20 +1,11 @@
 package com.pace.ext.funcs;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
-import com.pace.base.data.EvalUtil;
-import com.pace.base.data.IPafDataCache;
-import com.pace.base.data.Intersection;
-import com.pace.base.funcs.AbstractFunction;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
@@ -86,7 +77,7 @@ public class AllocOnlyFunc extends AllocFunc {
     	// Check for optional parameters - if any other parameters 
     	// then they represent the targets rather than the default children
     	int index = 1;
-    	targetMsrs = new ArrayList<String>();
+    	targetMsrs = new HashSet<String>();
     	if (parms.length > 1) {
     		while (index<parms.length)
     			targetMsrs.add(parms[index++]);
