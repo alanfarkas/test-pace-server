@@ -412,7 +412,7 @@ int alan=0;
 	        String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
 	        String allocMeasure = allocSrcIsx.getCoordinate(msrDim);
 	    	
-	    	long stepTime = System.currentTimeMillis();
+//	    	long stepTime = System.currentTimeMillis();
 	
 	    	// initial check, don't allocate any intersection that is "elapsed" during forward plannable sessions
 	        // if current plan is forward plannable, also don't allow
@@ -423,7 +423,7 @@ int alan=0;
 	        
 	        
 	        // total locked cells under intersection
-	        stepTime = System.currentTimeMillis();    
+//	        stepTime = System.currentTimeMillis();    
 	        
 	        
 	        double lockedTotal = 0;
@@ -432,9 +432,6 @@ int alan=0;
 	        
 				
 	        // add up all locked cell values, this must include floors intersections of excluded measures
-//	        for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
-//	        	currentLockedCells.addAll(EvalUtil.buildFloorIntersections(lockedCell, evalState));
-//	        }
 	        currentLockedCells.addAll(evalState.getCurrentLockedCells());
 	        for (Intersection target : targets) {
 	            if (currentLockedCells.contains(target) || 
@@ -448,7 +445,7 @@ int alan=0;
 	            }
 	        }
 	        
-int alan=0;
+	        
 	        double allocAvailable = 0;
 	        
 	        // normal routine, remove locked intersections from available allocation targets
@@ -459,13 +456,8 @@ int alan=0;
 	        else { // all targets locked so special case
 	        	// if some of the locks are original user changes
 	            ArrayList<Intersection> userLockedTargets = new ArrayList<Intersection>(evalState.getLoadFactor());
-				if (allocMeasure.equals(msrToAlloc)) {
-					userLockedTargets.addAll(msrToAllocPreservedLocks);
-				} else {
-					userLockedTargets.addAll(userLockTargets);
-				}
-	            userLockedTargets.retainAll(targets);
 	            ArrayList<Intersection> elapsedTargets = new ArrayList<Intersection>(evalState.getLoadFactor());
+	            double userLockedTotal = 0;
 	            double elapsedTotal = 0;
 	            for (Intersection target : targets) {
 	            	
@@ -475,38 +467,30 @@ int alan=0;
 	            	if (EvalUtil.isElapsedIs(target, evalState)) {			// TTN-1595
 	                	elapsedTotal += dataCache.getCellValue(target);
 	                	elapsedTargets.add(target);              
-	                }            	
+	                }  
+	            	
+	            	// total user locks and add them to a specific collection. These are user locks "only"
+	            	// and don't include elapsed period locks
+	                if (
+	                		(evalState.getOrigLockedCells().contains(target) || evalState.getOrigChangedCells().contains(target)) // user change true
+	                		&&
+	                		(!elapsedTargets.contains(target)) // not already counted as an elapsed period
+	                ) {
+	                	userLockedTotal += dataCache.getCellValue(target);
+	                    userLockedTargets.add(target);              
+	                }
+	            	
 	            }
 	            
 	            // always remove elapsed periods from the allocation
 	            targets.removeAll(elapsedTargets);
 	            allocAvailable = allocTotal - elapsedTotal;
 	            userLockedTargets.removeAll(elapsedTargets);
-	            
-	            // ensure that potential targets of the top allocation measure are preserved (TTN-1743)
-            	Set<Intersection> msrToAllocTargets = null;
-            	double msrToAllocTargetTotal = 0;
-	            if (!allocMeasure.equals(msrToAlloc)) {
-	            	msrToAllocTargets = new HashSet<Intersection>(evalState.getLoadFactor());
-	            	for (Intersection target : targets) {
-	            		if (sourceIsTargetCells.contains(target)) {
-	            			msrToAllocTargets.add(target);
-	            			msrToAllocTargetTotal += dataCache.getCellValue(target);
-	            		}
-	            	}
-	            	targets.removeAll(msrToAllocTargets);
-	            	allocAvailable -= msrToAllocTargetTotal;            	
-        			userLockedTargets.removeAll(msrToAllocTargets);
-	            }
-	            
+	            	            
 	            if (targets.size() != userLockedTargets.size()) {
 	            	// some targets are user locks so remove them and allocate into rest
-	            	for (Intersection userLockedTarget : userLockedTargets) {
-	            		if (targets.contains(userLockedTarget)) {
-	            			targets.remove(userLockedTarget);
-	            			allocAvailable -= dataCache.getCellValue(userLockedTarget); 
-	            		}
-	            	}
+	            	targets.removeAll(userLockedTargets);
+	            	allocAvailable -= userLockedTotal; 
 	            }
 	//            else { // all potential targets are user locks, so allocate evenly into them
 	//            	allocAvailable = allocAvailable;
@@ -523,7 +507,7 @@ int alan=0;
 	        }
 	        
 	        // begin timing allocation step
-	        stepTime = System.currentTimeMillis();
+	//        stepTime = System.currentTimeMillis();
 	//		logger.info("Allocating intersection: " + intersection);
 	//		logger.info("Allocating into " + targets.size() + " targets" );          
 	        
@@ -552,7 +536,7 @@ int alan=0;
         double allocValue = 0;
         int places = 0;
    
-        long stepTime = System.currentTimeMillis();
+ //       long stepTime = System.currentTimeMillis();
 
         
         
