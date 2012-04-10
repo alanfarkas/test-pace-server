@@ -1,7 +1,6 @@
 package com.pace.ext.funcs;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,10 +41,7 @@ public class AllocFunc extends AbstractFunction {
 	protected String msrToAlloc = null;
 	protected Set<String> targetMsrs = new HashSet<String>(), validTargetMsrs = new HashSet<String>();
 	protected Set<String> aggMsrs = new HashSet<String>();
-	protected Set<Intersection> unlockIntersections = null;
 	protected Set<String> excludedMsrs = new HashSet<String>();
-	protected Set<Intersection> userLockTargets = null;   // Exploded measures
-	protected Set<Intersection> msrToAllocPreservedLocks;    // Original (non-exploded) measures
 	protected Set<Intersection> sourceIsTargetCells = null;
 	protected Set<Intersection> allocatedTargets = null;
 		
@@ -65,7 +61,7 @@ public class AllocFunc extends AbstractFunction {
     	// Convenience variables
       	String msrDim = dataCache.getMeasureDim();
         String[] axisSortSeq = evalState.getAxisSortPriority();
-        Set<Intersection> allocMsrComponentIntersections = new HashSet<Intersection>(evalState.getLoadFactor());
+        Set<Intersection> allocIntersections = new HashSet<Intersection>(evalState.getLoadFactor());
         Set<Intersection> allocMsrIntersections = new HashSet<Intersection>(evalState.getLoadFactor());
         PafDimTree measureTree = evalState.getClientState().getUowTrees().getTree(msrDim);
 
@@ -77,8 +73,8 @@ public class AllocFunc extends AbstractFunction {
     	// The lists have been processed by validateParms
     	
      	// Get the list of intersections to allocate. This would include the current 
-    	// intersection as well as any non-elapsed, non-level 0, locked intersections
-    	// for the "msrToAlloc" or any of its descendants along the measure hierarchy. 
+    	// intersection as well as any non-elapsed, locked intersections for the
+    	// "msrToAlloc" or any of its descendants along the measure hierarchy. 
     	// (TTN-1743)
     	allocMsrIntersections.add(sourceIs);
     	for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
@@ -91,19 +87,13 @@ public class AllocFunc extends AbstractFunction {
     		// components.
     		String measure = lockedCell.getCoordinate(msrDim);
 			if (this.aggMsrs.contains(measure)) {
-				if (!measure.equals(msrToAlloc)) {
-					allocMsrComponentIntersections.add(lockedCell);
-				} else {
+				allocIntersections.add(lockedCell);
+				if (measure.equals(msrToAlloc)) {
 					allocMsrIntersections.add(lockedCell);
 				}
 			}
     	}
-    	Set<Intersection> allIs = new HashSet<Intersection>(allocMsrIntersections.size() + allocMsrComponentIntersections.size());
-    	allIs.addAll(allocMsrIntersections);
-    	allIs.addAll(allocMsrComponentIntersections);
-    	Intersection[] sortedIsSet = EvalUtil.sortIntersectionsByAxis(allIs.toArray(new Intersection[0]), 
-    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
-    	
+
     	// Sort intersections to allocate in ascending, but interleaved order. All 
     	// component measure intersections need to be allocated before any ancestor 
     	// "msrToAlloc" intersections, but after any "msrToAlloc" intersection that 
@@ -113,10 +103,13 @@ public class AllocFunc extends AbstractFunction {
     	// the first "msrToAlloc" intersection, are not re-allocated, since there is
     	// no need reason to recalculate them. 
     	// (TTN-1743)
-    	Intersection[] allocMsrCells = EvalUtil.sortIntersectionsByAxis(allocMsrIntersections.toArray(new Intersection[0]), 
+    	Intersection[] sortedIsSet = EvalUtil.sortIntersectionsByAxis(allocIntersections.toArray(new Intersection[0]), 
     			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
+    	
 
     	// Exit if we're already called this function on the current rule
+    	Intersection[] allocMsrCells = EvalUtil.sortIntersectionsByAxis(allocMsrIntersections.toArray(new Intersection[0]), 
+    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
     	Intersection topMsrToAllocIs = allocMsrCells[allocMsrCells.length - 1];
     	if (!sourceIs.equals(topMsrToAllocIs)) {
     		// actual intersection in question should remain unchanged by this operation
@@ -132,11 +125,10 @@ public class AllocFunc extends AbstractFunction {
     	// assumes that any component/descendant measures were already allocated in a 
     	// previous rule step. (TTN-1743)
     	allocatedTargets = new HashSet<Intersection>(evalState.getLoadFactor());
-    	unlockIntersections = new HashSet<Intersection>(evalState.getLoadFactor());
     	Set<Intersection> currentLockedCells = new HashSet<Intersection>(evalState.getOrigLockedCells().size() + sortedIsSet.length);
     	currentLockedCells.addAll(evalState.getOrigLockedCells());
         for (Intersection allocCell : sortedIsSet) {
-int alan=0;
+
         	// Find the targets of the cell to allocate
         	Set<Intersection> allocTargets = new HashSet<Intersection>();
         	String allocMeasure = allocCell.getCoordinate(msrDim);
@@ -146,27 +138,6 @@ int alan=0;
         		Intersection targetCell = allocCell.clone();
         		targetCell.setCoordinate(msrDim, targetMeasure);
         		allocTargets.addAll(EvalUtil.buildFloorIntersections(targetCell, evalState));
-        	}
-
-        	// gather the user lock target intersections. These are user locks "only" and
-        	// don't include elapsed period locks. Also gather the allocation locks that
-        	// need to be preserved when performing the allocation of the "msrToAlloc" (TTN-1743)
-        	userLockTargets = new HashSet<Intersection>(10000);
-        	msrToAllocPreservedLocks = new HashSet<Intersection>(10000);
-        	for (Intersection currentLockedCell : currentLockedCells) {
-        		String measure = currentLockedCell.getCoordinate(msrDim);
-        		if (aggMsrs.contains(measure)) {
-        			if (!EvalUtil.isElapsedIs(currentLockedCell, evalState) && isDescendantIs(currentLockedCell, allocCell, evalState)) {
-        				userLockTargets.addAll(EvalUtil.buildFloorIntersections(currentLockedCell, evalState, true));
-        				// Determine which locks need to be preserved when allocating the current
-        				// "msrToAlloc" intersection. Pick all descendant locked intersections.
-        				if (allocMeasure.equals(msrToAlloc) ) {
-							Set<Intersection> floorLocks = 
-									new HashSet<Intersection>(EvalUtil.buildFloorIntersections(currentLockedCell,evalState));
-							msrToAllocPreservedLocks.addAll(floorLocks);
-						}
-        			}
-        		}
         	}
         	
         	// Allocate cell
@@ -485,7 +456,6 @@ int alan=0;
 	            // always remove elapsed periods from the allocation
 	            targets.removeAll(elapsedTargets);
 	            allocAvailable = allocTotal - elapsedTotal;
-	            userLockedTargets.removeAll(elapsedTargets);
 	            	            
 	            if (targets.size() != userLockedTargets.size()) {
 	            	// some targets are user locks so remove them and allocate into rest
