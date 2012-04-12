@@ -114,6 +114,7 @@ public class PafDataCache implements IPafDataCache {
 	private PafMVS pafMVS = null;
 	private MemberTreeSet dimTrees = null;
 	private Map<String, PafBaseTree> mdbBaseTrees = null;
+	private List<String> mdbYears = null;								// List of years in mdb year tree
 	private EvalState evalState = null;
 	private boolean isDirty = true;					// Indicates that the data cache has been updated
 	private final static int NON_KEY_DIM_COUNT = 3;	// Measure, Time, and Year Dimensions are dense dimensions
@@ -263,8 +264,12 @@ public class PafDataCache implements IPafDataCache {
 	 * @return
 	 */
 	public List<String> getMdbYears() {
-		final PafDimTree mdbYearTree = mdbBaseTrees.get(this.getYearDim());
-		final List<String> mdbYears = mdbYearTree.getLowestMemberNames(mdbYearTree.getRootNode().getKey());
+		
+		if (mdbYears == null) {
+			// This collection is lazy loaded
+			final PafDimTree mdbYearTree = mdbBaseTrees.get(this.getYearDim());
+			mdbYears = mdbYearTree.getLowestMemberNames(mdbYearTree.getRootNode().getKey());
+		}
 		return mdbYears;
 	}
 
@@ -2812,7 +2817,6 @@ public class PafDataCache implements IPafDataCache {
 		final String versionDim = this.getVersionDim(), yearDim = this.getYearDim();
 		final String planVersion = this.getPlanVersion();
 		final List<String> uowYearList = Arrays.asList(this.getYears());
-		final List<String> mdbYearList = this.getMdbYears();
 		
 
 		// Check for offset version reference. If none found then return original
@@ -2828,6 +2832,7 @@ public class PafDataCache implements IPafDataCache {
 		VersionFormula vf = vd.getVersionFormula();
 		String yearCoord = cellIs.getCoordinate(yearDim);
 		String sourceYear = null;
+		final List<String> mdbYearList = this.getMdbYears();
 		try {
 			sourceYear = vf.calcOffsetVersionSourceYear(yearCoord, mdbYearList);
 		} catch (Exception e) {
