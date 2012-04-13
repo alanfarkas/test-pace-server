@@ -108,7 +108,6 @@ public class Intersection {
 
 	public void setDimensions(String[] dimensions) {
 		this.dimensions = dimensions;
-		this.hashCode = 0;
 	}
 
 	public String getCoordinate(String dimension) {
@@ -132,6 +131,7 @@ public class Intersection {
 		for (String dim : dimensions) {
 			if (dim.equals(dimension)) {
 				coordinates[i] = value;
+				hashCode = 0;
 				return;
 			}
 			i++;
