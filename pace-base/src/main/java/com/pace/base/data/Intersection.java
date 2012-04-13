@@ -31,9 +31,9 @@ import java.util.Set;
  */
 public class Intersection {
 
-	String[] dimensions;
-
-	String[] coordinates;
+	private String[] dimensions;
+	private String[] coordinates;
+	private int hashCode;
 
 	public Intersection(String[] dimensions) {
 		this.dimensions = dimensions;
@@ -99,6 +99,7 @@ public class Intersection {
 
 	public void setCoordinates(String[] coordinates) {
 		this.coordinates = coordinates;
+		this.hashCode = 0;
 	}
 
 	public String[] getDimensions() {
@@ -107,6 +108,7 @@ public class Intersection {
 
 	public void setDimensions(String[] dimensions) {
 		this.dimensions = dimensions;
+		this.hashCode = 0;
 	}
 
 	public String getCoordinate(String dimension) {
@@ -163,11 +165,14 @@ public class Intersection {
 	}
 
 	public int hashCode() {
-		int result = 17;
+		
+		if (hashCode != 0) return hashCode;
+		
+		hashCode = 17;
 		for (int i = 0; i < dimensions.length; i++) {
-			result = 37 * result + coordinates[i].hashCode();				
+			hashCode = 37 * hashCode + coordinates[i].hashCode();				
 		}
-		return result;
+		return hashCode;
 	}
 
 	public String toString() {
