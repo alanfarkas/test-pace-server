@@ -31,12 +31,9 @@ import java.util.NoSuchElementException;
  * @author JWatkins
  *
  */
-public class Odometer {
-	int[] iterators;
-    @SuppressWarnings("rawtypes")
-	List[] lists;
-    int[] listSizes;
-    boolean atTop = true;
+public class CopyOfOdometer {
+	ListIterator<Object>[] iterators;
+    Object[] items;
     
     
  	/**
@@ -47,64 +44,53 @@ public class Odometer {
  	 * @param keyArray Array that specifies the order of the element lists within the odometer
  	 */
  	@SuppressWarnings("unchecked")
-	public <T, K> Odometer(Map<K, List<T>> memberMap, K[] keyArray) {
+	public <T, K> CopyOfOdometer(Map<K, List<T>> memberMap, K[] keyArray) {
 		this((List<Object>[]) CollectionsUtil.convertToArrayOfLists(memberMap, keyArray));
 	}
 
     
-	@SuppressWarnings({ "rawtypes" })
-	public Odometer(List[] lists) {
-        iterators = new int[lists.length];
-        listSizes = new int[lists.length];
-        this.lists = lists;
-        
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public CopyOfOdometer(List[] lists) {
+        iterators = new ListIterator[lists.length];
+        items = new Object[lists.length];
         
         // initialize structures and roll all dials to first position
         for (int i = 0; i < lists.length; i++) {
-        	listSizes[i] = lists[i].size() - 1;
-         }
-              
-        reset();
+            iterators[i] = lists[i].listIterator();
+            items[i] = iterators[i].next();
+        }
+        
+        // decrement lowest level pointer so hasNext works naturally
+        iterators[0].previous();
+        items[0] = null;
+        
     }
     
 
 	public void reset() {
         for (int i = 0; i < iterators.length; i++) {
             reset(i);
-        }   
-
+        }  
+        
         // decrement lowest level pointer so hasNext works naturally
-        iterators[0]--;
- 
-        atTop = true;
+        iterators[0].previous();
+        items[0] = null;
    }
     
-	public boolean hasNext() {
-		
+    public boolean hasNext() {
         for (int i = 0; i < iterators.length; i++) {
-            if (hasNext(i))  return true;
+            if (iterators[i].hasNext()) return true;
         } 
         return false;
     }
     
-	public boolean hasNext(int i) {
-		if (iterators[i] < listSizes[i]) {
-			return true; 
-		} else {
-			return false;
-		}
-	}
-    
     public void increment() {
         boolean doneInc = false;
         int i = 0;
-        
-        if (!hasNext()) throw new NoSuchElementException("Can't increment - Odometer is at final value.");
-        
-        atTop = false;
+        if (!hasNext()) throw new NoSuchElementException("Odometer is at final value.");
         while (!doneInc && i < iterators.length) {
-            if (hasNext(i)) {
-                iterators[i]++;     
+            if (iterators[i].hasNext()) {
+                items[i] = iterators[i].next();     
                 if (i > 0) {
                     // reset all lower values
                     for (int j = 0; j < i; j++) {
@@ -119,8 +105,6 @@ public class Odometer {
         }
     }
     
-    
-    
  	@SuppressWarnings("rawtypes")
 	public ArrayList nextValue() {
         increment();
@@ -130,25 +114,19 @@ public class Odometer {
     
  	@SuppressWarnings("rawtypes")
 	public ArrayList getValue() {
- 		if (atTop()) throw new NoSuchElementException("Can't retrieve value - Odometer is at reset position.");
         ArrayList<Object> itemValues = new ArrayList<Object>(iterators.length);
-        for (int i = 0; i < iterators.length; i++) {
-        	int index = iterators[i];
-            itemValues.add(lists[i].get(index));
+        for (int i = 0; i < items.length; i++) {
+            itemValues.add(items[i]);
         }
         
         return itemValues;
     }
     
-    private void reset(int i) {
-    	iterators[i] = 0;
-    }
-  
-    public boolean atTop() {		
-		return atTop;
-	}
-
     
-  
+    private void reset(int i) {
+        while (iterators[i].hasPrevious()) iterators[i].previous();
+        items[i] = iterators[i].next();
+    }
+    
     public enum IncOrder {LowEndFirst, HighEndFirst}
 }
