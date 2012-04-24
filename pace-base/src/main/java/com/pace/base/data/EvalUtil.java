@@ -31,7 +31,6 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.SortOrder;
@@ -40,7 +39,13 @@ import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.VersionType;
-import com.pace.base.funcs.*;
+import com.pace.base.funcs.F_Bop;
+import com.pace.base.funcs.F_Cum;
+import com.pace.base.funcs.F_Next;
+import com.pace.base.funcs.F_Prev;
+import com.pace.base.funcs.F_PrevCum;
+import com.pace.base.funcs.F_TriggerIntersection;
+import com.pace.base.funcs.IPafFunction;
 import com.pace.base.mdb.PafAttributeTree;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDataCache;
@@ -53,9 +58,6 @@ import com.pace.base.state.IPafEvalState;
 import com.pace.base.utility.Odometer;
 import com.pace.base.utility.TimeBalance;
 import com.pace.base.view.PafViewSection;
-import com.pace.base.data.DimSortComparator;
-import com.pace.base.data.GenSortComparator;
-import com.pace.base.data.IFormulaEvalEngine;
 
 
 /**
