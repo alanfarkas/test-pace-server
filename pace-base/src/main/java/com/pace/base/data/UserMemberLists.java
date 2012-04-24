@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 @XStreamAlias("userMemberLists")
 public class UserMemberLists {
