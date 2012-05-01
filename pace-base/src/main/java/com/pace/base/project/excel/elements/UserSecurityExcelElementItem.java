@@ -393,12 +393,35 @@ public class UserSecurityExcelElementItem<T extends List<PafUserSecurity>> exten
 								
 									Map<String, PafDimSpec> dimSpecMap = new TreeMap<String, PafDimSpec>(String.CASE_INSENSITIVE_ORDER);
 									
-									for (PafDimSpec unOrderPafDimSpec : pafDimSpecAr )
+									for (PafDimSpec unOrderPafDimSpec : pafDimSpecAr ) {
 										dimSpecMap.put(unOrderPafDimSpec.getDimension(), unOrderPafDimSpec);
+									}
 										
 									int startDynamicHeaderNdx = 4;
 									int maxExpCount = 0;
-									//go thru dimension-security list
+									//go thru dimension-security list and find the max expression counts
+									for (int i = 0; i < pafDimSpecAr.length; i++ ) {
+										
+										String dynamicHierDim = this.hierarchyDimList.get(i);
+										
+										if ( dimSpecMap.containsKey(dynamicHierDim)) {
+											
+											PafDimSpec dimSpec = dimSpecMap.get(dynamicHierDim);
+											
+											if ( dimSpec.getExpressionList() != null ) {
+												//go thru each security
+												int expIdx = 0;
+												for (String expression : dimSpec.getExpressionList() ) {
+										            //dynamic hier member
+										            expIdx++;
+												}
+												if( expIdx > maxExpCount ) {
+													maxExpCount = expIdx;
+												}
+											}
+										}
+									}
+									//add members for each dimension
 									for (int i = 0; i < pafDimSpecAr.length; i++ ) {
 										
 										String dynamicHierDim = this.hierarchyDimList.get(i);
@@ -415,25 +438,29 @@ public class UserSecurityExcelElementItem<T extends List<PafUserSecurity>> exten
 										            excelRow.addRowItem(startDynamicHeaderNdx + i, PafExcelValueObject.createFromString(expression));	
 										            expIdx++;
 												}
-												if( expIdx > maxExpCount )
-													maxExpCount = expIdx;
-												else 
-													for( int ii=0; ii<maxExpCount-expIdx; ii++)
-											            excelRow.addRowItem(startDynamicHeaderNdx + i, PafExcelValueObject.createBlank());	
+												if( expIdx < maxExpCount ) {
+													for( int ii=0; ii<maxExpCount-expIdx; ii++) {
+											            excelRow.addRowItem(startDynamicHeaderNdx + i, PafExcelValueObject.createBlank());
+													}
+												}
 											}
 											
 										}
 										
 									}
-									for( int i=0; i < maxExpCount; i++ )
+									//insert blanks under role name column before adding another role 
+									for( int i=0; i < maxExpCount; i++ ) {
 										if( i == 0 )
-											if ( isCellReferencingEnabled() && roleReferenceMap != null && roleReferenceMap.containsKey(roleName) )
+											if ( isCellReferencingEnabled() && roleReferenceMap != null && roleReferenceMap.containsKey(roleName) ) {
 												excelRow.addRowItem(3, PafExcelValueObject.createFromFormula(roleReferenceMap.get(roleName)));
-											else
+											}
+											else {
 												excelRow.addRowItem(3, PafExcelValueObject.createFromString(roleName));
-										else
+											}
+										else {
 											excelRow.addRowItem(3, PafExcelValueObject.createBlank());
-								
+										}
+									}
 								}
 							}
 						}
