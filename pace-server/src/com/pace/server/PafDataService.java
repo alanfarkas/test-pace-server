@@ -1323,7 +1323,7 @@ public class PafDataService {
 		//	   contribution % version formula on the view. 
 		// 			OR 
 		//	2. Base reference version is used as the base version in a contribution % 
-		//	   formula and no other version is specified in the cross dim spec.
+		//	   formula. (TTN-1765)
 		//
 		//
 		// Some data specifications that were previously generated earlier in this methods
@@ -1351,12 +1351,12 @@ public class PafDataService {
 			
 			// Select any reference version that is specified in either the 
 			// base or comparison version.
+			List<String> refVersions = dataCache.getReferenceVersions();
 			Set<String> selectedVersions = new HashSet<String>();
-			if (viewRefVersions.contains(compareVersion)) {
+			if (refVersions.contains(compareVersion)) {
 				selectedVersions.add(compareVersion);
 			}
-//			if (referenceVersions.contains(baseVersion) && !baseVersion.equals(compareVersion)) {
-			if (viewRefVersions.contains(baseVersion)) {
+			if (refVersions.contains(baseVersion)) {
 				selectedVersions.add(baseVersion);
 			}
 			
