@@ -1,0 +1,125 @@
+<ViewSection>
+  <name>Contrib % - Ref Cache Test vs</name>
+  <description></description>
+  <primaryFormattingAxis>1</primaryFormattingAxis>
+  <readOnly>false</readOnly>
+  <managed>false</managed>
+  <isEmpty>false</isEmpty>
+  <topOffset>0</topOffset>
+  <leftOffset>0</leftOffset>
+  <scaleUnit>CELL</scaleUnit>
+  <pafViewHeaders>
+    <ViewHeader>
+      <label>Contrib %  - Ref Cache Test</label>
+      <globalStyleName>Data Bold</globalStyleName>
+    </ViewHeader>
+  </pafViewHeaders>
+  <rowAxisDims>
+    <string>Product</string>
+  </rowAxisDims>
+  <colAxisDims>
+    <string>Version</string>
+  </colAxisDims>
+  <rowTuples>
+    <ViewTuple>
+      <headerGlobalStyleName>Header Left 10pt</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>32</border>
+      </dataBorder>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>0</axis>
+      <memberDefs>
+        <string>@IDESC(@UOW_ROOT)</string>
+      </memberDefs>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+  </rowTuples>
+  <colTuples>
+    <ViewTuple>
+      <headerGlobalStyleName>Header Center 10pt</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>WP</string>
+      </memberDefs>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+    <ViewTuple>
+      <headerGlobalStyleName>Header Center 10pt</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>WP_%_Prod_Parent</string>
+      </memberDefs>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+    <ViewTuple>
+      <dataGlobalStyleName>Bold Sky Blue</dataGlobalStyleName>
+      <headerGlobalStyleName>Bold Sky Blue</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <dataBorder>
+        <border>0</border>
+      </dataBorder>
+      <headerBorder>
+        <border>0</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>PAFBLANK</string>
+      </memberDefs>
+      <columnWidth>2.0</columnWidth>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+    <ViewTuple>
+      <headerGlobalStyleName>Header Center 10pt</headerGlobalStyleName>
+      <memberTag>false</memberTag>
+      <headerBorder>
+        <border>32</border>
+      </headerBorder>
+      <parentFirst>false</parentFirst>
+      <axis>1</axis>
+      <memberDefs>
+        <string>LY_%_Prod_Parent</string>
+      </memberDefs>
+      <isCompressed>false</isCompressed>
+    </ViewTuple>
+  </colTuples>
+  <pageTuples>
+    <PageTuple>
+      <axis>Years</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Time</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>PlanType</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Measures</axis>
+      <member>SLS_DLR</member>
+    </PageTuple>
+    <PageTuple>
+      <axis>Location</axis>
+      <member>@UOW_ROOT</member>
+    </PageTuple>
+  </pageTuples>
+  <hierarchyFormatName>Product</hierarchyFormatName>
+  <isCompressed>false</isCompressed>
+  <isSuppressed>false</isSuppressed>
+</ViewSection>

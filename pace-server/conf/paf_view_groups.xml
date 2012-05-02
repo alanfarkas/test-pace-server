@@ -53,6 +53,10 @@
           <viewGroup>false</viewGroup>
         </PafViewGroupItem>
         <PafViewGroupItem>
+          <name>Contrib % - Ref Cache Test</name>
+          <viewGroup>false</viewGroup>
+        </PafViewGroupItem>
+        <PafViewGroupItem>
           <name>Locking Recalc Measures Test 1</name>
           <viewGroup>false</viewGroup>
         </PafViewGroupItem>
@@ -328,6 +332,23 @@
     </PafViewGroup>
   </entry>
   <entry>
+    <string>Approval Views</string>
+    <PafViewGroup>
+      <name>Approval Views</name>
+      <desc>Approval process views</desc>
+      <pafViewGroupItems>
+        <PafViewGroupItem>
+          <name>Approval Summary</name>
+          <viewGroup>false</viewGroup>
+        </PafViewGroupItem>
+        <PafViewGroupItem>
+          <name>Approval Detail</name>
+          <viewGroup>false</viewGroup>
+        </PafViewGroupItem>
+      </pafViewGroupItems>
+    </PafViewGroup>
+  </entry>
+  <entry>
     <string>Member Tag Views</string>
     <PafViewGroup>
       <name>Member Tag Views</name>
@@ -350,23 +371,6 @@
         </PafViewGroupItem>
         <PafViewGroupItem>
           <name>Member Tags - Header Test</name>
-          <viewGroup>false</viewGroup>
-        </PafViewGroupItem>
-      </pafViewGroupItems>
-    </PafViewGroup>
-  </entry>
-  <entry>
-    <string>Approval Views</string>
-    <PafViewGroup>
-      <name>Approval Views</name>
-      <desc>Approval process views</desc>
-      <pafViewGroupItems>
-        <PafViewGroupItem>
-          <name>Approval Summary</name>
-          <viewGroup>false</viewGroup>
-        </PafViewGroupItem>
-        <PafViewGroupItem>
-          <name>Approval Detail</name>
           <viewGroup>false</viewGroup>
         </PafViewGroupItem>
       </pafViewGroupItems>

@@ -1,0 +1,14 @@
+<PafView>
+  <viewSectionNames>
+    <string>Contrib % - Ref Cache Test vs</string>
+  </viewSectionNames>
+  <name>Contrib % - Ref Cache Test</name>
+  <desc>Test scenario where Contrib % version reference a version that&apos;s not on the view</desc>
+  <headers/>
+  <userSelections/>
+  <printStyle/>
+  <viewPrintState>LOCAL</viewPrintState>
+  <rowsSuppressed>false</rowsSuppressed>
+  <columnsSuppressed>false</columnsSuppressed>
+  <dirtyFlag>false</dirtyFlag>
+</PafView>
