@@ -44,6 +44,7 @@ import com.pace.base.mdb.IPafConnectionProps;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
+import com.pace.base.mdb.PafDimTree.DimTreeType;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.utility.StringUtils;
 import com.pace.base.view.PafMVS;
@@ -438,7 +439,8 @@ public class PafClientState implements IPafClientState {
 		final String prefixUowFloorGen = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_FLOOR_GEN;
 		final String prefixUowFloorLevel = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_FLOOR_LVL;
 		final String prefixUowMembers = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_MBRS;
-		final String prefixUowFloorMembers = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_FLOOR_MBRS;
+		final String prefixUowFloorMembers = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_MBRS_FLOOR;
+		final String prefixUowDimFloorMembers = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_MBRS_DIMFLOOR;
 		final String prefixUowRoot = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_ROOT;
 		final String prefixUserSel = PafBaseConstants.CALC_TOKEN_PREFIX_USER_SEL;
 		final String tokenStartChar = PafBaseConstants.CC_TOKEN_START_CHAR;
@@ -532,9 +534,20 @@ public class PafClientState implements IPafClientState {
 		Set<String> treeDims = getUowTrees().getTreeDimensions();
 		for (String dimension:treeDims) {
 			
-			// Get dimension's Paf Member Tree
-			PafDimTree memberTree = getUowTrees().getTree(dimension);
-			String root = memberTree.getRootNode().getKey();
+			// Get dimension's uow tree
+			PafDimTree uowTree = getUowTrees().getTree(dimension);
+			String uowRoot = uowTree.getRootNode().getKey();
+			
+			// Get dimension's mdb tree (TTN-1767)
+			PafDimTree mdbTree = null;
+			if (uowTree.getTreeType() == DimTreeType.Base) {
+				mdbTree = mdbBaseTrees.get(dimension);
+			} else {
+				// Attribute trees are not filtered, so the uow copy is the
+				// same as the original mdb tree.
+				mdbTree = uowTree;
+			}
+			
 			
 			// Create Role Filter Selections tokens (TTN-1472)
 			List<String> filterMembers = this.getRoleFilterSelections().get(dimension);
@@ -557,7 +570,7 @@ public class PafClientState implements IPafClientState {
 			// Create UOW Members token (TTN-1453)
 			// Sample Format: UOWMEMBERS.PRODUCT
 			parmKey = tokenStartChar + prefixUowMembers + dimension + tokenEndChar;
-			String[] uowMembers = memberTree.getMemberKeys();
+			String[] uowMembers = uowTree.getMemberKeys();
 			StringBuffer memberBuffer = new StringBuffer();
 			for (String member : uowMembers) {
 				memberBuffer.append(dQuotes(member));
@@ -569,9 +582,21 @@ public class PafClientState implements IPafClientState {
 			// Create UOW Floor Members token (TTN-1453)
 			// Sample Format: UOWMEMBERS.FLOOR.PRODUCT
 			parmKey = tokenStartChar + prefixUowFloorMembers + dimension + tokenEndChar;
-			List<PafDimMember> uowFloorMembers = memberTree.getLowestLevelMembers();
+			List<PafDimMember> uowFloorMembers = uowTree.getLowestLevelMembers();
 			memberBuffer = new StringBuffer();
 			for (PafDimMember member : uowFloorMembers) {
+				memberBuffer.append(dQuotes(member.getKey()));
+				memberBuffer.append(",");		// Comma delimit list of members
+			}
+			parmValue = memberBuffer.substring(0, memberBuffer.length() - 1); 
+			tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+				
+			// Create UOW Dim Floor Members token (TTN-1767)
+			// Sample Format: UOWMEMBERS.DIMFLOOR.PRODUCT
+			parmKey = tokenStartChar + prefixUowDimFloorMembers + dimension + tokenEndChar;
+			List<PafDimMember> uowDimFloorMembers = mdbTree.getMembersAtLevel(uowRoot, 0);
+			memberBuffer = new StringBuffer();
+			for (PafDimMember member : uowDimFloorMembers) {
 				memberBuffer.append(dQuotes(member.getKey()));
 				memberBuffer.append(",");		// Comma delimit list of members
 			}
@@ -581,13 +606,13 @@ public class PafClientState implements IPafClientState {
 			// Create UOW Root properties - Surround all Essbase members in quotes
 			// Sample Format: UOWROOT.PRODUCT
 			parmKey = tokenStartChar + prefixUowRoot + dimension + tokenEndChar;
-			parmValue = dQuotes(root); 
+			parmValue = dQuotes(uowRoot); 
 			tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 
 			// Create UOW Floor properties
 			// Sample Format: UOWFLOOR.LEVEL.PRODUCT
 			parmKey = tokenStartChar + prefixUowFloorLevel + dimension + tokenEndChar;
-			int level = memberTree.getLowestAbsLevelInTree(); 
+			int level = uowTree.getLowestAbsLevelInTree(); 
 			if (level != 0) {
 				// Essbase levels are denoted as negative numbers
 				level = level * -1;
@@ -596,7 +621,7 @@ public class PafClientState implements IPafClientState {
 			tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 			// Sample Format: UOWFLOOR.GEN.PRODUCT
 			parmKey = tokenStartChar + prefixUowFloorGen + dimension + tokenEndChar;
-			int gen = memberTree.getHighestGenInTree(); 
+			int gen = uowTree.getHighestGenInTree(); 
 			parmValue = String.valueOf(gen); 
 			tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 

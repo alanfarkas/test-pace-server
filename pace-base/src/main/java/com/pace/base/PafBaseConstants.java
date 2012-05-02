@@ -156,7 +156,8 @@ public class PafBaseConstants {
 	public static final String CALC_TOKEN_PREFIX_UOW_FLOOR_LVL = "UOWFLOOR.LEVEL.";
 	public static final String CALC_TOKEN_PREFIX_UOW_ROOT = "UOWROOT.";
 	public static final String CALC_TOKEN_PREFIX_UOW_MBRS = "UOWMEMBERS.";
-	public static final String CALC_TOKEN_PREFIX_UOW_FLOOR_MBRS = "UOWMEMBERS.FLOOR.";
+	public static final String CALC_TOKEN_PREFIX_UOW_MBRS_FLOOR = "UOWMEMBERS.FLOOR.";
+	public static final String CALC_TOKEN_PREFIX_UOW_MBRS_DIMFLOOR = "UOWMEMBERS.DIMFLOOR.";
 	public static final String CALC_TOKEN_PREFIX_USER_SEL = "USERSEL.";
 	public static final String CC_TOKEN_START_CHAR = "[";
 	public static final String CC_TOKEN_END_CHAR = "]";
