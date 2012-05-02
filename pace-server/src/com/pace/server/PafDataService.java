@@ -1351,7 +1351,7 @@ public class PafDataService {
 			}
 			
 			// Select any reference version that is specified in either the 
-			// base or comparison version.
+			// base or comparison versions.
 			Set<String> selectedVersions = new HashSet<String>();
 			if (refVersions.contains(compareVersion)) {
 				selectedVersions.add(compareVersion);
