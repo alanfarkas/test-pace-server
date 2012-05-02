@@ -1335,6 +1335,7 @@ public class PafDataService {
 		// complex logic required and the chance of introducing calculation errors. However,
 		// this may have to be revisited in the future if additional data load optimizations 
 		// are required.
+		List<String> refVersions = dataCache.getReferenceVersions();	// TTN-1765
 		for (String contribPctVersion : viewContribPctVersions) {
 			
 			// Get the formula's base version and optional comparison version
@@ -1351,7 +1352,6 @@ public class PafDataService {
 			
 			// Select any reference version that is specified in either the 
 			// base or comparison version.
-			List<String> refVersions = dataCache.getReferenceVersions();
 			Set<String> selectedVersions = new HashSet<String>();
 			if (refVersions.contains(compareVersion)) {
 				selectedVersions.add(compareVersion);
