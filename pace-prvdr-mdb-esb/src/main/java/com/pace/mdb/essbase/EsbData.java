@@ -18,9 +18,11 @@
  */
 package com.pace.mdb.essbase;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -566,7 +568,8 @@ public class EsbData implements IMdbData{
 		long sendStart = 0;
 		String dataFileName = null, dataFileShortName = null;
 		String[] planVersions = dataCache.getPlanVersions();
- 		FileWriter dataLoadFile = null;
+ 		BufferedWriter dataLoadFile = null;
+ 		final int bufferSize = 8192;
 		
 		EsbCube esbCube = null;
 		IEssCube cube = null;
@@ -691,7 +694,7 @@ public class EsbData implements IMdbData{
 								+ year + "] - Version [" + version + "]"); 
 						
 						// Open new data load file
-						dataLoadFile = new FileWriter(dataFileName);
+						dataLoadFile = new BufferedWriter(new FileWriter(dataFileName), bufferSize);
 						
 						// Get the list of open (unlocked) periods
 						List<String> openPeriods = dataCache.getOpenPeriods(version, year);
@@ -700,7 +703,8 @@ public class EsbData implements IMdbData{
 						// Format header definition
 						logger.debug("Formatting file header");
 						dataLoadFile.append(dQuotes(planType) + fieldDelim + dQuotes(year) + fieldDelim + dQuotes(version));
-						dataLoadFile.append(lineTerm);
+						//dataLoadFile.append(lineTerm);
+						dataLoadFile.newLine();
 											
 						// Format column headers(row dimensions followed by column dimension)
 						logger.debug("Formatting column headers");
@@ -710,7 +714,8 @@ public class EsbData implements IMdbData{
 						for (String period:openPeriods) {
 							dataLoadFile.append(dQuotes(period) + fieldDelim);
 						}
-						dataLoadFile.append(lineTerm);
+						//dataLoadFile.append(lineTerm);
+						dataLoadFile.newLine();
 						
 						// Writing data rows
 						logger.debug("Writing data rows");
@@ -746,7 +751,8 @@ public class EsbData implements IMdbData{
 									dataLoadFile.append(missingData + fieldDelim);
 								}
 							}
-							dataLoadFile.append(lineTerm);
+							//dataLoadFile.append(lineTerm);
+							dataLoadFile.newLine();
 						}
 						dataLoadFile.close();
 
