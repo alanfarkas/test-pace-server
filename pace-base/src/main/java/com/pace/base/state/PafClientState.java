@@ -532,7 +532,8 @@ public class PafClientState implements IPafClientState {
 		// Create UOW properties (Floor, Root, and Members) for each app dimension
 		// and create dimension specific properties. 
 		//
-		// Cycle through all UOW base dimensions, and all attribute dimensions
+		// Cycle through all UOW base dimensions and all attribute dimensions,
+		// skipping "special" dimensions (ex. Time Horizon).  TTN-1767
 		//
 		Set<String> treeDims = new HashSet<String>(Arrays.asList(getUnitOfWork().getDimensions()));
 		treeDims.addAll(uowTrees.getAttributeDimensions());
