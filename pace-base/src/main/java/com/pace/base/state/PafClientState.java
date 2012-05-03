@@ -440,7 +440,7 @@ public class PafClientState implements IPafClientState {
 		final String prefixUowFloorLevel = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_FLOOR_LVL;
 		final String prefixUowMembers = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_MBRS;
 		final String prefixUowFloorMembers = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_MBRS_FLOOR;
-		final String prefixUowDimFloorMembers = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_MBRS_DIMFLOOR;
+		final String prefixUowMdbFloorMembers = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_MBRS_MDBFLOOR;
 		final String prefixUowRoot = PafBaseConstants.CALC_TOKEN_PREFIX_UOW_ROOT;
 		final String prefixUserSel = PafBaseConstants.CALC_TOKEN_PREFIX_USER_SEL;
 		final String tokenStartChar = PafBaseConstants.CC_TOKEN_START_CHAR;
@@ -530,8 +530,12 @@ public class PafClientState implements IPafClientState {
 		}
 	
 		// Create UOW properties (Floor, Root, and Members) for each app dimension
-		// and create dimension specific properties.
-		Set<String> treeDims = getUowTrees().getTreeDimensions();
+		// and create dimension specific properties. 
+		//
+		// Cycle through all UOW base dimensions, and all attribute dimensions
+		//
+		Set<String> treeDims = new HashSet<String>(Arrays.asList(getUnitOfWork().getDimensions()));
+		treeDims.addAll(uowTrees.getAttributeDimensions());
 		for (String dimension:treeDims) {
 			
 			// Get dimension's uow tree
@@ -591,9 +595,9 @@ public class PafClientState implements IPafClientState {
 			parmValue = memberBuffer.substring(0, memberBuffer.length() - 1); 
 			tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 				
-			// Create UOW Dim Floor Members token (TTN-1767)
-			// Sample Format: UOWMEMBERS.DIMFLOOR.PRODUCT
-			parmKey = tokenStartChar + prefixUowDimFloorMembers + dimension + tokenEndChar;
+			// Create UOW Mdb Floor Members token (TTN-1767)
+			// Sample Format: UOWMEMBERS.MDBFLOOR.PRODUCT
+			parmKey = tokenStartChar + prefixUowMdbFloorMembers + dimension + tokenEndChar;
 			List<PafDimMember> uowDimFloorMembers = mdbTree.getMembersAtLevel(uowRoot, 0);
 			memberBuffer = new StringBuffer();
 			for (PafDimMember member : uowDimFloorMembers) {
