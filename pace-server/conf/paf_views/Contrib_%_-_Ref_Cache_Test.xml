@@ -6,7 +6,47 @@
   <desc>Test scenario where Contrib % version reference a version that&apos;s not on the view</desc>
   <headers/>
   <userSelections/>
-  <printStyle/>
+  <printStyle>
+    <GUID>c4e7e335-ae82-47a0-976a-785ddfc4f9b9</GUID>
+    <name>Embeded Print Settings</name>
+    <defaultStyle>false</defaultStyle>
+    <portrait>false</portrait>
+    <landscape>true</landscape>
+    <adjustTo>false</adjustTo>
+    <percentNormalSize>100</percentNormalSize>
+    <fitTo>true</fitTo>
+    <pageWide>1</pageWide>
+    <pageTall>1</pageTall>
+    <paperSize>Letter</paperSize>
+    <firstPageNumber>Auto</firstPageNumber>
+    <header>0.3</header>
+    <top>0.75</top>
+    <left>0.7</left>
+    <right>0.7</right>
+    <bottom>0.75</bottom>
+    <footer>0.3</footer>
+    <centerHorizontally>false</centerHorizontally>
+    <centerVertically>false</centerVertically>
+    <headerText></headerText>
+    <footerText></footerText>
+    <diffOddAndEvenPages>false</diffOddAndEvenPages>
+    <diffFirstPage>false</diffFirstPage>
+    <scaleWithDocument>true</scaleWithDocument>
+    <alignWithPageMargin>true</alignWithPageMargin>
+    <entireView>true</entireView>
+    <userSelection>false</userSelection>
+    <userSelectionText></userSelectionText>
+    <colsToRepeatAtLeft>Pace Column Headings</colsToRepeatAtLeft>
+    <rowsToRepeatAtTop>Pace Row Headings</rowsToRepeatAtTop>
+    <gridlines>false</gridlines>
+    <blackAndWhite>false</blackAndWhite>
+    <draftQuality>false</draftQuality>
+    <rowAndColHeadings>false</rowAndColHeadings>
+    <comment>(None)</comment>
+    <cellErrorsAs>displayed</cellErrorsAs>
+    <downThenOver>true</downThenOver>
+    <overThenDown>false</overThenDown>
+  </printStyle>
   <viewPrintState>LOCAL</viewPrintState>
   <rowsSuppressed>false</rowsSuppressed>
   <columnsSuppressed>false</columnsSuppressed>
