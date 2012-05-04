@@ -410,11 +410,7 @@ public class UserSecurityExcelElementItem<T extends List<PafUserSecurity>> exten
 											
 											if ( dimSpec.getExpressionList() != null ) {
 												//go thru each security
-												int expIdx = 0;
-												for (String expression : dimSpec.getExpressionList() ) {
-										            //dynamic hier member
-										            expIdx++;
-												}
+												int expIdx = dimSpec.getExpressionList().length;
 												if( expIdx > maxExpCount ) {
 													maxExpCount = expIdx;
 												}
@@ -438,6 +434,7 @@ public class UserSecurityExcelElementItem<T extends List<PafUserSecurity>> exten
 										            excelRow.addRowItem(startDynamicHeaderNdx + i, PafExcelValueObject.createFromString(expression));	
 										            expIdx++;
 												}
+												//insert blanks for that dimension if has fewer members than others
 												if( expIdx < maxExpCount ) {
 													for( int ii=0; ii<maxExpCount-expIdx; ii++) {
 											            excelRow.addRowItem(startDynamicHeaderNdx + i, PafExcelValueObject.createBlank());
