@@ -268,6 +268,8 @@ public class PafAdminConsoleView implements IPafView, Cloneable {
 
 		clonedView.setHeaders(headerList.toArray(new PafViewHeader[0]));
 		clonedView.setViewSectionNames(clonedSet);
+		
+		clonedView.printStyle = this.printStyle.clone();
 
 		return clonedView;
 	}

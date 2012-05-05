@@ -157,6 +157,11 @@ public class PafView implements IPafView, Cloneable {
 		// Create new cloned view
 		PafView view = (PafView) super.clone();
 
+		// Clone Print Style
+		if (this.printStyle != null) {
+			view.printStyle = this.printStyle.clone();
+		}
+		
 		// Clone view sections
 		if (this.viewSections != null) {
 			view.viewSections = new PafViewSection[this.viewSections.length];
