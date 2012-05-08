@@ -185,19 +185,17 @@ public class PafServer implements Comparable, Cloneable {
 
 		StringBuilder sb = new StringBuilder(getCompleteAppUrl());				
 		
-		if ( wsdlServiceName != null && ! wsdlServiceName.equals(WSDL)) {
-			
-			sb.append("/");
-		} 
+		if ( wsdlServiceName != null ) {
+			if( ! wsdlServiceName.equals(WSDL)) {
+				sb.append("/");
+			} 
 		
-		sb.append(wsdlServiceName);
+			sb.append(wsdlServiceName);
 		
-		if (! wsdlServiceName.endsWith(WSDL)) {
-			
-			sb.append(WSDL);
-			
+			if (! wsdlServiceName.endsWith(WSDL)) {
+				sb.append(WSDL);
+			}
 		}
-		
 		
 		return sb.toString();
 	}
