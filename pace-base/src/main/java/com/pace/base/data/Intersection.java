@@ -33,7 +33,7 @@ public class Intersection {
 
 	private String[] dimensions;
 	private String[] coordinates;
-	private int hashCode;
+	transient private int hashCode;
 
 	public Intersection(String[] dimensions) {
 		this.dimensions = dimensions;
