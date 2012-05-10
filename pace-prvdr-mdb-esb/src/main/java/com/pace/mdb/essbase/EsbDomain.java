@@ -50,6 +50,7 @@ public class EsbDomain {
 		try {			
 			// Create Essbase JAPI instance.
 			essbase = IEssbase.Home.create(IEssbase.JAPI_VERSION);
+			essbase.setAssertionsEnabled(false);			// Setting assertions to false should help performance
 			
 			// Sign On to EDS (using the correct signon method) 
 //			String japiVersion = IEssbase.JAPI_VERSION;
@@ -58,7 +59,7 @@ public class EsbDomain {
 //				essDomain = essbase.signOn(esbDomainUser, esbDomainPswd, false, null, esbDomainUrl);
 //			} else {
 				// All earlier JAPI versions
-				essDomain = essbase.signOn(esbDomainUser, esbDomainPswd, esbDomainName, esbDomainUrl);				
+				essDomain = essbase.signOn(esbDomainUser, esbDomainPswd, esbDomainName, esbDomainUrl);		
 //			}
 		} catch (EssException esx) {
 			// throw Paf Exception
