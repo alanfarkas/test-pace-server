@@ -40,6 +40,9 @@
 	<path id="EDS 11.1.2.userclasspath">
 	    <pathelement location="/java/userlib/EDS 11.1.2/ess_japi.jar"/>
 	</path>
+	<path id="EDS 11.1.2.2.userclasspath">
+	    <pathelement location="/java/userlib/EDS 11.1.2.2/ess_japi.jar"/>
+	</path>
 	<path id="Junit.userclasspath">
 		   <pathelement location="/java/userlib/junit-3.8.2/junit-3.8.2.jar"/>
 	</path>
@@ -82,6 +85,9 @@
 -->
 	
 		<compile esb.ver="11.1.2">
+		</compile>
+	
+		<compile esb.ver="11.1.2.2">
 		</compile>
 	
 		<!-- Commented out as Maven is automatically pushing out Essbase provider jar
