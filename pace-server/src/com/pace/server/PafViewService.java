@@ -3216,15 +3216,23 @@ public class PafViewService {
 									replaceUserSel(st.getIntersection().getCoordinates()[i],
 											userSelections);
 						}
-						if (st.getIntersection().getCoordinates()[i].contains("@UOW_ROOT")) {
+						else if (st.getIntersection().getCoordinates()[i].contains("@UOW_ROOT")) {
 							st.getIntersection().getCoordinates()[i] = 
 									replaceUserUow(st.getIntersection().getCoordinates()[i],
 											clientState, st.getIntersection().getDimensions()[i]);
 						}
-						if (st.getIntersection().getCoordinates()[i].contains("@PLAN_VERSION")) {
+						else if (st.getIntersection().getCoordinates()[i].contains("@PLAN_VERSION")) {
 							st.getIntersection().getCoordinates()[i] = 
 									replaceUserVers(st.getIntersection().getCoordinates()[i],
 											clientState);
+						}
+						//Jira 1774- Pace Client is not sorting on the tuples set on AC,
+						//	since Server is always getting sorting tuple from view cache and not updating from user selection
+						//
+						//go through user selections and replace sorting tuple if found matching dimension and member is different
+						else {
+							st.getIntersection().getCoordinates()[i] = replaceUserSelForSorting(st.getIntersection().getDimensions()[i], 
+									st.getIntersection().getCoordinates()[i], userSelections);
 						}
 					}
 				}
@@ -3232,6 +3240,19 @@ public class PafViewService {
 		}
 
 		return view;
+	}
+
+	private String replaceUserSelForSorting(String dimension, String member,
+			PafUserSelection[] userSelections) {
+		for (PafUserSelection sel : userSelections) {
+			if (sel != null) {
+				if (sel.getPafAxis().getValue() == sel.getPafAxis().getColAxis() && 
+						sel.getDimension().equals(dimension) && ! sel.getValues()[0].equals(member)) {
+					return sel.getValues()[0].trim();
+				}
+			}
+		}
+		return member.trim();
 	}
 
 	public String replaceUserUow(String member, PafClientState clientState, String dim) {
