@@ -3228,11 +3228,11 @@ public class PafViewService {
 						}
 						//Jira 1774- Pace Client is not sorting on the tuples set on AC,
 						//	since Server is always getting sorting tuple from view cache and not updating from user selection
-						//
-						//go through user selections and replace sorting tuple if found matching dimension and member is different
 						else {
-							st.getIntersection().getCoordinates()[i] = replaceUserSelForSorting(st.getIntersection().getDimensions()[i], 
-									st.getIntersection().getCoordinates()[i], userSelections);
+							if ( userSelections != null ) {
+								st.getIntersection().getCoordinates()[i] = replaceUserSelForSorting(st.getIntersection().getDimensions()[i], 
+										st.getIntersection().getCoordinates()[i], userSelections);
+							}
 						}
 					}
 				}
@@ -3242,8 +3242,11 @@ public class PafViewService {
 		return view;
 	}
 
+	/*
+	* go through user selections and replace sorting tuple if found matching dimension and member is different
+	*/
 	private String replaceUserSelForSorting(String dimension, String member,
-			PafUserSelection[] userSelections) {
+		PafUserSelection[] userSelections) {
 		for (PafUserSelection sel : userSelections) {
 			if (sel != null) {
 				if (sel.getPafAxis().getValue() == sel.getPafAxis().getColAxis() && 
