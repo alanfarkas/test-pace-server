@@ -33,9 +33,8 @@
       <CustomActionDef>
         <actionClassName>com.pace.ext.cmds.ExecProcess</actionClassName>
         <actionNamedParameters>
-          <string>pathToProcess=c:\windows\</string>
-          <string>processToRun=notepad.exe</string>
-          <string>waitFor=false</string>		  
+          <string>PATH.TO.PROCESS=c:\\windows\\notepad.exe</string>
+          <string>PROCESS.TO.RUN=notepad.exe</string>		  
         </actionNamedParameters>
       </CustomActionDef>
     </customActionDefs>
