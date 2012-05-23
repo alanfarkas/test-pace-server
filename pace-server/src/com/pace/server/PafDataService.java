@@ -78,6 +78,7 @@ import com.pace.base.mdb.PafDataSliceParms;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimMemberProps;
 import com.pace.base.mdb.PafDimTree;
+import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.mdb.PafMdbProps;
 import com.pace.base.mdb.PafSimpleDimTree;
 import com.pace.base.mdb.TreeTraversalOrder;
@@ -1222,6 +1223,7 @@ public class PafDataService {
 		int versionAxis = dataCache.getVersionAxis();
 		UnitOfWork refDataSpec = null;
 		Map<String, Map<Integer, List<String>>> dataSpecByVersion = new HashMap<String, Map<Integer, List<String>>>();
+		MemberTreeSet uowTrees = clientState.getUowTrees();
 
 		
 		// As a safeguard, filter out any versions not defined to the data cache. This
@@ -1326,37 +1328,44 @@ public class PafDataService {
 		//	   formula. (TTN-1765)
 		//
 		//
-		// Some data specifications that were previously generated earlier in this methods
-		// may be updated in this logic. Specifically, all UOW members will be pulled
-		// for any dimension referenced in the contribution % formula.
+		// Some data specifications, that were previously generated earlier in this method,
+		// may be updated in the following logic. 
 		//
-		//
-		// While this logic could be better optimized to pull in only the required 
-		// intersections, it doesn't seem worth the effort at this point, due to the 
-		// complex logic required and the chance of introducing calculation errors. However,
-		// this may have to be revisited in the future if additional data load optimizations 
-		// are required. Specifically, some additional logic that recognizes the difference
-		// between a hard-coded member reference or @PARENT or @UOWROOT may be needed.
 		List<String> refVersions = dataCache.getReferenceVersions();	// TTN-1765
 		for (String contribPctVersion : viewContribPctVersions) {
 			
 			// Get the formula's base version and optional comparison version;
 			// and determine the additional UOW members that are needed to support
 			// this contribution % formula.
-			UnitOfWork contribPctDataSpec = refDataSpec.clone();
 			VersionDef versionDef = pafApp.getVersionDef(contribPctVersion);
 			String baseVersion = versionDef.getVersionFormula().getBaseVersion();
 			String compareVersion = null;
 			PafDimSpec[] compareIsSpec = versionDef.getVersionFormula().getCompareIsSpec();
 			for (PafDimSpec crossDimSpec : compareIsSpec) {
 				String dim = crossDimSpec.getDimension();
+				String memberSpec = crossDimSpec.getExpressionList()[0];
 				if (!dim.equals(versionDim)) {
 					// Since this dimension was referenced in the contribution percent
-					// formula, all dimension members will be pulled (TTN-1781).
-					contribPctDataSpec.setDimMembers(dim, dataCache.getDimMembers(dim));
+					// formula, additional members need to be retrieved (TTN-1781).
+					String[] requiredMembers = null;
+					PafDimTree dimTree = uowTrees.getTree(dim);
+					Set<String> dataSpecMembers = new HashSet<String>(Arrays.asList(refDataSpec.getDimMembers(dim)));
+					if (memberSpec.equalsIgnoreCase(PafBaseConstants.VF_TOKEN_PARENT)) {
+						// Parent token - add all non-leaf dimension members
+						int lowestParentLvl = dimTree.getLowestAbsLevelInTree() + 1;
+						List<String> parentMembers = dimTree.getMemberNames(TreeTraversalOrder.POST_ORDER, lowestParentLvl);
+						dataSpecMembers.addAll(parentMembers);
+					} else if (memberSpec.equalsIgnoreCase(PafBaseConstants.VF_TOKEN_UOWROOT)) {
+						// UOW Root Token - Add Root Node
+						dataSpecMembers.add(dimTree.getRootNode().getKey());			
+					} else {
+						// Regular Member - add member 
+						dataSpecMembers.add(memberSpec);
+					}
+					requiredMembers = (new ArrayList<String>(dataSpecMembers)).toArray(new String[0]);
+					refDataSpec.setDimMembers(dim, requiredMembers);
 				} else {
-					compareVersion = crossDimSpec.getExpressionList()[0];
-					
+					compareVersion = memberSpec;				
 				}
 			}
 			
@@ -1374,7 +1383,7 @@ public class PafDataService {
 			for (String version : selectedVersions) {
 				
 				// Clone data specification for current version
-				Map <Integer, List<String>> dataSpecAsMap = contribPctDataSpec.buildUowMap(); //TTN-1781
+				Map <Integer, List<String>> dataSpecAsMap = refDataSpec.buildUowMap(); //TTN-1781
 				dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
 				
 				// Add filtered version-specific data spec to master map
@@ -1383,8 +1392,7 @@ public class PafDataService {
 				
 		}
 		
-		
-		
+				
 		// Update view reference data using data specification map
 		String dsId = mdbDef.getDataSourceId();
 		IPafConnectionProps connProps = clientState.getDataSources().get(dsId);
