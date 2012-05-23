@@ -1316,8 +1316,8 @@ public class PafDataService {
 		
 		
 		
-		// Contribution % versions - Populate all UOW intersections for any base reference
-		// versions (on or off the view) that meets one of the following criteria:
+		// Contribution % versions - Populate additional UOW intersections for any base
+		// reference versions (on or off the view) that meets one of the following criteria:
 		//
 		// 	1. Base reference version is used in the compare intersection spec of any 
 		//	   contribution % version formula on the view. 
@@ -1327,26 +1327,36 @@ public class PafDataService {
 		//
 		//
 		// Some data specifications that were previously generated earlier in this methods
-		// may be updated in this logic.
+		// may be updated in this logic. Specifically, all UOW members will be pulled
+		// for any dimension referenced in the contribution % formula.
 		//
 		//
 		// While this logic could be better optimized to pull in only the required 
 		// intersections, it doesn't seem worth the effort at this point, due to the 
 		// complex logic required and the chance of introducing calculation errors. However,
 		// this may have to be revisited in the future if additional data load optimizations 
-		// are required.
+		// are required. Specifically, some additional logic that recognizes the difference
+		// between a hard-coded member reference or @PARENT or @UOWROOT may be needed.
 		List<String> refVersions = dataCache.getReferenceVersions();	// TTN-1765
 		for (String contribPctVersion : viewContribPctVersions) {
 			
-			// Get the formula's base version and optional comparison version
+			// Get the formula's base version and optional comparison version;
+			// and determine the additional UOW members that are needed to support
+			// this contribution % formula.
+			UnitOfWork contribPctDataSpec = refDataSpec.clone();
 			VersionDef versionDef = pafApp.getVersionDef(contribPctVersion);
 			String baseVersion = versionDef.getVersionFormula().getBaseVersion();
 			String compareVersion = null;
 			PafDimSpec[] compareIsSpec = versionDef.getVersionFormula().getCompareIsSpec();
 			for (PafDimSpec crossDimSpec : compareIsSpec) {
-				if (crossDimSpec.getDimension().equals(versionDim)) {
+				String dim = crossDimSpec.getDimension();
+				if (!dim.equals(versionDim)) {
+					// Since this dimension was referenced in the contribution percent
+					// formula, all dimension members will be pulled (TTN-1781).
+					contribPctDataSpec.setDimMembers(dim, dataCache.getDimMembers(dim));
+				} else {
 					compareVersion = crossDimSpec.getExpressionList()[0];
-					break;
+					
 				}
 			}
 			
@@ -1360,12 +1370,11 @@ public class PafDataService {
 				selectedVersions.add(baseVersion);
 			}
 			
-			// Select all UOW intersections for any of the selected reference versions
-			refDataSpec = dataCache.getUowSpec();
+			// Select all members for any non-version dimension referenced UOW intersections for any of the selected reference versions
 			for (String version : selectedVersions) {
 				
 				// Clone data specification for current version
-				Map <Integer, List<String>> dataSpecAsMap = refDataSpec.buildUowMap();
+				Map <Integer, List<String>> dataSpecAsMap = contribPctDataSpec.buildUowMap(); //TTN-1781
 				dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
 				
 				// Add filtered version-specific data spec to master map
