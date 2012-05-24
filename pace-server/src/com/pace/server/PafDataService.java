@@ -1334,9 +1334,12 @@ public class PafDataService {
 		List<String> refVersions = dataCache.getReferenceVersions();	// TTN-1765
 		for (String contribPctVersion : viewContribPctVersions) {
 			
+			// This collection will keep track of additional members to be added by dimension
+			Map<String, List<String>> additionalMbrMap = new HashMap<String, List<String>>();
+
 			// Get the formula's base version and optional comparison version;
 			// and determine the additional UOW members that are needed to support
-			// this contribution % formula.
+			// the comparison version (if any) in this contribution % formula.
 			VersionDef versionDef = pafApp.getVersionDef(contribPctVersion);
 			String baseVersion = versionDef.getVersionFormula().getBaseVersion();
 			String compareVersion = null;
@@ -1347,28 +1350,30 @@ public class PafDataService {
 				if (!dim.equals(versionDim)) {
 					// Since this dimension was referenced in the contribution percent
 					// formula, additional members need to be retrieved (TTN-1781).
-					String[] requiredMembers = null;
+					List<String> compareVersMbrDepMap = null;
 					PafDimTree dimTree = uowTrees.getTree(dim);
-					Set<String> dataSpecMembers = new HashSet<String>(Arrays.asList(refDataSpec.getDimMembers(dim)));
 					if (memberSpec.equalsIgnoreCase(PafBaseConstants.VF_TOKEN_PARENT)) {
 						// Parent token - add all non-leaf dimension members
 						int lowestParentLvl = dimTree.getLowestAbsLevelInTree() + 1;
-						List<String> parentMembers = dimTree.getMemberNames(TreeTraversalOrder.POST_ORDER, lowestParentLvl);
-						dataSpecMembers.addAll(parentMembers);
+						compareVersMbrDepMap = dimTree.getMemberNames(TreeTraversalOrder.POST_ORDER, lowestParentLvl);
 					} else if (memberSpec.equalsIgnoreCase(PafBaseConstants.VF_TOKEN_UOWROOT)) {
-						// UOW Root Token - Add Root Node
-						dataSpecMembers.add(dimTree.getRootNode().getKey());			
+						// UOW Root Token - add Root Node
+						compareVersMbrDepMap = new ArrayList<String>();
+						compareVersMbrDepMap.add(dimTree.getRootNode().getKey());			
 					} else {
-						// Regular Member - add member 
-						dataSpecMembers.add(memberSpec);
+						// Regular Member - just add member
+						compareVersMbrDepMap = new ArrayList<String>();
+						compareVersMbrDepMap.add(memberSpec);
 					}
-					requiredMembers = (new ArrayList<String>(dataSpecMembers)).toArray(new String[0]);
-					refDataSpec.setDimMembers(dim, requiredMembers);
+
+					// Keep track of needed additional members by dimension
+					additionalMbrMap.put(dim, compareVersMbrDepMap);
+
 				} else {
 					compareVersion = memberSpec;				
 				}
 			}
-			
+
 			// Select any reference version that is specified in either the 
 			// base or comparison versions.
 			Set<String> selectedVersions = new HashSet<String>();
@@ -1379,16 +1384,48 @@ public class PafDataService {
 				selectedVersions.add(baseVersion);
 			}
 			
-			// Select all members for any non-version dimension referenced UOW intersections for any of the selected reference versions
+			// For each reference version specified in the current contribution percent 
+			// formula, select all UOW intersections needed to support the view, as well
+			// as the formula (TTN-1781). 
+			// 
+			// This logic is additive, as the same reference version can support multiple
+			// contribution percent formulas.
+			//
+			// The selection logic, as applied to reference versions, is:
+			//
+			// 	Formula base version - pull all members referenced on the view
+			//	Formula compare version - pull specific members required by each dimension
+			// 
 			for (String version : selectedVersions) {
 				
-				// Clone data specification for current version
-				Map <Integer, List<String>> dataSpecAsMap = refDataSpec.buildUowMap(); //TTN-1781
+				// Get previous defined data specification for selected version. If
+				// none exists, then pull the default data specification for the view
+				Map <Integer, List<String>> dataSpecAsMap = null;
+				if (dataSpecByVersion.containsKey(version)) {
+					dataSpecAsMap = dataSpecByVersion.get(version);
+				} else {
+					dataSpecAsMap = refDataSpec.buildUowMap();
+				}
+
+				// Update data specification based on version type: base version / compare version
+				Map <Integer, List<String>> refDataSpecAsMap = refDataSpec.buildUowMap();				
+				for (int axis : dataSpecAsMap.keySet())  {
+					Set<String> dataSpecMbrSet = new HashSet<String>(dataSpecAsMap.get(axis));
+					if (version.equals(baseVersion)) { 
+						// Base version logic 
+						dataSpecMbrSet.addAll(refDataSpecAsMap.get(axis));
+					} else {
+						// Compare version logic
+						String dim = dataCache.getDimension(axis);
+						dataSpecMbrSet.addAll(additionalMbrMap.get(dim));
+					}
+					dataSpecAsMap.put(axis, new ArrayList<String>(dataSpecMbrSet));
+				}
+
+				// Add filtered version-specific data specification to master map
 				dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
-				
-				// Add filtered version-specific data spec to master map
 				dataSpecByVersion.put(version, dataSpecAsMap);
-			}
+			}			
 				
 		}
 		
