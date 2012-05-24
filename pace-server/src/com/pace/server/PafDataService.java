@@ -1335,7 +1335,7 @@ public class PafDataService {
 		for (String contribPctVersion : viewContribPctVersions) {
 			
 			// This collection will keep track of additional members to be added by dimension
-			Map<String, List<String>> additionalMbrMap = new HashMap<String, List<String>>();
+			Map<String, List<String>> compareVersDepMbrMap = new HashMap<String, List<String>>();
 
 			// Get the formula's base version and optional comparison version;
 			// and determine the additional UOW members that are needed to support
@@ -1350,24 +1350,24 @@ public class PafDataService {
 				if (!dim.equals(versionDim)) {
 					// Since this dimension was referenced in the contribution percent
 					// formula, additional members need to be retrieved (TTN-1781).
-					List<String> compareVersMbrDepMap = null;
+					List<String> dependantMbrs = null;
 					PafDimTree dimTree = uowTrees.getTree(dim);
 					if (memberSpec.equalsIgnoreCase(PafBaseConstants.VF_TOKEN_PARENT)) {
 						// Parent token - add all non-leaf dimension members
 						int lowestParentLvl = dimTree.getLowestAbsLevelInTree() + 1;
-						compareVersMbrDepMap = dimTree.getMemberNames(TreeTraversalOrder.POST_ORDER, lowestParentLvl);
+						dependantMbrs = dimTree.getMemberNames(TreeTraversalOrder.POST_ORDER, lowestParentLvl);
 					} else if (memberSpec.equalsIgnoreCase(PafBaseConstants.VF_TOKEN_UOWROOT)) {
 						// UOW Root Token - add Root Node
-						compareVersMbrDepMap = new ArrayList<String>();
-						compareVersMbrDepMap.add(dimTree.getRootNode().getKey());			
+						dependantMbrs = new ArrayList<String>();
+						dependantMbrs.add(dimTree.getRootNode().getKey());			
 					} else {
 						// Regular Member - just add member
-						compareVersMbrDepMap = new ArrayList<String>();
-						compareVersMbrDepMap.add(memberSpec);
+						dependantMbrs = new ArrayList<String>();
+						dependantMbrs.add(memberSpec);
 					}
 
 					// Keep track of needed additional members by dimension
-					additionalMbrMap.put(dim, compareVersMbrDepMap);
+					compareVersDepMbrMap.put(dim, dependantMbrs);
 
 				} else {
 					compareVersion = memberSpec;				
@@ -1418,7 +1418,7 @@ public class PafDataService {
 					} else {
 						// Compare version logic
 						String dim = dataCache.getDimension(axis);
-						dataSpecMbrSet.addAll(additionalMbrMap.get(dim));
+						dataSpecMbrSet.addAll(compareVersDepMbrMap.get(dim));
 					}
 					dataSpecAsMap.put(axis, new ArrayList<String>(dataSpecMbrSet));
 				}
