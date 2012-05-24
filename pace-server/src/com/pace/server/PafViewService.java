@@ -3204,29 +3204,33 @@ public class PafViewService {
 				}
 			}
 			
-			//TTN 609 - presorted ranking view
-			// process sorting tuples
+			/*	TTN 609 - presorted ranking view
+			 * 
+			 * 	process sorting tuples
+			 */ 
 			SortingTuples sortTuples = viewSection.getSortingTuples();
 			if( sortTuples != null ) {
 				for (SortingTuple st : sortTuples.getSortingTupleList()) {
 					int dimCnt = st.getIntersection().getDimensions().length;
 					for (int i = 0; i < dimCnt; i++) {
 						String member = st.getIntersection().getCoordinates()[i];
-						String dimenstion = st.getIntersection().getDimensions()[i];
+						String dimension = st.getIntersection().getDimensions()[i];
 						if (member.contains("@USER_SEL(")) {
 							member = replaceUserSel(member,	userSelections);
 						}
 						else if (member.contains("@UOW_ROOT")) {
-							member = replaceUserUow(member,	clientState, dimenstion);
+							member = replaceUserUow(member,	clientState, dimension);
 						}
 						else if (member.contains("@PLAN_VERSION")) {
 							member = replaceUserVers(member, clientState);
 						}
-						//Jira 1774- Pace Client is not sorting on the tuples set on AC,
-						//	since Server is always getting sorting tuple from view cache and not updating from user selection
+						/*	TTN 1774- Pace Client is not sorting on the tuples set on AC.
+						 * 
+						 *	Update sorting tuples from user selections 
+						 */
 						else {
 							if ( userSelections != null ) {
-								member = replaceUserSelForSorting(dimenstion, member, userSelections);
+								member = replaceUserSelForSorting(dimension, member, userSelections);
 							}
 						}
 						st.getIntersection().getCoordinates()[i] = member;
@@ -3238,15 +3242,15 @@ public class PafViewService {
 		return view;
 	}
 
-	/** Jira 1774- Pace Client is not sorting on the tuples set on AC.
-	 * 		Go through user selections and replace sorting tuple if found matching dimension and member is different
-	 * @param dimension
-	 * @param member
-	 * @param userSelections
+	/** 
+	 * Go through user selections and replace sorting tuple(s) if any member for the matching dimension is different
+	 * 
+	 * @param dimension - input dimension
+	 * @param member - input member
+	 * @param userSelections - an array of user selections
 	 * @return modified member
 	 */
-	private String replaceUserSelForSorting(String dimension, String member,
-		PafUserSelection[] userSelections) {
+	private String replaceUserSelForSorting(String dimension, String member, PafUserSelection[] userSelections) {
 		for (PafUserSelection sel : userSelections) {
 			if (sel != null) {
 				if (sel.getPafAxis().getValue() == sel.getPafAxis().getColAxis() && 
