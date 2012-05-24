@@ -3243,7 +3243,7 @@ public class PafViewService {
 	}
 
 	/** 
-	 * Go through user selections and replace sorting tuple(s) if any member for the matching dimension is different
+	 * Go through user selections and replace sorting column if any member value is different from user selection
 	 * 
 	 * @param dimension - input dimension
 	 * @param member - input member
