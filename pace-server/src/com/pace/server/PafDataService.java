@@ -1388,13 +1388,14 @@ public class PafDataService {
 			// formula, select all UOW intersections needed to support the view, as well
 			// as the formula (TTN-1781). 
 			// 
-			// This logic is additive, as the same reference version can support multiple
-			// contribution percent formulas.
+			// Since the same reference version can support multiple contribution percent
+			// formulas, this logic is additive. 
 			//
 			// The selection logic, as applied to reference versions, is:
 			//
-			// 	Formula base version - pull all members referenced on the view
-			//	Formula compare version - pull specific members required by each dimension
+			// 	Formula base version - add all members referenced on the view
+			//	Formula compare version - add specific members required by each dimension 
+			// 							  to support formula calculation
 			// 
 			for (String version : selectedVersions) {
 				
