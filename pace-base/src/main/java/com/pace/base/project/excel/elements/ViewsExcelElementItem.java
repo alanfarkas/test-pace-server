@@ -431,7 +431,6 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 				
 				PafExcelRow excelRow = new PafExcelRow();
 				
-				PrintStyle printStyle = view.getPrintStyle();
 				//name
 				excelRow.addRowItem(0, PafExcelValueObject.createFromString(view.getName()));
 	
@@ -454,125 +453,130 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 				//description
 				excelRow.addRowItem(2, PafExcelValueObject.createFromString(view.getDesc()));
 				
-				//GUID
-				excelRow.addRowItem(3, PafExcelValueObject.createFromString(printStyle.getGUID()));
-	
-				//name
-				excelRow.addRowItem(4, PafExcelValueObject.createFromString(printStyle.getName()));
+				PrintStyle printStyle = view.getPrintStyle();
+				if( printStyle != null ) {
+					//GUID
+					excelRow.addRowItem(3, PafExcelValueObject.createFromString(printStyle.getGUID()));
+		
+					//name
+					excelRow.addRowItem(4, PafExcelValueObject.createFromString(printStyle.getName()));
+					
+					//Default Print Style?
+					excelRow.addRowItem(5, PafExcelValueObject.createFromBoolean(printStyle.getDefaultStyle()));
+					
+					//Portrait?
+					excelRow.addRowItem(6, PafExcelValueObject.createFromBoolean(printStyle.getPortrait()));
+									
+					//Landscape?
+					excelRow.addRowItem(7, PafExcelValueObject.createFromBoolean(printStyle.getLandscape()));
+					
+					//Adjust To
+					excelRow.addRowItem(8, PafExcelValueObject.createFromBoolean(printStyle.getAdjustTo()));
+					
+					//"% Normal Size"
+					excelRow.addRowItem(9, PafExcelValueObject.createFromInteger(printStyle.getPercentNormalSize()));
+									
+					//Fit To
+					excelRow.addRowItem(10, PafExcelValueObject.createFromBoolean(printStyle.getFitTo()));
+					
+					//"page Wide"
+					excelRow.addRowItem(11, PafExcelValueObject.createFromInteger(printStyle.getPageWide()));
+		
+					//"Page Tall"
+					excelRow.addRowItem(12, PafExcelValueObject.createFromInteger(printStyle.getPageTall()));
+					
+					//"Paper Size"
+					excelRow.addRowItem(13, PafExcelValueObject.createFromString(printStyle.getPaperSize()));
 				
-				//Default Print Style?
-				excelRow.addRowItem(5, PafExcelValueObject.createFromBoolean(printStyle.getDefaultStyle()));
+					//"First Page Number",
+					excelRow.addRowItem(14, PafExcelValueObject.createFromString(printStyle.getFirstPageNumber()));
 				
-				//Portrait?
-				excelRow.addRowItem(6, PafExcelValueObject.createFromBoolean(printStyle.getPortrait()));
-								
-				//Landscape?
-				excelRow.addRowItem(7, PafExcelValueObject.createFromBoolean(printStyle.getLandscape()));
+					//"Header"
+					excelRow.addRowItem(15, PafExcelValueObject.createFromString(printStyle.getHeader().toString()));
 				
-				//Adjust To
-				excelRow.addRowItem(8, PafExcelValueObject.createFromBoolean(printStyle.getAdjustTo()));
+					//"Top"
+					excelRow.addRowItem(16, PafExcelValueObject.createFromString(printStyle.getTop().toString()));
 				
-				//"% Normal Size"
-				excelRow.addRowItem(9, PafExcelValueObject.createFromInteger(printStyle.getPercentNormalSize()));
-								
-				//Fit To
-				excelRow.addRowItem(10, PafExcelValueObject.createFromBoolean(printStyle.getFitTo()));
+					//"Left"
+					excelRow.addRowItem(17, PafExcelValueObject.createFromString(printStyle.getLeft().toString()));
 				
-				//"page Wide"
-				excelRow.addRowItem(11, PafExcelValueObject.createFromInteger(printStyle.getPageWide()));
-	
-				//"Page Tall"
-				excelRow.addRowItem(12, PafExcelValueObject.createFromInteger(printStyle.getPageTall()));
+					//"Right"
+					excelRow.addRowItem(18, PafExcelValueObject.createFromString(printStyle.getRight().toString()));
 				
-				//"Paper Size"
-				excelRow.addRowItem(13, PafExcelValueObject.createFromString(printStyle.getPaperSize()));
-			
-				//"First Page Number",
-				excelRow.addRowItem(14, PafExcelValueObject.createFromString(printStyle.getFirstPageNumber()));
-			
-				//"Header"
-				excelRow.addRowItem(15, PafExcelValueObject.createFromString(printStyle.getHeader().toString()));
-			
-				//"Top"
-				excelRow.addRowItem(16, PafExcelValueObject.createFromString(printStyle.getTop().toString()));
-			
-				//"Left"
-				excelRow.addRowItem(17, PafExcelValueObject.createFromString(printStyle.getLeft().toString()));
-			
-				//"Right"
-				excelRow.addRowItem(18, PafExcelValueObject.createFromString(printStyle.getRight().toString()));
-			
-				//"Bottom"
-				excelRow.addRowItem(19, PafExcelValueObject.createFromString(printStyle.getBottom().toString()));
-			
-				//"Footer"
-				excelRow.addRowItem(20, PafExcelValueObject.createFromString(printStyle.getFooter().toString()));
-			
-				//"Center Horizontally"
-				excelRow.addRowItem(21, PafExcelValueObject.createFromBoolean(printStyle.getCenterHorizontally()));
-			
-				//"Center Vertically"
-				excelRow.addRowItem(22, PafExcelValueObject.createFromBoolean(printStyle.getCenterVertically()));
-			
-				//"Header Text"
-				excelRow.addRowItem(23, PafExcelValueObject.createFromString(printStyle.getHeaderText()));
-			
-				//"Footer Text"
-				excelRow.addRowItem(24, PafExcelValueObject.createFromString(printStyle.getFooterText()));
-			
-				//"Different odd and even pages"
-				excelRow.addRowItem(25, PafExcelValueObject.createFromBoolean(printStyle.getDiffOddAndEvenPages()));
-			
-				//"Different first page"
-				excelRow.addRowItem(26, PafExcelValueObject.createFromBoolean(printStyle.getDiffFirstPage()));
-			
-				//"Scale with document"
-				excelRow.addRowItem(27, PafExcelValueObject.createFromBoolean(printStyle.getScaleWithDocument()));
-			
-				//"Align with page margins"
-				excelRow.addRowItem(28, PafExcelValueObject.createFromBoolean(printStyle.getAlignWithPageMargin()));
-			
-				//"Entire Sheet"
-				excelRow.addRowItem(29, PafExcelValueObject.createFromBoolean(printStyle.getEntireView()));
-			
-				//"User Selection?"
-				excelRow.addRowItem(30, PafExcelValueObject.createFromBoolean(printStyle.getUserSelection()));
-			
-				//"User Selected Print area"
-				excelRow.addRowItem(31, PafExcelValueObject.createFromString(printStyle.getUserSelectionText()));
-			
-				//"Rows to repeat at top"
-				excelRow.addRowItem(32, PafExcelValueObject.createFromString(printStyle.getRowsToRepeatAtTop()));
-			
-				//"Columns to repeat at left"
-				excelRow.addRowItem(33, PafExcelValueObject.createFromString(printStyle.getColsToRepeatAtLeft()));
-			
-				//"Gridlines"
-				excelRow.addRowItem(34, PafExcelValueObject.createFromBoolean(printStyle.getGridlines()));
-			
-				//"Black and white"
-				excelRow.addRowItem(35, PafExcelValueObject.createFromBoolean(printStyle.getBlackAndWhite()));
-			
-				//"Draft quality"
-				excelRow.addRowItem(36, PafExcelValueObject.createFromBoolean(printStyle.getDraftQuality()));
-			
-				//"Row and column headings"
-				excelRow.addRowItem(37, PafExcelValueObject.createFromBoolean(printStyle.getRowAndColHeadings()));
-			
-				//"Comments"
-				excelRow.addRowItem(38, PafExcelValueObject.createFromString(printStyle.getComment()));
-			
-				//"Cell errors as"
-				excelRow.addRowItem(39, PafExcelValueObject.createFromString(printStyle.getCellErrorsAs()));
-			
-				//"Down, then Over"
-				excelRow.addRowItem(40, PafExcelValueObject.createFromBoolean(printStyle.getDownThenOver()));
-			
-				//"Over, then Down"
-				excelRow.addRowItem(41, PafExcelValueObject.createFromBoolean(printStyle.getOverThenDown()));
+					//"Bottom"
+					excelRow.addRowItem(19, PafExcelValueObject.createFromString(printStyle.getBottom().toString()));
 				
-				//"Print State"
-				excelRow.addRowItem(42, PafExcelValueObject.createFromString(view.getViewPrintState().toString()));
+					//"Footer"
+					excelRow.addRowItem(20, PafExcelValueObject.createFromString(printStyle.getFooter().toString()));
+				
+					//"Center Horizontally"
+					excelRow.addRowItem(21, PafExcelValueObject.createFromBoolean(printStyle.getCenterHorizontally()));
+				
+					//"Center Vertically"
+					excelRow.addRowItem(22, PafExcelValueObject.createFromBoolean(printStyle.getCenterVertically()));
+				
+					//"Header Text"
+					excelRow.addRowItem(23, PafExcelValueObject.createFromString(printStyle.getHeaderText()));
+				
+					//"Footer Text"
+					excelRow.addRowItem(24, PafExcelValueObject.createFromString(printStyle.getFooterText()));
+				
+					//"Different odd and even pages"
+					excelRow.addRowItem(25, PafExcelValueObject.createFromBoolean(printStyle.getDiffOddAndEvenPages()));
+				
+					//"Different first page"
+					excelRow.addRowItem(26, PafExcelValueObject.createFromBoolean(printStyle.getDiffFirstPage()));
+				
+					//"Scale with document"
+					excelRow.addRowItem(27, PafExcelValueObject.createFromBoolean(printStyle.getScaleWithDocument()));
+				
+					//"Align with page margins"
+					excelRow.addRowItem(28, PafExcelValueObject.createFromBoolean(printStyle.getAlignWithPageMargin()));
+				
+					//"Entire Sheet"
+					excelRow.addRowItem(29, PafExcelValueObject.createFromBoolean(printStyle.getEntireView()));
+				
+					//"User Selection?"
+					excelRow.addRowItem(30, PafExcelValueObject.createFromBoolean(printStyle.getUserSelection()));
+				
+					//"User Selected Print area"
+					excelRow.addRowItem(31, PafExcelValueObject.createFromString(printStyle.getUserSelectionText()));
+				
+					//"Rows to repeat at top"
+					excelRow.addRowItem(32, PafExcelValueObject.createFromString(printStyle.getRowsToRepeatAtTop()));
+				
+					//"Columns to repeat at left"
+					excelRow.addRowItem(33, PafExcelValueObject.createFromString(printStyle.getColsToRepeatAtLeft()));
+				
+					//"Gridlines"
+					excelRow.addRowItem(34, PafExcelValueObject.createFromBoolean(printStyle.getGridlines()));
+				
+					//"Black and white"
+					excelRow.addRowItem(35, PafExcelValueObject.createFromBoolean(printStyle.getBlackAndWhite()));
+				
+					//"Draft quality"
+					excelRow.addRowItem(36, PafExcelValueObject.createFromBoolean(printStyle.getDraftQuality()));
+				
+					//"Row and column headings"
+					excelRow.addRowItem(37, PafExcelValueObject.createFromBoolean(printStyle.getRowAndColHeadings()));
+				
+					//"Comments"
+					excelRow.addRowItem(38, PafExcelValueObject.createFromString(printStyle.getComment()));
+				
+					//"Cell errors as"
+					excelRow.addRowItem(39, PafExcelValueObject.createFromString(printStyle.getCellErrorsAs()));
+				
+					//"Down, then Over"
+					excelRow.addRowItem(40, PafExcelValueObject.createFromBoolean(printStyle.getDownThenOver()));
+				
+					//"Over, then Down"
+					excelRow.addRowItem(41, PafExcelValueObject.createFromBoolean(printStyle.getOverThenDown()));
+				}
+				
+				if(view.getViewPrintState() != null ) {
+					//"Print State"
+					excelRow.addRowItem(42, PafExcelValueObject.createFromString(view.getViewPrintState().toString()));
+				}
 				
 				//"Global Print Style GUID"
 				excelRow.addRowItem(43, PafExcelValueObject.createFromString(view.getGlobalPrintStyleGUID()));
