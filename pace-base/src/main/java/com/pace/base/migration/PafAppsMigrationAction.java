@@ -344,9 +344,6 @@ public class PafAppsMigrationAction extends MigrationAction {
 			//set the global suppress zeros
 			pafApp.getAppSettings().setGlobalSuppressZeroSettings(globalSuppressZeros);			
 		
-			//TTN 1733 - multi-select user role filters
-			pafApp.getAppSettings().setGlobalUserFilteredMultiSelect(false);
-
 			xmlPaceProject.setApplicationDefinitions(new ArrayList<PafApplicationDef>(Arrays.asList(pafApp)));
 			
 			try {
