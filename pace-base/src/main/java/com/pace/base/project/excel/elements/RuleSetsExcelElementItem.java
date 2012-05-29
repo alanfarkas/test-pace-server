@@ -777,20 +777,7 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 					uniqueSheetNameMap.put(newSheetName, uniqueSheetIndex);
 					
 					sheetName = newSheetName + "_" + uniqueSheetIndex;			
-					
-					
 				} 
-				//
-				//jira 1777 - Getting error when exporting role config for Giant Eagle due to rule set not found
-				//
-				String[] tokens = sheetName.split("\\-");
-				int len = tokens.length;
-				if( len > 0 ) {
-					sheetName = tokens[0];
-					for( int i=1; i<len; i++ ) {
-						sheetName = sheetName + "_" + tokens[i];
-					}
-				}
 				
 				sheetNameMap.put(initialSheetName, sheetName);
 				

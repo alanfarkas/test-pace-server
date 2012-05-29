@@ -502,12 +502,16 @@ public abstract class PaceProject implements IPaceProject {
 					
 				}
 				
-			} catch (RuntimeException re) {
+			} catch(IllegalArgumentException iae) {
+				
+				addErrorToProjectErrorMap(new ProjectDataError(orderedElementId, iae.getMessage()));
+				throw new ProjectSaveException(iae.getMessage());
+			
+			}catch (RuntimeException re) {
 							
 				logger.error(re.getMessage());
-				
 				addErrorToProjectErrorMap(new ProjectDataError(orderedElementId, re.getMessage()));
-							
+				throw new ProjectSaveException(re.getMessage());
 			}
 			
 		}

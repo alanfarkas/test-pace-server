@@ -665,7 +665,15 @@ logger.info("Adding PafExcelRow");
 										
 										cell.setCellType(Cell.CELL_TYPE_FORMULA);
 									
-										cell.setCellFormula(rowItem.getFormula());
+										String formula = rowItem.getFormula();
+										
+										String tokens[] = formula.split("!");
+										String sheetName = tokens[0];
+										cell.setCellFormula(formula);
+										if( ! sheetName.matches("[a-zA-Z0123456789]*") )  {
+											formula = "'" + sheetName + "'!" + tokens[1];
+										}
+										cell.setCellFormula(formula);
 										
 										evaluator.evaluateFormulaCell(cell);
 									
