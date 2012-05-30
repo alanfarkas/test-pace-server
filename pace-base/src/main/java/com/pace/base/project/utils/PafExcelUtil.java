@@ -669,6 +669,7 @@ logger.info("Adding PafExcelRow");
 
 										String formulas[] = formula.split(" & \" \\| \" & ");
 										if( formulas.length >= 1 ) { //there is only 1 formula
+											formula = formulas[0];
 											String tokens[] = formula.split("!");
 											String sheetName = tokens[0];
 											if( ! sheetName.matches("[a-zA-Z0123456789]*") )  {
