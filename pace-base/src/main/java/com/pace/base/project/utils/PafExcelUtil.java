@@ -671,9 +671,11 @@ logger.info("Adding PafExcelRow");
 										if( formulas.length >= 1 ) { //there is only 1 formula
 											formula = formulas[0];
 											String tokens[] = formula.split("!");
-											String sheetName = tokens[0];
-											if( ! sheetName.matches("[a-zA-Z0123456789]*") )  {
-												formula = "'" + sheetName + "'!" + tokens[1];
+											if( tokens.length > 1 ) {
+												String sheetName = tokens[0];
+												if( ! sheetName.matches("[a-zA-Z0123456789]*") )  {
+													formula = "'" + sheetName + "'!" + tokens[1];
+												}
 											}
 										}
 										if ( formulas.length > 1 ) { // more than 1 formula concatenated
