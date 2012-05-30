@@ -666,14 +666,28 @@ logger.info("Adding PafExcelRow");
 										cell.setCellType(Cell.CELL_TYPE_FORMULA);
 									
 										String formula = rowItem.getFormula();
-										
-										String tokens[] = formula.split("!");
-										String sheetName = tokens[0];
-										cell.setCellFormula(formula);
-										if( ! sheetName.matches("[a-zA-Z0123456789]*") )  {
-											formula = "'" + sheetName + "'!" + tokens[1];
+
+										String formulas[] = formula.split(" & \" \\| \" & ");
+										if( formulas.length >= 1 ) { //there is only 1 formula
+											String tokens[] = formula.split("!");
+											String sheetName = tokens[0];
+											if( ! sheetName.matches("[a-zA-Z0123456789]*") )  {
+												formula = "'" + sheetName + "'!" + tokens[1];
+											}
 										}
-										cell.setCellFormula(formula);
+										if ( formulas.length > 1 ) { // more than 1 formula concatenated
+											String tmp = "";
+											for( int j=1;j<formulas.length;j++ ) {
+												tmp = formulas[j];
+												String tokens[] = formulas[j].split("!");
+												String sheetName = tokens[0];
+												if( ! sheetName.matches("[a-zA-Z0123456789]*") )  {
+													tmp = "'" + sheetName + "'!" + tokens[1];
+												}
+												formula = formula + " & \" | \" & " + tmp;
+											}
+										}
+										cell.setCellFormula(formula);											
 										
 										evaluator.evaluateFormulaCell(cell);
 									
