@@ -40,25 +40,19 @@ public class ExecProcess extends AbstractCommand implements IPafCustomCommand {
 	
 	private static final String PROPKEY_PATH_TO_PROCESS = "PATH.TO.PROCESS";
 	private static final String PROPKEY_PROCESS_TO_RUN = "PROCESS.TO.RUN";
-	private static final String PROPKEY_WAIT_FOR = "WAIT.FOR";
+	private static final String PROPKEY_ASYNCH_MODE = "DONT.WAIT";
 	
 	public CustomCommandResult execute(Properties clientProps, IPafClientState clientState)
 			throws PafException {
 
 		String pathToProc = null;
 		String procToRun = null;
-		boolean waitFor = false;
-		String[] parms;
-		
-		String propKey = null;
-//		CustomCommandResult result = new CustomCommandResult();
+		boolean asynchMode = false;
 		
 		procToRun = this.getActionParm(PROPKEY_PROCESS_TO_RUN, clientProps, true);	
 		pathToProc = this.getActionParm(PROPKEY_PATH_TO_PROCESS, clientProps, false);
-		waitFor =  Boolean.getBoolean(this.getActionParm(PROPKEY_WAIT_FOR, clientProps, false));	
+		asynchMode  =  Boolean.parseBoolean(this.getActionParm(PROPKEY_ASYNCH_MODE, clientProps, false));
 
-		
-		
 		Process p = null;
     	ProcessBuilder pb = null;
 		
@@ -74,38 +68,46 @@ public class ExecProcess extends AbstractCommand implements IPafCustomCommand {
 
                 p = pb.start();
 
-               	
+                if (!asynchMode) {
+                    
+                    BufferedReader stdInput = new BufferedReader(new 
+                         InputStreamReader(p.getInputStream()));
 
-                BufferedReader stdInput = new BufferedReader(new 
-                     InputStreamReader(p.getInputStream()));
+                    BufferedReader stdError = new BufferedReader(new 
+                         InputStreamReader(p.getErrorStream()));
 
-                BufferedReader stdError = new BufferedReader(new 
-                     InputStreamReader(p.getErrorStream()));
-
-                // read the output from the command
-                
-                String s;
-                logger.info("Standard Output of Executed Command:\n");
-                while ((s = stdInput.readLine()) != null) {
-        			logger.info(s);
-                }
-                
-                // read any errors from the attempted command
-
-                System.out.println("Here is the standard error of the command (if any):\n");
-                while ((s = stdError.readLine()) != null) {
-        			logger.info(s);
-                }
+                    // read the output from the command
+                    
+                    
+                    
+                    // read any errors from the attempted command
+					String s;
+					logger.info("Standard Output of Executed Command:\n");
+					while ((s = stdInput.readLine()) != null) {
+						logger.info(s);
+					}
+					System.out
+							.println("Here is the standard error of the command (if any):\n");
+					while ((s = stdError.readLine()) != null) {
+						logger.info(s);
+					}
+				} else {
+					logger.info("Running Process Asynchronously");
+				}
                 
             }
             catch (IOException e) {
     			logger.error(errMsgBase + e.getMessage());
     			result.setReturnMessage(errMsgBase + e.getMessage());
     			return result;
-            }
+			}
 		
 
-		result.setReturnMessage("Process run successfully");		
+		if (!asynchMode) {
+	        result.setReturnMessage("Process run successfully");					
+		} else {
+	        result.setReturnMessage("Process running in background...");								
+		}
 		return result;
 	}
 	
