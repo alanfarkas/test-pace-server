@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="pace-prvdr-mdb-esb" default="deploy" basedir=".">
 	
+	<property name="pace_ver" value="2.8.3.2"/>
 	<property name="debuglevel" value="source,lines,vars"/>
 	<property name="target" value="1.6"/>
 	<property name="source" value="1.6"/>
@@ -129,10 +130,10 @@
 			<!-- Create the distribution directory -->
         	<mkdir dir="${dist}"/>
         	<!-- Building Jar file -->
-        	<jar jarfile="${dist}/${ant.project.name}-@{esb.ver}.jar" basedir="${driver-bin}" excludes="*.properties" />
+        	<jar jarfile="${dist}/${ant.project.name}-${pace_ver}-@{esb.ver}.jar" basedir="${driver-bin}" excludes="*.properties" />
         	<echo>"Deploying Essbase @{esb.ver} Provider Jar file to redist directory"</echo>
 <!--        	<copy todir="${esb_local_driver_path}\@{esb.ver}\" file = "${dist}/esbprv.jar"/> -->
-	       	<copy todir="${esb_redist_dir}\@{esb.ver}\\" file = "${dist}/${ant.project.name}-@{esb.ver}.jar"/> 
+	       	<copy todir="${esb_redist_dir}\@{esb.ver}\\" file = "${dist}/${ant.project.name}-${pace_ver}-@{esb.ver}.jar"/> 
 	
         	<!-- Remove the driver bin folder -->
 			<delete dir="${driver-bin}" failonerror="false" />
