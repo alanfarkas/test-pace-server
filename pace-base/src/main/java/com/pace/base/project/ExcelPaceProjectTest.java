@@ -152,9 +152,9 @@ public class ExcelPaceProjectTest extends TestCase {
 			
 		}		
 		
-		String pareArchiveFileName = "./test_files/pace.paf";
+		String paceArchiveFileName = "./test_files/pace.paf";
 		
-		File paceArchiveFile = new File(pareArchiveFileName);
+		File paceArchiveFile = new File(paceArchiveFileName);
 			
 		assertTrue(paceArchiveFile.isFile());
 			
