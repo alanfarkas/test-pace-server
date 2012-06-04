@@ -1206,7 +1206,9 @@ public class ExcelPaceProject extends PaceProject {
 		
 		UserMemberListExcelElementItem<UserMemberLists> excelElementItem = new UserMemberListExcelElementItem<UserMemberLists>(getWorkbook());
 		UserMemberLists userMemberList = getUserMemberLists();
-		excelElementItem.write(userMemberList);
+		if( userMemberList != null ) {
+			excelElementItem.write(userMemberList);
+		}
 		
 	}
 
