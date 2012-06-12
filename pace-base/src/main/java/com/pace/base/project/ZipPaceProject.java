@@ -86,9 +86,9 @@ public class ZipPaceProject extends PaceProject {
 						
 		}
 		
-		if ( ! projectInput.endsWith(".paf")) {
+		if ( ! projectInput.endsWith(".paf") &&  ! projectInput.endsWith(".zip") ) {
 			
-			throw new InvalidPaceProjectInputException("project input has to be a Pace Archive File.");
+			throw new InvalidPaceProjectInputException("project input has to be a Pace Archive File or Zip file.");
 			
 		}
 		
@@ -140,6 +140,22 @@ public class ZipPaceProject extends PaceProject {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		
+		if( FileUtils.findFileInDir(tempDirectory, PafBaseConstants.FN_ApplicationMetaData) == null ) {
+			logger.error("Invalid pace project.");
+		}
+		
+		else {
+			File file = null;
+			if ( (file = FileUtils.findFileInDir(tempDirectory, "conf")) != null ) {
+				dynamicDirName = file.getPath();
+			}
+			else {
+				if( (file = FileUtils.findFileInDir(tempDirectory, PafBaseConstants.FN_ApplicationMetaData)) != null ) {
+					dynamicDirName = file.getParentFile().getPath();
+				}
+			}
 		}
 		
 		//create empty xml pace project

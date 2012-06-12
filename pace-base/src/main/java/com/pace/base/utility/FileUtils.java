@@ -156,6 +156,24 @@ public class FileUtils {
 		return foundFiles;
 	}
 
+	public static File findFileInDir(File startFile, String fileName) {
+
+		File file = null;
+		if( startFile.isDirectory() ) {
+			for( File f : startFile.listFiles() ) {
+				if( f.getName().equalsIgnoreCase(fileName)){
+						return f;
+				}
+				else {
+					if( f.isDirectory() && ( file = findFileInDir( f, fileName ) ) != null ) {
+						return file;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	public static void deleteFilesInDir(File directoryToDelete,
 			boolean deleteDirectories) {
 

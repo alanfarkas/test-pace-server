@@ -72,9 +72,6 @@ public class PafZipUtil {
 	    out.close();
 	  }
 	
-	
-
-	
 	public static void unzipFile(String zipFileName, String extractDirectory) throws IOException {
 		
 		ZipFile zipFile =  new ZipFile(zipFileName);		      
