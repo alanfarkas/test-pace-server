@@ -136,6 +136,10 @@
           <name>Attribute Multiple Measures SM</name>
           <viewGroup>false</viewGroup>
         </PafViewGroupItem>
+		<PafViewGroupItem>
+          <name>Pre Sorted Test</name>
+          <viewGroup>false</viewGroup>
+        </PafViewGroupItem>
         <PafViewGroupItem>
           <name>Product by Location</name>
           <viewGroup>false</viewGroup>
