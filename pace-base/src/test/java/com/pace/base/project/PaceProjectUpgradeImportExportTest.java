@@ -33,13 +33,12 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 		
 		try {
 			PafZipUtil.unzipFile("./test_files/MerchPlnAAFES.paf", tempDir.toString());
-			PafZipUtil.unzipFile("./test_files/MerchPlnAAFES.paf", tempDir.toString());
-			PafZipUtil.unzipFile("./test_files/GEPlan.paf", tempDir.toString());
-			PafZipUtil.unzipFile("./test_files/Helzberg.paf", tempDir.toString());
-			PafZipUtil.unzipFile("./test_files/katz.paf", tempDir.toString());
-			PafZipUtil.unzipFile("./test_files/Michaels.paf", tempDir.toString());
-			PafZipUtil.unzipFile("./test_files/Outback.paf", tempDir.toString());
-			PafZipUtil.unzipFile("./test_files/CatLiteSafeway.paf", tempDir.toString());
+//			PafZipUtil.unzipFile("./test_files/GEPlan.paf", tempDir.toString());
+//			PafZipUtil.unzipFile("./test_files/Helzberg.paf", tempDir.toString());
+//			PafZipUtil.unzipFile("./test_files/katz.paf", tempDir.toString());
+//			PafZipUtil.unzipFile("./test_files/Michaels.paf", tempDir.toString());
+//			PafZipUtil.unzipFile("./test_files/Outback.paf", tempDir.toString());
+//			PafZipUtil.unzipFile("./test_files/CatLiteSafeway.paf", tempDir.toString());
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
