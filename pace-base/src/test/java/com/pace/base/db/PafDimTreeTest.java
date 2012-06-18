@@ -16,12 +16,15 @@
 	xx/xx/xx		xxxxxxxx		x.xx			..............
  * 
  */
-package com.pace.base.mdb;
+package com.pace.base.db;
 
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.mdb.PafAttributeTree;
+import com.pace.base.mdb.PafBaseTree;
+import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.PafDimTree.DimTreeType;
 
 /**
