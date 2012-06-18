@@ -18,4 +18,6 @@
     -->
     <!-- <set-property name="user.agent" value="gecko1_8"/> -->
 
+
+    <inherits name="main.java.com.pace.settings.widgetset.Pace_serverWidgetset" />
 </module>
