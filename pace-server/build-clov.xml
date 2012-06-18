@@ -372,7 +372,8 @@
 	    <echo message="${project.name}: ${ant.file}"/>
 	    <javac debug="true" debuglevel="${debuglevel}" destdir="${project.location}/${bin}" source="${source}" target="${target}">
 	        <src path="${project.location}/${src}"/>
-	        <classpath refid="${project.name}.classpath"/>
+            <src path="${project.location}/${test.src}"/>
+	    	<classpath refid="${project.name}.classpath"/>
 	    </javac>
 	</target>
 
