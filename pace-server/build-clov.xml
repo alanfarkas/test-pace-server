@@ -37,7 +37,7 @@
 	<property name="source" value="1.6"/>
 	<property name="src" value="src/main/java"/>
 	<property name="bin" value="bin"/>
-	<property name="test.src" value="src/main/java"/>
+	<property name="test.src" value="src/test/java"/>
 	<property name="test.bin" value="bin"/>
 	<property name="test.result" location="../test-results"/>
 	<property name="testfile.dir" value="test_files"/>
@@ -416,7 +416,7 @@
 				<format type="xml"/>
 			</current>
 		</clover-report>
-		<clover-html-report outdir="${clover.web.dir}" title="Pace Server"/>
+		<clover-html-report outdir="${clover.web.dir}" title="Pace Admin Console"/>
 		<clover-pdf-report	outfile="${clover.web.dir}/clover.pdf"
 							title="Pace Server">
 		</clover-pdf-report>
