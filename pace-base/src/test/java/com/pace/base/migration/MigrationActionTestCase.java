@@ -102,5 +102,9 @@ public class MigrationActionTestCase extends TestCase {
 	private static File getTempDirectory(){
 		return FileUtils.createTempDirectory();
 	}
+	
+	public void testProject() {
+		assertNotNull( pp );
+	}
 
 }
