@@ -460,7 +460,7 @@ public class PafAppsMigrationActionTest extends MigrationActionTestCase {
 		}
 		
 		try {
-			pp = new XMLPaceProject(tempConfDir.toString(), false);
+			pp = new XMLPaceProject(tempConfDir.toString(), true);
 		} catch (InvalidPaceProjectInputException e) {
 			fail(e.getMessage());
 		} catch (PaceProjectCreationException e) {
@@ -469,7 +469,7 @@ public class PafAppsMigrationActionTest extends MigrationActionTestCase {
 		
 		action.setXMLPaceProject(pp);
 		
-		assertEquals(MigrationActionStatus.NotStarted, action.getStatus());
+		assertEquals(MigrationActionStatus.Completed, action.getStatus());
 		
 		FileUtils.deleteFilesInDir(tempConfDir, true);
 		

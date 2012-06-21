@@ -61,6 +61,7 @@ import com.pace.base.migration.PafPlannerConfigMigrationAction;
 import com.pace.base.migration.PafRuleSetsSeparationMigrationAction;
 import com.pace.base.migration.PafSecurityMigrationAction;
 import com.pace.base.migration.PafStringCaseInsensitiveComparatorMigrationAction;
+import com.pace.base.migration.PafVersionMigrationAction;
 import com.pace.base.migration.PafViewGroupsMigrationAction;
 import com.pace.base.migration.PafViewPrintStylesMigrationAction;
 import com.pace.base.migration.PafViewSectionBorderMigration;
@@ -599,6 +600,13 @@ public class XMLPaceProject extends PaceProject {
 	@Override
 	protected void readVersions() throws PaceProjectReadException {
 
+		if ( upgradeProject) {
+			
+			//run security migration
+			new PafVersionMigrationAction(this).run();
+			
+		}
+		
 		PafXStreamElementItem<VersionDef[]> pafXStreamElementItem = new PafXStreamElementItem<VersionDef[]>(getProjectInput() + PafBaseConstants.FN_VersionMetaData);
 		
 		VersionDef[] objectAr = pafXStreamElementItem.read();
