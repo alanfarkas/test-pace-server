@@ -692,8 +692,8 @@ logger.info("Adding PafExcelRow");
 													if( ! sheetName.matches("[a-zA-Z0123456789]*") )  { 
 														tmp = "'" + sheetName + "'!" + tokens[1];
 													}
-													formula += " & \" | \" & " + tmp; //append to the previous one
 												}
+												formula += " & \" | \" & " + tmp; //append to the previous one
 											}
 										}
 										cell.setCellFormula(formula);											
