@@ -274,32 +274,32 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						switch (rowIndex) {
 							
 							//app colors - non plannable protected color
-							case 12:											
+							case 13:											
 								appColors.setNonPlannableProtectedColor(PafExcelUtil.getHexNumber(getProjectElementId(), firstValueObject));											
 								break;
 								
 							//app colors - forward plannable protected color
-							case 13:
+							case 14:
 								appColors.setForwardPlannableProtectedColor(PafExcelUtil.getHexNumber(getProjectElementId(), firstValueObject));
 								break;
 								
 							//app colors - protected color
-							case 14:	
+							case 15:	
 								appColors.setProtectedColor(PafExcelUtil.getHexNumber(getProjectElementId(), firstValueObject));
 								break;
 								
 							//app colors - system lock color
-							case 15:	
+							case 16:	
 								appColors.setSystemLockColor(PafExcelUtil.getHexNumber(getProjectElementId(), firstValueObject));
 								break;
 								
 							//app colors - user lock color
-							case 16:	
+							case 17:	
 								appColors.setUserLockColor(PafExcelUtil.getHexNumber(getProjectElementId(), firstValueObject));
 								break;
 								
 							//app colors - note color	
-							case 17:
+							case 18:
 								appColors.setNoteColor(PafExcelUtil.getHexNumber(getProjectElementId(), firstValueObject));
 								break;
 						}		
