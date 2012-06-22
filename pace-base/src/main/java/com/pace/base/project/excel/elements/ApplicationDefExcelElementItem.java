@@ -315,16 +315,16 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 					case 22:
 						
 						//alias mapping - dim name
-						if ( rowIndex == 18 ) {
+						if ( rowIndex == 19 ) {
 							
 							List<AliasMapping> aliasMappingList = new ArrayList<AliasMapping>();
 							
 							for ( int i = 0; i < rowItemList.size(); i++ ) {
 								
-								PafExcelValueObject dimNameValueObject = row.getRowItem(18).get(i);
-								PafExcelValueObject aliasTableNameValueObject = row.getRowItem(19).get(i);
-								PafExcelValueObject primaryRowColumnFormatValueObject = row.getRowItem(20).get(i);
-								PafExcelValueObject additionalRowColumnFormatValueObject = row.getRowItem(21).get(i);
+								PafExcelValueObject dimNameValueObject = row.getRowItem(19).get(i);
+								PafExcelValueObject aliasTableNameValueObject = row.getRowItem(20).get(i);
+								PafExcelValueObject primaryRowColumnFormatValueObject = row.getRowItem(21).get(i);
+								PafExcelValueObject additionalRowColumnFormatValueObject = row.getRowItem(22).get(i);
 								
 								if ( dimNameValueObject.isBlank() && aliasTableNameValueObject.isBlank() && primaryRowColumnFormatValueObject.isBlank() && additionalRowColumnFormatValueObject.isBlank()) {
 									
@@ -445,22 +445,22 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						switch (rowIndex) {
 						
 						//global suppress zero settings - enabled
-						case 22:									
+						case 23:									
 							szs.setEnabled(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject));									
 							break;
 							
 						//global suppress zero settings - visible
-						case 23:
+						case 24:
 							szs.setVisible(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject));
 							break;
 							
 						//global suppress zero settings - row suppressed
-						case 24:	
+						case 25:	
 							szs.setRowsSuppressed(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject));
 							break;
 							
 						//global suppress zero settings - col suppressed
-						case 25:
+						case 26:
 							szs.setColumnsSuppressed(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject));
 							break;
 						

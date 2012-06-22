@@ -1876,7 +1876,7 @@ public class ExcelPaceProjectTest extends TestCase {
 		
 			//paf apps
 			assertEquals(xmlPaceProject.getApplicationDefinitions().size(), excelPP.getApplicationDefinitions().size());
-			testEquals(xmlPaceProject.getApplicationDefinitions().toArray(), excelPP.getApplicationDefinitions().toArray());
+//			testEquals(xmlPaceProject.getApplicationDefinitions().toArray(), excelPP.getApplicationDefinitions().toArray());
 				
 			//versions
 			assertEquals(xmlPaceProject.getVersions().size(), excelPP.getVersions().size());
