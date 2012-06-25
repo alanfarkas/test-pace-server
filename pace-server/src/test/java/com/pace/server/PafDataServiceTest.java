@@ -48,22 +48,22 @@ public class PafDataServiceTest extends TestCase {
 	}
     
   
-	public void testBuildVirtualTimeTree() {
-
-		boolean isSuccess = false;
-		try {
-			PafDimTree timeTree = testCommonParms.getTimeTree();
-			PafDimTree yearTree = testCommonParms.getYearTree();
-			PafDimTree virtualTimeTree = pds.buildTimeHorizonTree(timeTree, yearTree);
-			isSuccess = true;
-        } catch (PafException pex) {
-            PafErrHandler.handleException(pex);
-        } catch (Exception ex) {
-                PafErrHandler.handleException(ex, PafErrSeverity.Error);
-        } finally {
-        	assertTrue(isSuccess);
-        }
-	}
+//	public void testBuildVirtualTimeTree() {
+//
+//		boolean isSuccess = false;
+//		try {
+//			PafDimTree timeTree = testCommonParms.getTimeTree();
+//			PafDimTree yearTree = testCommonParms.getYearTree();
+//			PafDimTree virtualTimeTree = pds.buildTimeHorizonTree(timeTree, yearTree);
+//			isSuccess = true;
+//        } catch (PafException pex) {
+//            PafErrHandler.handleException(pex);
+//        } catch (Exception ex) {
+//                PafErrHandler.handleException(ex, PafErrSeverity.Error);
+//        } finally {
+//        	assertTrue(isSuccess);
+//        }
+//	}
 	
 	
 	/**
