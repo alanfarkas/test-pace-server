@@ -208,10 +208,10 @@
     <resources>
       <resource>
         <directory>${basedir}/src</directory>
-	<includes>
-            <include>**/*.java</include>
-            <include>**/*Test.class</include>
-        </includes>
+	<excludes>
+            <exclude>**/*.java</exclude>
+            <exclude>**/*Test.class</exclude>
+        </excludes>
       </resource>
     </resources>
     <plugins>
