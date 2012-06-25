@@ -203,6 +203,8 @@
     <sourceDirectory>${basedir}/src</sourceDirectory>
     <outputDirectory>${basedir}/WebRoot/WEB-INF/classes</outputDirectory>
     <finalName>pace</finalName>
+    <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+    <testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
     <resources>
       <resource>
         <directory>${basedir}/src</directory>
