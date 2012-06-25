@@ -208,8 +208,8 @@
     <resources>
       <resource>
         <directory>${basedir}/src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
+	<excludes>
+            <exclude>src/test/</exclude>
         </excludes>
       </resource>
     </resources>
@@ -219,6 +219,7 @@
         <configuration>
           <webappDirectory>${basedir}/WebRoot</webappDirectory>
           <warSourceDirectory>${basedir}/WebRoot</warSourceDirectory>
+          <packagingExcludes>WEB-INF/classes/**/*Test.class</packagingExcludes>
     	<archive>
       	<manifestEntries>
         	<Dependencies>org.slf4j</Dependencies>
