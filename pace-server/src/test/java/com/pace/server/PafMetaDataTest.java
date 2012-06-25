@@ -12,6 +12,8 @@ public class PafMetaDataTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
+		PafMetaData.loadAppSettings();
+		PafMetaData.updateApplicationConfig();
 	}
 
 	protected void tearDown() throws Exception {
@@ -48,34 +50,34 @@ public class PafMetaDataTest extends TestCase {
         assertNotNull(memberTags);
     }
     
-   /* public void testDataReload() {
-    	
-    	PaceProject pp = PafMetaData.getPaceProject();
-    	
-    	assertNotNull(pp);
-    	
-    	String saveToDirName = PafBaseConstants.DN_JUnit + File.separator + PafBaseConstants.DN_ConfFldr;
-    	
-    	File saveToDir = new File(saveToDirName);
-    	
-    	if ( saveToDir.exists()) {
-    		
-    		FileUtils.deleteFilesInDir(saveToDir, true);
-    		
-    	}    	
-    	
-    	assertFalse(saveToDir.exists());
-    	
-    	try {
-			pp.saveTo(saveToDirName);
-		} catch (ProjectSaveException e) {
-			fail(e.getMessage());
-		}
-		
-		assertTrue(saveToDir.exists());
-				   	
-    	
-    }*/
+//    public void testDataReload() {
+//    	
+//    	PaceProject pp = PafMetaData.getPaceProject();
+//    	
+//    	assertNotNull(pp);
+//    	
+//    	String saveToDirName = PafBaseConstants.DN_JUnit + File.separator + PafBaseConstants.DN_ConfFldr;
+//    	
+//    	File saveToDir = new File(saveToDirName);
+//    	
+//    	if ( saveToDir.exists()) {
+//    		
+//    		FileUtils.deleteFilesInDir(saveToDir, true);
+//    		
+//    	}    	
+//    	
+//    	assertFalse(saveToDir.exists());
+//    	
+//    	try {
+//			pp.saveTo(saveToDirName);
+//		} catch (ProjectSaveException e) {
+//			fail(e.getMessage());
+//		}
+//		
+//		assertTrue(saveToDir.exists());
+//				   	
+//    	
+//    }
     
 
 }
