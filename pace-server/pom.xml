@@ -202,6 +202,12 @@
   <build>
     <outputDirectory>${basedir}/WebRoot/WEB-INF/classes</outputDirectory>
     <finalName>pace</finalName>
+    <resources>
+     <resource>
+       <directory>${basedir}/src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
