@@ -200,7 +200,6 @@
 	</dependency>
   </dependencies>
   <build>
-    <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
     <outputDirectory>${basedir}/WebRoot/WEB-INF/classes</outputDirectory>
     <finalName>pace</finalName>
     <plugins>
