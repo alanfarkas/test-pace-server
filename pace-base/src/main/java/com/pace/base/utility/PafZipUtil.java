@@ -80,8 +80,32 @@ public class PafZipUtil {
 		while(entries.hasMoreElements()) {
 	  
 			ZipEntry entry = (ZipEntry)entries.nextElement();
-
-			String outputName = extractDirectory + File.separator + entry.getName();
+			
+			String entryName = entry.getName();
+			String entryParts[];
+			
+			if( OSDetector.isUnix()) {//The server is running on Linux/Unix platform
+				entryParts = entryName.split("/");
+			
+				if( entryParts.length == 1 ) { 
+					entryParts = entryName.split("\\\\"); //The source file was zipped on Windows system
+					if( entryParts.length == 2 ) {
+						entryName = entryParts[0] + "/" + entryParts[1];//replace with Linux/Unix file separator
+					}
+				}
+			}
+			else if( OSDetector.isWindows() ) {//The server is running on Windows platform
+				entryParts = entryName.split("\\\\");
+			
+				if( entryParts.length == 1 ) { 
+					entryParts = entryName.split("/"); //The source file was zipped in Linux system
+					if( entryParts.length == 2 ) {
+						entryName = entryParts[0] + "\\" + entryParts[1];//replace with Winows file separator
+					}
+				}
+			}
+			
+			String outputName = extractDirectory + File.separator + entryName;
 			
 			if(entry.isDirectory()) {
 				// Assume directories are stored parents first then children.
