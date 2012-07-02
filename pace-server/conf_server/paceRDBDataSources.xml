@@ -5,7 +5,7 @@
       <property name="hibernate.connection.username" value="PAFSYS"/>
       <property name="hibernate.connection.password" value="PAFSYS"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
-      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/..\data\pafdb"/>
+      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/../data/pafdb"/>
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
@@ -18,7 +18,7 @@
       <property name="hibernate.connection.password" value="pafsys123"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
       <property name="hibernate.show_sql" value="false"/>
-      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/..\data\pafclientcache"/>
+      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/../data/pafclientcache"/>
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
@@ -29,7 +29,7 @@
       <property name="hibernate.connection.username" value="PAFSYS"/>
       <property name="hibernate.connection.password" value="PAFSYS"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
-      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/..\data\pafextattr"/>
+      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/../data/pafextattr"/>
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>
@@ -40,7 +40,7 @@
       <property name="hibernate.connection.username" value="pafsys"/>
       <property name="hibernate.connection.password" value="pafsys123"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
-      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/..\data\pafsecurity;bootPassword=xIdk82723Sdfke83"/>
+      <property name="hibernate.connection.url" value="jdbc:derby://localhost:1527/../data/pafsecurity;bootPassword=xIdk82723Sdfke83"/>
       <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
       <property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.ClientDriver"/>
     </hibernateProperties>

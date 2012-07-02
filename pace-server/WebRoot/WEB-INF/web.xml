@@ -14,12 +14,12 @@
   <env-entry>
    <env-entry-name>pace/paceHome</env-entry-name>
    <env-entry-type>java.lang.String</env-entry-type>
-   <env-entry-value>..\..</env-entry-value>
+   <env-entry-value>../..</env-entry-value>
   </env-entry>   
   <env-entry>
    <env-entry-name>pace/autoStart</env-entry-name>
    <env-entry-type>java.lang.Boolean</env-entry-type>
-   <env-entry-value>False</env-entry-value>
+   <env-entry-value>true</env-entry-value>
   </env-entry>   
   <listener>
     <listener-class>
