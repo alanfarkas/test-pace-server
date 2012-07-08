@@ -82,13 +82,13 @@ public class PafZipUtil {
 			ZipEntry entry = (ZipEntry)entries.nextElement();
 			
 			String entryName = entry.getName();
-			String entryParts[] = entryName.split("/");
-			if( entryParts.length == 1 ) { 
-				entryParts = entryName.split("\\\\"); //The source file was zipped on Windows system
-				if( entryParts.length == 2 ) {
-					entryName = entryParts[0] + "/" + entryParts[1];//replace with Linux/Unix file separator
-				}
-			}
+//			String entryParts[] = entryName.split("/");
+//			if( entryParts.length == 1 ) { 
+//				entryParts = entryName.split("\\\\"); //The source file was zipped on Windows system
+//				if( entryParts.length == 2 ) {
+//					entryName = entryParts[0] + "/" + entryParts[1];//replace with Linux/Unix file separator
+//				}
+//			}
 			
 			String outputName = extractDirectory + File.separator + entryName;
 			
