@@ -60,7 +60,7 @@ public class RelativeCountFunc extends AbstractFunction {
     	// Validate function parameters
     	parseParms(mdbDef);
     	   	 	
-       	PafDimTree memberTree = evalState.getEvaluationTree(dimension);
+       	PafDimTree memberTree = evalState.getClientState().getUowTrees().getTree(dimension);
     	
        	// Check for level option
     	if (level == -1){
