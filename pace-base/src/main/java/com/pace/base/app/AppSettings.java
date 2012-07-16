@@ -34,6 +34,7 @@ import com.pace.base.comm.UserFilterSpec;
 public class AppSettings {
 	
     private String appTitle;
+    private AllocType globalAllocType;
 	private Integer globalUowSizeLarge;
 	private Integer globalUowSizeMax;
 	private boolean globalReplicateEnabled;	
@@ -67,6 +68,13 @@ public class AppSettings {
 		this.appTitle = appTitle;
 	}
 	
+	/**
+	 * @return the globalAllocType
+	 */
+	public AllocType getGlobalAllocType() {
+		return globalAllocType;
+	}
+
 	/**
 	 * @return the globalUowSizeLarge
 	 */

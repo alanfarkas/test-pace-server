@@ -43,6 +43,8 @@ import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.app.AllocType;
+import com.pace.base.app.AppSettings;
 import com.pace.base.app.DimType;
 import com.pace.base.app.MdbDef;
 import com.pace.base.app.PafApplicationDef;
@@ -3435,8 +3437,8 @@ public class PafDataService {
 		RuleBasedEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
 		PafDataCache cache = getDataCache(clientState.getClientId());
 		EvalState evalState = new EvalState(clientState, cache);
-		evalState.setMeasureRuleSet(clientState.getDefaultMsrRuleset());
-
+		evalState.setMeasureRuleSet(clientState.getDefaultMsrRuleset()); 
+		
 		// Perform default evaluation
 		evalState.setDefaultEvalStep(true);
 		evalStrategy.executeDefaultStrategy(evalState);   
@@ -3471,6 +3473,7 @@ public class PafDataService {
 		PafDataSlice newSlice = evalRequest.getDataSlice();
 		PafMVS pafMVS = dataCache.getPafMVS();
 		PafApplicationDef appDef = clientState.getApp();
+		AppSettings appSettings = appDef.getAppSettings();
 		MdbDef mdbDef = appDef.getMdbDef();
 		PafViewSection currentViewSection = pafMVS.getViewSection();
 		String measureDim = mdbDef.getMeasureDim(), versionDim = mdbDef.getVersionDim(), timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
@@ -3540,7 +3543,8 @@ public class PafDataService {
 			measureRuleset = clientState.getMsrRulsetByName(evalRequest.getRuleSetName());
 		}
 		evalState.setMeasureRuleSet(measureRuleset);
-
+		measureRuleset = resolveRuleSetSettings(appSettings, measureRuleset);				// TTN-1792
+		
 		// Check for contribution percent formulas on view section
 		List<String> contribPctVersions = appDef.getContribPctVersions();
 		String[] viewSectionVersions = currentViewSection.getDimensionMembers(versionDim); 
@@ -3565,6 +3569,37 @@ public class PafDataService {
 		
 	}
 	
+
+	/**
+	 * Resolve rule set options 
+	 * 
+	 * @param appSettings Application settings
+	 * @param rule S Rule set
+     *
+	 * @return Updated rule set
+	 */
+	private RuleSet resolveRuleSetSettings(AppSettings appSettings, RuleSet ruleSet) {
+		
+		// Resolve allocType setting - rule set setting takes precedence over global setting
+		AllocType rsAllocType = ruleSet.getAllocType();
+		if (rsAllocType == null) {
+			AllocType globalAllocType = appSettings.getGlobalAllocType();
+			if (globalAllocType != null) {
+				rsAllocType = globalAllocType;
+			} else {
+				// Not rule set or global setting - use default allocation type
+				rsAllocType = PafBaseConstants.DEFAULT_ALLOC_TYPE;
+			}
+		}
+		String comment = ruleSet.getComment();
+		if (comment != null && comment.contains(AllocType.AbsAlloc.toString())) {
+			rsAllocType = AllocType.AbsAlloc;
+		}
+		ruleSet.setAllocType(rsAllocType);
+			
+		return ruleSet;
+	}
+
 
 	/**
 	 *	Save updated uow cache to mdb

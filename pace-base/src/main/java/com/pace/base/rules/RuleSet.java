@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.pace.base.PafException;
+import com.pace.base.app.AllocType;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.funcs.IPafFunction;
@@ -23,6 +24,7 @@ public class RuleSet implements Cloneable {
 		private String dimension;
         private String[] measureList;
         private List<RuleGroup> ruleGroups = new ArrayList<RuleGroup>();
+        private AllocType allocType;		// TTN-1792 Abs Allocation Method
         private transient Map<String, Set<String>> msrDeps = new HashMap<String, Set<String>>();
         private transient Set<String> exhaustedMeasures = new HashSet<String>();   // TTN-1307
                           
@@ -47,7 +49,20 @@ public class RuleSet implements Cloneable {
             	this.ruleGroups.add(rg);
         }
         
-        public String toString() {
+        /**
+		 * @return the allocType
+		 */
+		public AllocType getAllocType() {
+			return allocType;
+		}
+		/**
+		 * @param allocType the allocType to set
+		 */
+		public void setAllocType(AllocType allocType) {
+			this.allocType = allocType;
+		}
+
+		public String toString() {
             StringBuilder sb = new StringBuilder();
             for (RuleGroup rg : ruleGroups) sb.append(rg.toString() + "\n-----\n");
             return sb.toString();

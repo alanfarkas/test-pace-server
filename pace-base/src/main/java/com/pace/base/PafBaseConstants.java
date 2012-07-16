@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import com.pace.base.app.AllocType;
 import com.pace.base.app.VersionType;
 
 public class PafBaseConstants {
@@ -135,6 +136,9 @@ public class PafBaseConstants {
     public static final String JN_PaceRoot = "pace";
     public static final String JN_PaceHome = "paceHome";
     
+    // default allocation type
+    public static final AllocType DEFAULT_ALLOC_TYPE = AllocType.PaceAlloc;
+    
     // custom command script tokens (could apply to calc scripts, report scripts, etc.)
 	public static final String CC_PARM_DEFAULT = "DEFAULT";
 	public static final String CC_SESSION_TOKEN_CLIENTID = "CLIENTID";
@@ -216,7 +220,7 @@ public class PafBaseConstants {
 	//default alias table
 	public static final String ALIAS_TABLE_DEFAULT = "Default";
 	
-	//delimeters
+	//delimiters
 	public static final String  DELIMETER_ELEMENT = "^";  //unit separator
 	public static final String  DELIMETER_GROUP = "|^";	 //group separator
 	
@@ -268,7 +272,7 @@ public class PafBaseConstants {
 	public static final String SVN_HIDDEN_DIR_NAME = ".svn";
 	
 	
-	//TTN 900 - Print Preferences - added by Iris
+	// print preference options
 	public static final String PRINTSTYLE_DEFAULT_PRINT_SETTINGS_FILE = "default_printsettings.xml";
 	public static final String PRINTSTYLE_PAGE_ORIENTATION_LANDSCAPE = "Landscape";
 	public static final String PRINTSTYLE_PAGE_ORIENTATION_PORTRAIT = "Portrait";

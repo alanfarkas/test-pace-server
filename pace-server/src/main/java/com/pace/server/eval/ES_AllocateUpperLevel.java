@@ -59,6 +59,10 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         final String timeDim = evalState.getTimeHorizonDim();
         final MdbDef mdbDef = evalState.getAppDef().getMdbDef();
        
+
+        // opt out if flag set for this rule
+        if ( evalState.getRule().isSkipAllocation() ) return;        
+        
         // don't do non-aggregate or recalc measures
         if ( evalState.getMeasureType() == MeasureType.Recalc 
         		|| evalState.getMeasureType() == MeasureType.NonAggregate) {
@@ -130,9 +134,6 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
             }
         }
 
-        // opt out if flag set for this rule
-        if ( evalState.getRule().isSkipAllocation() ) return;        
-        
         
         // remove all the intersections calculated in the previous steps
         allocIntersections.removeAll(skipIS);

@@ -23,6 +23,7 @@ import java.util.*;
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
+import com.pace.base.app.AllocType;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDataCache;
@@ -57,6 +58,7 @@ public abstract class ES_AllocateBase extends ES_EvalBase implements IEvalStep {
     protected void allocateToTargets(Set<Intersection> targets, double allocAvailable, double origTargetSum, PafDataCache dataCache, EvalState evalState) throws PafException {
         double origValue = 0;
         double allocValue = 0;
+        double absTargetSum = 0, allocDiff = 0;
         int places = 0;
    
 //        if (logger.isDebugEnabled()) logger.debug("Original total of unlocked allocation targets: " + origTargetSum);  
@@ -66,16 +68,40 @@ public abstract class ES_AllocateBase extends ES_EvalBase implements IEvalStep {
         
         stepTime = System.currentTimeMillis();
         
+        // Allocation type pre-processing (TTN-1792)
+        AllocType allocType = evalState.getClientState().getCurrentMsrRuleset().getAllocType();
+        if (allocType == AllocType.AbsAlloc) {
+        	// Get sum of target absolute values
+        	for (Intersection target : targets) {
+        		absTargetSum += Math.abs(dataCache.getCellValue(target));
+        	}
+    		allocDiff = allocAvailable - origTargetSum;
+        }
+        
+        
+        // Allocate each target
         for (Intersection target : targets ) {
 
+        	
             origValue = dataCache.getCellValue(target);
 //            if (origValue == 0 && origTargetSum == 0) {
             if (origTargetSum == 0) {                
                 allocValue = allocAvailable / targets.size();
             }
             else {
-                allocValue = ((origValue / origTargetSum) * (allocAvailable));
-            }
+            	// Allocation type specific processing (TTN-1792)
+            	switch(allocType) {
+            		case PaceAlloc: allocValue = ((origValue / origTargetSum) * (allocAvailable));
+            						break;
+            		case AbsAlloc: allocValue = origValue + ((Math.abs(origValue) / absTargetSum) * (allocDiff));
+            						break;
+            		default:	String errMsg = "Unhandled Allocation Type: " + allocType.toString();
+            					logger.error(errMsg);
+            					throw new IllegalArgumentException(errMsg);
+            	}
+             }
+           
+            
             
     		if (evalState.getAppDef().getAppSettings() != null && evalState.getAppDef().getAppSettings().isEnableRounding())
     		{
