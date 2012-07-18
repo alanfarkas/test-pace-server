@@ -147,7 +147,7 @@ public class PafZipUtil {
 		
 			if ( fileToArchive.isDirectory()) {
 				
-				String directoryName = fileToArchive.getName() + File.separator;
+				String directoryName = fileToArchive.getName() + "/";
 				
 				zout.putNextEntry(new ZipEntry(directoryName)); 
 				continue;
