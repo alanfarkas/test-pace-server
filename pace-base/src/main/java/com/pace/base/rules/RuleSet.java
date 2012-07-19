@@ -21,10 +21,10 @@ public class RuleSet implements Cloneable {
 		private String comment;
 		private int type; // tbFirst, tbLast, tbNone
         private String name;
+        private AllocType allocType;		// TTN-1792 Abs Allocation Method
 		private String dimension;
         private String[] measureList;
         private List<RuleGroup> ruleGroups = new ArrayList<RuleGroup>();
-        private AllocType allocType;		// TTN-1792 Abs Allocation Method
         private transient Map<String, Set<String>> msrDeps = new HashMap<String, Set<String>>();
         private transient Set<String> exhaustedMeasures = new HashSet<String>();   // TTN-1307
                           

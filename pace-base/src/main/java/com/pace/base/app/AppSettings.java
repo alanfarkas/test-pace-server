@@ -75,6 +75,11 @@ public class AppSettings {
 		return globalAllocType;
 	}
 
+
+	public void setGlobalAllocType(AllocType globalAllocType) {
+		this.globalAllocType = globalAllocType;
+	}
+
 	/**
 	 * @return the globalUowSizeLarge
 	 */

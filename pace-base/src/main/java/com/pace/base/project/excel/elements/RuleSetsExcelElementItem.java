@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import com.pace.base.PafException;
+import com.pace.base.app.AllocType;
 import com.pace.base.project.*;
 import com.pace.base.project.excel.*;
 import com.pace.base.project.utils.PafExcelUtil;
@@ -61,7 +62,7 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 	@Override
 	protected void createHeaderListMapEntries() {
 		
-		getHeaderListMap().put(ProjectElementId.RuleSet_RuleSet.toString(), Arrays.asList("rule set name", "measure list", "comment - rs", "", "comment - rg", "id - rg", "perpetual - rg", "skip protection processing - rg", "balance key set - rg", "delayed perpetual - rg", "perpetual allocation - rg", "perform initial allocation - rg", "base allocate measure", "trigger measures (pipe delimited)", "skip allocation", "lock allocation", "skip aggeration", "lock system evaluation result", "lock user evaluation result", "eval locked intersections", "lock all prior time", "calc all periods", "initial TB first allocation"));
+		getHeaderListMap().put(ProjectElementId.RuleSet_RuleSet.toString(), Arrays.asList("rule set name", "alloc type", "measure list", "comment - rs", "comment - rg", "id - rg", "perpetual - rg", "skip protection processing - rg", "balance key set - rg", "delayed perpetual - rg", "perpetual allocation - rg", "perform initial allocation - rg", "base allocate measure", "trigger measures (pipe delimited)", "skip allocation", "lock allocation", "skip aggeration", "lock system evaluation result", "lock user evaluation result", "eval locked intersections", "lock all prior time", "calc all periods", "initial TB first allocation"));
 		getHeaderListMap().put(ProjectElementId.RuleSet_RuleGroup.toString(), Arrays.asList("rule group", "", "", "", ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, "", "", "", "", "", "", "", "", "", "", ""));
 		getHeaderListMap().put(ProjectElementId.RuleSet_Rule.toString(), Arrays.asList("", "rule(s)", "result term", "expression", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""));
 		
@@ -295,8 +296,18 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 											
 											break;
 											
-										//measure list
+											//aloc type
 										case 1:
+											
+											//if the rule set name not found, try to get
+											if ( ! valueObject.isBlank() ) {
+												rs.setAllocType(AllocType.valueOf(PafExcelUtil.getString(getProjectElementId(), valueObject)));
+											} 
+											
+											break;
+												
+										//measure list
+										case 2:
 											
 											if ( ! valueObject.isBlank() ) {
 												
@@ -329,7 +340,7 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 											break;
 											
 										//comment
-										case 2:
+										case 3:
 											
 											if ( ! valueObject.isBlank()) {
 												
@@ -559,19 +570,24 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 					//name
 					excelRow.addRowItem(0, PafExcelValueObject.createFromString(ruleSet.getName()));
 					
+					//alloc type
+					if( ruleSet.getAllocType() != null ) {
+						excelRow.addRowItem(1, PafExcelValueObject.createFromString(ruleSet.getAllocType().toString()));
+					}
+					
 					//measure list
 					if ( ruleSet.getMeasureList() != null ) {
 						
 						for (String measureName : ruleSet.getMeasureList() ) {
 							
-							excelRow.addRowItem(1, PafExcelValueObject.createFromString(measureName));
+							excelRow.addRowItem(2, PafExcelValueObject.createFromString(measureName));
 							
 						}
 						
 					}
 					
 					//comment
-					excelRow.addRowItem(2, PafExcelValueObject.createFromString(ruleSet.getComment()));
+					excelRow.addRowItem(3, PafExcelValueObject.createFromString(ruleSet.getComment()));
 					
 					//add rule set row
 					excelRowList.add(excelRow);
