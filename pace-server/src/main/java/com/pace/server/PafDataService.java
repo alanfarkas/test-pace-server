@@ -4231,10 +4231,11 @@ public class PafDataService {
 					}
 					
 					// Filter out any upper level rollups that are ancestors of the filtered members
-					// with the exception of UOWRoot (this could be a little better optimized - TTN-1786)
+					// with the exception of UOW Root (this could be a little better optimized - TTN-1786)
+					String uowRoot = expressionList.get(0); 
 					for (String filteredBaseMbr : filteredBaseMemberList) {
 						List<String> ancestors = PafDimTree.getMemberNames(dimTree.getAncestors(filteredBaseMbr));
-						ancestors.remove(root);
+						ancestors.remove(uowRoot);
 						validBaseMemberList.removeAll(ancestors);
 					}
 					
