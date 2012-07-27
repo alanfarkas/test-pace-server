@@ -21,7 +21,7 @@ public class RuleSet implements Cloneable {
 		private String comment;
 		private int type; // tbFirst, tbLast, tbNone
         private String name;
-        private AllocType allocType;		// TTN-1792 Abs Allocation Method
+        private AllocType allocType; // PaceAlloc, AbsAlloc  --TTN-1792 Abs Allocation Method
 		private String dimension;
         private String[] measureList;
         private List<RuleGroup> ruleGroups = new ArrayList<RuleGroup>();
