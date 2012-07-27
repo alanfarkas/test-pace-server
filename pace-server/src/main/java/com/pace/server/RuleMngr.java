@@ -47,6 +47,7 @@ import com.pace.base.rules.Rule;
 import com.pace.base.rules.RuleGroup;
 import com.pace.base.rules.RuleSet;
 import com.pace.base.state.EvalState;
+import com.pace.base.state.PafClientState;
 import com.pace.base.utility.TimeBalance;
 
 /**
@@ -290,12 +291,22 @@ public class RuleMngr {
         String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
         Intersection firstUnroundedLockedMeasure = null;
         Rule firstUnroundedLockedMeasureRule = null;
+        PafClientState clientState = evalState.getClientState();
+        final String LR_FIX_OPTION = "@EVAL_METHOD_B@";
+        boolean isLrFixSelected = false;
 
         // singleton rule exit, if only 1 rule in rule group this has to be the leading rule
         // but this whole operation really needs a re-think
         if (ruleGroup.getRules().length == 1) 
         	return ruleGroup.getRules()[0];
         
+        // check for leading rule fix in rule set comment (TTN-1761)
+        String rsComment = clientState.getMsrRulsetByName(clientState.getCurrentMsrRulesetName()).getComment();
+        if (rsComment != null && rsComment.toUpperCase().contains(LR_FIX_OPTION)) {
+        	isLrFixSelected = true;
+        }
+        
+        // find leading rule
         for (Rule r : ruleGroup.getRules()) {    
             measureName = r.getFormula().getResultTerm();
             if (evalState.getAppDef().isFunction(measureName)) {
@@ -310,24 +321,26 @@ public class RuleMngr {
             }
             
             if (!evalState.isRoundingResourcePass()){
-//            	// Regular pass (no rounding) - select the current rule if the result term is not locked
-                if (!evalState.getCurrentLockedCells().contains(testIs)) {
-//            	// and this is a pending change that triggers the rule. (TTN-1708)
-//		        if (!evalState.getCurrentLockedCells().contains(testIs) && EvalUtil.changeTriggersFormula(is, r, evalState)) {
-		            leadingRule = r;
-		           
-		            break;
-		        }
+            	// Regular pass (no rounding) - select the current rule if the result term is not locked
+            	if (!evalState.getCurrentLockedCells().contains(testIs)) {
+        			// If LR FIX selected, also ensure that this is a pending change that triggers the rule. (TTN-1761)
+            		if (!isLrFixSelected || EvalUtil.changeTriggersFormula(is, r, evalState)) {
+            			leadingRule = r;
+
+            			break;
+            		}
+            	}
             }
             else if (evalState.getAppDef().getAppSettings() != null && evalState.getAppDef().getAppSettings().isEnableRounding()){
             	// This is the rounding resource pass so take into consideration locks on allocated intersections
             	
+            	// Select the current rule if the current intersection is locked or contains a locked allocation
 		        if (!evalState.getCurrentLockedCells().contains(testIs) && !evalState.getAllocatedLockedCells().contains(testIs)) {
-//		        	// Select the current rule if it can be triggered by a pending change. (TTN-1708)
-//		            if (EvalUtil.changeTriggersFormula(is, r, evalState)) {
+		        	// If LR FIX selected, also ensure that the current rule can be triggered by a pending change. (TTN-1761)
+            		if (!isLrFixSelected || EvalUtil.changeTriggersFormula(is, r, evalState)) {
 						leadingRule = r;
 						break;
-//					}
+					}
 		        }  
 		        else  //Intersection is locked
 		        //If no unlocked intersection exists for an unrounded measure, then unlock the first unrounded measure
