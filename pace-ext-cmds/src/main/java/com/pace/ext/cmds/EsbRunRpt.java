@@ -34,7 +34,7 @@ import com.pace.mdb.essbase.EsbData;
  * @author AFarkas
  *
  */
-public class EsbRunRpt extends EssbaseCmd implements IPafCustomCommand {
+public class EsbRunRpt extends EssbaseCmd {
 
 	private static final String PROPKEY_REPORT_SCRIPT_TO_RUN = "REPORTSCRIPT";
 	private static final String PROPKEY_OUTPUT_FILE = "OUTPUTFILE";

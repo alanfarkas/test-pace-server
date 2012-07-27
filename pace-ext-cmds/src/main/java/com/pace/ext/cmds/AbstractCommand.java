@@ -23,6 +23,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import com.pace.base.CustomCommandResult;
+import com.pace.base.IPafCustomCommand;
 import com.pace.base.PafBaseConstants;
 
 /**
@@ -32,7 +33,7 @@ import com.pace.base.PafBaseConstants;
  * @author AFarkas
  *
  */
-public abstract class AbstractCommand {
+public abstract class AbstractCommand implements IPafCustomCommand {
 
 	final String actionParmPrefix = PafBaseConstants.CC_TOKEN_PREFIX_ACTION_PARM;
 	final String tokenStartChar = PafBaseConstants.CC_TOKEN_START_CHAR;

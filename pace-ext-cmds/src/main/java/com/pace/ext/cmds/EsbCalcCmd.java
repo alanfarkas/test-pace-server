@@ -21,7 +21,6 @@ package com.pace.ext.cmds;
 import java.util.Properties;
 
 import com.pace.base.CustomCommandResult;
-import com.pace.base.IPafCustomCommand;
 import com.pace.base.PafException;
 import com.pace.base.state.IPafClientState;
 import com.pace.mdb.essbase.EsbData;
@@ -34,9 +33,12 @@ import com.pace.mdb.essbase.EsbData;
  * @author AFarkas
  *
  */
-public class EsbCalcCmd extends EssbaseCmd implements IPafCustomCommand {
+public class EsbCalcCmd extends EssbaseCmd  {
 
 	private static final String CALC_SCRIPT_TO_RUN = "CALCSCRIPT";
+	private static final String PROPKEY_ASYNCH_MODE = "DONT.WAIT";
+	protected String calcScript = null;
+	protected EsbData esbData = null;
 
 	/* (non-Javadoc)
 	 * @see com.pace.base.IPafCustomCommand#execute(java.util.Properties, com.pace.base.IPafClientState)
@@ -44,14 +46,25 @@ public class EsbCalcCmd extends EssbaseCmd implements IPafCustomCommand {
 	public CustomCommandResult execute(Properties tokenCatalog, IPafClientState clientState) throws PafException {
 		
 		// Get calculation properties
-		String calcScript = this.getActionParm(CALC_SCRIPT_TO_RUN, tokenCatalog, true);
-		
+		calcScript = this.getActionParm(CALC_SCRIPT_TO_RUN, tokenCatalog, true);
+		boolean asynchMode = Boolean.parseBoolean(this.getActionParm(PROPKEY_ASYNCH_MODE, tokenCatalog, false));
+
 		// Get Essbase data connection
-		EsbData esbData = this.getEsbDataConnection(tokenCatalog, clientState);
+		esbData = this.getEsbDataConnection(tokenCatalog, clientState);
+
+		if (asynchMode) {
+			// Spawn a new process to run the calc script (TTN-1817)
+			Runnable threadJob = new EsbCalcCmdRunnable(tokenCatalog, clientState);
+			Thread myThread = new Thread(threadJob);
+			myThread.start();
+			
+		} else {
+			
+			// Run tokenized calc script
+			esbData.runTokenizedCalcScript(calcScript, tokenCatalog, clientState);
+
+		}
 		
-		// Run tokenized calc script
-		esbData.runTokenizedCalcScript(calcScript, tokenCatalog, clientState);
-				
 		// Return results
 		return result;
 	}

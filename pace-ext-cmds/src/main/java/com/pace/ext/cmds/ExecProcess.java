@@ -27,11 +27,10 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import com.pace.base.CustomCommandResult;
-import com.pace.base.IPafCustomCommand;
 import com.pace.base.PafException;
 import com.pace.base.state.IPafClientState;
 
-public class ExecProcess extends AbstractCommand implements IPafCustomCommand {
+public class ExecProcess extends AbstractCommand {
 
 	/* (non-Javadoc)
 	 * @see com.pace.base.IPafCustomCommand#execute(java.util.Properties, com.pace.base.state.IPafClientState)
