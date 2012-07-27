@@ -4202,6 +4202,7 @@ public class PafDataService {
 
 				//If there are no attribute dimensions, then do not filter the base dimension
 				List<String> validBaseMemberList = new ArrayList<String>();
+				List<String> filteredBaseMemberList = new ArrayList<String>();		// TTN-1786
 				if(attrDimLists.size() ==0){
 					//Build a map of valid members for each base dimension
 					for(String baseMember : expressionList){
@@ -4218,13 +4219,23 @@ public class PafDataService {
 						selAttrCombos.add(intersection);
 					}					        
 
-					//Build a map of valid members for each base member
+					//Build a map of base dimension members that are valid for the selected attributes
 					for(String baseMember : expressionList){
 						Set<Intersection> validAttrCombos = AttributeUtil.getValidAttributeCombos(baseDim, baseMember, attrDims, getAllDimTrees());
 						validAttrCombos.retainAll(selAttrCombos);
 						if(!validAttrCombos.isEmpty()){
 							validBaseMemberList.add(baseMember);
+						} else {
+							filteredBaseMemberList.add(baseMember);
 						}
+					}
+					
+					// Filter out any upper level rollups that are ancestors of the filtered members
+					// with the exception of UOWRoot (this could be a little better optimized - TTN-1786)
+					for (String filteredBaseMbr : filteredBaseMemberList) {
+						List<String> ancestors = PafDimTree.getMemberNames(dimTree.getAncestors(filteredBaseMbr));
+						ancestors.remove(root);
+						validBaseMemberList.removeAll(ancestors);
 					}
 					
 					// Since this dimension is filtered, the discontiguous member group collection needs to be
