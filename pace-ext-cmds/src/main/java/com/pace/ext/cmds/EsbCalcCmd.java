@@ -53,14 +53,14 @@ public class EsbCalcCmd extends EssbaseCmd  {
 		esbData = this.getEsbDataConnection(tokenCatalog, clientState);
 
 		if (asynchMode) {
-			// Spawn a new process to run the calc script (TTN-1817)
-			Runnable threadJob = new EsbCalcCmdRunnable(tokenCatalog, clientState);
+			// Asynchronous Mode - Spawn a new process to run the calc script (TTN-1817)
+			Runnable threadJob = new EsbCalcCmdRunnable(tokenCatalog, clientState, calcScript, esbData);
 			Thread myThread = new Thread(threadJob);
 			myThread.start();
 			
 		} else {
 			
-			// Run tokenized calc script
+			// Synchronous Mode - Run the tokenized calc script in the current thread
 			esbData.runTokenizedCalcScript(calcScript, tokenCatalog, clientState);
 
 		}

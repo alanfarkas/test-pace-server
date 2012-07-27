@@ -22,10 +22,11 @@ import java.util.Properties;
 
 import com.pace.base.PafException;
 import com.pace.base.state.IPafClientState;
+import com.pace.mdb.essbase.EsbData;
 
 /**
- * "EsbCalc" Custom Command - Executes a tokenized Essbase Calculation script against the specified 
- * Essbase database.
+ * Executes a tokenized Essbase Calculation script against the specified Essbase database
+ * (in Asynchonous Mode).
  *
  * @version	x.xx
  * @author AFarkas
@@ -37,9 +38,11 @@ public class EsbCalcCmdRunnable extends EsbCalcCmd implements Runnable  {
 	private IPafClientState clientState;
 	private Properties tokenCatalog;
 
-	public EsbCalcCmdRunnable(Properties tokenCatalog, IPafClientState clientState) {
+	public EsbCalcCmdRunnable(Properties tokenCatalog, IPafClientState clientState, String calcScript, EsbData esbData) {
 		this.clientState = clientState;
 		this.tokenCatalog = tokenCatalog;
+		this.calcScript = calcScript;
+		this.esbData = esbData;
 	}
 
 	@Override
