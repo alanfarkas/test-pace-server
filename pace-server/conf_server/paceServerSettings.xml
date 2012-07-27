@@ -52,7 +52,7 @@
     <connectTimeout>30000</connectTimeout>
   </ldapSettings>
   <authMode>nativeMode</authMode>
-  <clientUpdateUrl>http://ams.pace-planning.com/builds/releases/2.8.3.2/installations/planning/setup.exe/setup.exe</clientUpdateUrl>
-  <clientMinVersion>2.8.3.2</clientMinVersion>
+  <clientUpdateUrl>http://ams.pace-planning.com/builds/releases/2.8.3.4/installations/planning/setup.exe/setup.exe</clientUpdateUrl>
+  <clientMinVersion>2.8.3.4</clientMinVersion>
   <pafServerHome>../../</pafServerHome>
 </ServerSettings>
