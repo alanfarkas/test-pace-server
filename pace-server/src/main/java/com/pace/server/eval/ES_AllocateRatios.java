@@ -488,6 +488,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 
 		// allocation amount starts as full value of intersection to be allocated
 		double allocAvailable = dataCache.getCellValue(intersection);
+        double absTargetSum = 0, allocDiff = 0;
 
 
 //       Set<String> lockedTimePeriods = null;
@@ -525,6 +526,16 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		allocAvailable -= lockedTargetTotal;
 
 
+        // Allocation type pre-processing (TTN-1792)
+        AllocType allocType = evalState.getClientState().getCurrentMsrRuleset().getAllocType();
+        if (allocType == AllocType.AbsAlloc) {
+        	// Get sum of target absolute values
+        	for (Intersection target : targets) {
+        		absTargetSum += Math.abs(dataCache.getCellValue(target));
+        	}
+    		allocDiff = allocAvailable - origTargetSum;
+        }
+        
 		// allocate balance of total by shape into remaining targets
 		double origValue = 0;
 		double allocValue = 0;
@@ -536,7 +547,16 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 				allocValue = allocAvailable / targets.size();
 			}
 			else {
-				allocValue = ((origValue / origTargetSum) * (allocAvailable));
+            	// Allocation type specific processing (TTN-1792)
+            	switch(allocType) {
+            		case PaceAlloc: allocValue = ((origValue / origTargetSum) * (allocAvailable));
+            						break;
+            		case AbsAlloc: allocValue = origValue + ((Math.abs(origValue) / absTargetSum) * (allocDiff));
+            						break;
+            		default:	String errMsg = "Unhandled Allocation Type: " + allocType.toString();
+            					logger.error(errMsg);
+            					throw new IllegalArgumentException(errMsg);
+            	}
 			}
 
 			dataCache.setCellValue(target, allocValue);

@@ -3591,10 +3591,12 @@ public class PafDataService {
 				rsAllocType = PafBaseConstants.DEFAULT_ALLOC_TYPE;
 			}
 		}
-		String comment = ruleSet.getComment();
-		if (comment != null && comment.contains(AllocType.AbsAlloc.toString())) {
-			rsAllocType = AllocType.AbsAlloc;
-		}
+//		// For testing purposes - look for alloc type in rule set comment
+//		
+//		String comment = ruleSet.getComment();
+//		if (comment != null && comment.contains(AllocType.AbsAlloc.toString())) {
+//			rsAllocType = AllocType.AbsAlloc;
+//		}
 		ruleSet.setAllocType(rsAllocType);
 			
 		return ruleSet;
