@@ -1,11 +1,11 @@
 /*
- *	File: @(#)EsbCalcCmd.java 	Package: com.pace.ext.cmds 	Project: pace-ext-cmds
- *	Created: May 7, 2006  		By: AFarkas
+ *	File: @(#)EsbCalcCmdRunnable.java 		Package: com.pace.ext.cmds 	Project: pace-ext-cmds
+ *	Created: July 27, 2012  					By: AFarkas
  *	Version: x.xx
  *
- * 	Copyright (c) 2005-2006 Palladium Group, Inc. All rights reserved.
+ * 	Copyright (c) 2005-2012 Alvarez & Marsal Software, LLC. All rights reserved.
  *
- *	This software is the confidential and proprietary information of Palladium Group, Inc.
+ *	This software is the confidential and proprietary information of A&M Software LLC.
  *	("Confidential Information"). You shall not disclose such Confidential Information and 
  * 	should use it only in accordance with the terms of the license agreement you entered into
  *	with Palladium Group, Inc.
