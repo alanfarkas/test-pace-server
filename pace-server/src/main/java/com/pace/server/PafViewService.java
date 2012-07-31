@@ -1809,27 +1809,32 @@ public class PafViewService {
 		
 			//get locked forward plannable cells
 			LockedCell[] lockedForwardPlannableCells = section.getForwardPlannableLockedCell();
-			
+						
 			//if cells exist
 			if ( lockedForwardPlannableCells != null ) {
 
 				//create a temp locked forward plannable cell set to hold all the locked cells
 				Set<LockedCell> lockedForwardPlannableCellSet = new TreeSet<LockedCell>();
 				
+				//create a temp set, so searching is faster.
+				Set<LockedCell> tempNonPlannable = new HashSet<LockedCell>();
+				tempNonPlannable.addAll(notPlannableList);
+				
 				//populate set with forward locked cells
 				for (LockedCell lockedCell : lockedForwardPlannableCells) {
-					
-					lockedForwardPlannableCellSet.add(lockedCell);
-					
+					//don't add non plannable locked cells
+					if(! tempNonPlannable.contains(lockedCell)) {
+						lockedForwardPlannableCellSet.add(lockedCell);
+					}
 				}
-				
-				//remove all the non plannable locked cells
-				lockedForwardPlannableCellSet.removeAll(notPlannableList);
 						
 				//set the fp lc on the view section
 				section.setForwardPlannableLockedCell(lockedForwardPlannableCellSet.toArray(new LockedCell[0]));
 				
-			}			
+			}	
+			
+			
+			
 			
 			// create unqiue locked cells array from non plannable list
 			section.setNotPlannableLockedCells(createUniqueLockedCellsArray(notPlannableList));
