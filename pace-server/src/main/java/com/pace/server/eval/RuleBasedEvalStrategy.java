@@ -141,6 +141,8 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		this.measureCat = evalState.getAppDef().getMeasureDefs();
 
+		logger.info("Allocation method: " + ruleSet.getAllocType());	//TTN-1792
+
 		
 		// Load supporting multidimensional database data
 		stepTime = System.currentTimeMillis();
@@ -212,6 +214,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		this.measureCat = evalState.getAppDef().getMeasureDefs();
 
+		logger.info("Allocation method: " + ruleSet.getAllocType());	//TTN-1792
 		
 		// Convert variance changes to base version changes
 		logger.info(Messages.getString("RuleBasedEvalStrategy.16")); //$NON-NLS-1$
