@@ -3437,7 +3437,10 @@ public class PafDataService {
 		RuleBasedEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
 		PafDataCache cache = getDataCache(clientState.getClientId());
 		EvalState evalState = new EvalState(clientState, cache);
-		evalState.setMeasureRuleSet(clientState.getDefaultMsrRuleset()); 
+		RuleSet measureRuleSet = clientState.getDefaultMsrRuleset();				// TTN-1792
+		evalState.setMeasureRuleSet(measureRuleSet); 								// TTN-1792
+		AppSettings appSettings = clientState.getApp().getAppSettings();			// TTN-1792
+		measureRuleSet = resolveRuleSetSettings(appSettings, measureRuleSet);		// TTN-1792
 		
 		// Perform default evaluation
 		evalState.setDefaultEvalStep(true);
