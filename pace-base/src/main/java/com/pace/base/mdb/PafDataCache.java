@@ -217,8 +217,8 @@ public class PafDataCache implements IPafDataCache {
 		// and pool are pre-allocated to hold all initially defined blocks.
 		blockSize = getMeasureSize() * getTimeHorizonSize();
 		int maxCoreBlockCount = getMaxCoreDataBlockCount();
-		dataBlockIndexMap = new HashMap<Intersection, Integer>(maxCoreBlockCount);
-		dataBlockPool = new ArrayList<DataBlock>(maxCoreBlockCount);
+		dataBlockIndexMap = new HashMap<Intersection, Integer>(maxCoreBlockCount * 2);  // Allocate additional space for attribute blocks
+		dataBlockPool = new ArrayList<DataBlock>(maxCoreBlockCount *2);  				// Allocate additional space for attribute blocks 
 		
 		// Initialize various data block housekeeping objects
 		dataBlocksByVersion = new HashMap<String, Set<Intersection>>(getVersionSize());
@@ -2097,21 +2097,21 @@ public class PafDataCache implements IPafDataCache {
 			return aliasDataBlockResp;
 		}
 		
-		// Add index entry for new data block. Attempt to reuse any
-		// previously deleted blocks.
+		// Create new data block
+		dataBlock = new DataBlock(this.getMeasureSize(), this.getTimeHorizonSize(), this.cellPropsBitCount);
+
+		// Add data block to pool. Attempt to reuse any previously deleted blocks.
 		if (deletedBlockIndexes.size() == 0) {
 			// Add index entry for new data block (index is auto-incremented)
 			surrogateKey = dataBlockCount;
+			dataBlockPool.add(dataBlock);
 		} else {
 			// Reuse index of a deleted block
 			surrogateKey = deletedBlockIndexes.removeLast();
+			dataBlockPool.set(surrogateKey, dataBlock);
 		}
 		dataBlockIndexMap.put(key, surrogateKey);
 		dataBlockCount++;
-		
-		// Create new data block and add it to data block pool
-		dataBlock = new DataBlock(this.getMeasureSize(), this.getTimeHorizonSize(), this.cellPropsBitCount);
-		dataBlockPool.add(dataBlock);
 		
 		// Add data block key to lookup collections
 		addDataBlockKey(key);
@@ -2242,20 +2242,20 @@ public class PafDataCache implements IPafDataCache {
 			return;
 		}
 		
-		// Remove data block key from collections
-		deleteDataBlockKey(key);
-		
-		// Delete data block
-		dataBlock = null;
-		dataBlockIndexMap.remove(key);
+		// Remove data block key from index collections
+		deleteDataBlockKey(key);		
 		dataBlockCount--;
 
-		// Add index of deleted block to collection so that the 
-		// index entry can be reused for a future data
-		// block addition. 
+		// Get the block's surrogate key against the data block pool
 		int surrogateKey = dataBlockResp.getSurrogateKey();
+
+		// Initialized deleted data block
+		dataBlockPool.set(surrogateKey, null);
+		
+		// Add index of deleted block to collection so that 
+		// the block can be reused for a future data block addition. 
 		deletedBlockIndexes.add(surrogateKey);
-			
+		
 	}
 
 
@@ -2269,7 +2269,11 @@ public class PafDataCache implements IPafDataCache {
 		// This method is only called on the primary data
 		// block key.
 		
-		// Remove key from version collection
+		
+		// Remove key from main data block lookup
+		dataBlockIndexMap.remove(key);
+
+		// Remove key from data block by version collection
 		Set<Intersection> versionBlocks = dataBlocksByVersion.get(key.getCoordinate(getVersionDim()));
 		if (versionBlocks != null) {
 			versionBlocks.remove(key);
