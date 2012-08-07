@@ -141,7 +141,8 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		this.measureCat = evalState.getAppDef().getMeasureDefs();
 
-		logger.info("Allocation method: " + ruleSet.getAllocType());	//TTN-1792
+		// Display allocation method (TTN-1792)
+		logger.info(Messages.getString("RuleBasedEvalStrategy.17") + ruleSet.getAllocType());	//$NON-NLS-1$
 
 		
 		// Load supporting multidimensional database data
@@ -214,7 +215,8 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		this.measureCat = evalState.getAppDef().getMeasureDefs();
 
-		logger.info("Allocation method: " + ruleSet.getAllocType());	//TTN-1792
+		// Display allocation method (TTN-1792)
+		logger.info(Messages.getString("RuleBasedEvalStrategy.31") + ruleSet.getAllocType());	 //$NON-NLS-1$
 		
 		// Convert variance changes to base version changes
 		logger.info(Messages.getString("RuleBasedEvalStrategy.16")); //$NON-NLS-1$
