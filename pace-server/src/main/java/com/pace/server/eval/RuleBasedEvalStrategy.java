@@ -133,6 +133,10 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		RuleSet ruleSet = evalState.getMeasureRuleSet();
 		logger.info(Messages.getString("RuleBasedEvalStrategy.1") + ruleSet.getName() );         //$NON-NLS-1$
+
+		// Display allocation method (TTN-1792)
+		logger.info(Messages.getString("RuleBasedEvalStrategy.89") + ruleSet.getAllocType());	//$NON-NLS-1$
+
 		if (evalState.getAppDef().getAppSettings() != null && evalState.getAppDef().getAppSettings().isEnableRounding()) {
 			logger.info(Messages.getString("RuleBasedEvalStrategy.2")); //$NON-NLS-1$
 		} else {
@@ -140,9 +144,6 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		}
 
 		this.measureCat = evalState.getAppDef().getMeasureDefs();
-
-		// Display allocation method (TTN-1792)
-		logger.info(Messages.getString("RuleBasedEvalStrategy.17") + ruleSet.getAllocType());	//$NON-NLS-1$
 
 		
 		// Load supporting multidimensional database data
@@ -207,6 +208,10 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		RuleSet ruleSet = evalState.getMeasureRuleSet();
 		logger.info(Messages.getString("RuleBasedEvalStrategy.13") + ruleSet.getName() );         //$NON-NLS-1$
+
+		// Display allocation method (TTN-1792)
+		logger.info(Messages.getString("RuleBasedEvalStrategy.89") + ruleSet.getAllocType());	 //$NON-NLS-1$
+		
 		if (evalState.getAppDef().getAppSettings() != null && evalState.getAppDef().getAppSettings().isEnableRounding()) {
 			logger.info(Messages.getString("RuleBasedEvalStrategy.14")); //$NON-NLS-1$
 		} else {
@@ -215,9 +220,6 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		this.measureCat = evalState.getAppDef().getMeasureDefs();
 
-		// Display allocation method (TTN-1792)
-		logger.info(Messages.getString("RuleBasedEvalStrategy.31") + ruleSet.getAllocType());	 //$NON-NLS-1$
-		
 		// Convert variance changes to base version changes
 		logger.info(Messages.getString("RuleBasedEvalStrategy.16")); //$NON-NLS-1$
 		convertVarianceVersions.performEvaluation(evalState);    
