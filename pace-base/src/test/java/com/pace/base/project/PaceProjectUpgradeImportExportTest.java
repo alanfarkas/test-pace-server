@@ -45,6 +45,17 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 		verifyUpgradePaceProjectToCurrent();
 	}	
 	
+	public void testUpgradeDSGPaceProjectToCurrent(){
+		try {
+			PafZipUtil.unzipFile("./test_files/DSG.paf", tempDir.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		verifyUpgradePaceProjectToCurrent();
+	}	
+	
 	public void testUpgradeGiantEaglePaceProjectToCurrent(){
 		try {
 			PafZipUtil.unzipFile("./test_files/GEPlan.paf", tempDir.toString());
