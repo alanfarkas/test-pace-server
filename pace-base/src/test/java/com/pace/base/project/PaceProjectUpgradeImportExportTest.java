@@ -42,7 +42,7 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 			e.printStackTrace();
 		}
 		
-		verfoyUpgradePaceProjectToCurrent();
+		verifyUpgradePaceProjectToCurrent();
 	}	
 	
 	public void testUpgradeGiantEaglePaceProjectToCurrent(){
@@ -53,7 +53,7 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 			e.printStackTrace();
 		}
 		
-		verfoyUpgradePaceProjectToCurrent();
+		verifyUpgradePaceProjectToCurrent();
 	}	
 	
 	public void testUpgradeHelzbergPaceProjectToCurrent(){
@@ -64,7 +64,7 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 			e.printStackTrace();
 		}
 		
-		verfoyUpgradePaceProjectToCurrent();
+		verifyUpgradePaceProjectToCurrent();
 	}	
 
 	public void testUpgradeKatzPaceProjectToCurrent(){
@@ -75,7 +75,7 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 			e.printStackTrace();
 		}
 		
-		verfoyUpgradePaceProjectToCurrent();
+		verifyUpgradePaceProjectToCurrent();
 	}	
 	
 	public void testUpgradeMichaelsPaceProjectToCurrent(){
@@ -86,7 +86,7 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 			e.printStackTrace();
 		}
 		
-		verfoyUpgradePaceProjectToCurrent();
+		verifyUpgradePaceProjectToCurrent();
 	}	
 	
 	public void testUpgradeOutbackPaceProjectToCurrent(){
@@ -97,7 +97,7 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 			e.printStackTrace();
 		}
 		
-		verfoyUpgradePaceProjectToCurrent();
+		verifyUpgradePaceProjectToCurrent();
 	}	
 	
 	public void testUpgradeSafewayPaceProjectToCurrent(){
@@ -108,10 +108,10 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 			e.printStackTrace();
 		}
 	
-		verfoyUpgradePaceProjectToCurrent();
+		verifyUpgradePaceProjectToCurrent();
 	}	
 	
-	private void verfoyUpgradePaceProjectToCurrent(){
+	private void verifyUpgradePaceProjectToCurrent(){
 		//read a project from a paf
 		try {
 			xmlProject = new XMLPaceProject(tempDir.toString(), true);
@@ -248,7 +248,6 @@ public class PaceProjectUpgradeImportExportTest extends TestCase {
 			if( xmlProject.getViews().size() > 0 && epp.getViews().size() > 0 ) {
 				assertEquals(xmlProject.getViews().get(0).getName(), epp.getViews().get(0).getName());
 			}
-			
 			assertEquals(xmlProject.getViewSections().size(), epp.getViewSections().size());
 			if( xmlProject.getViewSections().size() > 0 && epp.getViewSections().size() > 0 ) {
 				assertEquals(xmlProject.getViewSections().get(0).getName(), epp.getViewSections().get(0).getName());
