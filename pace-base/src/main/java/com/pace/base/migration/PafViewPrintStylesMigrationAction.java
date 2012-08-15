@@ -49,10 +49,11 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 	public MigrationActionStatus getStatus() {
 		// TODO Auto-generated method stub
 		MigrationActionStatus status = MigrationActionStatus.Completed;
-		if( pafViews.size() == 0 )
+		if( pafViews.size() == 0 ) {
 			status = MigrationActionStatus.Failed;
+		}
 		for( PafView pafView : pafViews ) {
-			if( pafView.getViewPrintState() == null && pafView.getPrintStyle() == null ) {
+			if( pafView.getPrintStyle() == null || pafView.getPrintStyle().getGUID() == null || pafView.getViewPrintState() == null) {
 				return MigrationActionStatus.NotStarted;
 			}
 		}
@@ -93,7 +94,7 @@ public class PafViewPrintStylesMigrationAction extends MigrationAction {
 	public void constructMigrationGlobalPrintStyleForView( PafView view ) {
 		PrintStyle migratePrintStyle = defaultPrintStyle.clone();
 		if( view.getPageOrientation() == null && view.getPagesTall() == null && view.getPagesWide() == null ) {
-			if( view.getPrintStyle() == null && view.getViewPrintState() == null ) {
+			if( view.getPrintStyle() == null || view.getPrintStyle().getGUID() == null || view.getViewPrintState() == null ) {
 				migratePrintStyle.setGUID(GUIDUtil.getGUID());
 				migratePrintStyle.setDefaultStyle(false);
 				migratePrintStyle.setName(PafBaseConstants.EMBEDED_PRINT_SETTINGS);
