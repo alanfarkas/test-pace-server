@@ -504,22 +504,24 @@ public abstract class PaceProject implements IPaceProject {
 				
 			} catch(IllegalArgumentException iae) {
 				
+				logger.error(iae.getMessage());
 				addErrorToProjectErrorMap(new ProjectDataError(orderedElementId, iae.getMessage()));
-				throw new ProjectSaveException(iae.getMessage());
+				throw new ProjectSaveException(getProjectErrorMap(), true);
 			
-			}catch (RuntimeException re) {
+			} catch (RuntimeException re) {
 							
-				logger.error(re.getMessage());
-				addErrorToProjectErrorMap(new ProjectDataError(orderedElementId, re.getMessage()));
-				throw new ProjectSaveException(re.getMessage());
+				logger.error(re.getMessage()!=null?re.getMessage():re.toString());
+				addErrorToProjectErrorMap(new ProjectDataError(orderedElementId, re.getMessage()!=null?re.getMessage():re.toString()));
+				throw new ProjectSaveException(getProjectErrorMap(), true);
+				
 			}
 			
 		}
 
-		//if errors exist, throw exception
+		//if errors exist, throw exception and pass all the export errors so that still allow finish exports but will list all the errors
 		if ( this.projectErrorMap.size() > 0 ) {
 			
-			throw new ProjectSaveException("Error trying to save " + getProjectInput());
+			throw new ProjectSaveException(getProjectErrorMap());
 			
 		}
 
