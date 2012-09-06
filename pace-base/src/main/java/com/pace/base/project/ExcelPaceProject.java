@@ -813,7 +813,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		ApplicationDefExcelElementItem<List<PafApplicationDef>> excelElementItem = new ApplicationDefExcelElementItem<List<PafApplicationDef>>(getWorkbook(), this.isCellReferencingEnabled);
 		
-		excelElementItem.write(getApplicationDefinitions());
+		try {
+			
+			excelElementItem.write(getApplicationDefinitions());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 	}
 
 	@Override
@@ -823,7 +832,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		CustomFunctionsExcelElementItem<List<CustomFunctionDef>> excelElementItem = new CustomFunctionsExcelElementItem<List<CustomFunctionDef>>(getWorkbook());
 
-		excelElementItem.write(getCustomFunctions());
+		try {
+			
+			excelElementItem.write(getCustomFunctions());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 	}
 
 	@Override
@@ -833,8 +851,15 @@ public class ExcelPaceProject extends PaceProject {
 		
 		CustomMenusExcelElementItem<List<CustomMenuDef>> excelElementItem = new CustomMenusExcelElementItem<List<CustomMenuDef>>(getWorkbook(), this.isCellReferencingEnabled);
 		
-		excelElementItem.write(getCustomMenus());
-		
+		try {
+			
+			excelElementItem.write(getCustomMenus());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
 		
 	}
 
@@ -843,7 +868,16 @@ public class ExcelPaceProject extends PaceProject {
 
 		DynamicMembersExcelElementItem<List<DynamicMemberDef>> excelElementItem = new DynamicMembersExcelElementItem<List<DynamicMemberDef>>(getWorkbook(), this.isCellReferencingEnabled);
 
-		excelElementItem.write(getDynamicMembers());
+		try {
+			
+			excelElementItem.write(getDynamicMembers());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -854,9 +888,15 @@ public class ExcelPaceProject extends PaceProject {
 		
 		GlobalStylesExcelElementItem<Map<String, PafStyle>> excelElementItem = new GlobalStylesExcelElementItem<Map<String, PafStyle>>(getWorkbook());
 
-		excelElementItem.write(getGlobalStyles());
-		
-		
+		try {
+			
+			excelElementItem.write(getGlobalStyles());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
 		
 	}
 
@@ -867,7 +907,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		HierarchyFormatsExcelElementItem<Map<String,HierarchyFormat>> excelElementItem = new HierarchyFormatsExcelElementItem<Map<String,HierarchyFormat>>(getWorkbook(), this.isCellReferencingEnabled);
 		
-		excelElementItem.write(getHierarchyFormats());
+		try {
+			
+			excelElementItem.write(getHierarchyFormats());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 	}
 
 	@Override
@@ -877,7 +926,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		MeasuresExcelElementItem<List<MeasureDef>> excelElementItem = new MeasuresExcelElementItem<List<MeasureDef>>(getWorkbook(), this.isCellReferencingEnabled);
 		
-		excelElementItem.write(getMeasures());
+		try {
+			
+			excelElementItem.write(getMeasures());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -888,7 +946,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		MemberTagsExcelElementItem<List<MemberTagDef>> excelElementItem = new MemberTagsExcelElementItem<List<MemberTagDef>>(getWorkbook(), this.isCellReferencingEnabled);
 		
-		excelElementItem.write(getMemberTags());
+		try {
+			
+			excelElementItem.write(getMemberTags());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -899,7 +966,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		NumericFormatsExcelElementItem<Map<String, PafNumberFormat>> excelElementItem = new NumericFormatsExcelElementItem<Map<String, PafNumberFormat>>(getWorkbook());
 
-		excelElementItem.write(getNumericFormats());
+		try {
+			
+			excelElementItem.write(getNumericFormats());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -910,7 +986,16 @@ public class ExcelPaceProject extends PaceProject {
 						
 		PlanCyclesExcelElementItem<List<PlanCycle>> excelElementItem = new PlanCyclesExcelElementItem<List<PlanCycle>>(getWorkbook(), isCellReferencingEnabled);
 
-		excelElementItem.write(getPlanCycles());
+		try {
+			
+			excelElementItem.write(getPlanCycles());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -922,7 +1007,16 @@ public class ExcelPaceProject extends PaceProject {
 		RoleConfigsExcelElementItem<List<PafPlannerConfig>> excelElementItem = new RoleConfigsExcelElementItem<List<PafPlannerConfig>>(
 				getWorkbook(), this.isCellReferencingEnabled);
 		
-		excelElementItem.write(getRoleConfigurations());
+		try {
+			
+			excelElementItem.write(getRoleConfigurations());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -933,7 +1027,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		RolesExcelElementItem<List<PafPlannerRole>> excelElementItem = new RolesExcelElementItem<List<PafPlannerRole>>(getWorkbook(), this.isCellReferencingEnabled);
 		
-		excelElementItem.write(getRoles());
+		try {
+			
+			excelElementItem.write(getRoles());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -944,7 +1047,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		RoundingRulesExcelElementItem<List<RoundingRule>> excelElementItem = new RoundingRulesExcelElementItem<List<RoundingRule>>(getWorkbook(), this.isCellReferencingEnabled);
 
-		excelElementItem.write(getRoundingRules());
+		try {
+			
+			excelElementItem.write(getRoundingRules());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -955,7 +1067,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		RuleSetsExcelElementItem<Map<String,RuleSet>> excelElementItem = new RuleSetsExcelElementItem<Map<String,RuleSet>>(getWorkbook());
 		
-		excelElementItem.write(getRuleSets());
+		try {
+			
+			excelElementItem.write(getRuleSets());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -969,8 +1090,16 @@ public class ExcelPaceProject extends PaceProject {
 		UserSecurityExcelElementItem<List<PafUserSecurity>> excelElementItem = new UserSecurityExcelElementItem<List<PafUserSecurity>>(
 				getWorkbook(), this.isCellReferencingEnabled, hierDims);
 		
-		excelElementItem.write(getUserSecurity());
-
+		try {
+			
+			excelElementItem.write(getUserSecurity());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -981,7 +1110,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		UserSelectionsExcelElementItem<List<PafUserSelection>> excelElementItem = new UserSelectionsExcelElementItem<List<PafUserSelection>>(getWorkbook(), this.isCellReferencingEnabled);		
 
-		excelElementItem.write(getUserSelections());
+		try {
+			
+			excelElementItem.write(getUserSelections());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -992,7 +1130,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		VersionsExcelElementItem<List<VersionDef>> excelElementItem = new VersionsExcelElementItem<List<VersionDef>>(getWorkbook(), this.isCellReferencingEnabled);
 		
-		excelElementItem.write(getVersions());	
+		try {
+			
+			excelElementItem.write(getVersions());	
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 	
@@ -1003,7 +1150,15 @@ public class ExcelPaceProject extends PaceProject {
 		
 		ViewGroupsExcelElementItem<Map<String,PafViewGroup>> excelElementItem = new ViewGroupsExcelElementItem<Map<String,PafViewGroup>>(getWorkbook(), this.isCellReferencingEnabled);
 		
-		excelElementItem.write(getViewGroups());
+		try {
+			
+			excelElementItem.write(getViewGroups());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
 		
 		
 	}
@@ -1015,7 +1170,16 @@ public class ExcelPaceProject extends PaceProject {
 		
 		ViewSectionsExcelElementItem<List<PafViewSection>> excelElementItem = new ViewSectionsExcelElementItem<List<PafViewSection>>(getWorkbook(), this.isCellReferencingEnabled);
 
-		excelElementItem.write(getViewSections());
+		try {
+			
+			excelElementItem.write(getViewSections());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 
@@ -1026,7 +1190,15 @@ public class ExcelPaceProject extends PaceProject {
 		
 		ViewsExcelElementItem<List<PafView>> excelElementItem = new ViewsExcelElementItem<List<PafView>>(getWorkbook(), this.isCellReferencingEnabled);
 
-		excelElementItem.write(getViews());
+		try {
+			
+			excelElementItem.write(getViews());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
 		
 	}
 
@@ -1039,7 +1211,16 @@ public class ExcelPaceProject extends PaceProject {
 		SeasonsExcelElementItem<List<Season>> excelElementItem = new SeasonsExcelElementItem<List<Season>>(
 				getWorkbook(), this.isCellReferencingEnabled);
 
-		excelElementItem.write(getSeasons());
+		try {
+			
+			excelElementItem.write(getSeasons());
+			
+		} catch (PaceProjectWriteException e) {
+						
+			addErrorsToProjectCreationMap(excelElementItem.getProjectDataErrorList());
+			
+		}		
+		
 		
 	}
 	
