@@ -429,6 +429,10 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 
 			for ( PafView view : list ) {
 				
+				if( view.getPrintStyle() == null || view.getPrintStyle().getGUID() == null || view.getViewPrintState() == null ) {
+					addProjectDataErrorToList(new ProjectDataError(getProjectElementId(), "Missing Print Style in View: " + view.getName()));
+				}
+				
 				PafExcelRow excelRow = new PafExcelRow();
 				
 				//name
@@ -454,7 +458,7 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 				excelRow.addRowItem(2, PafExcelValueObject.createFromString(view.getDesc()));
 				
 				PrintStyle printStyle = view.getPrintStyle();
-				if( printStyle != null ) {
+				if( printStyle != null && printStyle.getGUID() != null ) {
 					//GUID
 					excelRow.addRowItem(3, PafExcelValueObject.createFromString(printStyle.getGUID()));
 		
@@ -573,15 +577,16 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 					excelRow.addRowItem(41, PafExcelValueObject.createFromBoolean(printStyle.getOverThenDown()));
 				}
 				
-				if(view.getViewPrintState() != null ) {
+				if( view.getViewPrintState() != null ) {
 					//"Print State"
 					excelRow.addRowItem(42, PafExcelValueObject.createFromString(view.getViewPrintState().toString()));
 				}
 				
 				//"Global Print Style GUID"
-				excelRow.addRowItem(43, PafExcelValueObject.createFromString(view.getGlobalPrintStyleGUID()));
-				
-				excelRowList.add(excelRow);			
+				if( view.getGlobalPrintStyleGUID() != null ) {
+					excelRow.addRowItem(43, PafExcelValueObject.createFromString(view.getGlobalPrintStyleGUID()));
+				}
+				excelRowList.add(excelRow);		
 				
 			}
 					
