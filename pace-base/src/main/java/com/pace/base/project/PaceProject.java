@@ -497,9 +497,10 @@ public abstract class PaceProject implements IPaceProject {
 				
 				//if fatel write error (e.g. file already open), don't continue
 				if ( ppwe.isFatel() ) {
-					
-					break;
-					
+					throw new ProjectSaveException(getProjectErrorMap(), true);
+				}
+				else {
+					throw new ProjectSaveException(getProjectErrorMap());
 				}
 				
 			} catch(IllegalArgumentException iae) {
