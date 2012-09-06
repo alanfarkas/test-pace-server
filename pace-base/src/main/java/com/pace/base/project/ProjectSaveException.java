@@ -18,6 +18,10 @@
  */
 package com.pace.base.project;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Class_description_goes_here
  *
@@ -27,6 +31,43 @@ package com.pace.base.project;
  */
 public class ProjectSaveException extends Exception {
 	
+	//TTN 1832- refine AC framework when exporting error occurs
+	//Added to display non-blocking errors when exporting a pace project  
+	private Map<ProjectElementId, List<ProjectDataError>> projectSaveErrorMap = null;
+	//TTN 1832- refine AC framework when exporting error occurs
+	//Added this field used for flagging blocking or non-blocking errors when exporting a pace project  
+	private boolean fatalError = false;
+	
+	public boolean isFatalError() {
+		return fatalError;
+	}
+
+	public void setFatalError(boolean fatalError) {
+		this.fatalError = fatalError;
+	}
+
+	public ProjectSaveException(
+			Map<ProjectElementId, List<ProjectDataError>> projectExportErrorMap) {
+		
+		super();
+		
+		if ( projectExportErrorMap != null ) {
+			
+			this.projectSaveErrorMap = new HashMap<ProjectElementId, List<ProjectDataError>>();
+			this.projectSaveErrorMap.putAll(projectExportErrorMap);
+			
+		}
+		
+	}
+	
+	public ProjectSaveException(
+			Map<ProjectElementId, List<ProjectDataError>> projectExportErrorMap, boolean fatalError) {
+		
+		this(projectExportErrorMap);
+		
+		setFatalError(fatalError);
+	}
+	
 	/**
 	 * @param message
 	 */
@@ -35,4 +76,10 @@ public class ProjectSaveException extends Exception {
 		// TODO Auto-generated constructor stub
 	}
 	
+	/**
+	 * @return the projectCreationErrorMap
+	 */
+	public Map<ProjectElementId, List<ProjectDataError>> getProjectSaveErrorMap() {
+		return projectSaveErrorMap;
+	}
 }
