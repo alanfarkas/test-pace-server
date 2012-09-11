@@ -3591,7 +3591,7 @@ public class PafDataService {
 				rsAllocType = globalAllocType;
 			} else {
 				// Not rule set or global setting - use default allocation type
-				rsAllocType = PafBaseConstants.DEFAULT_ALLOC_TYPE;
+				rsAllocType = PafAppService.getDefaultAllocType();
 			}
 		}
 //		// For testing purposes - look for alloc type in rule set comment

@@ -36,6 +36,7 @@ import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.RunningState;
+import com.pace.base.app.AllocType;
 import com.pace.base.app.AppSettings;
 import com.pace.base.app.CustomActionDef;
 import com.pace.base.app.MdbDef;
@@ -73,7 +74,9 @@ public class PafAppService {
 	PafViewService viewService = PafViewService.getInstance();
 	PafDataService dataService = PafDataService.getInstance();
 	
-	
+    // default allocation type (TTN-1792)
+    private static final AllocType DEFAULT_ALLOC_TYPE = AllocType.SignedAlloc;
+    
 	private static Logger logger = Logger.getLogger(PafAppService.class);
 	private static Logger logPerf = Logger.getLogger("pace.performance"); //$NON-NLS-1$
 
@@ -85,7 +88,16 @@ public class PafAppService {
 		return _instance;
 	}
     
-    /**
+	
+	/**
+	 * @return the defaultAllocType 
+	 */
+	protected static AllocType getDefaultAllocType() {
+		return DEFAULT_ALLOC_TYPE;
+	}
+
+
+	/**
      * Load key meta-data to each pace application
      */
     // TODO make measure and version loads driven by application

@@ -8,6 +8,6 @@ package com.pace.base.app;
  *
  */
 public enum AllocType {
-	PaceAlloc,
+	SignedAlloc,
 	AbsAlloc
 }

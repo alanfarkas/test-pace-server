@@ -549,7 +549,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 			else {
             	// Allocation type specific processing (TTN-1792)
             	switch(allocType) {
-            		case PaceAlloc: allocValue = ((origValue / origTargetSum) * (allocAvailable));
+            		case SignedAlloc: allocValue = ((origValue / origTargetSum) * (allocAvailable));
             						break;
             		case AbsAlloc: allocValue = origValue + ((Math.abs(origValue) / absTargetSum) * (allocDiff));
             						break;

@@ -91,7 +91,7 @@ public abstract class ES_AllocateBase extends ES_EvalBase implements IEvalStep {
             else {
             	// Allocation type specific processing (TTN-1792)
             	switch(allocType) {
-            		case PaceAlloc: allocValue = ((origValue / origTargetSum) * (allocAvailable));
+            		case SignedAlloc: allocValue = ((origValue / origTargetSum) * (allocAvailable));
             						break;
             		case AbsAlloc: allocValue = origValue + ((Math.abs(origValue) / absTargetSum) * (allocDiff));
             						break;

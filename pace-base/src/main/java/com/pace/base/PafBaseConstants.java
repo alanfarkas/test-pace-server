@@ -136,9 +136,6 @@ public class PafBaseConstants {
     public static final String JN_PaceRoot = "pace";
     public static final String JN_PaceHome = "paceHome";
     
-    // default allocation type
-    public static final AllocType DEFAULT_ALLOC_TYPE = AllocType.PaceAlloc;
-    
     // custom command script tokens (could apply to calc scripts, report scripts, etc.)
 	public static final String CC_PARM_DEFAULT = "DEFAULT";
 	public static final String CC_SESSION_TOKEN_CLIENTID = "CLIENTID";
