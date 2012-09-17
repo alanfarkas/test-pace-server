@@ -3999,12 +3999,16 @@ public class PafDataService {
 //		IMdbClassLoader mdbClassLoader = this.getMdbClassLoader(connProps);
 //		IMdbMetaData metaData = mdbClassLoader.getMetaDataProvider();
 //		PafMdbProps mdbProps = metaData.getMdbProps();
-		PafMdbProps mdbProps = getMetaDataProvider(connProps).getMdbProps();
+		PafMdbProps mdbProps = null;
+		
+		IMdbMetaData metaData  = getMetaDataProvider(connProps);
+		if( metaData != null ) {
+			 mdbProps = metaData.getMdbProps();
 
-		if(attributeTrees != null){
-			mdbProps.setCachedAttributeDims(attributeTrees.keySet().toArray(new String[0]));
+			if(attributeTrees != null){
+				mdbProps.setCachedAttributeDims(attributeTrees.keySet().toArray(new String[0]));
+			}
 		}
-
 		return mdbProps;
 	}    
 
