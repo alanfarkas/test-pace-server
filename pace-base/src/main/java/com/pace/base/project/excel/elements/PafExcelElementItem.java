@@ -129,6 +129,7 @@ public abstract class PafExcelElementItem<T> {
 			
 		} catch (PafException e) {
 			addProjectDataErrorToList(new ProjectDataError(getProjectElementId(), e.getMessage()));
+			
 			if ( e.getSeverity() != null && e.getSeverity().equals(PafErrSeverity.Fatal)) {
 						
 				throw new PaceProjectWriteException(e.getMessage(), true);
@@ -140,15 +141,6 @@ public abstract class PafExcelElementItem<T> {
 			}
 			
 		}
-			
-		//pass the errors and block saving if it's a fatal error
-		//if errors exists, throw read exception
-		if ( getProjectDataErrorList().size() > 0 ) {
-			
-			throw new PaceProjectWriteException(getSheetName());
-			
-		}
-		
 	}
 	
 	public Map<String, List<String>> getHeaderListMap() {

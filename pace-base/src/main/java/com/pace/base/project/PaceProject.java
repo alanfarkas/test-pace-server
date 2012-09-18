@@ -524,16 +524,6 @@ public abstract class PaceProject implements IPaceProject {
 			
 		}
 
-		//if errors exist, throw exception and pass all the export errors so that still allow finish exports but will list all the errors
-		if ( this.projectErrorMap.size() > 0 ) {
-			
-			//TTN 1832 - Refine AC framework when exporting error occurs 
-			//pass the errors and allow saving if it's a non fatal error
-			throw new ProjectSaveException(getProjectErrorMap());
-			
-		}
-
-		
 	}
 	
 	/**
