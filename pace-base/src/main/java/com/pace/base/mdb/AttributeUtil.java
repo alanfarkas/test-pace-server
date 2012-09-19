@@ -69,6 +69,37 @@ public abstract class AttributeUtil {
 		return !isValidAttributeCombo(baseDimName, baseMemberName, attrDimNames, attrCombo, uowTrees);
 	}
 
+//	/**
+//	 *	Determine if the specified attribute member combination is valid
+//	 *	for the specified base member, attribute dimensions, and uow
+//	 *  trees.
+//	 *
+//	 * @param baseDimName Base dimension name
+//	 * @param baseMemberName Base member name
+//	 * @param attrDimNames Attribute dimension names
+//	 * @param attrCombo Attribute member intersection
+//	 * @param uowTrees Collection of uow cache trees
+//	 * 
+//	 * @return True if the attribute combination is valid
+//	 */
+//	public static boolean isValidAttributeCombo(String baseDimName, String baseMemberName, String[] attrDimNames, 
+//			String[] attrCombo, MemberTreeSet uowTrees) {
+//	
+//		boolean isValid = false;
+//	
+//		// Create custom intersection object
+//		Intersection intersection = new Intersection(attrDimNames, attrCombo);
+//	
+//		// Get set of valid intersection objects
+//		Set<Intersection> intersections = getValidAttributeCombos(baseDimName, baseMemberName, attrDimNames, uowTrees);
+//	
+//		// Validate intersection
+//		if (intersections.contains(intersection)) {
+//			isValid = true;
+//		}
+//		return isValid;
+//	}
+
 	/**
 	 *	Determine if the specified attribute member combination is valid
 	 *	for the specified base member, attribute dimensions, and uow
@@ -77,7 +108,7 @@ public abstract class AttributeUtil {
 	 * @param baseDimName Base dimension name
 	 * @param baseMemberName Base member name
 	 * @param attrDimNames Attribute dimension names
-	 * @param attrCombo Attribute member intersection
+	 * @param attrCombo Combination of one or more attribute members, each from a different attribute dimension
 	 * @param uowTrees Collection of uow cache trees
 	 * 
 	 * @return True if the attribute combination is valid
@@ -85,62 +116,56 @@ public abstract class AttributeUtil {
 	public static boolean isValidAttributeCombo(String baseDimName, String baseMemberName, String[] attrDimNames, 
 			String[] attrCombo, MemberTreeSet uowTrees) {
 	
-		boolean isValid = false;
-	
-		// Create custom intersection object
-		Intersection intersection = new Intersection(attrDimNames, attrCombo);
-	
-		// Get set of valid intersection objects
-		Set<Intersection> intersections = getValidAttributeCombos(baseDimName, baseMemberName, attrDimNames, uowTrees);
-	
-		// Validate intersection
-		if (intersections.contains(intersection)) {
-			isValid = true;
+
+		PafBaseTree baseTree = uowTrees.getBaseTree(baseDimName);
+		boolean isValid = true;
+		
+		// Check if all attributes are mapped to the same base tree level
+		Integer mappingLevel = null;
+		for (String attrDimName:attrDimNames) {
+			int level = baseTree.getAttributeMappingLevel(attrDimName);	
+			if (mappingLevel !=null) {
+				if (level != mappingLevel) {
+					// Mapping levels aren't consistent - attribute combination is not valid
+					return false;
+				} 
+			} else {
+				// First attribute dimension - initialize mapppingLevel
+				mappingLevel = level;
+			}
 		}
+		
+		
+		// Validate the attribute member combination. The attribute member combination is only valid
+		// if all of its members pass validation. 
+		int attrDimCount = attrDimNames.length;
+		for (int i = 0; i < attrDimCount && isValid; i++) {
+			
+			String attrDimName = attrDimNames[i], attrMemberName = attrCombo[i];
+			PafAttributeTree attrTree = uowTrees.getAttributeTree(attrDimName);
+			
+			// Validate attribute member name
+			if (!attrTree.hasMember(attrMemberName)) {
+				String errMsg = "getAttributeIntersections error - attribute dim names are null or empty";
+				logger.error(errMsg);
+				throw new IllegalArgumentException(errMsg);				
+			}
+			
+			// Validate the corresponding attribute member. The attribute member is valid if it or 
+			// one of its level 0 descendants is mapped to the specified base member or one of 
+			// its descendants.
+			Set<String> lev0AttrMembers = new HashSet<String>(attrTree.getLowestMemberNames(attrMemberName));
+			Set<String> validAttrValues = baseTree.getAttributeMembers(baseMemberName, attrDimName);
+			lev0AttrMembers.retainAll(validAttrValues);
+			if (lev0AttrMembers.isEmpty()) {
+				isValid = false;
+			}
+		}
+		
+		// Return status
 		return isValid;
 	}
 
-//	/**
-//	 *	Determine if the specified attribute member combination is valid
-//	 *	for the specified base member and attribute dimensions
-//	 *
-//	 *  This is a convenience method that calls isValidAttributeIntersection(
-//	 *  baseDimName, baseMemberName, uowTrees, attrDimNames, attrIs) with
-//	 *  uowTrees set to null.
-//	 *  
-//	 * @param baseDimName Base dimension name
-//	 * @param baseMemberName Base member name
-//	 * @param attrDimNames Attribute dimension names
-//	 * @param attrCombo Attribute member combination
-//	 * 
-//	 * @return True if the attribute combination is valid
-//	 */
-//	public static boolean isValidAttributeCombo(String baseDimName, String baseMemberName, String[] attrDimNames, String[] attrCombo) {
-//		return isValidAttributeCombo(baseDimName, baseMemberName, null, attrDimNames, attrCombo);
-//	}
-
-//	/**
-//	 *	Return the valid attribute member combinations for the specified
-//	 *  base dimension, base member, and attribute dimension(s). If all attributes
-//	 *  aren't mapped to the same base member level, then an empty set is 
-//	 *  returned.
-//	 * 
-//	 *  This is a convenience method for getAttributeCombinations(baseDimName,
-//	 *  baseMemberName, attrDimNames, uowTrees), where uowTrees has been set
-//	 *  to null.
-//	 *  
-//	 * @param baseDimName Base dimension name
-//	 * @param baseMemberName Base member name
-//	 * @param attrDimNames Array of attribute dimension name(s)
-//	 *
-//	 * @return Set<Intersection>
-//	 */
-//	public Set<Intersection> getValidAttributeCombos(final String baseDimName, final String baseMemberName, 
-//			final String[] attrDimNames)  {
-//		
-//		return getValidAttributeCombos(baseDimName, baseMemberName, attrDimNames, null);
-//	
-//	}
 
 	/**
 	 *	Return the valid attribute member combinations for the specified

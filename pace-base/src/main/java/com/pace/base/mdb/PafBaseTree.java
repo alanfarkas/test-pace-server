@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.MemberTreeSet;
 
 /**
  * A Dimension Tree that holds a "real" (stored) dimension
@@ -442,6 +443,7 @@ public class PafBaseTree extends PafDimTree {
 		return attrCombinations;
 	}
 
+
 	/**
 	 *	Get copy of paf base tree using specified branch as root of new tree
 	 *
@@ -695,7 +697,6 @@ public class PafBaseTree extends PafDimTree {
 		
 		return true;
 	}
-
 
 }
 

@@ -207,9 +207,12 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 			// Re-calculate potentially impacted attribute intersections supporting the current
             // view. 
 			if (evalState.isAttributeEval() && dataCache.isDirty()) {
+				logger.info("Starting attribute recalc step..."); 	
+				long attribRecalcStartTime = System.currentTimeMillis();
 				PafDataCacheCalc.calcAttributeIntersections(dataCache, clientState, dataCache.getPafMVS().getDataSliceParms(),
 						aggFilter, DcTrackChangeOpt.NONE);
 				dataCache.setDirty(false);
+				this.evalPerLogger.info(LogUtil.timedStep("Attribute recalc step", attribRecalcStartTime));
 			}
 
 		}
