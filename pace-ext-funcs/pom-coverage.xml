@@ -42,7 +42,6 @@
       </configuration>
       <executions>
         <execution>
-          <phase>verify</phase>
           <goals>
             <goal>setup</goal>
             <goal>aggregate</goal>
@@ -50,7 +49,6 @@
             <!--  
             <goal>check</goal>
             -->
-            <goal>snapshot</goal>
           </goals>
         </execution>
        </executions>

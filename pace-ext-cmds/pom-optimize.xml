@@ -42,24 +42,10 @@
       </configuration>
       <executions>
          <execution>
-           <id>CI</id>
-           <phase>optimize</phase>
            <goals>
              <goal>setup</goal>
              <goal>optimize</goal>
              <goal>snapshot</goal>
-           </goals>
-         </execution>
-         <execution>
-           <id>CLOVER</id>
-           <phase>coverage</phase>
-           <goals>
-             <goal>setup</goal>
-             <goal>aggregate</goal>
-             <goal>clover</goal>
-             <!--  
-             <goal>check</goal>
-             -->
            </goals>
          </execution>
        </executions>

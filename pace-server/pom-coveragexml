@@ -254,15 +254,6 @@
        </configuration>
        <executions>
          <execution>
-           <phase>optimize</phase>
-           <goals>
-             <goal>setup</goal>
-             <goal>optimize</goal>
-             <goal>snapshot</goal>
-           </goals>
-         </execution>
-         <execution>
-           <phase>coverage</phase>
            <goals>
              <goal>setup</goal>
              <goal>aggregate</goal>
