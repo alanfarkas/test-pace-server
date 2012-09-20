@@ -38,7 +38,7 @@
           -->
 	  <generatePdf>true</generatePdf>
 	  <generateXml>true</generateXml>
-	  <generateHtml>false</generateHtml>
+	  <generateHtml>true</generateHtml>
       </configuration>
       <executions>
         <execution>
