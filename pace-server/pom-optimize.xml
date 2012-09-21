@@ -216,6 +216,18 @@
     </resources>
     <plugins>
       <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <webappDirectory>${basedir}/WebRoot</webappDirectory>
+          <warSourceDirectory>${basedir}/WebRoot</warSourceDirectory>
+    	<archive>
+      	<manifestEntries>
+        	<Dependencies>org.slf4j</Dependencies>
+      	</manifestEntries>
+    	</archive>          
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>com.atlassian.maven.plugins</groupId>
         <artifactId>maven-clover2-plugin</artifactId>
         <version>3.1.4</version>
@@ -231,6 +243,7 @@
        </configuration>
        <executions>
          <execution>
+          <phase>test</phase>
            <goals>
              <goal>setup</goal>
              <goal>optimize</goal>
