@@ -238,6 +238,7 @@
           <targetPercentage>50%</targetPercentage>
            -->
 		  <singleCloverDatabase>true</singleCloverDatabase>
+  		  <cloverMergeDatabase>/opt/clover</cloverMergeDatabase>
 		  <snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</snapshot>
        </configuration>
        <executions>
