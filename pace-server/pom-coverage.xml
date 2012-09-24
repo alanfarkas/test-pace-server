@@ -6,9 +6,14 @@
   <packaging>war</packaging>
   <name>pace-server</name>
   <description/>
-    <properties>
-  	<localRepository>${user.home}/.m2/repository</localRepository>
+ <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <localRepository>${user.home}/.m2/repository</localRepository>
+    <clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
+     <clover.database>${basedir}/clover/clover.db</clover.database>
+     <clover.mergeDatabase>${basedir}/clover/cloverMerge.db</clover.mergeDatabase>
   </properties>
+
   <repositories>
         <repository>
             <id>Sun</id>
@@ -214,49 +219,62 @@
         <filtering>true</filtering>
        </resource>
     </resources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-war-plugin</artifactId>
-        <configuration>
-          <webappDirectory>${basedir}/WebRoot</webappDirectory>
-          <warSourceDirectory>${basedir}/WebRoot</warSourceDirectory>
-    	<archive>
-      	<manifestEntries>
-        	<Dependencies>org.slf4j</Dependencies>
-      	</manifestEntries>
-    	</archive>          
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>com.atlassian.maven.plugins</groupId>
-        <artifactId>maven-clover2-plugin</artifactId>
-        <version>3.1.4</version>
-        <configuration>
-          <licenseLocation>/opt/clover/clover.license</licenseLocation>
-   		  <!-- 
-   		  <cloverDatabase>.clover</cloverDatabase>
-          <targetPercentage>50%</targetPercentage>
-           -->
-		  <generatePdf>true</generatePdf>
-		  <generateXml>true</generateXml>
-		  <generateHtml>true</generateHtml>
-		  <singleCloverDatabase>true</singleCloverDatabase>
-  		  <cloverMergeDatabase>/opt/clover</cloverMergeDatabase>
-       </configuration>
-       <executions>
-         <execution>
-          <phase>test</phase>
-           <goals>
-             <goal>setup</goal>
-             <goal>aggregate</goal>
-             <goal>clover</goal>
-             <!--  
-             <goal>check</goal>
-             -->
-           </goals>
-         </execution>
-       </executions>
-      </plugin>
-    </plugins>
-  </build>
+
+	 <plugins>
+	   <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-compiler-plugin</artifactId>
+	    <configuration>
+	     <source>1.6</source>
+	     <target>1.6</target>
+	    </configuration>
+	   </plugin>
+	   <plugin>
+	      <groupId>com.atlassian.maven.plugins</groupId>
+	       <artifactId>maven-clover2-plugin</artifactId>
+	       <version>3.1.4</version>
+	       <configuration>
+	          <licenseLocation>${clover.licenseLocation}</licenseLocation>
+	  		  <cloverDatabase>${clover.database}</cloverDatabase>
+	  		  <cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
+		      <generatePdf>true</generatePdf>
+		      <generateXml>true</generateXml>
+		      <generateHtml>true</generateHtml>
+			  <singleCloverDatabase>true</singleCloverDatabase>
+	  		  <cloverMergeDatabase>/opt/clover/</cloverMergeDatabase>
+	      </configuration>
+	      <executions>
+	         <execution>
+	          <phase>pre-site</phase>
+	           <goals>
+	             <goal>setup</goal>
+	             <goal>instrument</goal>
+	             <goal>aggregate</goal>
+	             <goal>clover</goal>
+	             <!--  
+	             <goal>check</goal>
+	             -->
+	           </goals>
+	         </execution>
+	       </executions>
+	      </plugin>
+	  </plugins>
+</build>
+
+	<reporting>
+	  <plugins>
+	    <plugin>
+	      <groupId>com.atlassian.maven.plugins</groupId>
+	      <artifactId>maven-clover-plugin</artifactId>
+	      <configuration>
+			<licenseLocation>${clover.licenseLocation}</licenseLocation>
+			<cloverDatabase>${clover.database}</cloverDatabase>
+			<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
+	        <generateHTML>true</generateHTML>
+	        <generatePdf>true</generatePdf>
+	        <generateXml>true</generateXml>
+	      </configuration>
+	 	</plugin>
+	  </plugins>
+    </reporting>
 </project>
