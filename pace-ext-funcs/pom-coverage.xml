@@ -40,7 +40,6 @@
 		      <generateXml>true</generateXml>
 		      <generateHtml>true</generateHtml>
 			  <singleCloverDatabase>true</singleCloverDatabase>
-	  		  <cloverMergeDatabase>/opt/clover/</cloverMergeDatabase>
 	      </configuration>
 	      <executions>
 	         <execution>

@@ -39,8 +39,7 @@
 		      <generatePdf>true</generatePdf>
 		      <generateXml>true</generateXml>
 		      <generateHtml>true</generateHtml>
-			  <singleCloverDatabase>true</singleCloverDatabase>
-	  		  <cloverMergeDatabase>/opt/clover/</cloverMergeDatabase>
+		  <singleCloverDatabase>true</singleCloverDatabase>
 	      </configuration>
 	      <executions>
 	         <execution>

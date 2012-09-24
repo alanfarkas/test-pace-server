@@ -237,11 +237,7 @@
 	          <licenseLocation>${clover.licenseLocation}</licenseLocation>
 	  		  <cloverDatabase>${clover.database}</cloverDatabase>
 	  		  <cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
-		      <generatePdf>true</generatePdf>
-		      <generateXml>true</generateXml>
-		      <generateHtml>true</generateHtml>
 			  <singleCloverDatabase>true</singleCloverDatabase>
-	  		  <cloverMergeDatabase>/opt/clover/</cloverMergeDatabase>
 	      </configuration>
 	      <executions>
 	         <execution>
@@ -259,7 +255,7 @@
 	       </executions>
 	      </plugin>
 	  </plugins>
-</build>
+	</build>
 
 	<reporting>
 	  <plugins>

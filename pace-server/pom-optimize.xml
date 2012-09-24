@@ -249,8 +249,8 @@
 			  <cloverDatabase>${clover.database}</cloverDatabase>
 			  <cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
 		       <targetPercentage>60%</targetPercentage>
-		 <singleCloverDatabase>true</singleCloverDatabase>
-		 <snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</snapshot>
+			 <singleCloverDatabase>true</singleCloverDatabase>
+			 <snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</snapshot>
 		   </configuration>
 		   <executions>
          <execution>
