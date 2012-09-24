@@ -237,9 +237,8 @@
    		  <cloverDatabase>.clover</cloverDatabase>
           <targetPercentage>50%</targetPercentage>
            -->
-		  <generatePdf>true</generatePdf>
-		  <generateXml>true</generateXml>
-		  <generateHtml>true</generateHtml>
+		  <singleCloverDatabase>true</singleCloverDatabase>
+		  <snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</snapshot>
        </configuration>
        <executions>
          <execution>
