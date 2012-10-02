@@ -198,6 +198,16 @@
    		<scope>compile</scope>
    		<version>0.9.3</version>
 	</dependency>
+  <dependency>
+         <groupId>oracle.core.ojdl</groupId>
+         <artifactId>oracle.core.ojdl</artifactId>
+          <version>11.1.2.2</version>
+	</dependency>
+  	<dependency>
+         <groupId>com.essbase.api-server</groupId>
+         <artifactId>com.essbase.api-server</artifactId>
+         <version>11.1.2</version>
+	</dependency>
   </dependencies>
   <build>
     <outputDirectory>${basedir}/WebRoot/WEB-INF/classes</outputDirectory>
