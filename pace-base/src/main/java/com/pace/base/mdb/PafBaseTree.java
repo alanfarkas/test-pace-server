@@ -361,7 +361,7 @@ public class PafBaseTree extends PafDimTree {
 		for (PafDimMember descendant:descendants) {
 			PafBaseMember baseDescendant = (PafBaseMember) descendant;
 			Map<String,String> associatedAttributes = baseDescendant.getMemberProps().getAssociatedAttributes();
-			// Append attribute value for specfied attribute dimension, if it exists
+			// Append attribute value for specified attribute dimension, if it exists
 			if (associatedAttributes.containsKey(attrDimName)) {
 				attributeMembers.add(associatedAttributes.get(attrDimName));
 			}

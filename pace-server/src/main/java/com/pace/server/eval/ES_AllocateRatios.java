@@ -294,7 +294,8 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
 		PafDimTree dimTree = uowTrees.getTree(dim);
 		String baseDim = null;
-		Set<String> assocAttrDims = null, baseDims = dataService.getBaseDimNames();
+		String[] assocAttrDims = null;
+		Set<String> assocAttrDimSet = null, baseDims = dataService.getBaseDimNames();
 		boolean isBaseDim = false;
 		Set<String>viewAttributes = new HashSet<String>();
 
@@ -312,8 +313,9 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 			}
 
 			// Set associated attribute dimensions for current base dimension
-			assocAttrDims = new HashSet<String>(dataService.getBaseTree(baseDim).getAttributeDimNames());
-			assocAttrDims.retainAll(viewAttributes);
+			assocAttrDimSet = new HashSet<String>(dataService.getBaseTree(baseDim).getAttributeDimNames());
+			assocAttrDimSet.retainAll(viewAttributes);
+			assocAttrDims = assocAttrDimSet.toArray(new String[0]);
 		} else {
 			// regular view / base dimension
 			isBaseDim = true;
@@ -341,29 +343,26 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 					// if current dimension is either an attribute dimension or a base dimension with at least
 					// one attribute dimension on the view, skip any invalid attribute member intersections for 
 					// the current dimension, since they aren't updatable. 
-					if (!assocAttrDims.isEmpty()) {
+					if (!assocAttrDimSet.isEmpty()) {
 
-						// get set of all valid attribute intersections for intersection represented
-						// by generation member for upcoming test.
+						// determine if the intersection containing the current generation member is a valid
+						// attribute intersection. (TTN-1851)
 						String baseMember = isTest.getCoordinate(baseDim);
-						Set<Intersection> validAttrIntersections = AttributeUtil.getValidAttributeCombos(baseDim, baseMember, assocAttrDims.toArray(new String[0]), uowTrees);
-
-						// create intersection containing associated attribute dimensions of selected 
-						// base member.
-						Intersection attrIs = new Intersection(assocAttrDims.toArray(new String[0]));
-						for (String attrDim:attrIs.getDimensions()) {
-							attrIs.setCoordinate(attrDim, isTest.getCoordinate(attrDim));
+						String[] attrCombo = new String[assocAttrDims.length];
+						for (int i = 0; i < assocAttrDims.length; i++) {
+							attrCombo[i] = isTest.getCoordinate(assocAttrDims[i]);
 						}
+						boolean isValidAttrIs = AttributeUtil.isValidAttributeCombo(baseDim, baseMember, assocAttrDims, attrCombo, uowTrees);
 
 						// skip ratio allocation if member being tested doesn't exist in data cache
 						// but represents a valid attribute intersection on the selected generation.
-						if (!dataCache.isMember(dim, mbrName) && validAttrIntersections.contains(attrIs)) {
+						if (!dataCache.isMember(dim, mbrName) && isValidAttrIs) {	// (TTN-1851)
 							isRatioAllocation = false;
 							break;
 						}        					
 
-						// if current gen member intersection is invalid then skip lock test
-						if (!validAttrIntersections.contains(attrIs)) {
+						// if current gen member intersection is invalid then skip lock test  
+						if (!isValidAttrIs) {  	// (TTN-1851)
 							continue;
 						}
 					}

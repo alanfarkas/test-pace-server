@@ -120,21 +120,21 @@ public abstract class AttributeUtil {
 		PafBaseTree baseTree = uowTrees.getBaseTree(baseDimName);
 		boolean isValid = true;
 		
-		// Check if all attributes are mapped to the same base tree level
-		Integer mappingLevel = null;
-		for (String attrDimName:attrDimNames) {
-			int level = baseTree.getAttributeMappingLevel(attrDimName);	
-			if (mappingLevel !=null) {
-				if (level != mappingLevel) {
-					// Mapping levels aren't consistent - attribute combination is not valid
-					return false;
-				} 
-			} else {
-				// First attribute dimension - initialize mapppingLevel
-				mappingLevel = level;
-			}
-		}
-		
+//		// Check if all attributes are mapped to the same base tree level
+//		Integer mappingLevel = null;
+//		for (String attrDimName:attrDimNames) {
+//			int level = baseTree.getAttributeMappingLevel(attrDimName);	
+//			if (mappingLevel !=null) {
+//				if (level != mappingLevel) {
+//					// Mapping levels aren't consistent - attribute combination is not valid
+//					return false;
+//				} 
+//			} else {
+//				// First attribute dimension - initialize mapppingLevel
+//				mappingLevel = level;
+//			}
+//		}
+//		
 		
 		// Validate the attribute member combination. The attribute member combination is only valid
 		// if all of its members pass validation. 
