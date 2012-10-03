@@ -54,7 +54,7 @@
 	    <pathelement location="${redist}"/>
 	    <path refid="Log4j 1.2.9.userclasspath"/>
 	    <path refid="Junit.userclasspath"/>
-	    <pathelement location="/proj_wrksp/eclipse/pace-base/dist/pace-base.jar"/>
+	    <pathelement location="${wrksp_root}/pace-base/dist/pace-base.jar"/>
 	</path>
 	
 
