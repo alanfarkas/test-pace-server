@@ -4,30 +4,36 @@
     </wsdl:import>
   <wsdl:binding name="PafServiceProviderServiceSoapBinding" type="ns1:PafService">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <wsdl:operation name="getValidAttributeMembers">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getValidAttributeMembers">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getValidAttributeMembersResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
     <wsdl:operation name="reinitializeClientState">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input name="reinitializeClientState">
         <soap:body use="literal"/>
       </wsdl:input>
       <wsdl:output name="reinitializeClientStateResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="startPlanSession">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="startPlanSession">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="startPlanSessionResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="logoff">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="logoff">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="logoffResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafSoapException">
@@ -52,6 +58,30 @@
         <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
+    <wsdl:operation name="getApplicationState">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getApplicationState">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getApplicationStateResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="loadApplication">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="loadApplication">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="loadApplicationResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
     <wsdl:operation name="populateRoleFilters">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input name="populateRoleFilters">
@@ -64,12 +94,111 @@
         <soap:fault name="PafSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="exportMemberTagData">
+    <wsdl:operation name="updatePafUser">
       <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="exportMemberTagData">
+      <wsdl:input name="updatePafUser">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="exportMemberTagDataResponse">
+      <wsdl:output name="updatePafUserResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getGroups">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getGroups">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getGroupsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="clientInit">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="clientInit">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="clientInitResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getVersion">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getVersion">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getVersionResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="runCustomCommand">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="runCustomCommand">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="runCustomCommandResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="validateUserSecurity">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="validateUserSecurity">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="validateUserSecurityResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="endPlanningSession">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="endPlanningSession">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="endPlanningSessionResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="clearImportedMdbAttributeDims">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="clearImportedMdbAttributeDims">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="clearImportedMdbAttributeDimsResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException">
@@ -91,51 +220,6 @@
         <soap:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="runCustomCommand">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="runCustomCommand">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="runCustomCommandResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getDimensionTree">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getDimensionTree">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getDimensionTreeResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getVersion">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getVersion">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getVersionResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="evaluateView">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="evaluateView">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="evaluateViewResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
     <wsdl:operation name="updateDatacache">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input name="updateDatacache">
@@ -148,12 +232,48 @@
         <soap:fault name="PafSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="clearImportedMdbAttributeDims">
+    <wsdl:operation name="getValidAttributeMembers">
       <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="clearImportedMdbAttributeDims">
+      <wsdl:input name="getValidAttributeMembers">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="clearImportedMdbAttributeDimsResponse">
+      <wsdl:output name="getValidAttributeMembersResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getPafUser">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getPafUser">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getPafUserResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAbletoGetLDAPContext">
+        <soap:fault name="PafNotAbletoGetLDAPContext" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getMdbProps">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getMdbProps">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getMdbPropsResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException">
@@ -202,114 +322,12 @@
         <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getGroups">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getGroups">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getGroupsResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="endPlanningSession">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="endPlanningSession">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="endPlanningSessionResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
     <wsdl:operation name="getFilteredUOWSize">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input name="getFilteredUOWSize">
         <soap:body use="literal"/>
       </wsdl:input>
       <wsdl:output name="getFilteredUOWSizeResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="importSimpleCellNotes">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="importSimpleCellNotes">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="importSimpleCellNotesResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="clientCacheRequest">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="clientCacheRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="clientCacheRequestResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="logoff">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="logoff">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="logoffResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getApplicationState">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getApplicationState">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getApplicationStateResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="startPlanSession">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="startPlanSession">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="startPlanSessionResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="loadApplication">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="loadApplication">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="loadApplicationResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafSoapException">
@@ -328,60 +346,48 @@
         <soap:fault name="PafSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="clientInit">
+    <wsdl:operation name="importSimpleCellNotes">
       <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="clientInit">
+      <wsdl:input name="importSimpleCellNotes">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="clientInitResponse">
+      <wsdl:output name="importSimpleCellNotesResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafSoapException">
         <soap:fault name="PafSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getPafUser">
+    <wsdl:operation name="getDimensionTree">
       <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getPafUser">
+      <wsdl:input name="getDimensionTree">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="getPafUserResponse">
+      <wsdl:output name="getDimensionTreeResponse">
         <soap:body use="literal"/>
       </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAbletoGetLDAPContext">
-        <soap:fault name="PafNotAbletoGetLDAPContext" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="validateUserSecurity">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="validateUserSecurity">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="validateUserSecurityResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
       <wsdl:fault name="PafSoapException">
         <soap:fault name="PafSoapException" use="literal"/>
       </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="updatePafUser">
+    <wsdl:operation name="evaluateView">
       <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="updatePafUser">
+      <wsdl:input name="evaluateView">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="updatePafUserResponse">
+      <wsdl:output name="evaluateViewResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="exportMemberTagData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="exportMemberTagData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="exportMemberTagDataResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException">
@@ -394,12 +400,51 @@
         <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getMdbProps">
+    <wsdl:operation name="clientCacheRequest">
       <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getMdbProps">
+      <wsdl:input name="clientCacheRequest">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="getMdbPropsResponse">
+      <wsdl:output name="clientCacheRequestResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="createPafUser">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="createPafUser">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="createPafUserResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="saveCellNotes">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="saveCellNotes">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="saveCellNotesResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="clearMemberTagData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="clearMemberTagData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="clearMemberTagDataResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException">
@@ -410,30 +455,6 @@
       </wsdl:fault>
       <wsdl:fault name="PafNotAuthenticatedSoapException">
         <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="resetPafUserPassword">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="resetPafUserPassword">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="resetPafUserPasswordResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="reloadDatacache">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="reloadDatacache">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="reloadDatacacheResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="getView">
@@ -448,12 +469,75 @@
         <soap:fault name="PafSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getCellNotes">
+    <wsdl:operation name="saveMemberTagData">
       <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getCellNotes">
+      <wsdl:input name="saveMemberTagData">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="getCellNotesResponse">
+      <wsdl:output name="saveMemberTagDataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getDimensionTrees">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getDimensionTrees">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getDimensionTreesResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getUserNamesForSecurityGroups">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getUserNamesForSecurityGroups">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getUserNamesForSecurityGroupsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAbletoGetLDAPContext">
+        <soap:fault name="PafNotAbletoGetLDAPContext" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="resetPafUserPassword">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="resetPafUserPassword">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="resetPafUserPasswordResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="renameMemberTagData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="renameMemberTagData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="renameMemberTagDataResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafSoapException">
@@ -490,24 +574,66 @@
         <soap:fault name="PafNotAbletoGetLDAPContext" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="saveWork">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="saveWork">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="saveWorkResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
     <wsdl:operation name="startApplication">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input name="startApplication">
         <soap:body use="literal"/>
       </wsdl:input>
       <wsdl:output name="startApplicationResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="setGroups">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setGroups">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setGroupsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="clientAuth">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="clientAuth">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="clientAuthResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getCellNotesInformation">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getCellNotesInformation">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getCellNotesInformationResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getCellNotes">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getCellNotes">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getCellNotesResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafSoapException">
@@ -529,12 +655,99 @@
         <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getSimpleCellNotesToExport">
+    <wsdl:operation name="importMemberTagData">
       <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getSimpleCellNotesToExport">
+      <wsdl:input name="importMemberTagData">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="getSimpleCellNotesToExportResponse">
+      <wsdl:output name="importMemberTagDataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="deletePafUser">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="deletePafUser">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="deletePafUserResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="changePafUserPassword">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="changePafUserPassword">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="changePafUserPasswordResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException">
+        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
+      </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException">
+        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="downloadApplication">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="downloadApplication">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="downloadApplicationResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="reloadDatacache">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="reloadDatacache">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="reloadDatacacheResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getFilteredResultSetResponse">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getFilteredResultSetResponse">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getFilteredResultSetResponseResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="PafSoapException">
+        <soap:fault name="PafSoapException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="saveWork">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="saveWork">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="saveWorkResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafSoapException">
@@ -562,96 +775,6 @@
         <soap:fault name="PafNotAbletoGetLDAPContext" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="createPafUser">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="createPafUser">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="createPafUserResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getCellNotesInformation">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getCellNotesInformation">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getCellNotesInformationResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getUserNamesForSecurityGroups">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getUserNamesForSecurityGroups">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getUserNamesForSecurityGroupsResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAbletoGetLDAPContext">
-        <soap:fault name="PafNotAbletoGetLDAPContext" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="renameMemberTagData">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="renameMemberTagData">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="renameMemberTagDataResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="clientAuth">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="clientAuth">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="clientAuthResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="importMemberTagData">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="importMemberTagData">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="importMemberTagDataResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
     <wsdl:operation name="getPafUsers">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input name="getPafUsers">
@@ -667,123 +790,12 @@
         <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="saveCellNotes">
+    <wsdl:operation name="getSimpleCellNotesToExport">
       <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="saveCellNotes">
+      <wsdl:input name="getSimpleCellNotesToExport">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="saveCellNotesResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="changePafUserPassword">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="changePafUserPassword">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="changePafUserPasswordResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="deletePafUser">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="deletePafUser">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="deletePafUserResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="downloadApplication">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="downloadApplication">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="downloadApplicationResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="setGroups">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="setGroups">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="setGroupsResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="clearMemberTagData">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="clearMemberTagData">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="clearMemberTagDataResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="saveMemberTagData">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="saveMemberTagData">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="saveMemberTagDataResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException">
-        <soap:fault name="PafNotAuthorizedSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafSoapException">
-        <soap:fault name="PafSoapException" use="literal"/>
-      </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException">
-        <soap:fault name="PafNotAuthenticatedSoapException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getDimensionTrees">
-      <soap:operation soapAction="" style="document"/>
-      <wsdl:input name="getDimensionTrees">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getDimensionTreesResponse">
+      <wsdl:output name="getSimpleCellNotesToExportResponse">
         <soap:body use="literal"/>
       </wsdl:output>
       <wsdl:fault name="PafSoapException">

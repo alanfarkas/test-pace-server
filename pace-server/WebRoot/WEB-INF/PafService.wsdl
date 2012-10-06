@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wsdl:definitions name="PafService" targetNamespace="pace.palladium.com" xmlns:ns1="pace.palladium.com" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <wsdl:types>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="pace.palladium.com" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="pace.palladium.com">
-<xs:import namespace="http://www.w3.org/2005/05/xmlmime"/>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="pace.palladium.com" attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="pace.palladium.com">
 <xs:element name="changePafUserPassword" type="tns:changePafUserPassword"/>
 <xs:element name="changePafUserPasswordResponse" type="tns:changePafUserPasswordResponse"/>
 <xs:element name="clearImportedMdbAttributeDims" type="tns:clearImportedMdbAttributeDims"/>
@@ -39,6 +38,8 @@
 <xs:element name="getDimensionTreeResponse" type="tns:getDimensionTreeResponse"/>
 <xs:element name="getDimensionTrees" type="tns:getDimensionTrees"/>
 <xs:element name="getDimensionTreesResponse" type="tns:getDimensionTreesResponse"/>
+<xs:element name="getFilteredResultSetResponse" type="tns:getFilteredResultSetResponse"/>
+<xs:element name="getFilteredResultSetResponseResponse" type="tns:getFilteredResultSetResponseResponse"/>
 <xs:element name="getFilteredUOWSize" type="tns:getFilteredUOWSize"/>
 <xs:element name="getFilteredUOWSizeResponse" type="tns:getFilteredUOWSizeResponse"/>
 <xs:element name="getGroups" type="tns:getGroups"/>
@@ -113,87 +114,7 @@
 <xs:element name="validateUserSecurityResponse" type="tns:validateUserSecurityResponse"/>
 <xs:element name="verifyUsers" type="tns:verifyUsers"/>
 <xs:element name="verifyUsersResponse" type="tns:verifyUsersResponse"/>
-<xs:complexType name="getValidAttributeMembers">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafValidAttrRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafValidAttrRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element minOccurs="0" name="reqAttrDim" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="selAttrSpecs" nillable="true" type="tns:pafDimSpec"/>
-<xs:element minOccurs="0" name="selBaseDim" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="selBaseMembers" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="pafRequest">
-<xs:sequence>
-<xs:element minOccurs="0" name="clientId" type="xs:string"/>
-<xs:element minOccurs="0" name="sessionToken" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafDimSpec">
-<xs:sequence>
-<xs:element minOccurs="0" name="dimension" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="expressionList" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getValidAttributeMembersResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafValidAttrResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafValidAttrResponse">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="members" nillable="true" type="xs:string"/>
-<xs:element name="success" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="reinitializeClientState">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="reinitializeClientStateResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafResponse">
-<xs:sequence>
-<xs:element name="responseCode" type="xs:int"/>
-<xs:element minOccurs="0" name="responseMsg" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="importMdbAttributeDims">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafImportAttrRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafImportAttrRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="importDimensions" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="importMdbAttributeDimsResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafImportAttrResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafImportAttrResponse">
-<xs:sequence>
-<xs:element name="success" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="populateRoleFilters">
+<xs:complexType name="startPlanSession">
 <xs:sequence>
 <xs:element minOccurs="0" name="arg0" type="tns:pafPlanSessionRequest"/>
 </xs:sequence>
@@ -210,22 +131,178 @@
 </xs:extension>
 </xs:complexContent>
 </xs:complexType>
-<xs:complexType name="populateRoleFiltersResponse">
+<xs:complexType name="pafRequest">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafPopulateRoleFilterResponse"/>
+<xs:element minOccurs="0" name="clientId" type="xs:string"/>
+<xs:element minOccurs="0" name="sessionToken" type="xs:string"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafPopulateRoleFilterResponse">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
+<xs:complexType name="startPlanSessionResponse">
 <xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="attributeTreeNames" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="baseTreeNames" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="dimTrees" nillable="true" type="tns:pafSimpleDimTree"/>
-<xs:element minOccurs="0" name="userFilterSpec" type="tns:userFilterSpec"/>
+<xs:element minOccurs="0" name="return" type="tns:pafPlanSessionResponse"/>
 </xs:sequence>
-</xs:extension>
-</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="pafPlanSessionResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="clientCacheBlock" type="tns:pafClientCacheBlock"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="customMenuDefs" nillable="true" type="tns:customMenuDef"/>
+<xs:element minOccurs="0" name="defaultRuleSetName" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="dimTrees" nillable="true" type="tns:pafSimpleDimTree"/>
+<xs:element minOccurs="0" name="planningVersion" type="xs:string"/>
+<xs:element name="replicateAllEnabled" type="xs:boolean"/>
+<xs:element name="replicateEnabled" type="xs:boolean"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="ruleSetList" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="viewTreeItems" nillable="true" type="tns:pafViewTreeItem"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="workSpec" nillable="true" type="tns:pafWorkSpec"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafClientCacheBlock">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="axisSequence" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="currentYear" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="globalStyles" nillable="true" type="tns:pafStyle"/>
+<xs:element minOccurs="0" name="lastPeriod" type="xs:string"/>
+<xs:element minOccurs="0" name="mdbDef" type="tns:mdbDef"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="measureDefs" nillable="true" type="tns:simpleMeasureDef"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagDefs" nillable="true" type="tns:memberTagDef"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="ruleSets" nillable="true" type="tns:ruleSet"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="versionDefs" nillable="true" type="tns:simpleVersionDef"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafStyle">
+<xs:sequence>
+<xs:element minOccurs="0" name="alignment" type="tns:pafAlignment"/>
+<xs:element minOccurs="0" name="bgFillColor" type="xs:string"/>
+<xs:element minOccurs="0" name="bgHexFillColor" type="xs:string"/>
+<xs:element minOccurs="0" name="bold" type="xs:boolean"/>
+<xs:element minOccurs="0" name="doubleUnderline" type="xs:boolean"/>
+<xs:element minOccurs="0" name="fontColor" type="xs:string"/>
+<xs:element minOccurs="0" name="fontHexColor" type="xs:string"/>
+<xs:element minOccurs="0" name="fontName" type="xs:string"/>
+<xs:element minOccurs="0" name="italics" type="xs:boolean"/>
+<xs:element minOccurs="0" name="name" type="xs:string"/>
+<xs:element minOccurs="0" name="size" type="xs:int"/>
+<xs:element minOccurs="0" name="strikeOut" type="xs:boolean"/>
+<xs:element minOccurs="0" name="underline" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafAlignment">
+<xs:sequence>
+<xs:element minOccurs="0" name="value" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="mdbDef">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="axisPriority" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="dataSourceId" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="hierDims" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="measureDim" type="xs:string"/>
+<xs:element minOccurs="0" name="measureRoot" type="xs:string"/>
+<xs:element minOccurs="0" name="planTypeDim" type="xs:string"/>
+<xs:element minOccurs="0" name="timeDim" type="xs:string"/>
+<xs:element name="versionAxis" type="xs:int"/>
+<xs:element minOccurs="0" name="versionDim" type="xs:string"/>
+<xs:element minOccurs="0" name="yearDim" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="simpleMeasureDef">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="aliases" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="name" type="xs:string"/>
+<xs:element minOccurs="0" name="numericFormatName" type="xs:string"/>
+<xs:element minOccurs="0" name="recalcTBOveride" type="xs:string"/>
+<xs:element minOccurs="0" name="type" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="memberTagDef">
+<xs:sequence>
+<xs:element name="commentVisible" type="xs:boolean"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="dims" nillable="true" type="xs:string"/>
+<xs:element name="editable" type="xs:boolean"/>
+<xs:element minOccurs="0" name="label" type="xs:string"/>
+<xs:element minOccurs="0" name="name" type="xs:string"/>
+<xs:element minOccurs="0" name="type" type="tns:memberTagType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="ruleSet">
+<xs:sequence>
+<xs:element minOccurs="0" name="allocType" type="tns:allocType"/>
+<xs:element minOccurs="0" name="comment" type="xs:string"/>
+<xs:element minOccurs="0" name="dimension" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="measureList" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="name" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="ruleGroups" nillable="true" type="tns:ruleGroup"/>
+<xs:element name="type" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="ruleGroup">
+<xs:sequence>
+<xs:element minOccurs="0" name="balanceSetKey" type="xs:string"/>
+<xs:element minOccurs="0" name="comment" type="xs:string"/>
+<xs:element name="delayedPerpetual" type="xs:boolean"/>
+<xs:element minOccurs="0" name="performInitialAllocation" type="xs:boolean"/>
+<xs:element name="perpetual" type="xs:boolean"/>
+<xs:element name="perpetualAllocation" type="xs:boolean"/>
+<xs:element minOccurs="0" name="ruleGroupId" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="rules" nillable="true" type="tns:rule"/>
+<xs:element name="skipProtProc" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="rule">
+<xs:sequence>
+<xs:element minOccurs="0" name="baseAllocateMeasure" type="xs:string"/>
+<xs:element name="calcAllPeriods" type="xs:boolean"/>
+<xs:element name="evalLockedIntersections" type="xs:boolean"/>
+<xs:element minOccurs="0" name="formula" type="tns:formula"/>
+<xs:element name="initialTBFirstAllocation" type="xs:boolean"/>
+<xs:element name="key" type="xs:int"/>
+<xs:element name="lockAllPriorTime" type="xs:boolean"/>
+<xs:element name="lockAllocation" type="xs:boolean"/>
+<xs:element name="lockSystemEvaluationResult" type="xs:boolean"/>
+<xs:element minOccurs="0" name="lockUserEvaluationResult" type="xs:boolean"/>
+<xs:element name="skipAggregation" type="xs:boolean"/>
+<xs:element name="skipAllocation" type="xs:boolean"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="triggerMeasures" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="formula">
+<xs:sequence>
+<xs:element minOccurs="0" name="expression" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="expressionTerms" nillable="true" type="xs:string"/>
+<xs:element name="parsed" type="xs:boolean"/>
+<xs:element name="resultFunction" type="xs:boolean"/>
+<xs:element minOccurs="0" name="resultTerm" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="simpleVersionDef">
+<xs:sequence>
+<xs:element minOccurs="0" name="name" type="xs:string"/>
+<xs:element minOccurs="0" name="numericFormat" type="xs:string"/>
+<xs:element minOccurs="0" name="type" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="customMenuDef">
+<xs:sequence>
+<xs:element name="autoRefreshUow" type="xs:boolean"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="autoRefreshVersionFilter" nillable="true" type="xs:string"/>
+<xs:element name="autoSaveUow" type="xs:boolean"/>
+<xs:element name="beginGroup" type="xs:boolean"/>
+<xs:element minOccurs="0" name="caption" type="xs:string"/>
+<xs:element minOccurs="0" name="confirmationMessage" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="customActionDefs" nillable="true" type="tns:customActionDef"/>
+<xs:element name="enableButton" type="xs:boolean"/>
+<xs:element minOccurs="0" name="faceID" type="xs:int"/>
+<xs:element minOccurs="0" name="key" type="xs:string"/>
+<xs:element minOccurs="0" name="terminationMessage" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="userPrompts" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="viewFilter" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="customActionDef">
+<xs:sequence>
+<xs:element minOccurs="0" name="actionClassName" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="actionNamedParameters" nillable="true" type="xs:string"/>
+</xs:sequence>
 </xs:complexType>
 <xs:complexType name="pafSimpleDimTree">
 <xs:sequence>
@@ -261,9 +338,320 @@
 <xs:element name="levelNumber" type="xs:int"/>
 </xs:sequence>
 </xs:complexType>
+<xs:complexType name="pafViewTreeItem">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="aliasMappings" nillable="true" type="tns:aliasMapping"/>
+<xs:element minOccurs="0" name="desc" type="xs:string"/>
+<xs:element name="group" type="xs:boolean"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="items" nillable="true" type="tns:pafViewTreeItem"/>
+<xs:element minOccurs="0" name="label" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="suppressZeroSettings" nillable="true" type="tns:suppressZeroSettings"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="userSelections" nillable="true" type="tns:pafUserSelection"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="aliasMapping">
+<xs:sequence>
+<xs:element minOccurs="0" name="additionalRowColumnFormat" type="xs:string"/>
+<xs:element minOccurs="0" name="aliasTableName" type="xs:string"/>
+<xs:element minOccurs="0" name="dimName" type="xs:string"/>
+<xs:element minOccurs="0" name="primaryRowColumnFormat" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="suppressZeroSettings">
+<xs:sequence>
+<xs:element minOccurs="0" name="columnsSuppressed" type="xs:boolean"/>
+<xs:element minOccurs="0" name="enabled" type="xs:boolean"/>
+<xs:element minOccurs="0" name="rowsSuppressed" type="xs:boolean"/>
+<xs:element minOccurs="0" name="visible" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafUserSelection">
+<xs:sequence>
+<xs:element minOccurs="0" name="dimension" type="xs:string"/>
+<xs:element minOccurs="0" name="id" type="xs:string"/>
+<xs:element name="multiples" type="xs:boolean"/>
+<xs:element minOccurs="0" name="pafAxis" type="tns:pafAxis"/>
+<xs:element minOccurs="0" name="promptString" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="values" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafAxis">
+<xs:sequence>
+<xs:element name="colAxis" type="xs:int"/>
+<xs:element name="pageAxis" type="xs:int"/>
+<xs:element name="rowAxis" type="xs:int"/>
+<xs:element name="value" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafWorkSpec">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="dimSpec" nillable="true" type="tns:pafDimSpec"/>
+<xs:element minOccurs="0" name="name" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafDimSpec">
+<xs:sequence>
+<xs:element minOccurs="0" name="dimension" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="expressionList" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="reinitializeClientState">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="reinitializeClientStateResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafResponse">
+<xs:sequence>
+<xs:element name="responseCode" type="xs:int"/>
+<xs:element minOccurs="0" name="responseMsg" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="logoff">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="logoffResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="importMdbAttributeDims">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafImportAttrRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafImportAttrRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="importDimensions" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="importMdbAttributeDimsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafImportAttrResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafImportAttrResponse">
+<xs:sequence>
+<xs:element name="success" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="loadApplication">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:loadApplicationRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="loadApplicationRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="appIds" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="loadApplicationResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafSuccessResponse">
+<xs:complexContent>
+<xs:extension base="tns:pafResponse">
+<xs:sequence>
+<xs:element name="success" type="xs:boolean"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getApplicationState">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:applicationStateRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="applicationStateRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="appIds" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getApplicationStateResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:applicationStateResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="applicationStateResponse">
+<xs:complexContent>
+<xs:extension base="tns:pafResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="appStates" nillable="true" type="tns:applicationState"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="applicationState">
+<xs:sequence>
+<xs:element minOccurs="0" name="applicationId" type="xs:string"/>
+<xs:element minOccurs="0" name="currentRunState" type="tns:runningState"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="populateRoleFilters">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafPlanSessionRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="populateRoleFiltersResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafPopulateRoleFilterResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafPopulateRoleFilterResponse">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="attributeTreeNames" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="baseTreeNames" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="dimTrees" nillable="true" type="tns:pafSimpleDimTree"/>
+<xs:element minOccurs="0" name="userFilterSpec" type="tns:userFilterSpec"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
 <xs:complexType name="userFilterSpec">
 <xs:sequence>
 <xs:element maxOccurs="unbounded" minOccurs="0" name="attrDimNames" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="updatePafUser">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafClientSecurityRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element minOccurs="0" name="pafUserDef" type="tns:pafUserDef"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="pafUserDef">
+<xs:sequence>
+<xs:element name="admin" type="xs:boolean"/>
+<xs:element name="changePassword" type="xs:boolean"/>
+<xs:element minOccurs="0" name="domain" type="xs:string"/>
+<xs:element minOccurs="0" name="email" type="xs:string"/>
+<xs:element minOccurs="0" name="firstName" type="xs:string"/>
+<xs:element minOccurs="0" name="lastName" type="xs:string"/>
+<xs:element minOccurs="0" name="password" type="xs:string"/>
+<xs:element minOccurs="0" name="userName" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="updatePafUserResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafClientSecurityResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="IV" type="xs:string"/>
+<xs:element minOccurs="0" name="pafUserDef" type="tns:pafUserDef"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="pafUserDefs" nillable="true" type="tns:pafUserDef"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="pafUserNames" nillable="true" type="xs:string"/>
+<xs:element name="successful" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getGroups">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafGetPaceGroupsRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGetPaceGroupsRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element minOccurs="0" name="application" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getGroupsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafGetPaceGroupsResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGetPaceGroupsResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="securityGroups" nillable="true" type="tns:securityGroup"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="securityGroup">
+<xs:sequence>
+<xs:element minOccurs="0" name="application" type="tns:application"/>
+<xs:element minOccurs="0" name="id" type="xs:int"/>
+<xs:element minOccurs="0" name="securityDomainNameTxt" type="xs:string"/>
+<xs:element minOccurs="0" name="securityGroupNameTxt" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="application">
+<xs:sequence>
+<xs:element name="id" type="xs:int"/>
+<xs:element minOccurs="0" name="name" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getVersion">
+<xs:sequence/>
+</xs:complexType>
+<xs:complexType name="getVersionResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="clientInit">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:clientInitRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="clientInitRequest">
+<xs:sequence>
+<xs:element minOccurs="0" name="clientLanguage" type="xs:string"/>
+<xs:element minOccurs="0" name="clientType" type="xs:string"/>
+<xs:element minOccurs="0" name="clientVersion" type="xs:string"/>
+<xs:element minOccurs="0" name="ipAddress" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="clientInitResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafServerAck"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafServerAck">
+<xs:sequence>
+<xs:element minOccurs="0" name="applicationId" type="xs:string"/>
+<xs:element minOccurs="0" name="authMode" type="tns:authMode"/>
+<xs:element minOccurs="0" name="clientId" type="xs:string"/>
+<xs:element name="clientPasswordResetEnabled" type="xs:boolean"/>
+<xs:element name="clientUpgradeRequired" type="xs:boolean"/>
+<xs:element minOccurs="0" name="clientUpgradeUrl" type="xs:string"/>
+<xs:element minOccurs="0" name="dataSourceId" type="xs:string"/>
+<xs:element name="maxPassowordLength" type="xs:int"/>
+<xs:element name="minPassowordLength" type="xs:int"/>
+<xs:element minOccurs="0" name="platform" type="xs:string"/>
+<xs:element name="serverPasswordResetEnabled" type="xs:boolean"/>
+<xs:element minOccurs="0" name="serverVersion" type="xs:string"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="runCustomCommand">
@@ -297,6 +685,44 @@
 <xs:element minOccurs="0" name="returnMessage" type="xs:string"/>
 </xs:sequence>
 </xs:complexType>
+<xs:complexType name="validateUserSecurity">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:validateUserSecurityRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="validateUserSecurityRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="securitySpecs" nillable="true" type="tns:pafDimSpec"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="validateUserSecurityResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:validationResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="validationResponse">
+<xs:complexContent>
+<xs:extension base="tns:pafSuccessResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="validationErrors" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="endPlanningSession">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="endPlanningSessionResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafResponse"/>
+</xs:sequence>
+</xs:complexType>
 <xs:complexType name="closeClientSession">
 <xs:sequence>
 <xs:element minOccurs="0" name="arg0" type="tns:pafRequest"/>
@@ -307,98 +733,29 @@
 <xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafSuccessResponse">
+<xs:complexType name="clearImportedMdbAttributeDims">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafClearImportedAttrRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafClearImportedAttrRequest">
 <xs:complexContent>
-<xs:extension base="tns:pafResponse">
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element name="clearAllDimensions" type="xs:boolean"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="dimensionsToClear" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="clearImportedMdbAttributeDimsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafClearImportedAttrResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafClearImportedAttrResponse">
 <xs:sequence>
 <xs:element name="success" type="xs:boolean"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="exportMemberTagData">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafFilteredMbrTagRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafFilteredMbrTagRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagFilters" nillable="true" type="tns:pafMbrTagFilter"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="pafMbrTagFilter">
-<xs:sequence>
-<xs:element minOccurs="0" name="appName" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagNames" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="newMemberTagNames" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="exportMemberTagDataResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafGetMemberTagDataResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafGetMemberTagDataResponse">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagData" nillable="true" type="tns:simpleMemberTagData"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="simpleMemberTagData">
-<xs:sequence>
-<xs:element minOccurs="0" name="applicationName" type="xs:string"/>
-<xs:element name="compressed" type="xs:boolean"/>
-<xs:element minOccurs="0" name="creator" type="xs:string"/>
-<xs:element minOccurs="0" name="data" type="xs:string"/>
-<xs:element name="id" type="xs:int"/>
-<xs:element minOccurs="0" name="lastUpdated" type="xs:dateTime"/>
-<xs:element minOccurs="0" name="memberTagName" type="xs:string"/>
-<xs:element minOccurs="0" name="memberTagType" type="xs:string"/>
-<xs:element minOccurs="0" name="simpleCoordList" type="tns:simpleCoordList"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="simpleCoordList">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="axis" nillable="true" type="xs:string"/>
-<xs:element name="compressed" type="xs:boolean"/>
-<xs:element minOccurs="0" name="compressedData" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="coordinates" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getDimensionTree">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafTreeRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafTreeRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element name="compressResponse" type="xs:boolean"/>
-<xs:element minOccurs="0" name="treeName" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="getDimensionTreeResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafTreeResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafTreeResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="pafSimpleDimTree" type="tns:pafSimpleDimTree"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getVersion">
-<xs:sequence/>
-</xs:complexType>
-<xs:complexType name="getVersionResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="xs:string"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="updateDatacache">
@@ -429,6 +786,274 @@
 <xs:element maxOccurs="unbounded" minOccurs="0" name="data" nillable="true" type="xs:double"/>
 </xs:sequence>
 </xs:complexType>
+<xs:complexType name="getValidAttributeMembers">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafValidAttrRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafValidAttrRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element minOccurs="0" name="reqAttrDim" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="selAttrSpecs" nillable="true" type="tns:pafDimSpec"/>
+<xs:element minOccurs="0" name="selBaseDim" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="selBaseMembers" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getValidAttributeMembersResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafValidAttrResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafValidAttrResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="members" nillable="true" type="xs:string"/>
+<xs:element name="success" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPafUser">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPafUserResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getMemberTagInfo">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafFilteredMbrTagRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafFilteredMbrTagRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagFilters" nillable="true" type="tns:pafMbrTagFilter"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="pafMbrTagFilter">
+<xs:sequence>
+<xs:element minOccurs="0" name="appName" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagNames" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="newMemberTagNames" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getMemberTagInfoResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafGetMemberTagInfoResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGetMemberTagInfoResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagInfo" nillable="true" type="tns:memberTagInformation"/>
+<xs:element name="totalMemberTagCount" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="memberTagInformation">
+<xs:sequence>
+<xs:element name="appMemberTagCount" type="xs:int"/>
+<xs:element minOccurs="0" name="appName" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagCounts" nillable="true" type="xs:int"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagNames" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getMdbProps">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafMdbPropsRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafMdbPropsRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence/>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getMdbPropsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafMdbPropsResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafMdbPropsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="mdbProps" type="tns:pafMdbProps"/>
+<xs:element name="success" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafMdbProps">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="aliasTables" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="attributeDims" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="baseDimLookupKeys" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="baseDimLookupValues" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="baseDims" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="cachedAttributeDims" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getMemberTagDefs">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafGetMemberTagDefsRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGetMemberTagDefsRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagNames" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getMemberTagDefsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafGetMemberTagDefsResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGetMemberTagDefsResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagDefs" nillable="true" type="tns:memberTagDef"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getFilteredUOWSize">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafGetFilteredUOWSizeRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGetFilteredUOWSizeRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element name="isInvalidIntersectionSuppressionSelected" type="xs:boolean"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="pafUserSelections" nillable="true" type="tns:pafDimSpec"/>
+<xs:element minOccurs="0" name="seasonId" type="xs:string"/>
+<xs:element minOccurs="0" name="selectedRole" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getFilteredUOWSizeResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafGetFilteredUOWSizeResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGetFilteredUOWSizeResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="emptyDimensions" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="uowCellCount" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="uploadApplication">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:uploadAppRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="uploadAppRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element minOccurs="0" name="appId" type="xs:string"/>
+<xs:element name="applyConfigurationUpdate" type="xs:boolean"/>
+<xs:element name="applyCubeUpdate" type="xs:boolean"/>
+<xs:element xmlns:ns1="http://www.w3.org/2005/05/xmlmime" minOccurs="0" name="paceProjectDataHandler" ns1:expectedContentTypes="application/octet-stream" type="xs:base64Binary"/>
+<xs:element name="partialDeployment" type="xs:boolean"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="projectElementIdFilters" nillable="true" type="tns:projectElementId"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="uploadApplicationResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:uploadAppResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="uploadAppResponse">
+<xs:complexContent>
+<xs:extension base="tns:pafSuccessResponse">
+<xs:sequence>
+<xs:element name="applyConfigurationUpdateSuccess" type="xs:boolean"/>
+<xs:element name="applyCubeUpdateSuccess" type="xs:boolean"/>
+<xs:element name="reinitClientState" type="xs:boolean"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="importSimpleCellNotes">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafSimpleCellNoteImportRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafSimpleCellNoteImportRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="simpleCellNotes" nillable="true" type="tns:simpleCellNote"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="simpleCellNote">
+<xs:sequence>
+<xs:element minOccurs="0" name="applicationName" type="xs:string"/>
+<xs:element name="compressed" type="xs:boolean"/>
+<xs:element minOccurs="0" name="creator" type="xs:string"/>
+<xs:element minOccurs="0" name="dataSourceName" type="xs:string"/>
+<xs:element name="id" type="xs:int"/>
+<xs:element minOccurs="0" name="lastUpdated" type="xs:dateTime"/>
+<xs:element minOccurs="0" name="simpleCoordList" type="tns:simpleCoordList"/>
+<xs:element minOccurs="0" name="text" type="xs:string"/>
+<xs:element name="visible" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="simpleCoordList">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="axis" nillable="true" type="xs:string"/>
+<xs:element name="compressed" type="xs:boolean"/>
+<xs:element minOccurs="0" name="compressedData" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="coordinates" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="importSimpleCellNotesResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafSimpleCellNoteImportResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafSimpleCellNoteImportResponse">
+<xs:sequence>
+<xs:element name="success" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getDimensionTree">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafTreeRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafTreeRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element name="compressResponse" type="xs:boolean"/>
+<xs:element minOccurs="0" name="treeName" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getDimensionTreeResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafTreeResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafTreeResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="pafSimpleDimTree" type="tns:pafSimpleDimTree"/>
+</xs:sequence>
+</xs:complexType>
 <xs:complexType name="evaluateView">
 <xs:sequence>
 <xs:element minOccurs="0" name="arg0" type="tns:evaluateViewRequest"/>
@@ -454,24 +1079,6 @@
 </xs:sequence>
 </xs:extension>
 </xs:complexContent>
-</xs:complexType>
-<xs:complexType name="pafUserSelection">
-<xs:sequence>
-<xs:element minOccurs="0" name="dimension" type="xs:string"/>
-<xs:element minOccurs="0" name="id" type="xs:string"/>
-<xs:element name="multiples" type="xs:boolean"/>
-<xs:element minOccurs="0" name="pafAxis" type="tns:pafAxis"/>
-<xs:element minOccurs="0" name="promptString" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="values" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafAxis">
-<xs:sequence>
-<xs:element name="colAxis" type="xs:int"/>
-<xs:element name="pageAxis" type="xs:int"/>
-<xs:element name="rowAxis" type="xs:int"/>
-<xs:element name="value" type="xs:int"/>
-</xs:sequence>
 </xs:complexType>
 <xs:complexType name="evaluateViewResponse">
 <xs:sequence>
@@ -601,27 +1208,6 @@
 <xs:element name="topOffset" type="xs:int"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="aliasMapping">
-<xs:sequence>
-<xs:element minOccurs="0" name="additionalRowColumnFormat" type="xs:string"/>
-<xs:element minOccurs="0" name="aliasTableName" type="xs:string"/>
-<xs:element minOccurs="0" name="dimName" type="xs:string"/>
-<xs:element minOccurs="0" name="primaryRowColumnFormat" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="simpleCellNote">
-<xs:sequence>
-<xs:element minOccurs="0" name="applicationName" type="xs:string"/>
-<xs:element name="compressed" type="xs:boolean"/>
-<xs:element minOccurs="0" name="creator" type="xs:string"/>
-<xs:element minOccurs="0" name="dataSourceName" type="xs:string"/>
-<xs:element name="id" type="xs:int"/>
-<xs:element minOccurs="0" name="lastUpdated" type="xs:dateTime"/>
-<xs:element minOccurs="0" name="simpleCoordList" type="tns:simpleCoordList"/>
-<xs:element minOccurs="0" name="text" type="xs:string"/>
-<xs:element name="visible" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
 <xs:complexType name="memberTagCommentPosition">
 <xs:sequence>
 <xs:element minOccurs="0" name="axis" type="xs:string"/>
@@ -676,28 +1262,6 @@
 <xs:element name="border" type="xs:int"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafStyle">
-<xs:sequence>
-<xs:element minOccurs="0" name="alignment" type="tns:pafAlignment"/>
-<xs:element minOccurs="0" name="bgFillColor" type="xs:string"/>
-<xs:element minOccurs="0" name="bgHexFillColor" type="xs:string"/>
-<xs:element minOccurs="0" name="bold" type="xs:boolean"/>
-<xs:element minOccurs="0" name="doubleUnderline" type="xs:boolean"/>
-<xs:element minOccurs="0" name="fontColor" type="xs:string"/>
-<xs:element minOccurs="0" name="fontHexColor" type="xs:string"/>
-<xs:element minOccurs="0" name="fontName" type="xs:string"/>
-<xs:element minOccurs="0" name="italics" type="xs:boolean"/>
-<xs:element minOccurs="0" name="name" type="xs:string"/>
-<xs:element minOccurs="0" name="size" type="xs:int"/>
-<xs:element minOccurs="0" name="strikeOut" type="xs:boolean"/>
-<xs:element minOccurs="0" name="underline" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafAlignment">
-<xs:sequence>
-<xs:element minOccurs="0" name="value" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
 <xs:complexType name="pafNumberFormat">
 <xs:sequence>
 <xs:element name="defaultFormat" type="xs:boolean"/>
@@ -740,205 +1304,32 @@
 <xs:element maxOccurs="unbounded" minOccurs="0" name="dimensions" nillable="true" type="xs:string"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="suppressZeroSettings">
-<xs:sequence>
-<xs:element minOccurs="0" name="columnsSuppressed" type="xs:boolean"/>
-<xs:element minOccurs="0" name="enabled" type="xs:boolean"/>
-<xs:element minOccurs="0" name="rowsSuppressed" type="xs:boolean"/>
-<xs:element minOccurs="0" name="visible" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="clearImportedMdbAttributeDims">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafClearImportedAttrRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafClearImportedAttrRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element name="clearAllDimensions" type="xs:boolean"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="dimensionsToClear" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="clearImportedMdbAttributeDimsResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafClearImportedAttrResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafClearImportedAttrResponse">
-<xs:sequence>
-<xs:element name="success" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getMemberTagInfo">
+<xs:complexType name="exportMemberTagData">
 <xs:sequence>
 <xs:element minOccurs="0" name="arg0" type="tns:pafFilteredMbrTagRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="getMemberTagInfoResponse">
+<xs:complexType name="exportMemberTagDataResponse">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafGetMemberTagInfoResponse"/>
+<xs:element minOccurs="0" name="return" type="tns:pafGetMemberTagDataResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafGetMemberTagInfoResponse">
+<xs:complexType name="pafGetMemberTagDataResponse">
 <xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagInfo" nillable="true" type="tns:memberTagInformation"/>
-<xs:element name="totalMemberTagCount" type="xs:int"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagData" nillable="true" type="tns:simpleMemberTagData"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="memberTagInformation">
+<xs:complexType name="simpleMemberTagData">
 <xs:sequence>
-<xs:element name="appMemberTagCount" type="xs:int"/>
-<xs:element minOccurs="0" name="appName" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagCounts" nillable="true" type="xs:int"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagNames" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getMemberTagDefs">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafGetMemberTagDefsRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafGetMemberTagDefsRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagNames" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="getMemberTagDefsResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafGetMemberTagDefsResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafGetMemberTagDefsResponse">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagDefs" nillable="true" type="tns:memberTagDef"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="memberTagDef">
-<xs:sequence>
-<xs:element name="commentVisible" type="xs:boolean"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="dims" nillable="true" type="xs:string"/>
-<xs:element name="editable" type="xs:boolean"/>
-<xs:element minOccurs="0" name="label" type="xs:string"/>
-<xs:element minOccurs="0" name="name" type="xs:string"/>
-<xs:element minOccurs="0" name="type" type="tns:memberTagType"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getGroups">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafGetPaceGroupsRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafGetPaceGroupsRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element minOccurs="0" name="application" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="getGroupsResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafGetPaceGroupsResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafGetPaceGroupsResponse">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="securityGroups" nillable="true" type="tns:securityGroup"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="securityGroup">
-<xs:sequence>
-<xs:element minOccurs="0" name="application" type="tns:application"/>
-<xs:element minOccurs="0" name="id" type="xs:int"/>
-<xs:element minOccurs="0" name="securityDomainNameTxt" type="xs:string"/>
-<xs:element minOccurs="0" name="securityGroupNameTxt" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="application">
-<xs:sequence>
+<xs:element minOccurs="0" name="applicationName" type="xs:string"/>
+<xs:element name="compressed" type="xs:boolean"/>
+<xs:element minOccurs="0" name="creator" type="xs:string"/>
+<xs:element minOccurs="0" name="data" type="xs:string"/>
 <xs:element name="id" type="xs:int"/>
-<xs:element minOccurs="0" name="name" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getFilteredUOWSize">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafGetFilteredUOWSizeRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafGetFilteredUOWSizeRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element name="isInvalidIntersectionSuppressionSelected" type="xs:boolean"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="pafUserSelections" nillable="true" type="tns:pafDimSpec"/>
-<xs:element minOccurs="0" name="seasonId" type="xs:string"/>
-<xs:element minOccurs="0" name="selectedRole" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="getFilteredUOWSizeResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafGetFilteredUOWSizeResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafGetFilteredUOWSizeResponse">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="emptyDimensions" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="uowCellCount" type="xs:int"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="endPlanningSession">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="endPlanningSessionResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="importSimpleCellNotes">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafSimpleCellNoteImportRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSimpleCellNoteImportRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="simpleCellNotes" nillable="true" type="tns:simpleCellNote"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="importSimpleCellNotesResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafSimpleCellNoteImportResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSimpleCellNoteImportResponse">
-<xs:sequence>
-<xs:element name="success" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="logoff">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="logoffResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafResponse"/>
+<xs:element minOccurs="0" name="lastUpdated" type="xs:dateTime"/>
+<xs:element minOccurs="0" name="memberTagName" type="xs:string"/>
+<xs:element minOccurs="0" name="memberTagType" type="xs:string"/>
+<xs:element minOccurs="0" name="simpleCoordList" type="tns:simpleCoordList"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="clientCacheRequest">
@@ -971,432 +1362,71 @@
 <xs:element minOccurs="0" name="return" type="tns:pafClientCacheBlock"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafClientCacheBlock">
+<xs:complexType name="saveCellNotes">
 <xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="axisSequence" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="currentYear" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="globalStyles" nillable="true" type="tns:pafStyle"/>
-<xs:element minOccurs="0" name="lastPeriod" type="xs:string"/>
-<xs:element minOccurs="0" name="mdbDef" type="tns:mdbDef"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="measureDefs" nillable="true" type="tns:simpleMeasureDef"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="memberTagDefs" nillable="true" type="tns:memberTagDef"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="ruleSets" nillable="true" type="tns:ruleSet"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="versionDefs" nillable="true" type="tns:simpleVersionDef"/>
+<xs:element minOccurs="0" name="arg0" type="tns:pafSaveNotesRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="mdbDef">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="axisPriority" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="dataSourceId" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="hierDims" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="measureDim" type="xs:string"/>
-<xs:element minOccurs="0" name="measureRoot" type="xs:string"/>
-<xs:element minOccurs="0" name="planTypeDim" type="xs:string"/>
-<xs:element minOccurs="0" name="timeDim" type="xs:string"/>
-<xs:element name="versionAxis" type="xs:int"/>
-<xs:element minOccurs="0" name="versionDim" type="xs:string"/>
-<xs:element minOccurs="0" name="yearDim" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="simpleMeasureDef">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="aliases" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="name" type="xs:string"/>
-<xs:element minOccurs="0" name="numericFormatName" type="xs:string"/>
-<xs:element minOccurs="0" name="recalcTBOveride" type="xs:string"/>
-<xs:element minOccurs="0" name="type" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="ruleSet">
-<xs:sequence>
-<xs:element minOccurs="0" name="allocType" type="tns:allocType"/>
-<xs:element minOccurs="0" name="comment" type="xs:string"/>
-<xs:element minOccurs="0" name="dimension" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="measureList" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="name" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="ruleGroups" nillable="true" type="tns:ruleGroup"/>
-<xs:element name="type" type="xs:int"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="ruleGroup">
-<xs:sequence>
-<xs:element minOccurs="0" name="balanceSetKey" type="xs:string"/>
-<xs:element minOccurs="0" name="comment" type="xs:string"/>
-<xs:element name="delayedPerpetual" type="xs:boolean"/>
-<xs:element minOccurs="0" name="performInitialAllocation" type="xs:boolean"/>
-<xs:element name="perpetual" type="xs:boolean"/>
-<xs:element name="perpetualAllocation" type="xs:boolean"/>
-<xs:element minOccurs="0" name="ruleGroupId" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="rules" nillable="true" type="tns:rule"/>
-<xs:element name="skipProtProc" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="rule">
-<xs:sequence>
-<xs:element minOccurs="0" name="baseAllocateMeasure" type="xs:string"/>
-<xs:element name="calcAllPeriods" type="xs:boolean"/>
-<xs:element name="evalLockedIntersections" type="xs:boolean"/>
-<xs:element minOccurs="0" name="formula" type="tns:formula"/>
-<xs:element name="initialTBFirstAllocation" type="xs:boolean"/>
-<xs:element name="key" type="xs:int"/>
-<xs:element name="lockAllPriorTime" type="xs:boolean"/>
-<xs:element name="lockAllocation" type="xs:boolean"/>
-<xs:element name="lockSystemEvaluationResult" type="xs:boolean"/>
-<xs:element minOccurs="0" name="lockUserEvaluationResult" type="xs:boolean"/>
-<xs:element name="skipAggregation" type="xs:boolean"/>
-<xs:element name="skipAllocation" type="xs:boolean"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="triggerMeasures" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="formula">
-<xs:sequence>
-<xs:element minOccurs="0" name="expression" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="expressionTerms" nillable="true" type="xs:string"/>
-<xs:element name="parsed" type="xs:boolean"/>
-<xs:element name="resultFunction" type="xs:boolean"/>
-<xs:element minOccurs="0" name="resultTerm" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="simpleVersionDef">
-<xs:sequence>
-<xs:element minOccurs="0" name="name" type="xs:string"/>
-<xs:element minOccurs="0" name="numericFormat" type="xs:string"/>
-<xs:element minOccurs="0" name="type" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getApplicationState">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:applicationStateRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="applicationStateRequest">
+<xs:complexType name="pafSaveNotesRequest">
 <xs:complexContent>
 <xs:extension base="tns:pafRequest">
 <xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="appIds" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="addNotes" nillable="true" type="tns:simpleCellNote"/>
+<xs:element minOccurs="0" name="deleteNoteIntersections" type="tns:simpleCoordList"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="updateNotes" nillable="true" type="tns:simpleCellNote"/>
 </xs:sequence>
 </xs:extension>
 </xs:complexContent>
 </xs:complexType>
-<xs:complexType name="getApplicationStateResponse">
+<xs:complexType name="saveCellNotesResponse">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:applicationStateResponse"/>
+<xs:element minOccurs="0" name="return" type="tns:pafSaveNotesResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="applicationStateResponse">
-<xs:complexContent>
-<xs:extension base="tns:pafResponse">
+<xs:complexType name="pafSaveNotesResponse">
 <xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="appStates" nillable="true" type="tns:applicationState"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="applicationState">
-<xs:sequence>
-<xs:element minOccurs="0" name="applicationId" type="xs:string"/>
-<xs:element minOccurs="0" name="currentRunState" type="tns:runningState"/>
+<xs:element name="success" type="xs:boolean"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="startPlanSession">
+<xs:complexType name="createPafUser">
 <xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafPlanSessionRequest"/>
+<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="startPlanSessionResponse">
+<xs:complexType name="createPafUserResponse">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafPlanSessionResponse"/>
+<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafPlanSessionResponse">
+<xs:complexType name="clearMemberTagData">
 <xs:sequence>
-<xs:element minOccurs="0" name="clientCacheBlock" type="tns:pafClientCacheBlock"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="customMenuDefs" nillable="true" type="tns:customMenuDef"/>
-<xs:element minOccurs="0" name="defaultRuleSetName" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="dimTrees" nillable="true" type="tns:pafSimpleDimTree"/>
-<xs:element minOccurs="0" name="planningVersion" type="xs:string"/>
-<xs:element name="replicateAllEnabled" type="xs:boolean"/>
-<xs:element name="replicateEnabled" type="xs:boolean"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="ruleSetList" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="viewTreeItems" nillable="true" type="tns:pafViewTreeItem"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="workSpec" nillable="true" type="tns:pafWorkSpec"/>
+<xs:element minOccurs="0" name="arg0" type="tns:pafFilteredMbrTagRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="customMenuDef">
-<xs:sequence>
-<xs:element name="autoRefreshUow" type="xs:boolean"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="autoRefreshVersionFilter" nillable="true" type="xs:string"/>
-<xs:element name="autoSaveUow" type="xs:boolean"/>
-<xs:element name="beginGroup" type="xs:boolean"/>
-<xs:element minOccurs="0" name="caption" type="xs:string"/>
-<xs:element minOccurs="0" name="confirmationMessage" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="customActionDefs" nillable="true" type="tns:customActionDef"/>
-<xs:element name="enableButton" type="xs:boolean"/>
-<xs:element minOccurs="0" name="faceID" type="xs:int"/>
-<xs:element minOccurs="0" name="key" type="xs:string"/>
-<xs:element minOccurs="0" name="terminationMessage" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="userPrompts" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="viewFilter" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="customActionDef">
-<xs:sequence>
-<xs:element minOccurs="0" name="actionClassName" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="actionNamedParameters" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafViewTreeItem">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="aliasMappings" nillable="true" type="tns:aliasMapping"/>
-<xs:element minOccurs="0" name="desc" type="xs:string"/>
-<xs:element name="group" type="xs:boolean"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="items" nillable="true" type="tns:pafViewTreeItem"/>
-<xs:element minOccurs="0" name="label" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="suppressZeroSettings" nillable="true" type="tns:suppressZeroSettings"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="userSelections" nillable="true" type="tns:pafUserSelection"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafWorkSpec">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="dimSpec" nillable="true" type="tns:pafDimSpec"/>
-<xs:element minOccurs="0" name="name" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="loadApplication">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:loadApplicationRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="loadApplicationRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="appIds" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="loadApplicationResponse">
+<xs:complexType name="clearMemberTagDataResponse">
 <xs:sequence>
 <xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="uploadApplication">
+<xs:complexType name="saveMemberTagData">
 <xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:uploadAppRequest"/>
+<xs:element minOccurs="0" name="arg0" type="tns:pafSaveMbrTagRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="uploadAppRequest">
+<xs:complexType name="pafSaveMbrTagRequest">
 <xs:complexContent>
 <xs:extension base="tns:pafRequest">
 <xs:sequence>
-<xs:element minOccurs="0" name="appId" type="xs:string"/>
-<xs:element name="applyConfigurationUpdate" type="xs:boolean"/>
-<xs:element name="applyCubeUpdate" type="xs:boolean"/>
-<xs:element minOccurs="0" name="paceProjectDataHandler" type="xs:base64Binary" xmime:expectedContentTypes="application/octet-stream"/>
-<xs:element name="partialDeployment" type="xs:boolean"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="projectElementIdFilters" nillable="true" type="tns:projectElementId"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="addMemberTags" nillable="true" type="tns:simpleMemberTagData"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="deleteMemberTags" nillable="true" type="tns:simpleMemberTagData"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="updateMemberTags" nillable="true" type="tns:simpleMemberTagData"/>
 </xs:sequence>
 </xs:extension>
 </xs:complexContent>
 </xs:complexType>
-<xs:complexType name="uploadApplicationResponse">
+<xs:complexType name="saveMemberTagDataResponse">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:uploadAppResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="uploadAppResponse">
-<xs:complexContent>
-<xs:extension base="tns:pafSuccessResponse">
-<xs:sequence>
-<xs:element name="applyConfigurationUpdateSuccess" type="xs:boolean"/>
-<xs:element name="applyCubeUpdateSuccess" type="xs:boolean"/>
-<xs:element name="reinitClientState" type="xs:boolean"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="clientInit">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:clientInitRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="clientInitRequest">
-<xs:sequence>
-<xs:element minOccurs="0" name="clientLanguage" type="xs:string"/>
-<xs:element minOccurs="0" name="clientType" type="xs:string"/>
-<xs:element minOccurs="0" name="clientVersion" type="xs:string"/>
-<xs:element minOccurs="0" name="ipAddress" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="clientInitResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafServerAck"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafServerAck">
-<xs:sequence>
-<xs:element minOccurs="0" name="applicationId" type="xs:string"/>
-<xs:element minOccurs="0" name="authMode" type="tns:authMode"/>
-<xs:element minOccurs="0" name="clientId" type="xs:string"/>
-<xs:element name="clientPasswordResetEnabled" type="xs:boolean"/>
-<xs:element name="clientUpgradeRequired" type="xs:boolean"/>
-<xs:element minOccurs="0" name="clientUpgradeUrl" type="xs:string"/>
-<xs:element minOccurs="0" name="dataSourceId" type="xs:string"/>
-<xs:element name="maxPassowordLength" type="xs:int"/>
-<xs:element name="minPassowordLength" type="xs:int"/>
-<xs:element minOccurs="0" name="platform" type="xs:string"/>
-<xs:element name="serverPasswordResetEnabled" type="xs:boolean"/>
-<xs:element minOccurs="0" name="serverVersion" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getPafUser">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafClientSecurityRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element minOccurs="0" name="pafUserDef" type="tns:pafUserDef"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="pafUserDef">
-<xs:sequence>
-<xs:element name="admin" type="xs:boolean"/>
-<xs:element name="changePassword" type="xs:boolean"/>
-<xs:element minOccurs="0" name="domain" type="xs:string"/>
-<xs:element minOccurs="0" name="email" type="xs:string"/>
-<xs:element minOccurs="0" name="firstName" type="xs:string"/>
-<xs:element minOccurs="0" name="lastName" type="xs:string"/>
-<xs:element minOccurs="0" name="password" type="xs:string"/>
-<xs:element minOccurs="0" name="userName" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getPafUserResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafClientSecurityResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="IV" type="xs:string"/>
-<xs:element minOccurs="0" name="pafUserDef" type="tns:pafUserDef"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="pafUserDefs" nillable="true" type="tns:pafUserDef"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="pafUserNames" nillable="true" type="xs:string"/>
-<xs:element name="successful" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="validateUserSecurity">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:validateUserSecurityRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="validateUserSecurityRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="securitySpecs" nillable="true" type="tns:pafDimSpec"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="validateUserSecurityResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:validationResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="validationResponse">
-<xs:complexContent>
-<xs:extension base="tns:pafSuccessResponse">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="validationErrors" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="updatePafUser">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="updatePafUserResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getMdbProps">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafMdbPropsRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafMdbPropsRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence/>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="getMdbPropsResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafMdbPropsResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafMdbPropsResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="mdbProps" type="tns:pafMdbProps"/>
-<xs:element name="success" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafMdbProps">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="aliasTables" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="attributeDims" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="baseDimLookupKeys" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="baseDimLookupValues" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="baseDims" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="cachedAttributeDims" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="resetPafUserPassword">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="resetPafUserPasswordResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityPasswordResetResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafClientSecurityPasswordResetResponse">
-<xs:sequence>
-<xs:element name="invalidEmailAddress" type="xs:boolean"/>
-<xs:element name="invalidUserName" type="xs:boolean"/>
-<xs:element name="successful" type="xs:boolean"/>
-<xs:element minOccurs="0" name="userEmailAddress" type="xs:string"/>
-<xs:element minOccurs="0" name="userName" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="reloadDatacache">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafViewRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafViewRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element minOccurs="0" name="viewName" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="reloadDatacacheResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafDataSlice"/>
+<xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="getView">
@@ -1422,29 +1452,109 @@
 <xs:element minOccurs="0" name="return" type="tns:pafView"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="getCellNotes">
+<xs:complexType name="getUserNamesForSecurityGroups">
 <xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafGetNotesRequest"/>
+<xs:element minOccurs="0" name="arg0" type="tns:pafUserNamesforSecurityGroupsRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafGetNotesRequest">
+<xs:complexType name="pafUserNamesforSecurityGroupsRequest">
 <xs:complexContent>
 <xs:extension base="tns:pafRequest">
 <xs:sequence>
-<xs:element name="refreshFromDatabase" type="xs:boolean"/>
-<xs:element minOccurs="0" name="simpleCoordLists" type="tns:simpleCoordList"/>
+<xs:element minOccurs="0" name="application" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="domainUserNames" nillable="true" type="tns:pafSecurityDomainGroups"/>
 </xs:sequence>
 </xs:extension>
 </xs:complexContent>
 </xs:complexType>
-<xs:complexType name="getCellNotesResponse">
+<xs:complexType name="pafSecurityDomainGroups">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafGetNotesResponse"/>
+<xs:element minOccurs="0" name="domain" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="securityGroups" nillable="true" type="tns:pafSecurityGroup"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafGetNotesResponse">
+<xs:complexType name="pafSecurityGroup">
 <xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="notes" nillable="true" type="tns:simpleCellNote"/>
+<xs:element minOccurs="0" name="groupName" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getUserNamesForSecurityGroupsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafUserNamesforSecurityGroupsResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafUserNamesforSecurityGroupsResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="domainUserNames" nillable="true" type="tns:pafSecurityDomainUserNames"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafSecurityDomainUserNames">
+<xs:sequence>
+<xs:element minOccurs="0" name="domainName" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="userNamesSecurityGroup" nillable="true" type="tns:pafUserNamesSecurityGroup"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafUserNamesSecurityGroup">
+<xs:complexContent>
+<xs:extension base="tns:pafSecurityGroup">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="displayNames" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="userNames" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getDimensionTrees">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafTreesRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafTreesRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element name="compressResponse" type="xs:boolean"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getDimensionTreesResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafTreesResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafTreesResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="pafSimpleDimTrees" nillable="true" type="tns:pafSimpleDimTree"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="resetPafUserPassword">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="resetPafUserPasswordResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityPasswordResetResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafClientSecurityPasswordResetResponse">
+<xs:sequence>
+<xs:element name="invalidEmailAddress" type="xs:boolean"/>
+<xs:element name="invalidUserName" type="xs:boolean"/>
+<xs:element name="successful" type="xs:boolean"/>
+<xs:element minOccurs="0" name="userEmailAddress" type="xs:string"/>
+<xs:element minOccurs="0" name="userName" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="renameMemberTagData">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafFilteredMbrTagRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="renameMemberTagDataResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="isSessionActive">
@@ -1500,114 +1610,29 @@
 <xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="saveWork">
+<xs:complexType name="setGroups">
 <xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:saveWorkRequest"/>
+<xs:element minOccurs="0" name="arg0" type="tns:pafSetPaceGroupsRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="saveWorkRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence/>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="saveWorkResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafCommandResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafCommandResponse">
-<xs:sequence>
-<xs:element name="errorCode" type="xs:long"/>
-<xs:element minOccurs="0" name="message" type="xs:string"/>
-<xs:element name="successful" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getPafUserNames">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getPafUserNamesResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getSimpleCellNotesToExport">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafSimpleCellNoteExportRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSimpleCellNoteExportRequest">
+<xs:complexType name="pafSetPaceGroupsRequest">
 <xs:complexContent>
 <xs:extension base="tns:pafRequest">
 <xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="cellNoteInformationAr" nillable="true" type="tns:cellNotesInformation"/>
+<xs:element minOccurs="0" name="application" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="securityGroups" nillable="true" type="tns:securityGroup"/>
 </xs:sequence>
 </xs:extension>
 </xs:complexContent>
 </xs:complexType>
-<xs:complexType name="cellNotesInformation">
+<xs:complexType name="setGroupsResponse">
 <xs:sequence>
-<xs:element minOccurs="0" name="applicationId" type="xs:string"/>
-<xs:element name="cellNoteCount" type="xs:int"/>
-<xs:element minOccurs="0" name="dataSourceId" type="xs:string"/>
-<xs:element minOccurs="0" name="overrideApplicationId" type="xs:string"/>
-<xs:element minOccurs="0" name="overrideDataSourceId" type="xs:string"/>
+<xs:element minOccurs="0" name="return" type="tns:pafSetPaceGroupsResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="getSimpleCellNotesToExportResponse">
+<xs:complexType name="pafSetPaceGroupsResponse">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafSimpleCellNoteExportResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSimpleCellNoteExportResponse">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="simpleCellNotesToExport" nillable="true" type="tns:simpleCellNote"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="getPafGroups">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafGroupSecurityRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafGroupSecurityRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence/>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="getPafGroupsResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafGroupSecurityResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafGroupSecurityResponse">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="domainGroups" nillable="true" type="tns:pafSecurityDomainGroups"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSecurityDomainGroups">
-<xs:sequence>
-<xs:element minOccurs="0" name="domain" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="securityGroups" nillable="true" type="tns:pafSecurityGroup"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSecurityGroup">
-<xs:sequence>
-<xs:element minOccurs="0" name="groupName" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="createPafUser">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="createPafUserResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
+<xs:element name="success" type="xs:boolean"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="getCellNotesInformation">
@@ -1625,55 +1650,13 @@
 <xs:element maxOccurs="unbounded" minOccurs="0" name="cellNotesInformationAr" nillable="true" type="tns:cellNotesInformation"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="getUserNamesForSecurityGroups">
+<xs:complexType name="cellNotesInformation">
 <xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafUserNamesforSecurityGroupsRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafUserNamesforSecurityGroupsRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element minOccurs="0" name="application" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="domainUserNames" nillable="true" type="tns:pafSecurityDomainGroups"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="getUserNamesForSecurityGroupsResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafUserNamesforSecurityGroupsResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafUserNamesforSecurityGroupsResponse">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="domainUserNames" nillable="true" type="tns:pafSecurityDomainUserNames"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSecurityDomainUserNames">
-<xs:sequence>
-<xs:element minOccurs="0" name="domainName" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="userNamesSecurityGroup" nillable="true" type="tns:pafUserNamesSecurityGroup"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafUserNamesSecurityGroup">
-<xs:complexContent>
-<xs:extension base="tns:pafSecurityGroup">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="displayNames" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="userNames" nillable="true" type="xs:string"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="renameMemberTagData">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafFilteredMbrTagRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="renameMemberTagDataResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
+<xs:element minOccurs="0" name="applicationId" type="xs:string"/>
+<xs:element name="cellNoteCount" type="xs:int"/>
+<xs:element minOccurs="0" name="dataSourceId" type="xs:string"/>
+<xs:element minOccurs="0" name="overrideApplicationId" type="xs:string"/>
+<xs:element minOccurs="0" name="overrideDataSourceId" type="xs:string"/>
 </xs:sequence>
 </xs:complexType>
 <xs:complexType name="clientAuth">
@@ -1811,6 +1794,31 @@
 <xs:element name="valid" type="xs:boolean"/>
 </xs:sequence>
 </xs:complexType>
+<xs:complexType name="getCellNotes">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafGetNotesRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGetNotesRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element name="refreshFromDatabase" type="xs:boolean"/>
+<xs:element minOccurs="0" name="simpleCoordLists" type="tns:simpleCoordList"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getCellNotesResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafGetNotesResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGetNotesResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="notes" nillable="true" type="tns:simpleCellNote"/>
+</xs:sequence>
+</xs:complexType>
 <xs:complexType name="importMemberTagData">
 <xs:sequence>
 <xs:element minOccurs="0" name="arg0" type="tns:pafImportMemberTagRequest"/>
@@ -1830,72 +1838,15 @@
 <xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="getPafUsers">
+<xs:complexType name="getPafUserNames">
 <xs:sequence>
 <xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="getPafUsersResponse">
+<xs:complexType name="getPafUserNamesResponse">
 <xs:sequence>
 <xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
 </xs:sequence>
-</xs:complexType>
-<xs:complexType name="saveCellNotes">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafSaveNotesRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSaveNotesRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="addNotes" nillable="true" type="tns:simpleCellNote"/>
-<xs:element minOccurs="0" name="deleteNoteIntersections" type="tns:simpleCoordList"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="updateNotes" nillable="true" type="tns:simpleCellNote"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="saveCellNotesResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafSaveNotesResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSaveNotesResponse">
-<xs:sequence>
-<xs:element name="success" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="downloadApplication">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:downloadAppRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="downloadAppRequest">
-<xs:complexContent>
-<xs:extension base="tns:pafRequest">
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="appIds" nillable="true" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="projectElementIdFilters" nillable="true" type="tns:projectElementId"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
-</xs:complexType>
-<xs:complexType name="downloadApplicationResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:downloadAppResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="downloadAppResponse">
-<xs:complexContent>
-<xs:extension base="tns:pafSuccessResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="appId" type="xs:string"/>
-<xs:element minOccurs="0" name="paceProjectDataHandler" type="xs:base64Binary" xmime:expectedContentTypes="application/octet-stream"/>
-<xs:element name="projectDataFiltered" type="xs:boolean"/>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
 </xs:complexType>
 <xs:complexType name="deletePafUser">
 <xs:sequence>
@@ -1926,99 +1877,190 @@
 <xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="setGroups">
+<xs:complexType name="downloadApplication">
 <xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafSetPaceGroupsRequest"/>
+<xs:element minOccurs="0" name="arg0" type="tns:downloadAppRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafSetPaceGroupsRequest">
+<xs:complexType name="downloadAppRequest">
 <xs:complexContent>
 <xs:extension base="tns:pafRequest">
 <xs:sequence>
-<xs:element minOccurs="0" name="application" type="xs:string"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="securityGroups" nillable="true" type="tns:securityGroup"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="appIds" nillable="true" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="projectElementIdFilters" nillable="true" type="tns:projectElementId"/>
 </xs:sequence>
 </xs:extension>
 </xs:complexContent>
 </xs:complexType>
-<xs:complexType name="setGroupsResponse">
+<xs:complexType name="downloadApplicationResponse">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafSetPaceGroupsResponse"/>
+<xs:element minOccurs="0" name="return" type="tns:downloadAppResponse"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafSetPaceGroupsResponse">
-<xs:sequence>
-<xs:element name="success" type="xs:boolean"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="clearMemberTagData">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafFilteredMbrTagRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="clearMemberTagDataResponse">
-<xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="saveMemberTagData">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafSaveMbrTagRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafSaveMbrTagRequest">
+<xs:complexType name="downloadAppResponse">
 <xs:complexContent>
-<xs:extension base="tns:pafRequest">
+<xs:extension base="tns:pafSuccessResponse">
 <xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="addMemberTags" nillable="true" type="tns:simpleMemberTagData"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="deleteMemberTags" nillable="true" type="tns:simpleMemberTagData"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="updateMemberTags" nillable="true" type="tns:simpleMemberTagData"/>
+<xs:element minOccurs="0" name="appId" type="xs:string"/>
+<xs:element xmlns:ns2="http://www.w3.org/2005/05/xmlmime" minOccurs="0" name="paceProjectDataHandler" ns2:expectedContentTypes="application/octet-stream" type="xs:base64Binary"/>
+<xs:element name="projectDataFiltered" type="xs:boolean"/>
 </xs:sequence>
 </xs:extension>
 </xs:complexContent>
 </xs:complexType>
-<xs:complexType name="saveMemberTagDataResponse">
+<xs:complexType name="reloadDatacache">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafSuccessResponse"/>
+<xs:element minOccurs="0" name="arg0" type="tns:pafViewRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="getDimensionTrees">
-<xs:sequence>
-<xs:element minOccurs="0" name="arg0" type="tns:pafTreesRequest"/>
-</xs:sequence>
-</xs:complexType>
-<xs:complexType name="pafTreesRequest">
+<xs:complexType name="pafViewRequest">
 <xs:complexContent>
 <xs:extension base="tns:pafRequest">
 <xs:sequence>
-<xs:element name="compressResponse" type="xs:boolean"/>
+<xs:element minOccurs="0" name="viewName" type="xs:string"/>
 </xs:sequence>
 </xs:extension>
 </xs:complexContent>
 </xs:complexType>
-<xs:complexType name="getDimensionTreesResponse">
+<xs:complexType name="reloadDatacacheResponse">
 <xs:sequence>
-<xs:element minOccurs="0" name="return" type="tns:pafTreesResponse"/>
+<xs:element minOccurs="0" name="return" type="tns:pafDataSlice"/>
 </xs:sequence>
 </xs:complexType>
-<xs:complexType name="pafTreesResponse">
+<xs:complexType name="saveWork">
 <xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="pafSimpleDimTrees" nillable="true" type="tns:pafSimpleDimTree"/>
+<xs:element minOccurs="0" name="arg0" type="tns:saveWorkRequest"/>
 </xs:sequence>
 </xs:complexType>
-<xs:simpleType name="viewPrintState">
-<xs:restriction base="xs:string">
-<xs:enumeration value="DEFAULT"/>
-<xs:enumeration value="LOCAL"/>
-<xs:enumeration value="GLOBAL"/>
-</xs:restriction>
-</xs:simpleType>
-<xs:simpleType name="sortOrder">
-<xs:restriction base="xs:string">
-<xs:enumeration value="Ascending"/>
-<xs:enumeration value="Descending"/>
-</xs:restriction>
-</xs:simpleType>
+<xs:complexType name="saveWorkRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence/>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="saveWorkResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafCommandResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafCommandResponse">
+<xs:sequence>
+<xs:element name="errorCode" type="xs:long"/>
+<xs:element minOccurs="0" name="message" type="xs:string"/>
+<xs:element name="successful" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getFilteredResultSetResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:paceQueryRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="paceQueryRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="attributes" nillable="true" type="tns:pafDimSpec"/>
+<xs:element name="level" type="xs:int"/>
+<xs:element minOccurs="0" name="members" type="tns:pafDimSpec"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="arrayList">
+<xs:complexContent>
+<xs:extension base="tns:abstractList">
+<xs:sequence/>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType abstract="true" name="abstractList">
+<xs:complexContent>
+<xs:extension base="tns:abstractCollection">
+<xs:sequence/>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType abstract="true" name="abstractCollection">
+<xs:sequence/>
+</xs:complexType>
+<xs:complexType name="getFilteredResultSetResponseResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:paceResultSetResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="paceResultSetResponse">
+<xs:complexContent>
+<xs:extension base="tns:pafResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="data" nillable="true" type="tns:stringRow"/>
+<xs:element minOccurs="0" name="header" type="tns:stringRow"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="stringRow">
+<xs:sequence>
+<xs:element minOccurs="0" name="id" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="items" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPafGroups">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafGroupSecurityRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGroupSecurityRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence/>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getPafGroupsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafGroupSecurityResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafGroupSecurityResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="domainGroups" nillable="true" type="tns:pafSecurityDomainGroups"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPafUsers">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafClientSecurityRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPafUsersResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafClientSecurityResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getSimpleCellNotesToExport">
+<xs:sequence>
+<xs:element minOccurs="0" name="arg0" type="tns:pafSimpleCellNoteExportRequest"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafSimpleCellNoteExportRequest">
+<xs:complexContent>
+<xs:extension base="tns:pafRequest">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="cellNoteInformationAr" nillable="true" type="tns:cellNotesInformation"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+<xs:complexType name="getSimpleCellNotesToExportResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:pafSimpleCellNoteExportResponse"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="pafSimpleCellNoteExportResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="simpleCellNotesToExport" nillable="true" type="tns:simpleCellNote"/>
+</xs:sequence>
+</xs:complexType>
 <xs:simpleType name="memberTagType">
 <xs:restriction base="xs:string">
 <xs:enumeration value="TEXT"/>
@@ -2040,6 +2082,12 @@
 <xs:enumeration value="RUNNING"/>
 <xs:enumeration value="FAILED"/>
 <xs:enumeration value="LOADING"/>
+</xs:restriction>
+</xs:simpleType>
+<xs:simpleType name="authMode">
+<xs:restriction base="xs:string">
+<xs:enumeration value="nativeMode"/>
+<xs:enumeration value="mixedMode"/>
 </xs:restriction>
 </xs:simpleType>
 <xs:simpleType name="projectElementId">
@@ -2072,22 +2120,29 @@
 <xs:enumeration value="RuleSet_Rule"/>
 </xs:restriction>
 </xs:simpleType>
-<xs:simpleType name="authMode">
+<xs:simpleType name="viewPrintState">
 <xs:restriction base="xs:string">
-<xs:enumeration value="nativeMode"/>
-<xs:enumeration value="mixedMode"/>
+<xs:enumeration value="DEFAULT"/>
+<xs:enumeration value="LOCAL"/>
+<xs:enumeration value="GLOBAL"/>
 </xs:restriction>
 </xs:simpleType>
-<xs:element name="PafNotAuthorizedSoapException" type="tns:PafNotAuthorizedSoapException"/>
-<xs:complexType name="PafNotAuthorizedSoapException">
-<xs:sequence/>
-</xs:complexType>
+<xs:simpleType name="sortOrder">
+<xs:restriction base="xs:string">
+<xs:enumeration value="Ascending"/>
+<xs:enumeration value="Descending"/>
+</xs:restriction>
+</xs:simpleType>
 <xs:element name="PafSoapException" type="tns:PafSoapException"/>
 <xs:complexType name="PafSoapException">
 <xs:sequence>
 <xs:element name="message" nillable="true" type="xs:string"/>
 <xs:element maxOccurs="unbounded" minOccurs="0" name="messageDetail" type="xs:string"/>
 </xs:sequence>
+</xs:complexType>
+<xs:element name="PafNotAuthorizedSoapException" type="tns:PafNotAuthorizedSoapException"/>
+<xs:complexType name="PafNotAuthorizedSoapException">
+<xs:sequence/>
 </xs:complexType>
 <xs:element name="PafNotAuthenticatedSoapException" type="tns:PafNotAuthenticatedSoapException"/>
 <xs:complexType name="PafNotAuthenticatedSoapException">
@@ -2211,6 +2266,10 @@
     <wsdl:part name="parameters" element="ns1:importMemberTagDataResponse">
     </wsdl:part>
   </wsdl:message>
+  <wsdl:message name="getFilteredResultSetResponse">
+    <wsdl:part name="parameters" element="ns1:getFilteredResultSetResponse">
+    </wsdl:part>
+  </wsdl:message>
   <wsdl:message name="downloadApplication">
     <wsdl:part name="parameters" element="ns1:downloadApplication">
     </wsdl:part>
@@ -2223,12 +2282,12 @@
     <wsdl:part name="parameters" element="ns1:saveWorkResponse">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="reloadDatacache">
-    <wsdl:part name="parameters" element="ns1:reloadDatacache">
-    </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="reloadDatacacheResponse">
     <wsdl:part name="parameters" element="ns1:reloadDatacacheResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="reloadDatacache">
+    <wsdl:part name="parameters" element="ns1:reloadDatacache">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="uploadApplicationResponse">
@@ -2323,16 +2382,16 @@
     <wsdl:part name="PafNotAuthorizedSoapException" element="ns1:PafNotAuthorizedSoapException">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="saveMemberTagData">
-    <wsdl:part name="parameters" element="ns1:saveMemberTagData">
+  <wsdl:message name="importMdbAttributeDims">
+    <wsdl:part name="parameters" element="ns1:importMdbAttributeDims">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="getApplicationStateResponse">
     <wsdl:part name="parameters" element="ns1:getApplicationStateResponse">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="importMdbAttributeDims">
-    <wsdl:part name="parameters" element="ns1:importMdbAttributeDims">
+  <wsdl:message name="saveMemberTagData">
+    <wsdl:part name="parameters" element="ns1:saveMemberTagData">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="getPafUsersResponse">
@@ -2355,6 +2414,10 @@
     <wsdl:part name="parameters" element="ns1:isSessionActiveResponse">
     </wsdl:part>
   </wsdl:message>
+  <wsdl:message name="getFilteredResultSetResponseResponse">
+    <wsdl:part name="parameters" element="ns1:getFilteredResultSetResponseResponse">
+    </wsdl:part>
+  </wsdl:message>
   <wsdl:message name="getView">
     <wsdl:part name="parameters" element="ns1:getView">
     </wsdl:part>
@@ -2363,12 +2426,12 @@
     <wsdl:part name="parameters" element="ns1:saveCellNotes">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="setGroupsResponse">
-    <wsdl:part name="parameters" element="ns1:setGroupsResponse">
-    </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="getGroupsResponse">
     <wsdl:part name="parameters" element="ns1:getGroupsResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setGroupsResponse">
+    <wsdl:part name="parameters" element="ns1:setGroupsResponse">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="createPafUserResponse">
@@ -2403,24 +2466,24 @@
     <wsdl:part name="parameters" element="ns1:endPlanningSessionResponse">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="runCustomCommand">
-    <wsdl:part name="parameters" element="ns1:runCustomCommand">
-    </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="getMdbProps">
     <wsdl:part name="parameters" element="ns1:getMdbProps">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="runCustomCommand">
+    <wsdl:part name="parameters" element="ns1:runCustomCommand">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="getPafUserNamesResponse">
     <wsdl:part name="parameters" element="ns1:getPafUserNamesResponse">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="clientCacheRequestResponse">
-    <wsdl:part name="parameters" element="ns1:clientCacheRequestResponse">
-    </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="getValidAttributeMembersResponse">
     <wsdl:part name="parameters" element="ns1:getValidAttributeMembersResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="clientCacheRequestResponse">
+    <wsdl:part name="parameters" element="ns1:clientCacheRequestResponse">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="startPlanSession">
@@ -2451,12 +2514,12 @@
     <wsdl:part name="parameters" element="ns1:saveWork">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="exportMemberTagDataResponse">
-    <wsdl:part name="parameters" element="ns1:exportMemberTagDataResponse">
-    </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="updatePafUserResponse">
     <wsdl:part name="parameters" element="ns1:updatePafUserResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="exportMemberTagDataResponse">
+    <wsdl:part name="parameters" element="ns1:exportMemberTagDataResponse">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="getPafUserNames">
@@ -2487,16 +2550,16 @@
     <wsdl:part name="parameters" element="ns1:isSessionActive">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="saveMemberTagDataResponse">
-    <wsdl:part name="parameters" element="ns1:saveMemberTagDataResponse">
-    </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="deletePafUserResponse">
     <wsdl:part name="parameters" element="ns1:deletePafUserResponse">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="uploadApplication">
     <wsdl:part name="parameters" element="ns1:uploadApplication">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="saveMemberTagDataResponse">
+    <wsdl:part name="parameters" element="ns1:saveMemberTagDataResponse">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="clearImportedMdbAttributeDims">
@@ -2519,12 +2582,16 @@
     <wsdl:part name="parameters" element="ns1:evaluateView">
     </wsdl:part>
   </wsdl:message>
+  <wsdl:message name="logoffResponse">
+    <wsdl:part name="parameters" element="ns1:logoffResponse">
+    </wsdl:part>
+  </wsdl:message>
   <wsdl:message name="loadApplicationResponse">
     <wsdl:part name="parameters" element="ns1:loadApplicationResponse">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="logoffResponse">
-    <wsdl:part name="parameters" element="ns1:logoffResponse">
+  <wsdl:message name="getPafUsers">
+    <wsdl:part name="parameters" element="ns1:getPafUsers">
     </wsdl:part>
   </wsdl:message>
   <wsdl:message name="getDimensionTreeResponse">
@@ -2535,10 +2602,6 @@
     <wsdl:part name="parameters" element="ns1:startApplicationResponse">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="getPafUsers">
-    <wsdl:part name="parameters" element="ns1:getPafUsers">
-    </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="getCellNotes">
     <wsdl:part name="parameters" element="ns1:getCellNotes">
     </wsdl:part>
@@ -2547,31 +2610,35 @@
     <wsdl:part name="parameters" element="ns1:getMemberTagDefsResponse">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="exportMemberTagData">
-    <wsdl:part name="parameters" element="ns1:exportMemberTagData">
-    </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="validateUserSecurity">
     <wsdl:part name="parameters" element="ns1:validateUserSecurity">
     </wsdl:part>
   </wsdl:message>
+  <wsdl:message name="exportMemberTagData">
+    <wsdl:part name="parameters" element="ns1:exportMemberTagData">
+    </wsdl:part>
+  </wsdl:message>
   <wsdl:portType name="PafService">
-    <wsdl:operation name="getValidAttributeMembers">
-      <wsdl:input name="getValidAttributeMembers" message="ns1:getValidAttributeMembers">
+    <wsdl:operation name="startPlanSession">
+      <wsdl:input name="startPlanSession" message="ns1:startPlanSession">
     </wsdl:input>
-      <wsdl:output name="getValidAttributeMembersResponse" message="ns1:getValidAttributeMembersResponse">
+      <wsdl:output name="startPlanSessionResponse" message="ns1:startPlanSessionResponse">
     </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
-    </wsdl:fault>
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="reinitializeClientState">
       <wsdl:input name="reinitializeClientState" message="ns1:reinitializeClientState">
     </wsdl:input>
       <wsdl:output name="reinitializeClientStateResponse" message="ns1:reinitializeClientStateResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="logoff">
+      <wsdl:input name="logoff" message="ns1:logoff">
+    </wsdl:input>
+      <wsdl:output name="logoffResponse" message="ns1:logoffResponse">
     </wsdl:output>
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
@@ -2588,6 +2655,22 @@
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
     </wsdl:operation>
+    <wsdl:operation name="loadApplication">
+      <wsdl:input name="loadApplication" message="ns1:loadApplication">
+    </wsdl:input>
+      <wsdl:output name="loadApplicationResponse" message="ns1:loadApplicationResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getApplicationState">
+      <wsdl:input name="getApplicationState" message="ns1:getApplicationState">
+    </wsdl:input>
+      <wsdl:output name="getApplicationStateResponse" message="ns1:getApplicationStateResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
     <wsdl:operation name="populateRoleFilters">
       <wsdl:input name="populateRoleFilters" message="ns1:populateRoleFilters">
     </wsdl:input>
@@ -2596,90 +2679,10 @@
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="runCustomCommand">
-      <wsdl:input name="runCustomCommand" message="ns1:runCustomCommand">
+    <wsdl:operation name="updatePafUser">
+      <wsdl:input name="updatePafUser" message="ns1:updatePafUser">
     </wsdl:input>
-      <wsdl:output name="runCustomCommandResponse" message="ns1:runCustomCommandResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="closeClientSession">
-      <wsdl:input name="closeClientSession" message="ns1:closeClientSession">
-    </wsdl:input>
-      <wsdl:output name="closeClientSessionResponse" message="ns1:closeClientSessionResponse">
-    </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="exportMemberTagData">
-      <wsdl:input name="exportMemberTagData" message="ns1:exportMemberTagData">
-    </wsdl:input>
-      <wsdl:output name="exportMemberTagDataResponse" message="ns1:exportMemberTagDataResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getDimensionTree">
-      <wsdl:input name="getDimensionTree" message="ns1:getDimensionTree">
-    </wsdl:input>
-      <wsdl:output name="getDimensionTreeResponse" message="ns1:getDimensionTreeResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getVersion">
-      <wsdl:input name="getVersion" message="ns1:getVersion">
-    </wsdl:input>
-      <wsdl:output name="getVersionResponse" message="ns1:getVersionResponse">
-    </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="updateDatacache">
-      <wsdl:input name="updateDatacache" message="ns1:updateDatacache">
-    </wsdl:input>
-      <wsdl:output name="updateDatacacheResponse" message="ns1:updateDatacacheResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="evaluateView">
-      <wsdl:input name="evaluateView" message="ns1:evaluateView">
-    </wsdl:input>
-      <wsdl:output name="evaluateViewResponse" message="ns1:evaluateViewResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="clearImportedMdbAttributeDims">
-      <wsdl:input name="clearImportedMdbAttributeDims" message="ns1:clearImportedMdbAttributeDims">
-    </wsdl:input>
-      <wsdl:output name="clearImportedMdbAttributeDimsResponse" message="ns1:clearImportedMdbAttributeDimsResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getMemberTagInfo">
-      <wsdl:input name="getMemberTagInfo" message="ns1:getMemberTagInfo">
-    </wsdl:input>
-      <wsdl:output name="getMemberTagInfoResponse" message="ns1:getMemberTagInfoResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getMemberTagDefs">
-      <wsdl:input name="getMemberTagDefs" message="ns1:getMemberTagDefs">
-    </wsdl:input>
-      <wsdl:output name="getMemberTagDefsResponse" message="ns1:getMemberTagDefsResponse">
+      <wsdl:output name="updatePafUserResponse" message="ns1:updatePafUserResponse">
     </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
     </wsdl:fault>
@@ -2700,77 +2703,11 @@
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getFilteredUOWSize">
-      <wsdl:input name="getFilteredUOWSize" message="ns1:getFilteredUOWSize">
+    <wsdl:operation name="getVersion">
+      <wsdl:input name="getVersion" message="ns1:getVersion">
     </wsdl:input>
-      <wsdl:output name="getFilteredUOWSizeResponse" message="ns1:getFilteredUOWSizeResponse">
+      <wsdl:output name="getVersionResponse" message="ns1:getVersionResponse">
     </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="endPlanningSession">
-      <wsdl:input name="endPlanningSession" message="ns1:endPlanningSession">
-    </wsdl:input>
-      <wsdl:output name="endPlanningSessionResponse" message="ns1:endPlanningSessionResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="importSimpleCellNotes">
-      <wsdl:input name="importSimpleCellNotes" message="ns1:importSimpleCellNotes">
-    </wsdl:input>
-      <wsdl:output name="importSimpleCellNotesResponse" message="ns1:importSimpleCellNotesResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="logoff">
-      <wsdl:input name="logoff" message="ns1:logoff">
-    </wsdl:input>
-      <wsdl:output name="logoffResponse" message="ns1:logoffResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="clientCacheRequest">
-      <wsdl:input name="clientCacheRequest" message="ns1:clientCacheRequest">
-    </wsdl:input>
-      <wsdl:output name="clientCacheRequestResponse" message="ns1:clientCacheRequestResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getApplicationState">
-      <wsdl:input name="getApplicationState" message="ns1:getApplicationState">
-    </wsdl:input>
-      <wsdl:output name="getApplicationStateResponse" message="ns1:getApplicationStateResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="startPlanSession">
-      <wsdl:input name="startPlanSession" message="ns1:startPlanSession">
-    </wsdl:input>
-      <wsdl:output name="startPlanSessionResponse" message="ns1:startPlanSessionResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="loadApplication">
-      <wsdl:input name="loadApplication" message="ns1:loadApplication">
-    </wsdl:input>
-      <wsdl:output name="loadApplicationResponse" message="ns1:loadApplicationResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="uploadApplication">
-      <wsdl:input name="uploadApplication" message="ns1:uploadApplication">
-    </wsdl:input>
-      <wsdl:output name="uploadApplicationResponse" message="ns1:uploadApplicationResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="clientInit">
       <wsdl:input name="clientInit" message="ns1:clientInit">
@@ -2780,16 +2717,12 @@
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getPafUser">
-      <wsdl:input name="getPafUser" message="ns1:getPafUser">
+    <wsdl:operation name="runCustomCommand">
+      <wsdl:input name="runCustomCommand" message="ns1:runCustomCommand">
     </wsdl:input>
-      <wsdl:output name="getPafUserResponse" message="ns1:getPafUserResponse">
+      <wsdl:output name="runCustomCommandResponse" message="ns1:runCustomCommandResponse">
     </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAbletoGetLDAPContext" message="ns1:PafNotAbletoGetLDAPContext">
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="validateUserSecurity">
@@ -2804,10 +2737,68 @@
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="updatePafUser">
-      <wsdl:input name="updatePafUser" message="ns1:updatePafUser">
+    <wsdl:operation name="endPlanningSession">
+      <wsdl:input name="endPlanningSession" message="ns1:endPlanningSession">
     </wsdl:input>
-      <wsdl:output name="updatePafUserResponse" message="ns1:updatePafUserResponse">
+      <wsdl:output name="endPlanningSessionResponse" message="ns1:endPlanningSessionResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="closeClientSession">
+      <wsdl:input name="closeClientSession" message="ns1:closeClientSession">
+    </wsdl:input>
+      <wsdl:output name="closeClientSessionResponse" message="ns1:closeClientSessionResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="clearImportedMdbAttributeDims">
+      <wsdl:input name="clearImportedMdbAttributeDims" message="ns1:clearImportedMdbAttributeDims">
+    </wsdl:input>
+      <wsdl:output name="clearImportedMdbAttributeDimsResponse" message="ns1:clearImportedMdbAttributeDimsResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="updateDatacache">
+      <wsdl:input name="updateDatacache" message="ns1:updateDatacache">
+    </wsdl:input>
+      <wsdl:output name="updateDatacacheResponse" message="ns1:updateDatacacheResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getValidAttributeMembers">
+      <wsdl:input name="getValidAttributeMembers" message="ns1:getValidAttributeMembers">
+    </wsdl:input>
+      <wsdl:output name="getValidAttributeMembersResponse" message="ns1:getValidAttributeMembersResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getPafUser">
+      <wsdl:input name="getPafUser" message="ns1:getPafUser">
+    </wsdl:input>
+      <wsdl:output name="getPafUserResponse" message="ns1:getPafUserResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAbletoGetLDAPContext" message="ns1:PafNotAbletoGetLDAPContext">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getMemberTagInfo">
+      <wsdl:input name="getMemberTagInfo" message="ns1:getMemberTagInfo">
+    </wsdl:input>
+      <wsdl:output name="getMemberTagInfoResponse" message="ns1:getMemberTagInfoResponse">
     </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
     </wsdl:fault>
@@ -2828,20 +2819,118 @@
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="resetPafUserPassword">
-      <wsdl:input name="resetPafUserPassword" message="ns1:resetPafUserPassword">
+    <wsdl:operation name="getMemberTagDefs">
+      <wsdl:input name="getMemberTagDefs" message="ns1:getMemberTagDefs">
     </wsdl:input>
-      <wsdl:output name="resetPafUserPasswordResponse" message="ns1:resetPafUserPasswordResponse">
+      <wsdl:output name="getMemberTagDefsResponse" message="ns1:getMemberTagDefsResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getFilteredUOWSize">
+      <wsdl:input name="getFilteredUOWSize" message="ns1:getFilteredUOWSize">
+    </wsdl:input>
+      <wsdl:output name="getFilteredUOWSizeResponse" message="ns1:getFilteredUOWSizeResponse">
     </wsdl:output>
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="reloadDatacache">
-      <wsdl:input name="reloadDatacache" message="ns1:reloadDatacache">
+    <wsdl:operation name="uploadApplication">
+      <wsdl:input name="uploadApplication" message="ns1:uploadApplication">
     </wsdl:input>
-      <wsdl:output name="reloadDatacacheResponse" message="ns1:reloadDatacacheResponse">
+      <wsdl:output name="uploadApplicationResponse" message="ns1:uploadApplicationResponse">
     </wsdl:output>
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="importSimpleCellNotes">
+      <wsdl:input name="importSimpleCellNotes" message="ns1:importSimpleCellNotes">
+    </wsdl:input>
+      <wsdl:output name="importSimpleCellNotesResponse" message="ns1:importSimpleCellNotesResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getDimensionTree">
+      <wsdl:input name="getDimensionTree" message="ns1:getDimensionTree">
+    </wsdl:input>
+      <wsdl:output name="getDimensionTreeResponse" message="ns1:getDimensionTreeResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="evaluateView">
+      <wsdl:input name="evaluateView" message="ns1:evaluateView">
+    </wsdl:input>
+      <wsdl:output name="evaluateViewResponse" message="ns1:evaluateViewResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="exportMemberTagData">
+      <wsdl:input name="exportMemberTagData" message="ns1:exportMemberTagData">
+    </wsdl:input>
+      <wsdl:output name="exportMemberTagDataResponse" message="ns1:exportMemberTagDataResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="clientCacheRequest">
+      <wsdl:input name="clientCacheRequest" message="ns1:clientCacheRequest">
+    </wsdl:input>
+      <wsdl:output name="clientCacheRequestResponse" message="ns1:clientCacheRequestResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="saveCellNotes">
+      <wsdl:input name="saveCellNotes" message="ns1:saveCellNotes">
+    </wsdl:input>
+      <wsdl:output name="saveCellNotesResponse" message="ns1:saveCellNotesResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="createPafUser">
+      <wsdl:input name="createPafUser" message="ns1:createPafUser">
+    </wsdl:input>
+      <wsdl:output name="createPafUserResponse" message="ns1:createPafUserResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="clearMemberTagData">
+      <wsdl:input name="clearMemberTagData" message="ns1:clearMemberTagData">
+    </wsdl:input>
+      <wsdl:output name="clearMemberTagDataResponse" message="ns1:clearMemberTagDataResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="saveMemberTagData">
+      <wsdl:input name="saveMemberTagData" message="ns1:saveMemberTagData">
+    </wsdl:input>
+      <wsdl:output name="saveMemberTagDataResponse" message="ns1:saveMemberTagDataResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="getView">
@@ -2852,10 +2941,40 @@
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getCellNotes">
-      <wsdl:input name="getCellNotes" message="ns1:getCellNotes">
+    <wsdl:operation name="getUserNamesForSecurityGroups">
+      <wsdl:input name="getUserNamesForSecurityGroups" message="ns1:getUserNamesForSecurityGroups">
     </wsdl:input>
-      <wsdl:output name="getCellNotesResponse" message="ns1:getCellNotesResponse">
+      <wsdl:output name="getUserNamesForSecurityGroupsResponse" message="ns1:getUserNamesForSecurityGroupsResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
+    </wsdl:fault>
+      <wsdl:fault name="PafNotAbletoGetLDAPContext" message="ns1:PafNotAbletoGetLDAPContext">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getDimensionTrees">
+      <wsdl:input name="getDimensionTrees" message="ns1:getDimensionTrees">
+    </wsdl:input>
+      <wsdl:output name="getDimensionTreesResponse" message="ns1:getDimensionTreesResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="resetPafUserPassword">
+      <wsdl:input name="resetPafUserPassword" message="ns1:resetPafUserPassword">
+    </wsdl:input>
+      <wsdl:output name="resetPafUserPasswordResponse" message="ns1:resetPafUserPasswordResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="renameMemberTagData">
+      <wsdl:input name="renameMemberTagData" message="ns1:renameMemberTagData">
+    </wsdl:input>
+      <wsdl:output name="renameMemberTagDataResponse" message="ns1:renameMemberTagDataResponse">
     </wsdl:output>
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
@@ -2888,52 +3007,14 @@
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="saveWork">
-      <wsdl:input name="saveWork" message="ns1:saveWork">
+    <wsdl:operation name="setGroups">
+      <wsdl:input name="setGroups" message="ns1:setGroups">
     </wsdl:input>
-      <wsdl:output name="saveWorkResponse" message="ns1:saveWorkResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getPafUserNames">
-      <wsdl:input name="getPafUserNames" message="ns1:getPafUserNames">
-    </wsdl:input>
-      <wsdl:output name="getPafUserNamesResponse" message="ns1:getPafUserNamesResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getSimpleCellNotesToExport">
-      <wsdl:input name="getSimpleCellNotesToExport" message="ns1:getSimpleCellNotesToExport">
-    </wsdl:input>
-      <wsdl:output name="getSimpleCellNotesToExportResponse" message="ns1:getSimpleCellNotesToExportResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getPafGroups">
-      <wsdl:input name="getPafGroups" message="ns1:getPafGroups">
-    </wsdl:input>
-      <wsdl:output name="getPafGroupsResponse" message="ns1:getPafGroupsResponse">
+      <wsdl:output name="setGroupsResponse" message="ns1:setGroupsResponse">
     </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
     </wsdl:fault>
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAbletoGetLDAPContext" message="ns1:PafNotAbletoGetLDAPContext">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="createPafUser">
-      <wsdl:input name="createPafUser" message="ns1:createPafUser">
-    </wsdl:input>
-      <wsdl:output name="createPafUserResponse" message="ns1:createPafUserResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
     </wsdl:fault>
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
@@ -2946,32 +3027,18 @@
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getUserNamesForSecurityGroups">
-      <wsdl:input name="getUserNamesForSecurityGroups" message="ns1:getUserNamesForSecurityGroups">
-    </wsdl:input>
-      <wsdl:output name="getUserNamesForSecurityGroupsResponse" message="ns1:getUserNamesForSecurityGroupsResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAbletoGetLDAPContext" message="ns1:PafNotAbletoGetLDAPContext">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="renameMemberTagData">
-      <wsdl:input name="renameMemberTagData" message="ns1:renameMemberTagData">
-    </wsdl:input>
-      <wsdl:output name="renameMemberTagDataResponse" message="ns1:renameMemberTagDataResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
     <wsdl:operation name="clientAuth">
       <wsdl:input name="clientAuth" message="ns1:clientAuth">
     </wsdl:input>
       <wsdl:output name="clientAuthResponse" message="ns1:clientAuthResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getCellNotes">
+      <wsdl:input name="getCellNotes" message="ns1:getCellNotes">
+    </wsdl:input>
+      <wsdl:output name="getCellNotesResponse" message="ns1:getCellNotesResponse">
     </wsdl:output>
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
@@ -2988,30 +3055,14 @@
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="getPafUsers">
-      <wsdl:input name="getPafUsers" message="ns1:getPafUsers">
+    <wsdl:operation name="getPafUserNames">
+      <wsdl:input name="getPafUserNames" message="ns1:getPafUserNames">
     </wsdl:input>
-      <wsdl:output name="getPafUsersResponse" message="ns1:getPafUsersResponse">
+      <wsdl:output name="getPafUserNamesResponse" message="ns1:getPafUserNamesResponse">
     </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
     </wsdl:fault>
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="saveCellNotes">
-      <wsdl:input name="saveCellNotes" message="ns1:saveCellNotes">
-    </wsdl:input>
-      <wsdl:output name="saveCellNotesResponse" message="ns1:saveCellNotesResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="downloadApplication">
-      <wsdl:input name="downloadApplication" message="ns1:downloadApplication">
-    </wsdl:input>
-      <wsdl:output name="downloadApplicationResponse" message="ns1:downloadApplicationResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="deletePafUser">
@@ -3036,10 +3087,42 @@
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="setGroups">
-      <wsdl:input name="setGroups" message="ns1:setGroups">
+    <wsdl:operation name="downloadApplication">
+      <wsdl:input name="downloadApplication" message="ns1:downloadApplication">
     </wsdl:input>
-      <wsdl:output name="setGroupsResponse" message="ns1:setGroupsResponse">
+      <wsdl:output name="downloadApplicationResponse" message="ns1:downloadApplicationResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="reloadDatacache">
+      <wsdl:input name="reloadDatacache" message="ns1:reloadDatacache">
+    </wsdl:input>
+      <wsdl:output name="reloadDatacacheResponse" message="ns1:reloadDatacacheResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="saveWork">
+      <wsdl:input name="saveWork" message="ns1:saveWork">
+    </wsdl:input>
+      <wsdl:output name="saveWorkResponse" message="ns1:saveWorkResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getFilteredResultSetResponse">
+      <wsdl:input name="getFilteredResultSetResponse" message="ns1:getFilteredResultSetResponse">
+    </wsdl:input>
+      <wsdl:output name="getFilteredResultSetResponseResponse" message="ns1:getFilteredResultSetResponseResponse">
+    </wsdl:output>
+      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
+    </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getPafGroups">
+      <wsdl:input name="getPafGroups" message="ns1:getPafGroups">
+    </wsdl:input>
+      <wsdl:output name="getPafGroupsResponse" message="ns1:getPafGroupsResponse">
     </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
     </wsdl:fault>
@@ -3047,35 +3130,23 @@
     </wsdl:fault>
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
+      <wsdl:fault name="PafNotAbletoGetLDAPContext" message="ns1:PafNotAbletoGetLDAPContext">
+    </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="clearMemberTagData">
-      <wsdl:input name="clearMemberTagData" message="ns1:clearMemberTagData">
+    <wsdl:operation name="getPafUsers">
+      <wsdl:input name="getPafUsers" message="ns1:getPafUsers">
     </wsdl:input>
-      <wsdl:output name="clearMemberTagDataResponse" message="ns1:clearMemberTagDataResponse">
+      <wsdl:output name="getPafUsersResponse" message="ns1:getPafUsersResponse">
     </wsdl:output>
       <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
       <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
     </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="saveMemberTagData">
-      <wsdl:input name="saveMemberTagData" message="ns1:saveMemberTagData">
+    <wsdl:operation name="getSimpleCellNotesToExport">
+      <wsdl:input name="getSimpleCellNotesToExport" message="ns1:getSimpleCellNotesToExport">
     </wsdl:input>
-      <wsdl:output name="saveMemberTagDataResponse" message="ns1:saveMemberTagDataResponse">
-    </wsdl:output>
-      <wsdl:fault name="PafNotAuthorizedSoapException" message="ns1:PafNotAuthorizedSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
-    </wsdl:fault>
-      <wsdl:fault name="PafNotAuthenticatedSoapException" message="ns1:PafNotAuthenticatedSoapException">
-    </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getDimensionTrees">
-      <wsdl:input name="getDimensionTrees" message="ns1:getDimensionTrees">
-    </wsdl:input>
-      <wsdl:output name="getDimensionTreesResponse" message="ns1:getDimensionTreesResponse">
+      <wsdl:output name="getSimpleCellNotesToExportResponse" message="ns1:getSimpleCellNotesToExportResponse">
     </wsdl:output>
       <wsdl:fault name="PafSoapException" message="ns1:PafSoapException">
     </wsdl:fault>
