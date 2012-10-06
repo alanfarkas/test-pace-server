@@ -125,6 +125,8 @@ import com.pace.base.view.PafStyle;
 import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewSection;
 import com.pace.server.comm.AttributeDimInfo;
+import com.pace.server.comm.PaceQueryRequest;
+import com.pace.server.comm.PaceResultSetResponse;
 import com.pace.server.comm.PafAuthRequest;
 import com.pace.server.comm.PafAuthResponse;
 import com.pace.server.comm.PafCellNoteInformationResponse;
@@ -185,6 +187,7 @@ import com.pace.server.comm.PafViewRequest;
 import com.pace.server.comm.SaveWorkRequest;
 import com.pace.server.comm.SimpleMeasureDef;
 import com.pace.server.comm.SimpleVersionDef;
+import com.pace.server.comm.StringRow;
 import com.pace.server.comm.ValidateUserSecurityRequest;
 import com.pace.server.comm.ValidationResponse;
 import com.pace.server.comm.ViewRequest;
@@ -3441,6 +3444,82 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		
 		return resp;
 	}
+	
+//	public PaceResultSetResponse getFilteredResultSetResponse(PaceQueryRequest queryRequest) throws RemoteException, PafSoapException {
+	public PaceResultSetResponse getFilteredResultSetResponse(PaceQueryRequest queryRequest) throws RemoteException, PafSoapException {
+		
+		// for now presume the expression list is simply a list of members/attributes
+		String dim = queryRequest.getMembers().getDimension();
+		String expr[] = queryRequest.getMembers().getExpressionList();
+		int level = queryRequest.getLevel();
+		
+		PafClientState clientState = clients.get(queryRequest.getClientId());
+		List<PafDimMember> dimMembers = new ArrayList<PafDimMember>();
+		List<String> dimMemberNames = new ArrayList<String>();
+		
+		PafBaseTree t = clientState.getMdbBaseTrees().get(dim);
+		
+		//get direct selected members at the specified level
+		
+		if (expr != null && expr.length>0) {
+			for (String e : expr) {
+				dimMembers.addAll(t.getMembersAtLevel(e, level));			
+			}
+		}
+
+		// get members correcsponding to the selected attributes
+		List<String> attribBaseNames = new ArrayList<String>();
+		if (queryRequest.getAttributes() != null) {
+			for (PafDimSpec spec : queryRequest.getAttributes()) {
+				PafAttributeTree at = clientState.getUowTrees().getAttributeTree(spec.getDimension() );
+				for ( String e : spec.getExpressionList() ) {
+					List<String> attribNames = at.getLowestMemberNames(e);
+					for (String aname : attribNames) {
+						attribBaseNames.addAll(at.getBaseMemberNames(aname));
+					}
+				}
+			}
+		}
+		
+		// process member names into basemembers
+		// should have some level checking here as basemembers might not match corresponding level
+		for (String aname : attribBaseNames) {
+			dimMembers.add(t.getMember(aname));
+		}
+
+		// dimMembers should now hold all selected members
+		// pump them into the lists
+		ArrayList<String[]> dataset = new ArrayList<String[]>();
+		// initialize header list
+		ArrayList<String> hdr = new ArrayList<String>();
+		hdr.add(dim);
+		for (String atname : t.getAttributeDimNames()) {
+			hdr.add(atname);
+		}
+
+
+		for (PafDimMember m : dimMembers) {
+			ArrayList<String> row = new ArrayList<String>();
+			// insert member
+			row.add(m.getKey());
+			// set attribute values
+			for (String atname : t.getAttributeDimNames()) {
+				// super sloppy, but presumption this is at a 1-1 level
+				Set<String> atval = t.getAttributeMembers(m.getKey(), atname);
+				if (atval.size() > 0)
+					row.add((String) atval.toArray()[0]);
+				else 
+					row.add("");
+			}
+			dataset.add(row.toArray(new String[0]));
+		}
+		
+		StringRow srHeader = new StringRow(hdr.toArray(new String[0]));
+		return new PaceResultSetResponse(srHeader, dataset.toArray(new String[0][]));
+
+	}
+	
+	
 	
 	/**
 	 * Logs off the current user.  This method cleans up the UOW Cache

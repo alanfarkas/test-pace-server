@@ -36,6 +36,8 @@ import com.pace.base.comm.UploadAppRequest;
 import com.pace.base.comm.UploadAppResponse;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.view.PafView;
+import com.pace.server.comm.PaceQueryRequest;
+import com.pace.server.comm.PaceResultSetResponse;
 import com.pace.server.comm.PafAuthRequest;
 import com.pace.server.comm.PafAuthResponse;
 import com.pace.server.comm.PafCellNoteInformationResponse;
@@ -457,6 +459,19 @@ public interface IPafService extends Remote {
      */
     public PafGetFilteredUOWSizeResponse getFilteredUOWSize(PafGetFilteredUOWSizeRequest filteredUOWSize) throws RemoteException, PafSoapException;
 	
+    
+    
+	/**
+	 * Returns a table of members and attribute values based upon a set of dimension and attribute specifications
+	 * 
+	 * @param queryRequest
+	 * @return
+	 * @throws RemoteException the remote exception
+     * @throws PafSoapException the paf soap exception
+	 */
+//	public PaceResultSetResponse getFilteredResultSetResponse(PaceQueryRequest queryRequest) throws RemoteException, PafSoapException;
+	public PaceResultSetResponse getFilteredResultSetResponse(PaceQueryRequest queryRequest) throws RemoteException, PafSoapException;
+    
 	/**
 	 * Reinitialize client state.
 	 *
