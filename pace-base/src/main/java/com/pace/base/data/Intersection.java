@@ -57,6 +57,16 @@ public class Intersection {
 	 * @param dimensionOrder Specifies the desired order of dimension coordinates in the new intersection
 	 */
 	public Intersection(List<String> dimensions, List<String> coordinates, List<String> dimensionOrder) {
+		this(dimensions, coordinates.toArray(new String[0]), dimensionOrder);
+	}
+
+
+	/**
+	 * @param dimensions Intersection dimensions
+	 * @param coordinates Intersection coordinates
+	 * @param dimensionOrder Specifies the desired order of dimension coordinates in the new intersection
+	 */
+	public Intersection(List<String> dimensions, String[] coordinates, List<String> dimensionOrder) {
 		
 		super();
 
@@ -64,12 +74,12 @@ public class Intersection {
 		String[] orderedCoords = new String[dimensionOrder.size()];
 		for (int i = 0; i < dimensionOrder.size(); i++) {
 			String orderedDim = dimensionOrder.get(i);
-			int index = dimensionOrder.indexOf(orderedDim);
+			int index = dimensions.indexOf(orderedDim);
 			if (index == -1) {
 				String errMsg = "Instantiation Error - Ordered Dimension [" + orderedDim + "] not found in Dimension list";
 				throw new IllegalArgumentException(errMsg);
 			} else {
-				orderedCoords[i] = coordinates.get(i);
+				orderedCoords[i] = coordinates[index];		// TTN-1851
 			}
 		}
 		

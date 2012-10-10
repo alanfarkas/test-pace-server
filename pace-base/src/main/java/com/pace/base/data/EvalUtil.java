@@ -55,7 +55,7 @@ import com.pace.base.rules.Formula;
 import com.pace.base.rules.Rule;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.IPafEvalState;
-import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringOdometer;
 import com.pace.base.utility.TimeBalance;
 import com.pace.base.view.PafViewSection;
 
@@ -406,7 +406,8 @@ public class EvalUtil {
 
     public static ArrayList<Intersection> buildIntersections(Map<String, List<String>> memberLists, String[] axisSequence) {
         
-        ArrayList[] memberArrays = new ArrayList[memberLists.size()];
+        @SuppressWarnings("unchecked")
+		ArrayList<String>[] memberArrays = new ArrayList[memberLists.size()];
         int i = 0;
         
         for (String axis : axisSequence) {         
@@ -414,18 +415,18 @@ public class EvalUtil {
         }
 
         // precalculate size of arraylist
-        long size = 1;
-        for (ArrayList list : memberArrays) {
-            size *= list.size();
-        }
+//        long size = 1;
+//        for (ArrayList list : memberArrays) {
+//            size *= list.size();
+//        }
         ArrayList<Intersection> intersections = new ArrayList<Intersection>();
         
         
-        Odometer odom = new Odometer(memberArrays);
+        StringOdometer odom = new StringOdometer(memberArrays);
         Intersection inter;
 
         while (odom.hasNext()) {
-            inter = new Intersection(axisSequence, (String[])odom.nextValue().toArray(new String[0]));
+            inter = new Intersection(axisSequence, odom.nextValue());		// TTN-1851
             intersections.add(inter);
         }
         
@@ -835,7 +836,7 @@ public class EvalUtil {
 	 * @return Odometer
 	 * @throws PafException 
 	 */
-	static private Odometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
+	static private StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
 			final MemberTreeSet memberTrees, final Set<String> explodedBaseDims) {
 	
 		PafViewSection viewSection = dataCache.getPafMVS().getViewSection();
@@ -920,7 +921,7 @@ public class EvalUtil {
 		}
 	
 		// Return iterator
-		Odometer cacheIterator = new Odometer(memberFilters, baseDimensions);
+		StringOdometer cacheIterator = new StringOdometer(memberFilters, baseDimensions);
 		return cacheIterator;
 	}
 
@@ -940,7 +941,7 @@ public class EvalUtil {
 	 * @return Odometer
 	 * @throws PafException 
 	 */
-	public static Odometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, final MemberTreeSet memberTrees) {
+	public static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, final MemberTreeSet memberTrees) {
 		return explodeAttributeIntersection(dataCache, attrIs, memberTrees, new HashSet<String>());
 	}
 
@@ -1052,16 +1053,15 @@ public class EvalUtil {
 		for (Intersection attrIs: attrIntersections) {
 	
 			// Explode attribute intersection into corresponding base intersections
-			Odometer baseIsIterator = explodeAttributeIntersection(dataCache, attrIs, memberTrees, explodedBaseDims);
+			StringOdometer baseIsIterator = explodeAttributeIntersection(dataCache, attrIs, memberTrees, explodedBaseDims);
 	
 			// Check for invalid attribute intersection
 			if (baseIsIterator != null) {
 				
 				// Valid intersection - generate base intersections and add to collection
 				while(baseIsIterator.hasNext()) {
-					@SuppressWarnings("unchecked")
-					List<String> baseCoords = baseIsIterator.nextValue();
-					Intersection baseIs = new Intersection(baseDims, baseCoords.toArray(new String[0]));
+					String[] baseCoords = baseIsIterator.nextValue();		// TTN-1851
+					Intersection baseIs = new Intersection(baseDims, baseCoords);		// TTN-1851
 					convertedIntersections.add(baseIs);
 				}
 				

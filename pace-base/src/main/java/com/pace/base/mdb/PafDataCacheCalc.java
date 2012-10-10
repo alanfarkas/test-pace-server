@@ -53,7 +53,7 @@ import com.pace.base.rules.RuleSet;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
-import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringOdometer;
 import com.pace.base.utility.StringUtils;
 import com.pace.base.view.PafViewSection;
 
@@ -152,7 +152,7 @@ public abstract class PafDataCacheCalc {
 		Set<MeasureType> aggMeasureTypes = new HashSet<MeasureType>(Arrays.asList(new MeasureType[]{MeasureType.Aggregate, MeasureType.TimeBalFirst, MeasureType.TimeBalLast}));
 		Map<String, List<String>> aggFilter = new HashMap<String, List<String>>();
 		MdbDef mdbDef = dataCache.getAppDef().getMdbDef();
-		Odometer cellIterator = null;
+		StringOdometer cellIterator = null;
 
 
 		// The fun starts now
@@ -280,8 +280,7 @@ public abstract class PafDataCacheCalc {
 				while (cellIterator.hasNext()) {
 					
 					// Get next member intersection
-					@SuppressWarnings("unchecked")
-					String[] coords = (String[]) cellIterator.nextValue().toArray(new String[0]);
+					String[] coords = cellIterator.nextValue();		// TTN-1851
 					Intersection intersection = new Intersection(dimensions, coords);
 					intersection.setCoordinate(aggDimension, aggMemberName); 
 					
@@ -479,12 +478,11 @@ public abstract class PafDataCacheCalc {
 		}
 		
 		// Iterate through all attribute intersections that have been selected for calculation
-		Odometer cacheIterator = new Odometer(memberMap, viewDims);
+		StringOdometer cacheIterator = new StringOdometer(memberMap, viewDims);
 		while(cacheIterator.hasNext()) {
 
 			// Get next intersection and convert to a time/year based intersection
-			@SuppressWarnings("unchecked")
-			String[] coordinates = (String[]) cacheIterator.nextValue().toArray(new String[0]);
+			String[] coordinates = cacheIterator.nextValue();		// TTN-1851
 			TimeSlice.translateTimeHorizonCoords(coordinates, timeIndex, yearIndex);		
 			Intersection attrIs = new Intersection(viewDims, coordinates);
 
@@ -623,7 +621,7 @@ public abstract class PafDataCacheCalc {
 		
 		
 		// Explode attribute intersection into corresponding base intersections
-		Odometer cacheIterator = EvalUtil.explodeAttributeIntersection(dataCache, attrIs, memberTrees);
+		StringOdometer cacheIterator = EvalUtil.explodeAttributeIntersection(dataCache, attrIs, memberTrees);
 
 		// Exit if no intersections were found
 		if (cacheIterator == null) {
@@ -638,8 +636,7 @@ public abstract class PafDataCacheCalc {
 		double total = 0;
 		int cellCount = 0;
 		while(cacheIterator.hasNext()) {
-			@SuppressWarnings("unchecked")
-			ArrayList<String> coords = cacheIterator.nextValue();
+			String[] coords = cacheIterator.nextValue();		// TTN-1851
 			Intersection intersection = new Intersection(dataCache.getBaseDimensions(), coords);
 			if (measureType != MeasureType.NonAggregate || dataCache.isExistingIntersection(intersection)) {
 				double cellValue = dataCache.getCellValue(intersection);
@@ -695,11 +692,10 @@ public abstract class PafDataCacheCalc {
 		}
 
 		// Generate the valid member combinations
-		Odometer odometer = new Odometer(baseMemberMap, baseDimNames.toArray(new String[0]));
+		StringOdometer odometer = new StringOdometer(baseMemberMap, baseDimNames.toArray(new String[0]));
 		List<Intersection> floorMemberCombos = new ArrayList<Intersection>();
 		while(odometer.hasNext()) {
-			@SuppressWarnings("unchecked")
-			String[] baseMembers = (String[])odometer.nextValue().toArray(new String[0]);
+			String[] baseMembers = odometer.nextValue();		// TTN-1851
 			Intersection memberCombo = new Intersection(memberComboDims.toArray(new String[0]));
 			for (int i = 0; i < baseDimNames.size(); i++) {
 
@@ -773,7 +769,7 @@ public abstract class PafDataCacheCalc {
 		String[] dimensions = dataCache.getPafMVS().getViewSection().getDimensionsPriority();
 		List<String> years = null;
 		Map<String, List<String>> updatedMemberFilter = new HashMap<String, List<String>>();
-		Odometer cellIterator = null;
+		StringOdometer cellIterator = null;
 
 
 		logger.info(String.format("Calculating version dimension: [%s]", versionDim));
@@ -855,8 +851,7 @@ public abstract class PafDataCacheCalc {
 					while (cellIterator.hasNext()) {
 
 						// Get next cell intersection
-						@SuppressWarnings("unchecked")
-						ArrayList<String> coords = cellIterator.nextValue();
+						String[] coords = cellIterator.nextValue();		// TTN-1851
 						Intersection intersection = new Intersection(dimensions, coords);
 						intersection.setCoordinate(versionDim, version);
 						intersection.setCoordinate(yearDim, year);
@@ -1256,7 +1251,7 @@ public abstract class PafDataCacheCalc {
 					// reused for each calculated measure. So, it must be initialized with a 
 					// dummy measure.
 					dimFilter.put(measureDim, new ArrayList<String>(Arrays.asList(new String[]{"[DUMMY]"})));
-					Odometer cellIterator = dataCache.getCellIterator(baseDims, dimFilter);
+					StringOdometer cellIterator = dataCache.getCellIterator(baseDims, dimFilter);
 
 					// Process each recalc measure formula in the each rule group
 					for (RuleGroup rg : ruleSet.getRuleGroups()) {
@@ -1269,8 +1264,7 @@ public abstract class PafDataCacheCalc {
 
 								// Iterate over required synthetic intersections and calculate them.
 								while (cellIterator.hasNext()) {
-									@SuppressWarnings("unchecked")
-									String[] coords = (String[]) cellIterator.nextValue().toArray(new String[0]);
+									String[] coords = cellIterator.nextValue();		// TTN-1851
 									TimeSlice.translateTimeHorizonCoords(coords, timeAxis, yearAxis);
 									is.setCoordinates(coords);
 									is.setCoordinate(measureDim, msrName);

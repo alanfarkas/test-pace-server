@@ -1,14 +1,14 @@
 /*
- *	File: @(#)Odometer.java 	Package: com.pace.base.utility 	Project: Paf Base Libraries
- *	Created: Sep 20, 2005  		By: JWatkins
+ *	File: @(#)StringOdometer.java 	Package: com.pace.base.utility 	Project: Paf Base Libraries
+ *	Created: Sep 20, 2005  			By: Alan Farkas / Jim Watkins
  *	Version: x.xx
  *
- * 	Copyright (c) 2005-2006 Palladium Group, Inc. All rights reserved.
+ * 	Copyright (c) 2005-2012 Alvarez and Marsal Software, LLC. All rights reserved.
  *
- *	This software is the confidential and proprietary information of Palladium Group, Inc.
+ *	This software is the confidential and proprietary information of Alvarez and Marsal Software, LLC.
  *	("Confidential Information"). You shall not disclose such Confidential Information and 
  * 	should use it only in accordance with the terms of the license agreement you entered into
- *	with Palladium Group, Inc.
+ *	with Alvarez and Marsal Software, LLC.
  *
  *
  *
@@ -18,23 +18,21 @@
  */
 package com.pace.base.utility;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * Class_description_goes_here
+ * Iterates through an array of string lists, where each list represents a separate 
+ * odometer "dial".
  *
  * @version	x.xx
- * @author JWatkins
+ * @author AFarkas
  *
  */
-public class Odometer implements IOdometer {
+public class StringOdometer implements IOdometer {
 	int[] iterators;
-    @SuppressWarnings("rawtypes")
-	List[] lists;
+	List<String>[] lists;
     int[] listSizes;
     boolean atTop = true;
     
@@ -47,13 +45,12 @@ public class Odometer implements IOdometer {
  	 * @param keyArray Array that specifies the order of the element lists within the odometer
  	 */
  	@SuppressWarnings("unchecked")
-	public <T, K> Odometer(Map<K, List<T>> memberMap, K[] keyArray) {
-		this((List<Object>[]) CollectionsUtil.convertToArrayOfLists(memberMap, keyArray));
+	public <T, K> StringOdometer(Map<K, List<T>> memberMap, K[] keyArray) {
+		this((List<String>[]) CollectionsUtil.convertToArrayOfLists(memberMap, keyArray));
 	}
 
     
-	@SuppressWarnings({ "rawtypes" })
-	public Odometer(List[] lists) {
+	public StringOdometer(List<String>[] lists) {
         iterators = new int[lists.length];
         listSizes = new int[lists.length];
         this.lists = lists;
@@ -121,19 +118,18 @@ public class Odometer implements IOdometer {
     
     
     
-	public Object[] nextValue() {
+	public String[] nextValue() {
         increment();
         return getValue();
     }
     
     
-	public Object[] getValue() {
+	public String[] getValue() {
  		if (atTop()) throw new NoSuchElementException("Can't retrieve value - Odometer is at reset position.");
-        Object[] itemValues = new Object[(iterators.length)];
+        String[] itemValues = new String[iterators.length];
         for (int i = 0; i < iterators.length; i++) {
         	int index = iterators[i];
-        	itemValues[i] = lists[i].get(index);
-//            itemValues.add(lists[i].get(index));
+            itemValues[i]=lists[i].get(index);		// TTN-1851
         }
         
         return itemValues;

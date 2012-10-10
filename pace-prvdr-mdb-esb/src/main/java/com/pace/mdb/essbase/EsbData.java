@@ -58,7 +58,7 @@ import com.pace.base.mdb.PafDimMember;
 import com.pace.base.state.IPafClientState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
-import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringOdometer;
 import com.pace.base.utility.StringUtils;
 
 /**
@@ -430,11 +430,10 @@ public class EsbData implements IMdbData{
 			// Populate data cache with retrieved Essbase data. Iterate through
 			// all data intersections retrieved from Essbase.
 			int mdxCellIndex = 0;
-			Odometer cellIterator = new Odometer(memberLists);
+			StringOdometer cellIterator = new StringOdometer(memberLists);
 			while (cellIterator.hasNext()) { 
 				// Load next data cache cell - Ignore #MISSING values
-				@SuppressWarnings("unchecked")
-				Intersection intersection = new Intersection(dimensions, (String[])cellIterator.nextValue().toArray(new String[0]));
+				Intersection intersection = new Intersection(dimensions, cellIterator.nextValue());		// TTN-1851
 				// Ignore missing values
 				if (!essMdDataSet.isMissingCell(mdxCellIndex)) {
 					double cellValue = essMdDataSet.getCellValue(mdxCellIndex);
@@ -649,7 +648,7 @@ public class EsbData implements IMdbData{
 		}
 			
 		// Instantiate row iterator - used to iterate through all row dimension members
-		Odometer rowIterator = dataCache.getCellIterator(iteratorDims.toArray(new String[0]), memberListMap);
+		StringOdometer rowIterator = dataCache.getCellIterator(iteratorDims.toArray(new String[0]), memberListMap);
 
 					
 		try {
@@ -722,9 +721,8 @@ public class EsbData implements IMdbData{
 						while (rowIterator.hasNext()) {
 							
 							// Get next row header intersection
-							@SuppressWarnings("unchecked")
-							ArrayList<String> coords = rowIterator.nextValue();
-							Intersection intersection = new Intersection(iteratorDims, coords, intersectionDims);
+							String[] coords = rowIterator.nextValue();
+							Intersection intersection = new Intersection(iteratorDims, coords, intersectionDims);		// TTN-1851
 							intersection.setCoordinate(versionDim, version);
 							intersection.setCoordinate(planTypeDim, planType);
 							intersection.setCoordinate(yearDim, year);

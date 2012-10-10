@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 import com.pace.base.app.PafDimSpec;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
-import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringOdometer;
 
 /**
  * Attribute Utilities
@@ -250,10 +250,10 @@ public abstract class AttributeUtil {
 	
 			// Use the odometer to generate all the possible attribute member combinations and
 			// add them to the intersection collection.
-			Odometer isIterator = new Odometer(memberLists);
+			StringOdometer isIterator = new StringOdometer(memberLists);
 			while (isIterator.hasNext()) {
-				List<String> isList = isIterator.nextValue();
-				Intersection is = new Intersection(attrDimNames, isList.toArray(new String[0]));
+				String[] coords = isIterator.nextValue();		// TTN-1851
+				Intersection is = new Intersection(attrDimNames, coords);	// TTN-1851
 				attrCombos.add(is);
 			}
 	

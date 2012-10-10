@@ -34,7 +34,7 @@ import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.testCommonParms;
 import com.pace.base.state.PafClientState;
-import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringOdometer;
 
 
 /*
@@ -141,10 +141,9 @@ public class EsbDataTest extends TestCase {
 			
 			// Update data cache
 			String[] dims = dataCache.getBaseDimensions();
-			Odometer dcIterator = dataCache.getCellIterator(dims);
+			StringOdometer dcIterator = dataCache.getCellIterator(dims);
 			while (dcIterator.hasNext()) {
-				@SuppressWarnings("unchecked")
-				List<String> coords = dcIterator.nextValue();
+				String[] coords = dcIterator.nextValue();		// TTN-1851
 				Intersection cell = new Intersection(dims, coords);
 				double cellValue = dataCache.getCellValue(cell);
 				dataCache.setCellValue(cell, cellValue * -1);
@@ -226,10 +225,9 @@ public class EsbDataTest extends TestCase {
 			
 			// Update data cache
 			String[] dims = dataCache.getBaseDimensions();
-			Odometer dcIterator = dataCache.getCellIterator(dims);
+			StringOdometer dcIterator = dataCache.getCellIterator(dims);
 			while (dcIterator.hasNext()) {
-				@SuppressWarnings("unchecked")
-				List<String> coords = dcIterator.nextValue();
+				String[] coords = dcIterator.nextValue();	// TTN-1851
 				Intersection cell = new Intersection(dims, coords);
 				double cellValue = dataCache.getCellValue(cell);
 				dataCache.setCellValue(cell, cellValue * -1);
@@ -309,10 +307,9 @@ public class EsbDataTest extends TestCase {
 			
 			// Update data cache
 			String[] dims = dataCache.getBaseDimensions();
-			Odometer dcIterator = dataCache.getCellIterator(dims);
+			StringOdometer dcIterator = dataCache.getCellIterator(dims);
 			while (dcIterator.hasNext()) {
-				@SuppressWarnings("unchecked")
-				List<String> coords = dcIterator.nextValue();
+				String[] coords = dcIterator.nextValue();		// TTN-1851
 				Intersection cell = new Intersection(dims, coords);
 				double cellValue = dataCache.getCellValue(cell);
 				dataCache.setCellValue(cell, cellValue * -1);

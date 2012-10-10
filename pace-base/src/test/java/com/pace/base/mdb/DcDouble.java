@@ -46,7 +46,7 @@ import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
-import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringOdometer;
 import com.pace.base.utility.StringUtils;
 import com.pace.base.view.PafMVS;
 
@@ -763,7 +763,7 @@ public class DcDouble  {
 	 * @param dimensions Dimensions to iterate through. 
 	 * @return Odometer
 	 */
-	public Odometer getCellIterator(String[] dimensions) {
+	public StringOdometer getCellIterator(String[] dimensions) {
 		return getCellIterator(dimensions, null);
 	}
 	
@@ -782,7 +782,7 @@ public class DcDouble  {
 	 * 
 	 * @return Odometer
 	 */
-	public Odometer getCellIterator(String[] dimensions, Map<String, List<String>> memberFilter) {
+	public StringOdometer getCellIterator(String[] dimensions, Map<String, List<String>> memberFilter) {
 		
 		// The Odometer requires member lists for each iterated dimension. So, a 
 		// member filter will be created if it's not already supplied and any
@@ -792,7 +792,7 @@ public class DcDouble  {
 		}
 		memberFilter = addMissingDimsToMemberFilter(memberFilter, dimensions);
 		
-		Odometer cellIterator = new Odometer(memberFilter, dimensions);
+		StringOdometer cellIterator = new StringOdometer(memberFilter, dimensions);
 		return cellIterator;
 	}
 	
@@ -1519,14 +1519,13 @@ public class DcDouble  {
 			}
 			memberLists[i] = memberList;
 		}
-		Odometer dataBlockIterator = new Odometer(memberLists);
+		StringOdometer dataBlockIterator = new StringOdometer(memberLists);
 		//List<Intersection> representedDataBlockKeys = IntersectionUtil.buildIntersections(memberLists, indexedCoreDims);
 
 		// Get list of keys for any requested data blocks that don't yet exist
 		List<Intersection> requiredKeys = new ArrayList<Intersection>();
 		while (dataBlockIterator.hasNext()) { 
-			@SuppressWarnings("unchecked")
-			Intersection dataBlockKey = new Intersection(coreKeyDims, (String[])dataBlockIterator.nextValue().toArray(new String[0]));
+			Intersection dataBlockKey = new Intersection(coreKeyDims, dataBlockIterator.nextValue());		// TTN-1851
 			if (!isExistingDataBlock(dataBlockKey)) {
 				requiredKeys.add(dataBlockKey);
 			}
@@ -2038,12 +2037,11 @@ public class DcDouble  {
 		}
 
 		// Iterate through all cell intersections represented by the member filter
-		Odometer cacheIterator = new Odometer(generatedMemberFilter, dimensions);
+		StringOdometer cacheIterator = new StringOdometer(generatedMemberFilter, dimensions);
 		while(cacheIterator.hasNext()) {
 
 			// Copy source intersection to this data cache
-			@SuppressWarnings("unchecked")
-			ArrayList<String> coords = cacheIterator.nextValue();
+			String[] coords = cacheIterator.nextValue();		// TTN-1851
 			Intersection intersection = new Intersection(dimensions, coords);
 //			try {
 				setCellValue(intersection, sourceCache.getCellValue(intersection));

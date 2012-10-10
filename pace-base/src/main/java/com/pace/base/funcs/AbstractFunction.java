@@ -14,7 +14,7 @@ import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.state.IPafEvalState;
-import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringOdometer;
 
 public abstract class AbstractFunction implements IPafFunction {
 	protected String[] parms;
@@ -218,11 +218,11 @@ public abstract class AbstractFunction implements IPafFunction {
         ArrayList<Intersection> intersections = new ArrayList<Intersection>();
         
         
-        Odometer odom = new Odometer(memberArrays);
+        StringOdometer odom = new StringOdometer(memberArrays);
         Intersection inter;
 
         while (odom.hasNext()) {
-            inter = new Intersection(axisSequence, (String[])odom.nextValue().toArray(new String[0]));
+            inter = new Intersection(axisSequence, odom.nextValue());		// TTN-1851
             intersections.add(inter);
         }
         

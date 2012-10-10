@@ -41,7 +41,7 @@ import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 import com.pace.base.utility.CollectionsUtil;
-import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringOdometer;
 
 /**
  * "CrossDim" Custom Function - Returns the value of the intersection represented by 
@@ -312,7 +312,8 @@ public class F_CrossDim extends AbstractFunction {
 	private ArrayList<Intersection> cloneIntersections(Intersection intersection, List<String> floorDims, IPafEvalState evalState) {
 
 		String[] allDims = intersection.getDimensions();
-		ArrayList[] memberArrays = new ArrayList[allDims.length];
+		@SuppressWarnings("unchecked")
+		ArrayList<String>[] memberArrays = new ArrayList[allDims.length];
 		MemberTreeSet memberTrees = evalState.getClientState().getUowTrees();		// TTN-1595
 		
 
@@ -342,10 +343,10 @@ public class F_CrossDim extends AbstractFunction {
 
 		// Clone Intersections
 		ArrayList<Intersection> clonedIntersections = new ArrayList<Intersection>();
-		Odometer odom = new Odometer(memberArrays);
+		StringOdometer odom = new StringOdometer(memberArrays);
 		Intersection clonedIntersection;
 		while (odom.hasNext()) {
-			clonedIntersection = new Intersection(allDims, (String[])odom.nextValue().toArray(new String[0]));
+			clonedIntersection = new Intersection(allDims, odom.nextValue());		// TTN-1851
 			// Filter out any intersections whose time coordinates are not valid in the
 			// time horizon tree (TTN-1595).
 			if (EvalUtil.hasValidTimeCoord(clonedIntersection, evalState)) {

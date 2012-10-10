@@ -90,7 +90,7 @@ import com.pace.base.state.PafClientState;
 import com.pace.base.state.SliceState;
 import com.pace.base.utility.LevelGenParamUtil;
 import com.pace.base.utility.LogUtil;
-import com.pace.base.utility.Odometer;
+import com.pace.base.utility.StringOdometer;
 import com.pace.base.utility.StringUtils;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafView;
@@ -3143,80 +3143,6 @@ public class PafDataService {
 
 
 	/**
-	 *	Return the invalid attribute member combinations for the specified
-	 *  base tree, base member, and attribute dimension(s)
-	 * 
-	 * @param baseDimName Base dimension name
-	 * @param baseMemberName Base member name
-	 * @param attrDimNames Array of attribute dimension name(s)
-	 *
-	 * @return Set<Intersection>
-	 */
-	@SuppressWarnings("unchecked")
-	public Set<Intersection> getInvalidAttributeCombos(String baseDimName, String baseMemberName, String[] attrDimNames)  {
-
-		int attrIndex = 0;
-		Set<Intersection> invalidAttrCombos = null;
-		Set<Intersection> validAttrCombos = null;
-		List<String>[] allAttrMembers = null;
-		PafBaseTree baseTree = null;
-
-		// Get baseMemberTree and baseMember
-		baseTree = getBaseTree(baseDimName);
-
-		// Get all possible attribute member intersections
-		allAttrMembers = new List[attrDimNames.length];
-		for (String attrDimName:attrDimNames) {
-
-			// Verify attribute dimension name
-			PafDimTree attrTree = null;
-			if (baseTree.getAttributeDimNames().contains(attrDimName)) {
-				attrTree = getAttributeTree(attrDimName);
-			} else {
-				String errMsg = "Unable to get invalid attribute intersections - [" + attrDimName
-				+ "] is not an attribute dimension mapped to the base dimension: " + baseDimName;
-				logger.error(errMsg);
-				IllegalArgumentException iae = new IllegalArgumentException(errMsg);
-				throw(iae);
-			}
-
-			// Add all members of current attribute dimension
-			List<String> dimMembers = attrTree.getMemberNames(TreeTraversalOrder.POST_ORDER);
-			allAttrMembers[attrIndex] = dimMembers;
-			attrIndex++;
-		}
-
-		// Create cross product of all valid attribute members across
-		// each attribute dimension
-		int intersectionCount = 1;
-		for (List<String> members:allAttrMembers) {
-			intersectionCount *= members.size();
-		}
-		invalidAttrCombos = new HashSet<Intersection>(intersectionCount);
-		Odometer isIterator = new Odometer(allAttrMembers);
-		List<String> isList = null;
-		while (isIterator.hasNext()) {
-
-			// Get next intersection (in list form)
-			isList = isIterator.nextValue();
-
-			// Convert list into custom intersection object
-			Intersection is = new Intersection(attrDimNames, isList.toArray(new String[0]));
-
-			// Add intersection to intersection collection
-			invalidAttrCombos.add(is);
-		}
-
-		// Remove valid intersections
-		validAttrCombos = AttributeUtil.getValidAttributeCombos(baseDimName, baseMemberName, attrDimNames, getAllDimTrees());
-		invalidAttrCombos.removeAll(validAttrCombos);
-
-		// Return invalid intersections
-		return invalidAttrCombos;
-	}
-
-
-	/**
 	 *	Return attribute tree for specified dimension
 	 *
 	 * @param dimension Specified dimension name
@@ -4218,11 +4144,11 @@ public class PafDataService {
 				}
 				else{
 					//Get a list of all possible attribute intersection lists
-					Odometer isIterator = new Odometer(attrMemberLists.toArray(new List[0]));
+					StringOdometer isIterator = new StringOdometer(attrMemberLists.toArray(new List[0]));
 					List<Intersection> selAttrCombos = new ArrayList<Intersection>();
 					while (isIterator.hasNext()) {
 						@SuppressWarnings("unchecked")
-						Intersection intersection = new Intersection(attrDims, (String[])isIterator.nextValue().toArray(new String[0]));
+						Intersection intersection = new Intersection(attrDims, isIterator.nextValue());		// TTN-1851
 						selAttrCombos.add(intersection);
 					}					        
 
