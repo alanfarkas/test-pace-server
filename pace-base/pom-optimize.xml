@@ -35,34 +35,41 @@
        <version>3.1.4</version>
        <configuration>
           <licenseLocation>${clover.licenseLocation}</licenseLocation>
-  		  <cloverDatabase>${clover.database}</cloverDatabase>
-  		  <cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
           <targetPercentage>60%</targetPercentage>
 		  <singleCloverDatabase>true</singleCloverDatabase>
 		  <snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</snapshot>
       </configuration>
       <executions>
          <execution>
-           <phase>test</phase>
+           <phase>verify</phase>
            <goals>
              <goal>setup</goal>
              <goal>optimize</goal>
              <goal>snapshot</goal>
+	             <!--  
+	             <goal>check</goal>
+	             -->
            </goals>
          </execution>
        </executions>
       </plugin>
   </plugins>
  </build>
-  <reporting>
-            <plugins>
-                    <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-surefire-report-plugin</artifactId>
-                    </plugin>
-            </plugins>
-
-  </reporting>
+ <reporting>
+    <outputDirectory>${basedir}/target/site</outputDirectory>
+	  <plugins>
+	    <plugin>
+	      <groupId>com.atlassian.maven.plugins</groupId>
+	      <artifactId>maven-clover2-plugin</artifactId>
+	      <configuration>
+			<licenseLocation>${clover.licenseLocation}</licenseLocation>
+	        <generateHTML>true</generateHTML>
+	        <generatePdf>true</generatePdf>
+	        <generateXml>true</generateXml>
+	      </configuration>
+	 	</plugin>
+	  </plugins>
+   </reporting>
 
   <issueManagement>
   	<system>Jira</system>

@@ -34,16 +34,13 @@
 	       <version>3.1.4</version>
 	       <configuration>
 	          <licenseLocation>${clover.licenseLocation}</licenseLocation>
-	  		  <cloverDatabase>${clover.database}</cloverDatabase>
-	  		  <cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
 			  <singleCloverDatabase>true</singleCloverDatabase>
 	      </configuration>
 	      <executions>
 	         <execution>
-	          <phase>pre-site</phase>
+	          <phase>verify</phase>
 	           <goals>
 	             <goal>setup</goal>
-	             <goal>instrument</goal>
 	             <goal>aggregate</goal>
 	             <goal>clover</goal>
 	             <!--  
@@ -55,22 +52,22 @@
 	      </plugin>
 	  </plugins>
 	</build>
-	<reporting>
+ <reporting>
+    <outputDirectory>${basedir}/target/site</outputDirectory>
 	  <plugins>
 	    <plugin>
 	      <groupId>com.atlassian.maven.plugins</groupId>
-	      <artifactId>maven-clover-plugin</artifactId>
+	      <artifactId>maven-clover2-plugin</artifactId>
+	       <version>3.1.4</version>
 	      <configuration>
 			<licenseLocation>${clover.licenseLocation}</licenseLocation>
-			<cloverDatabase>${clover.database}</cloverDatabase>
-			<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
 	        <generateHTML>true</generateHTML>
 	        <generatePdf>true</generatePdf>
 	        <generateXml>true</generateXml>
 	      </configuration>
 	 	</plugin>
 	  </plugins>
-    </reporting>
+   </reporting>
 
   <dependencies>
     <dependency>
