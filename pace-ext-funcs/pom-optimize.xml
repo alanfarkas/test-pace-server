@@ -24,6 +24,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -37,16 +38,6 @@
     				<licenseLocation>${clover.licenseLocation}</licenseLocation>
         			<singleCloverDatabase>true</singleCloverDatabase>
 				</configuration>
-				<executions>
-					<execution>
-						<id>clover</id>
-						<goals>
-							<goal>setup</goal>
-							<goal>optimize</goal>
-							<goal>snapshot</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

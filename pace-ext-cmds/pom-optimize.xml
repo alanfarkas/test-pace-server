@@ -14,8 +14,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
-		<clover.database>${basedir}/clover/clover.db</clover.database>
-		<clover.mergeDatabase>${basedir}/clover/cloverMerge.db</clover.mergeDatabase>
+		<clover.database>${env.PACEHOME}/.clover/clover.db</clover.database>
+		<clover.mergeDatabase>${env.PACEHOME}/.clover/cloverMerge.db</clover.mergeDatabase>
 	</properties>
 
 
@@ -37,16 +37,6 @@
     				<licenseLocation>${clover.licenseLocation}</licenseLocation>
         			<singleCloverDatabase>true</singleCloverDatabase>
 				</configuration>
-				<executions>
-					<execution>
-						<id>clover</id>
-						<goals>
-							<goal>setup</goal>
-							<goal>optimize</goal>
-							<goal>snapshot</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
