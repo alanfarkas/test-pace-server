@@ -29,36 +29,28 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-clover2-plugin</artifactId>
+				<version>3.1.4</version>
+				<configuration>
+    				<licenseLocation>${clover.licenseLocation}</licenseLocation>
+        			<singleCloverDatabase>true</singleCloverDatabase>
+					<snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</snapshot>
+				</configuration>
+				<executions>
+					<execution>
+						<id>clover</id>
+						<goals>
+							<goal>setup</goal>
+							<goal>optimize</goal>
+							<goal>snapshot</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<id>clover.optimize</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.atlassian.maven.plugins</groupId>
-						<artifactId>maven-clover2-plugin</artifactId>
-						<version>3.1.4</version>
-						<configuration>
-							<licenseLocation>${clover.licenseLocation}</licenseLocation>
-							<snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</snapshot>
-						</configuration>
-						<executions>
-							<execution>
-								<id>clover</id>
-								<goals>
-									<goal>setup</goal>
-									<goal>optimize</goal>
-									<goal>snapshot</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 	<dependencies>
 		<dependency>
