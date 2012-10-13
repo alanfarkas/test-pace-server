@@ -27,14 +27,6 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>com.atlassian.maven.plugins</groupId>
-				<artifactId>maven-clover2-plugin</artifactId>
-				<version>3.1.4</version>
-				<configuration>
-					<licenseLocation>${clover.licenseLocation}</licenseLocation>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -46,12 +38,15 @@
 					<plugin>
 						<groupId>com.atlassian.maven.plugins</groupId>
 						<artifactId>maven-clover2-plugin</artifactId>
+						<version>3.1.4</version>
 						<configuration>
+							<licenseLocation>${clover.licenseLocation}</licenseLocation>
+							<baseDir>${project.basedir}</baseDir>
+						    <singleCloverDatabase>true</singleCloverDatabase>
 							<snapshot>${clover.snapshot}</snapshot>
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
-							<baseDir>${project.basedir}</baseDir>
-							<licenseLocation>${clover.licenseLocation}</licenseLocation>
+							<generatePdf>true</generatePdf>
 						</configuration>
 						<executions>
 							<execution>
@@ -80,11 +75,18 @@
 				</plugins>
 			</build>
 			<reporting>
+			    <outputDirectory>${project.build.directory}/site</outputDirectory>
 				<plugins>
 					<plugin>
 						<groupId>com.atlassian.maven.plugins</groupId>
 						<artifactId>maven-clover2-plugin</artifactId>
 						<version>3.1.4</version>
+						<configuration>
+							<licenseLocation>${clover.licenseLocation}</licenseLocation>
+							<generateHTML>true</generateHTML>
+							<generatePdf>true</generatePdf>
+							<generateXml>true</generateXml>
+						</configuration>
 					</plugin>
 				</plugins>
 			</reporting>
