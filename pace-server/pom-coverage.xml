@@ -11,7 +11,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
-		<clover.mergeDatabase>${env.PACEHOME}/.clover/cloverMerge.db</clover.mergeDatabase>
+		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
 	</properties>
 
 	<repositories>
@@ -235,25 +235,12 @@
 				<version>3.1.4</version>
 				<configuration>
 					<licenseLocation>${clover.licenseLocation}</licenseLocation>
-					<singleCloverDatabase>true</singleCloverDatabase>
+					<snapshot>${clover.snapshot}</snapshot>
+					<generateHtml>true</generateHtml>
+					<generateXml>true</generateXml>
+					<baseDir>${project.basedir}</baseDir>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>com.atlassian.maven.plugins</groupId>
-				<artifactId>maven-clover2-plugin</artifactId>
-				<version>3.1.4</version>
-				<configuration>
-					<licenseLocation>${clover.licenseLocation}</licenseLocation>
-					<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
-					<generateHTML>true</generateHTML>
-					<generatePdf>true</generatePdf>
-					<generateXml>true</generateXml>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
 </project>

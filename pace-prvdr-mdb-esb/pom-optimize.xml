@@ -35,6 +35,10 @@
 				<version>3.1.4</version>
 				<configuration>
     				<licenseLocation>${clover.licenseLocation}</licenseLocation>
+					<snapshot>${clover.snapshot}</snapshot>
+					<generateHtml>true</generateHtml>
+					<generateXml>true</generateXml>
+					<baseDir>${project.basedir}</baseDir>
 				</configuration>
 			</plugin>
 		</plugins>
