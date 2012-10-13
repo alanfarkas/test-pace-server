@@ -15,7 +15,6 @@
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
 		<clover.database>${env.PACEHOME}/.clover/clover.db</clover.database>
-		<clover.mergeDatabase>${env.PACEHOME}/.clover/cloverMerge.db</clover.mergeDatabase>
 		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
 	</properties>
 
@@ -37,6 +36,7 @@
 				<configuration>
     				<licenseLocation>${clover.licenseLocation}</licenseLocation>
         			<singleCloverDatabase>true</singleCloverDatabase>
+					<cloverDatabase>${clover.database}</cloverDatabase>
 					<snapshot>${clover.snapshot}</snapshot>
 				</configuration>
 			</plugin>
