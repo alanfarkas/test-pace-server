@@ -253,7 +253,7 @@
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
 							<baseDir>${project.basedir}</baseDir>
-							<licenseLocation>/development/build-server/clover/clover.license</licenseLocation>
+							<licenseLocation>${clover.licenseLocation}</licenseLocation>
 						</configuration>
 						<executions>
 							<execution>
