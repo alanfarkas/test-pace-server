@@ -15,7 +15,6 @@
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
 		<clover.database>${env.PACEHOME}/.clover/clover.db</clover.database>
-		<clover.mergeDatabase>${env.PACEHOME}/.clover/cloverMerge.db</clover.mergeDatabase>
 	</properties>
 
 	<build>
