@@ -11,7 +11,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
-		<clover.database>${env.PACEHOME}/.clover/clover.db</clover.database>
 		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
 	</properties>
 	<repositories>
@@ -248,7 +247,6 @@
 				<configuration>
     				<licenseLocation>${clover.licenseLocation}</licenseLocation>
         			<singleCloverDatabase>true</singleCloverDatabase>
-					<cloverDatabase>${clover.database}</cloverDatabase>
 					<snapshot>${clover.snapshot}</snapshot>
 				</configuration>
 			</plugin>
