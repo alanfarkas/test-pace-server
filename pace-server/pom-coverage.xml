@@ -12,6 +12,7 @@
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
 		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
+        <clover.mergeDatabase>${project.build.directory}/clover/cloverMerge.db</clover.mergeDatabase>
 	</properties>
 
 	<repositories>
@@ -25,7 +26,7 @@
 			<url>http://maven.vaadin.com/vaadin-addons</url>
 		</repository>
 	</repositories>
-<!-- 
+ 
 	<modules>
 		<module>${project.build.directory}/pace-server</module>
 		<module>${project.build.directory}/pace-base</module>
@@ -33,7 +34,7 @@
 		<module>${project.build.directory}/pace-ext-funcs</module>
 		<module>${project.build.directory}/pace-prvdr-mdb-esb</module>
 	</modules>
--->
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.openejb</groupId>
@@ -253,9 +254,9 @@
 						<version>3.1.4</version>
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
-							<baseDir>${project.basedir}</baseDir>
-						    <singleCloverDatabase>true</singleCloverDatabase>
 							<snapshot>${clover.snapshot}</snapshot>
+					  		<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
+							<reportDescriptor>/clover/report/clover-report.xml</reportDescriptor>
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
 							<generatePdf>true</generatePdf>
@@ -272,6 +273,7 @@
 								<phase>verify</phase>
 								<goals>
 									<goal>aggregate</goal>
+									<goal>merge</goal>
 									<goal>clover</goal>
 								</goals>
 							</execution>
@@ -287,7 +289,7 @@
 				</plugins>
 			</build>
 			<reporting>
-			    <outputDirectory>${project.build.directory}/site</outputDirectory>
+			    <outputDirectory>${project.build.directory}/clover/site</outputDirectory>
 				<plugins>
 					<plugin>
 						<groupId>com.atlassian.maven.plugins</groupId>
@@ -295,8 +297,8 @@
 						<version>3.1.4</version>
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
-							<cloverDatabase>${clover.database}</cloverDatabase>
 							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
+							<reportDescriptor>/clover/report/clover-report.xml</reportDescriptor>
 							<generateHTML>true</generateHTML>
 							<generatePdf>true</generatePdf>
 							<generateXml>true</generateXml>
