@@ -235,38 +235,61 @@
 				<version>3.1.4</version>
 				<configuration>
 					<licenseLocation>${clover.licenseLocation}</licenseLocation>
-					<snapshot>${clover.snapshot}</snapshot>
-					<generateHtml>true</generateHtml>
-					<generateXml>true</generateXml>
-					<baseDir>${project.basedir}</baseDir>
 				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>setup</goal>
-							<goal>snapshot</goal>
-							<goal>aggregate</goal>
-							<goal>clover</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>com.atlassian.maven.plugins</groupId>
-				<artifactId>maven-clover2-plugin</artifactId>
-				<version>3.1.4</version>
-				<configuration>
-					<licenseLocation>${clover.licenseLocation}</licenseLocation>
-					<snapshot>${clover.snapshot}</snapshot>
-					<generateHtml>true</generateHtml>
-					<generateXml>true</generateXml>
-					<baseDir>${project.basedir}</baseDir>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
+
+	<profiles>
+		<profile>
+			<id>clover</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-clover2-plugin</artifactId>
+						<configuration>
+							<snapshot>${clover.snapshot}</snapshot>
+							<generateHtml>true</generateHtml>
+							<generateXml>true</generateXml>
+							<baseDir>${project.basedir}</baseDir>
+							<licenseLocation>/development/build-server/clover/clover.license</licenseLocation>
+						</configuration>
+						<executions>
+							<execution>
+								<id>clover</id>
+								<goals>
+									<goal>setup</goal>
+									<goal>snapshot</goal>
+								</goals>
+							</execution>
+							<execution>
+								<phase>verify</phase>
+								<goals>
+									<goal>aggregate</goal>
+									<goal>clover</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>site</id>
+								<phase>pre-site</phase>
+								<goals>
+									<goal>aggregate</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+			<reporting>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-clover2-plugin</artifactId>
+						<version>3.1.4</version>
+					</plugin>
+				</plugins>
+			</reporting>
+		</profile>
+	</profiles>
 </project>
