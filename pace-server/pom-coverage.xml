@@ -10,7 +10,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<localRepository>${user.home}/.m2/repository</localRepository>
-		<baseDir>${env.PACEHOME}</baseDir>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
 		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
 		<clover.mergeDatabase>${env.PACEHOME}/clover/cloverMerge.db</clover.mergeDatabase>
@@ -268,8 +267,9 @@
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
 							<snapshot>${clover.snapshot}</snapshot>
+							<baseDir>${env.PACEHOME}</baseDir>
 							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
-							<reportDescriptor>/clover/report/clover-report.xml</reportDescriptor>
+							<reportDescriptor>${env.PACEHOME}/clover/site/clover-report.xml</reportDescriptor>
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
 							<generatePdf>true</generatePdf>
@@ -302,7 +302,7 @@
 				</plugins>
 			</build>
 			<reporting>
-				<outputDirectory>${project.build.directory}/clover/site</outputDirectory>
+				<outputDirectory>${env.PACEHOME}/clover/site</outputDirectory>
 				<plugins>
 					<plugin>
 						<groupId>com.atlassian.maven.plugins</groupId>
@@ -311,7 +311,7 @@
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
 							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
-							<reportDescriptor>/clover/report/clover-report.xml</reportDescriptor>
+							<reportDescriptor>${env.PACEHOME}/clover/report/clover-report.xml</reportDescriptor>
 							<generateHTML>true</generateHTML>
 							<generatePdf>true</generatePdf>
 							<generateXml>true</generateXml>
