@@ -269,14 +269,13 @@
 							<snapshot>${clover.snapshot}</snapshot>
 							<baseDir>${env.PACEHOME}</baseDir>
 							<!-- 
-							<cloverdb>${clover.PACEHOME}/pace-base/</cloverdb>
-							<cloverdb>${clover.PACEHOME}/pace-ext-cmds/</cloverdb>
-							<cloverdb>${clover.PACEHOME}/pace-ext-funcs</cloverdb>
-							<cloverdb>${clover.PACEHOME}/pace-prvdr-mdb-esb</cloverdb>
-							<cloverdb>${clover.PACEHOME}/pace-server</cloverdb>
+							<cloverdb>${clover.PACEHOME}/pace-base/target/clover/clover.db</cloverdb>
+							<cloverdb>${clover.PACEHOME}/pace-ext-cmds/target/clover/clover.db</cloverdb>
+							<cloverdb>${clover.PACEHOME}/pace-ext-funcs/target/clover/clover.db</cloverdb>
+							<cloverdb>${clover.PACEHOME}/pace-prvdr-mdb-esb/target/clover/clover.db</cloverdb>
+							<cloverdb>target/clover/clover.db</cloverdb>
 							-->
 							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
-							<reportDescriptor>${env.PACEHOME}/clover/site/clover-report.xml</reportDescriptor>
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
 							<generatePdf>true</generatePdf>
@@ -317,7 +316,6 @@
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
 							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
-							<reportDescriptor>${env.PACEHOME}/clover/report/clover-report.xml</reportDescriptor>
 							<generateHTML>true</generateHTML>
 							<generatePdf>true</generatePdf>
 							<generateXml>true</generateXml>
