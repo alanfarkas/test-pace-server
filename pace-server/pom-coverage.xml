@@ -307,7 +307,7 @@
 				</plugins>
 			</build>
 			<reporting>
-				<outputDirectory>${env.PACEHOME}/clover/site</outputDirectory>
+    			<outputDirectory>../clover</outputDirectory>
 				<plugins>
 					<plugin>
 						<groupId>com.atlassian.maven.plugins</groupId>
