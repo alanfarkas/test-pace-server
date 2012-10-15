@@ -12,7 +12,7 @@
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
 		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
-		<clover.mergeDatabase>${env.PACEHOME}/clover/clover.db</clover.mergeDatabase>
+		<clover.mergeDatabase>${env.PACEHOME}/clover/clover.mergedb</clover.mergeDatabase>
 	</properties>
 
 	<repositories>
@@ -27,9 +27,14 @@
 		</repository>
 	</repositories>
 
-	<!-- <modules> <module>${project.build.directory}/pace-server</module> <module>${project.build.directory}/pace-base</module> 
-		<module>${project.build.directory}/pace-ext-cmds</module> <module>${project.build.directory}/pace-ext-funcs</module> 
-		<module>${project.build.directory}/pace-prvdr-mdb-esb</module> </modules> -->
+	<modules> 
+		<module>pace-server</module> 
+		<module>../pace-base</module> 
+		<module>../pace-ext-cmds</module> 
+		<module>../pace-ext-funcs</module> 
+		<module>../pace-prvdr-mdb-esb</module> 
+	</modules> 
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.openejb</groupId>
@@ -268,11 +273,6 @@
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
 							<snapshot>${clover.snapshot}</snapshot>
 							<baseDir>${env.PACEHOME}</baseDir>
-							<cloverdb>${clover.PACEHOME}/pace-base/target/clover/clover.db</cloverdb>
-							<cloverdb>${clover.PACEHOME}/pace-ext-cmds/target/clover/clover.db</cloverdb>
-							<cloverdb>${clover.PACEHOME}/pace-ext-funcs/target/clover/clover.db</cloverdb>
-							<cloverdb>${clover.PACEHOME}/pace-prvdr-mdb-esb/target/clover/clover.db</cloverdb>
-							<cloverdb>target/clover/clover.db</cloverdb>
 							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
@@ -314,7 +314,7 @@
 						<version>3.1.4</version>
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
-							<cloverDatabase>${clover.Database}</cloverDatabase>
+							<cloverDatabase>${clover.mergeDatabase}</cloverDatabase>
 							<generateHTML>true</generateHTML>
 							<generatePdf>true</generatePdf>
 							<generateXml>true</generateXml>
