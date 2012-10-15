@@ -268,13 +268,11 @@
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
 							<snapshot>${clover.snapshot}</snapshot>
 							<baseDir>${env.PACEHOME}</baseDir>
-							<!-- 
 							<cloverdb>${clover.PACEHOME}/pace-base/target/clover/clover.db</cloverdb>
 							<cloverdb>${clover.PACEHOME}/pace-ext-cmds/target/clover/clover.db</cloverdb>
 							<cloverdb>${clover.PACEHOME}/pace-ext-funcs/target/clover/clover.db</cloverdb>
 							<cloverdb>${clover.PACEHOME}/pace-prvdr-mdb-esb/target/clover/clover.db</cloverdb>
 							<cloverdb>target/clover/clover.db</cloverdb>
-							-->
 							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
@@ -307,7 +305,7 @@
 				</plugins>
 			</build>
 			<reporting>
-    			<outputDirectory>../clover</outputDirectory>
+     			<outputDirectory>${basedir}/target/site</outputDirectory>
 				<plugins>
 					<plugin>
 						<groupId>com.atlassian.maven.plugins</groupId>
