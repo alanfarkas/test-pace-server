@@ -34,7 +34,6 @@
 		<module>pace-ext-cmds</module> 
 		<module>pace-ext-funcs</module> 
 		<module>pace-prvdr-mdb-esb</module> 
-		<module>pace-server</module> 
 	</modules> 
 	
 	<dependencies>
