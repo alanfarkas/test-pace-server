@@ -1,0 +1,27 @@
+<PafLDAPSettings>
+  <ldapProviderName>jim</ldapProviderName>
+  <securityPrincipal>montana\jim</securityPrincipal>
+  <securityCredentials>amanda</securityCredentials>
+  <providerURLGC>ldap://montana.local:3268</providerURLGC>
+  <securityAuthentication>simple</securityAuthentication>
+  <securityProtocol>none</securityProtocol>
+  <searchBase>DC=montana,DC=local</searchBase>
+  <domainController>DC=montana,DC=local</domainController>
+  <ldapPagesize>10000</ldapPagesize>
+  <ignoreBuiltInGroups>false</ignoreBuiltInGroups>
+  <ignoreExpiredAccounts>true</ignoreExpiredAccounts>
+  <ignoreLockedOutAccounts>true</ignoreLockedOutAccounts>
+  <ignoreExpiredPWAccounts>true</ignoreExpiredPWAccounts>
+  <ignoreDisabledAccounts>true</ignoreDisabledAccounts>
+  <kerberosRealm> </kerberosRealm>
+  <kerberosKDC> </kerberosKDC>
+  <kerberosLoginConf> </kerberosLoginConf>
+  <sslKeyStore>c:/Program Files (x86)/Java/jdk1.5.0_08/jre/lib/security/cacerts</sslKeyStore>
+  <netBiosNames>
+    <entry>
+      <string>MONTANA</string>
+      <string>montana.local</string>
+    </entry>
+  </netBiosNames>
+  <connectTimeout>30000</connectTimeout>
+</PafLDAPSettings>
