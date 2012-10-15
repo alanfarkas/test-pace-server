@@ -30,11 +30,11 @@
 	</repositories>
 
 	<modules> 
-		<module>../pace-base</module> 
-		<module>../pace-ext-cmds</module> 
-		<module>../pace-ext-funcs</module> 
-		<module>../pace-prvdr-mdb-esb</module> 
-		<module>../pace-server</module> 
+		<module>pace-base</module> 
+		<module>pace-ext-cmds</module> 
+		<module>pace-ext-funcs</module> 
+		<module>pace-prvdr-mdb-esb</module> 
+		<module>pace-server</module> 
 	</modules> 
 	
 	<dependencies>
@@ -274,7 +274,7 @@
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
 							<snapshot>${clover.snapshot}</snapshot>
-							<baseDir>${env.PACEHOME}</baseDir>
+							<baseDir>../</baseDir>
 							<!-- 
 							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
 							 -->
@@ -294,7 +294,6 @@
 								<phase>verify</phase>
 								<goals>
 									<goal>aggregate</goal>
-									<goal>merge</goal>
 									<goal>clover</goal>
 								</goals>
 							</execution>
