@@ -12,9 +12,6 @@
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
 		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
-		<!-- 
-		<clover.mergeDatabase>${env.PACEHOME}/clover/clover.mergedb</clover.mergeDatabase>
-		 -->
 	</properties>
 
 	<repositories>
@@ -34,7 +31,6 @@
 		<module>../pace-ext-cmds</module> 
 		<module>../pace-ext-funcs</module> 
 		<module>../pace-prvdr-mdb-esb</module> 
-		<module>../pace-server</module> 
 	</modules> 
 	
 	<dependencies>
@@ -274,10 +270,7 @@
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
 							<snapshot>${clover.snapshot}</snapshot>
-							<baseDir>../</baseDir>
-							<!-- 
-							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
-							 -->
+							<baseDir>${project.basedir}</baseDir>
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
 							<generatePdf>true</generatePdf>
@@ -317,9 +310,6 @@
 						<version>3.1.4</version>
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
-							<!-- 
-							<cloverDatabase>${clover.mergeDatabase}</cloverDatabase>
-							 -->
 							<generateHTML>true</generateHTML>
 							<generatePdf>true</generatePdf>
 							<generateXml>true</generateXml>
