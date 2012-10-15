@@ -30,10 +30,10 @@
 	</repositories>
 
 	<modules> 
-		<module>pace-base</module> 
-		<module>pace-ext-cmds</module> 
-		<module>pace-ext-funcs</module> 
-		<module>pace-prvdr-mdb-esb</module> 
+		<module>../pace-base</module> 
+		<module>../pace-ext-cmds</module> 
+		<module>../pace-ext-funcs</module> 
+		<module>../pace-prvdr-mdb-esb</module> 
 	</modules> 
 	
 	<dependencies>
