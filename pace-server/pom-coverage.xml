@@ -12,7 +12,7 @@
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
 		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
-		<clover.mergeDatabase>${env.PACEHOME}/clover/cloverMerge.db</clover.mergeDatabase>
+		<clover.mergeDatabase>${env.PACEHOME}/clover/clover.db</clover.mergeDatabase>
 	</properties>
 
 	<repositories>
@@ -290,6 +290,7 @@
 								<phase>verify</phase>
 								<goals>
 									<goal>aggregate</goal>
+									<goal>merge</goal>
 									<goal>clover</goal>
 								</goals>
 							</execution>
@@ -313,7 +314,7 @@
 						<version>3.1.4</version>
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
-							<cloverMergeDatabase>${clover.mergeDatabase}</cloverMergeDatabase>
+							<cloverDatabase>${clover.Database}</cloverDatabase>
 							<generateHTML>true</generateHTML>
 							<generatePdf>true</generatePdf>
 							<generateXml>true</generateXml>
