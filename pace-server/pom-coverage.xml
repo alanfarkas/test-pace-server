@@ -28,7 +28,7 @@
 	</repositories>
 
 	<modules> 
-		<module>pace-server</module> 
+		<module>../pace-server</module> 
 		<module>../pace-base</module> 
 		<module>../pace-ext-cmds</module> 
 		<module>../pace-ext-funcs</module> 
