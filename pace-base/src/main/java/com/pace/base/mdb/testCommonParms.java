@@ -34,17 +34,28 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.essbase.api.metadata.IEssMember;
-import com.pace.base.CustomCommandResult;
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafConfigFileNotFoundException;
 import com.pace.base.PafException;
-import com.pace.base.app.*;
+import com.pace.base.app.MdbDef;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.MeasureType;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PlanCycle;
+import com.pace.base.app.Season;
+import com.pace.base.app.SeasonList;
+import com.pace.base.app.UnitOfWork;
+import com.pace.base.app.VarRptgFlag;
+import com.pace.base.app.VersionDef;
+import com.pace.base.app.VersionFormula;
+import com.pace.base.app.VersionType;
+import com.pace.base.app.VersionVarianceType;
 import com.pace.base.comm.ClientInitRequest;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
-import com.pace.base.state.IPafClientState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.PafXStream;
+import com.pace.base.utility.PropertyLoader;
 import com.pace.base.utility.StringUtils;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafView;
@@ -201,7 +212,9 @@ public abstract class testCommonParms {
 	public static PafConnectionProps getPafConnectionProps() {
 		
 		PafConnectionProps pafConnectProps = new PafConnectionProps();
-		pafConnectProps.setProperties(getConnectionProps());
+		Properties props = PropertyLoader.loadProperties(PafBaseConstants.FN_EssbaseConnPropTest);
+//		pafConnectProps.setProperties(getConnectionProps());
+		pafConnectProps.setProperties(props);
 		return pafConnectProps;
 	}
 	

@@ -39,8 +39,7 @@ import com.pace.base.utility.PropertyLoader;
 
 public class TestEsbConnMgr extends TestCase {
 	
-//	private Properties props = testCommonParms.getConnectionProps();
-	private Properties props = PropertyLoader.loadProperties(PafBaseConstants.FN_EssbaseConnPropTest);
+	private Properties props = testCommonParms.getConnectionProps();
 	
 	private static Logger logger = Logger.getLogger("TestEsbConnMgr");
 	
