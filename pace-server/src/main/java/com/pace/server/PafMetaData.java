@@ -587,7 +587,7 @@ public class PafMetaData {
 		if (props == null || debugMode) {
 			try {
 				props = PropertyLoader
-						.loadProperties(PafBaseConstants.FN_ServerInitialization,Thread.currentThread ().getContextClassLoader ());
+						.loadProperties(PafBaseConstants.FN_ServerInitialization);
 			} catch (Exception ex) {
 				PafErrHandler.handleException(ex, PafErrSeverity.Error);
 			}

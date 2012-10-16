@@ -212,7 +212,7 @@ public abstract class testCommonParms {
 	public static PafConnectionProps getPafConnectionProps() {
 		
 		PafConnectionProps pafConnectProps = new PafConnectionProps();
-		Properties props = PropertyLoader.loadProperties(PafBaseConstants.FN_EssbaseConnPropTest,Thread.currentThread ().getContextClassLoader ());
+		Properties props = PropertyLoader.loadProperties(PafBaseConstants.FN_EssbaseConnPropTest);
 //		pafConnectProps.setProperties(getConnectionProps());
 		pafConnectProps.setProperties(props);
 		return pafConnectProps;
