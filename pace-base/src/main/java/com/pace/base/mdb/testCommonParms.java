@@ -178,23 +178,24 @@ public abstract class testCommonParms {
 	
 	public static Properties getConnectionProps() {
 						
-		File propertyFile = new File(PafBaseConstants.FN_EssbaseConnPropTest);
+		Properties props = PropertyLoader.loadProperties(PafBaseConstants.FN_EssbaseConnPropTest);
+//		File propertyFile = new File(PafBaseConstants.FN_EssbaseConnPropTest);
+//		
 		
-		Properties props = new Properties(); 
-		
-		if ( propertyFile.exists() && propertyFile.canRead() ) {
-			
-			try {
-				props.load(new FileInputStream(propertyFile));
-			} catch (FileNotFoundException e) {
-				//do nothing
-			} catch (IOException e) {
-				logger.error(e.getMessage());
-			}
-						
-		} else {			
-			
-			logger.info("Property file: " + propertyFile.getAbsoluteFile() + " was not found.  Defaults will be used.");
+//		if ( propertyFile.exists() && propertyFile.canRead() ) {
+//			
+//			try {
+//				props.load(new FileInputStream(propertyFile));
+//			} catch (FileNotFoundException e) {
+//				//do nothing
+//			} catch (IOException e) {
+//				logger.error(e.getMessage());
+//			}
+//						
+//		} else {			
+//			
+		if( props == null ) {
+			props = new Properties(); 
 			
 			props.setProperty("EDSDOMAIN", "Essbase");
 			props.setProperty("EDSURL", "http://localhost:13080/aps/JAPI");
