@@ -70,7 +70,10 @@ public abstract class PropertyLoader
         InputStream in = null;
         try
         {
-            if (loader == null) loader = ClassLoader.getSystemClassLoader ();
+            if (loader == null) {
+//            	loader = ClassLoader.getSystemClassLoader ();
+            	loader = PropertyLoader.class.getClassLoader();
+            }
             
             if (LOAD_AS_RESOURCE_BUNDLE)
             {    
