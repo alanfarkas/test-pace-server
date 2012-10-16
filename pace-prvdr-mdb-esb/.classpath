@@ -10,6 +10,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/EDS 11.1.2"/>
-	<classpathentry kind="lib" path="C:/Program Files/AM Software/Pace Server/server/standalone/deployments/pace.war/WEB-INF/lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
