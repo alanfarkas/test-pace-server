@@ -65,685 +65,685 @@ public class TestPafDataCacheCalc extends TestCase {
 	/*
 	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension(String, PafUowCache, PafBaseTree)'
 	 */
-	public void testAggDimensionProductNoFilter() {
-		
-		boolean isSuccess = true;
-		
-		@SuppressWarnings("unused")
-		String aggDimName = "Product", aggBranch = "DIV01";
-		@SuppressWarnings("unused") String mdxSelect2 = "SELECT " 
-			+ " Descendants ( [Q1] )"
-//			+ "{[WK01]}"
-			+ " ON AXIS(0), "
-//			+ " {[BOPRTL_DLR], [EOPRTL_DLR],[MD_DLR], [RECRTL_DLR], [SLS_DLR]} "
-			+ " {[EOPRTL_DLR], [BOPRTL_DLR]} "
-			+ " ON AXIS(2), "
-			+ " Descendants ( [" + aggBranch + "] ) "
-			+ " ON AXIS(1), "
-			+ " {[ClassChn]} "
-			+ " ON AXIS(3), "
-			+ " {[WP]} "
-			+ " ON AXIS(4), "
-			+ " {[FY2005]}"
-			+ " ON AXIS(5), "
-			+ " Descendants ( [Location]) "
-			+ " ON AXIS(6) ";
-			
-		IMdbData esbData = null;
-		IMdbMetaData esbMetaData = null;
-		PafDataCache pafDataCache = null;
-		@SuppressWarnings("unused")
-		PafBaseTree pafBaseTree = null;
-
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(props);
-			
-			// Get data
-//			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
-					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
-			
-			// Create new EsbMetaData object
-			esbMetaData = new EsbMetaData(props);
-
-			// Get paf member tree for selected branch
-			pafBaseTree = esbMetaData.getBaseDimension(aggBranch);
-			
-			// Display initial data
-//			logger.info("Intial data..." + pafDataCache.toString());
-			
-			// Aggregate data
-//			PafUowCacheCalc.aggDimension(aggDimName, pafUowCache, pafBaseTree);
-			
-			// Display initial data
-//			logger.info("Aggregated data..." + pafDataCache.toString());
-			
-			// Send updated data cache back to Essbase 
-			esbData.sendData(pafDataCache, testCommonParms.getClientState());
-			
-		} catch (PafException pfe) {
-			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
-			pfe.printStackTrace();
-			isSuccess = false;
-		} catch (Exception ex) {
-			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
-			ex.printStackTrace();
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
-					pafBaseTree = null;
-				}
-			}
-		}
-		
-	}
-
-	/*
-	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension2(String, PafUowCache, PafBaseTree)'
-	 */
-	public void testAggDimensionProductWithFilter() {
-		
-		boolean isSuccess = true;
-		
-		@SuppressWarnings("unused")
-		String aggDimName = "Product", aggBranch = "DIV01";
-		
-		IMdbData esbData = null;
-		IMdbMetaData esbMetaData = null;
-		PafDataCache pafDataCache = null;
-		@SuppressWarnings("unused")
-		PafBaseTree pafBaseTree = null;
-
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(props);
-			
-			// Get data
-///			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
-					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
-			
-			// Create new EsbMetaData object
-			esbMetaData = new EsbMetaData(props);
-
-			// Get paf member tree for selected branch
-			pafBaseTree = esbMetaData.getBaseDimension(aggBranch);
-			
-			// Display initial data
-//			logger.info("Intial data..." + pafDataCache.toString());
-			
-			// Aggregate data
-//			PafUowCacheCalc.aggDimension(aggDimName, pafUowCache, pafBaseTree, memberFilters);
-			
-			// Display initial data
-//			logger.info("Aggregated data..." + pafDataCache.toString());
-			
-			// Send updated data cache back to Essbase 
-			esbData.sendData(pafDataCache, testCommonParms.getClientState());
-			
-		} catch (PafException pfe) {
-			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
-			pfe.printStackTrace();
-			isSuccess = false;
-		} catch (Exception ex) {
-			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
-			ex.printStackTrace();
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
-					pafBaseTree = null;
-				}
-			}
-		}
-		
-	}
-
-	/*
-	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension2(String, PafUowCache, PafBaseTree)'
-	 */
-	public void testAggDimensionProductEmptyFilter() {
-		
-		boolean isSuccess = true;
-		
-		@SuppressWarnings("unused")
-		String aggDimName = "Product", aggBranch = "DIV01";
-		
-		IMdbData esbData = null;
-		IMdbMetaData esbMetaData = null;
-		PafDataCache pafDataCache = null;
-		@SuppressWarnings("unused")
-		PafBaseTree pafBaseTree = null;
-
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(props);
-			
-			// Get data
-//			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
-					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
-			
-			// Create new EsbMetaData object
-			esbMetaData = new EsbMetaData(props);
-
-			// Get paf member tree for selected branch
-			pafBaseTree = esbMetaData.getBaseDimension(aggBranch);
-			
-			// Display initial data
-//			logger.info("Initial data..." + pafDataCache.toString());
-			
-			// Aggregate data
-//			PafUowCacheCalc.aggDimension(aggDimName, pafUowCache, pafBaseTree, emptyMemberFilters);
-			
-			// Display initial data
-//			logger.info("Aggregated data..." + pafDataCache.toString());
-			
-			// Send updated data cache back to Essbase 
-			esbData.sendData(pafDataCache, testCommonParms.getClientState());
-			
-		} catch (PafException pfe) {
-			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
-			pfe.printStackTrace();
-			isSuccess = false;
-		} catch (IllegalArgumentException iae) {
-			logger.error("*** Illegal Argument Exception: " + iae.getMessage() + " ***");
-			isSuccess = true;
-		} catch (Exception ex) {
-			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
-			ex.printStackTrace();
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
-					pafBaseTree = null;
-				}
-			}
-		}
-		
-	}
-
-	/*
-	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension3(String, PafUowCache, PafBaseTree)'
-	 */
-	public void testAggDimensionTime() {
-		
-		boolean isSuccess = true;
-		
-		@SuppressWarnings("unused")
-		String aggDimName = "Time", aggBranch = "S01";
-		@SuppressWarnings("unused") String mdxSelect2 = "SELECT " 
-			+ " Descendants ( [Q1] )"
-//			+ "{[WK01]}"
-			+ " ON AXIS(0), "
-//			+ " {[BOPRTL_DLR], [EOPRTL_DLR],[MD_DLR], [RECRTL_DLR], [SLS_DLR]} "
-			+ " {[BOPRTL_DLR], [SLS_DLR]} "
+//	public void testAggDimensionProductNoFilter() {
+//		
+//		boolean isSuccess = true;
+//		
+//		@SuppressWarnings("unused")
+//		String aggDimName = "Product", aggBranch = "DIV01";
+//		@SuppressWarnings("unused") String mdxSelect2 = "SELECT " 
+//			+ " Descendants ( [Q1] )"
+////			+ "{[WK01]}"
+//			+ " ON AXIS(0), "
+////			+ " {[BOPRTL_DLR], [EOPRTL_DLR],[MD_DLR], [RECRTL_DLR], [SLS_DLR]} "
 //			+ " {[EOPRTL_DLR], [BOPRTL_DLR]} "
-			+ " ON AXIS(2), "
+//			+ " ON AXIS(2), "
 //			+ " Descendants ( [" + aggBranch + "] ) "
-			+ " {[CLS110-00]} "
-			+ " ON AXIS(1), "
-			+ " {[ClassChn]} "
-			+ " ON AXIS(3), "
-			+ " {[WP]} "
-			+ " ON AXIS(4), "
-			+ " {[FY2005]}"
-			+ " ON AXIS(5), "
+//			+ " ON AXIS(1), "
+//			+ " {[ClassChn]} "
+//			+ " ON AXIS(3), "
+//			+ " {[WP]} "
+//			+ " ON AXIS(4), "
+//			+ " {[FY2005]}"
+//			+ " ON AXIS(5), "
 //			+ " Descendants ( [Location]) "
-			+ " {[Store1]} "
-			+ " ON AXIS(6) ";
-		
-		IMdbData esbData = null;
-		IMdbMetaData esbMetaData = null;
-		PafDataCache pafDataCache = null;
+//			+ " ON AXIS(6) ";
+//			
+//		IMdbData esbData = null;
+//		IMdbMetaData esbMetaData = null;
+//		PafDataCache pafDataCache = null;
+//		@SuppressWarnings("unused")
 //		PafBaseTree pafBaseTree = null;
-
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(props);
-			
-			// Get data
-//			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
-					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
-			
-			// Create new EsbMetaData object
-			esbMetaData = new EsbMetaData(props);
-
-			// Get paf member tree for selected branch
+//
+//		logger.info("***************************************************");
+//		logger.info(this.getName() +  " - Test Started");
+//		try {
+//			// Create new EsbData object
+//			esbData = new EsbData(props);
+//			
+//			// Get data
+////			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
+////			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+////					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
+//			
+//			// Create new EsbMetaData object
+//			esbMetaData = new EsbMetaData(props);
+//
+//			// Get paf member tree for selected branch
 //			pafBaseTree = esbMetaData.getBaseDimension(aggBranch);
-			
-			// Display initial data
-			//logger.info("Intial data..." + pafDataCache.toString());
-			
-			// Aggregate data
-//			PafUowCacheCalc.aggDimension(aggDimName, pafUowCache, pafBaseTree, null);
-			
-			// Display initial data
-			//logger.info("Aggregated data..." + pafDataCache.toString());
-			
-			// Send updated data cache back to Essbase 
-			esbData.sendData(pafDataCache, testCommonParms.getClientState());
-			
+//			
+//			// Display initial data
+////			logger.info("Intial data..." + pafDataCache.toString());
+//			
+//			// Aggregate data
+////			PafUowCacheCalc.aggDimension(aggDimName, pafUowCache, pafBaseTree);
+//			
+//			// Display initial data
+////			logger.info("Aggregated data..." + pafDataCache.toString());
+//			
+//			// Send updated data cache back to Essbase 
+//			esbData.sendData(pafDataCache, testCommonParms.getClientState());
+//			
 //		} catch (PafException pfe) {
 //			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
+//			pfe.printStackTrace();
 //			isSuccess = false;
-		} catch (Exception ex) {
-			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
+//		} catch (Exception ex) {
+//			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
+//			ex.printStackTrace();
+//			isSuccess = false;
+//		} finally {
+//			try {
+//				assertTrue(isSuccess);
+//			} finally {
+//				if (isSuccess) {
+//					logger.info(this.getName() + " - Successful");
+//					logger.info("***************************************************\n");
+//				}
+//				else {
+//					logger.info(this.getName() + " - Failed");			
+//					logger.info("***************************************************\n");
+//				}
+//				try {
+//					// Disconnect from Essbase
+//					logger.info("Disconnecting.........");
+//					esbMetaData.disconnect();
+//				} catch (PafException pfe) {
+//					logger.info("*** " + pfe.getMessage() + " ***");
+//					isSuccess = false;
+//				} catch (Exception e) {
+//					logger.info("*** Java Exception: " + e.getMessage() + " ***");
+//					isSuccess = false;
+//				} finally {
+//					esbMetaData = null;
 //					pafBaseTree = null;
-				}
-			}
-		}
-		
-	}
-	
-	/*
-	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension(String, PafUowCache, PafBaseTree)'
-	 */
-	public void testCalcVersionNoFilter() {
-		
-		boolean isSuccess = true;	
-		IMdbData esbData = null;
-		IMdbMetaData esbMetaData = null;
-		PafDataCache pafDataCache = null;
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(props);
-			
-			// Get data
-//			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
-					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
-			
-			// Create new EsbMetaData object
-			esbMetaData = new EsbMetaData(props);
-
-			// Display initial data
-//			logger.info("Intial data..." + pafDataCache.toString());
-			
-			// Calculate data
-//			PafUowCacheCalc.calcVersionDim(pafDataCache);
-			
-			// Display initial data
-//			logger.info("Aggregated data..." + pafDataCache.toString());
-			
-			// Send updated data cache back to Essbase 
-			esbData.sendData(pafDataCache, testCommonParms.getClientState());
-			
-		} catch (PafException pfe) {
-			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
-			pfe.printStackTrace();
-			isSuccess = false;
-		} catch (Exception ex) {
-			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
-			ex.printStackTrace();
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
-				}
-			}
-		}
-		
-	}
-
-	/*
-	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension(String, PafUowCache, PafBaseTree)'
-	 */
-	public void testCalcVersionVersionFilter() {
-		
-		boolean isSuccess = true;	
-		IMdbData esbData = null;
-		IMdbMetaData esbMetaData = null;
-		List<String> members = new ArrayList<String>();
-		Map<String, List<String>> versionFilter = new HashMap<String, List<String>>();
-		PafDataCache pafDataCache = null;
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(props);
-			
-			// Get data
-//			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
-					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
-			
-			// Create new EsbMetaData object
-			esbMetaData = new EsbMetaData(props);
-
-			// Display initial data
-//			logger.info("Intial data..." + pafDataCache.toString());
-			
-			// Create filter on Version dimension
-			members.add("WP_vs_LY");
-			members.add("WP_vs_LY_%");
-			versionFilter.put(pafDataCache.getVersionDim(), members);
-			
-			// Calculate data
-//			PafUowCacheCalc.calcVersionDim(pafDataCache, versionFilter);
-			
-			// Display initial data
-//			logger.info("Aggregated data..." + pafDataCache.toString());
-			
-			// Send updated data cache back to Essbase 
-			esbData.sendData(pafDataCache, testCommonParms.getClientState());
-			
-		} catch (PafException pfe) {
-			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
-			pfe.printStackTrace();
-			isSuccess = false;
-		} catch (Exception ex) {
-			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
-			ex.printStackTrace();
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
-				}
-			}
-		}
-		
-	}
-
-	/*
-	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension(String, PafUowCache, PafBaseTree)'
-	 */
-	public void testCalcVersionEmptyFilter() {
-		
-		boolean isSuccess = true;	
-		@SuppressWarnings("unused")
-		IMdbData esbData = null;
-		IMdbMetaData esbMetaData = null;
-		@SuppressWarnings("unused")
-		List<String> members = new ArrayList<String>();
-		@SuppressWarnings("unused")
-		Map<String, List<String>> versionFilter = emptyMemberFilters;
-		PafDataCache dataCache = null;
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(props);
-			
-			// Get data
-//			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + dataCache.getCellCount() + "] cells, [" + dataCache.getRowCount()
-					+ "] rows, and [" + dataCache.getColumnCount() + "] columns...");
-			
-			// Create new EsbMetaData object
-			esbMetaData = new EsbMetaData(props);
-
-			// Display initial data
-//			logger.info("Intial data..." + pafDataCache.toString());
-						
-			// Calculate data
-//			PafUowCacheCalc.calcVersionDim(pafDataCache, versionFilter);
-			
-		} catch (PafException pfe) {
-			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
-			pfe.printStackTrace();
-			isSuccess = false;
-		} catch (IllegalArgumentException iae) {
-			logger.error("*** Illegal Argument Exception: " + iae.getMessage() + " ***");
-			isSuccess = true;
-		} catch (Exception ex) {
-			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
-			ex.printStackTrace();
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
-				}
-			}
-		}
-		
-	}
-
-	/*
-	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension(String, PafUowCache, PafBaseTree)'
-	 */
-	public void testCalcVersionVersionandTimeFilter() {
-		
-		boolean isSuccess = true;	
-		IMdbData esbData = null;
-		IMdbMetaData esbMetaData = null;
-		List<String> members = new ArrayList<String>(), members2 = new ArrayList<String>();
-		Map<String, List<String>> memberFilters = new HashMap<String, List<String>>();
-		PafDataCache pafDataCache = null;
-		logger.info("***************************************************");
-		logger.info(this.getName() +  " - Test Started");
-		try {
-			// Create new EsbData object
-			esbData = new EsbData(props);
-			
-			// Get data
-//			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
-			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
-					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
-			
-			// Create new EsbMetaData object
-			esbMetaData = new EsbMetaData(props);
-
-			// Display initial data
-//			logger.info("Initial data..." + pafDataCache.toString());
-			
-			// Create filter for variance calc
-			members.add("WP_vs_LY");
-			members.add("WP_vs_LY_%");
-			memberFilters.put(pafDataCache.getVersionDim(), members);
-			members2.add("WK01");
-			members2.add("WK02");
-			members2.add("WK03");
-			memberFilters.put(pafDataCache.getTimeDim(), members2);
-			
-			// Calculate data
-//			PafUowCacheCalc.calcVersionDim(pafDataCache, memberFilters);
-			
-			// Display initial data
-//			logger.info("Aggregated data..." + pafDataCache.toString());
-			
-			// Send updated data cache back to Essbase 
-			esbData.sendData(pafDataCache, testCommonParms.getClientState());
-			
-		} catch (PafException pfe) {
-			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
-			pfe.printStackTrace();
-			isSuccess = false;
-		} catch (Exception ex) {
-			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
-			ex.printStackTrace();
-			isSuccess = false;
-		} finally {
-			try {
-				assertTrue(isSuccess);
-			} finally {
-				if (isSuccess) {
-					logger.info(this.getName() + " - Successful");
-					logger.info("***************************************************\n");
-				}
-				else {
-					logger.info(this.getName() + " - Failed");			
-					logger.info("***************************************************\n");
-				}
-				try {
-					// Disconnect from Essbase
-					logger.info("Disconnecting.........");
-					esbMetaData.disconnect();
-				} catch (PafException pfe) {
-					logger.info("*** " + pfe.getMessage() + " ***");
-					isSuccess = false;
-				} catch (Exception e) {
-					logger.info("*** Java Exception: " + e.getMessage() + " ***");
-					isSuccess = false;
-				} finally {
-					esbMetaData = null;
-				}
-			}
-		}
-	}
+//				}
+//			}
+//		}
+//		
+//	}
+//
+//	/*
+//	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension2(String, PafUowCache, PafBaseTree)'
+//	 */
+//	public void testAggDimensionProductWithFilter() {
+//		
+//		boolean isSuccess = true;
+//		
+//		@SuppressWarnings("unused")
+//		String aggDimName = "Product", aggBranch = "DIV01";
+//		
+//		IMdbData esbData = null;
+//		IMdbMetaData esbMetaData = null;
+//		PafDataCache pafDataCache = null;
+//		@SuppressWarnings("unused")
+//		PafBaseTree pafBaseTree = null;
+//
+//		logger.info("***************************************************");
+//		logger.info(this.getName() +  " - Test Started");
+//		try {
+//			// Create new EsbData object
+//			esbData = new EsbData(props);
+//			
+//			// Get data
+/////			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
+////			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+////					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
+//			
+//			// Create new EsbMetaData object
+//			esbMetaData = new EsbMetaData(props);
+//
+//			// Get paf member tree for selected branch
+//			pafBaseTree = esbMetaData.getBaseDimension(aggBranch);
+//			
+//			// Display initial data
+////			logger.info("Intial data..." + pafDataCache.toString());
+//			
+//			// Aggregate data
+////			PafUowCacheCalc.aggDimension(aggDimName, pafUowCache, pafBaseTree, memberFilters);
+//			
+//			// Display initial data
+////			logger.info("Aggregated data..." + pafDataCache.toString());
+//			
+//			// Send updated data cache back to Essbase 
+//			esbData.sendData(pafDataCache, testCommonParms.getClientState());
+//			
+//		} catch (PafException pfe) {
+//			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
+//			pfe.printStackTrace();
+//			isSuccess = false;
+//		} catch (Exception ex) {
+//			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
+//			ex.printStackTrace();
+//			isSuccess = false;
+//		} finally {
+//			try {
+//				assertTrue(isSuccess);
+//			} finally {
+//				if (isSuccess) {
+//					logger.info(this.getName() + " - Successful");
+//					logger.info("***************************************************\n");
+//				}
+//				else {
+//					logger.info(this.getName() + " - Failed");			
+//					logger.info("***************************************************\n");
+//				}
+//				try {
+//					// Disconnect from Essbase
+//					logger.info("Disconnecting.........");
+//					esbMetaData.disconnect();
+//				} catch (PafException pfe) {
+//					logger.info("*** " + pfe.getMessage() + " ***");
+//					isSuccess = false;
+//				} catch (Exception e) {
+//					logger.info("*** Java Exception: " + e.getMessage() + " ***");
+//					isSuccess = false;
+//				} finally {
+//					esbMetaData = null;
+//					pafBaseTree = null;
+//				}
+//			}
+//		}
+//		
+//	}
+//
+//	/*
+//	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension2(String, PafUowCache, PafBaseTree)'
+//	 */
+//	public void testAggDimensionProductEmptyFilter() {
+//		
+//		boolean isSuccess = true;
+//		
+//		@SuppressWarnings("unused")
+//		String aggDimName = "Product", aggBranch = "DIV01";
+//		
+//		IMdbData esbData = null;
+//		IMdbMetaData esbMetaData = null;
+//		PafDataCache pafDataCache = null;
+//		@SuppressWarnings("unused")
+//		PafBaseTree pafBaseTree = null;
+//
+//		logger.info("***************************************************");
+//		logger.info(this.getName() +  " - Test Started");
+//		try {
+//			// Create new EsbData object
+//			esbData = new EsbData(props);
+//			
+//			// Get data
+////			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
+////			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+////					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
+//			
+//			// Create new EsbMetaData object
+//			esbMetaData = new EsbMetaData(props);
+//
+//			// Get paf member tree for selected branch
+//			pafBaseTree = esbMetaData.getBaseDimension(aggBranch);
+//			
+//			// Display initial data
+////			logger.info("Initial data..." + pafDataCache.toString());
+//			
+//			// Aggregate data
+////			PafUowCacheCalc.aggDimension(aggDimName, pafUowCache, pafBaseTree, emptyMemberFilters);
+//			
+//			// Display initial data
+////			logger.info("Aggregated data..." + pafDataCache.toString());
+//			
+//			// Send updated data cache back to Essbase 
+////			esbData.sendData(pafDataCache, testCommonParms.getClientState());
+//			
+//		} catch (PafException pfe) {
+//			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
+//			pfe.printStackTrace();
+//			isSuccess = false;
+//		} catch (IllegalArgumentException iae) {
+//			logger.error("*** Illegal Argument Exception: " + iae.getMessage() + " ***");
+//			isSuccess = true;
+//		} catch (Exception ex) {
+//			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
+//			ex.printStackTrace();
+//			isSuccess = false;
+//		} finally {
+//			try {
+//				assertTrue(isSuccess);
+//			} finally {
+//				if (isSuccess) {
+//					logger.info(this.getName() + " - Successful");
+//					logger.info("***************************************************\n");
+//				}
+//				else {
+//					logger.info(this.getName() + " - Failed");			
+//					logger.info("***************************************************\n");
+//				}
+//				try {
+//					// Disconnect from Essbase
+//					logger.info("Disconnecting.........");
+//					esbMetaData.disconnect();
+//				} catch (PafException pfe) {
+//					logger.info("*** " + pfe.getMessage() + " ***");
+//					isSuccess = false;
+//				} catch (Exception e) {
+//					logger.info("*** Java Exception: " + e.getMessage() + " ***");
+//					isSuccess = false;
+//				} finally {
+//					esbMetaData = null;
+//					pafBaseTree = null;
+//				}
+//			}
+//		}
+//		
+//	}
+//
+//	/*
+//	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension3(String, PafUowCache, PafBaseTree)'
+//	 */
+//	public void testAggDimensionTime() {
+//		
+//		boolean isSuccess = true;
+//		
+//		@SuppressWarnings("unused")
+//		String aggDimName = "Time", aggBranch = "S01";
+//		@SuppressWarnings("unused") String mdxSelect2 = "SELECT " 
+//			+ " Descendants ( [Q1] )"
+////			+ "{[WK01]}"
+//			+ " ON AXIS(0), "
+////			+ " {[BOPRTL_DLR], [EOPRTL_DLR],[MD_DLR], [RECRTL_DLR], [SLS_DLR]} "
+//			+ " {[BOPRTL_DLR], [SLS_DLR]} "
+////			+ " {[EOPRTL_DLR], [BOPRTL_DLR]} "
+//			+ " ON AXIS(2), "
+////			+ " Descendants ( [" + aggBranch + "] ) "
+//			+ " {[CLS110-00]} "
+//			+ " ON AXIS(1), "
+//			+ " {[ClassChn]} "
+//			+ " ON AXIS(3), "
+//			+ " {[WP]} "
+//			+ " ON AXIS(4), "
+//			+ " {[FY2005]}"
+//			+ " ON AXIS(5), "
+////			+ " Descendants ( [Location]) "
+//			+ " {[Store1]} "
+//			+ " ON AXIS(6) ";
+//		
+//		IMdbData esbData = null;
+//		IMdbMetaData esbMetaData = null;
+//		PafDataCache pafDataCache = null;
+////		PafBaseTree pafBaseTree = null;
+//
+//		logger.info("***************************************************");
+//		logger.info(this.getName() +  " - Test Started");
+//		try {
+//			// Create new EsbData object
+//			esbData = new EsbData(props);
+//			
+//			// Get data
+////			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
+////			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+////					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
+//			
+//			// Create new EsbMetaData object
+//			esbMetaData = new EsbMetaData(props);
+//
+//			// Get paf member tree for selected branch
+////			pafBaseTree = esbMetaData.getBaseDimension(aggBranch);
+//			
+//			// Display initial data
+//			//logger.info("Intial data..." + pafDataCache.toString());
+//			
+//			// Aggregate data
+////			PafUowCacheCalc.aggDimension(aggDimName, pafUowCache, pafBaseTree, null);
+//			
+//			// Display initial data
+//			//logger.info("Aggregated data..." + pafDataCache.toString());
+//			
+//			// Send updated data cache back to Essbase 
+////			esbData.sendData(pafDataCache, testCommonParms.getClientState());
+//			
+////		} catch (PafException pfe) {
+////			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
+////			isSuccess = false;
+//		} catch (Exception ex) {
+//			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
+//			isSuccess = false;
+//		} finally {
+//			try {
+//				assertTrue(isSuccess);
+//			} finally {
+//				if (isSuccess) {
+//					logger.info(this.getName() + " - Successful");
+//					logger.info("***************************************************\n");
+//				}
+//				else {
+//					logger.info(this.getName() + " - Failed");			
+//					logger.info("***************************************************\n");
+//				}
+//				try {
+//					// Disconnect from Essbase
+//					logger.info("Disconnecting.........");
+//					esbMetaData.disconnect();
+//				} catch (PafException pfe) {
+//					logger.info("*** " + pfe.getMessage() + " ***");
+//					isSuccess = false;
+//				} catch (Exception e) {
+//					logger.info("*** Java Exception: " + e.getMessage() + " ***");
+//					isSuccess = false;
+//				} finally {
+//					esbMetaData = null;
+////					pafBaseTree = null;
+//				}
+//			}
+//		}
+//		
+//	}
+//	
+//	/*
+//	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension(String, PafUowCache, PafBaseTree)'
+//	 */
+//	public void testCalcVersionNoFilter() {
+//		
+//		boolean isSuccess = true;	
+//		IMdbData esbData = null;
+//		IMdbMetaData esbMetaData = null;
+//		PafDataCache pafDataCache = null;
+//		logger.info("***************************************************");
+//		logger.info(this.getName() +  " - Test Started");
+//		try {
+//			// Create new EsbData object
+//			esbData = new EsbData(props);
+//			
+//			// Get data
+////			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
+////			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+////					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
+//			
+//			// Create new EsbMetaData object
+//			esbMetaData = new EsbMetaData(props);
+//
+//			// Display initial data
+////			logger.info("Intial data..." + pafDataCache.toString());
+//			
+//			// Calculate data
+////			PafUowCacheCalc.calcVersionDim(pafDataCache);
+//			
+//			// Display initial data
+////			logger.info("Aggregated data..." + pafDataCache.toString());
+//			
+//			// Send updated data cache back to Essbase 
+////			esbData.sendData(pafDataCache, testCommonParms.getClientState());
+//			
+//		} catch (PafException pfe) {
+//			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
+//			pfe.printStackTrace();
+//			isSuccess = false;
+//		} catch (Exception ex) {
+//			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
+//			ex.printStackTrace();
+//			isSuccess = false;
+//		} finally {
+//			try {
+//				assertTrue(isSuccess);
+//			} finally {
+//				if (isSuccess) {
+//					logger.info(this.getName() + " - Successful");
+//					logger.info("***************************************************\n");
+//				}
+//				else {
+//					logger.info(this.getName() + " - Failed");			
+//					logger.info("***************************************************\n");
+//				}
+//				try {
+//					// Disconnect from Essbase
+//					logger.info("Disconnecting.........");
+//					esbMetaData.disconnect();
+//				} catch (PafException pfe) {
+//					logger.info("*** " + pfe.getMessage() + " ***");
+//					isSuccess = false;
+//				} catch (Exception e) {
+//					logger.info("*** Java Exception: " + e.getMessage() + " ***");
+//					isSuccess = false;
+//				} finally {
+//					esbMetaData = null;
+//				}
+//			}
+//		}
+//		
+//	}
+//
+//	/*
+//	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension(String, PafUowCache, PafBaseTree)'
+//	 */
+//	public void testCalcVersionVersionFilter() {
+//		
+//		boolean isSuccess = true;	
+//		IMdbData esbData = null;
+//		IMdbMetaData esbMetaData = null;
+//		List<String> members = new ArrayList<String>();
+//		Map<String, List<String>> versionFilter = new HashMap<String, List<String>>();
+//		PafDataCache pafDataCache = null;
+//		logger.info("***************************************************");
+//		logger.info(this.getName() +  " - Test Started");
+//		try {
+//			// Create new EsbData object
+//			esbData = new EsbData(props);
+//			
+//			// Get data
+////			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
+////			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+////					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
+//			
+//			// Create new EsbMetaData object
+//			esbMetaData = new EsbMetaData(props);
+//
+//			// Display initial data
+////			logger.info("Intial data..." + pafDataCache.toString());
+//			
+//			// Create filter on Version dimension
+//			members.add("WP_vs_LY");
+//			members.add("WP_vs_LY_%");
+////			versionFilter.put(pafDataCache.getVersionDim(), members);
+//			
+//			// Calculate data
+////			PafUowCacheCalc.calcVersionDim(pafDataCache, versionFilter);
+//			
+//			// Display initial data
+////			logger.info("Aggregated data..." + pafDataCache.toString());
+//			
+//			// Send updated data cache back to Essbase 
+//			esbData.sendData(pafDataCache, testCommonParms.getClientState());
+//			
+//		} catch (PafException pfe) {
+//			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
+//			pfe.printStackTrace();
+//			isSuccess = false;
+//		} catch (Exception ex) {
+//			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
+//			ex.printStackTrace();
+//			isSuccess = false;
+//		} finally {
+//			try {
+//				assertTrue(isSuccess);
+//			} finally {
+//				if (isSuccess) {
+//					logger.info(this.getName() + " - Successful");
+//					logger.info("***************************************************\n");
+//				}
+//				else {
+//					logger.info(this.getName() + " - Failed");			
+//					logger.info("***************************************************\n");
+//				}
+//				try {
+//					// Disconnect from Essbase
+//					logger.info("Disconnecting.........");
+//					esbMetaData.disconnect();
+//				} catch (PafException pfe) {
+//					logger.info("*** " + pfe.getMessage() + " ***");
+//					isSuccess = false;
+//				} catch (Exception e) {
+//					logger.info("*** Java Exception: " + e.getMessage() + " ***");
+//					isSuccess = false;
+//				} finally {
+//					esbMetaData = null;
+//				}
+//			}
+//		}
+//		
+//	}
+//
+//	/*
+//	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension(String, PafUowCache, PafBaseTree)'
+//	 */
+//	public void testCalcVersionEmptyFilter() {
+//		
+//		boolean isSuccess = true;	
+//		@SuppressWarnings("unused")
+//		IMdbData esbData = null;
+//		IMdbMetaData esbMetaData = null;
+//		@SuppressWarnings("unused")
+//		List<String> members = new ArrayList<String>();
+//		@SuppressWarnings("unused")
+//		Map<String, List<String>> versionFilter = emptyMemberFilters;
+//		PafDataCache dataCache = null;
+//		logger.info("***************************************************");
+//		logger.info(this.getName() +  " - Test Started");
+//		try {
+//			// Create new EsbData object
+//			esbData = new EsbData(props);
+//			
+//			// Get data
+////			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
+//			logger.info("Data cache retrieved with [" + dataCache.getCellCount() + "] cells, [" + dataCache.getRowCount()
+//					+ "] rows, and [" + dataCache.getColumnCount() + "] columns...");
+//			
+//			// Create new EsbMetaData object
+//			esbMetaData = new EsbMetaData(props);
+//
+//			// Display initial data
+////			logger.info("Intial data..." + pafDataCache.toString());
+//						
+//			// Calculate data
+////			PafUowCacheCalc.calcVersionDim(pafDataCache, versionFilter);
+//			
+//		} catch (PafException pfe) {
+//			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
+//			pfe.printStackTrace();
+//			isSuccess = false;
+//		} catch (IllegalArgumentException iae) {
+//			logger.error("*** Illegal Argument Exception: " + iae.getMessage() + " ***");
+//			isSuccess = true;
+//		} catch (Exception ex) {
+//			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
+//			ex.printStackTrace();
+//			isSuccess = false;
+//		} finally {
+//			try {
+//				assertTrue(isSuccess);
+//			} finally {
+//				if (isSuccess) {
+//					logger.info(this.getName() + " - Successful");
+//					logger.info("***************************************************\n");
+//				}
+//				else {
+//					logger.info(this.getName() + " - Failed");			
+//					logger.info("***************************************************\n");
+//				}
+//				try {
+//					// Disconnect from Essbase
+//					logger.info("Disconnecting.........");
+//					esbMetaData.disconnect();
+//				} catch (PafException pfe) {
+//					logger.info("*** " + pfe.getMessage() + " ***");
+//					isSuccess = false;
+//				} catch (Exception e) {
+//					logger.info("*** Java Exception: " + e.getMessage() + " ***");
+//					isSuccess = false;
+//				} finally {
+//					esbMetaData = null;
+//				}
+//			}
+//		}
+//		
+//	}
+//
+//	/*
+//	 * Test method for 'com.pace.base.mdb.PafUowCacheCalc.aggDimension(String, PafUowCache, PafBaseTree)'
+//	 */
+//	public void testCalcVersionVersionandTimeFilter() {
+//		
+//		boolean isSuccess = true;	
+//		IMdbData esbData = null;
+//		IMdbMetaData esbMetaData = null;
+//		List<String> members = new ArrayList<String>(), members2 = new ArrayList<String>();
+//		Map<String, List<String>> memberFilters = new HashMap<String, List<String>>();
+//		PafDataCache pafDataCache = null;
+//		logger.info("***************************************************");
+//		logger.info(this.getName() +  " - Test Started");
+//		try {
+//			// Create new EsbData object
+//			esbData = new EsbData(props);
+//			
+//			// Get data
+////			pafDataCache = esbData.getDataCache(mdxSelect, appDef, activeVersions, lockedPeriods);
+//			logger.info("Data cache retrieved with [" + pafDataCache.getCellCount() + "] cells, [" + pafDataCache.getRowCount()
+//					+ "] rows, and [" + pafDataCache.getColumnCount() + "] columns...");
+//			
+//			// Create new EsbMetaData object
+//			esbMetaData = new EsbMetaData(props);
+//
+//			// Display initial data
+////			logger.info("Initial data..." + pafDataCache.toString());
+//			
+//			// Create filter for variance calc
+//			members.add("WP_vs_LY");
+//			members.add("WP_vs_LY_%");
+//			memberFilters.put(pafDataCache.getVersionDim(), members);
+//			members2.add("WK01");
+//			members2.add("WK02");
+//			members2.add("WK03");
+//			memberFilters.put(pafDataCache.getTimeDim(), members2);
+//			
+//			// Calculate data
+////			PafUowCacheCalc.calcVersionDim(pafDataCache, memberFilters);
+//			
+//			// Display initial data
+////			logger.info("Aggregated data..." + pafDataCache.toString());
+//			
+//			// Send updated data cache back to Essbase 
+//			esbData.sendData(pafDataCache, testCommonParms.getClientState());
+//			
+//		} catch (PafException pfe) {
+//			logger.error("*** Paf Exception: " + pfe.getMessage() + " ***");
+//			pfe.printStackTrace();
+//			isSuccess = false;
+//		} catch (Exception ex) {
+//			logger.error("*** Java Exception: " + ex.getMessage() + " ***");
+//			ex.printStackTrace();
+//			isSuccess = false;
+//		} finally {
+//			try {
+//				assertTrue(isSuccess);
+//			} finally {
+//				if (isSuccess) {
+//					logger.info(this.getName() + " - Successful");
+//					logger.info("***************************************************\n");
+//				}
+//				else {
+//					logger.info(this.getName() + " - Failed");			
+//					logger.info("***************************************************\n");
+//				}
+//				try {
+//					// Disconnect from Essbase
+//					logger.info("Disconnecting.........");
+//					esbMetaData.disconnect();
+//				} catch (PafException pfe) {
+//					logger.info("*** " + pfe.getMessage() + " ***");
+//					isSuccess = false;
+//				} catch (Exception e) {
+//					logger.info("*** Java Exception: " + e.getMessage() + " ***");
+//					isSuccess = false;
+//				} finally {
+//					esbMetaData = null;
+//				}
+//			}
+//		}
+//	}
 
 }
