@@ -71,8 +71,7 @@ public abstract class PropertyLoader
         try
         {
             if (loader == null) {
-//            	loader = ClassLoader.getSystemClassLoader ();
-            	loader = PropertyLoader.class.getClassLoader();
+            	loader = ClassLoader.getSystemClassLoader ();
             }
             
             if (LOAD_AS_RESOURCE_BUNDLE)
