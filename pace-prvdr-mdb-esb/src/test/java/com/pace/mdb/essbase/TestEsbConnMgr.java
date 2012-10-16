@@ -24,8 +24,10 @@ import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.mdb.testCommonParms;
+import com.pace.base.utility.PropertyLoader;
 
 /**
  * Test the EsbConnMgr class
@@ -37,7 +39,9 @@ import com.pace.base.mdb.testCommonParms;
 
 public class TestEsbConnMgr extends TestCase {
 	
-	private Properties props = testCommonParms.getConnectionProps();
+//	private Properties props = testCommonParms.getConnectionProps();
+	private Properties props = PropertyLoader.loadProperties(PafBaseConstants.FN_EssbaseConnPropTest);
+	
 	private static Logger logger = Logger.getLogger("TestEsbConnMgr");
 	
 	/*
