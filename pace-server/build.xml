@@ -31,9 +31,9 @@
 	<target name="libraries">
 		<echo>"Running builds for dependent libraries"</echo>
 		<ant antfile="build.xml"
-			dir="${wrksp_root}\pace-base" target="deploy"/>	
+			dir="${wrksp_root}/pace-base" target="deploy"/>	
 		<ant antfile="build.xml"
-			dir="${wrksp_root}\pace-prvdr-mdb-esb" target="deploy"/>	
+			dir="${wrksp_root}/pace-prvdr-mdb-esb" target="deploy"/>	
 		
 		<!--
 		<ant antfile="build.xml"
@@ -210,11 +210,11 @@
 		<mkdir dir="${client_dir}\dist"/>
 				
 		<echo>"Making base jar"</echo>		
-		<ant antfile="build.xml"
+		<ant antfile="build.xml" 
 			dir="${wrksp_root}\pace-base" target="deploy"/>	
 
 		<echo>"Making wsdl"</echo>		
-		<exec executable="${proj_root}\pafwsclientcompile-cxf-java2wsdl.bat">
+		<exec executable="${proj_root}\pafwsclientcompile-cxf-java2wsdl.sh">
 			<arg line="${proj_root}" />
 		</exec>
 		
