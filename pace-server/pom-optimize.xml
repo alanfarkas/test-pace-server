@@ -13,7 +13,7 @@
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
 		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
 	</properties>
-	
+
 	<repositories>
 		<repository>
 			<id>Sun</id>
@@ -25,7 +25,7 @@
 			<url>http://maven.vaadin.com/vaadin-addons</url>
 		</repository>
 	</repositories>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.openejb</groupId>
@@ -204,6 +204,22 @@
 			<scope>compile</scope>
 			<version>0.9.3</version>
 		</dependency>
+		<dependency>
+			<groupId>com.orientechnologies</groupId>
+			<artifactId>orientdb</artifactId>
+			<version>1.1.0</version>
+			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>colt</groupId>
+			<artifactId>colt</artifactId>
+			<version>1.2.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<outputDirectory>${basedir}/WebRoot/WEB-INF/classes</outputDirectory>
@@ -247,7 +263,7 @@
 				<artifactId>maven-clover2-plugin</artifactId>
 				<version>3.1.4</version>
 				<configuration>
-    				<licenseLocation>${clover.licenseLocation}</licenseLocation>
+					<licenseLocation>${clover.licenseLocation}</licenseLocation>
 					<snapshot>${clover.snapshot}</snapshot>
 					<generateHtml>true</generateHtml>
 					<generateXml>true</generateXml>
@@ -268,8 +284,8 @@
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
 							<snapshot>${clover.snapshot}</snapshot>
-       						<singleCloverDatabase>true</singleCloverDatabase>
-       						<baseDir>${project.basedir}</baseDir>
+							<singleCloverDatabase>true</singleCloverDatabase>
+							<baseDir>${project.basedir}</baseDir>
 						</configuration>
 						<executions>
 							<execution>
