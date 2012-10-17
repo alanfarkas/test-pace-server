@@ -158,11 +158,11 @@ public class TestPafBaseMemberProps extends TestCase {
 		}		
 
 		// Validate Aliases
-		aliasCount = memberProps.getAliases().size();
+		aliases = memberProps.getAliases();
+		aliasCount = aliases.size();
 		if (simple.getAliasKeys().length == aliasCount) {
 			simpleAliasKeys = simple.getAliasKeys();
 			simpleAliasValues = simple.getAliasValues();
-			attributes = memberProps.getAliases();
 			for (int i = 0; i < aliasCount; i++) {
 				String key = simpleAliasKeys[i];
 				String value = simpleAliasValues[i];
