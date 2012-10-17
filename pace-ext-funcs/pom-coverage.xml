@@ -85,7 +85,6 @@
 					</plugin>
 				</plugins>
 			</build>
-			<!--  
 			<reporting>
 			    <outputDirectory>${project.build.directory}/site</outputDirectory>
 				<plugins>
@@ -102,7 +101,6 @@
 					</plugin>
 				</plugins>
 			</reporting>
-			-->
 		</profile>
 	</profiles>
 
