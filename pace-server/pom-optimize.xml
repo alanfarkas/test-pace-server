@@ -4,7 +4,7 @@
 	<groupId>com.ams.pace</groupId>
 	<artifactId>pace-server</artifactId>
 	<version>2.8.3.4</version>
-	<packaging>war</packaging>
+	<packaging>pom</packaging>
 	<name>pace-server</name>
 	<description />
 	<properties>
@@ -13,6 +13,7 @@
 		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
 		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
 	</properties>
+	
 	<repositories>
 		<repository>
 			<id>Sun</id>
@@ -24,6 +25,15 @@
 			<url>http://maven.vaadin.com/vaadin-addons</url>
 		</repository>
 	</repositories>
+	
+	<modules> 
+		<module>../pace-base</module> 
+		<module>../pace-ext-cmds</module> 
+		<module>../pace-ext-funcs</module> 
+		<module>../pace-prvdr-mdb-esb</module> 
+	</modules> 
+	
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.openejb</groupId>
@@ -254,4 +264,34 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>clover</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-clover2-plugin</artifactId>
+						<version>3.1.4</version>
+						<configuration>
+							<licenseLocation>${clover.licenseLocation}</licenseLocation>
+							<snapshot>${clover.snapshot}</snapshot>
+       						<singleCloverDatabase>true</singleCloverDatabase>
+       						<baseDir>${project.basedir}</baseDir>
+						</configuration>
+						<executions>
+							<execution>
+								<id>clover</id>
+								<goals>
+									<goal>setup</goal>
+									<goal>optimize</goal>
+									<goal>snapshot</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

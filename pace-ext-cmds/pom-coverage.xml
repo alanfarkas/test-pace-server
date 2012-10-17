@@ -27,6 +27,19 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-clover2-plugin</artifactId>
+				<version>3.1.4</version>
+				<configuration>
+    				<licenseLocation>${clover.licenseLocation}</licenseLocation>
+					<snapshot>${clover.snapshot}</snapshot>
+					<generateHtml>true</generateHtml>
+					<generateXml>true</generateXml>
+					<generatePdf>true</generatePdf>
+					<baseDir>${project.basedir}</baseDir>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -45,6 +58,7 @@
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
 							<generatePdf>true</generatePdf>
+							<baseDir>${project.basedir}</baseDir>
 						</configuration>
 						<executions>
 							<execution>
