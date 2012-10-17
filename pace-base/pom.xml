@@ -103,10 +103,19 @@
 			<artifactId>jep-ext</artifactId>
 			<version>1.1.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.essbase.api</groupId>
 			<artifactId>com.essbase.api</artifactId>
+			<version>11.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>oracle.core.ojdl</groupId>
+			<artifactId>oracle.core.ojdl</artifactId>
+			<version>11.1.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.essbase.api-server</groupId>
+			<artifactId>com.essbase.api-server</artifactId>
 			<version>11.1.2</version>
 		</dependency>
 		<dependency>
