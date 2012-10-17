@@ -290,7 +290,6 @@
 						<version>3.1.4</version>
 						<configuration>
 							<licenseLocation>${clover.licenseLocation}</licenseLocation>
-							<snapshot>${clover.snapshot}</snapshot>
 							<baseDir>${project.basedir}</baseDir>
 							<generateHtml>true</generateHtml>
 							<generateXml>true</generateXml>
@@ -301,7 +300,6 @@
 								<id>clover</id>
 								<goals>
 									<goal>setup</goal>
-									<goal>snapshot</goal>
 								</goals>
 							</execution>
 							<execution>

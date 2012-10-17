@@ -64,7 +64,6 @@
 								<id>clover</id>
 								<goals>
 									<goal>setup</goal>
-									<goal>snapshot</goal>
 								</goals>
 							</execution>
 							<execution>
@@ -72,13 +71,6 @@
 								<goals>
 									<goal>aggregate</goal>
 									<goal>clover</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>site</id>
-								<phase>pre-site</phase>
-								<goals>
-									<goal>aggregate</goal>
 								</goals>
 							</execution>
 						</executions>
