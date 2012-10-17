@@ -255,10 +255,5 @@
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.atlassian.clover</groupId>
-			<artifactId>clover-idea</artifactId>
-			<version>3.1.7</version>
-		</dependency>
 	</dependencies>
 </project>

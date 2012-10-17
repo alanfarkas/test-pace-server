@@ -136,11 +136,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.atlassian.clover</groupId>
-			<artifactId>clover-idea</artifactId>
-			<version>3.1.7</version>
-		</dependency>
-		<dependency>
 			<groupId>com.essbase.api</groupId>
 			<artifactId>com.essbase.api</artifactId>
 			<version>11.1.2</version>
