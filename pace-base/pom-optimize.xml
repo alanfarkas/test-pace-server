@@ -121,6 +121,16 @@
 			<version>11.1.2</version>
 		</dependency>
 		<dependency>
+			<groupId>oracle.core.ojdl</groupId>
+			<artifactId>oracle.core.ojdl</artifactId>
+			<version>11.1.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.essbase.api-server</groupId>
+			<artifactId>com.essbase.api-server</artifactId>
+			<version>11.1.2</version>
+		</dependency>
+		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
 			<version>1.4.2</version>
