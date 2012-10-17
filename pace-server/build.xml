@@ -214,7 +214,7 @@
 			dir="${wrksp_root}\pace-base" target="deploy"/>	
 
 		<echo>"Making wsdl"</echo>		
-		<exec executable="${proj_root}\pafwsclientcompile-cxf-java2wsdl.sh">
+		<exec executable="${proj_root}\pafwsclientcompile-cxf-java2wsdl.bat">
 			<arg line="${proj_root}" />
 		</exec>
 		
