@@ -15,7 +15,16 @@ public class PaceDataSet {
 		data.assign(inData);
 	}
 	
+	public double[] getRow(int index) {
+		return data.viewRow(index).toArray();
+	}
+
+	public int getRowCount() {
+		return data.rows();
+	}
 	
-	
+	public int getColCount() {
+		return data.columns();
+	}
 
 }

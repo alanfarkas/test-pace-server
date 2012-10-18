@@ -3445,7 +3445,6 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		return resp;
 	}
 	
-//	public PaceResultSetResponse getFilteredResultSetResponse(PaceQueryRequest queryRequest) throws RemoteException, PafSoapException {
 	public PaceResultSetResponse getFilteredResultSetResponse(PaceQueryRequest queryRequest) throws RemoteException, PafSoapException {
 		
 		// for now presume the expression list is simply a list of members/attributes
@@ -3519,7 +3518,11 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 	}
 	
-	
+	public PaceResultSetResponse getClusteredResult(PaceQueryRequest request) throws RemoteException, PafSoapException {
+		PaceResultSetResponse response = new PaceResultSetResponse();
+		
+		return response;
+	}
 	
 	/**
 	 * Logs off the current user.  This method cleans up the UOW Cache

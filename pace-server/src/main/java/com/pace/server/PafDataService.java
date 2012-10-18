@@ -34,10 +34,14 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.math3.stat.clustering.Cluster;
+import org.apache.commons.math3.stat.clustering.EuclideanIntegerPoint;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
+import cern.colt.list.IntArrayList;
 
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrHandler;
@@ -99,6 +103,7 @@ import com.pace.base.view.PageTuple;
 import com.pace.base.view.ViewTuple;
 import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.eval.IEvalStrategy;
+import com.pace.server.eval.MathOp;
 import com.pace.server.eval.RuleBasedEvalStrategy;
 
 
@@ -4292,12 +4297,18 @@ public class PafDataService {
 		}
 	}
 
-	public PaceDataSet clusterDataset() {
-		PaceDataSet dataSet = null;
+	public PaceClusteredDataSet clusterDataset(PaceDataSet inData) {
+		PaceClusteredDataSet dataSet = new PaceClusteredDataSet();
+		List<EuclideanIntegerPoint> points = new ArrayList<EuclideanIntegerPoint>();
+		IntArrayList iPoint = new IntArrayList();
+		for (int i=0 ; i < inData.getRowCount(); i++) {
+			for (double d : inData.getRow(i) ) {
+				iPoint.add( (int) Math.round(d) );
+				points.add(new EuclideanIntegerPoint(iPoint.elements()));
+			}
+		}
 		
-		
-		
-		
+		dataSet.setClusters(MathOp.clusterData(points));
 		return dataSet;
 	}
  

@@ -464,14 +464,25 @@ public interface IPafService extends Remote {
 	/**
 	 * Returns a table of members and attribute values based upon a set of dimension and attribute specifications
 	 * 
-	 * @param queryRequest
-	 * @return
+	 * @param PaceQueryRequest
+	 * @return PaceResultSetResponse
 	 * @throws RemoteException the remote exception
      * @throws PafSoapException the paf soap exception
 	 */
-//	public PaceResultSetResponse getFilteredResultSetResponse(PaceQueryRequest queryRequest) throws RemoteException, PafSoapException;
 	public PaceResultSetResponse getFilteredResultSetResponse(PaceQueryRequest queryRequest) throws RemoteException, PafSoapException;
-    
+
+
+	/**
+	 * Returns a dataset that has been clustered by an algorithm
+	 * 
+	 * @param PaceQueryRequest
+	 * @return PaceResultSetResponse
+	 * @throws RemoteException the remote exception
+     * @throws PafSoapException the paf soap exception
+	 */	
+	public PaceResultSetResponse getClusteredResult(PaceQueryRequest request) throws RemoteException, PafSoapException;
+	
+	
 	/**
 	 * Reinitialize client state.
 	 *
