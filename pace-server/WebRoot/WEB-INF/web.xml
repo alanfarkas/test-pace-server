@@ -9,7 +9,7 @@
   	<description>
   	Vaadin production mode</description>
   	<param-name>productionMode</param-name>
-  	<param-value>false</param-value>
+  	<param-value>true</param-value>
   </context-param>  
   <env-entry>
    <env-entry-name>pace/paceHome</env-entry-name>

@@ -31,9 +31,9 @@
 	<target name="libraries">
 		<echo>"Running builds for dependent libraries"</echo>
 		<ant antfile="build.xml"
-			dir="${wrksp_root}\pace-base" target="deploy"/>	
+			dir="${wrksp_root}/pace-base" target="deploy"/>	
 		<ant antfile="build.xml"
-			dir="${wrksp_root}\pace-prvdr-mdb-esb" target="deploy"/>	
+			dir="${wrksp_root}/pace-prvdr-mdb-esb" target="deploy"/>	
 		
 		<!--
 		<ant antfile="build.xml"
