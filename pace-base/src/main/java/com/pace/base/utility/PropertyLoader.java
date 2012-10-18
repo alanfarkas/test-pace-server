@@ -137,9 +137,8 @@ public abstract class PropertyLoader
      */
     public static Properties loadProperties (final String name)
     {
-        Thread.currentThread ().setContextClassLoader(PropertyLoader.class.getClassLoader());
-        return loadProperties (name, PropertyLoader.class.getClassLoader());
-//                Thread.currentThread ().getContextClassLoader());
+        return loadProperties (name,
+                Thread.currentThread ().getContextClassLoader());
     }
     
     // protected: .............................................................
