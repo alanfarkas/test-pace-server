@@ -7,9 +7,14 @@
 	<packaging>war</packaging>
 	<name>pace-server</name>
 	<description />
+	
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<localRepository>${user.home}/.m2/repository</localRepository>
+		<clover.licenseLocation>/opt/clover/clover.license</clover.licenseLocation>
+		<clover.snapshot>${env.CLOVER_HOME}/clover-snapshots/clover.db.snapshot</clover.snapshot>
 	</properties>
+	
 	<repositories>
 		<repository>
 			<id>Sun</id>
@@ -21,6 +26,7 @@
 			<url>http://maven.vaadin.com/vaadin-addons</url>
 		</repository>
 	</repositories>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.openejb</groupId>
@@ -172,7 +178,6 @@
 			<version>2.3.0</version>
 			<scope>compile</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.ams.pace</groupId>
 			<artifactId>pace-base</artifactId>
@@ -216,6 +221,7 @@
 			<version>1.2.0</version>
 		</dependency>
 	</dependencies>
+	
 	<build>
 		<outputDirectory>${basedir}/WebRoot/WEB-INF/classes</outputDirectory>
 		<finalName>pace</finalName>
@@ -233,6 +239,7 @@
 		</resources>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<webappDirectory>${basedir}/WebRoot</webappDirectory>
@@ -245,7 +252,9 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -259,4 +268,83 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>optimize</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-clover2-plugin</artifactId>
+						<version>3.1.4</version>
+						<configuration>
+							<licenseLocation>${clover.licenseLocation}</licenseLocation>
+							<snapshot>${clover.snapshot}</snapshot>
+							<singleCloverDatabase>true</singleCloverDatabase>
+							<baseDir>${project.basedir}</baseDir>
+						</configuration>
+						<executions>
+							<execution>
+								<id>clover</id>
+								<goals>
+									<goal>setup</goal>
+									<goal>optimize</goal>
+									<goal>snapshot</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>clover</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-clover2-plugin</artifactId>
+						<version>3.1.4</version>
+						<configuration>
+							<licenseLocation>${clover.licenseLocation}</licenseLocation>
+							<baseDir>${project.basedir}</baseDir>
+							<generateHtml>true</generateHtml>
+							<generateXml>true</generateXml>
+							<generatePdf>true</generatePdf>
+						</configuration>
+						<executions>
+							<execution>
+								<id>clover</id>
+								<goals>
+									<goal>setup</goal>
+								</goals>
+							</execution>
+							<execution>
+								<phase>verify</phase>
+								<goals>
+									<goal>aggregate</goal>
+									<goal>clover</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+			<reporting>
+				<plugins>
+					<plugin>
+						<groupId>com.atlassian.maven.plugins</groupId>
+						<artifactId>maven-clover2-plugin</artifactId>
+						<version>3.1.4</version>
+						<configuration>
+							<licenseLocation>${clover.licenseLocation}</licenseLocation>
+							<generateHTML>true</generateHTML>
+							<generatePdf>true</generatePdf>
+							<generateXml>true</generateXml>
+						</configuration>
+					</plugin>
+				</plugins>
+			</reporting>
+		</profile>
+	</profiles>
 </project>
