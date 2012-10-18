@@ -125,6 +125,7 @@ import com.pace.base.view.PafStyle;
 import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewSection;
 import com.pace.server.comm.AttributeDimInfo;
+import com.pace.server.comm.ClusterRequest;
 import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.comm.PaceResultSetResponse;
 import com.pace.server.comm.PafAuthRequest;
@@ -3518,7 +3519,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 	}
 	
-	public PaceResultSetResponse getClusteredResult(PaceQueryRequest request) throws RemoteException, PafSoapException {
+	public PaceResultSetResponse getClusteredResult(ClusterRequest request) throws RemoteException, PafSoapException {
 		PaceResultSetResponse response = new PaceResultSetResponse();
 		
 		return response;

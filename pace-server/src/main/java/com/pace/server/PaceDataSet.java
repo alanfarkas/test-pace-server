@@ -1,5 +1,7 @@
 package com.pace.server;
 
+import com.pace.db.PacePOJO;
+
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
@@ -7,14 +9,19 @@ import cern.colt.matrix.DoubleMatrix2D;
  * Just a wrapper class for the data matrix classes, meant to carry grids of data from mathematical operations
  *
  */
-public class PaceDataSet {
+public class PaceDataSet extends PacePOJO {
 	
 	private DoubleMatrix2D data;
+
 	
 	public PaceDataSet(double[][] inData) {
 		data.assign(inData);
 	}
 	
+	public PaceDataSet() {
+
+	}
+
 	public double[] getRow(int index) {
 		return data.viewRow(index).toArray();
 	}
@@ -26,5 +33,13 @@ public class PaceDataSet {
 	public int getColCount() {
 		return data.columns();
 	}
+	
+	public double[][] getData() {
+		return data.toArray();
+	}
 
+	public void setData(double[][] inData) {
+		data.assign(inData);
+	}
+	
 }

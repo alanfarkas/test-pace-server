@@ -36,6 +36,7 @@ import com.pace.base.comm.UploadAppRequest;
 import com.pace.base.comm.UploadAppResponse;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.view.PafView;
+import com.pace.server.comm.ClusterRequest;
 import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.comm.PaceResultSetResponse;
 import com.pace.server.comm.PafAuthRequest;
@@ -480,7 +481,7 @@ public interface IPafService extends Remote {
 	 * @throws RemoteException the remote exception
      * @throws PafSoapException the paf soap exception
 	 */	
-	public PaceResultSetResponse getClusteredResult(PaceQueryRequest request) throws RemoteException, PafSoapException;
+	public PaceResultSetResponse getClusteredResult(ClusterRequest request) throws RemoteException, PafSoapException;
 	
 	
 	/**
