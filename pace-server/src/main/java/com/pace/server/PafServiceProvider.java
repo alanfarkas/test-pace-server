@@ -124,8 +124,12 @@ import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafStyle;
 import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewSection;
+import com.pace.db.DataStore;
+import com.pace.server.assortment.AsstSet;
 import com.pace.server.comm.AttributeDimInfo;
 import com.pace.server.comm.ClusterRequest;
+import com.pace.server.comm.CreateAsstRequest;
+import com.pace.server.comm.CreateAsstResponse;
 import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.comm.PaceResultSetResponse;
 import com.pace.server.comm.PafAuthRequest;
@@ -231,6 +235,8 @@ public class PafServiceProvider implements IPafService {
 	
 	/** The clients. */
 	private static ConcurrentHashMap<String, PafClientState> clients = new ConcurrentHashMap<String, PafClientState>();
+	
+	private static DataStore dataStore = new DataStore();
 
 	/**
 	 * Instantiates a new paf service provider.
@@ -3489,7 +3495,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 		// dimMembers should now hold all selected members
 		// pump them into the lists
-		ArrayList<String[]> dataset = new ArrayList<String[]>();
+		Map<String, String[]> dataset = new HashMap<String, String[]>();
 		// initialize header list
 		ArrayList<String> hdr = new ArrayList<String>();
 		hdr.add(dim);
@@ -3511,11 +3517,11 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				else 
 					row.add("");
 			}
-			dataset.add(row.toArray(new String[0]));
+			dataset.put(m.getKey(), row.toArray(new String[0]));
 		}
 		
 		StringRow srHeader = new StringRow(hdr.toArray(new String[0]));
-		return new PaceResultSetResponse(srHeader, dataset.toArray(new String[0][]));
+		return new PaceResultSetResponse(srHeader, dataset.values().toArray(new String[0][]));
 
 	}
 	
@@ -4528,6 +4534,22 @@ public PafGetNotesResponse getCellNotes(
 		
 		return psr;		
 	
+	}
+
+
+
+
+	@Override
+	public CreateAsstResponse createAssortment(
+			CreateAsstRequest createAsstRequest) throws RemoteException,
+			PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException,
+			PafSoapException {
+		
+		// get a persisted object to go with session
+		AsstSet asst = dataStore.initAsstSet(createAsstRequest.getClientId(), createAsstRequest.getSessionToken());
+		
+
+		return new CreateAsstResponse();
 	}
 	
 	

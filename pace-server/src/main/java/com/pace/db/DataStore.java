@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import com.pace.server.PaceDataSet;
+import com.pace.server.assortment.AsstSet;
 
 /**
  * @author jim
@@ -19,8 +20,29 @@ public class DataStore {
 	public DataStore() {
 		if (!db.exists()) {
 			db.create();
-			db.getEntityManager().registerEntityClass(PaceDataSet.class);			
+			db.getEntityManager().registerEntityClass(PaceDataSet.class);
+			db.getEntityManager().registerEntityClass(AsstSet.class);					
 		}
+	}
+	
+	
+	public AsstSet initAsstSet(String clientId, String sessionId) {
+		AsstSet asst = db.newInstance(AsstSet.class);
+		asst.setClientId(clientId);
+		asst.setSessionId(sessionId);
+		db.save(asst);
+		return asst;
+	}
+	
+	public AsstSet getAsstSet(String clientId, String sessionId) {
+		AsstSet asst = null;
+		for (AsstSet a : db.browseClass(AsstSet.class)) {
+			if (a.getClientId().equals(clientId)) {
+				asst = a;
+				break;
+			}
+		}
+		return asst;		
 	}
 	
 	

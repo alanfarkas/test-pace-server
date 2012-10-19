@@ -37,6 +37,8 @@ import com.pace.base.comm.UploadAppResponse;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.view.PafView;
 import com.pace.server.comm.ClusterRequest;
+import com.pace.server.comm.CreateAsstRequest;
+import com.pace.server.comm.CreateAsstResponse;
 import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.comm.PaceResultSetResponse;
 import com.pace.server.comm.PafAuthRequest;
@@ -393,6 +395,11 @@ public interface IPafService extends Remote {
      * @throws PafNotAuthenticatedSoapException the paf not authenticated soap exception
      * @throws PafNotAuthorizedSoapException the paf not authorized soap exception
      */
+    
+    public CreateAsstResponse createAssortment(CreateAsstRequest createAsstRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException;
+
+    
+    
     public PafClientSecurityResponse createPafUser(PafClientSecurityRequest clientSecurityRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException;
     
     /**
@@ -406,6 +413,8 @@ public interface IPafService extends Remote {
      * @throws PafSoapException the paf soap exception
      */
     public PafClientSecurityResponse updatePafUser(PafClientSecurityRequest clientSecurityRequest) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException;
+    
+    
     
     /**
      * Delete paf user.

@@ -3,6 +3,10 @@
  */
 package com.pace.server.assortment;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.pace.base.app.PafDimSpec;
 import com.pace.db.PacePOJO;
 import com.pace.server.PaceDataSet;
 
@@ -11,29 +15,50 @@ import com.pace.server.PaceDataSet;
  *
  */
 public class AsstSet extends PacePOJO {
-	PaceDataSet dimToCluster = new PaceDataSet();
-	PaceDataSet dimToMeasure = new PaceDataSet();
-	PaceDataSet clusterSet = new PaceDataSet();	
+	String label;
 	
+	PafDimSpec timePeriods = new PafDimSpec();		
+	PafDimSpec dimToMeasure = new PafDimSpec();	
+	PafDimSpec dimToCluster = new PafDimSpec();
+	PafDimSpec measures = new PafDimSpec();
 	
-	
-	public PaceDataSet getDimToCluster() {
-		return dimToCluster;
+	public String getLabel() {
+		return label;
 	}
-	public void setDimToCluster(PaceDataSet dimToCluster) {
-		this.dimToCluster = dimToCluster;
+	public void setLabel(String label) {
+		this.label = label;
 	}
-	public PaceDataSet getDimToMeasure() {
+
+	
+	
+	public PafDimSpec getTimePeriods() {
+		return timePeriods;
+	}
+	public void setTimePeriods(PafDimSpec timePeriods) {
+		this.timePeriods = timePeriods;
+	}
+	public PafDimSpec getDimToMeasure() {
 		return dimToMeasure;
 	}
-	public void setDimToMeasure(PaceDataSet dimToMeasure) {
+	public void setDimToMeasure(PafDimSpec dimToMeasure) {
 		this.dimToMeasure = dimToMeasure;
 	}
-	public PaceDataSet getClusterSet() {
-		return clusterSet;
+	public PafDimSpec getDimToCluster() {
+		return dimToCluster;
 	}
-	public void setClusterSet(PaceDataSet clusterSet) {
-		this.clusterSet = clusterSet;
+	public void setDimToCluster(PafDimSpec dimToCluster) {
+		this.dimToCluster = dimToCluster;
 	}
+	public PafDimSpec getMeasures() {
+		return measures;
+	}
+	public void setMeasures(PafDimSpec measures) {
+		this.measures = measures;
+	}
+	public AsstSet() {
+		super();
+	}	
+	
+
 
 }
