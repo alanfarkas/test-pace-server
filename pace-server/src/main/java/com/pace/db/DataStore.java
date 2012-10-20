@@ -17,18 +17,29 @@ import com.pace.server.assortment.AsstSet;
  */
 public class DataStore {
 	static OObjectDatabaseTx db = new OObjectDatabaseTx("local:odb/paceCache");
+	static DataStore _instance = null;
 
-	public DataStore() {
+	public static DataStore getInstance() {
+		if (_instance == null)
+			_instance = new DataStore();
+		
+		return _instance;
+	}
+	
+	private DataStore() {
+		
+		
 		if (!db.exists()) {
 			db.create();
-		}		
-	
-		db.open("admin", "admin");
+		}
 		
+		if (!db.isClosed()) {
+			db.open("admin", "admin");
+		}
+			
 		db.getEntityManager().registerEntityClass(PaceDataSet.class);
 		db.getEntityManager().registerEntityClass(AsstSet.class);			
 	}
-	
 	
 	public AsstSet initAsstSet(String clientId, String sessionId) {
 		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
@@ -48,6 +59,12 @@ public class DataStore {
 			}
 		}
 		return asst;		
+	}
+	
+	public void clrAsstSets() {
+		for (AsstSet asst : db.browseClass(AsstSet.class)) {
+			db.delete(asst);
+		}				
 	}
 	
 	public void delAsstSet(String clientId) {
@@ -92,6 +109,14 @@ public class DataStore {
 		return dataSets;
 	}
 	
+	protected void finalize() throws Throwable
+	{
+		this.clrAsstSets();
+		db.close();
+		super.finalize();
 
+	} 
+	
+	
 	
 }

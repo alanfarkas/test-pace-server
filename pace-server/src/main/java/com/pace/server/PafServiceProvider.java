@@ -236,7 +236,7 @@ public class PafServiceProvider implements IPafService {
 	/** The clients. */
 	private static ConcurrentHashMap<String, PafClientState> clients = new ConcurrentHashMap<String, PafClientState>();
 	
-	private static DataStore dataStore = new DataStore();
+	private static DataStore dataStore = DataStore.getInstance();
 
 	/**
 	 * Instantiates a new paf service provider.
