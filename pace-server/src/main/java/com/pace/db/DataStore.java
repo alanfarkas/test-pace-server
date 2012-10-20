@@ -6,6 +6,7 @@ package com.pace.db;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import com.pace.server.PaceDataSet;
 import com.pace.server.assortment.AsstSet;
@@ -15,18 +16,22 @@ import com.pace.server.assortment.AsstSet;
  * Simple implementation of an object datastore
  */
 public class DataStore {
-	OObjectDatabaseTx db = new OObjectDatabaseTx("local:paceCache");
+	static OObjectDatabaseTx db = new OObjectDatabaseTx("local:odb/paceCache");
 
 	public DataStore() {
 		if (!db.exists()) {
 			db.create();
-			db.getEntityManager().registerEntityClass(PaceDataSet.class);
-			db.getEntityManager().registerEntityClass(AsstSet.class);					
-		}
+		}		
+	
+		db.open("admin", "admin");
+		
+		db.getEntityManager().registerEntityClass(PaceDataSet.class);
+		db.getEntityManager().registerEntityClass(AsstSet.class);			
 	}
 	
 	
 	public AsstSet initAsstSet(String clientId, String sessionId) {
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
 		AsstSet asst = db.newInstance(AsstSet.class);
 		asst.setClientId(clientId);
 		asst.setSessionId(sessionId);
@@ -45,7 +50,14 @@ public class DataStore {
 		return asst;		
 	}
 	
-	
+	public void delAsstSet(String clientId) {
+		for (AsstSet asst : db.browseClass(AsstSet.class)) {
+			if (asst.getClientId().equals(clientId)) {
+				db.delete(asst);
+			}
+		}		
+	}
+
 
 	public void storePaceDataSet(String clientId, PaceDataSet dataSet) {
 		

@@ -55,6 +55,7 @@ public class AsstSet extends PacePOJO {
 	public void setMeasures(PafDimSpec measures) {
 		this.measures = measures;
 	}
+	
 	public AsstSet() {
 		super();
 	}	

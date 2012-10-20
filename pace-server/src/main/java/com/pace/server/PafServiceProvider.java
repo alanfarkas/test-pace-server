@@ -4231,6 +4231,8 @@ public PafGetNotesResponse getCellNotes(
 		if ( pafRequest != null ) {
 			
 			String clientId = pafRequest.getClientId();
+			
+			dataStore.delAsstSet(clientId);
 						
 			if ( clients != null && clients.containsKey(clientId) ) {
 				

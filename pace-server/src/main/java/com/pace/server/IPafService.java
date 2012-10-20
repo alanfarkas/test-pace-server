@@ -739,5 +739,8 @@ public interface IPafService extends Remote {
 	 */
 	public ValidationResponse validateUserSecurity(ValidateUserSecurityRequest validateUserSecurityReq) throws RemoteException, PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException, PafSoapException;
 	
+	
+	
+	
 
 }
