@@ -19,6 +19,7 @@
 package com.pace.base.app;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import com.pace.base.comm.DataFilterSpec;
 import com.pace.base.comm.UserFilterSpec;
@@ -45,6 +46,8 @@ public class AppSettings {
 	private UserFilterSpec globalUserFilterSpec;
 	private DataFilterSpec globalDataFilterSpec;
  	private boolean enableRounding = false;
+ 	private Set<String> week53Years;		// TTN-1858 - Week 53 Support
+ 	private Set<String> week53Members;		// TTN-1858 - Week 53 Support
  	private AppColors appColors;
 	
  	private AliasMapping[] globalAliasMappings;
@@ -248,6 +251,34 @@ public class AppSettings {
 	public void setGlobalSuppressZeroSettings(
 			SuppressZeroSettings globalSuppressZeroSettings) {
 		this.globalSuppressZeroSettings = globalSuppressZeroSettings;
+	}
+
+	/**
+	 * @return the week53Years
+	 */
+	public Set<String> getWeek53Years() {
+		return week53Years;
+	}
+
+	/**
+	 * @param week53Years the week53Years to set
+	 */
+	public void setWeek53Years(Set<String> week53Years) {
+		this.week53Years = week53Years;
+	}
+
+	/**
+	 * @return the week53Members
+	 */
+	public Set<String> getWeek53Members() {
+		return week53Members;
+	}
+
+	/**
+	 * @param week53Members the week53Members to set
+	 */
+	public void setWeek53Members(Set<String> week53Members) {
+		this.week53Members = week53Members;
 	}
 
 	/* (non-Javadoc)
