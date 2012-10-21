@@ -12,10 +12,11 @@ public class Season implements Cloneable {
     private boolean isOpen = true;
     private String planCycle;
     private String[] years;
+    private String[] plannableYears;
     private String timePeriod;
     private PafDimSpec[] otherDims;
     @Deprecated
-    private String year; // Not used - needed for backwards compatability
+    private String year; // Not used - needed for backwards compatibility
     
 	/**
 	 * Default Season constructor 
@@ -76,6 +77,18 @@ public class Season implements Cloneable {
 	}
 	
 
+	/**
+	 * @return the plannableYears
+	 */
+	public String[] getPlannableYears() {
+		return plannableYears;
+	}
+	/**
+	 * @param plannableYears the plannableYears to set
+	 */
+	public void setPlannableYears(String[] plannableYears) {
+		this.plannableYears = plannableYears;
+	}
 	/**
      * @return Returns the label.
      */
