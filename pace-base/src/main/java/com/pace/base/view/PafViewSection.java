@@ -139,6 +139,11 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
     
     private boolean isSuppressed; 
     
+    private boolean isRowHeaderRepeated;
+
+    private boolean isColHeaderRepeated;
+    
+    
     private String elementDelimiterRowMemberTag;
     
     private String groupDelimiterRowMemberTag;
@@ -1085,6 +1090,34 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 
 	public boolean isSuppressed() {
 		return isSuppressed;
+	}
+
+	/**
+	 * @return the isRowHeaderRepeated
+	 */
+	public boolean isRowHeaderRepeated() {
+		return isRowHeaderRepeated;
+	}
+
+	/**
+	 * @param isRowHeaderRepeated the isRowHeaderRepeated to set
+	 */
+	public void setRowHeaderRepeated(boolean isRowHeaderRepeated) {
+		this.isRowHeaderRepeated = isRowHeaderRepeated;
+	}
+
+	/**
+	 * @return the isColHeaderRepeated
+	 */
+	public boolean isColHeaderRepeated() {
+		return isColHeaderRepeated;
+	}
+
+	/**
+	 * @param isColHeaderRepeated the isColHeaderRepeated to set
+	 */
+	public void setColHeaderRepeated(boolean isColHeaderRepeated) {
+		this.isColHeaderRepeated = isColHeaderRepeated;
 	}
 
 	/**
