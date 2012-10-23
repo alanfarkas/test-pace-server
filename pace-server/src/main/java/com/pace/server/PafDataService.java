@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -101,6 +102,7 @@ import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewSection;
 import com.pace.base.view.PageTuple;
 import com.pace.base.view.ViewTuple;
+import com.pace.server.assortment.AsstSet;
 import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.eval.IEvalStrategy;
 import com.pace.server.eval.MathOp;
@@ -4309,6 +4311,43 @@ public class PafDataService {
 		}
 		
 		dataSet.setClusters(MathOp.clusterData(points));
+		return dataSet;
+	}
+
+
+	public PaceDataSet buildAsstDataSet(AsstSet asst) throws PafException {
+		
+		// Look at each location to cluster and convert the measures in question into metrics in an array.
+		// For each product filtered to, treat it as another metric for that location. In effect this produces
+		// a data point for each unique product / measure combination at a given location.
+		PafDataCache dc = this.getDataCache(asst.getClientId());
+		String[] baseDims = dc.getBaseDimensions();	
+		
+		// initilize arrays
+		List<Double> row = new ArrayList<Double>(asst.getNumCols());
+		double[][] data = new double[asst.getNumRows()][asst.getNumCols()];
+		
+
+		Map<String, List<String>> memberFilter = new HashMap<String, List<String>>();
+		memberFilter.put("Products", Arrays.asList(asst.getDimToMeasure().getExpressionList() ) );
+		memberFilter.put("Time", Arrays.asList(asst.getTimePeriods().getExpressionList() ) );			
+		memberFilter.put("Measures", Arrays.asList(asst.getMeasures().getExpressionList() ) );	
+		
+		StringOdometer so;
+		int iRow = 0; int iCol = 0;
+		
+		for (String loc : asst.getDimToCluster().getExpressionList() ) {
+			memberFilter.put("Location", Arrays.asList(loc));
+			iCol = 0;
+			so = dc.getCellIterator(baseDims, memberFilter);
+			
+			while (so.hasNext()) {
+				data[iRow][iCol++] = dc.getCellValue(baseDims, so.getValue());
+			}
+			iRow++;
+		}
+		
+		PaceDataSet dataSet = new PaceDataSet(data);		
 		return dataSet;
 	}
  

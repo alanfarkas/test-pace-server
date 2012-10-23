@@ -16,24 +16,17 @@ import com.pace.server.assortment.AsstSet;
  * Simple implementation of an object datastore
  */
 public class DataStore {
-	static OObjectDatabaseTx db = new OObjectDatabaseTx("local:odb/paceCache");
-	static DataStore _instance = null;
 
-	public static DataStore getInstance() {
-		if (_instance == null)
-			_instance = new DataStore();
-		
-		return _instance;
-	}
+	private OObjectDatabaseTx db = new OObjectDatabaseTx("local:odb/paceCache");
 	
-	private DataStore() {
+	public DataStore() {
 		
 		
 		if (!db.exists()) {
 			db.create();
 		}
 		
-		if (!db.isClosed()) {
+		if (db.isClosed()) {
 			db.open("admin", "admin");
 		}
 			
@@ -115,8 +108,10 @@ public class DataStore {
 		db.close();
 		super.finalize();
 
+	}
+
+	public void saveAsst(AsstSet asst) {
+		db.save(asst);
 	} 
-	
-	
-	
+		
 }

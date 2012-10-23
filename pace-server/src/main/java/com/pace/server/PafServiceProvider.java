@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
+import org.apache.commons.math3.stat.clustering.Cluster;
+import org.apache.commons.math3.stat.clustering.EuclideanIntegerPoint;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
@@ -196,6 +198,7 @@ import com.pace.server.comm.StringRow;
 import com.pace.server.comm.ValidateUserSecurityRequest;
 import com.pace.server.comm.ValidationResponse;
 import com.pace.server.comm.ViewRequest;
+import com.pace.server.eval.MathOp;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -236,7 +239,7 @@ public class PafServiceProvider implements IPafService {
 	/** The clients. */
 	private static ConcurrentHashMap<String, PafClientState> clients = new ConcurrentHashMap<String, PafClientState>();
 	
-	private static DataStore dataStore = DataStore.getInstance();
+	private DataStore dataStore = new DataStore();
 
 	/**
 	 * Instantiates a new paf service provider.
@@ -3520,14 +3523,62 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			dataset.put(m.getKey(), row.toArray(new String[0]));
 		}
 		
+		// save off results for subsequent cluster work so client data doesn't need to be resent
+		// build an assortment set to save
+		PafDimSpec dimSpec = new PafDimSpec();
+		dimSpec.setDimension(dim);
+		dimSpec.setExpressionList(dataset.keySet().toArray(new String[0]));
+		
+		// get assortment set from datastore
+		AsstSet asst = dataStore.getAsstSet(queryRequest.getClientId(), queryRequest.getSessionToken());
+		
+		// hardcode for demos, will be based upon configuration file
+		if (dim.equals("Location"))
+			asst.setDimToCluster(dimSpec);
+		else if (dim.equals("Product"))
+			asst.setDimToMeasure(dimSpec);
+		
+		// save assortment set back into database
+		dataStore.saveAsst(asst);
+		
+		//return string grid response
 		StringRow srHeader = new StringRow(hdr.toArray(new String[0]));
 		return new PaceResultSetResponse(srHeader, dataset.values().toArray(new String[0][]));
 
 	}
 	
 	public PaceResultSetResponse getClusteredResult(ClusterRequest request) throws RemoteException, PafSoapException {
-		PaceResultSetResponse response = new PaceResultSetResponse();
+		AsstSet asst = dataStore.getAsstSet(request.getClientId(), request.getSessionToken() );
+				
+		PaceDataSet inData;
 		
+		try {
+			inData = dataService.buildAsstDataSet(asst);
+		} catch (PafException e) {
+			throw e.getPafSoapException();
+		}
+		
+		PaceClusteredDataSet clusters = dataService.clusterDataset(inData);
+		String[] row;
+		List<StringRow> rows = new ArrayList<StringRow>();
+		int i;
+		
+		PaceResultSetResponse response = new PaceResultSetResponse();
+		// cluster
+		for (Cluster<EuclideanIntegerPoint> c : clusters.getClusters() ){
+			// row
+			for (EuclideanIntegerPoint point : c.getPoints() ) {
+				// value
+				row = new String[point.getPoint().length];
+				i = 0;
+				for (Integer I : point.getPoint() ) {
+					row[i] = I.toString();
+				}
+				// add row
+				rows.add(new StringRow(row));
+			}
+		}
+		response.setData(rows.toArray(new StringRow[0]));
 		return response;
 	}
 	
@@ -4549,6 +4600,15 @@ public PafGetNotesResponse getCellNotes(
 		
 		// get a persisted object to go with session
 		AsstSet asst = dataStore.initAsstSet(createAsstRequest.getClientId(), createAsstRequest.getSessionToken());
+		
+		// stub in measures and time
+		PafDimSpec timeDim = new PafDimSpec();
+		PafDimSpec msrDim = new PafDimSpec();
+		timeDim.setDimension("Time");
+		timeDim.setExpressionList( new String[] {"Wk27"} );
+		msrDim.setDimension("Measures");
+		msrDim.setExpressionList( new String[] {"AUR"} );		
+		
 		
 
 		return new CreateAsstResponse();

@@ -28,6 +28,23 @@ public class AsstSet extends PacePOJO {
 	public void setLabel(String label) {
 		this.label = label;
 	}
+	
+	public int getNumRows() {
+		if (dimToCluster != null)
+			return dimToCluster.getExpressionList().length;
+		else
+			return 0;
+	}
+	
+	public int getNumCols() {
+		if (timePeriods == null || dimToMeasure == null || dimToCluster == null || measures == null) 
+			return 0;
+		else
+			return timePeriods.getExpressionList().length * 
+					dimToMeasure.getExpressionList().length *
+					dimToCluster.getExpressionList().length *
+					measures.getExpressionList().length;
+	}
 
 	
 	
