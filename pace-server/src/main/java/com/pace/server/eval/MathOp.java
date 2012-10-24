@@ -27,7 +27,7 @@ public class MathOp {
 		            new KMeansPlusPlusClusterer<EuclideanIntegerPoint>(new Random(1746432956321l));
 
 		        List<Cluster<EuclideanIntegerPoint>> clusters =
-		            transformer.cluster(dataPoints, 3, 10);
+		            transformer.cluster(dataPoints, 2, 3);
 		        
 //		        assertEquals(3, clusters.size());
 //		        boolean cluster1Found = false;

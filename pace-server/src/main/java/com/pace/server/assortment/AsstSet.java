@@ -1,4 +1,6 @@
 /**
+ *
+ * Use accessors for internal properties to avoid issues w lazy loaded properties.
  * 
  */
 package com.pace.server.assortment;
@@ -37,13 +39,14 @@ public class AsstSet extends PacePOJO {
 	}
 	
 	public int getNumCols() {
-		if (timePeriods == null || dimToMeasure == null || dimToCluster == null || measures == null) 
+		
+		if (getTimePeriods() == null || getDimToMeasure() == null || getDimToCluster() == null || getMeasures() == null) 
 			return 0;
 		else
-			return timePeriods.getExpressionList().length * 
-					dimToMeasure.getExpressionList().length *
-					dimToCluster.getExpressionList().length *
-					measures.getExpressionList().length;
+			return getTimePeriods().getExpressionList().length * 
+					getDimToMeasure().getExpressionList().length *
+					getDimToCluster().getExpressionList().length *
+					getMeasures().getExpressionList().length;
 	}
 
 	

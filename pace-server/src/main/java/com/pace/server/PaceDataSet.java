@@ -2,6 +2,7 @@ package com.pace.server;
 
 import com.pace.db.PacePOJO;
 
+import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
@@ -15,7 +16,8 @@ public class PaceDataSet extends PacePOJO {
 
 	
 	public PaceDataSet(double[][] inData) {
-		data.assign(inData);
+
+		data = DoubleFactory2D.dense.make(inData);
 	}
 	
 	public PaceDataSet() {

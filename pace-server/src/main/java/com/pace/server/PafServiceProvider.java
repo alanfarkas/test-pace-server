@@ -3559,7 +3559,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		}
 		
 		PaceClusteredDataSet clusters = dataService.clusterDataset(inData);
-		String[] row;
+		String[] row = null;
 		List<StringRow> rows = new ArrayList<StringRow>();
 		int i;
 		
@@ -3578,6 +3578,8 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				rows.add(new StringRow(row));
 			}
 		}
+
+		response.setHeader(new StringRow(row));
 		response.setData(rows.toArray(new StringRow[0]));
 		return response;
 	}
@@ -4598,6 +4600,9 @@ public PafGetNotesResponse getCellNotes(
 			PafNotAuthenticatedSoapException, PafNotAuthorizedSoapException,
 			PafSoapException {
 		
+		// clear asset sets for now
+		dataStore.clrAsstSets();
+		
 		// get a persisted object to go with session
 		AsstSet asst = dataStore.initAsstSet(createAsstRequest.getClientId(), createAsstRequest.getSessionToken());
 		
@@ -4605,10 +4610,16 @@ public PafGetNotesResponse getCellNotes(
 		PafDimSpec timeDim = new PafDimSpec();
 		PafDimSpec msrDim = new PafDimSpec();
 		timeDim.setDimension("Time");
-		timeDim.setExpressionList( new String[] {"Wk27"} );
+		timeDim.setExpressionList( new String[] {"Feb"} );
 		msrDim.setDimension("Measures");
-		msrDim.setExpressionList( new String[] {"AUR"} );		
+		msrDim.setExpressionList( new String[] {"SLS_DLR"} );		
 		
+		asst.setMeasures(msrDim);
+		asst.setTimePeriods(timeDim);
+		
+		asst.setLabel("Hello");
+		
+		dataStore.saveAsst(asst);
 		
 
 		return new CreateAsstResponse();

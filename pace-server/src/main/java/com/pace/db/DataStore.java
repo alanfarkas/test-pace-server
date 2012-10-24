@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
+import com.pace.base.app.PafDimSpec;
 import com.pace.server.PaceDataSet;
 import com.pace.server.assortment.AsstSet;
 
@@ -31,7 +32,8 @@ public class DataStore {
 		}
 			
 		db.getEntityManager().registerEntityClass(PaceDataSet.class);
-		db.getEntityManager().registerEntityClass(AsstSet.class);			
+		db.getEntityManager().registerEntityClass(AsstSet.class);
+		db.getEntityManager().registerEntityClass(PafDimSpec.class);
 	}
 	
 	public AsstSet initAsstSet(String clientId, String sessionId) {
@@ -44,6 +46,7 @@ public class DataStore {
 	}
 	
 	public AsstSet getAsstSet(String clientId, String sessionId) {
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
 		AsstSet asst = null;
 		for (AsstSet a : db.browseClass(AsstSet.class)) {
 			if (a.getClientId().equals(clientId)) {
@@ -55,12 +58,14 @@ public class DataStore {
 	}
 	
 	public void clrAsstSets() {
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
 		for (AsstSet asst : db.browseClass(AsstSet.class)) {
 			db.delete(asst);
 		}				
 	}
 	
 	public void delAsstSet(String clientId) {
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
 		for (AsstSet asst : db.browseClass(AsstSet.class)) {
 			if (asst.getClientId().equals(clientId)) {
 				db.delete(asst);

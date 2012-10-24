@@ -4321,6 +4321,7 @@ public class PafDataService {
 		// For each product filtered to, treat it as another metric for that location. In effect this produces
 		// a data point for each unique product / measure combination at a given location.
 		PafDataCache dc = this.getDataCache(asst.getClientId());
+
 		String[] baseDims = dc.getBaseDimensions();	
 		
 		// initilize arrays
@@ -4329,9 +4330,13 @@ public class PafDataService {
 		
 
 		Map<String, List<String>> memberFilter = new HashMap<String, List<String>>();
-		memberFilter.put("Products", Arrays.asList(asst.getDimToMeasure().getExpressionList() ) );
+		memberFilter.put("Product", Arrays.asList(asst.getDimToMeasure().getExpressionList() ) );
 		memberFilter.put("Time", Arrays.asList(asst.getTimePeriods().getExpressionList() ) );			
-		memberFilter.put("Measures", Arrays.asList(asst.getMeasures().getExpressionList() ) );	
+		memberFilter.put(dc.getMeasureDim(), Arrays.asList(asst.getMeasures().getExpressionList() ) );
+		memberFilter.put(dc.getVersionDim(), Arrays.asList(dc.getPlanVersion()));
+		memberFilter.put(dc.getYearDim(), Arrays.asList(dc.getYears()[0]));
+		
+		
 		
 		StringOdometer so;
 		int iRow = 0; int iCol = 0;
@@ -4342,7 +4347,7 @@ public class PafDataService {
 			so = dc.getCellIterator(baseDims, memberFilter);
 			
 			while (so.hasNext()) {
-				data[iRow][iCol++] = dc.getCellValue(baseDims, so.getValue());
+				data[iRow][iCol++] = dc.getCellValue(baseDims, so.nextValue());
 			}
 			iRow++;
 		}
