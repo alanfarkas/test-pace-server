@@ -4302,12 +4302,15 @@ public class PafDataService {
 	public PaceClusteredDataSet clusterDataset(PaceDataSet inData) {
 		PaceClusteredDataSet dataSet = new PaceClusteredDataSet();
 		List<EuclideanIntegerPoint> points = new ArrayList<EuclideanIntegerPoint>();
-		IntArrayList iPoint = new IntArrayList();
+		IntArrayList iPoint = new IntArrayList( inData.getColCount() );
 		for (int i=0 ; i < inData.getRowCount(); i++) {
 			for (double d : inData.getRow(i) ) {
+				// build row of data points
 				iPoint.add( (int) Math.round(d) );
-				points.add(new EuclideanIntegerPoint(iPoint.elements()));
 			}
+			// add row as euclidean point
+			points.add(new EuclideanIntegerPoint(iPoint.elements()));	
+			iPoint.clear();
 		}
 		
 		dataSet.setClusters(MathOp.clusterData(points));

@@ -75,7 +75,8 @@ public class DataStore {
 
 
 	public void storePaceDataSet(String clientId, PaceDataSet dataSet) {
-		
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
+	
 		PaceDataSet pDataSet = db.newInstance(PaceDataSet.class);
 		
 		pDataSet.setData(dataSet.getData());
@@ -86,10 +87,14 @@ public class DataStore {
 	}
 	
 	public void delPaceDataSet(PaceDataSet ds) {
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
+
 		db.delete(ds);
 	}
 	
 	public void delAllUserData(String clientId) {
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
+
 		for (PaceDataSet ds : db.browseClass(PaceDataSet.class)) {
 			if (ds.getClientId().equals(clientId)) {
 				db.delete(ds);
@@ -98,6 +103,8 @@ public class DataStore {
 	}
 	
 	public List<PaceDataSet> getPaceDataSets(String clientId) {
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
+
 		List<PaceDataSet> dataSets = new ArrayList<PaceDataSet>();
 		for (PaceDataSet ds : db.browseClass(PaceDataSet.class)) {
 			if (ds.getClientId().equals(clientId)) {
@@ -109,6 +116,8 @@ public class DataStore {
 	
 	protected void finalize() throws Throwable
 	{
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
+		
 		this.clrAsstSets();
 		db.close();
 		super.finalize();
@@ -116,6 +125,7 @@ public class DataStore {
 	}
 
 	public void saveAsst(AsstSet asst) {
+		ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
 		db.save(asst);
 	} 
 		

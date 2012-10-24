@@ -1,5 +1,9 @@
 package com.pace.server.comm;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class StringRow {
 	String id;
 	/**
@@ -37,4 +41,15 @@ public class StringRow {
 	}
 	
 	public StringRow() {}
+
+	public void add(String s) {
+		if (items == null) {
+			items = new String[] { s };
+		}
+		else {
+			List<String> newitems = new ArrayList<String>(Arrays.asList(items));
+			newitems.add(s);
+			items = newitems.toArray(new String[0]);			
+		}
+	}
 }

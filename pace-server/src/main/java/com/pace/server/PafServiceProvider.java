@@ -3572,14 +3572,23 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				row = new String[point.getPoint().length];
 				i = 0;
 				for (Integer I : point.getPoint() ) {
-					row[i] = I.toString();
+					row[i++] = I.toString();
 				}
 				// add row
 				rows.add(new StringRow(row));
+				
+			}
+		}
+		
+		// generate header
+		StringRow hdr = new StringRow();
+		for (String s : asst.getDimToMeasure().getExpressionList() ) {
+			for (String m : asst.getMeasures().getExpressionList() ) {
+				hdr.add(s + ", " + m);
 			}
 		}
 
-		response.setHeader(new StringRow(row));
+		response.setHeader(hdr);
 		response.setData(rows.toArray(new StringRow[0]));
 		return response;
 	}

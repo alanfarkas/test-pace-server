@@ -32,7 +32,8 @@ public class AsstSet extends PacePOJO {
 	}
 	
 	public int getNumRows() {
-		if (dimToCluster != null)
+		// accessor access forces load of underlying property
+		if (getDimToCluster() != null)
 			return dimToCluster.getExpressionList().length;
 		else
 			return 0;
@@ -45,7 +46,6 @@ public class AsstSet extends PacePOJO {
 		else
 			return getTimePeriods().getExpressionList().length * 
 					getDimToMeasure().getExpressionList().length *
-					getDimToCluster().getExpressionList().length *
 					getMeasures().getExpressionList().length;
 	}
 
