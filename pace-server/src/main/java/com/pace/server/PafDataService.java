@@ -4309,7 +4309,7 @@ public class PafDataService {
 				iPoint.add( (int) Math.round(d) );
 			}
 			// add row as euclidean point
-			points.add(new EuclideanIntegerPoint(iPoint.elements()));	
+			points.add(new EuclideanIntegerPoint(iPoint.elements().clone()));	
 			iPoint.clear();
 		}
 		
