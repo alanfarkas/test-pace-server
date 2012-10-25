@@ -130,6 +130,7 @@ import com.pace.db.DataStore;
 import com.pace.server.assortment.AsstSet;
 import com.pace.server.comm.AttributeDimInfo;
 import com.pace.server.comm.ClusterRequest;
+import com.pace.server.comm.ClusteredResultSetResponse;
 import com.pace.server.comm.CreateAsstRequest;
 import com.pace.server.comm.CreateAsstResponse;
 import com.pace.server.comm.PaceQueryRequest;
@@ -3547,7 +3548,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 	}
 	
-	public PaceResultSetResponse getClusteredResult(ClusterRequest request) throws RemoteException, PafSoapException {
+	public ClusteredResultSetResponse getClusteredResult(ClusterRequest request) throws RemoteException, PafSoapException {
 		AsstSet asst = dataStore.getAsstSet(request.getClientId(), request.getSessionToken() );
 				
 		PaceDataSet inData;
@@ -3563,7 +3564,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		List<StringRow> rows = new ArrayList<StringRow>();
 		int i;
 		
-		PaceResultSetResponse response = new PaceResultSetResponse();
+		ClusteredResultSetResponse response = new ClusteredResultSetResponse();
 		// cluster
 		for (Cluster<EuclideanIntegerPoint> c : clusters.getClusters() ){
 			// row
