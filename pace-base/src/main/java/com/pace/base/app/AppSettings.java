@@ -40,6 +40,8 @@ public class AppSettings {
 	private Integer globalUowSizeMax;
 	private boolean globalReplicateEnabled;	
 	private boolean globalReplicateAllEnabled;
+	private boolean globalLiftEnabled;	
+	private boolean globalLiftAllEnabled;
 	private boolean isGlobalUserFilteredUow;
 	private boolean isGlobalUserFilteredMultiSelect;// TTN 1733 - multi-select 
 	private boolean isGlobalDataFilteredUow;
@@ -138,6 +140,34 @@ public class AppSettings {
 	 */
 	public void setGlobalReplicateEnabled(boolean globalReplicateEnabled) {
 		this.globalReplicateEnabled = globalReplicateEnabled;
+	}
+
+	/**
+	 * @return the globalLiftEnabled
+	 */
+	public boolean isGlobalLiftEnabled() {
+		return globalLiftEnabled;
+	}
+
+	/**
+	 * @param globalLiftEnabled the globalLiftEnabled to set
+	 */
+	public void setGlobalLiftEnabled(boolean globalLiftEnabled) {
+		this.globalLiftEnabled = globalLiftEnabled;
+	}
+
+	/**
+	 * @return the globalLiftAllEnabled
+	 */
+	public boolean isGlobalLiftAllEnabled() {
+		return globalLiftAllEnabled;
+	}
+
+	/**
+	 * @param globalLiftAllEnabled the globalLiftAllEnabled to set
+	 */
+	public void setGlobalLiftAllEnabled(boolean globalLiftAllEnabled) {
+		this.globalLiftAllEnabled = globalLiftAllEnabled;
 	}
 
 	/**

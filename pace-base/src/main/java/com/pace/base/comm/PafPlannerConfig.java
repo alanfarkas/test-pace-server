@@ -55,6 +55,8 @@ public class PafPlannerConfig implements Cloneable {
     private String[] versionFilter;
     private Boolean replicateEnabled;
     private Boolean replicateAllEnabled;
+    private Boolean liftEnabled;
+    private Boolean liftAllEnabled;
     private String[] readOnlyMeasures;
 
 	/**
@@ -256,6 +258,34 @@ public class PafPlannerConfig implements Cloneable {
 	 */
 	public Boolean getReplicateEnabled() {
 		return replicateEnabled;
+	}
+
+	/**
+	 * @return the liftEnabled
+	 */
+	public Boolean getLiftEnabled() {
+		return liftEnabled;
+	}
+
+	/**
+	 * @param liftEnabled the liftEnabled to set
+	 */
+	public void setLiftEnabled(Boolean liftEnabled) {
+		this.liftEnabled = liftEnabled;
+	}
+
+	/**
+	 * @return the liftAllEnabled
+	 */
+	public Boolean getLiftAllEnabled() {
+		return liftAllEnabled;
+	}
+
+	/**
+	 * @param liftAllEnabled the liftAllEnabled to set
+	 */
+	public void setLiftAllEnabled(Boolean liftAllEnabled) {
+		this.liftAllEnabled = liftAllEnabled;
 	}
 
 	/**
