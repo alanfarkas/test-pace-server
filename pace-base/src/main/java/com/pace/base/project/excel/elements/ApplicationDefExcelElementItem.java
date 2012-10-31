@@ -279,36 +279,44 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 					//week 53 years
 					case 14:											
 						//Update for TTN-1862
-						Set<String> years = new HashSet<String>();
-						boolean yearsReadError = false;
-						for ( PafExcelValueObject year : rowItemList ) {
-							try {
-								years.add(PafExcelUtil.getString(getProjectElementId(), year));
-							} catch (ExcelProjectDataErrorException epdee) {
-								addProjectDataErrorToList(epdee.getProjectDataError());
-								yearsReadError = true;
+						if( rowItemList.size() != 0 ) {
+							Set<String> years = new HashSet<String>();
+							boolean yearsReadError = false;
+							for ( PafExcelValueObject year : rowItemList ) {
+								if( PafExcelUtil.getString(getProjectElementId(), year) !=null ) {
+									try {
+										years.add(PafExcelUtil.getString(getProjectElementId(), year));
+									} catch (ExcelProjectDataErrorException epdee) {
+										addProjectDataErrorToList(epdee.getProjectDataError());
+										yearsReadError = true;
+									}
+								}
 							}
-						}
-						if ( ! yearsReadError && years.size() > 0 ) {
-							appSettings.setWeek53Years(years);
+							if ( ! yearsReadError && years.size() > 0 ) {
+								appSettings.setWeek53Years(years);
+							}
 						}
 						break;
 	
 					//week 53 members
 					case 15:											
 						//Update for TTN-1862						
-						Set<String> members = new HashSet<String>();
-						boolean membersReadError = false;
-						for ( PafExcelValueObject member : rowItemList ) {
-							try {
-								members.add(PafExcelUtil.getString(getProjectElementId(), member));
-							} catch (ExcelProjectDataErrorException epdee) {
-								addProjectDataErrorToList(epdee.getProjectDataError());
-								yearsReadError = true;
+						if( rowItemList.size() != 0 ) {
+							Set<String> members = new HashSet<String>();
+							boolean membersReadError = false;
+							for ( PafExcelValueObject member : rowItemList ) {
+								if( PafExcelUtil.getString(getProjectElementId(), member) != null ) {
+									try {
+										members.add(PafExcelUtil.getString(getProjectElementId(), member));
+									} catch (ExcelProjectDataErrorException epdee) {
+										addProjectDataErrorToList(epdee.getProjectDataError());
+										membersReadError = true;
+									}
+								}
 							}
-						}
-						if ( ! membersReadError && members.size() > 0 ) {
-							appSettings.setWeek53Years(members);
+							if ( ! membersReadError && members.size() > 0 ) {
+								appSettings.setWeek53Years(members);
+							}
 						}
 						break;
 
