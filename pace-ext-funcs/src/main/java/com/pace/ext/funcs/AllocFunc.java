@@ -80,22 +80,25 @@ public class AllocFunc extends AbstractFunction {
     	
      	// Get the list of intersections to allocate. This would include the current 
     	// intersection as well as any non-elapsed, locked intersections for the
-    	// "msrToAlloc" or any of its descendants along the measure hierarchy. 
-    	// (TTN-1743)
-    	
-    	for (Intersection lockedCell : evalState.getCurrentLockedCells()) {
+    	// "msrToAlloc" or any of its descendants along the measure hierarchy 
+    	// (TTN-1743).  Also check current changed cells (TTN-1876).
+    	Set<Intersection> allocCandidates = new HashSet<Intersection>(evalState.getCurrentLockedCells());
+//       	allocCandidates.addAll(evalState.getOrigChangedCells());
+//       	allocCandidates.addAll(evalState.getOrigLockedCells());  
+       	allocCandidates.addAll(evalState.getCurrentChangedCells());
+    	for (Intersection candidateCell : allocCandidates) {
     		
     		// Skip elapsed periods
-    		if (EvalUtil.isElapsedIs(lockedCell, evalState)) continue;
+    		if (EvalUtil.isElapsedIs(candidateCell, evalState)) continue;
     		
     		// Split locked intersections into two groups by measure: the ones
     		// belonging to "msrToAlloc" and the ones belonging to the "msrToAlloc"
     		// components.
-    		String measure = lockedCell.getCoordinate(msrDim);
+    		String measure = candidateCell.getCoordinate(msrDim);
 			if (this.aggMsrs.contains(measure)) {
-				allocIntersections.add(lockedCell);
+				allocIntersections.add(candidateCell);
 				if (measure.equals(msrToAlloc)) {
-					allocMsrIntersections.add(lockedCell);
+					allocMsrIntersections.add(candidateCell);
 				}
 			}
     	}
