@@ -133,6 +133,8 @@ import com.pace.server.comm.ClusterRequest;
 import com.pace.server.comm.ClusteredResultSetResponse;
 import com.pace.server.comm.CreateAsstRequest;
 import com.pace.server.comm.CreateAsstResponse;
+import com.pace.server.comm.PaceDescendantsRequest;
+import com.pace.server.comm.PaceDescendantsResponse;
 import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.comm.PaceResultSetResponse;
 import com.pace.server.comm.PafAuthRequest;
@@ -199,7 +201,6 @@ import com.pace.server.comm.StringRow;
 import com.pace.server.comm.ValidateUserSecurityRequest;
 import com.pace.server.comm.ValidationResponse;
 import com.pace.server.comm.ViewRequest;
-import com.pace.server.eval.MathOp;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -4633,6 +4634,59 @@ public PafGetNotesResponse getCellNotes(
 		
 
 		return new CreateAsstResponse();
+	}
+
+
+
+
+	@Override
+	public PaceDescendantsResponse getDescendants(PaceDescendantsRequest pafDescendantsRequest)
+			throws RemoteException, PafSoapException {
+		
+		String clientId = pafDescendantsRequest.getClientId();
+		PaceDescendantsResponse response  = new PaceDescendantsResponse();
+		
+		try
+		{
+			// Set logger client info property to user name
+			pushToNDCStack(clientId);
+						
+			// Troubleshoot load balancer cookies
+			listCookies(clientId);
+			
+			// Verify client id is good
+			if ( ! clients.containsKey(clientId) ) {
+				logger.error(Messages.getString("PafServiceProvider.25") + clientId); //$NON-NLS-1$
+				throw new PafSoapException(new PafException(Messages.getString(Messages.getString("PafServiceProvider.31")), PafErrSeverity.Error));			 //$NON-NLS-1$
+			}		
+			
+			
+			// Get client state
+			PafClientState cs = clients.get(clientId);
+			
+			if (cs == null) {
+				throw new PafException(Messages.getString("PafServiceProvider.9"), 	PafErrSeverity.Fatal);
+			}
+			
+			
+			
+
+		} catch (RuntimeException re) {
+		
+			handleRuntimeException(re);
+			
+		} catch (PafException pex) {
+			
+			PafErrHandler.handleException(pex);
+			
+			throw pex.getPafSoapException();
+			
+		} finally {
+		
+			popFromNDCStack(clientId);
+		}	
+		
+		return response;
 	}
 	
 	

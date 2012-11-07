@@ -40,6 +40,8 @@ import com.pace.server.comm.ClusterRequest;
 import com.pace.server.comm.ClusteredResultSetResponse;
 import com.pace.server.comm.CreateAsstRequest;
 import com.pace.server.comm.CreateAsstResponse;
+import com.pace.server.comm.PaceDescendantsRequest;
+import com.pace.server.comm.PaceDescendantsResponse;
 import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.comm.PaceResultSetResponse;
 import com.pace.server.comm.PafAuthRequest;
@@ -352,6 +354,16 @@ public interface IPafService extends Remote {
      * @throws PafSoapException the paf soap exception
      */
     public PafTreesResponse getDimensionTrees(PafTreesRequest pafTreesRequest) throws RemoteException, PafSoapException;
+    
+    /**
+     * Gets the Descendants for an array of Intersections.
+     *
+     * @param pafTreesRequest the Pace Descendants request
+     * @return the pace descendants response
+     * @throws RemoteException the remote exception
+     * @throws PafSoapException the Pace Soap Exception
+     */
+    public PaceDescendantsResponse getDescendants(PaceDescendantsRequest pafDescendantsRequest) throws RemoteException, PafSoapException;
     
     /**
      * Gets the paf user.
