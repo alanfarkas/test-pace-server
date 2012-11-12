@@ -55,8 +55,8 @@ public class PafPlannerConfig implements Cloneable {
     private String[] versionFilter;
     private Boolean replicateEnabled;
     private Boolean replicateAllEnabled;
-    private Boolean liftEnabled;
-    private Boolean liftAllEnabled;
+    private Boolean liftEnabled; 	//TTN 1793 Lift Allocation
+    private Boolean liftAllEnabled; //TTN 1793 Lift Allocation
     private String[] readOnlyMeasures;
 
 	/**
