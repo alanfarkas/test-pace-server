@@ -69,7 +69,7 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 	@Override
 	protected void createHeaderListMapEntries() {
 
-		getHeaderListMap().put(getSheetName(), Arrays.asList("id", "plan cycle", "year", "is open", "time"));
+		getHeaderListMap().put(getSheetName(), Arrays.asList("id", "plan cycle", "selected years", "plannable years", "is open", "time"));
 		//TODO change year to years (TTN-1595)
 	}
 
@@ -123,7 +123,7 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 							season.setPlanCycle(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));	
 							break;
 							
-						//years
+						//selectable years
 						case 2:											
 						//Update for TTN-1595
 							List<String> yearsList = new ArrayList<String>();
@@ -141,14 +141,32 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 							}
 							break;
 						
+						//plannable years
+						case 3:											
+						//Update for TTN-1595
+							List<String> yearsPlannable = new ArrayList<String>();
+							boolean planYrsReadError = false;
+							for ( PafExcelValueObject year : rowItemList ) {
+								try {
+									yearsPlannable.add(PafExcelUtil.getString(getProjectElementId(), year, true));
+								} catch (ExcelProjectDataErrorException epdee) {
+									addProjectDataErrorToList(epdee.getProjectDataError());
+									planYrsReadError = true;
+								}
+							}
+							if ( ! planYrsReadError && yearsPlannable.size() > 0 ) {
+								season.setPlannableYears(yearsPlannable.toArray(new String[0]));
+							}
+							break;
+							
 						//is open
-						case 3:						
+						case 4:						
 													
 							season.setOpen(PafExcelUtil.getBoolean(getProjectElementId(), firstValueObject, true));	
 							break;
 							
 						//time
-						case 4:						
+						case 5:						
 							
 							season.setTimePeriod(PafExcelUtil.getString(getProjectElementId(), firstValueObject, true));	
 							break;		
@@ -229,20 +247,29 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 					
 				}
 				
-				//years
+				//selectable years
 				//TTN 1595 - multi-year
 				String[] years = season.getYears();
 				if ( years != null ) {
 					for (String year : years ) {
-							excelRow.addRowItem(2, PafExcelValueObject.createFromString(year));
+						excelRow.addRowItem(2, PafExcelValueObject.createFromString(year));
+					}
+				}
+				
+				//plannable years
+				//TTN 1595 - multi-year
+				String[] yearsPlan = season.getPlannableYears();
+				if ( yearsPlan != null ) {
+					for (String year : yearsPlan ) {
+						excelRow.addRowItem(3, PafExcelValueObject.createFromString(year));
 					}
 				}
 				
 				//is open
-				excelRow.addRowItem(3, PafExcelValueObject.createFromBoolean(season.isOpen()));		
+				excelRow.addRowItem(4, PafExcelValueObject.createFromBoolean(season.isOpen()));		
 				
 				//time
-				excelRow.addRowItem(4, PafExcelValueObject.createFromString(season.getTimePeriod()));
+				excelRow.addRowItem(5, PafExcelValueObject.createFromString(season.getTimePeriod()));
 				
 				excelRowList.add(excelRow);			
 				
