@@ -12,7 +12,7 @@ public class Season implements Cloneable {
     private boolean isOpen = true;
     private String planCycle;
     private String[] years;
-    private String[] plannableYears;
+    private String[] plannableYears; //1860 - Non-plannable Year Support
     private String timePeriod;
     private PafDimSpec[] otherDims;
     @Deprecated

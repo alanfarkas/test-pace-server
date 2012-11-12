@@ -40,8 +40,8 @@ public class AppSettings {
 	private Integer globalUowSizeMax;
 	private boolean globalReplicateEnabled;	
 	private boolean globalReplicateAllEnabled;
-	private boolean globalLiftEnabled;	
-	private boolean globalLiftAllEnabled;
+	private boolean globalLiftEnabled;	//1793 - Lift Allocation
+	private boolean globalLiftAllEnabled; //1793 - Lift Allocation
 	private boolean isGlobalUserFilteredUow;
 	private boolean isGlobalUserFilteredMultiSelect;// TTN 1733 - multi-select 
 	private boolean isGlobalDataFilteredUow;
