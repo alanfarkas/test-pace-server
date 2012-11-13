@@ -139,9 +139,9 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
     
     private boolean isSuppressed; 
     
-    private boolean isRowHeaderRepeated;
+    private boolean isRowHeaderRepeated; //TTN 1865 
 
-    private boolean isColHeaderRepeated;
+    private boolean isColHeaderRepeated; //TTN 1865
     
     
     private String elementDelimiterRowMemberTag;
