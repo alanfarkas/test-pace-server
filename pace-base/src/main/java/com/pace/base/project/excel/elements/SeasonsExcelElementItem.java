@@ -148,7 +148,7 @@ public class SeasonsExcelElementItem<T extends List<Season>> extends PafExcelEle
 							boolean planYrsReadError = false;
 							for ( PafExcelValueObject year : rowItemList ) {
 								try {
-									yearsPlannable.add(PafExcelUtil.getString(getProjectElementId(), year, true));
+									yearsPlannable.add(PafExcelUtil.getString(getProjectElementId(), year));
 								} catch (ExcelProjectDataErrorException epdee) {
 									addProjectDataErrorToList(epdee.getProjectDataError());
 									planYrsReadError = true;
