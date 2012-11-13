@@ -89,6 +89,7 @@ import com.pace.base.comm.StartApplicationRequest;
 import com.pace.base.comm.UploadAppRequest;
 import com.pace.base.comm.UploadAppResponse;
 import com.pace.base.comm.UserFilterSpec;
+import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.db.SecurityGroup;
@@ -122,6 +123,7 @@ import com.pace.base.utility.CompressionUtil;
 import com.pace.base.utility.DataHandlerPaceProjectUtil;
 import com.pace.base.utility.DomainNameParser;
 import com.pace.base.utility.LogUtil;
+import com.pace.base.utility.StringOdometer;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafStyle;
 import com.pace.base.view.PafView;
@@ -4644,7 +4646,18 @@ public PafGetNotesResponse getCellNotes(
 			throws RemoteException, PafSoapException {
 		
 		String clientId = pafDescendantsRequest.getClientId();
+		ArrayList<SimpleCoordList> descInter = new ArrayList<SimpleCoordList>();
 		PaceDescendantsResponse response  = new PaceDescendantsResponse();
+		
+		//Check for null items in the request, if so set the response and return.
+		if(pafDescendantsRequest.getSessionCells() == null || pafDescendantsRequest.getSessionCells().length == 0){
+			response.setResponseCode(-1);
+			//TODO externalize these messages...
+			logger.error("No session cells specified." + clientId); 
+			response.setResponseMsg("No session cells specified.");
+			return response;
+		}
+		
 		
 		try
 		{
@@ -4656,8 +4669,8 @@ public PafGetNotesResponse getCellNotes(
 			
 			// Verify client id is good
 			if ( ! clients.containsKey(clientId) ) {
-				logger.error(Messages.getString("PafServiceProvider.25") + clientId); //$NON-NLS-1$
-				throw new PafSoapException(new PafException(Messages.getString(Messages.getString("PafServiceProvider.31")), PafErrSeverity.Error));			 //$NON-NLS-1$
+				logger.error(Messages.getString("PafServiceProvider.25") + clientId);
+				throw new PafSoapException(new PafException(Messages.getString(Messages.getString("PafServiceProvider.31")), PafErrSeverity.Error));
 			}		
 			
 			
@@ -4668,8 +4681,49 @@ public PafGetNotesResponse getCellNotes(
 				throw new PafException(Messages.getString("PafServiceProvider.9"), 	PafErrSeverity.Fatal);
 			}
 			
+			//Get Client Trees
+			MemberTreeSet memberTreeSet = cs.getUowTrees();
 			
+			for(SimpleCoordList sessionCells : pafDescendantsRequest.getSessionCells()){
+				Map <String, List<String>> memberFilters = new HashMap<String, List<String>>();
+			    String[] dimensions = sessionCells.getAxis();
+			    
+			    
+			    for(int i = 0; i < dimensions.length; i++){
+			    	//dim name
+			    	String dimName = dimensions[i];
+			    	//Get the coordinates for that dim.
+			    	String coord = sessionCells.getCoordinates()[i];
+			    	//Get dimTree for dim from uowTrees
+			    	PafDimTree pafDimTree = memberTreeSet.getTree(dimName);
+			    	//Create a list to hold the descendants
+			    	List<String> dimDescendants = new ArrayList<String>();
+			    	//Get descendants of coord in dimTree
+			    	List<PafDimMember> descendants = pafDimTree.getDescendants(coord);
+			    	//Add the descendants to the member filter,
+			    	//if no descendants are returned, then add myself
+			    	if(descendants != null && descendants.size() > 0){
+				    	for(PafDimMember member : descendants){
+				    		dimDescendants.add(member.getKey());
+				    	}
+				    	
+			    	} else {
+			    		dimDescendants.add(coord);
+			    	}
+			    	memberFilters.put(dimName, dimDescendants);
+			    }
+
+			    //Create a StringOdometer
+			    StringOdometer stringOdometer = new StringOdometer(memberFilters, dimensions);
+			    
+			    //Iterate thru the Odometer and Create/Add the SimpleCoordLists to the ArrayList.
+			    while(stringOdometer.hasNext()) {
+			    	descInter.add(new SimpleCoordList(dimensions, stringOdometer.nextValue()));
+				}
+			}
 			
+			//Return...
+			response.setSessionIntersections(descInter.toArray(new SimpleCoordList[descInter.size()]));
 
 		} catch (RuntimeException re) {
 		
