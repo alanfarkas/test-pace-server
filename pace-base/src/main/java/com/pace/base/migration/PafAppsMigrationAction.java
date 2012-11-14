@@ -163,7 +163,7 @@ public class PafAppsMigrationAction extends MigrationAction {
 				if( pafApp.getSeasonList() != null ) {
 					Set<Season> seasons = pafApp.getSeasonList().getSeasons();
 					for( Season season : seasons ) {
-						if( season.getYears() == null || season.getYears().length == 0 || season.getYear() != null ) {
+						if( season.getYears() == null || season.getYears().length == 0 || season.getYear() != null || season.getPlannableYears() == null ) {
 							return MigrationActionStatus.NotStarted;
 						}
 					}
@@ -338,6 +338,9 @@ public class PafAppsMigrationAction extends MigrationAction {
 					years.add(season.getYear());
 					season.setYear(null);
 					season.setYears(years.toArray(new String[0]));
+				}
+				if( season.getYears() != null && season.getYears().length != 0 && season.getPlannableYears() == null ) {
+					season.setPlannableYears(season.getYears());
 				}
 			}
 			
