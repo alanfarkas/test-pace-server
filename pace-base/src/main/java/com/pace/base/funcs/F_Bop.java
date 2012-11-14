@@ -33,7 +33,7 @@ import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * Implements a beginning of period function for the specified measure and time
+ * Implements a beginning of period function for the specified measure and 
  * dimension. ie. @BOP(SLS_DLR, Time)
  * 
  * This function would return the intersection for SLS_DLR that is at the first

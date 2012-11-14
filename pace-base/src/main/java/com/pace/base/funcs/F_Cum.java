@@ -32,7 +32,7 @@ import com.pace.base.state.IPafEvalState;
 
 /**
  * Implements a cumulative function. It totals up all the intersections along a particular
- * dimensional axis. The default axis is the time diemnsion
+ * dimensional axis. The default axis is the time dimension (ie. @CUM(SLS_DLR, Time))
  *
  * @version	x.xx
  * @author jim

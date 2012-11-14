@@ -38,6 +38,8 @@ public class EvaluateViewRequest extends PafRequest implements IPafViewRequest{
     private SimpleCoordList lockedCells;
     private SimpleCoordList replicateExistingCells;
     private SimpleCoordList replicateAllCells;
+    private SimpleCoordList liftExistingCells;
+    private SimpleCoordList liftAllCells;
     
     private String protectedFormulas[];
     private String viewName;
@@ -145,6 +147,32 @@ public class EvaluateViewRequest extends PafRequest implements IPafViewRequest{
 	public void setReplicateExistingCells(SimpleCoordList replicateExistingCells) {
 		this.replicateExistingCells = replicateExistingCells;
 	}
+	
+	/**
+	 * @return the liftExistingCells
+	 */
+	public SimpleCoordList getLiftExistingCells() {
+		return liftExistingCells;
+	}
+	/**
+	 * @param liftExistingCells the liftExistingCells to set
+	 */
+	public void setLiftExistingCells(SimpleCoordList liftExistingCells) {
+		this.liftExistingCells = liftExistingCells;
+	}
+	/**
+	 * @return the liftAllCells
+	 */
+	public SimpleCoordList getLiftAllCells() {
+		return liftAllCells;
+	}
+	/**
+	 * @param liftAllCells the liftAllCells to set
+	 */
+	public void setLiftAllCells(SimpleCoordList liftAllCells) {
+		this.liftAllCells = liftAllCells;
+	}
+	
 	public void setRowsSuppressed(boolean rowsSuppressed) {
 		this.rowsSuppressed = rowsSuppressed;
 	}

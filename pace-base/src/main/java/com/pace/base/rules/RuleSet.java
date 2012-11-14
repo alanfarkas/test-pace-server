@@ -23,7 +23,7 @@ public class RuleSet implements Cloneable {
         private String name;
         private AllocType allocType; // SignedAlloc, AbsAlloc  --TTN-1792 Abs Allocation Method
 		private String dimension;
-        private String[] measureList;
+        private String[] measureList, liftExistingMeasureList, liftAllMeasureList;
         private List<RuleGroup> ruleGroups = new ArrayList<RuleGroup>();
         private transient Map<String, Set<String>> msrDeps = new HashMap<String, Set<String>>();
         private transient Set<String> exhaustedMeasures = new HashSet<String>();   // TTN-1307
@@ -292,6 +292,33 @@ public class RuleSet implements Cloneable {
         }
                 
         
+		/**
+		 * @return the liftExistingMeasureList
+		 */
+		public String[] getLiftExistingMeasureList() {
+			return liftExistingMeasureList;
+		}
+		/**
+		 * @param liftExistingMeasureList the liftExistingMeasureList to set
+		 */
+		public void setLiftExistingMeasureList(String[] liftExistingMeasureList) {
+			this.liftExistingMeasureList = liftExistingMeasureList;
+		}
+		
+		
+		/**
+		 * @return the liftAllMeasureList
+		 */
+		public String[] getLiftAllMeasureList() {
+			return liftAllMeasureList;
+		}
+		/**
+		 * @param liftAllMeasureList the liftAllMeasureList to set
+		 */
+		public void setLiftAllMeasureList(String[] liftAllMeasureList) {
+			this.liftAllMeasureList = liftAllMeasureList;
+		}
+		
 		/**
 		 * @return the comment
 		 */
