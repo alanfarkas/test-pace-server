@@ -62,14 +62,14 @@ public class Season implements Cloneable {
     }
 
     /**
-	 * @return the year - NOT USED - Needed for backwards compatability
+	 * @return the year - NOT USED - Needed for backwards compatibility
 	 * @deprecated
 	 */
 	public String getYear() {
 		return year;
 	}
 	/**
-	 * @param year the year to set -  NOT USED - Needed for backwards compatability
+	 * @param year the year to set -  NOT USED - Needed for backwards compatibility
 	 * @deprecated
 	 */
 	public void setYear(String year) {
