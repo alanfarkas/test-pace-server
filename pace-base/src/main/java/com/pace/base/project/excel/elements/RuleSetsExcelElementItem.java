@@ -62,9 +62,9 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 	@Override
 	protected void createHeaderListMapEntries() {
 		
-		getHeaderListMap().put(ProjectElementId.RuleSet_RuleSet.toString(), Arrays.asList("rule set name", "alloc type", "measure list", "comment - rs", "comment - rg", "id - rg", "perpetual - rg", "skip protection processing - rg", "balance key set - rg", "delayed perpetual - rg", "perpetual allocation - rg", "perform initial allocation - rg", "base allocate measure", "trigger measures (pipe delimited)", "skip allocation", "lock allocation", "skip aggeration", "lock system evaluation result", "lock user evaluation result", "eval locked intersections", "lock all prior time", "calc all periods", "initial TB first allocation"));
-		getHeaderListMap().put(ProjectElementId.RuleSet_RuleGroup.toString(), Arrays.asList("rule group", "", "", "", ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, "", "", "", "", "", "", "", "", "", "", ""));
-		getHeaderListMap().put(ProjectElementId.RuleSet_Rule.toString(), Arrays.asList("", "rule(s)", "result term", "expression", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""));
+		getHeaderListMap().put(ProjectElementId.RuleSet_RuleSet.toString(), Arrays.asList("rule set name", "alloc type", "measure list", "lift existing measure list", "lift all measure list", "comment - rs", "comment - rg", "id - rg", "perpetual - rg", "skip protection processing - rg", "balance key set - rg", "delayed perpetual - rg", "perpetual allocation - rg", "perform initial allocation - rg", "base allocate measure", "trigger measures (pipe delimited)", "skip allocation", "lock allocation", "skip aggeration", "lock system evaluation result", "lock user evaluation result", "eval locked intersections", "lock all prior time", "calc all periods", "initial TB first allocation"));
+		getHeaderListMap().put(ProjectElementId.RuleSet_RuleGroup.toString(), Arrays.asList("rule group", "", "", "", "", "", ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, "", "", "", "", "", "", "", "", "", "", ""));
+		getHeaderListMap().put(ProjectElementId.RuleSet_Rule.toString(), Arrays.asList("", "rule(s)", "result term", "expression", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""));
 		
 	}
 
@@ -187,49 +187,49 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 									switch (colIndex) {
 									
 									//rule group comment
-									case 4:
+									case 6:
 										
 										rg.setComment(PafExcelUtil.getString(getProjectElementId(), valueObject));									
 										break;
 									
 									//id
-									case 5:
+									case 7:
 										
 										rg.setRuleGroupId(PafExcelUtil.getString(getProjectElementId(), valueObject));									
 										break;
 										
 									//perpetual
-									case 6:
+									case 8:
 										
 										rg.setPerpetual(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//skip protection processing
-									case 7:
+									case 9:
 										
 										rg.setSkipProtProc(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//balance key set
-									case 8:
+									case 10:
 										
 										rg.setBalanceSetKey(PafExcelUtil.getString(getProjectElementId(), valueObject));
 										break;
 										
 									//delayed perpetual
-									case 9:
+									case 11:
 										
 										rg.setDelayedPerpetual(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//perpetual allocation
-									case 10:
+									case 12:
 										
 										rg.setPerpetualAllocation(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//perform initial allocation 
-									case 11:
+									case 13:
 										
 										rg.setPerformInitialAllocation(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;								
@@ -339,8 +339,76 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 											
 											break;
 											
-										//comment
+											
+										//lift existing measure list
 										case 3:
+											
+											if ( ! valueObject.isBlank() ) {
+												
+												String[] liftExistMeasureAr = rs.getLiftExistingMeasureList();
+												
+												List<String> liftExistMeasureList = new ArrayList<String>();
+												
+												if ( liftExistMeasureAr != null ) {
+													
+													liftExistMeasureList.addAll(Arrays.asList(liftExistMeasureAr)); 
+													
+												}
+												
+												String newMeasure = PafExcelUtil.getString(getProjectElementId(), valueObject);
+												
+												if ( newMeasure != null ) {
+												
+													liftExistMeasureList.add(newMeasure);
+													
+												}	
+												
+												if ( liftExistMeasureList.size() > 0 ) {
+												
+													rs.setMeasureList(liftExistMeasureList.toArray(new String[0]));
+													
+												}
+												
+											}
+											
+											break;
+												
+												
+										//lift all measure list
+										case 4:
+											
+											if ( ! valueObject.isBlank() ) {
+												
+												String[] liftAllMeasureAr = rs.getLiftAllMeasureList();
+												
+												List<String> liftAllMeasureList = new ArrayList<String>();
+												
+												if ( liftAllMeasureAr != null ) {
+													
+													liftAllMeasureList.addAll(Arrays.asList(liftAllMeasureAr)); 
+													
+												}
+												
+												String newMeasure = PafExcelUtil.getString(getProjectElementId(), valueObject);
+												
+												if ( newMeasure != null ) {
+												
+													liftAllMeasureList.add(newMeasure);
+													
+												}	
+												
+												if ( liftAllMeasureList.size() > 0 ) {
+												
+													rs.setMeasureList(liftAllMeasureList.toArray(new String[0]));
+													
+												}
+												
+											}
+											
+											break;
+								
+										//comment
+										case 5:
 											
 											if ( ! valueObject.isBlank()) {
 												
@@ -399,70 +467,70 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 										break;
 										
 									//base allocate measure		
-									case 12:
+									case 14:
 												
 										rule.setBaseAllocateMeasure(PafExcelUtil.getString(getProjectElementId(), valueObject));
 										break;
 										
 									//trigger measures
-									case 13:
+									case 15:
 											
 										rule.setTriggerMeasures(PafExcelUtil.getStringArFromDelimValueObject(getProjectElementId(), valueObject));
 										
 										break;
 										
 									//skip allocation	
-									case 14:
+									case 16:
 										
 										rule.setSkipAllocation(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										
 										break;
 										
 									//lock allocation	
-									case 15:
+									case 17:
 										
 										rule.setLockAllocation(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										
 										break;
 										
 									//skip aggeration	
-									case 16:
+									case 18:
 										
 										rule.setSkipAggregation(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//lock system evaluation result	
-									case 17:
+									case 19:
 										
 										rule.setLockSystemEvaluationResult(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//lock user evaluation result	
-									case 18:
+									case 20:
 										
 										rule.setLockUserEvaluationResult(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//eval locked intersections	
-									case 19:
+									case 21:
 										
 										rule.setEvalLockedIntersections(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//lock all prior time	
-									case 20:
+									case 22:
 										
 										rule.setLockAllPriorTime(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//calc all periods	
-									case 21:
+									case 23:
 										
 										rule.setCalcAllPeriods(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
 									//initial TB first allocation
-									case 22:
+									case 24:
 										
 										rule.setInitialTBFirstAllocation(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
@@ -586,8 +654,30 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 						
 					}
 					
+					//lift existing measure list
+					if ( ruleSet.getLiftExistingMeasureList() != null ) {
+						
+						for (String measureName : ruleSet.getLiftExistingMeasureList() ) {
+							
+							excelRow.addRowItem(3, PafExcelValueObject.createFromString(measureName));
+							
+						}
+						
+					}
+					
+					//lift all measure list
+					if ( ruleSet.getLiftAllMeasureList() != null ) {
+						
+						for (String measureName : ruleSet.getLiftAllMeasureList()) {
+							
+							excelRow.addRowItem(4, PafExcelValueObject.createFromString(measureName));
+							
+						}
+						
+					}
+					
 					//comment
-					excelRow.addRowItem(3, PafExcelValueObject.createFromString(ruleSet.getComment()));
+					excelRow.addRowItem(5, PafExcelValueObject.createFromString(ruleSet.getComment()));
 					
 					//add rule set row
 					excelRowList.add(excelRow);
@@ -617,28 +707,28 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 							excelRow.addRowItem(0, headerIdentValueObject);
 									
 							//comment - rg
-							excelRow.addRowItem(4, PafExcelValueObject.createFromString(rg.getComment()));
+							excelRow.addRowItem(6, PafExcelValueObject.createFromString(rg.getComment()));
 							
 							//id - rg
-							excelRow.addRowItem(5, PafExcelValueObject.createFromString(rg.getRuleGroupId()));
+							excelRow.addRowItem(7, PafExcelValueObject.createFromString(rg.getRuleGroupId()));
 							
 							//perpectual - rg
-							excelRow.addRowItem(6, PafExcelValueObject.createFromBoolean(rg.isPerpetual()));
+							excelRow.addRowItem(8, PafExcelValueObject.createFromBoolean(rg.isPerpetual()));
 							
 							//skip protection processing - rg
-							excelRow.addRowItem(7, PafExcelValueObject.createFromBoolean(rg.isSkipProtProc()));							
+							excelRow.addRowItem(9, PafExcelValueObject.createFromBoolean(rg.isSkipProtProc()));							
 
 							//balance key set - rg
-							excelRow.addRowItem(8, PafExcelValueObject.createFromString(rg.getBalanceSetKey()));
+							excelRow.addRowItem(10, PafExcelValueObject.createFromString(rg.getBalanceSetKey()));
 							
 							//delayed perpetual - rg
-							excelRow.addRowItem(9, PafExcelValueObject.createFromBoolean(rg.isDelayedPerpetual()));
+							excelRow.addRowItem(11, PafExcelValueObject.createFromBoolean(rg.isDelayedPerpetual()));
 
 							//perpetual allocation - rg
-							excelRow.addRowItem(10, PafExcelValueObject.createFromBoolean(rg.isPerpetualAllocation()));
+							excelRow.addRowItem(12, PafExcelValueObject.createFromBoolean(rg.isPerpetualAllocation()));
 							
 							//perform initial allocation - rg
-							excelRow.addRowItem(11, PafExcelValueObject.createFromBoolean(rg.getPerformInitialAllocation()));
+							excelRow.addRowItem(13, PafExcelValueObject.createFromBoolean(rg.getPerformInitialAllocation()));
 							
 							//add rule group row
 							excelRowList.add(excelRow);
@@ -669,42 +759,42 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 									}
 									
 									//base allocate measure
-									excelRow.addRowItem(12, PafExcelValueObject.createFromString(r.getBaseAllocateMeasure()));
+									excelRow.addRowItem(14, PafExcelValueObject.createFromString(r.getBaseAllocateMeasure()));
 									
 									//trigger measures
 									if ( r.getTriggerMeasures() != null ) {
 										
 										List<PafExcelValueObject> valueObjectList = PafExcelValueObjectUtil.createListOfDynamicReferencePafExcelValueObjects(r.getTriggerMeasures(), null);
 																														
-										excelRow.addRowItem(13, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
+										excelRow.addRowItem(15, PafExcelUtil.getDelimValueObjectFromList(valueObjectList));
 									}
 									
 									//skip allocation
-									excelRow.addRowItem(14, PafExcelValueObject.createFromBoolean(r.isSkipAllocation()));
+									excelRow.addRowItem(16, PafExcelValueObject.createFromBoolean(r.isSkipAllocation()));
 									
 									//lock allocation
-									excelRow.addRowItem(15, PafExcelValueObject.createFromBoolean(r.isLockAllocation()));
+									excelRow.addRowItem(17, PafExcelValueObject.createFromBoolean(r.isLockAllocation()));
 									
 									//skip aggeration
-									excelRow.addRowItem(16, PafExcelValueObject.createFromBoolean(r.isSkipAggregation()));
+									excelRow.addRowItem(18, PafExcelValueObject.createFromBoolean(r.isSkipAggregation()));
 									
 									//lock system evaluation result
-									excelRow.addRowItem(17, PafExcelValueObject.createFromBoolean(r.isLockSystemEvaluationResult()));
+									excelRow.addRowItem(19, PafExcelValueObject.createFromBoolean(r.isLockSystemEvaluationResult()));
 									
 									//lock user evaluation result
-									excelRow.addRowItem(18, PafExcelValueObject.createFromBoolean(r.getLockUserEvaluationResult()));
+									excelRow.addRowItem(20, PafExcelValueObject.createFromBoolean(r.getLockUserEvaluationResult()));
 									
 									//eval locked intersections
-									excelRow.addRowItem(19, PafExcelValueObject.createFromBoolean(r.getEvalLockedIntersections()));
+									excelRow.addRowItem(21, PafExcelValueObject.createFromBoolean(r.getEvalLockedIntersections()));
 
 									//lock all prior time
-									excelRow.addRowItem(20, PafExcelValueObject.createFromBoolean(r.isLockAllPriorTime()));
+									excelRow.addRowItem(22, PafExcelValueObject.createFromBoolean(r.isLockAllPriorTime()));
 
 									//calc all periods
-									excelRow.addRowItem(21, PafExcelValueObject.createFromBoolean(r.isCalcAllPeriods()));
+									excelRow.addRowItem(23, PafExcelValueObject.createFromBoolean(r.isCalcAllPeriods()));
 
 									//initial TB first allocation
-									excelRow.addRowItem(22, PafExcelValueObject.createFromBoolean(r.isInitialTBFirstAllocation()));
+									excelRow.addRowItem(24, PafExcelValueObject.createFromBoolean(r.isInitialTBFirstAllocation()));
 
 									
 									//add rule row
