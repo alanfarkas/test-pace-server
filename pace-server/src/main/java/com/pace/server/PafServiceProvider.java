@@ -42,6 +42,7 @@ import org.apache.commons.math3.stat.clustering.Cluster;
 import org.apache.commons.math3.stat.clustering.EuclideanIntegerPoint;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
+import org.springframework.util.StopWatch;
 
 import com.pace.base.AuthMode;
 import com.pace.base.InvalidPasswordException;
@@ -4643,7 +4644,10 @@ public PafGetNotesResponse getCellNotes(
 
 	@Override
 	public PaceDescendantsResponse getDescendants(PaceDescendantsRequest pafDescendantsRequest)
-			throws RemoteException, PafSoapException {
+			throws PafSoapException {
+		
+		final StopWatch sw = new StopWatch("getDescendants");
+		sw.start("init");
 		
 		String clientId = pafDescendantsRequest.getClientId();
 		ArrayList<SimpleCoordList> descInter = new ArrayList<SimpleCoordList>();
@@ -4681,8 +4685,10 @@ public PafGetNotesResponse getCellNotes(
 				throw new PafException(Messages.getString("PafServiceProvider.9"), 	PafErrSeverity.Fatal);
 			}
 			
-			//Get Client Trees
+						//Get Client Trees
 			MemberTreeSet memberTreeSet = cs.getUowTrees();
+			sw.stop();
+			
 			
 			for(SimpleCoordList sessionCells : pafDescendantsRequest.getSessionCells()){
 				Map <String, List<String>> memberFilters = new HashMap<String, List<String>>();
@@ -4690,6 +4696,7 @@ public PafGetNotesResponse getCellNotes(
 			    
 			    
 			    for(int i = 0; i < dimensions.length; i++){
+			    	sw.start("LoadFilter" + Integer.toString(i));
 			    	//dim name
 			    	String dimName = dimensions[i];
 			    	//Get the coordinates for that dim.
@@ -4702,24 +4709,38 @@ public PafGetNotesResponse getCellNotes(
 			    	List<PafDimMember> descendants = pafDimTree.getDescendants(coord);
 			    	//Add the descendants to the member filter,
 			    	//if no descendants are returned, then add myself
+			    	dimDescendants.add(coord);
 			    	if(descendants != null && descendants.size() > 0){
 				    	for(PafDimMember member : descendants){
 				    		dimDescendants.add(member.getKey());
 				    	}
-				    	
-			    	} else {
-			    		dimDescendants.add(coord);
 			    	}
 			    	memberFilters.put(dimName, dimDescendants);
+			    	sw.stop();
 			    }
 
+			    sw.start("CreateSimpleCoordList" );
 			    //Create a StringOdometer
 			    StringOdometer stringOdometer = new StringOdometer(memberFilters, dimensions);
+			    List<String> coords = new ArrayList<String>();
 			    
 			    //Iterate thru the Odometer and Create/Add the SimpleCoordLists to the ArrayList.
 			    while(stringOdometer.hasNext()) {
-			    	descInter.add(new SimpleCoordList(dimensions, stringOdometer.nextValue()));
+			    	coords.addAll(Arrays.asList(stringOdometer.nextValue()));
+			    	//descInter.add(new SimpleCoordList(dimensions, stringOdometer.nextValue()));
 				}
+			    sw.stop();
+			    
+			    sw.start("CompressSimpleCoordList" );
+			    SimpleCoordList scl = new SimpleCoordList(dimensions, coords.toArray(new String[0]));
+			    try {
+			    	scl.compressData();
+				} catch (IOException e) {
+					System.out.println(e.getMessage());
+				}	
+			    descInter.add(scl);
+			    sw.stop();
+			    
 			}
 			
 			//Return...
@@ -4737,6 +4758,7 @@ public PafGetNotesResponse getCellNotes(
 			
 		} finally {
 		
+			logPerf.info(sw.prettyPrint());
 			popFromNDCStack(clientId);
 		}	
 		
