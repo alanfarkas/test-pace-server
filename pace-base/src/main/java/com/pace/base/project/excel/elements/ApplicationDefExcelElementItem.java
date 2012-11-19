@@ -834,7 +834,7 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 						excelRow.addRowItem(22, PafExcelValueObject.createFromString(as.getAppColors().getUserLockColor()));
 						
 						//app colors - note color
-						excelRow.addRowItem(22, PafExcelValueObject.createFromString(as.getAppColors().getNoteColor()));
+						excelRow.addRowItem(23, PafExcelValueObject.createFromString(as.getAppColors().getNoteColor()));
 					}
 
 					//alias mappings
@@ -984,67 +984,67 @@ public class ApplicationDefExcelElementItem<T extends List<PafApplicationDef>> e
 		List<PafExcelInput> inputList = Arrays.asList(
 		
 		//measures dim
-		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 28)
+		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 33)
 			.headerListMap(this.getHeaderListMap())
 			.excludeHeaderRows(true)
 			.excludeEmptyRows(true)
 			.multiDataRow(true)
-			.startDataReadColumnIndex(27)
+			.startDataReadColumnIndex(32)
 			.sheetRequired(false)
 			.endOfSheetIdnt(ExcelPaceProjectConstants.END_OF_SHEET_IDENT)
 			.build(),
 			
 		//time dim
-		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 30)
+		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 35)
 			.headerListMap(this.getHeaderListMap())
 			.excludeHeaderRows(true)
 			.excludeEmptyRows(true)
 			.multiDataRow(true)
-			.startDataReadColumnIndex(29)
+			.startDataReadColumnIndex(34)
 			.sheetRequired(false)
 			.endOfSheetIdnt(ExcelPaceProjectConstants.END_OF_SHEET_IDENT)
 			.build(),
 			
 		//plan type dim
-		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 31)
+		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 36)
 				.headerListMap(this.getHeaderListMap())
 				.excludeHeaderRows(true)
 				.excludeEmptyRows(true)
 				.multiDataRow(true)
-				.startDataReadColumnIndex(30)
+				.startDataReadColumnIndex(35)
 				.sheetRequired(false)
 				.endOfSheetIdnt(ExcelPaceProjectConstants.END_OF_SHEET_IDENT)
 				.build(),
 				
 		//versions dim
-		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 32)
+		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 37)
 				.headerListMap(this.getHeaderListMap())
 				.excludeHeaderRows(true)
 				.excludeEmptyRows(true)
 				.multiDataRow(true)
-				.startDataReadColumnIndex(31)
+				.startDataReadColumnIndex(36)
 				.sheetRequired(false)
 				.endOfSheetIdnt(ExcelPaceProjectConstants.END_OF_SHEET_IDENT)
 				.build(),
 				
 		//year dim
-		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 33)
+		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 38)
 				.headerListMap(this.getHeaderListMap())
 				.excludeHeaderRows(true)
 				.excludeEmptyRows(true)
 				.multiDataRow(true)
-				.startDataReadColumnIndex(32)
+				.startDataReadColumnIndex(37)
 				.sheetRequired(false)
 				.endOfSheetIdnt(ExcelPaceProjectConstants.END_OF_SHEET_IDENT)
 				.build(),
 				
 		//hier dims
-		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 34)
+		new PafExcelInput.Builder(this.getWorkbook(), this.getSheetName(), 39)
 				.headerListMap(this.getHeaderListMap())
 				.excludeHeaderRows(true)
 				.excludeEmptyRows(true)
 				.multiDataRow(true)
-				.startDataReadColumnIndex(33)
+				.startDataReadColumnIndex(38)
 				.sheetRequired(false)
 				.endOfSheetIdnt(ExcelPaceProjectConstants.END_OF_SHEET_IDENT)
 				.build()
