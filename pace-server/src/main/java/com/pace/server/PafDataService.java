@@ -321,7 +321,8 @@ public class PafDataService {
 	}
 
 	/**
-	 *	Update the uow cache from the mdb for the specified versions
+	 *	Update the uow cache from the multi-dimensional database for the specified versions, without
+	 *  first refreshing these versions.
 	 *
 	 * @param clientState Client State	
 	 * @param dataCache Data cache
@@ -329,7 +330,7 @@ public class PafDataService {
 	 * 
 	 * @throws PafException 
 	 */
-	public void updateDataCacheFromMdb(PafClientState clientState, PafDataCache dataCache, List<String> versionFilter) throws PafException {
+	public void updateUowCache(PafClientState clientState, PafDataCache dataCache, List<String> versionFilter) throws PafException {
 
 		// Get mdb data provider corresponding to application data source id
 		String dsId = clientState.getApp().getMdbDef().getDataSourceId();
@@ -756,8 +757,8 @@ public class PafDataService {
 		String yearDim = mdbDef.getYearDim();
 		String[] uowMbrNames = null;
 		UnitOfWork expandedUow = null;
-
-
+		
+		
 		//Get the dimension members.  Use the optional workUnit parameter if it is not null
 		if(optionalWorkUnit != null){
 			expandedUow = optionalWorkUnit;
@@ -833,6 +834,19 @@ public class PafDataService {
 			copy = baseTree.getSubTreeCopyByGen(root.getKey(), treeMap.lastKey());			
 		}
 
+		
+		// Housekeeping for non-plannable year support (TTN-1860)
+		Set<String> plannableYears = new HashSet<String>();
+		boolean areNoPlannableYears = false;
+		if (dim.equals(yearDim)) {
+			String[] plannableYearArray = clientState.getPlanSeason().getPlannableYears();
+			if (plannableYearArray != null) {
+				plannableYears.addAll(Arrays.asList(clientState.getPlanSeason().getPlannableYears()));
+			}
+			areNoPlannableYears = (plannableYears.size() == 0 ? true : false);
+		}
+
+		
 		// build list of members in the cache, use hash set for quick find
 		List<String>cacheMbrs = new ArrayList<String>(); 
 		cacheMbrs.addAll(Arrays.asList(uowMbrNames));
@@ -890,6 +904,18 @@ public class PafDataService {
 						member.getMemberProps().setReadOnly(true);					
 					}
 					
+				}
+				
+				// TTN-1860: Non-Plannable Year Support
+				if (dim.equals(yearDim)) {
+					// Mark all non-plannable years as read-only. If there are no plannable years then
+					// mark the synthetic root as read-only as well.
+					if (!plannableYears.contains(member)) {
+						PafDimMemberProps memberProps = member.getMemberProps();
+						if (!memberProps.isSynthetic() || areNoPlannableYears) {
+							member.getMemberProps().setReadOnly(true);
+						}
+					}
 				}
 				
 			} else {
