@@ -365,7 +365,7 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 												
 												if ( liftExistMeasureList.size() > 0 ) {
 												
-													rs.setMeasureList(liftExistMeasureList.toArray(new String[0]));
+													rs.setLiftExistingMeasureList(liftExistMeasureList.toArray(new String[0]));
 													
 												}
 												
@@ -399,7 +399,7 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 												
 												if ( liftAllMeasureList.size() > 0 ) {
 												
-													rs.setMeasureList(liftAllMeasureList.toArray(new String[0]));
+													rs.setLiftAllMeasureList(liftAllMeasureList.toArray(new String[0]));
 													
 												}
 												
