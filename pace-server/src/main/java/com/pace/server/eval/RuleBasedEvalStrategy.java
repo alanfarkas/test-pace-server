@@ -389,7 +389,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
     	
     	
     	// Refresh data cache
-		PafDataService.getInstance().updateDataCacheFromMdb(clientState, dataCache, new ArrayList<String>(versionsToLoad));
+		PafDataService.getInstance().updateUowCache(clientState, dataCache, new ArrayList<String>(versionsToLoad));
 		String stepDesc = Messages.getString("RuleBasedEvalStrategy.88"); //$NON-NLS-1$
 		performanceLogger.info(LogUtil.timedStep(stepDesc, startTime));
 	}
