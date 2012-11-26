@@ -910,7 +910,7 @@ public class PafDataService {
 				if (dim.equals(yearDim)) {
 					// Mark all non-plannable years as read-only. If there are no plannable years then
 					// mark the synthetic root as read-only as well.
-					if (!plannableYears.contains(member)) {
+					if (!plannableYears.contains(member.getKey())) {
 						PafDimMemberProps memberProps = member.getMemberProps();
 						if (!memberProps.isSynthetic() || areNoPlannableYears) {
 							member.getMemberProps().setReadOnly(true);

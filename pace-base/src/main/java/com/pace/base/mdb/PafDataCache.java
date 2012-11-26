@@ -2977,9 +2977,6 @@ public class PafDataCache implements IPafDataCache {
 		Map<Integer, List<String>> filteredRefDataSpec = new HashMap<Integer, List<String>>();
 		
 		
-		// Generate all the data block keys represented by the member specifications. Since
-		// reference data is loaded an entire block at a time, we only need to filter at the
-		// data block level instead of the individual intersection level
 		logMsg = "Filtering data cache reference data specification....";
 		logger.debug(logMsg);
 		
@@ -3009,7 +3006,6 @@ public class PafDataCache implements IPafDataCache {
 		// Get list of keys for any requested data blocks that don't yet exist
 		List<Intersection> requiredKeys = new ArrayList<Intersection>();
 		while (dataBlockIterator.hasNext()) { 
-			@SuppressWarnings("unchecked")
 			String[] coords = dataBlockIterator.nextValue();
 			Intersection dataBlockKey = new Intersection(coreKeyDims, coords);		// TTN-1851
 			if (!isExistingDataBlock(dataBlockKey)) {

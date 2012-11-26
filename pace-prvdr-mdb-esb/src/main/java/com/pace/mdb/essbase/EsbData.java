@@ -681,6 +681,7 @@ public class EsbData implements IMdbData{
 			String[] years = dataCache.getFilteredDimMembers(yearDim, null, false, false);
 			
 			// Cycle through list of Plan Types
+			boolean wasDataLoaded = false;
 			String[] planTypes = dataCache.getDimMembers(planTypeDim);
 			for (String planType: planTypes) {
 	
@@ -759,6 +760,7 @@ public class EsbData implements IMdbData{
 						dataFileShortName = EsbUtility.copyTextFileToServer(olapServer, cube, tempFile);
 						logger.info("Loading data to Essbase....");
 						cube.loadData(IEssOlapFileObject.TYPE_RULES, null, IEssOlapFileObject.TYPE_TEXT, dataFileShortName, true);
+						wasDataLoaded = true;
 						logger.info("Data saved: Plan Type [" + planType + "] - Year [" + year + "] - Version [" + version + "]");
 						logger.info("");
 						
@@ -768,10 +770,14 @@ public class EsbData implements IMdbData{
 				}
 			}
 						
-			// Delete data load file from Essbase server
-			logger.debug("Deleting data file from Essbase Server");
-			EsbUtility.deleteServerTextFile(cube, dataFileShortName);
-	
+			if (wasDataLoaded) {
+				// Delete data load file from Essbase server
+				logger.debug("Deleting data file from Essbase Server");
+				EsbUtility.deleteServerTextFile(cube, dataFileShortName);
+			} else {
+				logger.warn("No Essbase data was saved");
+			}
+			
 			// Delete data load file from Paf Server
 			if (!tempFile.delete()) {
 				// Log warning message if file could not be deleted

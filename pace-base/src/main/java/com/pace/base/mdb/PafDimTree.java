@@ -494,7 +494,7 @@ public abstract class PafDimTree {
     /**
      * @return Returns the members.
      */
-    protected Map<String,PafDimMember> getMembers() {
+    public Map<String,PafDimMember> getMembers() {
     	return members;
     }
 

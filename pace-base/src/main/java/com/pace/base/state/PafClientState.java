@@ -93,6 +93,7 @@ public class PafClientState implements IPafClientState {
 	private Map<String, Set<String>> lockedPeriodMap = null;
 	private Set<String> lockedTimeHorizonPeriods = null;
 	private Set<TimeSlice> lockedTimeSlices = null;
+	private Set<String> lockedYears = null;
 	private Set<String> invalidTimeHorizonPeriods = null;
 	private Set<TimeSlice> invalidTimeSlices = null;
     
@@ -880,6 +881,20 @@ public class PafClientState implements IPafClientState {
 	 */
 	public void setLockedTimeSlices(Set<TimeSlice> lockedTimeSlices) {
 		this.lockedTimeSlices = lockedTimeSlices;
+	}
+
+	/**
+	 * @return the lockedYears
+	 */
+	public Set<String> getLockedYears() {
+		return lockedYears;
+	}
+
+	/**
+	 * @param lockedYears the lockedYears to set
+	 */
+	public void setLockedYears(Set<String> lockedYears) {
+		this.lockedYears = lockedYears;
 	}
 
 	/**

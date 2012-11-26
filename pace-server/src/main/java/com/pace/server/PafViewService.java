@@ -1394,6 +1394,7 @@ public class PafViewService {
 		String timeDim = mdbDef.getTimeDim();
 		String yearDim = mdbDef.getYearDim();		
 		String baseVersion = clientState.getPlanningVersion().getName();
+		Set<String> lockedYears = clientState.getLockedYears();
 		String[] serverDimensionOrder;
 //		String[] serverDimensionOrder = mdbDef.getAllDims();
 
@@ -1420,32 +1421,6 @@ public class PafViewService {
 
 			String versionMember = null;
 
-			/*
-			 * if version is on page, this is one place to check and see if
-			 * plannable
-			 */
-			if (versionAxis.getValue() == PafAxis.PAGE) {
-
-				// get version member
-				for (PageTuple tuple : pageTuples) {
-					if (tuple.getAxis().equals(mdbDef.getVersionDim())) {
-						versionMember = tuple.getMember();
-						break;
-					}
-				}
-
-				// retrieve the version type from the cache
-				VersionType versionType = versionsTypeCache.get(versionMember);
-
-				if (versionType != null) {
-					
-					// if plannable, continue to next view section
-					if (activeVersions.contains(versionMember) && versionType.equals(VersionType.Plannable)) {
-						continue;
-					}
-				}
-
-			}
 
 			// map dimensions to axis. key = dimensions name, value = actual
 			// axis obj
@@ -1490,7 +1465,14 @@ public class PafViewService {
 					switch (versionAxis.getValue()) {
 					case PafAxis.PAGE:
 						
-						// if page version is not an active version, lock pfa tuple
+						// get version member
+						for (PageTuple tuple : pageTuples) {
+							if (tuple.getAxis().equals(mdbDef.getVersionDim())) {
+								versionMember = tuple.getMember();
+								break;
+							}
+						}
+						// if page version is not an active version, lock page tuple
 						if ( ! activeVersions.contains(versionMember)) {
 							
 							switch (section.getPrimaryFormattingAxis()) {
@@ -1536,10 +1518,6 @@ public class PafViewService {
 						continue;
 					}
 					
-					// if plannable, then continue to next tuple.
-					if (versionType.equals(VersionType.Plannable)) {
-						continue;
-					}
 
 					ArrayList<String> colMembers = getTupleMemberDefs(colTuple);
 
@@ -1567,7 +1545,7 @@ public class PafViewService {
 						coords[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
 					}
 
-					// if version is non plannable
+					// lock all tuples if the version is non-plannable 
 					if (versionType.equals(VersionType.NonPlannable)) {
 
 						// add cell to non plannable list
@@ -1599,16 +1577,20 @@ public class PafViewService {
 				   /*
 					* if forward plannable, lock each tuple intersection
 					* that contains a locked period, using the locked period
-					* infomration from the client state (TTN-1595).
+					* information from the client state (TTN-1595). 
+					* 
+					* Also lock any tuples where the year is locked (TTN-1860).
+					*  
 					*/
 
-					} else if (versionType.equals(VersionType.ForwardPlannable)) {
+					} else if (versionType.equals(VersionType.Plannable) || versionType.equals(VersionType.ForwardPlannable)) {
 
 						String timeMember = getMember(timeDim, section, rowTuple, colTuple);
 						String yearMember = getMember(yearDim, section, rowTuple, colTuple);
 						Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
 						Set<String> lockedPeriods = lockedPeriodMap.get(yearMember);
-						if (lockedPeriods.contains(timeMember)) {
+						if ((versionType.equals(VersionType.Plannable) && lockedYears.contains(yearMember))	// TTN-1860 non-plannable year support
+								|| lockedPeriods.contains(timeMember)) {
 
 							forwardPlannableList.add(new LockedCell(rowId, colId));
 
@@ -2811,6 +2793,8 @@ public class PafViewService {
 	private String getMember(String dimension, PafViewSection section,
 			ViewTuple row, ViewTuple col) {
 
+		//@TODO - This method is inefficient if called repeatedly on the same view section; add another method that determines what axis a given dimension is in
+		// and and an optional parameter that allows you to sear the specific axis.
 		String member = null;
 
 		if (section.getPageTuples() != null) {
