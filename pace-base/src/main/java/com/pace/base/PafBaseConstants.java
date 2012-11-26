@@ -30,6 +30,12 @@ public class PafBaseConstants {
 	public static final String UOW_ROOT = "@UOW_ROOT";
 	public static final String USER_SEL_TAG = "@USER_SEL";
 	public static final String PLAN_VERSION = "@PLAN_VERSION";
+	//TTN 1595 - N-Year Support
+	public static final String PLAN_YEARS = "@PLAN_YEARS";
+	public static final String NONPLAN_YEARS = "@NONPLAN_YEARS";
+	public static final String FIRST_PLAN_YEARS = "@FIRST_PLAN_YEARS";
+	public static final String FIRST_NONPLAN_YEARS = "@FIRST_NONPLAN_YEARS";
+	public static final String FIRST_PLAN_PERIOD = "@FIRST_PLAN_PERIOD";
 	
 	// time horizon constants
 	public static final String TIME_HORIZON_DEFAULT_YEAR = "**YEAR.NA**";
@@ -177,7 +183,7 @@ public class PafBaseConstants {
 	public static final String HEADER_TOKEN_PARM_START_CHAR = "(";
 	public static final String HEADER_TOKEN_PARM_END_CHAR = ")";
 	public static final String HEADER_TOKEN_VIEW_NAME = "@VIEW_NAME";
-
+	
 	// member list token
 	public static final String MEMBERLIST_TOKEN = "@MEMBER_LIST";
 	
