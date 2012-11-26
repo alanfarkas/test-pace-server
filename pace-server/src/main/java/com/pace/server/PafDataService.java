@@ -996,7 +996,7 @@ public class PafDataService {
 		// Virtual Time Horizon Dimension
 		PafDimTree timeTree = treeSet.getTree(clientState.getMdbDef().getTimeDim());
 		PafDimTree yearTree = treeSet.getTree(clientState.getMdbDef().getYearDim());
-		treeSet.addTree(PafBaseConstants.TIME_HORIZON_DIM, buildTimeHorizonTree(timeTree, yearTree));
+		treeSet.addTree(PafBaseConstants.TIME_HORIZON_DIM, buildTimeHorizonTree(timeTree, yearTree, clientState));
 		
 		return treeSet;
 	}
@@ -1006,19 +1006,21 @@ public class PafDataService {
 	 * 
 	 * @param timeTree UOW time tree
 	 * @param yearTree UOW year tree
+	 * @param clientState Client State
 	 * 
 	 * @return Virtual time horizon tree
 	 * @throws PafException 
 	 */
-	protected PafDimTree buildTimeHorizonTree(PafDimTree timeTree, PafDimTree yearTree) throws PafException {
+	protected PafDimTree buildTimeHorizonTree(PafDimTree timeTree, PafDimTree yearTree, PafClientState clientState) throws PafException {
 		
 		PafDimMember timeRoot = timeTree.getRootNode(), yearRoot = yearTree.getRootNode();
 		List<PafDimMember> yearMembers = yearTree.getLowestLevelMembers();
 		List<PafDimMember> timeChildMbrs = null;
+		AppSettings appSettings = clientState.getApp().getAppSettings();
 
 
 		// The virtual time tree is formed by combining the UOW Time and Year trees. It is used 
-		// in aggregation and any time-based rule function call, instead of the seperate Time 
+		// in aggregation and any time-based rule function call, instead of the separate Time 
 		// and Year trees loaded directly from the multidimensional database. The main advantage 
 		// of the virtual time tree is that it makes it easy to index and accumulate time periods
 		// that cross year boundaries.
@@ -1031,7 +1033,7 @@ public class PafDataService {
 		PafBaseMember root = new PafBaseMember(rootName, rootProps);		
 		rootProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, root.getKey());
 		rootProps.setGenerationNumber(1);
-		rootProps.setSynthetic(yearRoot.getMemberProps().isSynthetic() || yearRoot.getMemberProps().isSynthetic());
+		rootProps.setSynthetic(timeRoot.getMemberProps().isSynthetic() || yearRoot.getMemberProps().isSynthetic());
 		
 		// The is some differing logic depending on whether the is just a single year in the UOW
 		// or multiple years, represented by a year tree with a virtual node whose children are 
@@ -1042,10 +1044,9 @@ public class PafDataService {
 			rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree()); 
 			timeChildMbrs = timeRoot.getChildren();
 		} else {
-			// There time horizon tree contains a node for each combination of year and time 
+			// Otherwise, the time horizon tree contains a node for each combination of year and time 
 			// period, plus the root node which is comprised of the root of the year tree 
 			// and the root of the time tree. 
-			// Since the root of the year tree is synthetic
 			rootProps.setLevelNumber(timeTree.getHighestAbsLevelInTree() + 1); 
 			rootProps.setSynthetic(true);
 			timeChildMbrs = new ArrayList<PafDimMember>(Arrays.asList(new PafDimMember[]{timeRoot}));
@@ -1053,10 +1054,30 @@ public class PafDataService {
 		PafDimTree timeHorizonTree = new PafBaseTree(root, new String[]{PafBaseConstants.ESS_DEF_ALIAS_TABLE});
 		
 		
+		// Get week 53 settings (TTN-1858)
+		Set<String> week53Mbrs = new HashSet<String>(), week53Years = new HashSet<String>();
+		if (appSettings.getWeek53Members() != null) {
+			week53Mbrs.addAll(appSettings.getWeek53Members());
+		}
+		if (appSettings.getWeek53Years() != null) {
+			week53Years.addAll(appSettings.getWeek53Years());
+		}
+		
+		// Ensure that only one "week 53 member" exists in current time tree (TTN-1858)
+		List<String> allPeriods = new ArrayList<String>(Arrays.asList(timeTree.getMemberKeys()));
+		allPeriods.retainAll(week53Mbrs);
+		if (allPeriods.size() > 1) {
+			String errMsg = "Unable to bulid client trees. More than one 'Week 53 member' has been identified in the client time hiearchy."
+					+ " This can indicate an issue with the application Week 53 properties or with the current season definition";
+			logger.fatal(errMsg);
+			throw new PafException(errMsg, PafErrSeverity.Fatal);
+		}
+		
+		
 		// Build out the rest of the time horizon tree
 		for (PafDimMember yearMember : yearMembers) {
 			// Add child members
-			addTimeHorizonChildren(timeHorizonTree, root, yearMember, timeChildMbrs);
+			addTimeHorizonChildren(timeHorizonTree, root, yearMember, timeChildMbrs, week53Mbrs, week53Years);
 		}
 		return timeHorizonTree;
 	}
@@ -1069,16 +1090,23 @@ public class PafDataService {
 	 * @param parentNode Parent node
 	 * @param yearMember Name of year member
 	 * @param timeMembers Time tree node
+	 * @param week53Mbrs Week 53 members
+	 * @param week53Years Week 53 years
 	 * 
 	 * @throws PafException 
 	 */
-	private void addTimeHorizonChildren(PafDimTree timeHorizonTree, PafDimMember parentNode, PafDimMember yearMember, List<PafDimMember> timeMembers) throws PafException {
+	private void addTimeHorizonChildren(PafDimTree timeHorizonTree, PafDimMember parentNode, PafDimMember yearMember, List<PafDimMember> timeMembers, Set<String> week53Mbrs, Set<String> week53Years) throws PafException {
 		
 		for (PafDimMember timeMember : timeMembers) {
 			
+			// Skip any invalid week 53 members (TTN-1858)
+			String period = timeMember.getKey(), year = yearMember.getKey();
+			if (week53Mbrs.contains(period) && !week53Years.contains(year)) 
+				continue;
+
 			// Create child member
 			PafBaseMemberProps memberProps = new PafBaseMemberProps();
-			String memberName = TimeSlice.buildTimeHorizonCoord(timeMember.getKey(), yearMember.getKey());
+			String memberName = TimeSlice.buildTimeHorizonCoord(period, year);
 			PafDimMember timeHorizonChild = new PafBaseMember(memberName, memberProps);
 			memberProps.addMemberAlias(PafBaseConstants.ESS_DEF_ALIAS_TABLE, timeHorizonChild.getKey());
 			memberProps.setLevelNumber(timeMember.getMemberProps().getLevelNumber()); 				// Use level number of time member
@@ -1086,10 +1114,11 @@ public class PafDataService {
 
 			// Add child member to time horizon tree 
 			timeHorizonTree.addChild(parentNode, timeHorizonChild);
-
+			
 			// Recursively add a child member to time horizon tree for each child member of the regular time tree
-			addTimeHorizonChildren(timeHorizonTree, timeHorizonChild, yearMember, timeMember.getChildren());
+			addTimeHorizonChildren(timeHorizonTree, timeHorizonChild, yearMember, timeMember.getChildren(), week53Mbrs,week53Years);
 		}
+
 	}
 
 

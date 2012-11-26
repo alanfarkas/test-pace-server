@@ -45,6 +45,7 @@ import com.essbase.api.datasource.IEssOlapServer;
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.app.MdbDef;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.PafDimSpec;
 import com.pace.base.app.UnitOfWork;
@@ -52,6 +53,7 @@ import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionFormula;
 import com.pace.base.app.VersionType;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.IMdbData;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -371,9 +373,11 @@ public class EsbData implements IMdbData{
 	private int loadCubeData(EsbCubeView esbCubeView, String mdxQuery, PafDataCache dataCache, Map<String, List<String>> remappedMemberSpec) throws PafException {
 		
 		int baseDimCount = dataCache.getBaseDimCount(), retrievedCellCount = 0;
+		Set<String> invalidTimeHorizonPeriods = dataCache.getInvalidTimeHorizonPeriods();
 		String dimensions[] = dataCache.getBaseDimensions();
 		String logMsg = null;
 		PafApplicationDef appDef = dataCache.getAppDef();
+		MdbDef mdbDef = dataCache.getMdbDef();
 		IEssMdAxis[] axes = null;
 		IEssMdDataSet essMdDataSet = null;
 		IEssMdMember[] essMdMembers = null;
@@ -436,8 +440,12 @@ public class EsbData implements IMdbData{
 				Intersection intersection = new Intersection(dimensions, cellIterator.nextValue());		// TTN-1851
 				// Ignore missing values
 				if (!essMdDataSet.isMissingCell(mdxCellIndex)) {
-					double cellValue = essMdDataSet.getCellValue(mdxCellIndex);
-					dataCache.setCellValue(intersection, cellValue);	
+					// Also filter out any intersections corresponding to any invalid time horizon periods (TTN-1858)
+					String timeHorizonCoord = TimeSlice.buildTimeHorizonCoord(intersection, mdbDef);
+					if (!invalidTimeHorizonPeriods.contains(timeHorizonCoord)) {
+						double cellValue = essMdDataSet.getCellValue(mdxCellIndex);
+						dataCache.setCellValue(intersection, cellValue);
+					}	
 				}
 				mdxCellIndex++;
 			}
