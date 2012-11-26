@@ -586,13 +586,14 @@ public class PafAppService {
 		final boolean isCalcElapsedPeriods = clientState.getPlannerConfig().isCalcElapsedPeriods();
 		Set<TimeSlice> lockedTimeSlices = new HashSet<TimeSlice>(), invalidTimeSlices = new HashSet<TimeSlice>();
 		Set<String> lockedTimeHorizPeriods = new HashSet<String>(), invalidTimeHorizPeriods = new HashSet<String>();
-		Map<String, Set<String>> lockedPeriodMap = new HashMap<String, Set<String>>();	
+		Map<String, Set<String>> lockedPeriodMap = new HashMap<String, Set<String>>(), invalidPeriodMap = new HashMap<String, Set<String>>();	
 		
 		
-		// Initialize locked period map
+		// Initialize locked & invalid period maps
 		String[] years = uow.getDimMembers(yearDim);
 		for (String year : years) {
 			lockedPeriodMap.put(year, new HashSet<String>());
+			invalidPeriodMap.put(year, new HashSet<String>());		// TTN-1858 - week 53 support
 		}
 		
 		// Set the locked time horizon periods that correspond to an individual year,
@@ -622,7 +623,7 @@ public class PafAppService {
 		// in the time horizon tree - OR those in which the year is read-only (TTN-1860)
 		String[] uowPeriods = timeTree.getMemberKeys();
 		String[] uowYears = yearTree.getMemberKeys();
-		Set<String> readOnlyYears = yearTree.getReadOnlyMemberNames();	// TTN-1860 - non-plannable year support
+		Set<String> readOnlyYears = yearTree.getReadOnlyMemberNames();		// TTN-1860 - non-plannable year support
 		for (String year : uowYears) {
 			for (String period : uowPeriods) {
 				String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
@@ -630,9 +631,10 @@ public class PafAppService {
 				if (!timeHorizTree.hasMember(timeHorizCoord)) {
 					invalidTimeHorizPeriods.add(timeHorizCoord);
 					invalidTimeSlices.add(timeSlice);
-					lockedPeriodMap.get(timeSlice.getYear()).add(timeSlice.getPeriod());
-				} else 	if (readOnlyYears.contains(year)) {	 			// TTN-1860 - non-plannable year support
-					lockedPeriodMap.get(timeSlice.getYear()).add(timeSlice.getPeriod());					
+					lockedPeriodMap.get(year).add(period);
+					invalidPeriodMap.get(year).add(period);					// TTN-1858 - week 53 support
+				} else 	if (readOnlyYears.contains(year)) {	 				// TTN-1860 - non-plannable year support
+					lockedPeriodMap.get(year).add(period);					
 				}
 			}
 		}
@@ -643,8 +645,9 @@ public class PafAppService {
 		clientState.setLockedTimeSlices(lockedTimeSlices);
 		clientState.setInvalidTimeSlices(invalidTimeSlices);
 		clientState.setLockedPeriodMap(lockedPeriodMap);
+		clientState.setInvalidPeriodMap(invalidPeriodMap); 					// TTN-1858 - week 53 support
 		clientState.setLockedTimeHorizonPeriods(lockedTimeHorizPeriods);
-		clientState.setLockedYears(readOnlyYears);	// TTN-1860 - non-plannable year support
+		clientState.setLockedYears(readOnlyYears);							// TTN-1860 - non-plannable year support
 		clientState.setInvalidTimeHorizonPeriods(invalidTimeHorizPeriods);
 
 	}

@@ -91,6 +91,7 @@ public class PafClientState implements IPafClientState {
     private Set<String> readOnlyMeasuresSet = null;
 	private Map<String, PafBaseTree> mdbBaseTrees = null;   
 	private Map<String, Set<String>> lockedPeriodMap = null;
+	private Map<String, Set<String>> invalidPeriodMap = null;
 	private Set<String> lockedTimeHorizonPeriods = null;
 	private Set<TimeSlice> lockedTimeSlices = null;
 	private Set<String> lockedYears = null;
@@ -853,6 +854,20 @@ public class PafClientState implements IPafClientState {
 	 */
 	public void setLockedPeriodMap(Map<String, Set<String>> lockedPeriodMap) {
 		this.lockedPeriodMap = lockedPeriodMap;
+	}
+
+	/**
+	 * @return the invalidPeriodMap
+	 */
+	public Map<String, Set<String>> getInvalidPeriodMap() {
+		return invalidPeriodMap;
+	}
+
+	/**
+	 * @param invalidPeriodMap the invalidPeriodMap to set
+	 */
+	public void setInvalidPeriodMap(Map<String, Set<String>> invalidPeriodMap) {
+		this.invalidPeriodMap = invalidPeriodMap;
 	}
 
 	/**

@@ -105,9 +105,11 @@ public class PafDataCache implements IPafDataCache {
 																		// 		used to lookup Measures and Time dimension members)
 	private String[] planVersions = null; 								// Plan version 
 	private Map<String, Set<String>> lockedPeriodMap = null; 			// Locked planning periods by year
+	private Map<String, Set<String>> invalidPeriodMap = null; 			// Invalid planning periods by year
 	private Set<String> lockedTimeHorizonPeriods = null;				// Locked time horizon coordinates
 	private Set<String> invalidTimeHorizonPeriods = null;				// Invalid time horizon coordinates within possible set of uow time/year coordinates
-//	private Set<TimeSlice> lockedTimeSlices = null; 					// Locked time slices (time slice holds both period & year and period/year time coords)
+	private Set<String> lockedYears = null;								// Locked / non-plannable years
+	//	private Set<TimeSlice> lockedTimeSlices = null; 					// Locked time slices (time slice holds both period & year and period/year time coords)
 //	private Set<TimeSlice> invalidTimeSlices = null; 					// Potential time slices that don't exist in current uow
 	private PafDataCacheCells changedCells = new PafDataCacheCells();	// Optionally tracks changed cells
 	private PafApplicationDef appDef = null;
@@ -134,7 +136,6 @@ public class PafDataCache implements IPafDataCache {
 
 	/**
 	 * @param clientState Client State
-	 * @param lockedPeriodMap Collection of locked periods by year
 	 */
 	public PafDataCache(PafClientState clientState) {
 		initDataCache(clientState);		
@@ -165,6 +166,8 @@ public class PafDataCache implements IPafDataCache {
 		dimTrees = clientState.getUowTrees();
 		mdbBaseTrees = clientState.getMdbBaseTrees();
 		lockedPeriodMap = clientState.getLockedPeriodMap();
+		invalidPeriodMap = clientState.getInvalidPeriodMap();			// TTN-1858 - week 53 support
+		lockedYears = clientState.getLockedYears();						// TTN-1860 - non-plannable support
 		lockedTimeHorizonPeriods = clientState.getLockedTimeHorizonPeriods();
 		invalidTimeHorizonPeriods = clientState.getInvalidTimeHorizonPeriods();
 
@@ -704,17 +707,23 @@ public class PafDataCache implements IPafDataCache {
 		boolean hasLockedPeriods = false;
 		VersionType versionType = getVersionType(version);
 
-		// A Version and Year combination contains locked periods if the following conditions are met:
-		// 	1. The year matches the "current year"
-		//	2. The Version is Forward Plannable 
+		// A Version and Year combination contains locked periods if one of the following conditions are met:
+		// 
+		//  A - The year is "locked" OR
+		//
+		// 	B - The year matches the "current year" AND
+		//	    The Version is Forward Plannable 
 		//			OR The Version is a Variance Version whose Base Version is Forward Plannable
-		if (year.equalsIgnoreCase(getCurrentYear())) {
+		//
+		if (getLockedYears().contains(year)) {			// TTN-1860 non-plannable support
+			hasLockedPeriods = true;
+		} else if (year.equalsIgnoreCase(getCurrentYear())) {
 			if (versionType == VersionType.ForwardPlannable) {
 				hasLockedPeriods = true;
 			} else if (PafBaseConstants.DERIVED_VERSION_TYPE_LIST.contains(versionType)) {
 				String baseVersion = getVersionDef(version).getVersionFormula().getBaseVersion();
 				hasLockedPeriods = hasLockedPeriods(baseVersion, year);
-			}
+			} 
 		}
 		return hasLockedPeriods;
 	}
@@ -764,7 +773,7 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 *	Get the list of open periods in this data cache based on the 
+	 *	Get the list of open and valid periods in this data cache based on the 
 	 *  selected version and year
 	 *	 
 	 * @param version Selected member of version dimension
@@ -776,6 +785,8 @@ public class PafDataCache implements IPafDataCache {
 
 		List<String> openPeriods = null;
 
+		// @TODO Consolidate this logic on the application service - it's currently being done in at least a couple of places, here and the view service
+		
 		// Does the selected Version Type and Year combination have locked periods?
 		if (hasLockedPeriods(version, year)) {
 			// Yes - Just return list of Forward Plannable members
@@ -783,6 +794,9 @@ public class PafDataCache implements IPafDataCache {
 		} else {
 			// No locked periods - Return entire list of time members
 			openPeriods = new ArrayList<String>(Arrays.asList(getDimMembers(getTimeDim())));
+			
+			// Remove any periods that aren't valid across the time horizon (TTN-1858)
+			openPeriods.removeAll(getInvalidPeriods(year));
 		}
 		return openPeriods;
 	}
@@ -2719,13 +2733,18 @@ public class PafDataCache implements IPafDataCache {
 	 * @param cellIs Cell intersection
 	 * @return True is the specified intersection is elapsed
 	 */
-	private boolean isElapsedIs(Intersection cellIs) {
+	public boolean isElapsedIs(Intersection cellIs) {
 
 
 		String version = cellIs.getCoordinate(this.getVersionDim());
 		VersionType versionType = getVersionDef(version).getType();
 		
 		
+		// First check if the cell is valid along the time horizon (TTN-1858)
+		if (lockedTimeHorizonPeriods.contains(TimeSlice.buildTimeHorizonCoord(cellIs, this.getMdbDef()))) {
+			return true;
+		}
+
 		// For the plan version, this has to be a forward plannable version 
 		// for elapsed period logic to apply
 		if (this.getPlanVersion().equals(version)) {
@@ -2736,23 +2755,9 @@ public class PafDataCache implements IPafDataCache {
 			// Reference version - assume all periods are elapsed
 			return true;
 		}
-
-		// Either the intersection contains the plan version, which is 
-		// forward plannable, or this is a dynamic version, so check
-		// if the time coordinate is elapsed.
-		if (lockedTimeHorizonPeriods.contains(TimeSlice.buildTimeHorizonCoord(cellIs, this.getMdbDef()))) {
-			return true;
-		} else {
-			return false;
-		}
-		
-		//			// Ensure intersection maps to a valid time horizon coordinate. If not consider
-		//			// the intersection as elapsed (TTN-1595)
-		//			if (!dataCache.hasValidTimeHorizonCoord(cellIs)) {
-		//				return true;
-		//			}
-
-
+	
+		// If we get this far, we'll assume that the period is not elapsed.
+		return false;
 	}
 
 	
@@ -3094,11 +3099,17 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public Set<String> getLockedPeriods(String year) {
 		
-		Set<String> lockedPeriods = new HashSet<String>();
-		lockedPeriods = lockedPeriodMap.get(year);
-		
+		Set<String> lockedPeriods = lockedPeriodMap.get(year);
 		return lockedPeriods;
 	}
+
+	/**
+	 * @return the lockedYears
+	 */
+	public Set<String> getLockedYears() {
+		return lockedYears;
+	}
+
 
 	/**
 	 * @return the lockedTimeHorizonPeriods
@@ -3113,6 +3124,28 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public Set<String> getInvalidTimeHorizonPeriods() {
 		return invalidTimeHorizonPeriods;
+	}
+
+
+	/**
+	 * @return the invalidPeriodMap
+	 */
+	public Map<String, Set<String>> getInvalidPeriodMap() {
+		return invalidPeriodMap;
+	}
+
+
+	/**
+	 * Returns the invalid Periods for the specified year
+	 * 
+	 * @param year Year member
+	 * @return Returns the invalid Periods
+	 */
+	public Set<String> getInvalidPeriods(String year) {
+		
+		Set<String> invalidPeriods = invalidPeriodMap.get(year);
+		
+		return invalidPeriods;
 	}
 
 

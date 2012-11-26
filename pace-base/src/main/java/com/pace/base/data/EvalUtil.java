@@ -434,8 +434,7 @@ public class EvalUtil {
     }
     
 	/**
-	 * Returns true if the specified intersection is elapsed (assumes that the 
-	 * intersection contains the active plan version)
+	 * Returns true if the specified intersection is elapsed 
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param evalState Evaluation state
@@ -444,31 +443,9 @@ public class EvalUtil {
 	 */
 	public static boolean isElapsedIs(Intersection cellIs, IPafEvalState evalState) {
 		
-//		// Ensure intersection maps to a valid time horizon coordinate. If not consider
-//		// the intersection as elapsed (TTN-1595)
-//		if (!dataCache.hasValidTimeHorizonCoord(cellIs)) {
-//			return true;
-//		}
-		
-		// Has to be a forward plannable version for elapsed period to apply
-		if (evalState.getPlanVersion().getType() != VersionType.ForwardPlannable) {
-			return false;
-		}
-		
-		// Must be forward plannable so get locked periods
-		Set<String> lockedTimePeriods = evalState.getClientState().getLockedTimeHorizonPeriods();
-
-		// If no locked periods can't be elapsed.
-		if (lockedTimePeriods == null) {
-			return false;
-		}
-		
-		// Check on time dim match
-		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
-		if (lockedTimePeriods.contains(TimeSlice.buildTimeHorizonCoord(cellIs, mdbDef)))
-			return true;
-		else
-			return false;
+		// Use the data cache's elapsed period logic (TTN-1858)
+		PafDataCache dataCache = evalState.getDataCache();
+		return dataCache.isElapsedIs(cellIs);
 	}
 	
 //	public static List<Intersection> filterElapsedIsx(List<Intersection> isxPool, IPafEvalState evalState) {
