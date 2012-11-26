@@ -50,7 +50,7 @@ public class PafPlannerConfig implements Cloneable {
     private boolean defaultEvalEnabledWorkingVersion;
     private String[] defaultEvalRefVersions;
     private boolean mdbSaveWorkingVersionOnUowLoad;
-    private Boolean defaultEvalEnabled;
+    private Boolean defaultEvalEnabled;		// No longer used, kept around for backwards compatibility
     private boolean calcElapsedPeriods;
     private String[] versionFilter;
     private Boolean replicateEnabled;
