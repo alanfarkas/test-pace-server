@@ -235,11 +235,11 @@ public class EvalState implements IPafEvalState, Cloneable {
 		// initialize time structures.
 		// Get a post order version of the time dimension for the data cache
 		// and filter out any locked periods
-//		this.timeSubTree = dataCacheTrees.getTree(timeDim);
 		this.timeSubTree = dataCacheTrees.getTree(this.getTimeHorizonDim());	// TTN-1595
 		List<String> timePeriods = timeSubTree.getMemberNames(TreeTraversalOrder.POST_ORDER);
-		if (clientState.getLockedTimeHorizonPeriods() != null) {
-			timePeriods.removeAll(clientState.getLockedTimeHorizonPeriods());
+		Set<String> lockedPeriods = clientState.getLockedTimeHorizonPeriods();
+		if (lockedPeriods != null) {
+			timePeriods.removeAll(lockedPeriods);
 		}
 		
 		// Set useful objects in eval state object

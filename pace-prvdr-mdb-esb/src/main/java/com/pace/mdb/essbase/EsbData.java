@@ -373,11 +373,9 @@ public class EsbData implements IMdbData{
 	private int loadCubeData(EsbCubeView esbCubeView, String mdxQuery, PafDataCache dataCache, Map<String, List<String>> remappedMemberSpec) throws PafException {
 		
 		int baseDimCount = dataCache.getBaseDimCount(), retrievedCellCount = 0;
-		Set<String> invalidTimeHorizonPeriods = dataCache.getInvalidTimeHorizonPeriods();
 		String dimensions[] = dataCache.getBaseDimensions();
 		String logMsg = null;
 		PafApplicationDef appDef = dataCache.getAppDef();
-		MdbDef mdbDef = dataCache.getMdbDef();
 		IEssMdAxis[] axes = null;
 		IEssMdDataSet essMdDataSet = null;
 		IEssMdMember[] essMdMembers = null;
@@ -441,8 +439,7 @@ public class EsbData implements IMdbData{
 				// Ignore missing values
 				if (!essMdDataSet.isMissingCell(mdxCellIndex)) {
 					// Also filter out any intersections corresponding to any invalid time horizon periods (TTN-1858)
-					String timeHorizonCoord = TimeSlice.buildTimeHorizonCoord(intersection, mdbDef);
-					if (!invalidTimeHorizonPeriods.contains(timeHorizonCoord)) {
+					if (dataCache.hasValidTimeHorizonCoord(intersection)) {
 						double cellValue = essMdDataSet.getCellValue(mdxCellIndex);
 						dataCache.setCellValue(intersection, cellValue);
 					}	
@@ -704,7 +701,7 @@ public class EsbData implements IMdbData{
 						// Open new data load file
 						dataLoadFile = new BufferedWriter(new FileWriter(dataFileName), bufferSize);
 						
-						// Get the list of open (unlocked) periods
+						// Get the list of open (unlocked) and valid periods
 						List<String> openPeriods = dataCache.getOpenPeriods(version, year);
 						int dataCols = openPeriods.size();
 					

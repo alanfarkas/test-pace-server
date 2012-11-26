@@ -633,8 +633,10 @@ public class PafAppService {
 					invalidTimeSlices.add(timeSlice);
 					lockedPeriodMap.get(year).add(period);
 					invalidPeriodMap.get(year).add(period);					// TTN-1858 - week 53 support
-				} else 	if (readOnlyYears.contains(year)) {	 				// TTN-1860 - non-plannable year support
-					lockedPeriodMap.get(year).add(period);					
+				} else 	if (readOnlyYears.contains(year)) {	 
+					// Lock any period where the year is read-only (TTN-1860)
+					lockedPeriodMap.get(year).add(period);
+					lockedTimeHorizPeriods.add(timeHorizCoord);
 				}
 			}
 		}
