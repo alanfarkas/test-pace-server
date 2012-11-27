@@ -2515,7 +2515,10 @@ public class PafDataService {
 
 		int dimCount = axes.length;
 		int innerAxisIndex = dimCount -1;
+		MdbDef mdbDef = clientState.getMdbDef();
+		String timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
 		String axisList = "";
+		Set<String> invalidTimeHorizonPeriods = clientState.getInvalidTimeHorizonPeriods();
 		List <ViewTuple>expandedTuples = new ArrayList<ViewTuple>();
 
 		
@@ -2532,11 +2535,11 @@ public class PafDataService {
 		// information will be used to in an initial pass at filtering out invalid member 
 		// intersections. (TTN-1469)
 		Set<String> tupleAttrDims = new HashSet<String>();
+		List<String> axisDimList = Arrays.asList(axes);
+		List<String> pageDimList = Arrays.asList(pageAxisDims);
 		if (axes.length > 0 && attributeDims != null && attributeDims.length > 1) {
 			// Attribute View
 			// Check for attributes on the tuple (page or current axis)
-			List<String> axisDimList = Arrays.asList(axes);
-			List<String> pageDimList = Arrays.asList(pageAxisDims);
 			for (String attrDim : attributeDims) {
 				if (axisDimList.contains(attrDim) || pageDimList.contains(attrDim)) {
 					tupleAttrDims.add(attrDim);
@@ -2549,18 +2552,86 @@ public class PafDataService {
 			expandedTuples = expandSymetricTupleGroups(axisIndex, expandedTuples.toArray(new ViewTuple[0]), axes, tupleAttrDims, pageAxisDims, pageAxisMembers, clientState);
 		}
 
-		//If any tuple member is set to PAFBLANK, set the remaining members to PAFBLANK as well
-		logger.debug("Converting Paf Blank Tuples");
-		for (ViewTuple viewTuple:expandedTuples) {
-			if (isBlankViewTuple(viewTuple)) {
-				String[] memberAr = viewTuple.getMemberDefs();
-				for (int i = 0; i < memberAr.length; i++) {
-					memberAr[i] = PafBaseConstants.PAF_BLANK;
-				}
-				viewTuple.setMemberDefs(memberAr);
+		
+		// Run the expanded tuples through some final editing and filtering
+		logger.debug("Editing & Filtering Expanded View Tuples");
+		List<ViewTuple> tuplesToRemove = new ArrayList<ViewTuple>();
+		
+		// -- Determine if time horizon validation will be performed. This validation will be performed
+		// if the tuple, by itself, or in combination with the page tuple contains both the time and
+		// year dimensions. No time horizon validation will be performed, however,  if the tuple doesn't 
+		// contain at least one of these dimensions, even if they are both specified as page dimensions
+		// (TTN-1858 / TTN-1886).
+		boolean bDoTimeHorizValidation = true, bTimeOnPage = false, bYearOnPage = false;
+		int timeAxis = 0, yearAxis = 0;
+		String period = null, year = null;
+		do {
+			// Search for time dimension
+			if (axisDimList.contains(timeDim)) {
+				timeAxis = axisDimList.indexOf(timeDim);
+			} else if (pageDimList.contains(timeDim)) {
+				timeAxis = pageDimList.indexOf(timeDim);
+				period = pageAxisMembers[timeAxis];
+				bTimeOnPage = true;
+			} else {
+				// Time dimension was not found - skip validation
+				bDoTimeHorizValidation = false;	
+				break;
 			}
+			
+			// Search for year dimension
+			if (axisDimList.contains(yearDim)) {
+				yearAxis = axisDimList.indexOf(yearDim);
+			} else if (pageDimList.contains(yearDim)) {
+				yearAxis = pageDimList.indexOf(yearDim);
+				year = pageAxisMembers[yearAxis];
+				bYearOnPage = true;
+			} else {
+				// Year dimension was not found - skip validation
+				bDoTimeHorizValidation = false;	
+			}
+			
+			// Skip validation if both year and time are page dimensions
+			if (bTimeOnPage && bYearOnPage) 
+				bDoTimeHorizValidation = false;
+			
+		 } while (false);
+		
+
+			
+		// -- Now edit/validate each expanded view tuple
+		for (ViewTuple viewTuple:expandedTuples) {
+
+			// Initialization
+			String[] memberArray = viewTuple.getMemberDefs();
+
+			// If any tuple member is set to PAFBLANK, set the remaining members to PAFBLANK as well
+			if (isBlankViewTuple(viewTuple)) {
+				for (int i = 0; i < memberArray.length; i++) {
+					memberArray[i] = PafBaseConstants.PAF_BLANK;
+				}
+				viewTuple.setMemberDefs(memberArray);
+				continue;
+			}
+						
+			// Compile a list of any tuples with invalid time / year combinations (TTN-1858 / TTN-1886).
+			if (bDoTimeHorizValidation) {
+				if (!bTimeOnPage)
+					period = memberArray[timeAxis];
+				if (!bYearOnPage)
+					year = memberArray[yearAxis];
+				String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
+				if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
+					tuplesToRemove.add(viewTuple);
+				}
+			}			
+			
 		}
-	
+		
+		// -- Lastly, remove any filtered tuples
+		expandedTuples.removeAll(tuplesToRemove);
+		
+
 		logger.debug("Completed expanding tuples.");
 		return expandedTuples.toArray(new ViewTuple[0]);
 	}
@@ -2807,6 +2878,7 @@ public class PafDataService {
 							}
 
 						}
+												
 					}
 
 					// Tuple expansion
