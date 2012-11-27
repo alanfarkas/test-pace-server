@@ -2544,7 +2544,7 @@ public class PafDataService {
 			}
 		}
 		
-		// Expand each symetric tuple group (for tuples comprised of multiple dimensions)
+		// Expand each symmetric tuple group (for tuples comprised of multiple dimensions)
 		for (int axisIndex = innerAxisIndex - 1; axisIndex >= 0; axisIndex--) {
 			expandedTuples = expandSymetricTupleGroups(axisIndex, expandedTuples.toArray(new ViewTuple[0]), axes, tupleAttrDims, pageAxisDims, pageAxisMembers, clientState);
 		}
@@ -2566,7 +2566,7 @@ public class PafDataService {
 	}
 
 	/**
-	 *  Expand symteric view tuple groups
+	 *  Expand symmetric view tuple groups
 	 *
 	 * @param axisIndex
 	 * @param origViewTuples
@@ -2746,7 +2746,7 @@ public class PafDataService {
 			ViewTuple firstTuple = tupleGroup.get(0);
 			String groupTerm = firstTuple.getMemberDefs()[axisIndex];
 			boolean groupParentFirst = firstTuple.getParentFirst();
-			String[] expandedGroupTerms = expandExpression(groupTerm, groupParentFirst, dimToExpand , clientState);
+			String[] expandedGroupTerms = expandExpression(groupTerm, groupParentFirst, dimToExpand , clientState, true);
 			for (String expandedTerm:expandedGroupTerms) {
 				for (ViewTuple viewTuple:tupleGroup) {
 				
@@ -2853,13 +2853,7 @@ public class PafDataService {
 		String term = viewTuple.getMemberDefs()[axisIndex];
 		if (term.contains("@")) {
 			ExpOperation expOp = new ExpOperation(term);
-			String [] expTerms = resolveExpOperation(expOp, viewTuple.getParentFirst(), dim, clientState);
-			// Special year dimension logic for view rendering - if no children are found then 
-			// use specified member. This will allow @CHILD(@UOWROOT(Year)) to work in both a
-			// single year and multiple-year UOW. (TTN-1595)
-			if (expTerms.length == 0 && dim.equals(clientState.getApp().getMdbDef().getYearDim())) {
-				expTerms = new String[]{expOp.getParms()[0]};
-			}
+			String [] expTerms = resolveExpOperation(expOp, viewTuple.getParentFirst(), dim, clientState, true);
 			for (String expTerm : expTerms) {
 				ViewTuple vt = viewTuple.clone();
 				vt.getMemberDefs()[axisIndex] = expTerm;
@@ -2874,11 +2868,38 @@ public class PafDataService {
 
 
 
+	/**
+	 * Expand member expansion expression along it dimension hierarchy
+	 * 
+	 * @param term Expression to expand
+	 * @param parentFirst Indicates that parents should appear before children in return set
+	 * @param dim Member dimension
+	 * @param clientState Client state
+	 * 
+	 * @return String[]
+	 * @throws PafException
+	 */
 	private String[] expandExpression(String term, boolean parentFirst, String dim, PafClientState clientState) throws PafException {
+		return expandExpression(term, parentFirst, dim, clientState, false);
+	}
+
+	/**
+	 * Expand member expansion expression along it dimension hierarchy
+	 * 
+	 * @param term Expression to expand
+	 * @param parentFirst Indicates that parents should appear before children in return set
+	 * @param dim Member dimension
+	 * @param clientState Client state
+	 * @param bIgnoreErrors If set to true, then any resolution/expansion errors will be ignored
+	 * 
+	 * @return String[]
+	 * @throws PafException
+	 */
+	private String[] expandExpression(String term, boolean parentFirst, String dim, PafClientState clientState, boolean bIgnoreErrors) throws PafException {
 		String [] expTerms;
 		if (term.contains("@")) {
 			ExpOperation expOp = new ExpOperation(term);
-			expTerms = resolveExpOperation(expOp, parentFirst, dim, clientState);
+			expTerms = resolveExpOperation(expOp, parentFirst, dim, clientState, bIgnoreErrors);
 		}
 		else {
 			expTerms = new String[] {term};
@@ -2901,6 +2922,23 @@ public class PafDataService {
 	 * @throws PafException 
 	 */
 	private String[] resolveExpOperation(ExpOperation expOp, Boolean parentFirst, String dim, PafClientState clientState) throws PafException {
+		return resolveExpOperation(expOp, parentFirst, dim, clientState, false);
+	}
+
+	/**
+	 *	Expands a multidimensional operator for the specified dimension and returns corresponding members
+	 *
+	 * @param expOp
+	 * @param parentFirst Indicates whether the parent member should appear before or after it's children
+	 * @param dim
+	 * @param clientState If this is null than the full tree for the specified dimension is used. Otherwise
+	 * the subtree appropriate for that client will be used.
+	 * @param bIgnoreErrors If set to true, then any resolution/expansion errors will be ignored
+	 * 
+	 * @return String[]
+	 * @throws PafException 
+	 */
+	private String[] resolveExpOperation(ExpOperation expOp, Boolean parentFirst, String dim, PafClientState clientState, boolean bIgnoreErrors ) throws PafException {
 
 		PafDimTree tree; 
 		if (clientState == null || clientState.getUowTrees() == null)
@@ -2996,18 +3034,30 @@ public class PafDataService {
 			break;
 		}
 
-		//if member list doesn't have any members, throw exception.
-		if ( memberList.size() == 0 ) {
-			
-			throw new PafException("No members found for dimension " + dim + ". Please check view and security settings.", PafErrSeverity.Error);
-			
+		// check if member list is empty. depending on method parm, either throw
+		// a fatal error or issue warning and return original member (TTN-1886).
+		String firstTerm = expOp.getParms()[0];
+		if (memberList.size() == 0) {
+			if (bIgnoreErrors) {
+				String errMsg = "Unable to expand the member [" + firstTerm + "] in the dimension [" + dim
+						+ "] using the operation [" + expOp.toString() + "]";
+				logger.warn(errMsg);
+			} else {
+				throw new PafException("No members found for dimension [" + dim + "]. Please check view and security settings.", PafErrSeverity.Error);
+			}
 		}
-		
+
+
+		// return member names, if none the return original member (TTN-1886)
 		int i=0;
 		String[] memberNames = new String[memberList.size()];
 		for (PafDimMember m : memberList)
 			memberNames[i++] = m.getKey();
-
+		if (memberNames.length == 0) {
+			memberNames = new String[]{firstTerm};
+		}
+		
+		// return member names
 		return memberNames;
 	}
 
