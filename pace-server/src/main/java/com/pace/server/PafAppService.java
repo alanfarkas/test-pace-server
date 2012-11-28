@@ -664,7 +664,7 @@ public class PafAppService {
 			firstPlanPeriod = ts.getPeriod();		
 		}
 		clientState.setFirstPlanPeriod(firstPlanPeriod);
-		clientState.setFirstPlanTimeHorizonPeriod(firstTimeHorizPlanPeriod);
+		clientState.setFirstTimeHorizonPlanPeriod(firstTimeHorizPlanPeriod);
 	}
 
 
