@@ -30,12 +30,6 @@ public class PafBaseConstants {
 	public static final String UOW_ROOT = "@UOW_ROOT";
 	public static final String USER_SEL_TAG = "@USER_SEL";
 	public static final String PLAN_VERSION = "@PLAN_VERSION";
-	//TTN 1595 - N-Year Support
-	public static final String PLAN_YEARS = "@PLAN_YEARS";
-	public static final String NONPLAN_YEARS = "@NONPLAN_YEARS";
-	public static final String FIRST_PLAN_YEAR = "@FIRST_PLAN_YEAR";
-	public static final String FIRST_NONPLAN_YEAR = "@FIRST_NONPLAN_YEAR";
-	public static final String FIRST_PLAN_PERIOD = "@FIRST_PLAN_PERIOD";
 	
 	// time horizon constants
 	public static final String TIME_HORIZON_DEFAULT_YEAR = "**YEAR.NA**";
@@ -168,11 +162,12 @@ public class PafBaseConstants {
 	public static final String CALC_TOKEN_PREFIX_USER_SEL = "USERSEL.";
 	public static final String CC_TOKEN_START_CHAR = "[";
 	public static final String CC_TOKEN_END_CHAR = "]";
-	public static final String CALC_TOKEN_PLAN_YEARS = "PLAN.YEARS";
-	public static final String CALC_TOKEN_NONPLAN_YEARS = "NONPLAN.YEARS";
-	public static final String CALC_TOKEN_FIRST_PLAN_YEAR = "FIRST.PLAN.YEAR";
-	public static final String CALC_TOKEN_FIRST_NONPLAN_YEAR = "FIRST.NONPLAN.YEAR";
-	public static final String CALC_TOKEN_FIRST_PLAN_PERIOD = "FIRST.PLAN.PERIOD";
+	// TTN 1595 - N-Year Support
+	public static final String CC_TOKEN_PLAN_YEARS = "PLAN.YEARS";
+	public static final String CC_TOKEN_NONPLAN_YEARS = "NONPLAN.YEARS";
+	public static final String CC_TOKEN_FIRST_PLAN_YEAR = "FIRST.PLAN.YEAR";
+	public static final String CC_TOKEN_FIRST_NONPLAN_YEAR = "FIRST.NONPLAN.YEAR";
+	public static final String CC_TOKEN_FIRST_PLAN_PERIOD = "FIRST.PLAN.PERIOD";
 	
 	// function tokens
 	public static final String FUNC_TOKEN_PARENT = "[PARENT]";
@@ -189,6 +184,13 @@ public class PafBaseConstants {
 	public static final String HEADER_TOKEN_PARM_END_CHAR = ")";
 	public static final String HEADER_TOKEN_VIEW_NAME = "@VIEW_NAME";
 	
+	// view tokens (TTN 1595 - N-Year Support)
+	public static final String VIEW_TOKEN_PLAN_YEARS = "@PLAN_YEARS";
+	public static final String VIEW_TOKEN_NONPLAN_YEARS = "@NONPLAN_YEARS";
+	public static final String VIEW_TOKEN_FIRST_PLAN_YEAR = "@FIRST_PLAN_YEAR";
+	public static final String VIEW_TOKEN_FIRST_NONPLAN_YEAR = "@FIRST_NONPLAN_YEAR";
+	public static final String VIEW_TOKEN_FIRST_PLAN_PERIOD = "@FIRST_PLAN_PERIOD";
+
 	// member list token
 	public static final String MEMBERLIST_TOKEN = "@MEMBER_LIST";
 	

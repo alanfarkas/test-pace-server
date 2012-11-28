@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,10 +32,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.pace.base.PafBaseConstants;
 import com.pace.base.PafSecurityToken;
-import com.pace.base.app.*;
+import com.pace.base.app.MdbDef;
+import com.pace.base.app.PafApplicationDef;
+import com.pace.base.app.PafPlannerRole;
+import com.pace.base.app.PafUserDef;
+import com.pace.base.app.Season;
+import com.pace.base.app.UnitOfWork;
+import com.pace.base.app.VersionDef;
 import com.pace.base.comm.ClientInitRequest;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.data.Intersection;
@@ -46,6 +54,7 @@ import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.PafDimTree.DimTreeType;
 import com.pace.base.rules.RuleSet;
+import com.pace.base.utility.CollectionsUtil;
 import com.pace.base.utility.StringUtils;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafUserSelection;
@@ -97,8 +106,17 @@ public class PafClientState implements IPafClientState {
 	private Set<String> lockedYears = null;
 	private Set<String> invalidTimeHorizonPeriods = null;
 	private Set<TimeSlice> invalidTimeSlices = null;
+    private String firstPlanPeriod;
     
-    public MemberTreeSet getUowTrees() {
+    public String getFirstPlanPeriod() {
+		return firstPlanPeriod;
+	}
+
+	public void setFirstPlanPeriod(String firstPlanPeriod) {
+		this.firstPlanPeriod = firstPlanPeriod;
+	}
+
+	public MemberTreeSet getUowTrees() {
 		return uowTrees;
 	}
 
@@ -504,6 +522,85 @@ public class PafClientState implements IPafClientState {
 		if (parmValue == null) { //TTN-1458
 			parmValue = "";
 		}
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		
+		//****************TTN 1881 View Tokens for N-Year*************************
+		//-- [PLAN.YEARS] (TTN-1881)
+		parmKey = tokenStartChar + PafBaseConstants.CC_TOKEN_PLAN_YEARS + tokenEndChar;
+		parmValue = "";
+		String[] planYears = this.getPlanSeason().getPlannableYears();
+		if( planYears != null && planYears.length != 0 ) {
+			parmValue = StringUtils.arrayToString(planYears,"","","\"","\"",",");
+			System.out.println(parmValue );
+		}
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		//-- @PLAN_YEARS (TTN-1881)
+		parmKey = PafBaseConstants.VIEW_TOKEN_PLAN_YEARS;
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		
+		//-- [NONPLAN.YEARS] (TTN-1881)
+		parmKey = tokenStartChar + PafBaseConstants.CC_TOKEN_NONPLAN_YEARS + tokenEndChar;
+		parmValue = "";
+		String[] selYears = this.getPlanSeason().getYears();
+		List<String> nonPlanYearList = null;
+		if( selYears != null && selYears.length != 0 && planYears != null && planYears.length != 0 ) {
+			List<String> selYearList = new ArrayList<String>(Arrays.asList(selYears));
+			List<String> planYearList = new ArrayList<String>(Arrays.asList(planYears));
+			for( String selYr : selYearList ) {
+				System.out.println(selYr );
+			}
+			for( String plnYr : selYearList ) {
+				System.out.println(plnYr );
+			}
+			if( selYearList != null && selYearList.size() != 0 && planYearList != null && planYearList.size() != 0 ) {
+				nonPlanYearList = (List<String>)CollectionsUtil.diff(selYearList, planYearList);
+				for( String nonplnYr : nonPlanYearList ) {
+					System.out.println(nonplnYr );
+				}
+				if( nonPlanYearList != null && nonPlanYearList.size() != 0 ) {
+					parmValue = StringUtils.arrayToString(nonPlanYearList.toArray(new String[0]),"","","\"","\"",",");
+				}
+				System.out.println(parmValue );
+			}
+		}	
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		//-- @NONPLAN_YEARS (TTN-1881)
+		parmKey = PafBaseConstants.VIEW_TOKEN_NONPLAN_YEARS;
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		
+		//-- [FIRST.PLAN.YEAR] (TTN-1881)
+		parmKey = tokenStartChar + PafBaseConstants.CC_TOKEN_FIRST_PLAN_YEAR + tokenEndChar;
+		parmValue = "";
+		if( planYears != null && planYears.length != 0 ) {
+			parmValue = planYears[0];
+			System.out.println(parmValue );
+		}
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		//-- @FIRST_PLAN_YEAR (TTN-1881)
+		parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_YEAR;
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		
+		//-- [FIRST.NONPLAN.YEAR] (TTN-1881)
+		parmKey = tokenStartChar + PafBaseConstants.CC_TOKEN_FIRST_NONPLAN_YEAR + tokenEndChar;
+		parmValue = "";
+		if( nonPlanYearList != null && nonPlanYearList.size() != 0 ) {
+			parmValue = nonPlanYearList.get(0);
+			System.out.println(parmValue );
+		}
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		//-- @FIRST_NONPLAN_YEAR (TTN-1881)
+		parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_NONPLAN_YEAR;
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		
+		//-- [FIRST.PLAN.PERIOD] (TTN-1881)
+		parmKey = tokenStartChar + PafBaseConstants.CC_TOKEN_FIRST_PLAN_PERIOD + tokenEndChar;
+		parmValue = this.getFirstPlanPeriod();
+		if( parmValue == null ) {
+			parmValue = "";
+		}
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		//-- @FIRST_PLAN_PERIOD (TTN-1881)
+		parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_PERIOD;
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		
 		// Get user selection properties for the active view

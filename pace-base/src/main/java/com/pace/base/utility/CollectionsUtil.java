@@ -19,6 +19,7 @@
 package com.pace.base.utility;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -348,11 +349,32 @@ public class CollectionsUtil {
 		
 	}
 	
+  public static <T> Collection<T> diff(Collection<T> c1, Collection<T> c2) {
+	    if (c1 == null || c1.size() == 0 || c2 == null || c2.size() == 0) {
+	        return c1;
+	    }
+	    Collection<T> difference = new ArrayList<T>();
+	    for (T item : c1) {
+	        if (!c2.contains(item)) {
+	            difference.add(item);
+	        }
+	    }
+	    return difference;
+	}
+
     public static void main(String[] argss) {
     	
-    	List<String> list = convertToList("abc^dce|^kjk^kjd|^lll^lll", "|^");
+ //   	List<String> list = convertToList("abc^dce|^kjk^kjd|^lll^lll", "|^");
+    	List<String> list1 = new ArrayList<String>();
+    	list1.add("2001");
+    	list1.add("2002");
+    	list1.add("2003");
+    	List<String> list2 = new ArrayList<String>();
+    	list2.add("2002");
     	
-    	for (String str : list) {
+    	List<String> list3 = (List<String>)diff(list1,list2);
+    	
+    	for (String str : list3) {
     		System.out.println(str);
     	}
     	

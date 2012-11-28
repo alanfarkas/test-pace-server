@@ -2421,12 +2421,17 @@ public class PafViewService {
 	private PafViewSection resolvePageHeaders(PafViewSection viewSection, String planVersion, PafUserSelection[] userSelections, Properties tokenCatalog, String viewName) throws PafException {
 
 		final String TOKEN_START = PafBaseConstants.HEADER_TOKEN_START_CHAR;
+		final String TOKEN_PARM_START = PafBaseConstants.HEADER_TOKEN_PARM_START_CHAR;
+		final String TOKEN_PARM_END = PafBaseConstants.HEADER_TOKEN_PARM_END_CHAR;
         final String MEMBER_TAG_TOKEN = PafBaseConstants.HEADER_TOKEN_MEMBER_TAG;
         final String PLAN_VERSION_TOKEN = PafBaseConstants.HEADER_TOKEN_PLAN_VERSION;
         final String USER_SEL_TOKEN = PafBaseConstants.HEADER_TOKEN_USER_SEL;
         final String ROLE_FILTER_SEL_TOKEN = PafBaseConstants.HEADER_TOKEN_ROLE_FILTER_SEL;
-		final String TOKEN_PARM_START = PafBaseConstants.HEADER_TOKEN_PARM_START_CHAR;
-		final String TOKEN_PARM_END = PafBaseConstants.HEADER_TOKEN_PARM_END_CHAR;
+        final String PLAN_YEARS_TOKEN = PafBaseConstants.VIEW_TOKEN_PLAN_YEARS;
+        final String NONPLAN_YEARS_TOKEN = PafBaseConstants.VIEW_TOKEN_NONPLAN_YEARS;
+        final String FIRST_PLAN_YEAR_TOKEN = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_YEAR;
+		final String FIRST_NONPLAN_YEAR_TOKEN = PafBaseConstants.VIEW_TOKEN_FIRST_NONPLAN_YEAR;
+		final String FIRST_PLAN_PERIOD_TOKEN = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_PERIOD;
         final String VIEW_NAME_TOKEN = PafBaseConstants.HEADER_TOKEN_VIEW_NAME;
         PafViewHeader[] viewHeaders = viewSection.getPafViewHeaders();
         AliasMapping[] aliasMappings = viewSection.getAliasMappings();
@@ -2478,6 +2483,81 @@ public class PafViewService {
 
 				// Get token value from token catalog. If not found then replace token with a blank.
 				String tokenValue = viewName;
+				if (tokenValue == null) {
+					tokenValue = "";
+				}
+
+				// Replace token with resolved value
+				headerText = StringUtils.replaceAllIgnoreCase(headerText, token, tokenValue);							
+			}
+			
+       		// Resolve @PLAN_YEARS references, where @PLAN_YEARS is a reference to 
+       		// the set of Plannable Years. 
+ 			token = PLAN_YEARS_TOKEN;
+			if (headerText.toUpperCase().indexOf(token) >= 0) {
+
+				// Get token value from token catalog. If not found then replace token with a blank.
+				String tokenValue = tokenCatalog.getProperty(token);
+				if (tokenValue == null) {
+					tokenValue = "";
+				}
+
+				// Replace token with resolved value
+				headerText = StringUtils.replaceAllIgnoreCase(headerText, token, tokenValue);							
+			}
+
+       		// Resolve @NONPLAN_YEARS references, where @PLAN_YEARS is a reference to 
+       		// the set of Non-Plannable Years. 
+ 			token = NONPLAN_YEARS_TOKEN;
+			if (headerText.toUpperCase().indexOf(token) >= 0) {
+
+				// Get token value from token catalog. If not found then replace token with a blank.
+				String tokenValue = tokenCatalog.getProperty(token);
+				if (tokenValue == null) {
+					tokenValue = "";
+				}
+
+				// Replace token with resolved value
+				headerText = StringUtils.replaceAllIgnoreCase(headerText, token, tokenValue);							
+			}
+
+       		// Resolve @FIRST_PLAN_YEAR references, where @PLAN_YEARS is a reference to 
+       		// the first Plannable Year 
+ 			token = FIRST_PLAN_YEAR_TOKEN;
+			if (headerText.toUpperCase().indexOf(token) >= 0) {
+
+				// Get token value from token catalog. If not found then replace token with a blank.
+				String tokenValue = tokenCatalog.getProperty(token);
+				if (tokenValue == null) {
+					tokenValue = "";
+				}
+
+				// Replace token with resolved value
+				headerText = StringUtils.replaceAllIgnoreCase(headerText, token, tokenValue);							
+			}
+
+       		// Resolve @FIRST_NONPLAN_YEAR references, where @PLAN_YEARS is a reference to 
+       		// the first non-Plannable Year 
+ 			token = FIRST_NONPLAN_YEAR_TOKEN;
+			if (headerText.toUpperCase().indexOf(token) >= 0) {
+
+				// Get token value from token catalog. If not found then replace token with a blank.
+				String tokenValue = tokenCatalog.getProperty(token);
+				if (tokenValue == null) {
+					tokenValue = "";
+				}
+
+				// Replace token with resolved value
+				headerText = StringUtils.replaceAllIgnoreCase(headerText, token, tokenValue);							
+			}
+
+       		// Resolve @FIRST_PLAN_PERIOD references, where @PLAN_YEARS is a reference to 
+       		// the first Plannable period 
+ 			token = FIRST_PLAN_PERIOD_TOKEN;
+			if (headerText.toUpperCase().indexOf(token) >= 0) {
+
+				// Get token value from token catalog. If not found then replace token with a blank.
+				String tokenValue = tokenCatalog.getProperty(token);
 				if (tokenValue == null) {
 					tokenValue = "";
 				}
