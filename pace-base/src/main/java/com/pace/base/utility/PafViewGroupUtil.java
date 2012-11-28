@@ -74,24 +74,25 @@ public class PafViewGroupUtil {
 					List<PafViewTreeItem> pafViewTreeItemList = new ArrayList<PafViewTreeItem>();
 
 					//loop over children and create new pafViewTreeItem's
-					for (PafViewGroupItem pafViewGroupItem : pafViewGroup
-							.getPafViewGroupItems()) {
+					if( pafViewGroup.getPafViewGroupItems() != null ) {
+						for (PafViewGroupItem pafViewGroupItem : pafViewGroup
+								.getPafViewGroupItems()) {
+	
+							PafViewTreeItem pafViewTreeItem = new PafViewTreeItem();
+							pafViewTreeItem.setLabel(pafViewGroupItem.getName());
+							pafViewTreeItem
+									.setGroup(pafViewGroupItem.isViewGroup());
+	
+							pafViewTreeItemList.add(pafViewTreeItem);
+	
+						}
+						//set new items to parent group
+						pafViewTreeItemGroup.setItems(pafViewTreeItemList
+								.toArray(new PafViewTreeItem[0]));
 
-						PafViewTreeItem pafViewTreeItem = new PafViewTreeItem();
-						pafViewTreeItem.setLabel(pafViewGroupItem.getName());
-						pafViewTreeItem
-								.setGroup(pafViewGroupItem.isViewGroup());
-
-						pafViewTreeItemList.add(pafViewTreeItem);
-
+						//add to map
+						pafViewTreeItemMap.put(key, pafViewTreeItemGroup);
 					}
-
-					//set new items to parent group
-					pafViewTreeItemGroup.setItems(pafViewTreeItemList
-							.toArray(new PafViewTreeItem[0]));
-
-					//add to map
-					pafViewTreeItemMap.put(key, pafViewTreeItemGroup);
 				}
 
 			}

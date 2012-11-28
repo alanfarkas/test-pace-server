@@ -433,6 +433,10 @@ public class ViewsExcelElementItem<T extends List<PafView>> extends PafExcelElem
 					addProjectDataErrorToList(new ProjectDataError(getProjectElementId(), "Missing Print Style in View: " + view.getName()));
 				}
 				
+				if( view.getViewSectionNames() == null || view.getViewSectionNames().length == 0 ) {
+					addProjectDataErrorToList(new ProjectDataError(getProjectElementId(), "Missing View Section Names in View: " + view.getName()));
+				}
+				
 				PafExcelRow excelRow = new PafExcelRow();
 				
 				//name

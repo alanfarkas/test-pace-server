@@ -278,6 +278,10 @@ public class ViewGroupsExcelElementItem<T extends Map<String, PafViewGroup>> ext
 				//description
 				excelRow.addRowItem(1, PafExcelValueObject.createFromString(viewGroup.getDesc()));
 				
+				if( viewGroup.getPafViewGroupItems() == null || viewGroup.getPafViewGroupItems().length == 0 ) {
+					addProjectDataErrorToList(new ProjectDataError(getProjectElementId(), "Missing View Group Items in View Group: " + viewGroup.getName()));
+				}
+				
 				if ( viewGroup.getPafViewGroupItems() != null ) {
 					
 					for ( PafViewGroupItem viewGroupItem : viewGroup.getPafViewGroupItems() ) {

@@ -3431,12 +3431,15 @@ public class PafViewService {
 			entry[i].setAliasMappings(configureGlobalAliasMappings(globalAliasMappingSet, view.getViewSections()));
 			
 			int j = 0;
-			SuppressZeroSettings[] suppressZeroSettings = new SuppressZeroSettings [view.getViewSectionNames().length];
-			for(PafViewSection viewSection : view.getViewSections()){
-				suppressZeroSettings[j] = PafAppService.getInstance().resolveSuppressZeroSettings(viewSection.getSuppressZeroSettings(), appId);			
+			if( view.getViewSectionNames() != null ) {
+				SuppressZeroSettings[] suppressZeroSettings = new SuppressZeroSettings [view.getViewSectionNames().length];
+				for(PafViewSection viewSection : view.getViewSections()){
+					suppressZeroSettings[j] = PafAppService.getInstance().resolveSuppressZeroSettings(viewSection.getSuppressZeroSettings(), appId);			
+				}
+				
+				entry[i].setSuppressZeroSettings(suppressZeroSettings);
+				
 			}
-			
-			entry[i].setSuppressZeroSettings(suppressZeroSettings);
 			i++;
 		}
 		
