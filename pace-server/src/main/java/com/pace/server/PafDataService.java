@@ -2472,7 +2472,7 @@ public class PafDataService {
 		// Loop through each view tuple to be updated
 		for (ViewTuple viewTuple:updatedViewTuples) {
 
-			// If headers are to be repeated simply increment group# on first (outer) axis (TTN-1865).
+			// If headers are to be repeated, simply increment group# on first (outer) axis (TTN-1865).
 			if (isHeaderRepeated) {
 				groupNo[0]++;
 			} else {
