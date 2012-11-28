@@ -107,7 +107,7 @@ public class PafClientState implements IPafClientState {
 	private Set<String> invalidTimeHorizonPeriods = null;
 	private Set<TimeSlice> invalidTimeSlices = null;
     private String firstPlanPeriod = null;
-    private String firstPlanTimeHorizonPeriod = null;
+    private String firstTimeHorizonPlanPeriod = null;
     
 
     public MemberTreeSet getUowTrees() {
@@ -210,17 +210,17 @@ public class PafClientState implements IPafClientState {
 	}
 
     /**
-	 * @return the firstPlanPeriod
+	 * @return the firstTimeHorizonPlanPeriod
 	 */
-	public String getFirstPlanTimeHorizonPeriod() {
-		return firstPlanTimeHorizonPeriod;
+	public String getFirstTimeHorizonPlanPeriod() {
+		return firstTimeHorizonPlanPeriod;
 	}
 
 	/**
-	 * @param firstPlanTimeHorizonPeriod the firstPlanTimeHorizonPeriod to set
+	 * @param firstTimeHorizonPlanPeriod the firstTimeHorizonPlanPeriod to set
 	 */
-	public void setFirstPlanTimeHorizonPeriod(String firstPlanTimeHorizonPeriod) {
-		this.firstPlanTimeHorizonPeriod = firstPlanTimeHorizonPeriod;
+	public void setFirstTimeHorizonPlanPeriod(String firstTimeHorizonPlanPeriod) {
+		this.firstTimeHorizonPlanPeriod = firstTimeHorizonPlanPeriod;
 	}
 
 	public String getPaceHome() {
