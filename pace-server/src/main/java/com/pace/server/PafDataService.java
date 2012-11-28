@@ -2406,15 +2406,14 @@ public class PafDataService {
 
 			// Remove invalid tuples from view section
 			PafViewService.getInstance().ProcessInvalidTuples(viewSection, clientState);
-
 			if (viewSection.getRowTuples().length > 0){
-				viewSection.setRowTuples(generateHeaderGroupNo(viewSection.getRowTuples(),viewSection.getRowAxisDims()));
+				viewSection.setRowTuples(generateHeaderGroupNo(viewSection.getRowTuples(),viewSection.getRowAxisDims(), viewSection.isRowHeaderRepeated()));
 			} else {
 				viewSection.setEmpty(true);
 			}
 			if (viewSection.getColTuples().length > 0)
 			{
-				viewSection.setColTuples(generateHeaderGroupNo(viewSection.getColTuples(), viewSection.getColAxisDims()));
+				viewSection.setColTuples(generateHeaderGroupNo(viewSection.getColTuples(), viewSection.getColAxisDims(), viewSection.isColHeaderRepeated()));
 			} else {
 				viewSection.setEmpty(true);
 			}
@@ -2429,9 +2428,11 @@ public class PafDataService {
 	 *
 	 * @param viewTuples View tuples
 	 * @param axisDims	Axis dimension names
+	 * @param isHeaderRepeated Indicates is headers should be repeated across rows or columns
+	 * 
 	 * @return ViewTuple[] 
 	 */
-	private ViewTuple[] generateHeaderGroupNo(ViewTuple[] viewTuples, String[] axisDims) {
+	private ViewTuple[] generateHeaderGroupNo(ViewTuple[] viewTuples, String[] axisDims, boolean isHeaderRepeated) {
 
 		int dimCount = axisDims.length;
 		
@@ -2468,27 +2469,35 @@ public class PafDataService {
 			groupNo[i] = 0;
 		}
 
-		// Loop through each view tuple to be update
+		// Loop through each view tuple to be updated
 		for (ViewTuple viewTuple:updatedViewTuples) {
-			// Compare headers on current view tuple to previous view tuple
-			String headers[] = viewTuple.getMemberDefs();
-			for (int axis = 0; axis < dimCount; axis++) {
-				// If header on current axis has changed
-				if (!headers[axis].equals(prevHeader[axis])) {
-					// Increment group number for current axis
-					groupNo[axis]++;
-					prevHeader[axis] = headers[axis];
-					// Initialize group numbers for remaining axis
-					for (int remainingAxis = axis + 1; remainingAxis < dimCount; remainingAxis++) {
-						groupNo[remainingAxis] = 0;
-						prevHeader[remainingAxis] = headers[remainingAxis]; 
+
+			// If headers are to be repeated simply increment group# on first (outer) axis (TTN-1865).
+			if (isHeaderRepeated) {
+				groupNo[0]++;
+			} else {
+				// Compare headers on current view tuple to previous view tuple
+				String headers[] = viewTuple.getMemberDefs();
+				for (int axis = 0; axis < dimCount; axis++) {
+					// If header on current axis has changed
+					if (!headers[axis].equals(prevHeader[axis])) {
+						// Increment group number for current axis
+						groupNo[axis]++;
+						prevHeader[axis] = headers[axis];
+						// Initialize group numbers for remaining axis
+						for (int remainingAxis = axis + 1; remainingAxis < dimCount; remainingAxis++) {
+							groupNo[remainingAxis] = 0;
+							prevHeader[remainingAxis] = headers[remainingAxis]; 
+						}
+						// Break out of comparison loop
+						break;
 					}
-					// Break out of comparison loop
-					break;
 				}
 			}
+
 			// Set header group number
 			viewTuple.setDerivedHeaderGroupNo(groupNo.clone());
+
 			// Set order property
 			viewTuple.setOrder(tupleInx++);
 		}
@@ -2499,7 +2508,7 @@ public class PafDataService {
 
 
 	/**
-	 *	Resolve and expand the member definitions on a set of  view tuples
+	 *	Resolve and expand the member definitions on a set of view tuples
 	 *
 	 * @param origViewTuples Array of view tuples
 	 * @param axes Array of dimensional axes corresponding to the dimensions in each view tuple
