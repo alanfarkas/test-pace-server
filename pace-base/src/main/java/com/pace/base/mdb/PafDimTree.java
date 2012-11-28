@@ -2011,11 +2011,27 @@ public abstract class PafDimTree {
     	return floorMembers;
     }
     
+
     /**
      * 
+     * This method performs a traversal starting at the root node of he current tree.
+     * It then returns the lowest level member names. In the case that the branch has
+     * no children it returns itself
+     * 
+     * 
+     * @return List<String>
+     */
+	public List<String> getLowestMemberNames() {
+		return getLowestMemberNames(this.getRootNode().getKey());
+	}
+
+
+/**
+     * 
      * This method performs a traversal starting at the member specified in the current tree.
-     * It then returns the lowest level members under the specified branch. This is the equivalent
-     * of a "relative" level 0 call. In the case that the branch has no children it returns itself
+     * It then returns the lowest level member names under the specified branch. This is the 
+     * equivalent of a "relative" level 0 call. In the case that the branch has no children
+     * it returns itself
      * 
      * 
      * @param branchName

@@ -106,17 +106,11 @@ public class PafClientState implements IPafClientState {
 	private Set<String> lockedYears = null;
 	private Set<String> invalidTimeHorizonPeriods = null;
 	private Set<TimeSlice> invalidTimeSlices = null;
-    private String firstPlanPeriod;
+    private String firstPlanPeriod = null;
+    private String firstPlanTimeHorizonPeriod = null;
     
-    public String getFirstPlanPeriod() {
-		return firstPlanPeriod;
-	}
 
-	public void setFirstPlanPeriod(String firstPlanPeriod) {
-		this.firstPlanPeriod = firstPlanPeriod;
-	}
-
-	public MemberTreeSet getUowTrees() {
+    public MemberTreeSet getUowTrees() {
 		return uowTrees;
 	}
 
@@ -201,7 +195,35 @@ public class PafClientState implements IPafClientState {
         return initRequest.getIpAddress();
     }
     
-    public String getPaceHome() {
+    /**
+ 	 * @return the firstPlanPeriod
+ 	 */
+    public String getFirstPlanPeriod() {
+		return firstPlanPeriod;
+	}
+
+	/**
+	 * @param firstPlanPeriod the firstPlanPeriod to set
+	 */
+	public void setFirstPlanPeriod(String firstPlanPeriod) {
+		this.firstPlanPeriod = firstPlanPeriod;
+	}
+
+    /**
+	 * @return the firstPlanPeriod
+	 */
+	public String getFirstPlanTimeHorizonPeriod() {
+		return firstPlanTimeHorizonPeriod;
+	}
+
+	/**
+	 * @param firstPlanTimeHorizonPeriod the firstPlanTimeHorizonPeriod to set
+	 */
+	public void setFirstPlanTimeHorizonPeriod(String firstPlanTimeHorizonPeriod) {
+		this.firstPlanTimeHorizonPeriod = firstPlanTimeHorizonPeriod;
+	}
+
+	public String getPaceHome() {
 		return paceHome;
 	}
 

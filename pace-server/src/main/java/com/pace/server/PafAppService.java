@@ -533,7 +533,7 @@ public class PafAppService {
 	}
 
 	/**
-	 *  Get all or specified member tag defintions
+	 *  Get all or specified member tag definitions
 	 *
 	 * @param appId Application Id
 	 * @param memberTagNames Optional member tag filter
@@ -652,6 +652,19 @@ public class PafAppService {
 		clientState.setLockedYears(readOnlyYears);							// TTN-1860 - non-plannable year support
 		clientState.setInvalidTimeHorizonPeriods(invalidTimeHorizPeriods);
 
+		
+		// Populate first plan period properties. Find the first unlocked floor
+		// member of the time horizon tree. (TTN-1882)
+		String firstPlanPeriod = "", firstTimeHorizPlanPeriod = "";
+		List<String> timeHorizPeriods = timeHorizTree.getLowestMemberNames();
+		timeHorizPeriods.removeAll(lockedTimeHorizPeriods);
+		if (!timeHorizPeriods.isEmpty()) {
+			firstTimeHorizPlanPeriod = timeHorizPeriods.get(0);
+			TimeSlice ts = new TimeSlice(firstTimeHorizPlanPeriod);
+			firstPlanPeriod = ts.getPeriod();		
+		}
+		clientState.setFirstPlanPeriod(firstPlanPeriod);
+		clientState.setFirstPlanTimeHorizonPeriod(firstTimeHorizPlanPeriod);
 	}
 
 
