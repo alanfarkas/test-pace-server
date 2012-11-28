@@ -1,6 +1,13 @@
 package com.pace.base.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.apache.log4j.Logger;
+
 
 import com.pace.base.PafBaseConstants;
 
@@ -27,7 +34,8 @@ public class PafServer implements Comparable, Cloneable {
 	private String osServiceName;
 	private Integer jmsMessagingPort;
 		
-
+	private static final Logger logger = Logger
+			.getLogger(PafServer.class);
 	public PafServer() {		
 	}
 	
@@ -413,5 +421,86 @@ public class PafServer implements Comparable, Cloneable {
 		return true;
 	}
 	
+	
+	public  boolean isServerRunning(PafServer server,int urlTimeoutInMilliseconds) {
+
+		// set default
+		boolean isServerRunning = false;
+		
+		HttpURLConnection httpConnection = null;
+		String url = null;
+		
+		try {
+			
+			
+						
+			//try to get pafserver from url
+			
+			url = server.getCompleteWSDLService();         
+			//cast to http connection
+			httpConnection = (HttpURLConnection) new URL(url).openConnection();
+			
+			httpConnection.setRequestMethod("GET");
+			
+		
+			//if paf server exists
+			if ( server != null ) {
+			
+				//if pafserver has specified url timeout
+				if ( server.getUrlTimeoutInMilliseconds() != null ) {
+				
+					//try to convert into an int, catch runtime if problem and ignore
+					try {
+						
+						urlTimeoutInMilliseconds = server.getUrlTimeoutInMilliseconds().intValue();
+						
+					} catch (RuntimeException re) {
+						
+						logger.error("There was a problem coverting " + server.getUrlTimeoutInMilliseconds() + " to an integer.");
+						
+					}
+					
+				}            	
+			}
+			  
+		if ( logger.isDebugEnabled()) {
+						logger.debug("Setting connection timeout to " + urlTimeoutInMilliseconds + " for url " + url);
+			}
+		
+			//set timeout
+			httpConnection.setConnectTimeout(urlTimeoutInMilliseconds);	
+			
+			//if successful http status, server/app is running
+			if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK ) {
+				
+				isServerRunning = true;
+				logger.info("Successfully connected to url '" + url +"'");
+				
+			} else {
+				
+				logger.info("Couldn't connect to url '" + url +"'");
+				
+			}                                    
+                        
+		} catch (MalformedURLException e) {
+			logger.error("MalformedURLException: " + e.getMessage());
+		} catch (IOException e) {
+			logger.warn("URL IOException: " + e.getMessage());
+		}  finally {
+			
+			if ( httpConnection != null ) {
+			  logger.debug("About to disconnect from url: " + url);
+          	  httpConnection.disconnect();
+          	  logger.debug("Successfully disconnected from url: " + url);
+            }
+			
+		}
+		
+		// log info
+		logger.info("URL: '" + url + "' is alive: " + isServerRunning); //$NON-NLS-1$ //$NON-NLS-2$
+
+		// return true if server is running or false if not.
+		return isServerRunning;
+	}
 	
 }
