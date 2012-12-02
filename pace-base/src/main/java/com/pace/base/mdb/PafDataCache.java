@@ -41,6 +41,7 @@ import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionFormula;
 import com.pace.base.app.VersionType;
+import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
@@ -2343,12 +2344,40 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	/**
+	 * Returns true if the intersection in an attribute intersection
+	 * 
+	 * @param intersection Cell intersection
+	 * @return True if the intersection is an attribute intersection 
+	 */
+	public boolean isAttributeIntersection(SimpleCoordList intersection) {
+		
+		boolean isAttributeIs = false;
+		
+		// Simple check - an intersection is an attribute intersection,
+		// if it contains any non-core dimensions
+		if (intersection.getAxis().length > this.coreDimensions.size()) {
+			isAttributeIs = true;
+		}
+		return isAttributeIs;
+	}
+
+	/**
 	 * Returns true if the intersection in not an attribute intersection
 	 * 
 	 * @param intersection Cell intersection
 	 * @return True if the intersection is not an attribute intersection 
 	 */
 	public boolean isBaseIntersection(Intersection intersection) {
+		return !isAttributeIntersection(intersection);
+	}
+
+	/**
+	 * Returns true if the intersection in not an attribute intersection
+	 * 
+	 * @param intersection Cell intersection
+	 * @return True if the intersection is not an attribute intersection 
+	 */
+	public boolean isBaseIntersection(SimpleCoordList intersection) {
 		return !isAttributeIntersection(intersection);
 	}
 
