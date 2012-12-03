@@ -46,7 +46,7 @@ import com.pace.base.funcs.F_Prev;
 import com.pace.base.funcs.F_PrevCum;
 import com.pace.base.funcs.F_TriggerIntersection;
 import com.pace.base.funcs.IPafFunction;
-import com.pace.base.mdb.PafAttributeTree;
+import com.pace.base.mdb.AttributeUtil;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
@@ -857,7 +857,7 @@ public class EvalUtil {
 			if (assocAttributes.size() > 0) {
 				
 				// Yes - Add list of component base members to member filter
-				List<String> memberList = EvalUtil.getComponentBaseMembers(dataCache, baseDimension, assocAttributes, attrIs, memberTrees);
+				List<String> memberList = AttributeUtil.getComponentBaseMembers(dataCache, baseDimension, assocAttributes, attrIs, memberTrees);
 				if (memberList.size() == 0) {
 					// No members were returned - this must be an invalid intersection - just return null
 					return null;
@@ -1053,97 +1053,6 @@ public class EvalUtil {
 	
 		// Return converted intersections
 		return convertedIntersections;
-	}
-
-	/**
-	 *	Return the list of base members that will aggregate to the specified intersection
-	 *  for the specified base dimension. Component base member lists are added to a 
-	 *  collection so that they can be quickly recalled for future processing.
-	 *
-	 * @param dataCache Data cache
-	 * @param baseDimension Base dimension
-	 * @param attrDimensions Associated attribute dimensions
-	 * @param attrIs Attribute intersection
-	 * @param memberTrees Set of attribute and base member trees
-	 * 
-	 * @return List<String>
-	 */
-	public static List<String> getComponentBaseMembers(PafDataCache dataCache, final String baseDimension, final Set<String> attrDimensions, 
-			final Intersection attrIs, final MemberTreeSet memberTrees) {
-	
-	
-		// Initialization
-		List<String> componentMembers = null;
-		Set<String> validBaseMembers = new HashSet<String>();
-		PafBaseTree baseTree = (PafBaseTree) memberTrees.getTree(baseDimension);
-		String baseMember = attrIs.getCoordinate(baseDimension);		
-	
-		// Create an intersection containing the base member and it's associated attributes
-		// in the view section
-		int memberIsDimCount = attrDimensions.size() + 1;
-		String[] baseMemberDims = new String[memberIsDimCount];
-		String[] baseMemberCoords = new String[memberIsDimCount];
-		int i = 0;
-		for (String dsDimension:attrIs.getDimensions()) {
-			if (baseDimension.equalsIgnoreCase(dsDimension) || attrDimensions.contains(dsDimension)) {
-				baseMemberDims[i] = dsDimension;
-				baseMemberCoords[i] = attrIs.getCoordinate(dsDimension);
-				i++;
-			}
-		}
-		Intersection baseMemberIs = new Intersection(baseMemberDims, baseMemberCoords);
-	
-		// Return pre-tabulated component member list, if it exists
-		componentMembers = dataCache.getComponentBaseMembers(baseMemberIs);
-		if (!componentMembers.isEmpty()) {
-			return componentMembers;
-		}
-	
-		// Find the intersection of associated base members for each attribute dimension
-		// in the data slice cache intersection
-		for (String attrDimension:attrDimensions) {
-	
-			// Get associated base member names of current attribute
-			String attrMember = attrIs.getCoordinate(attrDimension);
-			PafAttributeTree attrTree = (PafAttributeTree) memberTrees.getTree(attrDimension);
-			Set<String> associatedBaseMembers =  attrTree.getBaseMemberNames(attrMember);
-	
-			// If there are no base members then return empty set since this must be
-			// an invalid intersection of a base member with one or more attributes
-			if (associatedBaseMembers.isEmpty()) {
-				return new ArrayList<String>();
-			}
-	
-			// If 1st time through loop then initialize existing base members set
-			if (validBaseMembers.isEmpty()) {
-				validBaseMembers.addAll(associatedBaseMembers);
-			}
-	
-			// Get intersection of base members associated with each processed attribute
-			validBaseMembers.retainAll(associatedBaseMembers);
-	
-		}
-	
-		// Get base member descendants at attribute mapping level. It is assumed that
-		// all attribute dimensions on the view are mapped to the same level within
-		// a given base dimension.
-		int mappingLevel = baseTree.getAttributeMappingLevel((String)attrDimensions.toArray()[0]);
-		List<PafDimMember> dimMembers = baseTree.getMembersAtLevel(baseMember, (short) mappingLevel);
-		Set<String> intersectionDescendants = new HashSet<String>();
-		for (PafDimMember dimMember:dimMembers) {
-			intersectionDescendants.add(dimMember.getKey());
-		}
-	
-		// Filter list of potential valid base members against relevant base members for intersection
-		validBaseMembers.retainAll(intersectionDescendants);
-		componentMembers.addAll(validBaseMembers);
-	
-		// Add component base members to collection for future use
-		dataCache.addComponentBaseMembers(baseMemberIs, componentMembers);
-		
-	
-		// Return component base members
-		return componentMembers;
 	}
 
 	/**

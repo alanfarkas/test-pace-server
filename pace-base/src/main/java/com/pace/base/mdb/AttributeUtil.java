@@ -370,4 +370,151 @@ public abstract class AttributeUtil {
 		return validAttributeMembers;
 	}
 
+	/**
+	 *	Return the list of base members that will aggregate to the specified attribute 
+	 *  intersection for the specified base dimension. Component base member lists are 
+	 *  added to a collection so that they can be quickly recalled for future processing.
+	 *
+	 * @param dataCache Data cache
+	 * @param baseDimension Base dimension
+	 * @param attrDimensions Associated attribute dimensions
+	 * @param attrIs Attribute intersection
+	 * @param memberTrees Set of attribute and base member trees
+	 * 
+	 * @return List<String>
+	 */
+	public static List<String> getComponentBaseMembers(PafDataCache dataCache, final String baseDimension, final Set<String> attrDimensions, 
+			final Intersection attrIs, final MemberTreeSet memberTrees) {
+	
+	
+		// Initialization
+		List<String> componentMembers = null;
+		Set<String> validBaseMembers = new HashSet<String>();
+		PafBaseTree baseTree = (PafBaseTree) memberTrees.getTree(baseDimension);
+		String baseMember = attrIs.getCoordinate(baseDimension);		
+	
+		// Create an intersection containing the base member and it's associated attributes
+		// in the view section
+		int memberIsDimCount = attrDimensions.size() + 1;
+		String[] baseMemberDims = new String[memberIsDimCount];
+		String[] baseMemberCoords = new String[memberIsDimCount];
+		int i = 0;
+		for (String dsDimension:attrIs.getDimensions()) {
+			if (baseDimension.equalsIgnoreCase(dsDimension) || attrDimensions.contains(dsDimension)) {
+				baseMemberDims[i] = dsDimension;
+				baseMemberCoords[i] = attrIs.getCoordinate(dsDimension);
+				i++;
+			}
+		}
+		Intersection baseMemberIs = new Intersection(baseMemberDims, baseMemberCoords);
+	
+		// Return pre-tabulated component member list, if it exists
+		componentMembers = dataCache.getComponentBaseMembers(baseMemberIs);
+		if (!componentMembers.isEmpty()) {
+			return componentMembers;
+		}
+	
+		// Find the intersection of associated base members for each attribute dimension
+		// in the data slice cache intersection
+		for (String attrDimension:attrDimensions) {
+	
+			// Get associated base member names of current attribute
+			String attrMember = attrIs.getCoordinate(attrDimension);
+			PafAttributeTree attrTree = (PafAttributeTree) memberTrees.getTree(attrDimension);
+			Set<String> associatedBaseMembers =  attrTree.getBaseMemberNames(attrMember);
+	
+			// If there are no base members then return empty set since this must be
+			// an invalid intersection of a base member with one or more attributes
+			if (associatedBaseMembers.isEmpty()) {
+				return new ArrayList<String>();
+			}
+	
+			// If 1st time through loop then initialize existing base members set
+			if (validBaseMembers.isEmpty()) {
+				validBaseMembers.addAll(associatedBaseMembers);
+			}
+	
+			// Get intersection of base members associated with each processed attribute
+			validBaseMembers.retainAll(associatedBaseMembers);
+	
+		}
+	
+		// Get base member descendants at attribute mapping level. It is assumed that
+		// all attribute dimensions on the view are mapped to the same level within
+		// a given base dimension.
+		int mappingLevel = baseTree.getAttributeMappingLevel((String)attrDimensions.toArray()[0]);
+		List<PafDimMember> dimMembers = baseTree.getMembersAtLevel(baseMember, (short) mappingLevel);
+		Set<String> intersectionDescendants = new HashSet<String>();
+		for (PafDimMember dimMember:dimMembers) {
+			intersectionDescendants.add(dimMember.getKey());
+		}
+	
+		// Filter list of potential valid base members against relevant base members for intersection
+		validBaseMembers.retainAll(intersectionDescendants);
+		componentMembers.addAll(validBaseMembers);
+	
+		// Add component base members to collection for future use
+		dataCache.addComponentBaseMembers(baseMemberIs, componentMembers);
+		
+	
+		// Return component base members
+		return componentMembers;
+	}
+
+	/**
+	 *	Return the list of base members along the specified base dimension, that aggregate to 
+	 *  the specified attribute intersection all valid ancestor members are included as well. 
+	 *
+	 * @param dataCache Data cache
+	 * @param baseDimension Base dimension
+	 * @param attrDimensions Associated attribute dimensions
+	 * @param attrIs Attribute intersection
+	 * @param memberTrees Set of attribute and base member trees
+	 * @param bOnlyIncludeFullyMappedAncestors Indicates if only ancestors whose descendants are all valid components should be returned
+	 * 
+	 * @return List<String>
+	 */
+	public static List<String> getAllComponentBaseMembers(PafDataCache dataCache, final String baseDimension, final Set<String> attrDimensions, 
+			final Intersection attrIs, final MemberTreeSet memberTrees, boolean bOnlyIncludeFullyMappedAncestors) {
+	
+		
+		// Initialization
+		PafBaseTree baseTree = memberTrees.getBaseTree(baseDimension);
+		String baseMember = attrIs.getCoordinate(baseDimension);	
+		int mappingLevel = baseTree.getAttributeMappingLevel((String)attrDimensions.toArray()[0]);
+		Set<String> validAncestors = new HashSet<String>();
+		List<String> allDescendants = PafDimTree.getMemberNames(baseTree.getIDescendants(baseMember));
+
+		// Get component base members
+		List<String> allComponentMembers = new ArrayList<String>(getComponentBaseMembers(dataCache, baseDimension, attrDimensions, attrIs, memberTrees));
+		
+		// Merge in the all ancestors of each component member
+		for (String componentMember : allComponentMembers) {
+			List<String> ancestors = PafDimTree.getMemberNames(baseTree.getAncestors(componentMember));
+			if (!bOnlyIncludeFullyMappedAncestors) {
+				// No filtering - include all ancestors
+				validAncestors.addAll(ancestors);
+			} else {
+				// Filtering - only include ancestors whose descendants are all valid components.
+				// First, get base member descendants at attribute mapping level. It is assumed that
+				// all attribute dimensions on the view are mapped to the same level within
+				// a given base dimension.
+				List<String> potentialComponents = PafDimTree.getMemberNames(baseTree.getMembersAtLevel(baseMember, (short) mappingLevel));
+				if (allComponentMembers.containsAll(potentialComponents)) {
+					validAncestors.addAll(ancestors);
+				}
+			}
+		}
+		
+		// Remove ancestors that are above current base member
+		validAncestors.retainAll(allDescendants);
+		
+		// Merge in valid ancestors
+		allComponentMembers.addAll(validAncestors);
+		
+		// Return full list of component members
+		return allComponentMembers;
+
+	}
+
 }

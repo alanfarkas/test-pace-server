@@ -687,7 +687,7 @@ public abstract class PafDataCacheCalc {
 			// Get list of valid base members for the current base dimension
 			Set<String> assocAttributes = new HashSet<String>(assocAttrMap.get(baseDim));
 			memberComboDims.addAll(assocAttributes);
-			List<String> baseMembers = EvalUtil.getComponentBaseMembers(dataCache, baseDim, assocAttributes, attrIs, uowTrees);
+			List<String> baseMembers = AttributeUtil.getComponentBaseMembers(dataCache, baseDim, assocAttributes, attrIs, uowTrees);
 			baseMemberMap.put(baseDim, baseMembers);
 		}
 
