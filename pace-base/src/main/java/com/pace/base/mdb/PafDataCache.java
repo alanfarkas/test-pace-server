@@ -982,6 +982,25 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	/**
+	 * Return the attribute dimensions in the specified intersection
+	 * 
+	 * @param intersection Intersection
+	 * @return the attributeDims
+	 */
+	public List<String> getIntersectionAttrDims(Intersection intersection) {
+		
+		// Assume all attribute dimensions appear after all base dimensions
+		List<String> attrDims = new ArrayList<String>();
+		int i = coreDimensions.size();
+		while (i < intersection.getSize()) {
+			attrDims.add(intersection.getCoordinates()[i]);
+			i++;
+		}		
+		return attrDims;
+
+	}
+
+	/**
 	 * @return the attributeDims
 	 */
 	public String[] getAttributeDims() {

@@ -13,10 +13,15 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafException;
+import com.pace.base.app.MeasureDef;
+import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafDimSpec;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.utility.StringOdometer;
+import com.pace.base.utility.TimeBalance;
+import com.pace.base.view.PafViewSection;
 
 /**
  * Attribute Utilities
@@ -461,21 +466,41 @@ public abstract class AttributeUtil {
 		return componentMembers;
 	}
 
+
 	/**
 	 *	Return the list of base members along the specified base dimension, that aggregate to 
-	 *  the specified attribute intersection all valid ancestor members are included as well. 
+	 *  the specified attribute intersection. All valid ancestor members are included as well. 
 	 *
 	 * @param dataCache Data cache
 	 * @param baseDimension Base dimension
 	 * @param attrDimensions Associated attribute dimensions
 	 * @param attrIs Attribute intersection
 	 * @param memberTrees Set of attribute and base member trees
-	 * @param bOnlyIncludeFullyMappedAncestors Indicates if only ancestors whose descendants are all valid components should be returned
 	 * 
 	 * @return List<String>
 	 */
 	public static List<String> getAllComponentBaseMembers(PafDataCache dataCache, final String baseDimension, final Set<String> attrDimensions, 
-			final Intersection attrIs, final MemberTreeSet memberTrees, boolean bOnlyIncludeFullyMappedAncestors) {
+			final Intersection attrIs, final MemberTreeSet memberTrees) {
+		
+		return getAllComponentBaseMembers(dataCache, baseDimension, attrDimensions, attrIs, memberTrees, false);
+	}
+	
+		
+	/**
+	 *	Return the list of base members along the specified base dimension, that aggregate to 
+	 *  the specified attribute intersection. All valid ancestor members are included as well. 
+	 *
+	 * @param dataCache Data cache
+	 * @param baseDimension Base dimension
+	 * @param attrDimensions Associated attribute dimensions
+	 * @param attrIs Attribute intersection
+	 * @param memberTrees Set of attribute and base member trees
+	 * @param bOmitPartialRollups Indicates that only ancestors whose descendants are all valid components should be returned
+	 * 
+	 * @return List<String>
+	 */
+	public static List<String> getAllComponentBaseMembers(PafDataCache dataCache, final String baseDimension, final Set<String> attrDimensions, 
+			final Intersection attrIs, final MemberTreeSet memberTrees, boolean bOmitPartialRollups) {
 	
 		
 		// Initialization
@@ -491,17 +516,19 @@ public abstract class AttributeUtil {
 		// Merge in the all ancestors of each component member
 		for (String componentMember : allComponentMembers) {
 			List<String> ancestors = PafDimTree.getMemberNames(baseTree.getAncestors(componentMember));
-			if (!bOnlyIncludeFullyMappedAncestors) {
+			if (!bOmitPartialRollups) {
 				// No filtering - include all ancestors
 				validAncestors.addAll(ancestors);
 			} else {
 				// Filtering - only include ancestors whose descendants are all valid components.
-				// First, get base member descendants at attribute mapping level. It is assumed that
-				// all attribute dimensions on the view are mapped to the same level within
-				// a given base dimension.
-				List<String> potentialComponents = PafDimTree.getMemberNames(baseTree.getMembersAtLevel(baseMember, (short) mappingLevel));
-				if (allComponentMembers.containsAll(potentialComponents)) {
-					validAncestors.addAll(ancestors);
+				for (String ancestor : ancestors) {
+					// Get ancestor's descendants at the attribute mapping level. It is assumed
+					// that all attribute dimensions on the view are mapped to the same level
+					// within a given base dimension.
+					List<String> potentialComponents = PafDimTree.getMemberNames(baseTree.getMembersAtLevel(ancestor, (short) mappingLevel));
+					if (allComponentMembers.containsAll(potentialComponents)) {
+						validAncestors.add(ancestor);
+					}
 				}
 			}
 		}
@@ -515,6 +542,158 @@ public abstract class AttributeUtil {
 		// Return full list of component members
 		return allComponentMembers;
 
+	}
+
+	/**
+	 *	Return an iterator that will generate the corresponding descendant base 
+	 *  intersections for the specified attribute intersection.
+	 *  
+	 *  If there are no corresponding base intersections, then null is returned.
+	 *  
+	 *  NOTE: Although similarly named, this method serves a different purpose 
+	 *  than the 'explodeAttributeInterection' method belonging to the 'EvalUtil'
+	 *  class. This current method is meant to do a 'generic' explosion of an
+	 *  attribute intersection, while its evaluation counterpart applies logic 
+	 *  specific to evaluation.
+	 *
+	 * @param dataCache Data cache
+	 * @param attrIs Attribute intersection to explode
+	 * @param memberTrees Collection of attribute and base trees corresponding to uow
+	 * 
+	 * @return StringOdometer
+	 * @throws PafException 
+	 */
+	static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
+			final MemberTreeSet memberTrees) {
+		
+		return explodeAttributeIntersection(dataCache, attrIs, memberTrees, false);
+		
+	}
+
+	/**
+	 *	Return an iterator that will generate the corresponding descendant base 
+	 *  intersections for the specified attribute intersection.
+	 *  
+	 *  If there are no corresponding base intersections, then null is returned.
+	 *  
+	 *  NOTE: Although similarly named, this method serves a different purpose 
+	 *  than the 'explodeAttributeInterection' method belonging to the 'EvalUtil'
+	 *  class. This current method is meant to do a 'generic' explosion of an
+	 *  attribute intersection, while its evaluation counterpart applies logic 
+	 *  specific to evaluation.
+	 *
+	 * @param dataCache Data cache
+	 * @param attrIs Attribute intersection to explode
+	 * @param memberTrees Collection of attribute and base trees corresponding to uow
+	 * @param bOmitPartialRollups Indicates that aggregate base members, whose descendants don't all map to the current attribute value(s), will be excluded. 
+	 * 
+	 * @return StringOdometer
+	 * @throws PafException 
+	 */
+	static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
+			final MemberTreeSet memberTrees, final boolean bOmitPartialRollups) {
+
+		Set<String> allBaseDims = new HashSet<String>(Arrays.asList(dataCache.getBaseDimensions()));
+		return explodeAttributeIntersection(dataCache, attrIs, memberTrees, allBaseDims, false, bOmitPartialRollups);
+
+	}
+	
+
+	/**
+	 *	Return an iterator that will generate the corresponding descendant base 
+	 *  intersections for the specified attribute intersection.
+	 *  
+	 *  If there are no corresponding base intersections, then null is returned.
+	 *  
+	 *  NOTE: Although similarly named, this method serves a different purpose 
+	 *  than the 'explodeAttributeInterection' method belonging to the 'EvalUtil'
+	 *  class. This current method is meant to do a 'generic' explosion of an
+	 *  attribute intersection, while its evaluation counterpart applies logic 
+	 *  specific to evaluation.
+	 *
+	 * @param dataCache Data cache
+	 * @param attrIs Attribute intersection to explode
+	 * @param memberTrees Collection of attribute and base trees corresponding to uow
+	 * @param explodedBaseDims Lists the base dimensions that should be exploded
+	 * @param bFloorOnly If set to true, only floor intersections will be returned
+	 * @param bOmitPartialRollups Indicates that aggregate base members, whose descendants don't all map to the current attribute value(s), will be excluded (only applicable if 'bFloorOnly' is set to false). 
+	 * 
+	 * @return StringOdometer
+	 * @throws PafException 
+	 */
+	static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
+			final MemberTreeSet memberTrees, final Set<String> explodedBaseDims, final boolean bFloorOnly, final boolean bOmitPartialRollups) {
+	
+		Map <String, List<String>> memberFilters = new HashMap<String, List<String>>();
+	
+		// Iterate through each base dimension in each attribute intersection and create
+		// the list of corresponding base members in the uow cache. For base dimensions
+		// without any corresponding attribute dimensions the current member is returned,
+		// unless isBaseDimExploed is set to true. In which case, the floor base members 
+		// are returned.
+		String[] baseDimensions = dataCache.getBaseDimensions();
+		int baseDimCount = baseDimensions.length;
+		
+		Set<String> attrDims = new HashSet<String>(Arrays.asList(dataCache.getAttributeDims()));
+		for (int axisInx = 0; axisInx < baseDimCount; axisInx++) {
+	
+			// Get current base member and tree
+			String baseDimension = baseDimensions[axisInx];
+			PafBaseTree pafBaseTree = memberTrees.getBaseTree(baseDimension);
+			String baseMember = attrIs.getCoordinate(baseDimension);
+			
+			// Get associated attribute dim names
+			Set<String> assocAttributes = new HashSet<String>();
+			assocAttributes.addAll(pafBaseTree.getAttributeDimNames());
+	
+			// Does this intersection contain any associated attributes for this base dimension
+			assocAttributes.retainAll(attrDims);
+			if (assocAttributes.size() > 0) {
+				
+				// Yes - Add list of component base members to member filter
+				List<String> memberList;
+				if (bFloorOnly) {
+					memberList = AttributeUtil.getComponentBaseMembers(dataCache, baseDimension, assocAttributes, attrIs,
+							memberTrees);
+				} else {
+					memberList = AttributeUtil.getAllComponentBaseMembers(dataCache, baseDimension, assocAttributes, attrIs,
+							memberTrees, bOmitPartialRollups);					
+				}
+				if (memberList.size() == 0) {
+					// No members were returned - this must be an invalid intersection - just return null
+					return null;
+				}
+				// Convert set of component base members to a list and add to member filter
+				// hash map.
+				memberFilters.put(baseDimension, memberList);
+				
+			} else {
+	
+				// No attribute dimensions
+				List<String> memberList = null;
+				if (explodedBaseDims != null && explodedBaseDims.contains(baseDimension)) {
+					// Base dimension explosion 
+					if (bFloorOnly) {
+						// Just pick lowest level descendants under member
+						memberList = pafBaseTree.getLowestMemberNames(baseMember);
+					} else {
+						// Get all descendants
+						memberList = PafDimTree.getMemberNames(pafBaseTree.getIDescendants(baseMember));
+					}
+				} else {
+					// No base dimension explosion - just add current base member to filter
+					memberList = new ArrayList<String>();
+					memberList.add(baseMember);
+				}	
+				
+				// Add selected base members to member filter
+				memberFilters.put(baseDimension, memberList);
+			}	
+		}
+	
+		// Return iterator
+		StringOdometer cacheIterator = new StringOdometer(memberFilters, baseDimensions);
+		return cacheIterator;
 	}
 
 }
