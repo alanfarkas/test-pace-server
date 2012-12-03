@@ -1675,7 +1675,10 @@ public class PafViewService {
 			// index counters for both row and column
 			int rowId = 0;
 
-			ArrayList<LockedCell> notPlannableList = createNonPlannableLockedCellList(section.getNotPlannableLockedCells());
+			//get current not plannable list
+			ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
+			if (section.getNotPlannableLockedCells() != null)
+				notPlannableList.addAll(Arrays.asList(section.getNotPlannableLockedCells()));
 
 			// get row tuples
 			ViewTuple[] rowTuples = section.getRowTuples();
@@ -1853,32 +1856,6 @@ public class PafViewService {
 	}
 	
 	/**
-	 *  Given an array of Locked Cells, create an array list of them
-	 * 
-	 * @param notPlannableLockedCells 
-	 * 			Locked Cells
-	 * 
-	 * @return Complex view section array
-	 */
-	private ArrayList<LockedCell> createNonPlannableLockedCellList(LockedCell[] notPlannableLockedCells) {
-		
-		ArrayList<LockedCell> lockedCells = new ArrayList<LockedCell>();
-		
-		//add if existing locked cells are on view section
-		if (notPlannableLockedCells != null) {
-
-			for (LockedCell lockedCell : notPlannableLockedCells ) {
-
-				lockedCells.add(lockedCell);
-
-			}
-
-		}
-		
-		return lockedCells;
-	}
-
-	/**
 	 *  Checks the tuples to see if they are not plannable.  If not plannable, then
 	 *  a locked cell is added to the non plannable locked cell list and added to the 
 	 *  array of hte view section.
@@ -1897,7 +1874,9 @@ public class PafViewService {
 			int rowId = 0;
 
 			//get current not plannable list
-			ArrayList<LockedCell> notPlannableList = createNonPlannableLockedCellList(section.getNotPlannableLockedCells());
+			ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
+			if (section.getNotPlannableLockedCells() != null)
+				notPlannableList.addAll(Arrays.asList(section.getNotPlannableLockedCells()));
 			
 			// get row tuples
 			ViewTuple[] rowTuples = section.getRowTuples();
