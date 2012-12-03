@@ -553,7 +553,6 @@ public class PafClientState implements IPafClientState {
 		String[] planYears = this.getPlanSeason().getPlannableYears();
 		if( planYears != null && planYears.length != 0 ) {
 			parmValue = StringUtils.arrayToString(planYears,"","","\"","\"",",");
-			System.out.println(parmValue );
 		}
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		//-- @PLAN_YEARS (TTN-1881)
@@ -568,21 +567,11 @@ public class PafClientState implements IPafClientState {
 		if( selYears != null && selYears.length != 0 && planYears != null && planYears.length != 0 ) {
 			List<String> selYearList = new ArrayList<String>(Arrays.asList(selYears));
 			List<String> planYearList = new ArrayList<String>(Arrays.asList(planYears));
-			for( String selYr : selYearList ) {
-				System.out.println(selYr );
-			}
-			for( String plnYr : selYearList ) {
-				System.out.println(plnYr );
-			}
 			if( selYearList != null && selYearList.size() != 0 && planYearList != null && planYearList.size() != 0 ) {
 				nonPlanYearList = (List<String>)CollectionsUtil.diff(selYearList, planYearList);
-				for( String nonplnYr : nonPlanYearList ) {
-					System.out.println(nonplnYr );
-				}
 				if( nonPlanYearList != null && nonPlanYearList.size() != 0 ) {
 					parmValue = StringUtils.arrayToString(nonPlanYearList.toArray(new String[0]),"","","\"","\"",",");
 				}
-				System.out.println(parmValue );
 			}
 		}	
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
@@ -595,7 +584,6 @@ public class PafClientState implements IPafClientState {
 		parmValue = "";
 		if( planYears != null && planYears.length != 0 ) {
 			parmValue = planYears[0];
-			System.out.println(parmValue );
 		}
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		//-- @FIRST_PLAN_YEAR (TTN-1881)
@@ -607,7 +595,6 @@ public class PafClientState implements IPafClientState {
 		parmValue = "";
 		if( nonPlanYearList != null && nonPlanYearList.size() != 0 ) {
 			parmValue = nonPlanYearList.get(0);
-			System.out.println(parmValue );
 		}
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		//-- @FIRST_NONPLAN_YEAR (TTN-1881)
