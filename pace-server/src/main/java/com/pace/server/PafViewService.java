@@ -1822,38 +1822,13 @@ public class PafViewService {
 			
 			
 			// create unqiue locked cells array from non plannable list
-			section.setNotPlannableLockedCells(createUniqueLockedCellsArray(notPlannableList));
+			section.setNotPlannableLockedCells(notPlannableList.toArray(new LockedCell[0]));
 
 		}
 
 		return sections;
 	}
 	
-	/**
-	 *  Create a unique locked cells array by adding to a tree set then creating
-	 *  an array.
-	 * 
-	 * @param notPlannableList 
-	 * 			A list of non plannable locked cells
-	 * 
-	 * @return Locked Cell array
-	 */
-	
-	private LockedCell[] createUniqueLockedCellsArray(ArrayList<LockedCell> notPlannableList) {
-		
-		//sort the locked cell list
-		LockedCell[] lockedCells = sortLockedCells(notPlannableList);
-
-		TreeSet<LockedCell> orderedSet = new TreeSet<LockedCell>();
-
-		// populated ordered set
-		for (LockedCell lockedCell : lockedCells) {
-			orderedSet.add(lockedCell);
-		}
-		
-		return orderedSet.toArray(new LockedCell[0]);
-		
-	}
 	
 	/**
 	 *  Checks the tuples to see if they are not plannable.  If not plannable, then
@@ -1902,7 +1877,7 @@ public class PafViewService {
 						continue;
 					}
 										
-					//if row is not plannalbe, or if col is not plannable, add to not plannable list
+					//if row is not plannable, or if col is not plannable, add to not plannable list
 					if ( (rowTuple.getPlannable() != null && ! rowTuple.getPlannable()) || (colTuple.getPlannable() != null && ! colTuple.getPlannable() )) {
 						
 						notPlannableList.add(new LockedCell(rowId, colId));						
@@ -1914,7 +1889,7 @@ public class PafViewService {
 			}
 			
 			// set on view section by creating a unique locked cell array
-			section.setNotPlannableLockedCells(createUniqueLockedCellsArray(notPlannableList));
+			section.setNotPlannableLockedCells(notPlannableList.toArray(new LockedCell[0]));
 
 			
 		}
