@@ -4564,6 +4564,7 @@ public class PafDataService {
 		SimpleCoordList resultCoordList = null;
 		//Get the users datacache
 		PafDataCache dataCache = getDataCache(clientState.getClientId());
+		String[] baseDims = dataCache.getBaseDimensions();
 		//Get the UOW trees
 		MemberTreeSet memberTreeSet = clientState.getUowTrees();
 		//Check for null items in the request, if so set the response and return.
@@ -4632,7 +4633,7 @@ public class PafDataService {
 	    sw.stop();
 	    
 	    sw.start("CompressSimpleCoordList" );
-	    resultCoordList = new SimpleCoordList(dimensions, expCoords.toArray(new String[0]));
+	    resultCoordList = new SimpleCoordList(baseDims, expCoords.toArray(new String[0]));
 	    try {
 	    	resultCoordList.compressData();
 		} catch (IOException e) {
