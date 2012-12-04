@@ -41,6 +41,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.springframework.util.StopWatch;
 
 import cern.colt.list.IntArrayList;
 
@@ -48,6 +49,7 @@ import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.PafSoapException;
 import com.pace.base.app.AllocType;
 import com.pace.base.app.AppSettings;
 import com.pace.base.app.DimType;
@@ -58,6 +60,7 @@ import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
 import com.pace.base.comm.EvaluateViewRequest;
 import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.data.ExpOperation;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
@@ -103,6 +106,8 @@ import com.pace.base.view.PafViewSection;
 import com.pace.base.view.PageTuple;
 import com.pace.base.view.ViewTuple;
 import com.pace.server.assortment.AsstSet;
+import com.pace.server.comm.PaceDescendantsRequest;
+import com.pace.server.comm.PaceDescendantsResponse;
 import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.eval.IEvalStrategy;
 import com.pace.server.eval.MathOp;
@@ -4543,6 +4548,102 @@ public class PafDataService {
 		
 		PaceDataSet dataSet = new PaceDataSet(data);		
 		return dataSet;
+	}
+	
+	/**
+	 * Gets the all the descendants intersections (SimpleCoordList) from a parent SimpleCoordList 
+	 * @param parent SimpleCoordList to retrieve the descendants
+	 * @param clientState User's PafClientState
+	 * @return A SimpleCoordList containing all the descendant Intersections (in a SimpleCoordList) format.
+	 * @throws PafException
+	 */
+	public SimpleCoordList getDescendants(SimpleCoordList parent, PafClientState clientState)
+			throws PafException {
+		
+		final StopWatch sw = new StopWatch("getDescendants");
+		SimpleCoordList resultCoordList = null;
+		//Get the users datacache
+		PafDataCache dataCache = getDataCache(clientState.getClientId());
+		//Get the UOW trees
+		MemberTreeSet memberTreeSet = clientState.getUowTrees();
+		//Check for null items in the request, if so set the response and return.
+		if(parent == null){
+			return null;
+		}
+		//Create a HashMap for the dim filters.
+		Map <String, List<String>> memberFilters = new HashMap<String, List<String>>();
+		//get the simple coord list
+		SimpleCoordList sessionCell = parent;
+		//the the dims off the coord list.
+	    String[] dimensions = sessionCell.getAxis();
+	    //the the coords off the coord list.
+	    String[] coords = sessionCell.getCoordinates();
+	    StringOdometer stringOdometer = null;
+		
+		if(dataCache.isBaseIntersection(parent)){
+		    //process the coordinates of the coord list.
+		    for(int j = 0; j < dimensions.length; j++){
+		    	sw.start("LoadFilter: " + dimensions[j]);
+		    	//dim name
+		    	String dimName = dimensions[j];
+		    	//Get the coordinates for that dim.
+		    	String coord = sessionCell.getCoordinates()[j];
+		    	//Get dimTree for dim from uowTrees
+		    	PafDimTree pafDimTree = memberTreeSet.getTree(dimName);
+		    	//Create a list to hold the descendants
+		    	List<String> dimDescendants = new ArrayList<String>();
+		    	//Get descendants of coord in dimTree
+		    	List<PafDimMember> descendants = pafDimTree.getDescendants(coord);
+		    	//Add the descendants to the member filter,
+		    	//if no descendants are returned, then add myself
+		    	dimDescendants.add(coord);
+		    	if(descendants != null && descendants.size() > 0){
+			    	for(PafDimMember member : descendants){
+			    		dimDescendants.add(member.getKey());
+			    	}
+		    	}
+		    	memberFilters.put(dimName, dimDescendants);
+		    	sw.stop();
+		    	
+		    }
+		    //Create a StringOdometer
+		    stringOdometer = new StringOdometer(memberFilters, dimensions);
+		}
+		else{
+			Intersection attbrIs = new Intersection(dimensions, coords);
+			//Create a StringOdometer
+			stringOdometer = AttributeUtil.explodeAttributeIntersection(dataCache, attbrIs, memberTreeSet, true);
+			if(stringOdometer == null){
+				String errorMessage = "Encountered invalid attribute intersection: " + StringUtils.arrayToString(coords);
+				logger.error(errorMessage);
+	            throw new IllegalArgumentException(errorMessage);
+			}
+		}
+			
+	    sw.start("CreateSimpleCoordList" );
+	    //Create a StringOdometer
+	    //stringOdometer = new StringOdometer(memberFilters, dimensions);
+	    List<String> expCoords = new ArrayList<String>();
+	    
+	    //Iterate thru the Odometer and Create/Add the SimpleCoordLists to the ArrayList.
+	    while(stringOdometer.hasNext()) {
+	    	expCoords.addAll(Arrays.asList(stringOdometer.nextValue()));
+		}
+	    sw.stop();
+	    
+	    sw.start("CompressSimpleCoordList" );
+	    resultCoordList = new SimpleCoordList(dimensions, expCoords.toArray(new String[0]));
+	    try {
+	    	resultCoordList.compressData();
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}	
+	    uowPerfLogger.info("coord list length: " + Integer.toString(resultCoordList.getCompressedData().length()));
+	    
+	    sw.stop();
+	    uowPerfLogger.info(sw.prettyPrint());
+		
+		return resultCoordList;
 	}
  
 }

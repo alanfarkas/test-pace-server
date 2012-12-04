@@ -563,7 +563,7 @@ public abstract class AttributeUtil {
 	 * @return StringOdometer
 	 * @throws PafException 
 	 */
-	static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
+	public static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
 			final MemberTreeSet memberTrees) {
 		
 		return explodeAttributeIntersection(dataCache, attrIs, memberTrees, false);
@@ -590,7 +590,7 @@ public abstract class AttributeUtil {
 	 * @return StringOdometer
 	 * @throws PafException 
 	 */
-	static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
+	public static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
 			final MemberTreeSet memberTrees, final boolean bOmitPartialRollups) {
 
 		Set<String> allBaseDims = new HashSet<String>(Arrays.asList(dataCache.getBaseDimensions()));

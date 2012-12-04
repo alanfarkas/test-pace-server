@@ -4645,12 +4645,12 @@ public PafGetNotesResponse getCellNotes(
 	@Override
 	public PaceDescendantsResponse getDescendants(PaceDescendantsRequest pafDescendantsRequest)
 			throws PafSoapException {
-		
+		//Create a stopwatch for performance logging.
 		final StopWatch sw = new StopWatch("getDescendants");
-		sw.start("init");
-		
+		sw.start("run");
+		//Get Client ID
 		String clientId = pafDescendantsRequest.getClientId();
-		ArrayList<SimpleCoordList> descInter = new ArrayList<SimpleCoordList>();
+		//Create a response object.
 		PaceDescendantsResponse response  = new PaceDescendantsResponse();
 		
 		//Check for null items in the request, if so set the response and return.
@@ -4677,87 +4677,31 @@ public PafGetNotesResponse getCellNotes(
 				throw new PafSoapException(new PafException(Messages.getString(Messages.getString("PafServiceProvider.31")), PafErrSeverity.Error));
 			}		
 			
-			
 			// Get client state
 			PafClientState cs = clients.get(clientId);
-			
+			//if null, throw exception to client.
 			if (cs == null) {
 				throw new PafException(Messages.getString("PafServiceProvider.9"), 	PafErrSeverity.Fatal);
 			}
 			
-						//Get Client Trees
-			MemberTreeSet memberTreeSet = cs.getUowTrees();
-			sw.stop();
-			
-			
-			for(SimpleCoordList sessionCells : pafDescendantsRequest.getSessionCells()){
-				Map <String, List<String>> memberFilters = new HashMap<String, List<String>>();
-			    String[] dimensions = sessionCells.getAxis();
-			    
-			    
-			    for(int i = 0; i < dimensions.length; i++){
-			    	sw.start("LoadFilter" + Integer.toString(i));
-			    	//dim name
-			    	String dimName = dimensions[i];
-			    	//Get the coordinates for that dim.
-			    	String coord = sessionCells.getCoordinates()[i];
-			    	//Get dimTree for dim from uowTrees
-			    	PafDimTree pafDimTree = memberTreeSet.getTree(dimName);
-			    	//Create a list to hold the descendants
-			    	List<String> dimDescendants = new ArrayList<String>();
-			    	//Get descendants of coord in dimTree
-			    	List<PafDimMember> descendants = pafDimTree.getDescendants(coord);
-			    	//Add the descendants to the member filter,
-			    	//if no descendants are returned, then add myself
-			    	dimDescendants.add(coord);
-			    	if(descendants != null && descendants.size() > 0){
-				    	for(PafDimMember member : descendants){
-				    		dimDescendants.add(member.getKey());
-				    	}
-			    	}
-			    	memberFilters.put(dimName, dimDescendants);
-			    	sw.stop();
-			    }
-
-			    sw.start("CreateSimpleCoordList" );
-			    //Create a StringOdometer
-			    StringOdometer stringOdometer = new StringOdometer(memberFilters, dimensions);
-			    List<String> coords = new ArrayList<String>();
-			    
-			    //Iterate thru the Odometer and Create/Add the SimpleCoordLists to the ArrayList.
-			    while(stringOdometer.hasNext()) {
-			    	coords.addAll(Arrays.asList(stringOdometer.nextValue()));
-			    	//descInter.add(new SimpleCoordList(dimensions, stringOdometer.nextValue()));
-				}
-			    sw.stop();
-			    
-			    sw.start("CompressSimpleCoordList" );
-			    SimpleCoordList scl = new SimpleCoordList(dimensions, coords.toArray(new String[0]));
-			    try {
-			    	scl.compressData();
-				} catch (IOException e) {
-					System.out.println(e.getMessage());
-				}	
-			    descInter.add(scl);
-			    sw.stop();
-			    
+			//get the decendant intersections
+			response.setSessionIntersections(new SimpleCoordList[pafDescendantsRequest.getSessionCells().length]);
+			for(int i = 0; i < pafDescendantsRequest.getSessionCells().length; i++){
+			    SimpleCoordList scl = this.dataService.getDescendants(pafDescendantsRequest.getSessionCells()[i], cs);
+			    SimpleCoordList[] temp = response.getSessionIntersections();
+			    temp[i] = scl;
+			    response.setSessionIntersections(temp);
 			}
-			
-			//Return...
-			response.setSessionIntersections(descInter.toArray(new SimpleCoordList[descInter.size()]));
+			sw.stop();
 
 		} catch (RuntimeException re) {
-		
 			handleRuntimeException(re);
 			
 		} catch (PafException pex) {
-			
 			PafErrHandler.handleException(pex);
-			
 			throw pex.getPafSoapException();
 			
 		} finally {
-		
 			logPerf.info(sw.prettyPrint());
 			popFromNDCStack(clientId);
 		}	
