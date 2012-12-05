@@ -20,11 +20,15 @@
 package com.pace.base.comm;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
-
+import java.util.Map;
 import com.pace.base.IPafCompressedObj;
 import com.pace.base.PafBaseConstants;
 import com.pace.base.utility.CollectionsUtil;
+import com.pace.base.utility.CompressionUtil;
 import com.pace.base.utility.StringUtils;
 
 /**
@@ -44,6 +48,8 @@ public class SimpleCoordList implements IPafCompressedObj {
     
     private String compressedData;
     
+    private String compressedStringTable;
+    
     /**
      * default constructor 
      */
@@ -58,7 +64,7 @@ public class SimpleCoordList implements IPafCompressedObj {
 
     /**
      * @param axis Array of dimensions
-     * @param coordinates Arrary of member coordinates
+     * @param coordinates Array of member coordinates
      */
     public SimpleCoordList(String[] axis, String[] coordinates) {
     	this.axis = axis;
@@ -87,32 +93,48 @@ public class SimpleCoordList implements IPafCompressedObj {
 		if ( this.getAxis() != null && this.getAxis().length != 0 && 
 				this.getCoordinates() != null && this.getCoordinates().length != 0 ) {
 			
-			//	create string buffer
-			StringBuffer strBuff = new StringBuffer(1000);
+			// initialization
+			StringBuffer dataBuffer = new StringBuffer(1000);
+			StringBuffer memberNameBuffer = new StringBuffer(1000);
+			LinkedHashSet<String> memberNameLookup = new LinkedHashSet<String>(1000);
+			Map<String, Integer> surrogateKeyLookup = new HashMap<String, Integer>();	
 			
-			//add dimensions
+			// add dimensions
 			for (int i = 0; i < this.getAxis().length; i++ ) {
 				
-				strBuff.append(this.getAxis()[i]);
-				strBuff.append(PafBaseConstants.DELIMETER_ELEMENT);
+				String dim = this.getAxis()[i];
+				Integer key = CompressionUtil.generateSurrogateKey(dim, memberNameLookup, surrogateKeyLookup);
+				dataBuffer.append(key);
+				dataBuffer.append(PafBaseConstants.DELIMETER_ELEMENT);
 							
-			}
-			
-			strBuff.append(PafBaseConstants.DELIMETER_GROUP);
-			
-			//add coords
-			for (int i = 0; i < this.getCoordinates().length; i++ ) {
-				
-				strBuff.append(this.getCoordinates()[i]);
-				strBuff.append(PafBaseConstants.DELIMETER_ELEMENT);
-				
 			}		
+			dataBuffer.append(PafBaseConstants.DELIMETER_GROUP);
 			
-			this.compressedData = strBuff.toString();
+			// add coordinates
+			for (int i = 0; i < this.getCoordinates().length; i++ ) {
+
+				String coord = this.getCoordinates()[i];
+				Integer key = CompressionUtil.generateSurrogateKey(coord, memberNameLookup, surrogateKeyLookup);
+				dataBuffer.append(key);
+				dataBuffer.append(PafBaseConstants.DELIMETER_ELEMENT);
+			}		
+			this.compressedData = dataBuffer.toString();
+
+
+			// compress member name lookup
+			Iterator<String> iterator = memberNameLookup.iterator();
+			while(iterator.hasNext()) {
+				String memberName = iterator.next();
+				memberNameBuffer.append(memberName);
+				memberNameBuffer.append(PafBaseConstants.DELIMETER_ELEMENT);			
+			}
+			this.compressedStringTable = memberNameBuffer.toString();
+		
+
+			// final housekeeping
 			axis = null;
 			coordinates = null;
-			isCompressed = true;
-		
+			isCompressed = true;	
 		}
 	
 	
@@ -140,40 +162,50 @@ public class SimpleCoordList implements IPafCompressedObj {
 	 */
 	public void uncompressData() {
 
-		if ( isCompressed ) {
-									
-			//get a list of simple coord list attributes { axis, coordinates }
-			List<String> listOfSimpleCoordListAttributes = CollectionsUtil.convertToList(compressedData, PafBaseConstants.DELIMETER_GROUP);
-			
-			//if not null and size = 2 attributes
-			if ( listOfSimpleCoordListAttributes != null && listOfSimpleCoordListAttributes.size() == 2 ) {
+		do {
+			if (isCompressed) {
 				
-				//get axis list
-				List<String> axisList = CollectionsUtil.convertToList(listOfSimpleCoordListAttributes.get(0), PafBaseConstants.DELIMETER_ELEMENT);
+				// Parse the compressed member names into a list. Exit if they are null or empty
+				List<String> memberNameLookup = CollectionsUtil.convertToList(compressedStringTable, PafBaseConstants.DELIMETER_ELEMENT);
+				if (memberNameLookup == null)
+					continue;
 				
-				//if not null, set axis with axis list
-				if ( axisList != null && axisList.size() > 0) {
-					
-					this.axis = axisList.toArray(new String[0]);
-					
-				}
 				
-				//get coord list
-				List<String> coordList = CollectionsUtil.convertToList(listOfSimpleCoordListAttributes.get(1), PafBaseConstants.DELIMETER_ELEMENT);
+				// Split the compressed coordinate list into an axis list and a coordinate list. Exit if either of these lists
+				// are null.
+				List<String> splitCoordList = CollectionsUtil.convertToList(compressedData, PafBaseConstants.DELIMETER_GROUP);
+				if (splitCoordList == null || splitCoordList.size() != 2) 
+					continue;
+
+
+				// Uncompress the axis and list. Exit if null or empty.
+				List<String> axisList = CollectionsUtil.convertToList(splitCoordList.get(0), PafBaseConstants.DELIMETER_ELEMENT);
+				if (axisList == null || axisList.isEmpty())
+					continue;
 				
-				//if not null, set coordiantes
-				if ( coordList != null && coordList.size() > 0 ) {
-					
-					this.coordinates = coordList.toArray(new String[0]);					
-				}
+				// Convert the surrogate keys in the axis list to their corresponding member names.
+				List<String> convertedAxisList = CompressionUtil.resolveSurrogateKeys(axisList, memberNameLookup);
+				axis = convertedAxisList.toArray(new String[0]);	
+
+				// Uncompress the coordinate list. Exit if null or empty.
+				List<String> coordList = CollectionsUtil.convertToList(splitCoordList.get(1), PafBaseConstants.DELIMETER_ELEMENT);
+				// if not null, set coordinates
+				if (coordList == null || coordList.isEmpty())
+					continue;
+
+				// Convert the surrogate keys in the coordinate list to their corresponding member names.
+				List<String> convertedCoordList = CompressionUtil.resolveSurrogateKeys(coordList, memberNameLookup);
+				coordinates = convertedCoordList.toArray(new String[0]);	
+
+				// All done!
+				compressedData = null;
+				compressedStringTable = null;
+				isCompressed = false;
+
 			}
-			
-			this.compressedData = null;
-			
-			isCompressed = false;
-			
 		}
-		
+		while (false);
+
 	}
 
 	/**
@@ -189,6 +221,36 @@ public class SimpleCoordList implements IPafCompressedObj {
 	public void setCompressedData(String compressedData) {
 		this.compressedData = compressedData;
 	}
+	
+	/**
+	 * @return the compressedStringTable
+	 */
+	public String getCompressedStringTable() {
+		return compressedStringTable;
+	}
+
+	/**
+	 * @param compressedStringTable the compressedMemberNameLookup to set
+	 */
+	public void setCompressedStringTable(String compressedStringTable) {
+		this.compressedStringTable = compressedStringTable;
+	}
+
+
+	/**
+	 * @return the coordinate count
+	 */
+	public int getCoordCount() {
+
+		int coordCount = 0;
+	    if (isCompressed()) {
+	    	coordCount = compressedData.length();
+	    } else {
+	    	coordCount = coordinates.length;
+	    }
+		return coordCount;
+	}
+
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

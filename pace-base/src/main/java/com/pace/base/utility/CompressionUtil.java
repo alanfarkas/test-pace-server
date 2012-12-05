@@ -19,6 +19,11 @@
 package com.pace.base.utility;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.pace.base.IPafCompressedObj;
 import com.pace.base.IPafCompressedSingleObj;
@@ -225,7 +230,7 @@ public class CompressionUtil {
 				}
 				
 				if(escapeCounter == null){
-					//delimeter element in string, but no escape characters to the left
+					//delimiter element in string, but no escape characters to the left
 					if(endIndex != -1){
 						escapeCounter = 0;
 						
@@ -246,6 +251,56 @@ public class CompressionUtil {
 	}
 	
 	
+	/**
+	 * Generate a surrogate key from the supplied string value and related lookup tables. 
+	 * 
+	 * @param stringValue String value being converted
+	 * @param stringLookup Set of pre-existing string values in surrogate key order
+	 * @param surrogateKeyLookup Pre-existing map of string value to surrogate key
+	 * 
+	 * @return surrogateKey
+	 */
+	public static Integer generateSurrogateKey(String stringValue, LinkedHashSet<String> stringLookup, Map<String, Integer> surrogateKeyLookup) {
+		
+		Integer surrogateKey = null;
+		
+		// Check if a surrogate key has already been generated
+		if (stringLookup.contains(stringValue)) {
+			// Existing string, just lookup its surrogate key
+			surrogateKey = surrogateKeyLookup.get(stringValue);
+		} else {
+			// Else create a new surrogate key and update lookup collections
+			surrogateKey = stringLookup.size();
+			stringLookup.add(stringValue);
+			surrogateKeyLookup.put(stringValue, surrogateKey);
+		}
+						
+		return surrogateKey;
+	}
+	
+
+	/**
+	 * Convert a list of surrogate keys to their corresponding string values using the supplied string lookup table.
+	 * 
+	 * @param surrogateKeyList List of surrogate Keys
+	 * @param stringLookup List of string values in surrogate key order
+	 * 
+	 * @return List of resolved key values
+	 */
+	public static List<String> resolveSurrogateKeys(List<String> surrogateKeyList, List<String> stringLookup) {
+		
+		List<String> resolvedKeyList = new ArrayList<String>();
+		for (String axis : surrogateKeyList) {
+			Integer surrogateKey = Integer.valueOf(axis);
+			String stringValue = stringLookup.get(surrogateKey);
+			resolvedKeyList.add(stringValue);
+		}
+		
+		// Return converted keys
+		return resolvedKeyList;
+	}
+	
+
 	
 	/**
 	 *  This is a testing stub
@@ -279,5 +334,6 @@ public class CompressionUtil {
 		
 		
 	}
+
 
 }

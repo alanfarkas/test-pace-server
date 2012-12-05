@@ -634,7 +634,7 @@ public abstract class AttributeUtil {
 		String[] baseDimensions = dataCache.getBaseDimensions();
 		int baseDimCount = baseDimensions.length;
 		
-		Set<String> attrDims = new HashSet<String>(Arrays.asList(dataCache.getAttributeDims()));
+		Set<String> isDims = new HashSet<String>(Arrays.asList(attrIs.getDimensions()));
 		for (int axisInx = 0; axisInx < baseDimCount; axisInx++) {
 	
 			// Get current base member and tree
@@ -647,7 +647,7 @@ public abstract class AttributeUtil {
 			assocAttributes.addAll(pafBaseTree.getAttributeDimNames());
 	
 			// Does this intersection contain any associated attributes for this base dimension
-			assocAttributes.retainAll(attrDims);
+			assocAttributes.retainAll(isDims);
 			if (assocAttributes.size() > 0) {
 				
 				// Yes - Add list of component base members to member filter

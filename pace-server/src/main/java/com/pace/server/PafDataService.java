@@ -4636,10 +4636,11 @@ public class PafDataService {
 	    resultCoordList = new SimpleCoordList(baseDims, expCoords.toArray(new String[0]));
 	    try {
 	    	resultCoordList.compressData();
+	    	resultCoordList.uncompressData();
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
-		}	
-	    uowPerfLogger.info("coord list length: " + Integer.toString(resultCoordList.getCompressedData().length()));
+		}
+	    uowPerfLogger.info("coord list length: " + Integer.toString(resultCoordList.getCoordCount()));
 	    
 	    sw.stop();
 	    uowPerfLogger.info(sw.prettyPrint());
