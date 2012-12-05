@@ -23,14 +23,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import com.pace.base.IPafCompressedObj;
 import com.pace.base.IPafCompressedSingleObj;
-import com.pace.base.PafBaseConstants;
 import com.pace.base.comm.SimpleCoordList;
-import com.pace.base.db.membertags.MemberTagViewSectionData;
-import com.pace.base.view.ViewTuple;
 
 /**
  * 
