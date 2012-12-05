@@ -4571,6 +4571,10 @@ public class PafDataService {
 		if(parent == null){
 			return null;
 		}
+		if(parent.isCompressed()){
+			parent.uncompressData();
+		}
+		
 		//Create a HashMap for the dim filters.
 		Map <String, List<String>> memberFilters = new HashMap<String, List<String>>();
 		//get the simple coord list
@@ -4636,7 +4640,7 @@ public class PafDataService {
 	    resultCoordList = new SimpleCoordList(baseDims, expCoords.toArray(new String[0]));
 	    try {
 	    	resultCoordList.compressData();
-	    	resultCoordList.uncompressData();
+	    	//resultCoordList.uncompressData();
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
