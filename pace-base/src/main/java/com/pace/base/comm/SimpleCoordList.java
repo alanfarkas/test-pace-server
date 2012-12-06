@@ -89,6 +89,9 @@ public class SimpleCoordList implements IPafCompressedObj {
     
 	public void compressData() throws IOException {
 		
+		// The compressed data will be normalized. The original string values will be stored in 
+		// a separate collection in surrogate key order.
+
 		//if not null or length isn't 0
 		if ( this.getAxis() != null && this.getAxis().length != 0 && 
 				this.getCoordinates() != null && this.getCoordinates().length != 0 ) {
@@ -162,6 +165,8 @@ public class SimpleCoordList implements IPafCompressedObj {
 	 */
 	public void uncompressData() {
 
+		// The compressed data is normalized. The original string values are held in a separate 
+		// collection in surrogate key order.
 		do {
 			if (isCompressed) {
 				
