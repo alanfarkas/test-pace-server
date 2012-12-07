@@ -1791,11 +1791,10 @@ public class PafViewService {
 				}
 
 			}
-		
-			//get locked forward plannable cells
+			
+
+			// remove any non-plannable cells from the locked forward plannable cells collection
 			LockedCell[] lockedForwardPlannableCells = section.getForwardPlannableLockedCell();
-						
-			//if cells exist
 			if ( lockedForwardPlannableCells != null ) {
 
 				//create a temp locked forward plannable cell set to hold all the locked cells
@@ -1821,7 +1820,7 @@ public class PafViewService {
 			
 			
 			
-			// create unqiue locked cells array from non plannable list
+			// create unique locked cells array from non plannable list
 			section.setNotPlannableLockedCells(notPlannableList.toArray(new LockedCell[0]));
 
 		}
