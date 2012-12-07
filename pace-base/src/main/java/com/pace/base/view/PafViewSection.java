@@ -89,9 +89,9 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 	
 	private String[] attributeDims;
 	
-	private String[] dimensionsPriority;
+	private String[] dimensionsPriority;		// Order of dimensions in a data cache intersection
 	
-	private String[] dimensionCalcSequence;
+	private String[] dimensionCalcSequence;		// Maps to the application's axis priority property
 	
 	private String[] dimensions;
 	
