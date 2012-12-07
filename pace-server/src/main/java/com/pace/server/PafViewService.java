@@ -4126,7 +4126,6 @@ public class PafViewService {
 		Map<Integer, Set<Intersection>> rowCache = new HashMap<Integer, Set<Intersection>>();
 		Map<Integer, Set<Intersection>> colCache = new HashMap<Integer, Set<Intersection>>();
 	
-		PafDataService dataService = PafDataService.getInstance();
 
 		for(String baseDim: crossAttrBaseDims.keySet()){
 			attrDimNames = new ArrayList<String>();
