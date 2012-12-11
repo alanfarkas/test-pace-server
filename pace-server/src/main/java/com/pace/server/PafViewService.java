@@ -1579,7 +1579,7 @@ public class PafViewService {
 					* that contains a locked period, using the locked period
 					* information from the client state (TTN-1595). 
 					* 
-					* Also lock any tuples where the year is locked (TTN-1860).
+					* Also lock any tuple intersections where the year is locked (TTN-1860).
 					*  
 					*/
 
@@ -1599,34 +1599,37 @@ public class PafViewService {
 								lockedForwardPlannableIntersectionsSet.add(new Intersection(serverDimensionOrder, coords));
 							}
 
-							// lock the tuple based on time axis. if time is
-							// on page, use primary formatting axis, if on
-							// col axis, lock column tuple. if on row axis, 
-							// lock row tuple.
-							PafAxis timeAxis = section.getAxis(mdbDef.getTimeDim());
-							switch (timeAxis.getValue()) {
-							case PafAxis.PAGE:
-
-								switch (section.getPrimaryFormattingAxis()) {
-								case (PafAxis.COL):
-									colTuple.setPlannable(false);
-								break;
-								case (PafAxis.ROW):
-									rowTuple.setPlannable(false);
-								break;
-								}
-
-							case PafAxis.COL:
-
-								colTuple.setPlannable(false);
-								break;
-
-							case PafAxis.ROW:
-
-								rowTuple.setPlannable(false);
-								break;
-
-							}
+//						The following tuple locking code has been commented out as it erroneously locking cells on
+//							multi-year views. Based on initial testing, it doesn't look like this code was needed (TTN-1860).
+//							
+//							// lock the tuple based on time axis. if time is
+//							// on page, use primary formatting axis, if on
+//							// col axis, lock column tuple. if on row axis, 
+//							// lock row tuple.
+//							PafAxis timeAxis = section.getAxis(mdbDef.getTimeDim());
+//							switch (timeAxis.getValue()) {
+//							case PafAxis.PAGE:
+//
+//								switch (section.getPrimaryFormattingAxis()) {
+//								case (PafAxis.COL):
+//									colTuple.setPlannable(false);
+//								break;
+//								case (PafAxis.ROW):
+//									rowTuple.setPlannable(false);
+//								break;
+//								}
+//
+//							case PafAxis.COL:
+//
+//								colTuple.setPlannable(false);
+//								break;
+//
+//							case PafAxis.ROW:
+//
+//								rowTuple.setPlannable(false);
+//								break;
+//
+//							}
 						}
 					}
 				}
