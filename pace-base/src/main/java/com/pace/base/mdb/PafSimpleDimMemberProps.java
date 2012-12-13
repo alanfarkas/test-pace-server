@@ -23,6 +23,8 @@ public class PafSimpleDimMemberProps {
 
 	private int generationNumber = 0;
 	private int levelNumber = 0;
+	private boolean isReadOnly = false;
+	private boolean isSynthetic = false;
 
 	/**
 	 *	Return the SimplePafMemberAttr id
@@ -124,6 +126,30 @@ public class PafSimpleDimMemberProps {
 	 */
 	public void setLevelNumber(int levelNumber) {
 		this.levelNumber = levelNumber;
+	}
+	/**
+	 * @return the isReadOnly
+	 */
+	public boolean isReadOnly() {
+		return isReadOnly;
+	}
+	/**
+	 * @param isReadOnly the isReadOnly to set
+	 */
+	public void setReadOnly(boolean isReadOnly) {
+		this.isReadOnly = isReadOnly;
+	}
+	/**
+	 * @return the isSynthetic
+	 */
+	public boolean isSynthetic() {
+		return isSynthetic;
+	}
+	/**
+	 * @param isSynthetic the isSynthetic to set
+	 */
+	public void setSynthetic(boolean isSynthetic) {
+		this.isSynthetic = isSynthetic;
 	}
 	
 	

@@ -78,6 +78,8 @@ public class PafAttributeMemberProps extends PafDimMemberProps {
 		logger.debug("Setting simple properties...");
 		simpleAttributeMemberProps.setGenerationNumber(getGenerationNumber());
 		simpleAttributeMemberProps.setLevelNumber(getLevelNumber());
+		simpleAttributeMemberProps.setReadOnly(isReadOnly());			// TTN-1893 Session Locks
+		simpleAttributeMemberProps.setSynthetic(isSynthetic());			// TTN-1893 Session Locks
 
 		// Set arrayed properties
 		logger.debug("Setting arrayed properties...");

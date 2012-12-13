@@ -249,6 +249,8 @@ public class PafBaseMemberProps extends PafDimMemberProps  implements Cloneable{
 		simpleBaseMemberProps.setLevelNumber(getLevelNumber());
 		simpleBaseMemberProps.setFormula(getFormula());
 		simpleBaseMemberProps.setLastFormula(getLastFormula());
+		simpleBaseMemberProps.setReadOnly(isReadOnly());			// TTN-1893 Session Locks
+		simpleBaseMemberProps.setSynthetic(isSynthetic());			// TTN-1893 Session Locks
 
 		// Set arrayed properties
 		logger.debug("Setting arrayed properties...");
