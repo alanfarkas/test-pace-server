@@ -88,7 +88,7 @@ public class ExpOperation {
 			maxParms = 2;
 		} else if (t.contains(LEVEL_TAG)) {
 			code = ExpOpCode.LEVEL;
-			minParms = 2;
+			minParms = 1;
 			maxParms = 2;
 		} else if (t.contains(GEN_TAG)) {
 			code = ExpOpCode.GEN;
