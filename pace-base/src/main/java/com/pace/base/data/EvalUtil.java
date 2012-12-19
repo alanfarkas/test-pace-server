@@ -404,36 +404,7 @@ public class EvalUtil {
     
     
 
-    public static ArrayList<Intersection> buildIntersections(Map<String, List<String>> memberLists, String[] axisSequence) {
-        
-        @SuppressWarnings("unchecked")
-		ArrayList<String>[] memberArrays = new ArrayList[memberLists.size()];
-        int i = 0;
-        
-        for (String axis : axisSequence) {         
-            memberArrays[i++] = new ArrayList<String>(memberLists.get(axis));
-        }
-
-        // precalculate size of arraylist
-//        long size = 1;
-//        for (ArrayList list : memberArrays) {
-//            size *= list.size();
-//        }
-        ArrayList<Intersection> intersections = new ArrayList<Intersection>();
-        
-        
-        StringOdometer odom = new StringOdometer(memberArrays);
-        Intersection inter;
-
-        while (odom.hasNext()) {
-            inter = new Intersection(axisSequence, odom.nextValue());		// TTN-1851
-            intersections.add(inter);
-        }
-        
-        return intersections;
-    }
-    
-	/**
+    /**
 	 * Returns true if the specified intersection is elapsed 
 	 * 
 	 * @param cellIs Cell intersection
@@ -698,12 +669,6 @@ public class EvalUtil {
 	    		continue;
 	    	}
 	
-//	    	// Year dimension - if time horizon intersection, just return
-//	    	// member since the year hierarchy does not apply. If not 
-//	    	// time horizon intersection, just go through normal logic (TTN-1595).
-//	    	if (dim.equals(yearDim) && dataCache.isTimeHorizonIs(is)) {
-//    		memberList = Arrays.asList(new String[]{is.getCoordinate(dim)});
-
 	    	// Year dimension - use time horizon default year member (TTN-1595)
 		    if (dim.equals(yearDim)) {
 	    		memberList = Arrays.asList(new String[]{TimeSlice.getTimeHorizonYear()});
@@ -723,7 +688,7 @@ public class EvalUtil {
 	    }
 	
 	    // Convert time horizon intersections back to time/year intersections (TTN-1595)
-	    List<Intersection> floorIntersections =  buildIntersections(memberListMap, is.getDimensions());
+	    List<Intersection> floorIntersections =  IntersectionUtil.buildIntersections(memberListMap, is.getDimensions());
 	    int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
 	    for (Intersection floorIs : floorIntersections) {
 	    	TimeSlice.translateTimeHorizonCoords(floorIs.getCoordinates(), timeAxis, yearAxis);

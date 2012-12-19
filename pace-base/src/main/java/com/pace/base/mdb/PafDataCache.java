@@ -119,6 +119,7 @@ public class PafDataCache implements IPafDataCache {
 	private Map<String, PafBaseTree> mdbBaseTrees = null;
 	private List<String> mdbYears = null;								// List of years in mdb year tree
 	private EvalState evalState = null;
+	private PafClientState clientState = null;
 	private boolean isDirty = true;					// Indicates that the data cache has been updated
 	private final static int NON_KEY_DIM_COUNT = 3;	// Measure, Time, and Year Dimensions are dense dimensions
 	private final static int MB = 1048576; 			// 1024*1024
@@ -171,6 +172,7 @@ public class PafDataCache implements IPafDataCache {
 		lockedYears = clientState.getLockedYears();						// TTN-1860 - non-plannable support
 		lockedTimeHorizonPeriods = clientState.getLockedTimeHorizonPeriods();
 		invalidTimeHorizonPeriods = clientState.getInvalidTimeHorizonPeriods();
+		this.clientState = clientState;									// TTN-1561 - session locks
 
 
 		// Set dimension properties
@@ -275,6 +277,22 @@ public class PafDataCache implements IPafDataCache {
 			mdbYears = mdbYearTree.getLowestMemberNames(mdbYearTree.getRootNode().getKey());
 		}
 		return mdbYears;
+	}
+
+
+	/**
+	 * @return the clientState
+	 */
+	public PafClientState getClientState() {
+		return clientState;
+	}
+
+
+	/**
+	 * @param clientState the clientState to set
+	 */
+	public void setClientState(PafClientState clientState) {
+		this.clientState = clientState;
 	}
 
 

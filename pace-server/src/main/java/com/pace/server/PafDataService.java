@@ -70,6 +70,7 @@ import com.pace.base.data.TimeSlice;
 import com.pace.base.data.UserMemberLists;
 import com.pace.base.db.Application;
 import com.pace.base.db.SecurityGroup;
+import com.pace.base.mdb.AttrExplosionType;
 import com.pace.base.mdb.AttributeUtil;
 import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.IMdbClassLoader;
@@ -4622,7 +4623,7 @@ public class PafDataService {
 		else{
 			Intersection attbrIs = new Intersection(dimensions, coords);
 			//Create a StringOdometer
-			stringOdometer = AttributeUtil.explodeAttributeIntersection(dataCache, attbrIs, memberTreeSet, true);
+			stringOdometer = AttributeUtil.explodeAttributeIntersection(dataCache, attbrIs, AttrExplosionType.filteredDescendants);
 			if(stringOdometer == null){
 				String errorMessage = "Encountered invalid attribute intersection: " + StringUtils.arrayToString(coords);
 				logger.error(errorMessage);
