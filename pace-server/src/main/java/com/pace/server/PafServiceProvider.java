@@ -4684,14 +4684,9 @@ public PafGetNotesResponse getCellNotes(
 				throw new PafException(Messages.getString("PafServiceProvider.9"), 	PafErrSeverity.Fatal);
 			}
 			
-			//get the decendant intersections
-			response.setSessionIntersections(new SimpleCoordList[pafDescendantsRequest.getSessionCells().length]);
-			for(int i = 0; i < pafDescendantsRequest.getSessionCells().length; i++){
-			    SimpleCoordList scl = this.dataService.getDescendants(pafDescendantsRequest.getSessionCells()[i], cs);
-			    SimpleCoordList[] temp = response.getSessionIntersections();
-			    temp[i] = scl;
-			    response.setSessionIntersections(temp);
-			}
+			// Get the decendant intersections
+			SimpleCoordList[] sessionIntersections = dataService.getDescendants(pafDescendantsRequest.getSessionCells(), cs);
+			response.setSessionIntersections(sessionIntersections);
 			sw.stop();
 
 		} catch (RuntimeException re) {

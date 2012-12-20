@@ -22,11 +22,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.mdb.AttributeUtil;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimTree;
@@ -41,10 +40,73 @@ import com.pace.base.utility.StringOdometer;
 public class IntersectionUtil {
 
 	/**
+	 * Return the ancestor intersections above the specified intersection. If there are no ancestors
+	 * then the original intersection will be returned.
+	 * 
+	 * (Attribute intersections are not supported at this time)
+	 * 
+	 * @param is Intersection
+	 * @param dataCache Data cache
+	 * 
+	 * @return ArrayList of ancestor intersections
+	 */
+	public static List<Intersection> buildAncestorIntersections(Intersection is, PafDataCache dataCache) {
+		List<Intersection> ancestorIntersections = null;
+		if (dataCache.isBaseIntersection(is)) {
+			ancestorIntersections = buildBaseAncestorIntersections(is, dataCache);
+		} else {
+			//TODO Create AttributeUtil.buildAncestorIntersections
+//			ancestorIntersections = AttributeUtil.buildAncestorIntersections(is, dataCache);
+			String errMsg = "Attribute intersections are not currently supported by 'buildAncestorIntersections()'";
+			throw new IllegalArgumentException(errMsg);
+		}
+		return ancestorIntersections;
+	}
+
+	
+	/**
+	 * Return the specified base intersection's ancestor intersections. If there are no ancestors
+	 * then the original intersection will be returned.
+	 * 
+	 * @param is Base (non-attribute) intersection
+	 * @param dataCache Data Cache
+	 * 
+	 * @return List of ancestor intersections
+	 */
+	public static List<Intersection> buildBaseAncestorIntersections(Intersection is, PafDataCache dataCache) {
+		
+		List<Intersection> ancestorIntersections = new ArrayList<Intersection>();
+		Map<String, List<String>> memberMap = new HashMap<String, List<String>>();
+		MemberTreeSet clientTrees = dataCache.getDimTrees();
+		
+		// Collate the list of ancestors for each dimension. The original
+		// coordinate needs to be included as well, in order to get all
+		// ancestor intersections
+		String[] dimensions = is.getDimensions();
+		for (String dim : dimensions) {
+			String coord = is.getCoordinate(dim);
+			PafDimTree dimTree = clientTrees.getTree(dim);
+			List<String> ancestors = new ArrayList<String>();
+			ancestors.add(coord);
+			ancestors.addAll(PafDimTree.getMemberNames(dimTree.getAncestors(coord)));
+			memberMap.put(dim, ancestors);
+		}
+		
+		// Build ancestor intersections, making sure that original intersection
+		// isn't included.
+		ancestorIntersections = IntersectionUtil.buildIntersections(memberMap, dimensions);
+		ancestorIntersections.remove(is);
+		
+		// Return ancestor intersections
+		return ancestorIntersections;
+	}
+
+
+	/**
 	 * Return the floor intersections beneath the specified intersection
 	 * 
 	 * @param is Intersection
-	 * @param clientState Client state
+	 * @param dataCache Data cache
 	 * 
 	 * @return ArrayList of floor intersections
 	 */
@@ -178,6 +240,38 @@ public class IntersectionUtil {
 	    
 	    // Return translated intersections
 	    return intersections;
+	}
+
+
+	/**
+	 * Convert a collection of "like" intersections to a simple coordinate list
+	 * 
+	 * @param intersections List of intersections
+	 * @return SimpleCoordList
+	 */
+	public static SimpleCoordList convertIntersectionsToSimpleCoordList(Collection<Intersection> intersections) {
+		
+		boolean isFirstIs = true;
+		String[] dimensions = null;
+		List<String> coordList = new ArrayList<String>();
+		
+
+		// Iterate through all intersections and assemble all coordinates into a single list
+		for (Intersection intersection : intersections) {
+			
+			// Get list of dimensions (assume that all intersections have the same dimensionality)
+			if (isFirstIs) {
+				dimensions = intersection.getDimensions();
+				isFirstIs = false;
+			}
+			
+			// Get intersections coordinates
+			coordList.addAll(Arrays.asList(intersection.getCoordinates()));		
+		}
+
+		// Construct and return the SimpleCoordList
+		SimpleCoordList simpleCoordList = new SimpleCoordList(dimensions, coordList.toArray(new String[0]));
+		return simpleCoordList;
 	}
 
 

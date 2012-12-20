@@ -63,6 +63,7 @@ import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.data.ExpOperation;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.data.PafMemberList;
@@ -4557,105 +4558,111 @@ public class PafDataService {
 	}
 	
 	/**
-	 * Gets the all the descendants intersections (SimpleCoordList) from a parent SimpleCoordList 
-	 * @param parent SimpleCoordList to retrieve the descendants
+	 * Gets the all the descendants intersections for the parent SimpleCoordList array.
+	 * 
+	 * Any ancestor intersections, whose descendants are all represented by the parent
+	 * array, will be included in the last array element of the returned array.
+	 * 
+	 * @param parentCells Array of parent SimpleCoodList cells
 	 * @param clientState User's PafClientState
+	 * 
 	 * @return A SimpleCoordList containing all the descendant Intersections (in a SimpleCoordList) format.
 	 * @throws PafException
 	 */
-	public SimpleCoordList getDescendants(SimpleCoordList parent, PafClientState clientState)
-			throws PafException {
+	public SimpleCoordList[] getDescendants(SimpleCoordList[] parentCells, PafClientState clientState) throws PafException {
 		
 		final StopWatch sw = new StopWatch("getDescendants");
-		SimpleCoordList resultCoordList = null;
-		//Get the users datacache
-		PafDataCache dataCache = getDataCache(clientState.getClientId());
-		String[] baseDims = dataCache.getBaseDimensions();
-		//Get the UOW trees
-		MemberTreeSet memberTreeSet = clientState.getUowTrees();
-		//Check for null items in the request, if so set the response and return.
-		if(parent == null){
-			return null;
-		}
-		if(parent.isCompressed()){
-			parent.uncompressData();
-		}
+		final PafDataCache dataCache = getDataCache(clientState.getClientId());
+		Set<Intersection> explodedIsSet = new HashSet<Intersection>(1000), ancestorIsSet = new HashSet<Intersection>(1000),
+				parentIsSet = new HashSet<Intersection>(parentCells.length);
 		
-		//Create a HashMap for the dim filters.
-		Map <String, List<String>> memberFilters = new HashMap<String, List<String>>();
-		//get the simple coord list
-		SimpleCoordList sessionCell = parent;
-		//the the dims off the coord list.
-	    String[] dimensions = sessionCell.getAxis();
-	    //the the coords off the coord list.
-	    String[] coords = sessionCell.getCoordinates();
-	    StringOdometer stringOdometer = null;
+		// Initialize result object - add an additional element to hold the ancestor cells
+		SimpleCoordList[] resultCoordLists = new SimpleCoordList[parentCells.length + 1];
 		
-		if(dataCache.isBaseIntersection(parent)){
-		    //process the coordinates of the coord list.
-		    for(int j = 0; j < dimensions.length; j++){
-		    	sw.start("LoadFilter: " + dimensions[j]);
-		    	//dim name
-		    	String dimName = dimensions[j];
-		    	//Get the coordinates for that dim.
-		    	String coord = sessionCell.getCoordinates()[j];
-		    	//Get dimTree for dim from uowTrees
-		    	PafDimTree pafDimTree = memberTreeSet.getTree(dimName);
-		    	//Create a list to hold the descendants
-		    	List<String> dimDescendants = new ArrayList<String>();
-		    	//Get descendants of coord in dimTree
-		    	List<PafDimMember> descendants = pafDimTree.getDescendants(coord);
-		    	//Add the descendants to the member filter,
-		    	//if no descendants are returned, then add myself
-		    	dimDescendants.add(coord);
-		    	if(descendants != null && descendants.size() > 0){
-			    	for(PafDimMember member : descendants){
-			    		dimDescendants.add(member.getKey());
-			    	}
-		    	}
-		    	memberFilters.put(dimName, dimDescendants);
-		    	sw.stop();
-		    	
-		    }
-		    //Create a StringOdometer
-		    stringOdometer = new StringOdometer(memberFilters, dimensions);
+		// Cycle through each parent cell and explode to its floor descendants. Valid ancestors
+		// are added in a later step.
+		for (int i = 0; i <  parentCells.length; i++) {
+		 
+			//Check for null items in the request, if so set the response and return.
+			SimpleCoordList parentCell = parentCells[i];
+			if(parentCell == null){
+				resultCoordLists[i] = null;
+				continue;
+			}
+			
+			// Uncompress parent cell
+			if(parentCell.isCompressed()){
+				parentCell.uncompressData();
+			}
+			
+			// Explode the parent cell to its floor descendants
+			String[] dimensions = parentCell.getAxis();
+			String[] coords = parentCell.getCoordinates();
+			Intersection parentIs = new Intersection(dimensions, coords);
+			List<Intersection> floorIntersections = IntersectionUtil.buildFloorIntersections(parentIs, dataCache);
+
+			// Convert list of intersections to SimpleCoordList and place in result array
+			sw.start("CreateSimpleCoordList" );
+			SimpleCoordList resultCoordList = IntersectionUtil.convertIntersectionsToSimpleCoordList(floorIntersections);	
+			resultCoordLists[i] = resultCoordList;
+		    sw.stop();
+		    
+		    // Compress SimpleCoordList
+		    sw.start("CompressSimpleCoordList" );
+		    try {
+		    	resultCoordList.compressData();
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+			}
+		    uowPerfLogger.info("coord list length: " + Integer.toString(resultCoordList.getCoordCount()));
+		    sw.stop();
+		    uowPerfLogger.info(sw.prettyPrint());
+		    
+			// Need to also maintain an accumulated set of all floor intersections, and each parent intersection
+		    // for quick lookup later on
+			explodedIsSet.addAll(floorIntersections);
+			parentIsSet.add(parentIs);
 		}
-		else{
-			Intersection attbrIs = new Intersection(dimensions, coords);
-			//Create a StringOdometer
-			stringOdometer = AttributeUtil.explodeAttributeIntersection(dataCache, attbrIs, AttrExplosionType.filteredDescendants);
-			if(stringOdometer == null){
-				String errorMessage = "Encountered invalid attribute intersection: " + StringUtils.arrayToString(coords);
-				logger.error(errorMessage);
-	            throw new IllegalArgumentException(errorMessage);
+
+		
+		// Get all the ancestor intersections of the exploded floor intersections
+		for (Intersection intersection : explodedIsSet) {
+			List<Intersection> ancestors = IntersectionUtil.buildAncestorIntersections(intersection, dataCache);
+			ancestorIsSet.addAll(ancestors);
+		}
+		 
+		// Remove any ancestor intersections that are already included in the original set 
+		// of parent cells.
+		ancestorIsSet.removeAll(parentIsSet);
+		
+		
+		// Only keep the ancestors who have had all of their floor descendants exploded.
+		Set<Intersection> ancestorsToRemove = new HashSet<Intersection>(ancestorIsSet.size());
+		for (Intersection ancestor : ancestorIsSet) {
+			List<Intersection> floorIntersections = IntersectionUtil.buildFloorIntersections(ancestor, dataCache);
+			if (!explodedIsSet.containsAll(floorIntersections)) {
+				ancestorsToRemove.add(ancestor);
 			}
 		}
-			
-	    sw.start("CreateSimpleCoordList" );
-	    //Create a StringOdometer
-	    //stringOdometer = new StringOdometer(memberFilters, dimensions);
-	    List<String> expCoords = new ArrayList<String>();
-	    
-	    //Iterate thru the Odometer and Create/Add the SimpleCoordLists to the ArrayList.
-	    while(stringOdometer.hasNext()) {
-	    	expCoords.addAll(Arrays.asList(stringOdometer.nextValue()));
+		ancestorIsSet.removeAll(ancestorsToRemove);
+		 
+		// Place the ancestor cells onto the last element of the results array
+		if (!ancestorIsSet.isEmpty()) {
+			SimpleCoordList ancestorCoordList = IntersectionUtil.convertIntersectionsToSimpleCoordList(ancestorIsSet);	
+		    sw.start("CompressSimpleCoordList" );
+		    try {
+		    	ancestorCoordList.compressData();
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+			}
+		    uowPerfLogger.info("coord list length: " + Integer.toString(ancestorCoordList.getCoordCount()));
+		    sw.stop();
+		    uowPerfLogger.info(sw.prettyPrint());
+			resultCoordLists[resultCoordLists.length - 1] = ancestorCoordList;
 		}
-	    sw.stop();
-	    
-	    sw.start("CompressSimpleCoordList" );
-	    resultCoordList = new SimpleCoordList(baseDims, expCoords.toArray(new String[0]));
-	    try {
-	    	resultCoordList.compressData();
-	    	//resultCoordList.uncompressData();
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-	    uowPerfLogger.info("coord list length: " + Integer.toString(resultCoordList.getCoordCount()));
-	    
-	    sw.stop();
-	    uowPerfLogger.info(sw.prettyPrint());
 		
-		return resultCoordList;
+		// Return results
+		return resultCoordLists;
 	}
  
 }

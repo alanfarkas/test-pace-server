@@ -14,16 +14,12 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
-import com.pace.base.app.MeasureDef;
-import com.pace.base.app.MeasureType;
 import com.pace.base.app.PafDimSpec;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.TimeSlice;
 import com.pace.base.utility.StringOdometer;
-import com.pace.base.utility.TimeBalance;
-import com.pace.base.view.PafViewSection;
 
 /**
  * Attribute Utilities
@@ -632,7 +628,7 @@ public abstract class AttributeUtil {
 	 * @return StringOdometer
 	 * @throws PafException 
 	 */
-	public static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
+	private static StringOdometer explodeAttributeIntersection(PafDataCache dataCache, final Intersection attrIs, 
 			final AttrExplosionType explosionType) {
 
 		Set<String> allBaseDims = new HashSet<String>(Arrays.asList(dataCache.getBaseDimensions()));
