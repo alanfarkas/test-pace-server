@@ -79,9 +79,8 @@ public class IntersectionUtil {
 		Map<String, List<String>> memberMap = new HashMap<String, List<String>>();
 		MemberTreeSet clientTrees = dataCache.getDimTrees();
 		
-		// Collate the list of ancestors for each dimension. The original
-		// coordinate needs to be included as well, in order to get all
-		// ancestor intersections
+		// Collate the list of ancestors in each dimension. The original coordinate
+		// needs to be included as well, in order to get all ancestor intersections.
 		String[] dimensions = is.getDimensions();
 		for (String dim : dimensions) {
 			String coord = is.getCoordinate(dim);
