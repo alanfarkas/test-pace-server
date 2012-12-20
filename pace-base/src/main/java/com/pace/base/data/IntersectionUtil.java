@@ -76,24 +76,50 @@ public class IntersectionUtil {
 	public static List<Intersection> buildBaseAncestorIntersections(Intersection is, PafDataCache dataCache) {
 		
 		List<Intersection> ancestorIntersections = new ArrayList<Intersection>();
-		Map<String, List<String>> memberMap = new HashMap<String, List<String>>();
+	    String timeDim = dataCache.getTimeDim(); 
+	    String yearDim = dataCache.getYearDim(); 
 		MemberTreeSet clientTrees = dataCache.getDimTrees();
+		PafDimTree timeHorizonTree = clientTrees.getTree(dataCache.getTimeHorizonDim());			
+		Map<String, List<String>> memberListMap = new HashMap<String, List<String>>();
 		
 		// Collate the list of ancestors in each dimension. The original coordinate
 		// needs to be included as well, in order to get all ancestor intersections.
 		String[] dimensions = is.getDimensions();
 		for (String dim : dimensions) {
+			
+			List<String> ancestorList = new ArrayList<String>();
+			
+	       	// Time dimension - use time horizon tree
+	    	if (dim.equals(timeDim)) {
+	    		String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(is.getCoordinate(timeDim), is.getCoordinate(yearDim));
+	    		ancestorList.add(timeHorizCoord);
+	    		ancestorList.addAll(PafDimTree.getMemberNames(timeHorizonTree.getAncestors(timeHorizCoord)));
+	    		memberListMap.put(dim, ancestorList);
+	    		continue;
+	    	}
+	
+	    	// Year dimension - use time horizon default year member
+		    if (dim.equals(yearDim)) {
+		    	ancestorList.add(TimeSlice.getTimeHorizonYear());
+	    		memberListMap.put(dim, ancestorList);
+	    		continue;
+	    	}
+	    	
+	    	// All other dimensions - use corresponding tree to get the coordinate's ancestors
 			String coord = is.getCoordinate(dim);
 			PafDimTree dimTree = clientTrees.getTree(dim);
-			List<String> ancestors = new ArrayList<String>();
-			ancestors.add(coord);
-			ancestors.addAll(PafDimTree.getMemberNames(dimTree.getAncestors(coord)));
-			memberMap.put(dim, ancestors);
+			ancestorList.add(coord);
+			ancestorList.addAll(PafDimTree.getMemberNames(dimTree.getAncestors(coord)));
+			memberListMap.put(dim, ancestorList);
 		}
 		
-		// Build ancestor intersections, making sure that original intersection
-		// isn't included.
-		ancestorIntersections = IntersectionUtil.buildIntersections(memberMap, dimensions);
+		// Build ancestor intersections
+		ancestorIntersections = IntersectionUtil.buildIntersections(memberListMap, dimensions);
+		
+	    // Translate time horizon coordinates back into regular time & year coordinates
+	    ancestorIntersections = translateTimeHorizonCoordinates(ancestorIntersections, dataCache);
+	    
+	    // Remove original intersection from set of ancestors
 		ancestorIntersections.remove(is);
 		
 		// Return ancestor intersections
