@@ -552,7 +552,7 @@ public class PafClientState implements IPafClientState {
 		parmValue = "";
 		String[] planYears = this.getPlanSeason().getPlannableYears();
 		if( planYears != null && planYears.length != 0 ) {
-			parmValue = StringUtils.arrayToString(planYears,"","","\"","\"",",");
+			parmValue = StringUtils.arrayToString(planYears,",");
 		}
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		//-- @PLAN_YEARS (TTN-1881)
@@ -570,7 +570,7 @@ public class PafClientState implements IPafClientState {
 			if( selYearList != null && selYearList.size() != 0 && planYearList != null && planYearList.size() != 0 ) {
 				nonPlanYearList = (List<String>)CollectionsUtil.diff(selYearList, planYearList);
 				if( nonPlanYearList != null && nonPlanYearList.size() != 0 ) {
-					parmValue = StringUtils.arrayToString(nonPlanYearList.toArray(new String[0]),"","","\"","\"",",");
+					parmValue = StringUtils.arrayToString(nonPlanYearList.toArray(new String[0]),",");
 				}
 			}
 		}	
