@@ -703,8 +703,14 @@ public class IntersectionUtil {
 			IntersectionUtil.setIsCoord(parentCoords, dim, parentMember.getKey(), dataCache);
 				
 			// Check if we've already looked at this parent
-			if (checkedParentCoords.contains(parentCoords))
-				return parentLocks;
+//			if (checkedParentCoords.contains(parentCoords))
+//				return parentLocks;
+			
+			for (String[] checkedParent : checkedParentCoords) {
+				if (Arrays.equals(checkedParent, parentCoords)) 
+					return parentLocks;
+			}
+			
 	
 			
 			if (isLockedPath(parentMember, parentCoords, dim, dimTree, dataCache, lockedCoordsSet)) {
