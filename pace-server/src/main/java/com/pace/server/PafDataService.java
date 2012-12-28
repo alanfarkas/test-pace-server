@@ -4629,8 +4629,8 @@ public class PafDataService {
 		parentCoordsSet = IntersectionUtil.getLockedBaseParentCoords(floorCoordsSet, dataCache);
 				 
 		// Remove any ancestor intersections that are already included in the original set 
-		// of parent cells.
-		parentCoordsSet.removeAll(ancestorCoordsSet);
+		// of ancestor cells.
+//		parentCoordsSet.removeAll(ancestorCoordsSet);
 	    sw.stop();
 	    uowPerfLogger.info(sw.prettyPrint());
 		

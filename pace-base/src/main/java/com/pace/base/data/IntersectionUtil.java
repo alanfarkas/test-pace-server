@@ -659,13 +659,17 @@ public class IntersectionUtil {
 			Set<String[]> checkedParentCoords = new HashSet<String[]>(200);
 			PafDimTree dimTree = getIsDimTree(dim, dataCache);
 			for (String[] lockedCoords : lockedCoordsSet) {
-
-
 				List<String[]> foundParents = findParentLocks(lockedCoords, dim, dimTree, dataCache, lockedCoordsSet, checkedParentCoords);
 				lockedParentCoords.addAll(foundParents); 
 					
 			}
 
+		}
+		
+		// Process the new parents
+		if (!lockedParentCoords.isEmpty()) {
+			Set<String[]> foundParents = getLockedBaseParentCoords(lockedParentCoords, dataCache);
+			lockedParentCoords.addAll(foundParents);		
 		}
 		
 		return lockedParentCoords;
@@ -699,17 +703,17 @@ public class IntersectionUtil {
 			IntersectionUtil.setIsCoord(parentCoords, dim, parentMember.getKey(), dataCache);
 				
 			// Check if we've already looked at this parent
-			if (checkedParentCoords.contains(parentCoords)) {
+			if (checkedParentCoords.contains(parentCoords))
 				return parentLocks;
-			} else {
-				checkedParentCoords.add(parentCoords);
-			}
+	
 			
 			if (isLockedPath(parentMember, parentCoords, dim, dimTree, dataCache, lockedCoordsSet)) {
 				parentLocks.add(parentCoords);
 				parentLocks.addAll(findParentLocks(parentCoords, dim, dimTree, dataCache, lockedCoordsSet, checkedParentCoords));
 			}
 			
+			checkedParentCoords.add(parentCoords);
+
 		}
 
 		// TODO Auto-generated method stub
@@ -742,7 +746,6 @@ public class IntersectionUtil {
 		if (parentMember.hasChildren()) {
 			String [] childCoords = parentCoords.clone();
 			for (PafDimMember child : parentMember.getChildren()) {
-				childCoords[dataCache.getAxisIndex(dim)] = child.getKey();
 				IntersectionUtil.setIsCoord(childCoords, dim, child.getKey(), dataCache);
 				if (!isLockedPath(child, childCoords, dim, dimTree, dataCache, lockedCoordsSet)) 
 					return false;
