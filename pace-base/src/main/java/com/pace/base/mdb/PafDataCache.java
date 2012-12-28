@@ -2383,6 +2383,24 @@ public class PafDataCache implements IPafDataCache {
 	/**
 	 * Returns true if the intersection in an attribute intersection
 	 * 
+	 * @param coords Cell intersection coordinates
+	 * @return True if the intersection is an attribute intersection 
+	 */
+	public boolean isAttributeIntersection(String[] coords) {
+		
+		boolean isAttributeIs = false;
+		
+		// Simple check - an intersection is an attribute intersection,
+		// if it contains any non-core dimensions
+		if (coords.length > this.coreDimensions.size()) {
+			isAttributeIs = true;
+		}
+		return isAttributeIs;
+	}
+
+	/**
+	 * Returns true if the intersection in an attribute intersection
+	 * 
 	 * @param intersection Cell intersection
 	 * @return True if the intersection is an attribute intersection 
 	 */
@@ -2406,6 +2424,17 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public boolean isBaseIntersection(Intersection intersection) {
 		return !isAttributeIntersection(intersection);
+	}
+
+	/**
+	 * Returns true if the intersection coordinates do not represent an 
+	 * attribute intersection
+	 * 
+	 * @param coords Cell intersection coordinates
+	 * @return True if the intersection is not an attribute intersection 
+	 */
+	public boolean isBaseIntersection(String[] coords) {
+		return !isAttributeIntersection(coords);
 	}
 
 	/**

@@ -544,6 +544,31 @@ public abstract class AttributeUtil {
 
 
 	/**
+	 * Return the coordinates of specified attribute intersection's descendant floor intersections
+	 * 
+	 * @param is Attribute intersection
+	 * @param dataCache Data Cache
+	 * 
+	 * @return List of floor intersection coordinates
+	 */
+	public static List<String[]> buildAttrFloorIsCoords(Intersection is, PafDataCache dataCache) {
+
+		// Create the list of base dimensions that will be exploded as part of an attribute
+		// allocation. Currently, allocations are not performed over the measures dimension.		
+		StringOdometer isIterator = AttributeUtil.explodeAttributeIntersection(dataCache, is); 
+
+		// Build floor intersection coordinate list
+		List<String[]> floorIsCoordList =  IntersectionUtil.buildIsCoordList(isIterator, dataCache.getBaseDimensions());
+		
+	    // Translate time horizon coordinates back into regular time & year coordinates
+	    floorIsCoordList = IntersectionUtil.translateTimeHorizonCoords(floorIsCoordList, dataCache);
+
+		// Return the floor intersections
+		return floorIsCoordList;
+	}
+
+
+	/**
 	 * Return the specified attribute intersection's descendant floor intersections
 	 * 
 	 * @param is Attribute intersection
@@ -562,7 +587,7 @@ public abstract class AttributeUtil {
 		List<Intersection> floorIntersections =  IntersectionUtil.buildIntersections(isIterator, dataCache.getBaseDimensions());
 		
 	    // Translate time horizon coordinates back into regular time & year coordinates
-	    floorIntersections = IntersectionUtil.translateTimeHorizonCoordinates(floorIntersections, dataCache);
+	    floorIntersections = IntersectionUtil.translateTimeHorizonIntersections(floorIntersections, dataCache);
 
 		// Return the floor intersections
 		return floorIntersections;

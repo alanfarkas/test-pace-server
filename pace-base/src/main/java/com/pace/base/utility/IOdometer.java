@@ -3,7 +3,6 @@
  */
 package com.pace.base.utility;
 
-import java.util.ArrayList;
 
 /**
  * @author Alan Farkas
@@ -18,5 +17,6 @@ public interface IOdometer {
 	public Object[] nextValue();
 	public Object[] getValue();    
     public boolean atTop();		
+    public int getCount();
 
 }

@@ -4558,7 +4558,7 @@ public class PafDataService {
 	}
 	
 	/**
-	 * Gets the all the descendants intersections for the parent SimpleCoordList array.
+	 * Get all the descendant intersections for the SimpleCoordList parent array.
 	 * 
 	 * Any ancestor intersections, whose descendants are all represented by the parent
 	 * array, will be included in the last array element of the returned array.
@@ -4573,8 +4573,11 @@ public class PafDataService {
 		
 		final StopWatch sw = new StopWatch("getDescendants");
 		final PafDataCache dataCache = getDataCache(clientState.getClientId());
-		Set<Intersection> explodedIsSet = new HashSet<Intersection>(1000), ancestorIsSet = new HashSet<Intersection>(1000),
-				parentIsSet = new HashSet<Intersection>(parentCells.length);
+		final String[] baseDims = dataCache.getBaseDimensions();
+//		Set<Intersection> explodedIsSet = new HashSet<Intersection>(1000), ancestorIsSet = new HashSet<Intersection>(1000),
+//				parentIsSet = new HashSet<Intersection>(parentCells.length);
+		Set<String[]> explodedCoordsSet = new HashSet<String[]>(1000), ancestorCoordsSet = new HashSet<String[]>(1000),
+				parentCoordsSet = new HashSet<String[]>(parentCells.length);
 		
 		// Initialize result object - add an additional element to hold the ancestor cells
 		SimpleCoordList[] resultCoordLists = new SimpleCoordList[parentCells.length + 1];
@@ -4599,11 +4602,13 @@ public class PafDataService {
 			String[] dimensions = parentCell.getAxis();
 			String[] coords = parentCell.getCoordinates();
 			Intersection parentIs = new Intersection(dimensions, coords);
-			List<Intersection> floorIntersections = IntersectionUtil.buildFloorIntersections(parentIs, dataCache);
+//			List<Intersection> floorIntersections = IntersectionUtil.buildFloorIntersections(parentIs, dataCache);
+			List<String[]> floorCoordsList = IntersectionUtil.buildFloorIsCoords(parentIs, dataCache);
 
 			// Convert list of intersections to SimpleCoordList and place in result array
 			sw.start("CreateSimpleCoordList" );
-			SimpleCoordList resultCoordList = IntersectionUtil.convertIntersectionsToSimpleCoordList(floorIntersections);	
+//			SimpleCoordList resultCoordList = IntersectionUtil.convertIntersectionsToSimpleCoordList(floorIntersections);	
+			SimpleCoordList resultCoordList = IntersectionUtil.convertIsCoordListToSimpleCoordList(dimensions, floorCoordsList);	
 			resultCoordLists[i] = resultCoordList;
 		    sw.stop();
 		    
@@ -4620,35 +4625,59 @@ public class PafDataService {
 		    
 			// Need to also maintain an accumulated set of all floor intersections, and each parent intersection
 		    // for quick lookup later on
-			explodedIsSet.addAll(floorIntersections);
-			parentIsSet.add(parentIs);
+//			explodedIsSet.addAll(floorIntersections);
+			explodedCoordsSet.addAll(floorCoordsList);
+//			parentIsSet.add(parentIs);
+			parentCoordsSet.add(parentIs.getCoordinates());
 		}
 
 		
-		// Get all the ancestor intersections of the exploded floor intersections
-		for (Intersection intersection : explodedIsSet) {
-			List<Intersection> ancestors = IntersectionUtil.buildAncestorIntersections(intersection, dataCache);
-			ancestorIsSet.addAll(ancestors);
+//		// Get all the ancestor intersections of the exploded floor intersections
+//		for (Intersection intersection : explodedIsSet) {
+//			List<Intersection> ancestors = IntersectionUtil.buildAncestorIntersections(intersection, dataCache);
+//			ancestorIsSet.addAll(ancestors);
+//		}
+//		 
+		// Get all the ancestor intersection coordinates of the exploded floor intersections
+		for (String[] coords : explodedCoordsSet) {
+			List<String[]> ancestors = IntersectionUtil.buildAncestorIsCoords(coords, dataCache);
+			ancestorCoordsSet.addAll(ancestors);
 		}
 		 
 		// Remove any ancestor intersections that are already included in the original set 
 		// of parent cells.
-		ancestorIsSet.removeAll(parentIsSet);
+		ancestorCoordsSet.removeAll(parentCoordsSet);
 		
+//		// Remove any ancestor intersections that are already included in the original set 
+//		// of parent cells.
+//		ancestorIsSet.removeAll(parentIsSet);
+//		
 		
 		// Only keep the ancestors who have had all of their floor descendants exploded.
-		Set<Intersection> ancestorsToRemove = new HashSet<Intersection>(ancestorIsSet.size());
-		for (Intersection ancestor : ancestorIsSet) {
-			List<Intersection> floorIntersections = IntersectionUtil.buildFloorIntersections(ancestor, dataCache);
-			if (!explodedIsSet.containsAll(floorIntersections)) {
+		Set<String[]> ancestorsToRemove = new HashSet<String[]>(ancestorCoordsSet.size());
+		for (String[] ancestor : ancestorCoordsSet) {
+			List<String[]> floorIntersections = IntersectionUtil.buildBaseFloorIsCoords(ancestor, dataCache);
+			if (!explodedCoordsSet.containsAll(floorIntersections)) {
 				ancestorsToRemove.add(ancestor);
 			}
 		}
-		ancestorIsSet.removeAll(ancestorsToRemove);
-		 
+		ancestorCoordsSet.removeAll(ancestorsToRemove);
+
+		
+//		// Only keep the ancestors who have had all of their floor descendants exploded.
+//		Set<Intersection> ancestorsToRemove = new HashSet<Intersection>(ancestorCoordsSet.size());
+//		for (Intersection ancestor : ancestorCoordsSet) {
+//			List<Intersection> floorIntersections = IntersectionUtil.buildFloorIntersections(ancestor, dataCache);
+//			if (!explodedIsSet.containsAll(floorIntersections)) {
+//				ancestorsToRemove.add(ancestor);
+//			}
+//		}
+//		ancestorCoordsSet.removeAll(ancestorsToRemove);
+//		 
+
 		// Place the ancestor cells onto the last element of the results array
-		if (!ancestorIsSet.isEmpty()) {
-			SimpleCoordList ancestorCoordList = IntersectionUtil.convertIntersectionsToSimpleCoordList(ancestorIsSet);	
+		if (!ancestorCoordsSet.isEmpty()) {
+			SimpleCoordList ancestorCoordList = IntersectionUtil.convertIsCoordListToSimpleCoordList(baseDims, ancestorCoordsSet);	
 		    sw.start("CompressSimpleCoordList" );
 		    try {
 		    	ancestorCoordList.compressData();

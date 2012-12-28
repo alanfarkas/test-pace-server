@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafBaseConstants;
 import com.pace.base.app.MdbDef;
+import com.pace.base.mdb.PafDataCache;
 
 
 /**
@@ -142,6 +143,22 @@ public class TimeSlice {
 
 		String timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
 		String timeCoord = cellIs.getCoordinate(timeDim), yearCoord = cellIs.getCoordinate(yearDim);
+		
+		return buildTimeHorizonCoord(timeCoord, yearCoord);
+	}
+
+	/**
+	 * Generate a time horizon coordinate from the supplied intersection coordinates
+	 *
+	 * @param coords Cell intersection coordinates
+	 * @param dataCache Data cache
+	 * 
+	 * @return Time horizon coordinate
+	 */
+	public static String buildTimeHorizonCoord(String[] coords, PafDataCache dataCache) {
+
+		int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
+		String timeCoord = coords[timeAxis], yearCoord = coords[yearAxis];
 		
 		return buildTimeHorizonCoord(timeCoord, yearCoord);
 	}

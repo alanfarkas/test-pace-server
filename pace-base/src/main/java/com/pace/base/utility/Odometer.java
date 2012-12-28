@@ -148,6 +148,25 @@ public class Odometer implements IOdometer {
 	}
 
     
-  
+	/**
+	 * Return the number of odometer entries
+	 * 
+	 * @return
+	 */
+	public int getCount() {
+
+		int count = 0;
+		if (listSizes != null) {
+			count = 1;
+			for (int size : listSizes) {
+				count = count * size;
+			}
+		}
+		
+		return count;
+		
+	}
+    
+ 
     public enum IncOrder {LowEndFirst, HighEndFirst}
 }
