@@ -34,6 +34,7 @@ import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
+import com.pace.base.utility.CollectionsUtil;
 import com.pace.base.utility.IOdometer;
 import com.pace.base.utility.StringOdometer;
 
@@ -635,17 +636,17 @@ public class IntersectionUtil {
 	 * Return the coordinates of any base intersections who should be locked as result each of their
 	 * children contained in the supplied set of locked intersections coordinates.
 	 * 
-	 * @param lockedCoordsSet Set of locked base intersections
+	 * @param lockedCoordsList Set of locked base intersections
 	 * @param dataCache Data cache
 	 * 
 	 * @return Set of coordinates for each locked parent 
 	 */
-	public static Set<String[]> getLockedBaseParentCoords(final Set<String[]> lockedCoordsSet, final PafDataCache dataCache) {
+	public static List<String[]> getLockedBaseParentCoords(final List<String[]> lockedCoordsList, final PafDataCache dataCache) {
 		
 		final String yearDim = dataCache.getYearDim();
 		final String[] baseDims = dataCache.getBaseDimensions();
-		
-		Set<String[]> lockedParentCoords = new HashSet<String[]>(200);
+		final int PARENT_COLLECTION_SIZE = lockedCoordsList.size() / 10;
+		List<String[]> lockedParentCoords = new ArrayList<String[]>(PARENT_COLLECTION_SIZE);
 
 		// Check for potential parent locks along each base dimension
 		for (String dim : baseDims) {
@@ -654,21 +655,41 @@ public class IntersectionUtil {
 			if (dim.equals(yearDim))
 				continue;
 			
-			// Check each locked intersection and look for any parent intersections along
-			// the current dimension that should also be locked.
-			Set<String[]> checkedParentCoords = new HashSet<String[]>(200);
+			// Compile a set of unique parent intersections along this dimension
 			PafDimTree dimTree = getIsDimTree(dim, dataCache);
-			for (String[] lockedCoords : lockedCoordsSet) {
-				List<String[]> foundParents = findParentLocks(lockedCoords, dim, dimTree, dataCache, lockedCoordsSet, checkedParentCoords);
-				lockedParentCoords.addAll(foundParents); 
-					
-			}
+			List<String[]> uniqueParentCoords = new ArrayList<String[]>(PARENT_COLLECTION_SIZE);
+			for (String[] lockedCoords : lockedCoordsList) {
 
+				// Get the member coordinate information corresponding to the current dimension
+				String currMemberName = getIsCoord(lockedCoords, dim, dataCache);
+				PafDimMember currMember = dimTree.getMember(currMemberName);
+
+				// If parent intersection exists, add it to collection for subsequent processing
+				if (currMember.hasParent()) {
+					PafDimMember parentMember = currMember.getParent();
+					String[] parentCoords = lockedCoords.clone();
+					IntersectionUtil.setIsCoord(parentCoords, dim, parentMember.getKey(), dataCache);
+					if (!CollectionsUtil.containsArray(uniqueParentCoords, parentCoords))
+						uniqueParentCoords.add(parentCoords);
+				}
+			}
+			
+			// Check each parent intersection to see if it should be locked
+			List<String[]> checkedParentCoords = new ArrayList<String[]>(PARENT_COLLECTION_SIZE);
+			for (String[] parentCoords : uniqueParentCoords) {
+				if (!CollectionsUtil.containsArray(checkedParentCoords, parentCoords)) {
+					if (isLockedPath(parentCoords, dim, dimTree, dataCache, lockedCoordsList)) {
+						lockedParentCoords.add(parentCoords);
+					}
+					checkedParentCoords.add(parentCoords);
+				}
+			}
 		}
+		
 		
 		// Process the new parents
 		if (!lockedParentCoords.isEmpty()) {
-			Set<String[]> foundParents = getLockedBaseParentCoords(lockedParentCoords, dataCache);
+			List<String[]> foundParents = getLockedBaseParentCoords(lockedParentCoords, dataCache);
 			lockedParentCoords.addAll(foundParents);		
 		}
 		
@@ -711,12 +732,11 @@ public class IntersectionUtil {
 					return parentLocks;
 			}
 			
-	
 			
-			if (isLockedPath(parentMember, parentCoords, dim, dimTree, dataCache, lockedCoordsSet)) {
-				parentLocks.add(parentCoords);
-				parentLocks.addAll(findParentLocks(parentCoords, dim, dimTree, dataCache, lockedCoordsSet, checkedParentCoords));
-			}
+//			if (isLockedPath(parentCoords, dim, dimTree, dataCache, lockedCoordsSet)) {
+//				parentLocks.add(parentCoords);
+//				parentLocks.addAll(findParentLocks(parentCoords, dim, dimTree, dataCache, lockedCoordsSet, checkedParentCoords));
+//			}
 			
 			checkedParentCoords.add(parentCoords);
 
@@ -735,25 +755,26 @@ public class IntersectionUtil {
 	 * @param dim 
 	 * @param dimTree
 	 * @param dataCache
-	 * @param lockedCoordsSet 
+	 * @param lockedCoordsList 
 	 * @return
 	 */
-	private static boolean isLockedPath(PafDimMember parentMember, String[] parentCoords, String dim, PafDimTree dimTree, PafDataCache dataCache, Set<String[]> lockedCoordsSet) {
+	private static boolean isLockedPath(String[] parentCoords, String dim, PafDimTree dimTree, PafDataCache dataCache, List<String[]> lockedCoordsList) {
 
 //		if (lockedCoordsSet.contains(parentCoords)) {
 //			return true;
 //		}
 		
-		for (String[] lockedCoords : lockedCoordsSet) {
+		for (String[] lockedCoords : lockedCoordsList) {
 			if (Arrays.equals(parentCoords, lockedCoords)) 
 				return true;
 		}
 		
+		PafDimMember parentMember = dimTree.getMember(getIsCoord(parentCoords, dim, dataCache));
 		if (parentMember.hasChildren()) {
 			String [] childCoords = parentCoords.clone();
 			for (PafDimMember child : parentMember.getChildren()) {
 				IntersectionUtil.setIsCoord(childCoords, dim, child.getKey(), dataCache);
-				if (!isLockedPath(child, childCoords, dim, dimTree, dataCache, lockedCoordsSet)) 
+				if (!isLockedPath(childCoords, dim, dimTree, dataCache, lockedCoordsList)) 
 					return false;
 			}
 			return true;

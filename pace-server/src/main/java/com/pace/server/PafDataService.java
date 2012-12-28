@@ -4574,8 +4574,7 @@ public class PafDataService {
 		final StopWatch sw = new StopWatch("getDescendants");
 		final PafDataCache dataCache = getDataCache(clientState.getClientId());
 		final String[] baseDims = dataCache.getBaseDimensions();
-		Set<String[]> floorCoordsSet = new HashSet<String[]>(1000), parentCoordsSet = new HashSet<String[]>(1000),
-				ancestorCoordsSet = new HashSet<String[]>(ancestorCells.length);
+		List<String[]> allFloorCoords = new ArrayList<String[]>(10000), ancestorCoordsList = new ArrayList<String[]>(ancestorCells.length);
 		
 
 		// Initialize result object - add an additional element to hold the intermediate parent cells
@@ -4619,14 +4618,14 @@ public class PafDataService {
 		    
 			// Need to also maintain an accumulated set of all floor intersections, and each ancestor intersection
 		    // for quick lookup later on.
-			floorCoordsSet.addAll(floorCoordsList);
-			ancestorCoordsSet.add(ancestorCell.getCoordinates());
+			allFloorCoords.addAll(floorCoordsList);
+			ancestorCoordsList.add(ancestorCell.getCoordinates());
 		}
 
 		// Get the coordinates of any parent intersections whose children have all been included
 		// in the set of exploded floor intersections
 	    sw.start("ComputeParentCells" );
-		parentCoordsSet = IntersectionUtil.getLockedBaseParentCoords(floorCoordsSet, dataCache);
+		List<String[]>parentCoordsList = IntersectionUtil.getLockedBaseParentCoords(allFloorCoords, dataCache);
 				 
 		// Remove any ancestor intersections that are already included in the original set 
 		// of ancestor cells.
@@ -4636,8 +4635,8 @@ public class PafDataService {
 		
 		
 		// Place the parent cells onto the last element of the results array
-		if (!parentCoordsSet.isEmpty()) {
-			SimpleCoordList ancestorCoordList = IntersectionUtil.convertIsCoordListToSimpleCoordList(baseDims, parentCoordsSet);	
+		if (!parentCoordsList.isEmpty()) {
+			SimpleCoordList ancestorCoordList = IntersectionUtil.convertIsCoordListToSimpleCoordList(baseDims, parentCoordsList);	
 		    sw.start("CompressSimpleCoordList-Parents" );
 		    try {
 		    	ancestorCoordList.compressData();

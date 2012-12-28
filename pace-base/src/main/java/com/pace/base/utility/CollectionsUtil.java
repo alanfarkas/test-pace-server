@@ -19,6 +19,7 @@
 package com.pace.base.utility;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -362,7 +363,31 @@ public class CollectionsUtil {
 	    return difference;
 	}
 
-    public static void main(String[] argss) {
+
+  
+	/**
+	 * Returns true if the array collection contains the specified search array
+	 * 
+	 * @param arrayCollection Array collection being searched
+	 * @param searchArray Array being searched for
+	 * 
+	 * @return boolean
+	 */
+	public static <T> boolean containsArray(Collection<T[]> arrayCollection, T[] searchArray) {
+			
+		// Must do a sequential search since a 'contains' doesn't seem to work on array collections because of 
+		// hash code issues
+		for (T[] array : arrayCollection) {
+			if (Arrays.equals(searchArray, array)) 
+				return true;
+		}
+
+		return false;
+	}
+
+	
+  
+  public static void main(String[] argss) {
     	
  //   	List<String> list = convertToList("abc^dce|^kjk^kjd|^lll^lll", "|^");
     	List<String> list1 = new ArrayList<String>();
@@ -379,6 +404,6 @@ public class CollectionsUtil {
     	}
     	
     }
-    
+
     
 }
