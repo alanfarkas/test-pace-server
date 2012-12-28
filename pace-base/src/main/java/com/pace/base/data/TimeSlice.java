@@ -119,6 +119,27 @@ public class TimeSlice {
 	}
 	
 	/**
+	 * Update the cell intersection using the specified time horizon coordinate
+	 * 
+	 * @param coords Cell intersection coordinates
+	 * @param timeHorizonCoord Time horizon coordinate
+	 * @param dataCache Data cache
+	 */
+	public static void applyTimeHorizonCoord(String[] coords, String timeHorizonCoord, PafDataCache dataCache) {
+		
+		int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
+		
+		// Look for period/year delimiter. Throw an error if the delimiter is not found
+		// or if it is the last character.
+		int pos = findTimeHorizonDelim(timeHorizonCoord);
+
+		// Split time horizon coordinate into period and year
+		coords[timeAxis] = timeHorizonCoord.substring(pos + PafBaseConstants.TIME_HORIZON_MBR_DELIM_LEN);
+		coords[yearAxis] = timeHorizonCoord.substring(0, pos);
+	}
+	
+
+	/**
 	 * Generate a time horizon coordinate from the supplied period and year
 	 *
 	 * @param period Period dimension member

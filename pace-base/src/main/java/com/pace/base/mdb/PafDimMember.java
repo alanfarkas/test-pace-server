@@ -151,6 +151,18 @@ public abstract class PafDimMember implements Cloneable {
 		return parent;
 	}
 
+    /**
+     * Returns true if the member has a parent
+     * 
+     * @return True if the member has a parent
+     */
+    public boolean hasParent() {
+        if (parent == null) 
+            return false;
+ 
+        return true;
+    }
+    
 	/**
 	 *	Set parent node pointer
 	 *

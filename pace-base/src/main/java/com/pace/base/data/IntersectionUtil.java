@@ -22,13 +22,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.pace.base.app.MdbDef;
 import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.mdb.AttributeUtil;
 import com.pace.base.mdb.PafDataCache;
+import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
+import com.pace.base.state.IPafEvalState;
 import com.pace.base.utility.IOdometer;
 import com.pace.base.utility.StringOdometer;
 
@@ -504,6 +509,253 @@ public class IntersectionUtil {
 
 
 	/**
+	 * Return the intersection coordinate for the specified dimension that is appropriate
+	 * for traversal across the combined time/year time horizon. In the case of the time
+	 * dimension, the time horizon coordinate will be returned. In the case of the year 
+	 * dimension, the default time horizon year will be returned.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension name
+	 * @param dataCache Data cache
+	 * 
+	 * @return Intersection coordinate
+	 */
+	public static String getIsCoord(Intersection cellIs, String dim, PafDataCache dataCache) {	
+		return getIsCoord(cellIs.getCoordinates(), dim, dataCache);
+	}
+
+	/**
+	 * Return the intersection coordinate for the specified dimension that is appropriate
+	 * for traversal across the combined time/year time horizon. In the case of the time
+	 * dimension, the time horizon coordinate will be returned. In the case of the year 
+	 * dimension, the default time horizon year will be returned.
+	 * 
+	 * @param coords Cell intersection coordinates
+	 * @param dim Dimension name
+	 * @param dataCache Data cache
+	 * 
+	 * @return Intersection coordinate
+	 */
+	public static String getIsCoord(String[] coords, String dim, PafDataCache dataCache) {
+		
+		MdbDef mdbDef = dataCache.getMdbDef();
+		String timeHorizonDim = dataCache.getTimeHorizonDim();
+		String timeDim = dataCache.getTimeDim(), yearDim = mdbDef.getYearDim();
+		String coord = null;
+
+		if (dim.equals(timeDim) || dim.equals(timeHorizonDim)) {
+			coord = TimeSlice.buildTimeHorizonCoord(coords, dataCache);
+		} else if (dim.equals(yearDim)) {
+			coord = TimeSlice.getTimeHorizonYear();
+		} else {
+			coord = coords[dataCache.getAxisIndex(dim)]; 
+		}
+		return coord;
+	}
+
+
+	/**
+	 * Set the intersection coordinate for the specified dimension. In the case of the time
+	 * dimension, this method assumes that the time horizon coordinate is being set.
+	 *
+	 * @param coords Cell intersection coordinates
+	 * @param dim Dimension name
+	 * @param coord Intersection coordinate being set
+	 * @param dataCache Data cache
+	 * 
+	 */
+	public static void setIsCoord(String[] coords, String dim, String coord, PafDataCache dataCache) {
+
+		String timeHorizonDim = dataCache.getTimeHorizonDim();
+		String timeDim = dataCache.getTimeDim();
+
+		if (!dim.equals(timeDim) && !dim.equalsIgnoreCase(timeHorizonDim)) {
+			coords[dataCache.getAxisIndex(dim)] = coord; 
+		} else {
+			TimeSlice.applyTimeHorizonCoord(coords, coord, dataCache);
+		}
+	
+	}
+
+	/**
+	 * Set the intersection coordinate for the specified dimension. In the case of the time
+	 * dimension, this method assumes that the time horizon coordinate is being set.
+	 *
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension name
+	 * @param coord Intersection coordinate
+	 * @param evalState Evaluation state
+	 * 
+	 */
+	public static void setIsCoord(Intersection cellIs, String dim, String coord, IPafEvalState evalState) {
+
+		String timeHorizonDim = evalState.getTimeHorizonDim();
+		String timeDim = evalState.getTimeDim();
+		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
+
+		if (!dim.equals(timeDim) && !dim.equalsIgnoreCase(timeHorizonDim)) {
+			cellIs.setCoordinate(dim, coord); 
+		} else {
+			TimeSlice.applyTimeHorizonCoord(cellIs, coord, mdbDef);
+		}
+	
+	}
+
+
+	/**
+	 * Return the uow tree for the specified dimension that is appropriate for
+	 * traversal across the combined time/year time horizon. In the case of the time
+	 * dimension, the time horizon tree will be used. 
+	 * 
+	 * @param dim Dimension name
+	 * @param dataCache DataCache
+	 * 
+	 * @return Dim Tree
+	 */
+	public static PafDimTree getIsDimTree(String dim, PafDataCache dataCache) {
+
+		final String timeDim = dataCache.getTimeDim();
+		final String timeHorizDim = dataCache.getTimeHorizonDim();
+		final MemberTreeSet uowTrees = dataCache.getDimTrees();
+		PafDimTree dimTree = null;
+		
+		// Substitute the time horizon tree when the time dimension
+		// is specified, else return the specified dimension tree
+		if (!dim.equalsIgnoreCase(timeDim)) {
+			dimTree = uowTrees.getTree(dim);
+		} else {
+			dimTree =  uowTrees.getTree(timeHorizDim);
+		}
+
+		return dimTree;
+	}
+	
+
+	/**
+	 * Return the coordinates of any base intersections who should be locked as result each of their
+	 * children contained in the supplied set of locked intersections coordinates.
+	 * 
+	 * @param lockedCoordsSet Set of locked base intersections
+	 * @param dataCache Data cache
+	 * 
+	 * @return Set of coordinates for each locked parent 
+	 */
+	public static Set<String[]> getLockedBaseParentCoords(final Set<String[]> lockedCoordsSet, final PafDataCache dataCache) {
+		
+		final String yearDim = dataCache.getYearDim();
+		final String[] baseDims = dataCache.getBaseDimensions();
+		
+		Set<String[]> lockedParentCoords = new HashSet<String[]>(200);
+
+		// Check for potential parent locks along each base dimension
+		for (String dim : baseDims) {
+
+			// Skip year dimension as it will be referenced when processing the time dimension
+			if (dim.equals(yearDim))
+				continue;
+			
+			// Check each locked intersection and look for any parent intersections along
+			// the current dimension that should also be locked.
+			Set<String[]> checkedParentCoords = new HashSet<String[]>(200);
+			PafDimTree dimTree = getIsDimTree(dim, dataCache);
+			for (String[] lockedCoords : lockedCoordsSet) {
+
+
+				List<String[]> foundParents = findParentLocks(lockedCoords, dim, dimTree, dataCache, lockedCoordsSet, checkedParentCoords);
+				lockedParentCoords.addAll(foundParents); 
+					
+			}
+
+		}
+		
+		return lockedParentCoords;
+	}
+
+
+	/**
+	 * Find any parents along the specified dimension whose children intersections are all locked
+	 * 
+	 * @param lockedCoords 
+	 * @param dim 
+	 * @param dimTree
+	 * @param dataCache 
+	 * @param lockedCoordsSet Set of existing locked intersection coordinates
+	 * @param checkedParentCoords Parent coordinates already checked
+	 * 
+	 * @return
+	 */
+	private static List<String[]> findParentLocks(String[] lockedCoords, String dim, PafDimTree dimTree, PafDataCache dataCache, Set<String[]> lockedCoordsSet,
+			Set<String[]> checkedParentCoords) {
+		
+		List<String[]> parentLocks = new ArrayList<String[]>();
+		
+		// Get the member coordinate information corresponding to the current dimension
+		String currMemberName = getIsCoord(lockedCoords, dim, dataCache);
+		PafDimMember currMember = dimTree.getMember(currMemberName);
+		
+		if (currMember.hasParent()) {
+			PafDimMember parentMember = currMember.getParent();
+			String[] parentCoords = lockedCoords.clone();
+			IntersectionUtil.setIsCoord(parentCoords, dim, parentMember.getKey(), dataCache);
+				
+			// Check if we've already looked at this parent
+			if (checkedParentCoords.contains(parentCoords)) {
+				return parentLocks;
+			} else {
+				checkedParentCoords.add(parentCoords);
+			}
+			
+			if (isLockedPath(parentMember, parentCoords, dim, dimTree, dataCache, lockedCoordsSet)) {
+				parentLocks.add(parentCoords);
+				parentLocks.addAll(findParentLocks(parentCoords, dim, dimTree, dataCache, lockedCoordsSet, checkedParentCoords));
+			}
+			
+		}
+
+		// TODO Auto-generated method stub
+		return parentLocks;
+	}
+
+
+	/**
+	 * Determine if all children intersections are locked
+	 * 
+	 * @param parentMember
+	 * @param parentCoords 
+	 * @param dim 
+	 * @param dimTree
+	 * @param dataCache
+	 * @param lockedCoordsSet 
+	 * @return
+	 */
+	private static boolean isLockedPath(PafDimMember parentMember, String[] parentCoords, String dim, PafDimTree dimTree, PafDataCache dataCache, Set<String[]> lockedCoordsSet) {
+
+//		if (lockedCoordsSet.contains(parentCoords)) {
+//			return true;
+//		}
+		
+		for (String[] lockedCoords : lockedCoordsSet) {
+			if (Arrays.equals(parentCoords, lockedCoords)) 
+				return true;
+		}
+		
+		if (parentMember.hasChildren()) {
+			String [] childCoords = parentCoords.clone();
+			for (PafDimMember child : parentMember.getChildren()) {
+				childCoords[dataCache.getAxisIndex(dim)] = child.getKey();
+				IntersectionUtil.setIsCoord(childCoords, dim, child.getKey(), dataCache);
+				if (!isLockedPath(child, childCoords, dim, dimTree, dataCache, lockedCoordsSet)) 
+					return false;
+			}
+			return true;
+		}
+		
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	/**
 	 * Translate the time horizon coordinates, in the supplied list of intersection coordinates, into time/year coordinates
 	 * 
 	 * @param isCoordList List of data cache intersection coordinates
@@ -598,6 +850,7 @@ public class IntersectionUtil {
 		SimpleCoordList simpleCoordList = new SimpleCoordList(dimensions, coordList.toArray(new String[0]));
 		return simpleCoordList;
 	}
+
 
 	
 }
