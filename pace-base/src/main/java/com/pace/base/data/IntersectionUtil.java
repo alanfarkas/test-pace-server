@@ -234,6 +234,48 @@ public class IntersectionUtil {
 	 * @param is Intersection
 	 * @param dataCache Data cache
 	 * 
+	 * @return ArrayList<Coordinates>
+	 */
+	public static List<Coordinates> buildFloorCoordinates(Intersection is, PafDataCache dataCache) {
+
+		List<Coordinates> floorCoords = null;
+		if (dataCache.isBaseIntersection(is)) {
+			floorCoords = buildBaseFloorCoordinates(is, dataCache);
+		} else {
+			floorCoords = AttributeUtil.buildAttrFloorCoordinates(is, dataCache);
+		}
+		return floorCoords;
+	}
+
+
+	/**
+	 * Return the coordinates of the floor intersections beneath the specified base intersection
+	 * 
+	 * @param is Base (non-attribute) intersection
+	 * @param dataCache Data Cache
+	 * 
+	 * @return List of floor intersections
+	 */
+	public static List<Coordinates> buildBaseFloorCoordinates(Intersection is, PafDataCache dataCache) {
+	
+	    // Build floor intersection coordinate list
+	    Map<String, List<String>> memberListMap = buildBaseFloorMemberMap(is, dataCache);
+	    List<Coordinates> floorCoords =  buildCoordinates(memberListMap, is.getDimensions());
+	    
+	    // Translate time horizon coordinates back into regular time & year coordinates
+	    floorCoords = translateTimeHorizonCoordinates(floorCoords, dataCache);
+	    
+	    // Return the floor intersections
+	    return floorCoords;
+	}
+
+
+	/**
+	 * Return the coordinates of the floor intersections beneath the specified intersection
+	 * 
+	 * @param is Intersection
+	 * @param dataCache Data cache
+	 * 
 	 * @return ArrayList of floor intersections coordinates
 	 */
 	public static List<String[]> buildFloorIsCoords(Intersection is, PafDataCache dataCache) {
@@ -426,6 +468,49 @@ public class IntersectionUtil {
 	 * @param memberLists Member lists by dimension
 	 * @param axisSequence Sorted list of dimensions
 	 * 
+	 * @return List<Coordinates>
+	 */
+	public static List<Coordinates> buildCoordinates(Map<String, List<String>> memberLists, String[] axisSequence) {
+
+		@SuppressWarnings("unchecked")
+		ArrayList<String>[] memberArrays = new ArrayList[memberLists.size()];
+		int i = 0;
+
+		for (String axis : axisSequence) {         
+			memberArrays[i++] = new ArrayList<String>(memberLists.get(axis));
+		}
+
+		StringOdometer odom = new StringOdometer(memberArrays);
+		List<Coordinates> coordinates = buildCoordinates(odom, axisSequence);
+
+		return coordinates;
+	}
+	
+	/**
+	 * Build a list of intersection coordinates using the supplied odometer to generate each intersection's coordinates
+	 * 
+	 * @param coordOdometer Odometer that will iterate through each set of intersection coordinates
+	 * @param dimensions The dimensions that will be used to construct each intersection
+	 * 
+	 * @return List of intersection coordinates
+	 */
+	public static List<Coordinates> buildCoordinates(StringOdometer coordOdometer, String[] dimensions) {
+		
+		List<Coordinates> isCoordList = new ArrayList<Coordinates>(coordOdometer.getCount());
+		while (coordOdometer.hasNext()) {
+			isCoordList.add(new Coordinates(coordOdometer.nextValue()));
+		}
+		
+		return isCoordList;
+	}
+
+	
+	/**
+	 * Build a list of intersection coordinates that represents all possible combinations of the supplied member lists
+	 * 
+	 * @param memberLists Member lists by dimension
+	 * @param axisSequence Sorted list of dimensions
+	 * 
 	 * @return List of intersection coordinates
 	 */
 	public static List<String[]> buildIsCoordList(Map<String, List<String>> memberLists, String[] axisSequence) {
@@ -582,6 +667,29 @@ public class IntersectionUtil {
 	 * Set the intersection coordinate for the specified dimension. In the case of the time
 	 * dimension, this method assumes that the time horizon coordinate is being set.
 	 *
+	 * @param coords Cell intersection coordinates
+	 * @param dim Dimension name
+	 * @param coord Intersection coordinate being set
+	 * @param dataCache Data cache
+	 * 
+	 */
+	public static void setIsCoord(Coordinates coords, String dim, String coord, PafDataCache dataCache) {
+
+		String timeHorizonDim = dataCache.getTimeHorizonDim();
+		String timeDim = dataCache.getTimeDim();
+
+		if (!dim.equals(timeDim) && !dim.equalsIgnoreCase(timeHorizonDim)) {
+			coords.setCoordinate(dataCache.getAxisIndex(dim), coord); 
+		} else {
+			TimeSlice.applyTimeHorizonCoord(coords, coord, dataCache);
+		}
+	
+	}
+
+	/**
+	 * Set the intersection coordinate for the specified dimension. In the case of the time
+	 * dimension, this method assumes that the time horizon coordinate is being set.
+	 *
 	 * @param cellIs Cell intersection
 	 * @param dim Dimension name
 	 * @param coord Intersection coordinate
@@ -636,17 +744,18 @@ public class IntersectionUtil {
 	 * Return the coordinates of any base intersections who should be locked as result each of their
 	 * children contained in the supplied set of locked intersections coordinates.
 	 * 
-	 * @param lockedCoordsList Set of locked base intersections
+	 * @param childCoordsSet Set of locked base intersection coordinates
 	 * @param dataCache Data cache
+	 * @param lockedCoordsSet Set of locked base intersection coordinates
 	 * 
 	 * @return Set of coordinates for each locked parent 
 	 */
-	public static List<String[]> getLockedBaseParentCoords(final List<String[]> lockedCoordsList, final PafDataCache dataCache) {
+	public static Set<Coordinates> getLockedBaseParentCoords(final Set<Coordinates> childCoordsSet, final PafDataCache dataCache, Set<Coordinates> lockedCoordsSet) {
 		
 		final String yearDim = dataCache.getYearDim();
 		final String[] baseDims = dataCache.getBaseDimensions();
-		final int PARENT_COLLECTION_SIZE = lockedCoordsList.size() / 10;
-		List<String[]> lockedParentCoords = new ArrayList<String[]>(PARENT_COLLECTION_SIZE);
+		final int PARENT_COLLECTION_SIZE = childCoordsSet.size() / 10;
+		Set<Coordinates> lockedParentCoords = new HashSet<Coordinates>(PARENT_COLLECTION_SIZE);
 
 		// Check for potential parent locks along each base dimension
 		for (String dim : baseDims) {
@@ -657,31 +766,28 @@ public class IntersectionUtil {
 			
 			// Compile a set of unique parent intersections along this dimension
 			PafDimTree dimTree = getIsDimTree(dim, dataCache);
-			List<String[]> uniqueParentCoords = new ArrayList<String[]>(PARENT_COLLECTION_SIZE);
-			for (String[] lockedCoords : lockedCoordsList) {
+			Set<Coordinates> uniqueParentCoords = new HashSet<Coordinates>(PARENT_COLLECTION_SIZE);
+			for (Coordinates childCoords : childCoordsSet) {
 
 				// Get the member coordinate information corresponding to the current dimension
-				String currMemberName = getIsCoord(lockedCoords, dim, dataCache);
+				String currMemberName = getIsCoord(childCoords.getCoordinates(), dim, dataCache);
 				PafDimMember currMember = dimTree.getMember(currMemberName);
 
 				// If parent intersection exists, add it to collection for subsequent processing
 				if (currMember.hasParent()) {
 					PafDimMember parentMember = currMember.getParent();
-					String[] parentCoords = lockedCoords.clone();
-					IntersectionUtil.setIsCoord(parentCoords, dim, parentMember.getKey(), dataCache);
-					if (!CollectionsUtil.containsArray(uniqueParentCoords, parentCoords))
-						uniqueParentCoords.add(parentCoords);
+					Coordinates parentCoords = childCoords.clone();
+					IntersectionUtil.setIsCoord(parentCoords.getCoordinates(), dim, parentMember.getKey(), dataCache);
+					uniqueParentCoords.add(parentCoords);
 				}
 			}
 			
 			// Check each parent intersection to see if it should be locked
-			List<String[]> checkedParentCoords = new ArrayList<String[]>(PARENT_COLLECTION_SIZE);
-			for (String[] parentCoords : uniqueParentCoords) {
-				if (!CollectionsUtil.containsArray(checkedParentCoords, parentCoords)) {
-					if (isLockedPath(parentCoords, dim, dimTree, dataCache, lockedCoordsList)) {
-						lockedParentCoords.add(parentCoords);
-					}
-					checkedParentCoords.add(parentCoords);
+			for (Coordinates parentCoords : uniqueParentCoords) {
+
+				if (isLockedPath(parentCoords, dim, dimTree, dataCache, lockedCoordsSet)) {
+					lockedParentCoords.add(parentCoords);
+					lockedCoordsSet.add(parentCoords);
 				}
 			}
 		}
@@ -689,62 +795,13 @@ public class IntersectionUtil {
 		
 		// Process the new parents
 		if (!lockedParentCoords.isEmpty()) {
-			List<String[]> foundParents = getLockedBaseParentCoords(lockedParentCoords, dataCache);
+			Set<Coordinates> foundParents = getLockedBaseParentCoords(lockedParentCoords, dataCache, lockedCoordsSet);
 			lockedParentCoords.addAll(foundParents);		
 		}
 		
 		return lockedParentCoords;
 	}
 
-
-	/**
-	 * Find any parents along the specified dimension whose children intersections are all locked
-	 * 
-	 * @param lockedCoords 
-	 * @param dim 
-	 * @param dimTree
-	 * @param dataCache 
-	 * @param lockedCoordsSet Set of existing locked intersection coordinates
-	 * @param checkedParentCoords Parent coordinates already checked
-	 * 
-	 * @return
-	 */
-	private static List<String[]> findParentLocks(String[] lockedCoords, String dim, PafDimTree dimTree, PafDataCache dataCache, Set<String[]> lockedCoordsSet,
-			Set<String[]> checkedParentCoords) {
-		
-		List<String[]> parentLocks = new ArrayList<String[]>();
-		
-		// Get the member coordinate information corresponding to the current dimension
-		String currMemberName = getIsCoord(lockedCoords, dim, dataCache);
-		PafDimMember currMember = dimTree.getMember(currMemberName);
-		
-		if (currMember.hasParent()) {
-			PafDimMember parentMember = currMember.getParent();
-			String[] parentCoords = lockedCoords.clone();
-			IntersectionUtil.setIsCoord(parentCoords, dim, parentMember.getKey(), dataCache);
-				
-			// Check if we've already looked at this parent
-//			if (checkedParentCoords.contains(parentCoords))
-//				return parentLocks;
-			
-			for (String[] checkedParent : checkedParentCoords) {
-				if (Arrays.equals(checkedParent, parentCoords)) 
-					return parentLocks;
-			}
-			
-			
-//			if (isLockedPath(parentCoords, dim, dimTree, dataCache, lockedCoordsSet)) {
-//				parentLocks.add(parentCoords);
-//				parentLocks.addAll(findParentLocks(parentCoords, dim, dimTree, dataCache, lockedCoordsSet, checkedParentCoords));
-//			}
-			
-			checkedParentCoords.add(parentCoords);
-
-		}
-
-		// TODO Auto-generated method stub
-		return parentLocks;
-	}
 
 
 	/**
@@ -758,23 +815,19 @@ public class IntersectionUtil {
 	 * @param lockedCoordsList 
 	 * @return
 	 */
-	private static boolean isLockedPath(String[] parentCoords, String dim, PafDimTree dimTree, PafDataCache dataCache, List<String[]> lockedCoordsList) {
+	private static boolean isLockedPath(Coordinates parentCoords, String dim, PafDimTree dimTree, PafDataCache dataCache, Set<Coordinates> lockedCoordsSet) {
 
-//		if (lockedCoordsSet.contains(parentCoords)) {
-//			return true;
-//		}
-		
-		for (String[] lockedCoords : lockedCoordsList) {
-			if (Arrays.equals(parentCoords, lockedCoords)) 
-				return true;
+		if (lockedCoordsSet.contains(parentCoords)) {
+			return true;
 		}
-		
-		PafDimMember parentMember = dimTree.getMember(getIsCoord(parentCoords, dim, dataCache));
+				
+		String parent = getIsCoord(parentCoords.getCoordinates(), dim, dataCache);
+		PafDimMember parentMember = dimTree.getMember(parent);
 		if (parentMember.hasChildren()) {
-			String [] childCoords = parentCoords.clone();
+			Coordinates childCoords = parentCoords.clone();
 			for (PafDimMember child : parentMember.getChildren()) {
 				IntersectionUtil.setIsCoord(childCoords, dim, child.getKey(), dataCache);
-				if (!isLockedPath(childCoords, dim, dimTree, dataCache, lockedCoordsList)) 
+				if (!isLockedPath(childCoords, dim, dimTree, dataCache, lockedCoordsSet)) 
 					return false;
 			}
 			return true;
@@ -807,6 +860,26 @@ public class IntersectionUtil {
 
 
 	/**
+	 * Translate the time horizon coordinates, in the supplied list of intersection coordinates, into time/year coordinates
+	 * 
+	 * @param coordinatesList List of data cache intersection coordinates
+	 * @param dataCache Data cache 
+	 * 
+	 * @return List of translated intersection coordinates
+	 */
+	public static List<Coordinates> translateTimeHorizonCoordinates(List<Coordinates> coordinatesList, PafDataCache dataCache) {
+		
+	    // Convert time horizon intersections back to time/year intersections 
+	    int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
+	    for (Coordinates coordinates : coordinatesList) {
+	    	TimeSlice.translateTimeHorizonCoords(coordinates, timeAxis, yearAxis);
+	    }
+	    
+	    // Return translated intersections
+	    return coordinatesList;
+	}
+
+	/**
 	 * Translate the time horizon coordinates, in the supplied list of intersections, into time/year coordinates
 	 * 
 	 * @param intersections List of data cache intersections
@@ -817,9 +890,9 @@ public class IntersectionUtil {
 	public static List<Intersection> translateTimeHorizonIntersections(List<Intersection> intersections, PafDataCache dataCache) {
 		
 	    // Convert time horizon intersections back to time/year intersections 
-	    int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
+	    String timeDim = dataCache.getTimeDim(), yearDim = dataCache.getYearDim();
 	    for (Intersection is : intersections) {
-	    	TimeSlice.translateTimeHorizonCoords(is.getCoordinates(), timeAxis, yearAxis);
+	    	TimeSlice.translateTimeHorizonCoords(is, timeDim, yearDim);
 	    }
 	    
 	    // Return translated intersections
@@ -851,6 +924,29 @@ public class IntersectionUtil {
 			
 			// Get intersections coordinates
 			coordList.addAll(Arrays.asList(intersection.getCoordinates()));		
+		}
+
+		// Construct and return the SimpleCoordList
+		SimpleCoordList simpleCoordList = new SimpleCoordList(dimensions, coordList.toArray(new String[0]));
+		return simpleCoordList;
+	}
+
+
+	/**
+	 * Convert a list of "like" intersection coordinates to a simple coordinate list
+	 * 
+	 * @param dimensions Intersection dimensions
+	 * @param coordinatesList List of each intersection's coordinates
+	 * 
+	 * @return SimpleCoordList
+	 */
+	public static SimpleCoordList convertCoordinatesToSimpleCoordList(String[] dimensions, Collection<Coordinates> coordinatesList) {
+
+		List<String> coordList = new ArrayList<String>();
+		
+		// Iterate through all intersections and assemble all coordinates into a single list
+		for (Coordinates coordinates : coordinatesList) {
+			coordList.addAll(Arrays.asList(coordinates.getCoordinates()));		
 		}
 
 		// Construct and return the SimpleCoordList

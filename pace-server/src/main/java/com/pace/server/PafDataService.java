@@ -61,6 +61,7 @@ import com.pace.base.app.VersionDef;
 import com.pace.base.comm.EvaluateViewRequest;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.comm.SimpleCoordList;
+import com.pace.base.data.Coordinates;
 import com.pace.base.data.ExpOperation;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.IntersectionUtil;
@@ -4574,7 +4575,7 @@ public class PafDataService {
 		final StopWatch sw = new StopWatch("getDescendants");
 		final PafDataCache dataCache = getDataCache(clientState.getClientId());
 		final String[] baseDims = dataCache.getBaseDimensions();
-		List<String[]> allFloorCoords = new ArrayList<String[]>(10000), ancestorCoordsList = new ArrayList<String[]>(ancestorCells.length);
+		Set<Coordinates> floorCoordsSet = new HashSet<Coordinates>(10000), ancestorCoordsSet = new HashSet<Coordinates>(ancestorCells.length);
 		
 
 		// Initialize result object - add an additional element to hold the intermediate parent cells
@@ -4597,11 +4598,11 @@ public class PafDataService {
 		
 			// Explode the parent cell to its floor descendants
 			Intersection ancestorIs = new Intersection(ancestorCell.getAxis(), ancestorCell.getCoordinates());
-			List<String[]> floorCoordsList = IntersectionUtil.buildFloorIsCoords(ancestorIs, dataCache);
+			List<Coordinates> floorCoords= IntersectionUtil.buildFloorCoordinates(ancestorIs, dataCache);
 
 			// Convert list of intersections to SimpleCoordList and place in result array
 			sw.start("CreateSimpleCoordList" );
-			SimpleCoordList resultCoordList = IntersectionUtil.convertIsCoordListToSimpleCoordList(baseDims, floorCoordsList);	
+			SimpleCoordList resultCoordList = IntersectionUtil.convertCoordinatesToSimpleCoordList(baseDims, floorCoords);	
 			resultCoordLists[i] = resultCoordList;
 		    sw.stop();
 		    
@@ -4618,25 +4619,25 @@ public class PafDataService {
 		    
 			// Need to also maintain an accumulated set of all floor intersections, and each ancestor intersection
 		    // for quick lookup later on.
-			allFloorCoords.addAll(floorCoordsList);
-			ancestorCoordsList.add(ancestorCell.getCoordinates());
+			floorCoordsSet.addAll(floorCoords);
+			ancestorCoordsSet.add(new Coordinates(ancestorCell.getCoordinates()));
 		}
 
 		// Get the coordinates of any parent intersections whose children have all been included
 		// in the set of exploded floor intersections
 	    sw.start("ComputeParentCells" );
-		List<String[]>parentCoordsList = IntersectionUtil.getLockedBaseParentCoords(allFloorCoords, dataCache);
+		Set<Coordinates>parentCoordsSet = IntersectionUtil.getLockedBaseParentCoords(floorCoordsSet, dataCache, floorCoordsSet);
 				 
 		// Remove any ancestor intersections that are already included in the original set 
 		// of ancestor cells.
-//		parentCoordsSet.removeAll(ancestorCoordsSet);
+		parentCoordsSet.removeAll(ancestorCoordsSet);
 	    sw.stop();
 	    uowPerfLogger.info(sw.prettyPrint());
 		
 		
 		// Place the parent cells onto the last element of the results array
-		if (!parentCoordsList.isEmpty()) {
-			SimpleCoordList ancestorCoordList = IntersectionUtil.convertIsCoordListToSimpleCoordList(baseDims, parentCoordsList);	
+		if (!parentCoordsSet.isEmpty()) {
+			SimpleCoordList ancestorCoordList = IntersectionUtil.convertCoordinatesToSimpleCoordList(baseDims, parentCoordsSet);	
 		    sw.start("CompressSimpleCoordList-Parents" );
 		    try {
 		    	ancestorCoordList.compressData();

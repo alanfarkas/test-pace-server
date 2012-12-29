@@ -689,9 +689,8 @@ public class EvalUtil {
 	
 	    // Convert time horizon intersections back to time/year intersections (TTN-1595)
 	    List<Intersection> floorIntersections =  IntersectionUtil.buildIntersections(memberListMap, is.getDimensions());
-	    int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
 	    for (Intersection floorIs : floorIntersections) {
-	    	TimeSlice.translateTimeHorizonCoords(floorIs.getCoordinates(), timeAxis, yearAxis);
+	    	TimeSlice.translateTimeHorizonCoords(floorIs, timeDim, yearDim);
 	    }
 	    
 	    return floorIntersections;

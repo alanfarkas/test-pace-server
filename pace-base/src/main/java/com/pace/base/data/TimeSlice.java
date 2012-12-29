@@ -119,6 +119,26 @@ public class TimeSlice {
 	}
 	
 	/**
+	 * Update the cell intersection coordinates using the specified time horizon coordinate
+	 * 
+	 * @param coords Cell intersection coordinates
+	 * @param timeHorizonCoord Time horizon coordinate
+	 * @param dataCache Data cache
+	 */
+	public static void applyTimeHorizonCoord(Coordinates coords, String timeHorizonCoord, PafDataCache dataCache) {
+		
+		int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
+		
+		// Look for period/year delimiter. Throw an error if the delimiter is not found
+		// or if it is the last character.
+		int pos = findTimeHorizonDelim(timeHorizonCoord);
+
+		// Split time horizon coordinate into period and year
+		coords.setCoordinate(timeAxis, timeHorizonCoord.substring(pos + PafBaseConstants.TIME_HORIZON_MBR_DELIM_LEN));
+		coords.setCoordinate(yearAxis, timeHorizonCoord.substring(0, pos));
+	}
+	
+	/**
 	 * Update the cell intersection using the specified time horizon coordinate
 	 * 
 	 * @param coords Cell intersection coordinates
@@ -187,6 +207,51 @@ public class TimeSlice {
 	
 	/**
 	 * Translate time horizon intersection coordinates to time/year coordinates
+	 * 
+	 * @param intersection Intersection
+	 * @param periodDim Period dimension
+	 * @param yearDim Year dimension
+	 */
+	public static void translateTimeHorizonCoords(Intersection intersection, String periodDim, String yearDim) {
+		
+		String yearCoord = intersection.getCoordinate(yearDim);
+		
+		// Verify that these are time horizon coordinates before performing translation
+		if (yearCoord.equals(PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR)) {
+			String timeHorizonCoord = intersection.getCoordinate(periodDim);
+			int pos = findTimeHorizonDelim(timeHorizonCoord);
+			intersection.setCoordinate(periodDim, timeHorizonCoord.substring(pos + PafBaseConstants.TIME_HORIZON_MBR_DELIM_LEN));
+			intersection.setCoordinate(yearDim, timeHorizonCoord.substring(0, pos));
+		}
+	
+	}
+
+	/**
+	 * Translate time horizon intersection coordinates to time/year coordinates
+	 * 
+	 * @param coords Intersection coordinates
+	 * @param peridIndex Period coordinate index
+	 * @param yearIndex Year coordinate index
+	 */
+	public static void translateTimeHorizonCoords(Coordinates coords, int periodIndex, int yearIndex) {
+		
+		String yearCoord = coords.getCoordinate(yearIndex);
+		
+		// Verify that these are time horizon coordinates before performing translation
+		if (yearCoord.equals(PafBaseConstants.TIME_HORIZON_DEFAULT_YEAR)) {
+			String timeHorizonCoord = coords.getCoordinate(periodIndex);
+			int pos = findTimeHorizonDelim(timeHorizonCoord);
+			coords.setCoordinate(periodIndex, timeHorizonCoord.substring(pos + PafBaseConstants.TIME_HORIZON_MBR_DELIM_LEN));
+			coords.setCoordinate(yearIndex, timeHorizonCoord.substring(0, pos));
+		}
+	
+	}
+
+	/**
+	 * Translate time horizon intersection coordinates to time/year coordinates
+	 * 
+	 * WARNING: Avoid using this method on the coordinates property of either the Intersection
+	 * or Coordinates object, as you may circumvent their internal hashing logic
 	 * 
 	 * @param coords Intersection coordinates
 	 * @param peridIndex Period coordinate index

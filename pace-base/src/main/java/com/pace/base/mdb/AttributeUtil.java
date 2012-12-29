@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
 import com.pace.base.app.PafDimSpec;
+import com.pace.base.data.Coordinates;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
@@ -540,6 +541,31 @@ public abstract class AttributeUtil {
 		// Return full list of component members
 		return allComponentMembers;
 
+	}
+
+
+	/**
+	 * Return the coordinates of specified attribute intersection's descendant floor intersections
+	 * 
+	 * @param is Attribute intersection
+	 * @param dataCache Data Cache
+	 * 
+	 * @return List<Coordinates>
+	 */
+	public static List<Coordinates> buildAttrFloorCoordinates(Intersection is, PafDataCache dataCache) {
+
+		// Create the list of base dimensions that will be exploded as part of an attribute
+		// allocation. Currently, allocations are not performed over the measures dimension.		
+		StringOdometer isIterator = AttributeUtil.explodeAttributeIntersection(dataCache, is); 
+
+		// Build floor intersection coordinate list
+		List<Coordinates> floorCoords =  IntersectionUtil.buildCoordinates(isIterator, dataCache.getBaseDimensions());
+		
+	    // Translate time horizon coordinates back into regular time & year coordinates
+	    floorCoords = IntersectionUtil.translateTimeHorizonCoordinates(floorCoords, dataCache);
+
+		// Return the floor intersections
+		return floorCoords;
 	}
 
 
