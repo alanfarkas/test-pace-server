@@ -805,14 +805,13 @@ public class IntersectionUtil {
 
 
 	/**
-	 * Determine if all children intersections are locked
+	 * Determine if all children intersections against selected dimension are locked
 	 * 
-	 * @param parentMember
-	 * @param parentCoords 
-	 * @param dim 
-	 * @param dimTree
-	 * @param dataCache
-	 * @param lockedCoordsList 
+	 * @param parentCoords Parent intersection coordinates
+	 * @param dim Dimension
+	 * @param dimTree Dimension tree
+	 * @param dataCache Data cache
+	 * @param lockedCoordsSet Set of coordinates for existing locked floor intersections 
 	 * @return
 	 */
 	private static boolean isLockedPath(Coordinates parentCoords, String dim, PafDimTree dimTree, PafDataCache dataCache, Set<Coordinates> lockedCoordsSet) {

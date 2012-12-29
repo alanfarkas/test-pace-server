@@ -4575,6 +4575,7 @@ public class PafDataService {
 		final StopWatch sw = new StopWatch("getDescendants");
 		final PafDataCache dataCache = getDataCache(clientState.getClientId());
 		final String[] baseDims = dataCache.getBaseDimensions();
+		final Set<String> lockedTimeHorizPeriods = clientState.getLockedTimeHorizonPeriods();
 		Set<Coordinates> floorCoordsSet = new HashSet<Coordinates>(10000), ancestorCoordsSet = new HashSet<Coordinates>(ancestorCells.length);
 		
 
@@ -4596,8 +4597,12 @@ public class PafDataService {
 			if(ancestorCell.isCompressed())
 				ancestorCell.uncompressData();
 		
-			// Explode the parent cell to its floor descendants
+			// Explode the parent cell to its floor descendants (filtering out any parents with invalid 
+			// or locked time horizon periods) 
 			Intersection ancestorIs = new Intersection(ancestorCell.getAxis(), ancestorCell.getCoordinates());
+			String timeHorizPeriod = TimeSlice.buildTimeHorizonCoord(ancestorIs, dataCache.getMdbDef());
+			if (lockedTimeHorizPeriods.contains(timeHorizPeriod))
+				continue;
 			List<Coordinates> floorCoords= IntersectionUtil.buildFloorCoordinates(ancestorIs, dataCache);
 
 			// Convert list of intersections to SimpleCoordList and place in result array
