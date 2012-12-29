@@ -816,10 +816,13 @@ public class IntersectionUtil {
 	 */
 	private static boolean isLockedPath(Coordinates parentCoords, String dim, PafDimTree dimTree, PafDataCache dataCache, Set<Coordinates> lockedCoordsSet) {
 
+		// Check if parent intersection is already locked
 		if (lockedCoordsSet.contains(parentCoords)) {
 			return true;
 		}
 				
+		// Perform a recursive traversal through all children to check if floor descendants along
+		// this dimension are locked.
 		String parent = getIsCoord(parentCoords.getCoordinates(), dim, dataCache);
 		PafDimMember parentMember = dimTree.getMember(parent);
 		if (parentMember.hasChildren()) {
@@ -832,7 +835,8 @@ public class IntersectionUtil {
 			return true;
 		}
 		
-		// TODO Auto-generated method stub
+		// Intersection has no children and doesn't appear in locked set, therefore it should not
+		// be locked.
 		return false;
 	}
 
