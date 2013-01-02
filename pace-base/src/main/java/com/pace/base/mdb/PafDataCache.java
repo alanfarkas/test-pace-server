@@ -2831,18 +2831,19 @@ public class PafDataCache implements IPafDataCache {
 	public boolean isElapsedIs(Intersection cellIs) {
 
 
-		String version = cellIs.getCoordinate(this.getVersionDim());
-		VersionType versionType = getVersionDef(version).getType();
-		
 		
 		// First check if the cell is valid along the time horizon (TTN-1858)
-		if (lockedTimeHorizonPeriods.contains(TimeSlice.buildTimeHorizonCoord(cellIs, this.getMdbDef()))) {
+		String year = cellIs.getCoordinates()[this.getYearAxis()];
+		String period = cellIs.getCoordinates()[this.getTimeAxis()];
+		if (this.getLockedPeriods(year).contains(period)) {
 			return true;
 		}
 
 		// For the plan version, this has to be a forward plannable version 
 		// for elapsed period logic to apply
+		String version = cellIs.getCoordinates()[this.getVersionAxis()];
 		if (this.getPlanVersion().equals(version)) {
+			VersionType versionType = getVersionDef(version).getType();
 			if (versionType != VersionType.ForwardPlannable) {
 				return false;
 			}
