@@ -97,6 +97,7 @@ public class ES_ProcessReplication implements IEvalStep {
     		Intersection[] replicatedIx, ReplicationType replicationType) throws PafException{
 
     	String versionDim = evalState.getVersionDim();
+    	Set<String> varianceVersions = new HashSet<String>(dataCache.getVarianceVersions());
 
 //    	// Get the list of locked periods on the view
 //    	Set<String> lockedPeriods = evalState.getClientState().getLockedPeriods();
@@ -119,15 +120,15 @@ public class ES_ProcessReplication implements IEvalStep {
     		List<Intersection> flrIx = EvalUtil.buildFloorIntersections(ix, evalState);
     		
     		double replicatedValue = 0;
-    		boolean isVarVer = false;
     		String baseVersion = null;
     		
 
     		// Variance version replication preparation
-            //TODO - Simply this logic, since all versions are now in the data cache
-    		if(evalState != null && evalState.getVarianceReplicationValues() != null && evalState.getVarianceReplicationValues().containsKey(ix)){
+    		boolean isVarVer = false;
+    		String ixVersion = ix.getCoordinate(versionDim);
+    		if(varianceVersions.contains(ixVersion)){
     			isVarVer = true;
-    			VersionDef versionDef = dataCache.getVersionDef(ix.getCoordinate(versionDim));
+    			VersionDef versionDef = dataCache.getVersionDef(ixVersion);
     			baseVersion = versionDef.getVersionFormula().getBaseVersion();
     		}
 
@@ -192,7 +193,7 @@ public class ES_ProcessReplication implements IEvalStep {
 				    				tempIx = i;
 			    				}
 			    				break;
-			    			case LiftAll:
+			    			case LiftAll:		// TTN-1793
 			    				//update no matter what.
 			    				if(isVarVer){
 			    					//convert the variance version to a base version and update the value.
@@ -203,7 +204,7 @@ public class ES_ProcessReplication implements IEvalStep {
 			    					tempIx = i;
 			    				}
 			    				break;
-			    			case LiftExisting:
+			    			case LiftExisting:	// TTN-1793
 			    				//update only if != to zero.
 			    				if(isVarVer){
 			    					if (getBaseVersionValue(i, evalState, dataCache) != 0){

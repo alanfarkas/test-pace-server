@@ -98,7 +98,6 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private HashMap<String, Set<Intersection>> changedCellsByTime = new HashMap<String, Set<Intersection>>(SM_CHNG_LOAD);
 	private HashMap<String, Set<Intersection>> origLockedCellsByTime = new HashMap<String, Set<Intersection>>(SM_CHNG_LOAD);
 	
-	private Map<Intersection, Double> varianceReplicationValues = new HashMap<Intersection, Double>();
 	private List<String> varianceVersionNames = new ArrayList<String>();
 	
 	// Contribution percent change collections
@@ -881,17 +880,6 @@ public class EvalState implements IPafEvalState, Cloneable {
 
 	public void setLoadFactor(int loadFactor) {
 		this.loadFactor = loadFactor;
-	}
-
-
-	public Map<Intersection, Double> getVarianceReplicationValues() {
-		return varianceReplicationValues;
-	}
-
-
-	public void setVarianceReplicationValues(
-			Map<Intersection, Double> varianceReplicationValues) {
-		this.varianceReplicationValues = varianceReplicationValues;
 	}
 
 

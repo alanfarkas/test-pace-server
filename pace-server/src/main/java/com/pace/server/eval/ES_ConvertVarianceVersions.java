@@ -154,22 +154,6 @@ public class ES_ConvertVarianceVersions implements IEvalStep {
         evalState.getCurrentProtectedCells().removeAll(protectedVariances);
         
         
-        // Add data points for replications in variance versions. Since variance versions
-        // don't exist in the data cache these values will need to be looked up from the eval state
-        //TODO - Simply this logic, since all versions are now in the data cache
-        Map<Intersection, Double> varianceReplicationValues = new HashMap<Intersection, Double>();
-        for (Intersection is : evalState.getSliceState().getReplicateAllCells()) {
-            if (vdNames.contains(is.getCoordinate(versDim))) {
-            	varianceReplicationValues.put(is, dataCache.getCellValue(is));
-            }
-        }
-        for (Intersection is : evalState.getSliceState().getReplicateExistingCells()) {
-            if (vdNames.contains(is.getCoordinate(versDim))) {
-            	varianceReplicationValues.put(is, dataCache.getCellValue(is));
-            }
-        }
-        
-        evalState.setVarianceReplicationValues(varianceReplicationValues);
     }
 
     
