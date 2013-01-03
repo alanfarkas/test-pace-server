@@ -46,7 +46,7 @@ import com.pace.base.state.EvalState;
 public class ES_ProcessReplication implements IEvalStep {
     private static Logger logger = Logger.getLogger(ES_ProcessReplication.class);
     
-	public enum ReplicationType { ReplicateAll, ReplicateExisting };
+	public enum ReplicationType { ReplicateAll, ReplicateExisting, LiftAll, LiftExisting };
 	
     /* (non-Javadoc)
      * @see com.pace.base.eval.IEvalStep#performEvaluation(com.pace.base.state.EvalState)
@@ -56,21 +56,33 @@ public class ES_ProcessReplication implements IEvalStep {
     	PafDataCache dataCache = evalState.getDataCache();
     	logger.info("Protected cell intersections: " + evalState.getCurrentProtectedCells().size());
     	
-    	//the replicate all cells
     	if(evalState != null && evalState.getSliceState() != null){
+    		
+        	//the replicate all cells
 	    	Intersection[] replicateAll = evalState.getSliceState().getReplicateAllCells();
 	    	if(replicateAll != null){
 	    		this.replicateCells(evalState, dataCache, replicateAll, ReplicationType.ReplicateAll);
 	    	}
-    	}
-    	
-    	//the replicate existing cells
-    	if(evalState != null && evalState.getSliceState() != null){
+
+	    	//the replicate existing cells
 	    	Intersection[] replicateExis = evalState.getSliceState().getReplicateExistingCells();
 	    	if(replicateExis != null){
 	    		this.replicateCells(evalState, dataCache, replicateExis, ReplicationType.ReplicateExisting);
 	    	}
+
+	    	//the lift all cells (TTN-1793)
+	    	Intersection[] liftAll = evalState.getSliceState().getLiftAllCells();
+	    	if(liftAll != null){
+	    		this.replicateCells(evalState, dataCache, liftAll, ReplicationType.LiftAll);
+	    	}
+
+	    	//the lift existing cells (TTN-1793)
+	    	Intersection[] liftExis = evalState.getSliceState().getReplicateExistingCells();
+	    	if(replicateExis != null){
+	    		this.replicateCells(evalState, dataCache, liftExis, ReplicationType.LiftExisting);
+	    	}
     	}
+    	
     }
 
     /**
@@ -84,7 +96,6 @@ public class ES_ProcessReplication implements IEvalStep {
     private void replicateCells(EvalState evalState, PafDataCache dataCache, 
     		Intersection[] replicatedIx, ReplicationType replicationType) throws PafException{
 
-    	String timeDim = evalState.getTimeDim();
     	String versionDim = evalState.getVersionDim();
 
 //    	// Get the list of locked periods on the view
@@ -147,7 +158,6 @@ public class ES_ProcessReplication implements IEvalStep {
  	    			if(!evalState.getCurrentChangedCells().contains(tempIx) &&
 	    					!evalState.getCurrentLockedCells().contains(tempIx) &&
 	    					!isIntersectionUnderProtection(evalState, tempIx) &&
-//	    					!lockedPeriods.contains(tempIx.getCoordinate(timeDim))){
 	    					!EvalUtil.isElapsedIs(tempIx, evalState)){		//TTN-1595
 	    				
 	    				boolean cellChanged = true;
@@ -165,6 +175,35 @@ public class ES_ProcessReplication implements IEvalStep {
 			    				}
 			    				break;
 			    			case ReplicateExisting:
+			    				//update only if != to zero.
+			    				if(isVarVer){
+			    					if (getBaseVersionValue(i, evalState, dataCache) != 0){
+			    						//convert the variance version to a base version and update the value.
+			    						tempIx = convertChange(i, evalState, dataCache, replicatedValue);
+				    				} else {
+				    					cellChanged = false;
+				    				}
+			    				}else{
+				    				if (dataCache.getCellValue(i) != 0){
+				    					dataCache.setCellValue(i, replicatedValue);
+				    				} else {
+				    					cellChanged = false;
+				    				}
+				    				tempIx = i;
+			    				}
+			    				break;
+			    			case LiftAll:
+			    				//update no matter what.
+			    				if(isVarVer){
+			    					//convert the variance version to a base version and update the value.
+			    					tempIx = convertChange(i, evalState, dataCache, replicatedValue);
+			    				}else{
+			    					//just update the value.
+			    					dataCache.setCellValue(i, replicatedValue);
+			    					tempIx = i;
+			    				}
+			    				break;
+			    			case LiftExisting:
 			    				//update only if != to zero.
 			    				if(isVarVer){
 			    					if (getBaseVersionValue(i, evalState, dataCache) != 0){

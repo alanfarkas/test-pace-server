@@ -2830,8 +2830,6 @@ public class PafDataCache implements IPafDataCache {
 	 */
 	public boolean isElapsedIs(Intersection cellIs) {
 
-
-		
 		// First check if the cell is valid along the time horizon (TTN-1858)
 		String year = cellIs.getCoordinates()[this.getYearAxis()];
 		String period = cellIs.getCoordinates()[this.getTimeAxis()];

@@ -49,6 +49,8 @@ public class SliceState {
 	private Intersection[] changedCells;
 	private Intersection[] replicateExistingCells;
 	private Intersection[] replicateAllCells;
+	private Intersection[] liftExistingCells;
+	private Intersection[] liftAllCells;
     private String[] protectedCellFormulas;
     private PafDataSliceParms dataSliceParms;
     private String viewName;
@@ -65,8 +67,12 @@ public class SliceState {
         changedCells = buildIntersections(evalRequest.getChangedCells());
         logger.debug("Building intersections for cells to replicate to all level 0");
         replicateAllCells = buildIntersections(evalRequest.getReplicateAllCells());
-        logger.debug("Building intersections for replicate to existing level 0.");
+        logger.debug("Building intersections for cells to replicate to existing level 0.");
         replicateExistingCells = buildIntersections(evalRequest.getReplicateExistingCells());
+        logger.debug("Building intersections for cells to lift to all level 0");
+        liftAllCells = buildIntersections(evalRequest.getLiftAllCells());
+        logger.debug("Building intersections for cells to lift to existing level 0.");
+        liftExistingCells = buildIntersections(evalRequest.getLiftExistingCells());
         
         protectedCellFormulas = evalRequest.getProtectedFormulas();
         viewName = evalRequest.getViewName();
@@ -169,6 +175,7 @@ public class SliceState {
 		replicateAllCells = existingCells.toArray(new Intersection[0]);
 	}
 	
+
 	public Intersection[] getReplicateExistingCells() {
 		return replicateExistingCells;
 	}
@@ -189,6 +196,58 @@ public class SliceState {
 		replicateExistingCells = existingCells.toArray(new Intersection[0]);
 	}
 	
+
+	/**
+	 * @return the liftExistingCells
+	 */
+	public Intersection[] getLiftExistingCells() {
+		return liftExistingCells;
+	}
+
+	/**
+	 * @param liftExistingCells the liftExistingCells to set
+	 */
+	public void setLiftExistingCells(Intersection[] liftExistingCells) {
+		this.liftExistingCells = liftExistingCells;
+	}
+
+	/**
+	 *  Remove cells from liftExistingCells collection
+	 *
+	 * @param cellsToRemove Cells to remove
+	 */
+	public void removeLiftExistingCells(Set<Intersection> cellsToRemove) {
+		
+		Set<Intersection> existingCells = new HashSet<Intersection>(Arrays.asList(liftExistingCells));
+		existingCells.removeAll(cellsToRemove);
+		liftExistingCells = existingCells.toArray(new Intersection[0]);
+	}
 	
 
+	/**
+	 * @return the liftAllCells
+	 */
+	public Intersection[] getLiftAllCells() {
+		return liftAllCells;
+	}
+
+	/**
+	 * @param liftAllCells the liftAllCells to set
+	 */
+	public void setLiftAllCells(Intersection[] liftAllCells) {
+		this.liftAllCells = liftAllCells;
+	}
+
+	/**
+	 *  Remove cells from liftAllCells collection
+	 *
+	 * @param cellsToRemove Cells to remove
+	 */
+	public void removeLiftAllCells(Set<Intersection> cellsToRemove) {
+		
+		Set<Intersection> existingCells = new HashSet<Intersection>(Arrays.asList(liftAllCells));
+		existingCells.removeAll(cellsToRemove);
+		liftAllCells = existingCells.toArray(new Intersection[0]);
+	}
+	
 }

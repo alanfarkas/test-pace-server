@@ -194,8 +194,6 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		// Initialization
 		PafDataCache dataCache = evalState.getDataCache();
-		PafClientState clientState = evalState.getClientState();
-		MemberTreeSet memberTrees = clientState.getUowTrees();
 		String initialDcStats = dataCache.getCurrentUsageStatsString();
 
 		long startTime = System.currentTimeMillis(), stepTime = 0;
