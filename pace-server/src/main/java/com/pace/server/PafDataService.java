@@ -3614,6 +3614,7 @@ public class PafDataService {
 		PafViewSection currentViewSection = pafMVS.getViewSection();
 		String measureDim = mdbDef.getMeasureDim(), versionDim = mdbDef.getVersionDim(), timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
 		boolean hasAttributes = currentViewSection.hasAttributes();
+		boolean bTrackChangedCells = false;
 
 		if (newSlice.isCompressed()) {
 			logger.info("Uncompressing data slice" );
@@ -3645,8 +3646,14 @@ public class PafDataService {
 //			evalPerfLogger.info(logMsg);
 //		}
 		
+		// Update the data cache with updated client data. Lift allocation requires that the original
+		// cell values are recorded (TTN-1793).
 		logger.info("Updating data cache with client data: " + sliceParms.toString() );
-		dataCache.updateDataCache(newSlice, sliceParms);
+		if ((evalRequest.getLiftAllCells() != null && evalRequest.getLiftAllCells().getCoordCount() > 0)
+				|| evalRequest.getLiftExistingCells() != null && evalRequest.getLiftExistingCells().getCoordCount() > 0) {
+			bTrackChangedCells = true;
+		}
+		Map<Intersection, Double> origViewCellValueMap = dataCache.updateDataCache(newSlice, sliceParms, bTrackChangedCells);
 
 		IEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
 
@@ -3658,6 +3665,7 @@ public class PafDataService {
 		evalState.setAxisSortPriority(currentViewSection.getDimensionCalcSequence());
 		evalState.setDimSequence(currentViewSection.getDimensionsPriority());
 		evalState.setAttributeEval(hasAttributes);
+		evalState.setPreChangeViewCellValueMap(origViewCellValueMap);
 
 		// Set the axisAllocPriority property on eval state. The axisAlocPriority
 		// is equal to the axisSortPriority, except that the time and year 

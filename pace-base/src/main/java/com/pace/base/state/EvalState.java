@@ -109,6 +109,8 @@ public class EvalState implements IPafEvalState, Cloneable {
 	
 	private List<String> triggeredAggMsrs = new ArrayList<String>();
 	
+	// Holds pre-changed cell values on view
+	private Map<Intersection, Double> preChangeViewCellValueMap = null;
 	
 	private PafApplicationDef appDef;
 
@@ -1139,6 +1141,22 @@ public class EvalState implements IPafEvalState, Cloneable {
 		}
 
 		return evalTree;
+	}
+
+
+	/**
+	 * @return the preChangeViewCellValueMap
+	 */
+	public Map<Intersection, Double> getPreChangeViewCellValueMap() {
+		return preChangeViewCellValueMap;
+	}
+
+
+	/**
+	 * @param preChangeViewCellValueMap the preChangeViewCellValueMap to set
+	 */
+	public void setPreChangeViewCellValueMap(Map<Intersection, Double> preChangeViewCellValueMap) {
+		this.preChangeViewCellValueMap = preChangeViewCellValueMap;
 	}
 	
 

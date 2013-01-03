@@ -20,14 +20,15 @@ package com.pace.server.eval;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.SortOrder;
 import com.pace.base.app.MeasureDef;
-import com.pace.base.app.MeasureType;
 import com.pace.base.app.VarRptgFlag;
 import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionFormula;
@@ -36,6 +37,7 @@ import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.rules.Formula;
 import com.pace.base.state.EvalState;
+import com.pace.base.utility.StringUtils;
 
 /**
  *
@@ -98,6 +100,7 @@ public class ES_ProcessReplication implements IEvalStep {
 
     	String versionDim = evalState.getVersionDim();
     	Set<String> varianceVersions = new HashSet<String>(dataCache.getVarianceVersions());
+    	Map<Intersection, Double> origCellValueMap = evalState.getPreChangeViewCellValueMap();
 
 //    	// Get the list of locked periods on the view
 //    	Set<String> lockedPeriods = evalState.getClientState().getLockedPeriods();
@@ -132,8 +135,22 @@ public class ES_ProcessReplication implements IEvalStep {
     			baseVersion = versionDef.getVersionFormula().getBaseVersion();
     		}
 
-    		//get the value of the the intersection to be replicated
+     		//get the value of the the intersection to be replicated
     		replicatedValue = dataCache.getCellValue(ix);
+    		
+       		// Lift allocation pre-processing. The lift amount is calculated by subtracting the original
+    		// value of the allocated cell from the current value (TTN-1793)
+    		double origCellValue, liftAmount = 0;
+    		if (replicationType == ReplicationType.LiftAll || replicationType == ReplicationType.LiftExisting) {
+    			if (!origCellValueMap.containsKey(ix)) {
+    				String errMsg = "Unable to perform lift allocation - unable to retrieve original value of replicated cell: " 
+    						+ StringUtils.arrayToString(replicatedIx);
+    				logger.error(errMsg);
+    				throw new PafException(errMsg, PafErrSeverity.Error);
+    			}
+    			origCellValue= origCellValueMap.get(ix);
+    			liftAmount = replicatedValue - origCellValue;
+    		}
     		
     		if(flrIx != null){
     			//add all of the floor intersections to the changed cell stack.
@@ -194,6 +211,7 @@ public class ES_ProcessReplication implements IEvalStep {
 			    				}
 			    				break;
 			    			case LiftAll:		// TTN-1793
+			    				replicatedValue = dataCache.getCellValue(i) + liftAmount;
 			    				//update no matter what.
 			    				if(isVarVer){
 			    					//convert the variance version to a base version and update the value.
@@ -205,6 +223,7 @@ public class ES_ProcessReplication implements IEvalStep {
 			    				}
 			    				break;
 			    			case LiftExisting:	// TTN-1793
+			    				replicatedValue = dataCache.getCellValue(i) + liftAmount;
 			    				//update only if != to zero.
 			    				if(isVarVer){
 			    					if (getBaseVersionValue(i, evalState, dataCache) != 0){

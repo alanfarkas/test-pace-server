@@ -2732,14 +2732,25 @@ public class PafDataCache implements IPafDataCache {
 	/**
 	 * 	Update the data cache with the contents of the data slice
 	 * 
-	 * @param dataCache Data Cache
 	 * @param pafDataSlice Paf Data Slice
 	 * @param parms Object containing required PafDataSlice parameters
-	 * @param dimSequence Dimension sequence for data cache intersections associated with the corresponding view section
 	 * 
 	 * @throws PafException
 	 */
-	public void updateDataCache(PafDataSlice pafDataSlice, PafDataSliceParms parms) throws PafException {
+	public Map<Intersection, Double> updateDataCache(PafDataSlice pafDataSlice, PafDataSliceParms parms) throws PafException {
+		return updateDataCache(pafDataSlice, parms);
+	}
+	
+	/**
+	 * 	Update the data cache with the contents of the data slice
+	 * 
+	 * @param pafDataSlice Paf Data Slice
+	 * @param parms Object containing required PafDataSlice parameters
+	 * @param bReturnOrigValues If set to true, then a map containing the original values of any updated cells will be returned
+	 * 
+	 * @throws PafException
+	 */
+	public Map<Intersection, Double> updateDataCache(PafDataSlice pafDataSlice, PafDataSliceParms parms, boolean bReturnOrigValues) throws PafException {
 
 		boolean hasPageDimensions = false;
 		int cols = 0, rows = 0;
@@ -2748,6 +2759,7 @@ public class PafDataCache implements IPafDataCache {
 		String[][] rowTuples = parms.getRowTuples(), colTuples = parms.getColTuples();
 		String [] attributeDims = parms.getAttributeDims();
 		boolean hasAttributes = false;
+		Map<Intersection, Double> origCellValueMap = null;
 
 		
 		try {
@@ -2768,6 +2780,17 @@ public class PafDataCache implements IPafDataCache {
 			// data cache data. This intersection will get updated as
 			// we iterate through all the tuple members
 			Intersection cellIs = new Intersection(parms.getDimSequence());
+			
+			// Create cell value map (TTN-1793)
+			if (bReturnOrigValues) {
+				// Initialize map to number of data slice cells
+				int dsCellCount = rowTuples.length * colTuples.length;		
+				origCellValueMap = new HashMap<Intersection, Double>(dsCellCount);
+			} else {
+				// Tracking option not selected - just return an empty map
+				origCellValueMap = new HashMap<Intersection, Double>();
+			}
+			
 			
 			// Enter page headers into appropriate elements of the data  
 			// cache cell intersection 
@@ -2801,7 +2824,18 @@ public class PafDataCache implements IPafDataCache {
 					// elapsed period intersections (TTN-1595)
 					if (!hasAttributes || isValidAttributeIntersection(cellIs, attributeDims)) {
 						if (!this.isElapsedIs(cellIs)) {
+
+							// Track original data slice cell values (TTN-1793)
+							if (bReturnOrigValues) {
+								Intersection origCellIs = cellIs.clone();
+								double cellValue = this
+										.getCellValue(origCellIs);
+								origCellValueMap.put(origCellIs, cellValue);
+							}
+
+							// Update data cache
 							setCellValue(cellIs, dataSlice[sliceIndex]);
+							
 						}
 					}
 					sliceIndex++;
@@ -2819,6 +2853,7 @@ public class PafDataCache implements IPafDataCache {
 			throw pfe;
 		}
 
+		return origCellValueMap;
 	}
 
 

@@ -152,7 +152,7 @@ public class EvaluateViewRequest extends PafRequest implements IPafViewRequest{
 	 * @return the liftExistingCells
 	 */
 	public SimpleCoordList getLiftExistingCells() {
-		return liftExistingCells;
+		return CompressionUtil.tryToUncompress(liftExistingCells);
 	}
 	/**
 	 * @param liftExistingCells the liftExistingCells to set
@@ -164,7 +164,7 @@ public class EvaluateViewRequest extends PafRequest implements IPafViewRequest{
 	 * @return the liftAllCells
 	 */
 	public SimpleCoordList getLiftAllCells() {
-		return liftAllCells;
+		return CompressionUtil.tryToUncompress(liftAllCells);
 	}
 	/**
 	 * @param liftAllCells the liftAllCells to set

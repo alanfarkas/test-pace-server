@@ -250,7 +250,7 @@ public class SimpleCoordList implements IPafCompressedObj {
 		int coordCount = 0;
 	    if (isCompressed()) {
 	    	coordCount = compressedData.length();
-	    } else {
+	    } else if (coordinates != null) {
 	    	coordCount = coordinates.length;
 	    }
 		return coordCount;
