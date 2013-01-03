@@ -79,8 +79,8 @@ public class ES_ProcessReplication implements IEvalStep {
 	    	}
 
 	    	//the lift existing cells (TTN-1793)
-	    	Intersection[] liftExis = evalState.getSliceState().getReplicateExistingCells();
-	    	if(replicateExis != null){
+	    	Intersection[] liftExis = evalState.getSliceState().getLiftExistingCells();
+	    	if(liftExis != null){
 	    		this.replicateCells(evalState, dataCache, liftExis, ReplicationType.LiftExisting);
 	    	}
     	}
