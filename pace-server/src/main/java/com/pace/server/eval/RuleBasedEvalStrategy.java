@@ -357,7 +357,17 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
     	    	replicatedCellList.addAll(Arrays.asList(replicatedCells));
     	    }
     	    
-    	    // Check the version member on each replicated cell intersection. If the 
+    		// Check for lift on reference versions or variance versions (TTN-1793)
+    	    replicatedCells = sliceState.getLiftAllCells();
+    	    if (replicatedCells != null) {
+    	    	replicatedCellList.addAll(Arrays.asList(replicatedCells));
+    	    }
+    	    replicatedCells = sliceState.getLiftExistingCells();
+    	    if (replicatedCells != null) {
+    	    	replicatedCellList.addAll(Arrays.asList(replicatedCells));
+    	    }
+    	    
+     	    // Check the version member on each replicated cell intersection. If the 
     	    // version is a reference version then load it. Or, if the version is a 
     	    // variance version, check the "compare version". Load the compare version
     	    // if it is a reference version.

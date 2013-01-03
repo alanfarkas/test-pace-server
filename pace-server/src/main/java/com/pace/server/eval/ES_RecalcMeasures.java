@@ -56,7 +56,6 @@ public class ES_RecalcMeasures extends ES_EvalBase implements IEvalStep {
                 is.setCoordinate(measureDim, evalState.getRule().getFormula().getResultTerm());
   
             	// skip over elapsed time periods if there are any
-//            	if (evalState.getDataCache().getLockedPeriods().contains(is.getCoordinate(evalState.getTimeDim()))) {
                 if (EvalUtil.isElapsedIs(is, evalState)) {
             		continue;
             	}
@@ -73,25 +72,27 @@ public class ES_RecalcMeasures extends ES_EvalBase implements IEvalStep {
         }
         
         //TTN-718 - Need to add any replicated recalc measures to recalc stack.
-        if(evalState != null && evalState.getSliceState() != null && evalState.getSliceState().getReplicateAllCells() != null){
-        	this.addReplicatedIntersections(targets, 
-        			evalState.getSliceState().getReplicateAllCells(),
-        			measureDim, 
-        			measure, 
-        			evalState.getVarVersNames(), 
-        			evalState.getVersionDim());
+        if(!evalState.isDefaultEvalStep()){
+        	
+        	// Replicate all
+        	this.addReplicatedIntersections(targets, evalState.getSliceState().getReplicateAllCells(),
+        			measureDim, measure, evalState.getVarVersNames(), evalState.getVersionDim());
+
+            // Replicate existing
+        	this.addReplicatedIntersections(targets, evalState.getSliceState().getReplicateExistingCells(), 
+        			measureDim, measure, evalState.getVarVersNames(),evalState.getVersionDim());
+
+        	// Lift all (TTN-1793)
+        	this.addReplicatedIntersections(targets, evalState.getSliceState().getLiftAllCells(),
+        			measureDim, measure, evalState.getVarVersNames(), evalState.getVersionDim());
+
+        	// Lift existing (TTN-1793)
+        	this.addReplicatedIntersections(targets, evalState.getSliceState().getLiftExistingCells(),
+        			measureDim, measure, evalState.getVarVersNames(), evalState.getVersionDim());
+
     	}
     	
-        //TTN-718 - Need to add any replicated recalc measures to recalc stack.
-        if(evalState != null && evalState.getSliceState() != null && evalState.getSliceState().getReplicateExistingCells() != null){
-        	this.addReplicatedIntersections(targets, 
-        			evalState.getSliceState().getReplicateExistingCells(), 
-        			measureDim, 
-        			measure,
-        			evalState.getVarVersNames(),
-        			evalState.getVersionDim());
-    	}
-        
+         
         
         if (logger.isDebugEnabled())
         	logger.debug(LogUtil.timedStep("Building intersections for calculated measure: " + evalState.getMeasureName(), stepTime));       
@@ -129,7 +130,7 @@ public class ES_RecalcMeasures extends ES_EvalBase implements IEvalStep {
     	// dimensionality doesn't exist in this datacache.
     	
     	//TTN-718
-        if(replicatedIntersections != null && replicatedIntersections.length > 0){
+        if(replicatedIntersections != null){
 	    	for(Intersection ix : replicatedIntersections){
 	    		if(ix.getCoordinate(measureDim).equals(measure)){
 	    			if(!targets.contains(ix)){
