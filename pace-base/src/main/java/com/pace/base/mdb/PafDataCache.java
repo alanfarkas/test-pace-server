@@ -2738,7 +2738,7 @@ public class PafDataCache implements IPafDataCache {
 	 * @throws PafException
 	 */
 	public Map<Intersection, Double> updateDataCache(PafDataSlice pafDataSlice, PafDataSliceParms parms) throws PafException {
-		return updateDataCache(pafDataSlice, parms);
+		return updateDataCache(pafDataSlice, parms, false);
 	}
 	
 	/**
