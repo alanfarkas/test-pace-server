@@ -705,6 +705,9 @@ public class PafViewService {
 			// get current paf app
 			pafApp = clientState.getApp();
 
+			Properties tokenCatalog = clientState.generateTokenCatalog(new Properties());
+			clientState.setTokenCatalog(tokenCatalog);
+			
 			// clone original view for rendering purposes. This is done to avoid
 			// collisions between multiple user threads (TTN-1066)
 			renderedView = definedView.clone();
@@ -863,7 +866,8 @@ public class PafViewService {
 				viewSection = populateMemberTagComments(viewSection, memberTags);
 				
 				//Resolve page headers
-				viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), clientState.generateTokenCatalog(new Properties()), viewName);		
+				viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), tokenCatalog, viewName);		
+//				viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), clientState.generateTokenCatalog(new Properties()), viewName);		
 				
 			}
 			
@@ -3368,41 +3372,61 @@ public class PafViewService {
 	}
 
 	public String replaceUserMultiYear (String member, PafClientState clientState) {
-		String[] planYears = clientState.getPlanSeason().getPlannableYears();
-		String[] selYears = clientState.getPlanSeason().getYears();
-		List<String> nonPlanYearList = null;
-		if( selYears != null && selYears.length != 0 && planYears != null && planYears.length != 0 ) {
-			List<String> selYearList = new ArrayList<String>(Arrays.asList(selYears));
-			List<String> planYearList = new ArrayList<String>(Arrays.asList(planYears));
-			if( selYearList != null && selYearList.size() != 0 && planYearList != null && planYearList.size() != 0 ) {
-				nonPlanYearList = (List<String>)CollectionsUtil.diff(selYearList, planYearList);
-			}
-		}	
+		Properties tokenCatalog = null; 
+		String parmKey = "", parmVal = "";
+		if( clientState != null ) {
+			tokenCatalog = clientState.getTokenCatalog();
+		}
 
 		if( member.contains("@FIRST_PLAN_YEAR")) {
-			if( planYears != null && planYears.length > 0 ) {
-				member = member.replaceAll("@FIRST_PLAN_YEAR", Matcher.quoteReplacement(planYears[0]));
+			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_YEAR;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( (parmVal == null || parmVal.equals("")) ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
 			}
+			member = member.replaceAll("@FIRST_PLAN_YEAR", Matcher.quoteReplacement(parmVal));
 		}
 		else if( member.contains("@FIRST_NONPLAN_YEAR")) {
-			if( nonPlanYearList != null && nonPlanYearList.size() > 0 ) {
-				member = member.replaceAll("@FIRST_NONPLAN_YEAR", Matcher.quoteReplacement(nonPlanYearList.get(0)));
+			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_NONPLAN_YEAR;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( (parmVal == null || parmVal.equals("")) ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
 			}
+			member = member.replaceAll("@FIRST_NONPLAN_YEAR", Matcher.quoteReplacement(parmVal));
 		}
 		else if( member.contains("@FIRST_PLAN_PERIOD")) {
-			member = member.replaceAll("@FIRST_PLAN_PERIOD", Matcher.quoteReplacement(clientState.getFirstPlanPeriod()));
+			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_PERIOD;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( (parmVal == null || parmVal.equals("")) ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
+			}
+			member = member.replaceAll("@FIRST_PLAN_PERIOD", Matcher.quoteReplacement(parmVal));
 		}
 		else if( member.contains("@PLAN_YEARS")) {
-			if( planYears != null && planYears.length > 0 ) {
-				String parmValue = StringUtils.arrayToString(planYears,",");
-				member = member.replaceAll("@PLAN_YEARS", Matcher.quoteReplacement(parmValue));
+			parmKey = PafBaseConstants.VIEW_TOKEN_PLAN_YEARS;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( (parmVal == null || parmVal.equals("")) ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
 			}
+			member = member.replaceAll("@PLAN_YEARS", Matcher.quoteReplacement(parmVal));
 		}
 		else if( member.contains("@NONPLAN_YEARS")) {
-			if( nonPlanYearList != null && nonPlanYearList.size() > 0 ) {
-				String parmValue = StringUtils.arrayToString(nonPlanYearList.toArray(new String[0]),",");
-				member = member.replaceAll("@NONPLAN_YEARS", Matcher.quoteReplacement(parmValue));
+			parmKey = PafBaseConstants.VIEW_TOKEN_NONPLAN_YEARS;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( (parmVal == null || parmVal.equals("")) ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
 			}
+			member = member.replaceAll("@NONPLAN_YEARS", Matcher.quoteReplacement(parmVal));
 		}
 		//Matcher.quoteReplacement replaces all $ with \$
 		return member.trim();

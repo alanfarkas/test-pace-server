@@ -3036,6 +3036,12 @@ public class PafDataService {
 			throw pfe;
 		}
 
+		String parmKey = "", parmVal = "";
+		Properties tokenCatalog = null;
+		if( clientState != null ) {
+			tokenCatalog = clientState.getTokenCatalog();
+		}
+		
 		List<PafDimMember> memberList = null;
 
 		switch (expOp.getOpCode()) {
@@ -3125,27 +3131,32 @@ public class PafDataService {
 			break;
 			
 		case PLAN_YEARS:
-			String[] planYears = clientState.getPlanSeason().getPlannableYears();
-			if( planYears != null && planYears.length > 0 ) {
+			parmKey = PafBaseConstants.VIEW_TOKEN_PLAN_YEARS;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( (parmVal == null || parmVal.equals("")) ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
+			}
+			List<String> planYearList = StringUtils.stringToList(parmVal, ",");
+			if( planYearList != null && planYearList.size() > 0 ) {
 				memberList = new ArrayList<PafDimMember>();
-				for( String planYear : planYears ) {
-					PafDimMember newPafDimMember = tree.getMember(planYear);
+				for( String nonPlanYear : planYearList ) {
+					PafDimMember newPafDimMember = tree.getMember(nonPlanYear);
 					memberList.add(newPafDimMember);
 				}
 			}
 			break;
 
 		case NONPLAN_YEARS:
-			String[] planYears2 = clientState.getPlanSeason().getPlannableYears();
-			String[] selYears = clientState.getPlanSeason().getYears();
-			List<String> nonPlanYearList = null;
-			if( selYears != null && selYears.length != 0 && planYears2 != null && planYears2.length != 0 ) {
-				List<String> selYearList = new ArrayList<String>(Arrays.asList(selYears));
-				List<String> planYearList = new ArrayList<String>(Arrays.asList(planYears2));
-				if( selYearList != null && selYearList.size() != 0 && planYearList != null && planYearList.size() != 0 ) {
-					nonPlanYearList = (List<String>)CollectionsUtil.diff(selYearList, planYearList);
-				}
-			}	
+			parmKey = PafBaseConstants.VIEW_TOKEN_NONPLAN_YEARS;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( (parmVal == null || parmVal.equals("")) ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
+			}
+			List<String> nonPlanYearList = StringUtils.stringToList(parmVal, ",");
 			if( nonPlanYearList != null && nonPlanYearList.size() > 0 ) {
 				memberList = new ArrayList<PafDimMember>();
 				for( String nonPlanYear : nonPlanYearList ) {
