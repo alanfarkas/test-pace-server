@@ -108,9 +108,17 @@ public class PafClientState implements IPafClientState {
 	private Set<TimeSlice> invalidTimeSlices = null;
     private String firstPlanPeriod = null;
     private String firstTimeHorizonPlanPeriod = null;
-    
+    private Properties tokenCatalog = new Properties();
 
-    public MemberTreeSet getUowTrees() {
+    public Properties getTokenCatalog() {
+		return tokenCatalog;
+	}
+
+	public void setTokenCatalog(Properties tokenCatalog) {
+		this.tokenCatalog = tokenCatalog;
+	}
+
+	public MemberTreeSet getUowTrees() {
 		return uowTrees;
 	}
 
@@ -536,11 +544,15 @@ public class PafClientState implements IPafClientState {
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		//-- Role (TTN-1453)
 		parmKey = tokenStartChar + prefixSession + PafBaseConstants.CC_SESSION_TOKEN_ROLENAME + tokenEndChar;
-		parmValue = this.getPlannerRole().getRoleName();
-		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+//		if(  this.getPlannerRole() != null ) {
+			parmValue = this.getPlannerRole().getRoleName();
+			tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+//		}
 		//-- Cycle (TTN-1453)
 		parmKey = tokenStartChar + prefixSession + PafBaseConstants.CC_SESSION_TOKEN_CYCLENAME + tokenEndChar;
-		parmValue = this.getPlannerConfig().getCycle();
+//		if(  this.getPlannerConfig() != null ) {
+			parmValue = this.getPlannerConfig().getCycle();
+//		}
 		if (parmValue == null) { //TTN-1458
 			parmValue = "";
 		}
