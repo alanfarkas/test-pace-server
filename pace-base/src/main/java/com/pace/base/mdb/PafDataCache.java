@@ -2748,6 +2748,7 @@ public class PafDataCache implements IPafDataCache {
 	 * @param parms Object containing required PafDataSlice parameters
 	 * @param bReturnOrigValues If set to true, then a map containing the original values of any updated cells will be returned
 	 * 
+	 * @return Map containing updated cells and their original values (OPTIONAL)
 	 * @throws PafException
 	 */
 	public Map<Intersection, Double> updateDataCache(PafDataSlice pafDataSlice, PafDataSliceParms parms, boolean bReturnOrigValues) throws PafException {
