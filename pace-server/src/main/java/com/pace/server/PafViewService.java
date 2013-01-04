@@ -74,6 +74,7 @@ import com.pace.base.project.ProjectElementId;
 import com.pace.base.state.PafClientState;
 import com.pace.base.ui.PrintStyle;
 import com.pace.base.ui.PrintStyles;
+import com.pace.base.utility.CollectionsUtil;
 import com.pace.base.utility.CompressionUtil;
 import com.pace.base.utility.PafViewSectionUtil;
 import com.pace.base.utility.StringUtils;
@@ -3185,6 +3186,10 @@ public class PafViewService {
 				if (pt.getMember().contains("@PLAN_VERSION")) {
 					pt.setMember(replaceUserVers(pt.getMember(), clientState));
 				}
+				if ( pt.getMember().contains("@FIRST_PLAN_YEAR") || pt.getMember().contains("@FIRST_NONPLAN_YEAR") 
+						|| pt.getMember().contains("@FIRST_PLAN_PERIOD")  ) {
+					pt.setMember(replaceUserMultiYear(pt.getMember(), clientState));
+				}
 
 			}
 			
@@ -3205,6 +3210,11 @@ public class PafViewService {
 						vt.getMemberDefs()[i] = replaceUserVers(vt
 								.getMemberDefs()[i], clientState);
 					}
+					if ( vt.getMemberDefs()[i].contains("@FIRST_PLAN_YEAR") || vt.getMemberDefs()[i].contains("@FIRST_NONPLAN_YEAR") 
+							 || vt.getMemberDefs()[i].contains("@PLAN_YEARS") || vt.getMemberDefs()[i].contains("@NONPLAN_YEARS") 
+							 || vt.getMemberDefs()[i].contains("@FIRST_PLAN_PERIOD")  ) {
+						vt.getMemberDefs()[i] = replaceUserMultiYear(vt.getMemberDefs()[i], clientState);
+					}
 				}
 			}
 
@@ -3224,6 +3234,11 @@ public class PafViewService {
 					if (vt.getMemberDefs()[i].contains("@PLAN_VERSION")) {
 						vt.getMemberDefs()[i] = replaceUserVers(vt
 								.getMemberDefs()[i], clientState);
+					}
+					if ( vt.getMemberDefs()[i].contains("@FIRST_PLAN_YEAR") || vt.getMemberDefs()[i].contains("@FIRST_NONPLAN_YEAR") 
+							 || vt.getMemberDefs()[i].contains("@PLAN_YEARS") || vt.getMemberDefs()[i].contains("@NONPLAN_YEARS") 
+							 || vt.getMemberDefs()[i].contains("@FIRST_PLAN_PERIOD")  ) {
+						vt.getMemberDefs()[i] = replaceUserMultiYear(vt.getMemberDefs()[i], clientState);
 					}
 
 				}
@@ -3349,6 +3364,47 @@ public class PafViewService {
 			}
 		}
 
+		return member.trim();
+	}
+
+	public String replaceUserMultiYear (String member, PafClientState clientState) {
+		String[] planYears = clientState.getPlanSeason().getPlannableYears();
+		String[] selYears = clientState.getPlanSeason().getYears();
+		List<String> nonPlanYearList = null;
+		if( selYears != null && selYears.length != 0 && planYears != null && planYears.length != 0 ) {
+			List<String> selYearList = new ArrayList<String>(Arrays.asList(selYears));
+			List<String> planYearList = new ArrayList<String>(Arrays.asList(planYears));
+			if( selYearList != null && selYearList.size() != 0 && planYearList != null && planYearList.size() != 0 ) {
+				nonPlanYearList = (List<String>)CollectionsUtil.diff(selYearList, planYearList);
+			}
+		}	
+
+		if( member.contains("@FIRST_PLAN_YEAR")) {
+			if( planYears != null && planYears.length > 0 ) {
+				member = member.replaceAll("@FIRST_PLAN_YEAR", Matcher.quoteReplacement(planYears[0]));
+			}
+		}
+		else if( member.contains("@FIRST_NONPLAN_YEAR")) {
+			if( nonPlanYearList != null && nonPlanYearList.size() > 0 ) {
+				member = member.replaceAll("@FIRST_NONPLAN_YEAR", Matcher.quoteReplacement(nonPlanYearList.get(0)));
+			}
+		}
+		else if( member.contains("@FIRST_PLAN_PERIOD")) {
+			member = member.replaceAll("@FIRST_PLAN_PERIOD", Matcher.quoteReplacement(clientState.getFirstPlanPeriod()));
+		}
+		else if( member.contains("@PLAN_YEARS")) {
+			if( planYears != null && planYears.length > 0 ) {
+				String parmValue = StringUtils.arrayToString(planYears,",");
+				member = member.replaceAll("@PLAN_YEARS", Matcher.quoteReplacement(parmValue));
+			}
+		}
+		else if( member.contains("@NONPLAN_YEARS")) {
+			if( nonPlanYearList != null && nonPlanYearList.size() > 0 ) {
+				String parmValue = StringUtils.arrayToString(nonPlanYearList.toArray(new String[0]),",");
+				member = member.replaceAll("@NONPLAN_YEARS", Matcher.quoteReplacement(parmValue));
+			}
+		}
+		//Matcher.quoteReplacement replaces all $ with \$
 		return member.trim();
 	}
 

@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -35,7 +34,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.math3.stat.clustering.Cluster;
 import org.apache.commons.math3.stat.clustering.EuclideanIntegerPoint;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
@@ -49,7 +47,6 @@ import com.pace.base.PafBaseConstants;
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
-import com.pace.base.PafSoapException;
 import com.pace.base.app.AllocType;
 import com.pace.base.app.AppSettings;
 import com.pace.base.app.DimType;
@@ -72,7 +69,6 @@ import com.pace.base.data.TimeSlice;
 import com.pace.base.data.UserMemberLists;
 import com.pace.base.db.Application;
 import com.pace.base.db.SecurityGroup;
-import com.pace.base.mdb.AttrExplosionType;
 import com.pace.base.mdb.AttributeUtil;
 import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.IMdbClassLoader;
@@ -91,7 +87,6 @@ import com.pace.base.mdb.PafDataSliceParms;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimMemberProps;
 import com.pace.base.mdb.PafDimTree;
-import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.mdb.PafMdbProps;
 import com.pace.base.mdb.PafSimpleDimTree;
 import com.pace.base.mdb.TreeTraversalOrder;
@@ -99,6 +94,7 @@ import com.pace.base.rules.RuleSet;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.state.SliceState;
+import com.pace.base.utility.CollectionsUtil;
 import com.pace.base.utility.LevelGenParamUtil;
 import com.pace.base.utility.LogUtil;
 import com.pace.base.utility.StringOdometer;
@@ -109,9 +105,6 @@ import com.pace.base.view.PafViewSection;
 import com.pace.base.view.PageTuple;
 import com.pace.base.view.ViewTuple;
 import com.pace.server.assortment.AsstSet;
-import com.pace.server.comm.PaceDescendantsRequest;
-import com.pace.server.comm.PaceDescendantsResponse;
-import com.pace.server.comm.PaceQueryRequest;
 import com.pace.server.eval.IEvalStrategy;
 import com.pace.server.eval.MathOp;
 import com.pace.server.eval.RuleBasedEvalStrategy;
@@ -3126,6 +3119,42 @@ public class PafDataService {
 				}
 			}
 			break;
+			
+		case OFFSET_MEMBERS:
+			memberList = new ArrayList<PafDimMember>();
+			break;
+			
+		case PLAN_YEARS:
+			String[] planYears = clientState.getPlanSeason().getPlannableYears();
+			if( planYears != null && planYears.length > 0 ) {
+				memberList = new ArrayList<PafDimMember>();
+				for( String planYear : planYears ) {
+					PafDimMember newPafDimMember = tree.getMember(planYear);
+					memberList.add(newPafDimMember);
+				}
+			}
+			break;
+
+		case NONPLAN_YEARS:
+			String[] planYears2 = clientState.getPlanSeason().getPlannableYears();
+			String[] selYears = clientState.getPlanSeason().getYears();
+			List<String> nonPlanYearList = null;
+			if( selYears != null && selYears.length != 0 && planYears2 != null && planYears2.length != 0 ) {
+				List<String> selYearList = new ArrayList<String>(Arrays.asList(selYears));
+				List<String> planYearList = new ArrayList<String>(Arrays.asList(planYears2));
+				if( selYearList != null && selYearList.size() != 0 && planYearList != null && planYearList.size() != 0 ) {
+					nonPlanYearList = (List<String>)CollectionsUtil.diff(selYearList, planYearList);
+				}
+			}	
+			if( nonPlanYearList != null && nonPlanYearList.size() > 0 ) {
+				memberList = new ArrayList<PafDimMember>();
+				for( String nonPlanYear : nonPlanYearList ) {
+					PafDimMember newPafDimMember = tree.getMember(nonPlanYear);
+					memberList.add(newPafDimMember);
+				}
+			}
+			break;
+
 		}
 
 		// check if member list is empty. depending on method parm, either throw

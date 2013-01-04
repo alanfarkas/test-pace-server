@@ -42,6 +42,10 @@ public class ExpOperation {
 	public static final String LEVEL_TAG = "@LEVEL";
 	public static final String GEN_TAG = "@GEN";
 	public static final String MEMBERS_TAG = "@MEMBERS";
+	public static final String PLAN_YEARS_TAG = "@PLAN_YEARS";
+	public static final String NONPLAN_YEARS_TAG = "@NONPLAN_YEARS";
+	public static final String FIRST_PLAN_PERIOD_TAG = "@FIRST_PLAN_PERIOD";
+	public static final String OFFSET_MEMBERS_TAG = "@OFFSET_MEMBERS";
 	public static final String UOW_ROOT_TAG = PafBaseConstants.UOW_ROOT;
 	public static final String USER_SEL_TAG = PafBaseConstants.USER_SEL_TAG;
 	public static final String PLAN_VERSION_TAG = PafBaseConstants.PLAN_VERSION;
@@ -107,7 +111,20 @@ public class ExpOperation {
 			code = ExpOpCode.USER_SEL;
 			minParms = 1;
 			maxParms = 4;
-		} else {
+		} else if (t.contains(PLAN_YEARS_TAG)) {
+			code = ExpOpCode.PLAN_YEARS;			
+			isTagOnly = true;
+		} else if (t.contains(NONPLAN_YEARS_TAG)) {
+			code = ExpOpCode.NONPLAN_YEARS;			
+			isTagOnly = true;
+		} else if (t.contains(FIRST_PLAN_PERIOD_TAG)) {
+			code = ExpOpCode.FIRST_PLAN_PERIOD;			
+			isTagOnly = true;
+		}  else if (t.contains(OFFSET_MEMBERS_TAG)) {
+			code = ExpOpCode.OFFSET_MEMBERS;			
+			minParms = 2;
+			maxParms = 3;
+		}else {
 			throw new IllegalArgumentException(
 					"Not a valid expansion code, undefined. (" + term + ")");
 		}
@@ -202,6 +219,18 @@ public class ExpOperation {
 			case USER_SEL:
 				tag = USER_SEL_TAG;
 				break;
+			case PLAN_YEARS:
+				tag = PLAN_YEARS_TAG;
+				break;				
+			case NONPLAN_YEARS:
+				tag = NONPLAN_YEARS_TAG;
+				break;				
+			case FIRST_PLAN_PERIOD:
+				tag = FIRST_PLAN_PERIOD_TAG;
+				break;
+			case OFFSET_MEMBERS:
+				tag = OFFSET_MEMBERS_TAG;
+				break;				
 		}
 		
 		return tag;
