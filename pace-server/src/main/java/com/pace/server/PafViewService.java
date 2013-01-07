@@ -3388,7 +3388,7 @@ public class PafViewService {
 			}
 			member = member.replaceAll("@FIRST_PLAN_YEAR", Matcher.quoteReplacement(parmVal));
 		}
-		else if( member.contains("@FIRST_NONPLAN_YEAR")) {
+		if( member.contains("@FIRST_NONPLAN_YEAR")) {
 			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_NONPLAN_YEAR;
 			parmVal = tokenCatalog.getProperty(parmKey);
 			if ( (parmVal == null || parmVal.equals("")) ) {
@@ -3398,7 +3398,7 @@ public class PafViewService {
 			}
 			member = member.replaceAll("@FIRST_NONPLAN_YEAR", Matcher.quoteReplacement(parmVal));
 		}
-		else if( member.contains("@FIRST_PLAN_PERIOD")) {
+		if( member.contains("@FIRST_PLAN_PERIOD")) {
 			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_PERIOD;
 			parmVal = tokenCatalog.getProperty(parmKey);
 			if ( (parmVal == null || parmVal.equals("")) ) {
@@ -3408,7 +3408,7 @@ public class PafViewService {
 			}
 			member = member.replaceAll("@FIRST_PLAN_PERIOD", Matcher.quoteReplacement(parmVal));
 		}
-		else if( member.contains("@PLAN_YEARS")) {
+		if( member.contains("@PLAN_YEARS")) {
 			parmKey = PafBaseConstants.VIEW_TOKEN_PLAN_YEARS;
 			parmVal = tokenCatalog.getProperty(parmKey);
 			if ( (parmVal == null || parmVal.equals("")) ) {
@@ -3418,7 +3418,7 @@ public class PafViewService {
 			}
 			member = member.replaceAll("@PLAN_YEARS", Matcher.quoteReplacement(parmVal));
 		}
-		else if( member.contains("@NONPLAN_YEARS")) {
+		if( member.contains("@NONPLAN_YEARS")) {
 			parmKey = PafBaseConstants.VIEW_TOKEN_NONPLAN_YEARS;
 			parmVal = tokenCatalog.getProperty(parmKey);
 			if ( (parmVal == null || parmVal.equals("")) ) {
