@@ -3268,6 +3268,11 @@ public class PafViewService {
 						else if (member.contains("@PLAN_VERSION")) {
 							member = replaceUserVers(member, clientState);
 						}
+						if ( member.contains("@FIRST_PLAN_YEAR") || member.contains("@FIRST_NONPLAN_YEAR") 
+								 || member.contains("@PLAN_YEARS") || member.contains("@NONPLAN_YEARS") 
+								 || member.contains("@FIRST_PLAN_PERIOD")  ) {
+							member = replaceUserMultiYear(member, clientState);
+						}
 						/*	TTN 1774- Pace Client is not sorting on the tuples set on AC.
 						 * 
 						 *	Update sorting tuples from user selections 

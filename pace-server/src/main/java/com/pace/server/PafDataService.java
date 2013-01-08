@@ -2943,7 +2943,18 @@ public class PafDataService {
 			}
 		}
 		else {
-			expTuples.add(viewTuple);
+			//added code to handle terms that contains multiple members
+			if( term.contains(",") ) {
+				List<String> expTermList = StringUtils.stringToList(term, ",");
+				for (String expTerm : expTermList) {
+					ViewTuple vt = viewTuple.clone();
+					vt.getMemberDefs()[axisIndex] = expTerm;
+					expTuples.add(vt);
+				}
+			}
+			else {
+				expTuples.add(viewTuple);
+			}
 		}
 		return expTuples;        
 	}
@@ -3043,7 +3054,8 @@ public class PafDataService {
 		}
 		
 		List<PafDimMember> memberList = null;
-
+		PafDimMember newPafDimMember = null;
+		
 		switch (expOp.getOpCode()) {
 		case CHILDREN: 
 			memberList = tree.getChildren(expOp.getParms()[0]);
@@ -3104,7 +3116,7 @@ public class PafDataService {
 				} else {
 
 					//get dim member from tree
-					PafDimMember newPafDimMember = tree.getMember(m);
+					newPafDimMember = tree.getMember(m);
 					
 					//if memberList has members in it, get last member in tree and see
 					//if last and current members are same, if so..don't add dup to list.
@@ -3128,6 +3140,27 @@ public class PafDataService {
 			
 		case OFFSET_MEMBERS:
 			memberList = new ArrayList<PafDimMember>();
+			for (String m : expOp.getParms()) {
+					int index = 1;
+					//get dim member from tree
+					newPafDimMember = tree.getPeer(m, index);
+					
+					//if memberList has members in it, get last member in tree and see
+					//if last and current members are same, if so..don't add dup to list.
+					if ( memberList.size() > 0 ) {
+						
+						//get last dim member
+						PafDimMember lastPafDimMember = memberList.get(memberList.size() -1);
+						
+						//if last = new, continue to next member
+						if ( lastPafDimMember.equals(newPafDimMember)) {
+							continue;
+						}
+					}
+					//add new paf dim member to list
+					memberList.add(newPafDimMember);
+					
+			}
 			break;
 			
 		case PLAN_YEARS:
@@ -3142,7 +3175,7 @@ public class PafDataService {
 			if( planYearList != null && planYearList.size() > 0 ) {
 				memberList = new ArrayList<PafDimMember>();
 				for( String nonPlanYear : planYearList ) {
-					PafDimMember newPafDimMember = tree.getMember(nonPlanYear);
+					newPafDimMember = tree.getMember(nonPlanYear);
 					memberList.add(newPafDimMember);
 				}
 			}
@@ -3160,10 +3193,36 @@ public class PafDataService {
 			if( nonPlanYearList != null && nonPlanYearList.size() > 0 ) {
 				memberList = new ArrayList<PafDimMember>();
 				for( String nonPlanYear : nonPlanYearList ) {
-					PafDimMember newPafDimMember = tree.getMember(nonPlanYear);
+					newPafDimMember = tree.getMember(nonPlanYear);
 					memberList.add(newPafDimMember);
 				}
 			}
+			break;
+
+		case FIRST_PLAN_YEAR:
+			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_YEAR;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( (parmVal == null || parmVal.equals("")) ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
+			}
+			memberList = new ArrayList<PafDimMember>();
+			newPafDimMember = tree.getMember(parmVal);
+			memberList.add(newPafDimMember);
+			break;
+
+		case FIRST_NONPLAN_YEAR:
+			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_NONPLAN_YEAR;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( (parmVal == null || parmVal.equals("")) ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
+			}
+			memberList = new ArrayList<PafDimMember>();
+			newPafDimMember = tree.getMember(parmVal);
+			memberList.add(newPafDimMember);
 			break;
 
 		}
