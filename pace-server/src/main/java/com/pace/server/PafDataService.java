@@ -2943,7 +2943,7 @@ public class PafDataService {
 			}
 		}
 		else {
-			//added code to handle terms that contains multiple members
+			//added code to handle terms that contain multiple members
 			if( term.contains(",") ) {
 				List<String> expTermList = StringUtils.stringToList(term, ",");
 				for (String expTerm : expTermList) {
