@@ -2829,9 +2829,13 @@ public class PafDataCache implements IPafDataCache {
 							// Track original data slice cell values (TTN-1793)
 							if (bReturnOrigValues) {
 								Intersection origCellIs = cellIs.clone();
-								double cellValue = this
-										.getCellValue(origCellIs);
-								origCellValueMap.put(origCellIs, cellValue);
+								// Don't re-add intersection if it's on the view more than once,
+								// as this will cause the user-updated value to overwrite the
+								// original value in the map.
+								if (!origCellValueMap.containsKey(origCellIs)) {
+									double cellValue = this.getCellValue(origCellIs);
+									origCellValueMap.put(origCellIs, cellValue);
+								}
 							}
 
 							// Update data cache
