@@ -1247,6 +1247,52 @@ public abstract class PafDimTree {
 	}
 
 	/**
+	 *	Return the list of members that are at the same level as the specified member and offset
+	 *  but come after it in the hierarchy.
+	 * @param dim Dimension name
+	 * @param memberName Member name
+	 * @param startIndex offset start
+	 * @param endIndex offset end
+	 * @return List of Paf Dim Members
+	 */
+	public List<PafDimMember> getPeersByOffsets(String dim, String memberName, int startIndex, int endIndex) {
+		List<PafDimMember> allPeers = getIPeers(memberName);
+		PafDimMember member = getMember(memberName);
+		int memberIndex = allPeers.indexOf(member);
+		int offsetStart =  memberIndex + startIndex, offsetEnd =  memberIndex + endIndex;
+		boolean bLOutOfRange = false, bROutOfRange = false;
+		if( offsetStart != offsetEnd ) {
+			if( offsetStart < 0 ) {
+				offsetStart = 0;
+				bLOutOfRange = true;
+			}
+			if( offsetEnd >= allPeers.size() ) {
+				offsetEnd = allPeers.size() - 1;
+				bROutOfRange = true;
+			}
+		}
+		else { //offsetStart == offsetEnd ) {
+			if( offsetStart < 0 || offsetEnd >= allPeers.size() ) {
+				bLOutOfRange = bROutOfRange = true;
+			}
+		}
+		if( ( ! bLOutOfRange && bROutOfRange ) || ( bLOutOfRange && ! bROutOfRange ) ) {
+			String errMsg = "View Section [" + dim + "] - Tuple Specification (@FIRST_PLAN_YEAR, " + startIndex + ", " + endIndex + ")] references one or more members not contained in the Unit of Work.";
+			logger.warn(errMsg);
+		}
+		else if( bLOutOfRange && bROutOfRange ) {
+			String errMsg = "View Section [" + dim + "] - Tuple Specification (@FIRST_PLAN_YEAR, " + startIndex + ", " + endIndex + ")] references one or more members not contained in the Unit of Work.";
+			logger.error(errMsg);
+			throw new IllegalArgumentException(errMsg);
+		}
+		List<PafDimMember> offsetPeers = new ArrayList<PafDimMember>();
+		for (int i = offsetStart; i <= offsetEnd; i++) {
+			offsetPeers.add(allPeers.get(i));
+		}
+		return offsetPeers;
+	}
+
+	/**
 	 *	Method_description_goes_here
 	 *
 	 * @param member

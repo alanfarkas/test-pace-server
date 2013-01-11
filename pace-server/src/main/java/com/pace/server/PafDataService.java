@@ -94,7 +94,6 @@ import com.pace.base.rules.RuleSet;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.state.SliceState;
-import com.pace.base.utility.CollectionsUtil;
 import com.pace.base.utility.LevelGenParamUtil;
 import com.pace.base.utility.LogUtil;
 import com.pace.base.utility.StringOdometer;
@@ -3140,26 +3139,14 @@ public class PafDataService {
 			
 		case OFFSET_MEMBERS:
 			memberList = new ArrayList<PafDimMember>();
-			for (String m : expOp.getParms()) {
-					int index = 1;
-					//get dim member from tree
-					newPafDimMember = tree.getPeer(m, index);
-					
-					//if memberList has members in it, get last member in tree and see
-					//if last and current members are same, if so..don't add dup to list.
-					if ( memberList.size() > 0 ) {
-						
-						//get last dim member
-						PafDimMember lastPafDimMember = memberList.get(memberList.size() -1);
-						
-						//if last = new, continue to next member
-						if ( lastPafDimMember.equals(newPafDimMember)) {
-							continue;
-						}
-					}
-					//add new paf dim member to list
-					memberList.add(newPafDimMember);
-					
+			String baseMember = expOp.getParms()[0];
+			int offsetStart = Short.parseShort(expOp.getParms()[1]);
+			int offsetEnd = Short.parseShort(expOp.getParms()[2]);
+			try {
+				List<PafDimMember> peers = tree.getPeersByOffsets(dim, baseMember, offsetStart, offsetEnd);
+				memberList.addAll(peers);
+			} catch( RuntimeException re ) {
+				throw re;
 			}
 			break;
 			
