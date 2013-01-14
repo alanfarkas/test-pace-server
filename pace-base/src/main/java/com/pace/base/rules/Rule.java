@@ -33,6 +33,7 @@ public class Rule {
         private boolean lockAllPriorTime = false;
         private boolean calcAllPeriods = false;
         private boolean initialTBFirstAllocation = false;
+        private boolean measureAllocation = false;
 
 
         /** 
@@ -226,6 +227,20 @@ public class Rule {
         public void setInitialTBFirstAllocation(boolean initialTBFirstAllocation) {
             this.initialTBFirstAllocation = initialTBFirstAllocation;
         }
+
+		/**
+		 * @return the measureAllocation
+		 */
+		public boolean isMeasureAllocation() {
+			return measureAllocation;
+		}
+
+		/**
+		 * @param measureAllocation the measureAllocation to set
+		 */
+		public void setMeasureAllocation(boolean measureAllocation) {
+			this.measureAllocation = measureAllocation;
+		}
 
 		/* (non-Javadoc)
 		 * @see java.lang.Object#hashCode()
