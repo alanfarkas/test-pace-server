@@ -1,10 +1,22 @@
 package com.pace.settings.ui;
 
+import javax.swing.Icon;
+
+
+
+
 import com.pace.settings.PaceSettingsConstants;
 import com.vaadin.data.Item;
+
+
+import com.vaadin.terminal.Resource;
+import com.vaadin.terminal.ThemeResource;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Field;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 
 /**
@@ -24,29 +36,42 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 	public static final String CONNECTION_STRING = "connectionString";
 	public static final String META_DATA_SERVICE_PROVIDER = "metaDataServiceProvider";
 	public static final String DATA_SERVICE_PROVIDER = "dataServiceProvider";
+	public static final String TOOL_TIP = "connectionToolTip";
 		
 	private ComboBox metaDataServiceProviderComboBox = new ComboBox();
 	
 	private ComboBox dataServiceProviderComboBox = new ComboBox();
 	
+	
+	
+	
 	private String connectionStringTooltip = null;
 	
+	public String getConnectionStringTooltip() {
+		return connectionStringTooltip;
+	}
+
 	public MDBDatasourceFieldFactory() {
 		
 		formOrderList.add(NAME);
+		formOrderList.add(TOOL_TIP);
 		formOrderList.add(CONNECTION_STRING);
+		
 		formOrderList.add(META_DATA_SERVICE_PROVIDER);
 		formOrderList.add(DATA_SERVICE_PROVIDER);		
 			
 		requiredFieldSet.add(NAME);
 		requiredFieldSet.add(META_DATA_SERVICE_PROVIDER);
+	requiredFieldSet.add(TOOL_TIP);
 		requiredFieldSet.add(DATA_SERVICE_PROVIDER);
 		requiredFieldSet.add(CONNECTION_STRING);
 		
 		captionMap.put(NAME, "Name");
 		captionMap.put(META_DATA_SERVICE_PROVIDER, "Meta Data Service Provider");
+		captionMap.put(TOOL_TIP, "");
 		captionMap.put(DATA_SERVICE_PROVIDER, "Data Service Provider");
 		captionMap.put(CONNECTION_STRING, "Connection String");
+		
 			
 		metaDataServiceProviderComboBox.setNewItemsAllowed(false);
 		metaDataServiceProviderComboBox.setNullSelectionAllowed(false);
@@ -56,6 +81,7 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 		dataServiceProviderComboBox.setNullSelectionAllowed(false);
 		dataServiceProviderComboBox.addItem("com.pace.mdb.essbase.EsbData");
 		
+	
 		String tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
 		
 		StringBuilder connectionStringTooltipStringBuilder = new StringBuilder("=================================<p>");
@@ -74,6 +100,10 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 		
 		connectionStringTooltip = connectionStringTooltipStringBuilder.toString();
 		
+		
+		
+		
+		
 	}
 	
 	@Override
@@ -89,9 +119,8 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 			TextField tf = (TextField) field;
 			
 			tf.setInputPrompt(CONNECTION_STRING_INPUT_PROMPT);
-					
-			tf.setDescription(connectionStringTooltip);	
-			
+		
+		
 			
 		} else if ( propertyId.equals(META_DATA_SERVICE_PROVIDER) ) {
 			
@@ -110,6 +139,18 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 			return dataServiceProviderComboBox;
 			
 		} 
+	else if(propertyId.equals(TOOL_TIP))
+		{
+
+		
+		field.setReadOnly(true);
+		field.setIcon(new ThemeResource("icons/32/questionmark1.png"));
+	
+	
+		field.setDescription(getConnectionStringTooltip());
+		TextField lf = (TextField)field;
+		
+		}
 		
 		
 		return field;
