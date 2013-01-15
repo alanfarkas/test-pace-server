@@ -40,6 +40,7 @@ import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataCacheCalc;
 import com.pace.base.mdb.PafDimTree;
+import com.pace.base.rules.Rule;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
@@ -72,11 +73,12 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 		String timeDim = dataCache.getTimeDim();
 		String versionDim = dataCache.getVersionDim();
 		String yearDim = dataCache.getYearDim();
+		Rule rule = evalState.getRule();
 
         // opt out if flag set for this rule
-        if ( evalState.getRule().isSkipAggregation() ) return;
+        if (rule.isSkipAggregation()) return;
         
-        // don't bother if not a default evaluation and no changes exist for the current measure
+        // don't bother if not a default evaluation and no changes exist for the current measure (TTN-1927)
         if ( !evalState.isDefaultEvalStep() ) {
         	Set<Intersection> chngSet = evalState.getChangedCellsByMsr().get(evalState.getMeasureName());
         	if (chngSet == null || chngSet.size() == 0) return;
@@ -95,9 +97,15 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             // build measure dimension/member filter object.
             Map<String, List<String>> aggFilter = new HashMap<String, List<String>>(1);
             List<String> mbrs = new ArrayList<String>(1);
-            mbrs.add(measure);
-            
-            //total hack at this point. Allows additional measures to be signaled for 
+			mbrs.add(measure);
+
+			// if measure allocation, include current measure's floor descendants
+			if (rule.isMeasureAllocation()) {
+				PafDimTree measureTree = evalState.getEvaluationTree(measureDim);
+				mbrs.addAll(measureTree.getLowestMemberNames(measure));
+			}
+
+			//total hack at this point. Allows additional measures to be signaled for 
             // aggregation other than the primary measure of the rule. Used by certain custom functions
             // and needs cleared after this operation.
             mbrs.addAll( evalState.getTriggeredAggMsrs() ); 
@@ -189,14 +197,19 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
 
 
              
-              // Perform aggregation of base intersections
+             // Perform aggregation of base intersections
              //-- Aggregate all hierarchical dimensions
              for (String s : hierDims) {
             	 aggregateDimension(evalState, dataCache, s, aggFilter, DcTrackChangeOpt.APPEND);
              }
              //-- Aggregate time dimension
              aggregateDimension(evalState, dataCache, timeDim, aggFilter, DcTrackChangeOpt.APPEND);
-
+             //-- Aggregate measure dimension (if measure allocation enabled) (TTN-1927)
+             if (rule.isMeasureAllocation()) {
+                 aggregateDimension(evalState, dataCache, measureDim, aggFilter, DcTrackChangeOpt.APPEND);
+             }
+             
+             
              
              // Store changed cells as intersections, keyed by measure
              Set<Intersection> dcChangedIsSet = dataCache.getChangedIntersections();

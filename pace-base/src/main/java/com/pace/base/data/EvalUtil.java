@@ -653,7 +653,6 @@ public class EvalUtil {
 	    String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
 	    String timeDim = evalState.getAppDef().getMdbDef().getTimeDim(); 
 	    String yearDim = evalState.getAppDef().getMdbDef().getYearDim(); 
-	    PafDataCache dataCache = evalState.getDataCache();
 	    PafDimTree tree;
 	    List<PafDimMember> desc = null;
 	    Map<String, List<String>> memberListMap = new HashMap<String, List<String>>();
