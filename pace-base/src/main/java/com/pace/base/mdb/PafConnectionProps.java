@@ -15,8 +15,19 @@ public class PafConnectionProps implements IPafConnectionProps, Cloneable {
     private String metaDataServiceProvider;
     private String dataServiceProvider;
     private String mdbClassLoader;
+    private String connectionToolTip;
 
-    public PafConnectionProps() {
+    public String getConnectionToolTip() {
+		return connectionToolTip;
+	}
+
+
+	public void setConnectionToolTip(String connectionToolTip) {
+		this.connectionToolTip = connectionToolTip;
+	}
+
+
+	public PafConnectionProps() {
     }
         
     
