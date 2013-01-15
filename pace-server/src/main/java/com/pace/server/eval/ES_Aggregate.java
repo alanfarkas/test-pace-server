@@ -202,12 +202,12 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
              for (String s : hierDims) {
             	 aggregateDimension(evalState, dataCache, s, aggFilter, DcTrackChangeOpt.APPEND);
              }
-             //-- Aggregate time dimension
-             aggregateDimension(evalState, dataCache, timeDim, aggFilter, DcTrackChangeOpt.APPEND);
-             //-- Aggregate measure dimension (if measure allocation enabled) (TTN-1927)
+             //-- Aggregate measure dimension, if measure allocation enabled (TTN-1927)
              if (rule.isMeasureAllocation()) {
                  aggregateDimension(evalState, dataCache, measureDim, aggFilter, DcTrackChangeOpt.APPEND);
              }
+             //-- Aggregate time dimension
+             aggregateDimension(evalState, dataCache, timeDim, aggFilter, DcTrackChangeOpt.APPEND);
              
              
              
