@@ -99,10 +99,10 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             List<String> mbrs = new ArrayList<String>(1);
 			mbrs.add(measure);
 
-			// if measure allocation, include current measure's floor descendants
+			// if measure allocation, include current measure's descendants (TTN-1927)
 			if (rule.isMeasureAllocation()) {
 				PafDimTree measureTree = evalState.getEvaluationTree(measureDim);
-				mbrs.addAll(measureTree.getLowestMemberNames(measure));
+				mbrs.addAll(PafDimTree.getMemberNames(measureTree.getDescendants(measure)));
 			}
 
 			//total hack at this point. Allows additional measures to be signaled for 
