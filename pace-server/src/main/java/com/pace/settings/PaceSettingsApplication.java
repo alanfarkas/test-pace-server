@@ -5,6 +5,8 @@ import com.pace.base.InvalidUserNameException;
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafException;
 import com.pace.base.app.PafUserDef;
+import com.pace.base.ui.PafServer;
+import com.pace.server.PafMetaData;
 import com.pace.server.PafSecurityService;
 import com.pace.settings.data.MDBDatasourceContainer;
 import com.pace.settings.data.RDBDatasourceContainer;
@@ -55,11 +57,13 @@ public class PaceSettingsApplication extends Application implements
 
 	protected static final String TREE_NODE_WITHOUT_CHILDREN_STYLE = "no-children";
 	
-	private Label headingLabel = new Label(PaceSettingsConstants.PACE_APP_HEADING);
+	private Label headingLabel = new Label();
 
 	private HorizontalSplitPanel horizontalSplit = new HorizontalSplitPanel();
 
 	private SettingsTree tree = new SettingsTree(this);
+	
+	
 
 	private ServerInfoView serverInfoView;
 	
@@ -100,7 +104,7 @@ public class PaceSettingsApplication extends Application implements
 	@Override
 	public void init() {
 
-		setMainWindow(new Window(PaceSettingsConstants.PACE_APP_HEADING));
+		setMainWindow(new Window(PaceSettingsConstants.PACE_APP_HEADING+" ( "+this.getURL().getHost()+":"+this.getURL().getPort()+" )"));
 
 		VerticalLayout vl = new VerticalLayout();
 		vl.setSizeFull();
@@ -125,6 +129,8 @@ public class PaceSettingsApplication extends Application implements
 		tree.setItemStyleGenerator(itemStyleGenerator);
 
 		horizontalSplit.setFirstComponent(tree);
+		
+		headingLabel.setCaption(PaceSettingsConstants.PACE_APP_HEADING+" ( "+this.getURL().getHost()+":"+this.getURL().getPort()+" )");
 
 		vl.addComponent(createToolbar());
 		vl.addComponent(horizontalSplit);
@@ -141,6 +147,8 @@ public class PaceSettingsApplication extends Application implements
 		showServerInfoView();*/
 		
 		showLoginView();
+		
+		System.out.println("*************"+tree.getApplication().getURL());
 	}
 
 	public HorizontalLayout createToolbar() {
