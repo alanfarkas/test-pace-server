@@ -9,10 +9,14 @@ import java.util.List;
 import com.pace.settings.PaceSettingsApplication;
 import com.vaadin.data.Container;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.terminal.ThemeResource;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.Button.ClickListener;
 
 /**
  * @author JMilliron
@@ -49,35 +53,26 @@ public class MDBDatasourceTable extends Table {
         }
         
         setColumnHeaders(captionHeaderList.toArray(new String[0]));
+        
+        this.setColumnAlignment("connectionToolTip", Table.ALIGN_LEFT);
+        this.setItemIcon("connectionToolTip",new ThemeResource("icons/32/questionmark1.png"));
 		
         setSelectable(true);
         setImmediate(true);
         addListener((ItemClickListener) paceSettingsApplication);
         setNullSelectionAllowed(false);
-      /*  setTableFieldFactory(new TableFieldFactory() {
-			
-			@Override
-			public Field createField(Container container, Object itemId,
-					Object propertyId, Component uiContext) {
-				
-				
-				if ( propertyId.equals(MDBDatasourceFieldFactory.CONNECTION_STRING)) {
-					
-					setStyleName("table-text-wrap");
-					
-				}
-				
-				
-				return null;
-			}
-		});*/
+     
         
+        
+        
+  
         setColumnExpandRatio(MDBDatasourceFieldFactory.NAME, 10);
         setColumnExpandRatio(MDBDatasourceFieldFactory.CONNECTION_STRING, 45);
+       
         setColumnExpandRatio(MDBDatasourceFieldFactory.META_DATA_SERVICE_PROVIDER, 25);
         setColumnExpandRatio(MDBDatasourceFieldFactory.DATA_SERVICE_PROVIDER, 20);
         
-        
+      
         
 	}
 	
