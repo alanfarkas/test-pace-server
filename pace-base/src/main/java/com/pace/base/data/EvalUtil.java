@@ -450,8 +450,16 @@ public class EvalUtil {
 	 * 
 	 * @return List<Intersection>
 	 */
-	public static List<Intersection> buildFloorIntersections(Intersection is, IPafEvalState evalState) {	
-		return buildFloorIntersections(is, evalState, false);
+	public static List<Intersection> buildFloorIntersections(Intersection is, IPafEvalState evalState) {
+		
+		boolean bExplodeMeasures = false;
+		Rule rule = evalState.getRule();
+		
+		// Explode measures if measure allocation has been enabled (TTN-1927)
+		if (rule != null) 
+			bExplodeMeasures = rule.isMeasureAllocation();
+		
+		return buildFloorIntersections(is, evalState, bExplodeMeasures);
 	}
     
 	/**
