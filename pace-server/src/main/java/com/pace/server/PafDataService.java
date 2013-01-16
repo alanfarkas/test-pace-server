@@ -3743,26 +3743,6 @@ public class PafDataService {
 
 		IEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
 
-		// Create evaluation state object (holds and tracks information that
-		// is key to the evaluation process)
-		SliceState sliceState = new SliceState(evalRequest);
-		sliceState.setDataSliceParms(sliceParms);
-		EvalState evalState = new EvalState(sliceState, clientState, dataCache);
-		evalState.setAxisSortPriority(currentViewSection.getDimensionCalcSequence());
-		evalState.setDimSequence(currentViewSection.getDimensionsPriority());
-		evalState.setAttributeEval(hasAttributes);
-		evalState.setPreChangeViewCellValueMap(origViewCellValueMap);
-
-		// Set the axisAllocPriority property on eval state. The axisAlocPriority
-		// is equal to the axisSortPriority, except that the time and year 
-		// dimensions are replaced with time horizon dimension (TTN-1595).
-		List<String> axisPriorityList = new ArrayList<String>(Arrays.asList(evalState.getAxisSortPriority()));
-		axisPriorityList.remove(yearDim);
-		int timeDimIndex = axisPriorityList.indexOf(timeDim);
-		axisPriorityList.remove(timeDim);
-		axisPriorityList.add(timeDimIndex, dataCache.getTimeHorizonDim());
-		evalState.setAxisAllocPriority(axisPriorityList.toArray(new String[0]));
-		
 		// Set the measure rule set. If a measure rule set name is specified,
 		// use that rule set, else just use the default rule set.
 		RuleSet measureRuleset;
@@ -3772,8 +3752,32 @@ public class PafDataService {
 		else {
 			measureRuleset = clientState.getMsrRulsetByName(evalRequest.getRuleSetName());
 		}
-		evalState.setMeasureRuleSet(measureRuleset);
 		measureRuleset = resolveRuleSetSettings(appSettings, measureRuleset);				// TTN-1792
+		
+		// Create slice state object (holds info about evaluation request sent over from the client)
+		SliceState sliceState = new SliceState(evalRequest, measureRuleset);
+		sliceState.setDataSliceParms(sliceParms);
+				
+		
+		// Create evaluation state object (holds and tracks information that
+		// is key to the evaluation process)
+		EvalState evalState = new EvalState(sliceState, clientState, dataCache);
+		evalState.setAxisSortPriority(currentViewSection.getDimensionCalcSequence());
+		evalState.setDimSequence(currentViewSection.getDimensionsPriority());
+		evalState.setAttributeEval(hasAttributes);
+		evalState.setPreChangeViewCellValueMap(origViewCellValueMap);
+		evalState.setMeasureRuleSet(measureRuleset);
+
+		
+		// Set the axisAllocPriority property on eval state. The axisAlocPriority
+		// is equal to the axisSortPriority, except that the time and year 
+		// dimensions are replaced with time horizon dimension (TTN-1595).
+		List<String> axisPriorityList = new ArrayList<String>(Arrays.asList(evalState.getAxisSortPriority()));
+		axisPriorityList.remove(yearDim);
+		int timeDimIndex = axisPriorityList.indexOf(timeDim);
+		axisPriorityList.remove(timeDim);
+		axisPriorityList.add(timeDimIndex, dataCache.getTimeHorizonDim());
+		evalState.setAxisAllocPriority(axisPriorityList.toArray(new String[0]));
 		
 		// Check for contribution percent formulas on view section
 		List<String> contribPctVersions = appDef.getContribPctVersions();

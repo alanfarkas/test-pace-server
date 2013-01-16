@@ -29,6 +29,7 @@ import com.pace.base.comm.EvaluateViewRequest;
 import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDataSliceParms;
+import com.pace.base.rules.RuleSet;
 import com.pace.base.utility.StringUtils;
 
 /**
@@ -57,7 +58,7 @@ public class SliceState {
     
     public SliceState() {}
     
-	public SliceState(EvaluateViewRequest evalRequest) {
+	public SliceState(EvaluateViewRequest evalRequest, RuleSet ruleSet) {
 		
 		logger.debug("Building intersections for locked cells");
         lockedCells = buildIntersections(evalRequest.getLockedCells());
@@ -77,8 +78,34 @@ public class SliceState {
         protectedCellFormulas = evalRequest.getProtectedFormulas();
         viewName = evalRequest.getViewName();
         
+        // Intercept lift allocation changes (TTN-1793)
+        interceptLiftAllocationChanges(ruleSet.getLiftAllMeasureList());       
+        interceptLiftAllocationChanges(ruleSet.getLiftExistingMeasureList());       
     }
-    public Intersection[] getChangedCells() {
+	
+		
+    /**
+     * Intercept any user changes that belong to any lift allocation
+     * measures.
+     * 
+     * @param strings Current rule set
+     */
+    private void interceptLiftAllocationChanges(String[] strings) {
+    	
+//    	String[] liftAllMeasures = strings.getLiftAllMeasureList();
+//    	String[] liftExistingMeasures = strings.getLiftExistingMeasureList();
+//    			
+//    	// Nothing to do if no lift allocation measures defined in rule set
+//    	if ( (liftAllMeasures == null || liftAllMeasures.length == 0) 
+//    			&& (liftExistingMeasures == null || liftExistingMeasures.length == 0))
+//    		return;
+    		
+    	
+		// TODO Auto-generated method stub
+		
+	}
+
+	public Intersection[] getChangedCells() {
 		return changedCells;
 	}
 	public void setChangedCells(Intersection[] changedCells) {
