@@ -3762,7 +3762,7 @@ public class PafDataService {
 		// Convert user changes that correspond to lift allocation measures to lift allocation
 		// changes. This involves taking these user change intersections and moving them into 
 		// the appropriate lift collections. (TTN-1793)
-		ES_ProcessReplication.convertLiftAllocChanges(sliceState, measureRuleset);
+		ES_ProcessReplication.convertLiftAllocChanges(sliceState, measureRuleset, dataCache);
 
 		// Create evaluation state object (holds and tracks information that
 		// is key to the evaluation process)

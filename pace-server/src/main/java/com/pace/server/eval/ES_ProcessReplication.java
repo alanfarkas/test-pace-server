@@ -18,7 +18,9 @@
  */
 package com.pace.server.eval;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +53,7 @@ import com.pace.base.utility.StringUtils;
 public class ES_ProcessReplication implements IEvalStep {
     private static Logger logger = Logger.getLogger(ES_ProcessReplication.class);
     
-	public enum ReplicationType { ReplicateAll, ReplicateExisting, LiftAll, LiftExisting };
+	public enum ReplicationType { ReplicateAll, ReplicateExisting, LiftAll, LiftExisting, RSLiftAll, RSLiftExisting };
 	
     /* (non-Javadoc)
      * @see com.pace.base.eval.IEvalStep#performEvaluation(com.pace.base.state.EvalState)
@@ -85,6 +87,18 @@ public class ES_ProcessReplication implements IEvalStep {
 	    	Intersection[] liftExis = evalState.getSliceState().getLiftExistingCells();
 	    	if(liftExis != null){
 	    		this.replicateCells(evalState, dataCache, liftExis, ReplicationType.LiftExisting);
+	    	}
+
+	    	//the rule set lift all cells (TTN-1793)
+	    	Intersection[] rsLiftAll = evalState.getSliceState().getRuleSetLiftAllCells();
+	    	if(rsLiftAll != null){
+	    		this.replicateCells(evalState, dataCache, rsLiftAll, ReplicationType.RSLiftAll);
+	    	}
+
+	    	//the rule set lift existing cells (TTN-1793)
+	    	Intersection[] rsLiftExis = evalState.getSliceState().getRuleSetLiftExistingCells();
+	    	if(rsLiftExis != null){
+	    		this.replicateCells(evalState, dataCache, liftExis, ReplicationType.RSLiftExisting);
 	    	}
     	}
     	
@@ -141,10 +155,12 @@ public class ES_ProcessReplication implements IEvalStep {
      		//get the value of the the intersection to be replicated
     		replicatedValue = dataCache.getCellValue(ix);
     		
-       		// Lift allocation pre-processing. The lift amount is calculated by subtracting the original
-    		// value of the allocated cell from the current value (TTN-1793)
+       		// Lift allocation pre-processing. The lift amount for a lift allocation defined in a rule set
+    		// is calculated by subtracting the original value of the allocated cell from the current value.
+    		// For a lift allocation initiated from the client, the lift amount is just the value entered.
+    		// (TTN-1793).
     		double origCellValue, liftAmount = 0;
-    		if (replicationType == ReplicationType.LiftAll || replicationType == ReplicationType.LiftExisting) {
+    		if (replicationType == ReplicationType.RSLiftAll || replicationType == ReplicationType.RSLiftExisting) {
     			if (!origCellValueMap.containsKey(ix)) {
     				String errMsg = "Unable to perform lift allocation - unable to retrieve original value of replicated cell: " 
     						+ StringUtils.arrayToString(replicatedIx);
@@ -153,6 +169,7 @@ public class ES_ProcessReplication implements IEvalStep {
     			}
     			origCellValue= origCellValueMap.get(ix);
     			liftAmount = replicatedValue - origCellValue;
+    		} else if (replicationType == ReplicationType.LiftAll || replicationType == ReplicationType.LiftExisting) {
     			liftAmount = replicatedValue;
     		}
     		
@@ -214,7 +231,7 @@ public class ES_ProcessReplication implements IEvalStep {
 				    				tempIx = i;
 			    				}
 			    				break;
-			    			case LiftAll:		// TTN-1793
+			    			case LiftAll: case RSLiftAll:			// TTN-1793
 			    				replicatedValue = origCellValueMap.get(i) + liftAmount;
 			    				//update no matter what.
 			    				if(isVarVer){
@@ -226,7 +243,7 @@ public class ES_ProcessReplication implements IEvalStep {
 			    					tempIx = i;
 			    				}
 			    				break;
-			    			case LiftExisting:	// TTN-1793
+			    			case LiftExisting: case RSLiftExisting:	// TTN-1793
 			    				replicatedValue = origCellValueMap.get(i) + liftAmount;
 			    				//update only if != to zero.
 			    				if(isVarVer){
@@ -358,32 +375,42 @@ public class ES_ProcessReplication implements IEvalStep {
 	 *  
 	 * @param sliceState Slice state
 	 * @param ruleSet Measure rule set
+	 * @param dataCache Data cache
 	 */
-	public static void convertLiftAllocChanges(SliceState sliceState, RuleSet ruleSet) {
+	public static void convertLiftAllocChanges(SliceState sliceState, RuleSet ruleSet, PafDataCache dataCache) {
 		
-		Intersection[] changedCells = sliceState.getChangedCells(), liftAllCells = sliceState.getLiftAllCells(),
-				liftExistingCells = sliceState.getLiftExistingCells();
-        String[] liftAllMeasures = ruleSet.getLiftAllMeasureList(), liftExistingMeasures = ruleSet.getLiftExistingMeasureList();
+        String[] liftAllMeasures = ruleSet.getLiftAllMeasureList(), liftExistMeasures = ruleSet.getLiftExistingMeasureList();
 
         
 		// Intercept user changes that correspond to lift allocation measures and take
         // those user changes and move them into the appropriate lift collections.
         if ( (liftAllMeasures != null && liftAllMeasures.length > 0)
-        		|| (liftExistingMeasures != null && liftExistingMeasures.length > 0)) {
+        		|| (liftExistMeasures != null && liftExistMeasures.length > 0)) {
         	
-        	// Convert collections to be modified, into sets for quick lookup
+        	// Initialization
+        	Intersection[] changedCells = sliceState.getChangedCells();
+    		List<Intersection> rsLiftAllCellList = new ArrayList<Intersection>(), rsLiftExistCellList = new ArrayList<Intersection>();
+            final int measureAxis = dataCache.getMeasureAxis();
+
+    		// Convert changed cells array to map for quick lookup of intersection by measure
         	Set<Intersection> changedCellSet = new HashSet<Intersection>(Arrays.asList(changedCells));
-        	Set<Intersection> liftAllCellSet = new HashSet<Intersection>(Arrays.asList(liftAllCells));
-        	Set<Intersection> liftExistingCellSet = new HashSet<Intersection>(Arrays.asList(liftExistingCells));
+         	Map<String, Set<Intersection>> changedCellsByMsr = new HashMap<String, Set<Intersection>>();
+        	for (Intersection changedCell : changedCells) {
+        		String measure = changedCell.getCoordinates()[measureAxis];
+        		if (!changedCellsByMsr.containsKey(measure)) {
+        			changedCellsByMsr.put(measure, new HashSet<Intersection>());
+        		}
+        		changedCellsByMsr.get(measure).add(changedCell);
+        	}
         	
-        	// 
-        	interceptLiftAllocationChanges(ruleSet.getLiftAllMeasureList());
-			interceptLiftAllocationChanges(ruleSet.getLiftExistingMeasureList());
+        	// Intercept lift allocation changes
+        	interceptLiftAllocationChanges(ruleSet.getLiftAllMeasureList(), rsLiftAllCellList, changedCellsByMsr, changedCellSet);
+			interceptLiftAllocationChanges(ruleSet.getLiftExistingMeasureList(), rsLiftExistCellList, changedCellsByMsr, changedCellSet);
 			
-			// Apply changes to cell collections
-			changedCells = changedCellSet.toArray(new Intersection[0]);
-			liftAllCells = liftAllCellSet.toArray(new Intersection[0]);
-			liftExistingCells = liftExistingCellSet.toArray(new Intersection[0]);
+			// Apply updates to cell collections
+			sliceState.setChangedCells(changedCellSet.toArray(new Intersection[0]));
+			sliceState.setRuleSetLiftAllCells(rsLiftAllCellList.toArray(new Intersection[0]));
+			sliceState.setRuleSetLiftExistingCells(rsLiftExistCellList.toArray(new Intersection[0]));
 		}       
     }
 	
@@ -392,20 +419,32 @@ public class ES_ProcessReplication implements IEvalStep {
      * Intercept any user changes that belong to any lift allocation
      * measures.
      * 
-     * @param strings Current rule set
+     * @param liftMeasures Lift allocation measures
+     * @param liftCellList Lift cell list (to be created)
+     * @param changedCellsByMsr User changed cells by measure
+     * @param changedCellSet  All user changed cells
      */
-    private static void interceptLiftAllocationChanges(String[] liftMeasureLists) {
+    private static void interceptLiftAllocationChanges(String[] liftMeasures, List<Intersection> liftCellList, Map<String, Set<Intersection>> changedCellsByMsr, Set<Intersection> changedCellSet) {
     	
     	// Nothing to do if no lift allocation measures defined in rule set
-    	if (liftMeasureLists == null || liftMeasureLists.length == 0) return;
+    	if (liftMeasures == null || liftMeasures.length == 0) return;
     	
-    	// 
-//    			&& (liftExistingMeasures == null || liftExistingMeasures.length == 0))
-//    		return;
+    	// Convert all user changes for any lift measures into lift allocation changes
+    	for (String liftMeasure : liftMeasures) {
     		
-    	
-		// TODO Auto-generated method stub
-		
+    		// Look for any intersections for lift measure
+    		Set<Intersection> liftCells = changedCellsByMsr.get(liftMeasure);
+    		if (liftCells != null && !liftCells.isEmpty()) {
+    			
+    			// Add these lift cells into the lift cells collection
+    			liftCellList.addAll(liftCells);
+    			
+    			// Remove these lift cells from the changed cells collections
+    			changedCellsByMsr.remove(liftMeasure);
+    			changedCellSet.removeAll(liftCells);
+    		}
+    	}
+    			
 	}
-    
+ 
 }

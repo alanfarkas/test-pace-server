@@ -43,7 +43,7 @@ import com.pace.base.utility.StringUtils;
 public class SliceState {
 	
 	private static Logger logger = Logger.getLogger(SliceState.class); 
-	
+
 	private Intersection[] lockedCells;
 	private Intersection[] protectedCells;
 	private Intersection[] changedCells;
@@ -51,11 +51,13 @@ public class SliceState {
 	private Intersection[] replicateAllCells;
 	private Intersection[] liftExistingCells;
 	private Intersection[] liftAllCells;
-    private String[] protectedCellFormulas;
-    private PafDataSliceParms dataSliceParms;
-    private String viewName;
-    
-    public SliceState() {}
+	private Intersection[] ruleSetLiftExistingCells = new Intersection[0];
+	private Intersection[] ruleSetLiftAllCells = new Intersection[0];
+	private String[] protectedCellFormulas;
+	private PafDataSliceParms dataSliceParms;
+	private String viewName;
+
+	public SliceState() {}
     
 	public SliceState(EvaluateViewRequest evalRequest) {
 		
@@ -248,6 +250,35 @@ public class SliceState {
 		Set<Intersection> existingCells = new HashSet<Intersection>(Arrays.asList(liftAllCells));
 		existingCells.removeAll(cellsToRemove);
 		liftAllCells = existingCells.toArray(new Intersection[0]);
+	}
+
+
+	/**
+	 * @return the ruleSetLiftExistingCells
+	 */
+	public Intersection[] getRuleSetLiftExistingCells() {
+		return ruleSetLiftExistingCells;
+	}
+
+	/**
+	 * @param ruleSetLiftExistingCells the ruleSetLiftExistingCells to set
+	 */
+	public void setRuleSetLiftExistingCells(Intersection[] ruleSetLiftExistingCells) {
+		this.ruleSetLiftExistingCells = ruleSetLiftExistingCells;
+	}
+
+	/**
+	 * @return the ruleSetLiftAllCells
+	 */
+	public Intersection[] getRuleSetLiftAllCells() {
+		return ruleSetLiftAllCells;
+	}
+
+	/**
+	 * @param ruleSetLiftAllCells the ruleSetLiftAllCells to set
+	 */
+	public void setRuleSetLiftAllCells(Intersection[] ruleSetLiftAllCells) {
+		this.ruleSetLiftAllCells = ruleSetLiftAllCells;
 	}
 	
 }

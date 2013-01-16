@@ -524,7 +524,11 @@ public class RuleMngr {
             this.parseRuleSet(rsTemp, app.getMeasureFunctionFactory());
             
             // expand rule set measure list (TTN-1698)
-            rsTemp.setMeasureList(expandMeasureList(rsTemp, app));
+            rsTemp.setMeasureList(expandMeasureList(rsTemp.getMeasureList(), rsTemp, app));
+            
+            // expand lift allocation rule set measure lists (TTM-1793)
+            rsTemp.setLiftAllMeasureList(expandMeasureList(rsTemp.getLiftAllMeasureList(), rsTemp, app));
+            rsTemp.setLiftExistingMeasureList(expandMeasureList(rsTemp.getLiftExistingMeasureList(), rsTemp, app));
                         
         }
                
@@ -534,16 +538,16 @@ public class RuleMngr {
     /**
      * Expand rule set measure list specification
      * 
+     * @param measureList Measure list to be expanded
      * @param ruleSet Rule set
      * @param app Application definition
      * 
      * @return Expanded measures
      * @throws PafException 
      */
-    private static String[] expandMeasureList(RuleSet ruleSet, PafApplicationDef app) throws PafException {
+    private static String[] expandMeasureList(String[] measureList, RuleSet ruleSet, PafApplicationDef app) throws PafException {
     	
 		String measureDim = app.getMdbDef().getMeasureDim();
-    	String[] origMeasureList = ruleSet.getMeasureList();
 		List<String> updatedMeasureList = new ArrayList<String>();
 		List<String> measureTerms = new ArrayList<String>();
 		
@@ -555,13 +559,13 @@ public class RuleMngr {
 		// ex. "@IDESC(MDTTL_DRL)".  (TTN-1698)
 		
 		// no measure list - exit method
-		if (origMeasureList == null || origMeasureList.length == 0) {
-			return origMeasureList;
+		if (measureList == null || measureList.length == 0) {
+			return measureList;
 		}
 		      
 		// Expand each measure list term
 		PafDataService dataService = PafDataService.getInstance();
-		for (String measureTerm : origMeasureList) {
+		for (String measureTerm : measureList) {
 			
 			// Check for member list token
 			if (measureTerm.startsWith(PafBaseConstants.MEMBERLIST_TOKEN)) {
