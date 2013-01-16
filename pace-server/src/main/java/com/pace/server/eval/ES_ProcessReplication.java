@@ -18,6 +18,7 @@
  */
 package com.pace.server.eval;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,9 @@ import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.rules.Formula;
+import com.pace.base.rules.RuleSet;
 import com.pace.base.state.EvalState;
+import com.pace.base.state.SliceState;
 import com.pace.base.utility.StringUtils;
 
 /**
@@ -150,6 +153,7 @@ public class ES_ProcessReplication implements IEvalStep {
     			}
     			origCellValue= origCellValueMap.get(ix);
     			liftAmount = replicatedValue - origCellValue;
+    			liftAmount = replicatedValue;
     		}
     		
     		if(flrIx != null){
@@ -211,7 +215,7 @@ public class ES_ProcessReplication implements IEvalStep {
 			    				}
 			    				break;
 			    			case LiftAll:		// TTN-1793
-			    				replicatedValue = dataCache.getCellValue(i) + liftAmount;
+			    				replicatedValue = origCellValueMap.get(i) + liftAmount;
 			    				//update no matter what.
 			    				if(isVarVer){
 			    					//convert the variance version to a base version and update the value.
@@ -223,7 +227,7 @@ public class ES_ProcessReplication implements IEvalStep {
 			    				}
 			    				break;
 			    			case LiftExisting:	// TTN-1793
-			    				replicatedValue = dataCache.getCellValue(i) + liftAmount;
+			    				replicatedValue = origCellValueMap.get(i) + liftAmount;
 			    				//update only if != to zero.
 			    				if(isVarVer){
 			    					if (getBaseVersionValue(i, evalState, dataCache) != 0){
@@ -347,5 +351,61 @@ public class ES_ProcessReplication implements IEvalStep {
 		return dataCache.getCellValue(tempIs);
 		
     }
+
+	/**
+	 *  Convert user changes that correspond to lift allocation measures to lift allocation
+	 *  changes.
+	 *  
+	 * @param sliceState Slice state
+	 * @param ruleSet Measure rule set
+	 */
+	public static void convertLiftAllocChanges(SliceState sliceState, RuleSet ruleSet) {
+		
+		Intersection[] changedCells = sliceState.getChangedCells(), liftAllCells = sliceState.getLiftAllCells(),
+				liftExistingCells = sliceState.getLiftExistingCells();
+        String[] liftAllMeasures = ruleSet.getLiftAllMeasureList(), liftExistingMeasures = ruleSet.getLiftExistingMeasureList();
+
+        
+		// Intercept user changes that correspond to lift allocation measures and take
+        // those user changes and move them into the appropriate lift collections.
+        if ( (liftAllMeasures != null && liftAllMeasures.length > 0)
+        		|| (liftExistingMeasures != null && liftExistingMeasures.length > 0)) {
+        	
+        	// Convert collections to be modified, into sets for quick lookup
+        	Set<Intersection> changedCellSet = new HashSet<Intersection>(Arrays.asList(changedCells));
+        	Set<Intersection> liftAllCellSet = new HashSet<Intersection>(Arrays.asList(liftAllCells));
+        	Set<Intersection> liftExistingCellSet = new HashSet<Intersection>(Arrays.asList(liftExistingCells));
+        	
+        	// 
+        	interceptLiftAllocationChanges(ruleSet.getLiftAllMeasureList());
+			interceptLiftAllocationChanges(ruleSet.getLiftExistingMeasureList());
+			
+			// Apply changes to cell collections
+			changedCells = changedCellSet.toArray(new Intersection[0]);
+			liftAllCells = liftAllCellSet.toArray(new Intersection[0]);
+			liftExistingCells = liftExistingCellSet.toArray(new Intersection[0]);
+		}       
+    }
+	
+		
+    /**
+     * Intercept any user changes that belong to any lift allocation
+     * measures.
+     * 
+     * @param strings Current rule set
+     */
+    private static void interceptLiftAllocationChanges(String[] liftMeasureLists) {
+    	
+    	// Nothing to do if no lift allocation measures defined in rule set
+    	if (liftMeasureLists == null || liftMeasureLists.length == 0) return;
+    	
+    	// 
+//    			&& (liftExistingMeasures == null || liftExistingMeasures.length == 0))
+//    		return;
+    		
+    	
+		// TODO Auto-generated method stub
+		
+	}
     
 }

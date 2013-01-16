@@ -524,7 +524,7 @@ public class RuleMngr {
             this.parseRuleSet(rsTemp, app.getMeasureFunctionFactory());
             
             // expand rule set measure list (TTN-1698)
-            expandMeasureList(rsTemp, app);
+            rsTemp.setMeasureList(expandMeasureList(rsTemp, app));
                         
         }
                
@@ -537,9 +537,10 @@ public class RuleMngr {
      * @param ruleSet Rule set
      * @param app Application definition
      * 
+     * @return Expanded measures
      * @throws PafException 
      */
-    private static void expandMeasureList(RuleSet ruleSet, PafApplicationDef app) throws PafException {
+    private static String[] expandMeasureList(RuleSet ruleSet, PafApplicationDef app) throws PafException {
     	
 		String measureDim = app.getMdbDef().getMeasureDim();
     	String[] origMeasureList = ruleSet.getMeasureList();
@@ -555,7 +556,7 @@ public class RuleMngr {
 		
 		// no measure list - exit method
 		if (origMeasureList == null || origMeasureList.length == 0) {
-			return;
+			return origMeasureList;
 		}
 		      
 		// Expand each measure list term
@@ -585,9 +586,9 @@ public class RuleMngr {
 			}
 		}
 		
-		// Expand all found measure terms and update rule set measure list
+		// Expand all found measure terms and return expanded list
 		updatedMeasureList.addAll(dataService.expandExpressionList(measureDim, measureTerms, null));
-		ruleSet.setMeasureList(updatedMeasureList.toArray(new String[0]));
+		return updatedMeasureList.toArray(new String[0]);
 		
 
 	}

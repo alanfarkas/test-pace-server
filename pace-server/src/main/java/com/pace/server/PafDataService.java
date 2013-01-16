@@ -104,6 +104,7 @@ import com.pace.base.view.PafViewSection;
 import com.pace.base.view.PageTuple;
 import com.pace.base.view.ViewTuple;
 import com.pace.server.assortment.AsstSet;
+import com.pace.server.eval.ES_ProcessReplication;
 import com.pace.server.eval.IEvalStrategy;
 import com.pace.server.eval.MathOp;
 import com.pace.server.eval.RuleBasedEvalStrategy;
@@ -3755,10 +3756,14 @@ public class PafDataService {
 		measureRuleset = resolveRuleSetSettings(appSettings, measureRuleset);				// TTN-1792
 		
 		// Create slice state object (holds info about evaluation request sent over from the client)
-		SliceState sliceState = new SliceState(evalRequest, measureRuleset);
+		SliceState sliceState = new SliceState(evalRequest);
 		sliceState.setDataSliceParms(sliceParms);
 				
-		
+		// Convert user changes that correspond to lift allocation measures to lift allocation
+		// changes. This involves taking these user change intersections and moving them into 
+		// the appropriate lift collections. (TTN-1793)
+		ES_ProcessReplication.convertLiftAllocChanges(sliceState, measureRuleset);
+
 		// Create evaluation state object (holds and tracks information that
 		// is key to the evaluation process)
 		EvalState evalState = new EvalState(sliceState, clientState, dataCache);
