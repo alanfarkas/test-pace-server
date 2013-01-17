@@ -2407,7 +2407,7 @@ public class PafDataService {
 			viewSection.setColTuples(expandTuples(viewSection.getColTuples(), viewSection.getColAxisDims(), viewSection.getPageAxisDims(), viewSection.getPageAxisMembers(), viewSection.getAttributeDims(), clientState));
 
 			// Remove invalid tuples from view section
-			PafViewService.getInstance().ProcessInvalidTuples(viewSection, clientState);
+			PafViewService.getInstance().processInvalidTuples(viewSection, clientState);
 			if (viewSection.getRowTuples().length > 0){
 				viewSection.setRowTuples(generateHeaderGroupNo(viewSection.getRowTuples(),viewSection.getRowAxisDims(), viewSection.isRowHeaderRepeated()));
 			} else {
@@ -2567,13 +2567,16 @@ public class PafDataService {
 		
 		// Run the expanded tuples through some final editing and filtering
 		logger.debug("Editing & Filtering Expanded View Tuples");
-		List<ViewTuple> tuplesToRemove = new ArrayList<ViewTuple>();
-		String invalidCoords = ""; 
+
 		// -- Determine if time horizon validation will be performed. This validation will be performed
 		// if the tuple, by itself, or in combination with the page tuple contains both the time and
 		// year dimensions. No time horizon validation will be performed, however,  if the tuple doesn't 
-		// contain at least one of these dimensions, even if they are both specified as page dimensions
-		// (TTN-1858 / TTN-1886).
+		// contain at least one of these dimensions, unless if they are both specified as page dimensions.
+		//
+		// Validating the case where the time and year are on different axis, but are either a row or column
+		// dimension, cannot be done here, but will be done in some later logic (TTN-1858 / TTN-1886)
+		List<ViewTuple> tuplesToRemove = new ArrayList<ViewTuple>();
+		List<String> invalidCoordList = new ArrayList<String>(); 
 		boolean bDoTimeHorizValidation = true, bTimeOnPage = false, bYearOnPage = false;
 		int timeAxis = 0, yearAxis = 0;
 		String period = null, year = null;
@@ -2603,10 +2606,16 @@ public class PafDataService {
 				bDoTimeHorizValidation = false;	
 			}
 			
-			// Skip validation if both year and time are page dimensions
-			if (bTimeOnPage && bYearOnPage) 
-				bDoTimeHorizValidation = false;
-			
+			// Test for invalid time horizon coordinate when time and year
+			// are both page dimensions
+			if (bTimeOnPage && bYearOnPage) {
+				String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
+				if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
+					String invalidCoords = PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period;
+					String errMsg = invalidCoords + " is an invalid Year/Time combination. Please select a different Year/Time combination.";
+					throw new PafException(errMsg, PafErrSeverity.Error);
+				}				
+			}
 		 } while (false);
 		
 
@@ -2634,7 +2643,7 @@ public class PafDataService {
 					year = memberArray[yearAxis];
 				String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
 				if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
-					invalidCoords = PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period  + ",";
+					invalidCoordList.add(PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period);
 					tuplesToRemove.add(viewTuple);
 				}
 			}			
@@ -2642,8 +2651,9 @@ public class PafDataService {
 		}
 		
 		// -- Lastly, remove any filtered tuples
-		if( expandedTuples.size() != 0 && expandedTuples.equals(tuplesToRemove) ) {
-			String errMsg = invalidCoords + " contains invalid Year/Time member combination. Please select a different Year/Time intersection.";
+		if( expandedTuples.size() != 0 && tuplesToRemove.size() == expandedTuples.size() ) {
+			String errMsg = "The view can not be displayed since all the selected Year/Time combinations: "
+					+ StringUtils.arrayListToString(invalidCoordList) + " are invalid. Please select different Year/Time combination(s).";
 			throw new PafException(errMsg, PafErrSeverity.Error);
 		}
 		expandedTuples.removeAll(tuplesToRemove);

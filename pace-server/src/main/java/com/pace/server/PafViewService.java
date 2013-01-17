@@ -3927,12 +3927,40 @@ public class PafViewService {
 		PafViewService.invalidViewsMap = invalidViewsMap;
 	}
 	
+
+	/**
+	 * Process invalid view tuples
+	 * 
+	 * @param viewSection View section
+	 * @param clientState Client state
+	 */
+	public void processInvalidTuples(PafViewSection viewSection, PafClientState clientState) {
+
+		processInvalidTimeHorizTuples(viewSection, clientState);
+		processInvalidAttrTuples(viewSection, clientState);
+		
+	}
+
+	/**
+	 * Process invalid time horizon tuples
+	 * 
+	 * @param viewSection View section
+	 * @param clientState Client state
+	 */
+	private void processInvalidTimeHorizTuples(PafViewSection viewSection, PafClientState clientState) {
+		
+		// Filter out any col/tuple combinations that correspond to invalid time horizon coorindates
+		
+
+		
+	}
+
 	/**
 	 * Process each attribute base dimension for invalid attribute combinations.
 	 * @param viewSection View section
 	 * @param clientState Client state
 	 */
-	public void ProcessInvalidTuples(PafViewSection viewSection, PafClientState clientState){
+	public void processInvalidAttrTuples(PafViewSection viewSection, PafClientState clientState){
 		
 		PafAxis baseDimAxis;
 		List<String> viewSectionAttrDims;
@@ -3997,7 +4025,7 @@ public class PafViewService {
 				}
 			}
 			
-			removeInvalidTuples(viewSection, baseDim, attrDims, baseDimAxis, primaryAttrAxis, isCrossAttrBaseDim, clientState.getUowTrees());
+			removeInvalidAttrTuples(viewSection, baseDim, attrDims, baseDimAxis, primaryAttrAxis, isCrossAttrBaseDim, clientState.getUowTrees());
 		}
 		
 		//Now, lock the invalid attribute intersections for the base dimensions with attributes on both the 
@@ -4018,7 +4046,7 @@ public class PafViewService {
 	 * @param isCrossAttrBaseDim
 	 * @param uowTrees Collection of uow cache trees
 	 */
-	private void removeInvalidTuples(PafViewSection viewSection, String baseDim, List<String> attrDims, 
+	private void removeInvalidAttrTuples(PafViewSection viewSection, String baseDim, List<String> attrDims, 
 			PafAxis baseDimAxis, int primaryAttrAxis, boolean isCrossAttrBaseDim, MemberTreeSet uowTrees){
 		ViewTuple[] tuples = null;
 		String [] axisDims = null;
@@ -4835,16 +4863,5 @@ public class PafViewService {
 		
 		return false;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+		
 }
