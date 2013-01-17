@@ -3745,17 +3745,6 @@ public class PafDataService {
 //			evalPerfLogger.info(logMsg);
 //		}
 		
-		// Update the data cache with updated client data. Lift allocation requires that the original
-		// cell values are recorded (TTN-1793).
-		logger.info("Updating data cache with client data: " + sliceParms.toString() );
-		if ((evalRequest.getLiftAllCells() != null && evalRequest.getLiftAllCells().getCoordCount() > 0)
-				|| evalRequest.getLiftExistingCells() != null && evalRequest.getLiftExistingCells().getCoordCount() > 0) {
-			bTrackChangedCells = true;
-		}
-		Map<Intersection, Double> origViewCellValueMap = dataCache.updateDataCache(newSlice, sliceParms, bTrackChangedCells);
-
-		IEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
-
 		// Set the measure rule set. If a measure rule set name is specified,
 		// use that rule set, else just use the default rule set.
 		RuleSet measureRuleset;
@@ -3767,6 +3756,19 @@ public class PafDataService {
 		}
 		measureRuleset = resolveRuleSetSettings(appSettings, measureRuleset);				// TTN-1792
 		
+		// Update the data cache with updated client data. Lift allocation requires that the original
+		// cell values are recorded (TTN-1793).
+		logger.info("Updating data cache with client data: " + sliceParms.toString() );
+		if ( (evalRequest.getLiftAllCells() != null && evalRequest.getLiftAllCells().getCoordCount() > 0)
+				|| (evalRequest.getLiftExistingCells() != null && evalRequest.getLiftExistingCells().getCoordCount() > 0) 
+					|| (measureRuleset.getLiftAllMeasureList() != null && measureRuleset.getLiftAllMeasureList().length > 0)
+						|| (measureRuleset.getLiftExistingMeasureList() != null && measureRuleset.getLiftExistingMeasureList().length > 0) ) {
+			bTrackChangedCells = true;
+		}
+		Map<Intersection, Double> origViewCellValueMap = dataCache.updateDataCache(newSlice, sliceParms, bTrackChangedCells);
+
+		IEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
+
 		// Create slice state object (holds info about evaluation request sent over from the client)
 		SliceState sliceState = new SliceState(evalRequest);
 		sliceState.setDataSliceParms(sliceParms);
