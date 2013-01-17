@@ -59,6 +59,7 @@ import com.pace.base.comm.EvaluateViewRequest;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.data.Coordinates;
+import com.pace.base.data.ExpOpCode;
 import com.pace.base.data.ExpOperation;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.IntersectionUtil;
@@ -2418,7 +2419,6 @@ public class PafDataService {
 			} else {
 				viewSection.setEmpty(true);
 			}
-			
 		}
 		logger.debug("Completed exapanding tuples for view: " + view.getName());        
 		return view;
@@ -2537,8 +2537,10 @@ public class PafDataService {
 		logger.debug("Expanding tuples for axis: " + axisList);  
 
 		// Expand inner axis
-		for (ViewTuple vt:origViewTuples) {               
-			expandedTuples.addAll(expandTuple(vt, innerAxisIndex, axes[innerAxisIndex], clientState));         
+		for (ViewTuple vt:origViewTuples) {   
+			if( ! vt.getMemberDefs()[innerAxisIndex].isEmpty() ) {
+				expandedTuples.addAll(expandTuple(vt, innerAxisIndex, axes[innerAxisIndex], clientState));   
+			}
 		}
 
 		// Compile a list of attribute dimensions used in this tuple or the page tuple. This
@@ -2566,7 +2568,7 @@ public class PafDataService {
 		// Run the expanded tuples through some final editing and filtering
 		logger.debug("Editing & Filtering Expanded View Tuples");
 		List<ViewTuple> tuplesToRemove = new ArrayList<ViewTuple>();
-		
+		String invalidCoords = ""; 
 		// -- Determine if time horizon validation will be performed. This validation will be performed
 		// if the tuple, by itself, or in combination with the page tuple contains both the time and
 		// year dimensions. No time horizon validation will be performed, however,  if the tuple doesn't 
@@ -2632,6 +2634,7 @@ public class PafDataService {
 					year = memberArray[yearAxis];
 				String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
 				if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
+					invalidCoords = PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period  + ",";
 					tuplesToRemove.add(viewTuple);
 				}
 			}			
@@ -2639,6 +2642,10 @@ public class PafDataService {
 		}
 		
 		// -- Lastly, remove any filtered tuples
+		if( expandedTuples.size() != 0 && expandedTuples.equals(tuplesToRemove) ) {
+			String errMsg = invalidCoords + " contains invalid Year/Time member combination. Please select a different Year/Time intersection.";
+			throw new PafException(errMsg, PafErrSeverity.Error);
+		}
 		expandedTuples.removeAll(tuplesToRemove);
 		
 
@@ -3114,32 +3121,36 @@ public class PafDataService {
 				if ( m.equals(PafBaseConstants.PAF_BLANK)) {
 					memberList.add(new PafBaseMember(m));
 				} else {
-
-					//get dim member from tree
-					newPafDimMember = tree.getMember(m);
 					
-					//if memberList has members in it, get last member in tree and see
-					//if last and current members are same, if so..don't add dup to list.
-					if ( memberList.size() > 0 ) {
+					if( ! m.isEmpty() ) {
+						//get dim member from tree
+						newPafDimMember = tree.getMember(m);
 						
-						//get last dim member
-						PafDimMember lastPafDimMember = memberList.get(memberList.size() -1);
-						
-						//if last = new, continue to next member
-						if ( lastPafDimMember.equals(newPafDimMember)) {
-							continue;
+						//if memberList has members in it, get last member in tree and see
+						//if last and current members are same, if so..don't add dup to list.
+						if ( memberList.size() > 0 ) {
+							
+							//get last dim member
+							PafDimMember lastPafDimMember = memberList.get(memberList.size() -1);
+							
+							//if last = new, continue to next member
+							if ( lastPafDimMember.equals(newPafDimMember)) {
+								continue;
+							}
 						}
+						
+						//add new paf dim member to list
+						memberList.add(newPafDimMember);
 					}
-					
-					//add new paf dim member to list
-					memberList.add(newPafDimMember);
-					
 				}
 			}
 			break;
 			
 		case OFFSET_MEMBERS:
 			memberList = new ArrayList<PafDimMember>();
+			if (expOp.getParms().length == 0) {
+				
+			}
 			String baseMember = expOp.getParms()[0];
 			int offsetStart = Short.parseShort(expOp.getParms()[1]);
 			int offsetEnd = Short.parseShort(expOp.getParms()[2]);
@@ -3154,7 +3165,7 @@ public class PafDataService {
 		case PLAN_YEARS:
 			parmKey = PafBaseConstants.VIEW_TOKEN_PLAN_YEARS;
 			parmVal = tokenCatalog.getProperty(parmKey);
-			if ( (parmVal == null || parmVal.equals("")) ) {
+			if ( parmVal == null ) {
 				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
 				logger.error(errMsgDtl);
 				throw new IllegalArgumentException(errMsgDtl);
@@ -3172,7 +3183,7 @@ public class PafDataService {
 		case NONPLAN_YEARS:
 			parmKey = PafBaseConstants.VIEW_TOKEN_NONPLAN_YEARS;
 			parmVal = tokenCatalog.getProperty(parmKey);
-			if ( (parmVal == null || parmVal.equals("")) ) {
+			if ( parmVal == null ) {
 				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
 				logger.error(errMsgDtl);
 				throw new IllegalArgumentException(errMsgDtl);
@@ -3190,7 +3201,7 @@ public class PafDataService {
 		case FIRST_PLAN_YEAR:
 			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_YEAR;
 			parmVal = tokenCatalog.getProperty(parmKey);
-			if ( (parmVal == null || parmVal.equals("")) ) {
+			if ( parmVal == null ) {
 				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
 				logger.error(errMsgDtl);
 				throw new IllegalArgumentException(errMsgDtl);
@@ -3203,7 +3214,7 @@ public class PafDataService {
 		case FIRST_NONPLAN_YEAR:
 			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_NONPLAN_YEAR;
 			parmVal = tokenCatalog.getProperty(parmKey);
-			if ( (parmVal == null || parmVal.equals("")) ) {
+			if ( parmVal == null ) {
 				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
 				logger.error(errMsgDtl);
 				throw new IllegalArgumentException(errMsgDtl);
@@ -3230,14 +3241,15 @@ public class PafDataService {
 
 
 		// return member names, if none the return original member (TTN-1886)
-		int i=0;
 		String[] memberNames = new String[memberList.size()];
-		for (PafDimMember m : memberList)
-			memberNames[i++] = m.getKey();
-		if (memberNames.length == 0) {
-			memberNames = new String[]{firstTerm};
+		if( ! firstTerm.isEmpty() && expOp.getOpCode() != ExpOpCode.OFFSET_MEMBERS ) {
+			int i=0;
+			for (PafDimMember m : memberList)
+				memberNames[i++] = m.getKey();
+			if (memberNames.length == 0) {
+				memberNames = new String[]{firstTerm};
+			}
 		}
-		
 		// return member names
 		return memberNames;
 	}

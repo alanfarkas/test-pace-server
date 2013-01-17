@@ -3386,7 +3386,7 @@ public class PafViewService {
 		if( member.contains("@FIRST_PLAN_YEAR")) {
 			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_YEAR;
 			parmVal = tokenCatalog.getProperty(parmKey);
-			if ( (parmVal == null || parmVal.equals("")) ) {
+			if ( parmVal == null ) {
 				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
 				logger.error(errMsgDtl);
 				throw new IllegalArgumentException(errMsgDtl);
@@ -3396,7 +3396,7 @@ public class PafViewService {
 		if( member.contains("@FIRST_NONPLAN_YEAR")) {
 			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_NONPLAN_YEAR;
 			parmVal = tokenCatalog.getProperty(parmKey);
-			if ( (parmVal == null || parmVal.equals("")) ) {
+			if ( parmVal == null ) {
 				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
 				logger.error(errMsgDtl);
 				throw new IllegalArgumentException(errMsgDtl);
@@ -3406,7 +3406,7 @@ public class PafViewService {
 		if( member.contains("@FIRST_PLAN_PERIOD")) {
 			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_PERIOD;
 			parmVal = tokenCatalog.getProperty(parmKey);
-			if ( (parmVal == null || parmVal.equals("")) ) {
+			if ( parmVal == null ) {
 				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
 				logger.error(errMsgDtl);
 				throw new IllegalArgumentException(errMsgDtl);
@@ -3416,7 +3416,7 @@ public class PafViewService {
 		if( member.contains("@PLAN_YEARS")) {
 			parmKey = PafBaseConstants.VIEW_TOKEN_PLAN_YEARS;
 			parmVal = tokenCatalog.getProperty(parmKey);
-			if ( (parmVal == null || parmVal.equals("")) ) {
+			if ( parmVal == null ) {
 				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
 				logger.error(errMsgDtl);
 				throw new IllegalArgumentException(errMsgDtl);
@@ -3426,7 +3426,7 @@ public class PafViewService {
 		if( member.contains("@NONPLAN_YEARS")) {
 			parmKey = PafBaseConstants.VIEW_TOKEN_NONPLAN_YEARS;
 			parmVal = tokenCatalog.getProperty(parmKey);
-			if ( (parmVal == null || parmVal.equals("")) ) {
+			if ( parmVal == null ) {
 				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
 				logger.error(errMsgDtl);
 				throw new IllegalArgumentException(errMsgDtl);
