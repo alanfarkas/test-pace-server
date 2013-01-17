@@ -62,9 +62,9 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 	@Override
 	protected void createHeaderListMapEntries() {
 		
-		getHeaderListMap().put(ProjectElementId.RuleSet_RuleSet.toString(), Arrays.asList("rule set name", "alloc type", "measure list", "lift existing measure list", "lift all measure list", "comment - rs", "comment - rg", "id - rg", "perpetual - rg", "skip protection processing - rg", "balance key set - rg", "delayed perpetual - rg", "perpetual allocation - rg", "perform initial allocation - rg", "base allocate measure", "trigger measures (pipe delimited)", "skip allocation", "lock allocation", "skip aggeration", "lock system evaluation result", "lock user evaluation result", "eval locked intersections", "lock all prior time", "calc all periods", "initial TB first allocation"));
-		getHeaderListMap().put(ProjectElementId.RuleSet_RuleGroup.toString(), Arrays.asList("rule group", "", "", "", "", "", ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, "", "", "", "", "", "", "", "", "", "", ""));
-		getHeaderListMap().put(ProjectElementId.RuleSet_Rule.toString(), Arrays.asList("", "rule(s)", "result term", "expression", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""));
+		getHeaderListMap().put(ProjectElementId.RuleSet_RuleSet.toString(), Arrays.asList("rule set name", "alloc type", "measure list", "lift existing measure list", "lift all measure list", "comment - rs", "comment - rg", "id - rg", "perpetual - rg", "skip protection processing - rg", "balance key set - rg", "delayed perpetual - rg", "perpetual allocation - rg", "perform initial allocation - rg", "base allocate measure", "trigger measures (pipe delimited)", "skip allocation", "lock allocation", "skip aggeration", "lock system evaluation result", "lock user evaluation result", "eval locked intersections", "lock all prior time", "calc all periods", "initial TB first allocation", "measure allocation"));
+		getHeaderListMap().put(ProjectElementId.RuleSet_RuleGroup.toString(), Arrays.asList("rule group", "", "", "", "", "", ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, ExcelPaceProjectConstants.HEADER_IGNORE_IDENT, "", "", "", "", "", "", "", "", "", "", "", ""));
+		getHeaderListMap().put(ProjectElementId.RuleSet_Rule.toString(), Arrays.asList("", "rule(s)", "result term", "expression", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""));
 		
 	}
 
@@ -535,6 +535,12 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 										rule.setInitialTBFirstAllocation(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
 										break;
 										
+									//measure allocation
+									case 25:
+										
+										rule.setMeasureAllocation(PafExcelUtil.getBoolean(getProjectElementId(), valueObject, true));
+										break;
+										
 									}
 									
 								} catch (ExcelProjectDataErrorException epdee) {
@@ -796,6 +802,8 @@ public class RuleSetsExcelElementItem<T extends Map<String, RuleSet>> extends Pa
 									//initial TB first allocation
 									excelRow.addRowItem(24, PafExcelValueObject.createFromBoolean(r.isInitialTBFirstAllocation()));
 
+									//measure allocation
+									excelRow.addRowItem(25, PafExcelValueObject.createFromBoolean(r.isMeasureAllocation()));
 									
 									//add rule row
 									excelRowList.add(excelRow);
