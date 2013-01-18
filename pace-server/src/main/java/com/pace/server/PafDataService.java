@@ -2533,7 +2533,9 @@ public class PafDataService {
 
 		
 		// Initialization
-		for (String a : axes) {axisList += a + " "; }
+		for (String a : axes) {
+			axisList += a + " "; 
+		}
 		logger.debug("Expanding tuples for axis: " + axisList);  
 
 		// Expand inner axis
@@ -2954,9 +2956,11 @@ public class PafDataService {
 			ExpOperation expOp = new ExpOperation(term);
 			String [] expTerms = resolveExpOperation(expOp, viewTuple.getParentFirst(), dim, clientState, true);
 			for (String expTerm : expTerms) {
-				ViewTuple vt = viewTuple.clone();
-				vt.getMemberDefs()[axisIndex] = expTerm;
-				expTuples.add(vt);
+				if( expTerm != null && ! expTerm.isEmpty() ) {
+					ViewTuple vt = viewTuple.clone();
+					vt.getMemberDefs()[axisIndex] = expTerm;
+					expTuples.add(vt);
+				}
 			}
 		}
 		else {
@@ -2964,9 +2968,11 @@ public class PafDataService {
 			if( term.contains(",") ) {
 				List<String> expTermList = StringUtils.stringToList(term, ",");
 				for (String expTerm : expTermList) {
-					ViewTuple vt = viewTuple.clone();
-					vt.getMemberDefs()[axisIndex] = expTerm;
-					expTuples.add(vt);
+					if( expTerm != null && ! expTerm.isEmpty() ) {
+						ViewTuple vt = viewTuple.clone();
+						vt.getMemberDefs()[axisIndex] = expTerm;
+						expTuples.add(vt);
+					}
 				}
 			}
 			else {
