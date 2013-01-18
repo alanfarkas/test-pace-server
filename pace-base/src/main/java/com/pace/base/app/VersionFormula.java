@@ -87,7 +87,7 @@ public class VersionFormula {
 	 * @param baseVersion Base Version
 	 * @param yearOffset yearOffset
 	 */
-	public VersionFormula(String baseVersion, String compareVersion, Integer yearOffset) {
+	public VersionFormula(String baseVersion, Integer yearOffset) {
 
 		this.baseVersion = baseVersion;
 		this.yearOffset = yearOffset;

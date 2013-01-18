@@ -271,7 +271,7 @@ public class EsbData implements IMdbData{
 				
 				// Get version formula properties
 				VersionFormula vf = vd.getVersionFormula();
-				String baseVersion = vf.getBaseVersionValue(dataCache.getPlanVersion());
+				String baseVersion = vf.getBaseVersionValue(vf.getBaseVersion());
 				
 				// Determine the years that need to be loaded versus the year intersections that
 				// only need to be instantiated
