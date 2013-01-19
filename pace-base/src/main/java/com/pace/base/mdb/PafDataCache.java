@@ -4589,7 +4589,7 @@ public class PafDataCache implements IPafDataCache {
 			}
 
 			// Validate member name. 
-			String member = key.getCoordinate(dim);
+			String member = key.getCoordinate(i);
 //			if (!dim.equals(yearDim)) {
 				if (!this.isMember(dim, member)) {
 					return false;
@@ -4615,7 +4615,7 @@ public class PafDataCache implements IPafDataCache {
 			}
 			
 			// Validate member name
-			String member = key.getCoordinate(dim);
+			String member = key.getCoordinate(i);
 			if (!this.isMember(dim, member)) {
 				return false;
 			}
