@@ -30,7 +30,7 @@ import java.util.List;
  * @author AFarkas
  * 
  */
-public class Coordinates {
+public class Coordinates implements ICoords {
 
 	private String[] coordinates;
 	transient private int hashCode;

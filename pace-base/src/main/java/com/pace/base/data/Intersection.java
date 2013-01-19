@@ -29,7 +29,7 @@ import java.util.Set;
  * @author JWatkins
  * 
  */
-public class Intersection {
+public class Intersection implements ICoords {
 
 	private String[] dimensions;
 	private String[] coordinates;
@@ -324,6 +324,27 @@ public class Intersection {
 			size = dimensions.length;
 		}
 		return size;
+	}
+
+	/**
+	 * 	Get the value of a coordinate
+	 * 
+	 * @param axis Coordinate axis
+	 * @return Coordinate value
+	 */
+	public String getCoordinate(int axis) {
+		return getCoordinates()[axis];
+	}
+
+	/**
+	 * 	Set the value of a coordinate
+	 * 
+	 * @param axis Coordinate axis
+	 * @param value String value
+	 */
+	public void setCoordinate(int axis, String value) {
+		getCoordinates()[axis] = value;
+		hashCode = 0;
 	}
 
 }
