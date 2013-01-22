@@ -54,6 +54,7 @@ import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
+import com.pace.base.data.TimeSlice;
 import com.pace.base.db.cellnotes.SimpleCellNote;
 import com.pace.base.db.membertags.MemberTagCommentEntry;
 import com.pace.base.db.membertags.MemberTagCommentPosition;
@@ -3933,8 +3934,9 @@ public class PafViewService {
 	 * 
 	 * @param viewSection View section
 	 * @param clientState Client state
+	 * @throws PafException 
 	 */
-	public void processInvalidTuples(PafViewSection viewSection, PafClientState clientState) {
+	public void processInvalidTuples(PafViewSection viewSection, PafClientState clientState) throws PafException {
 
 		processInvalidTimeHorizTuples(viewSection, clientState);
 		processInvalidAttrTuples(viewSection, clientState);
@@ -3946,13 +3948,187 @@ public class PafViewService {
 	 * 
 	 * @param viewSection View section
 	 * @param clientState Client state
+	 * @throws PafException 
 	 */
-	private void processInvalidTimeHorizTuples(PafViewSection viewSection, PafClientState clientState) {
+	private void processInvalidTimeHorizTuples(PafViewSection viewSection, PafClientState clientState) throws PafException {
 		
 		// Filter out any col/tuple combinations that correspond to invalid time horizon coorindates
+		ViewTuple[] rowViewTuples = viewSection.getRowTuples();
+		ViewTuple[] colViewTuples = viewSection.getColTuples();
+		String[] rowAxes = viewSection.getRowAxisDims();
+		String[] colAxes = viewSection.getColAxisDims();
+		String rowAxisList = "", colAxisList = "";
+		MdbDef mdbDef = clientState.getMdbDef();
+		String timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
+		Set<String> invalidTimeHorizonPeriods = clientState.getInvalidTimeHorizonPeriods();
+		List<ViewTuple> expandedRowTuples = new ArrayList<ViewTuple>();
+		List<ViewTuple> expandedColTuples = new ArrayList<ViewTuple>();
+		
+		// Initialization
+		for (String a : rowAxes) {
+			rowAxisList += a + " "; 
+		}
+		logger.debug("Expanding row tuples for row axis: " + rowAxisList);  
+		for (String a : colAxes) {
+			colAxisList += a + " "; 
+		}
+		logger.debug("Expanding column tuples for column axis: " + colAxisList);  
+		
+		// Expand tuples
+		int rowDimCount = rowAxes.length;
+		int innerRowAxisIndex = rowDimCount -1;
+		for (ViewTuple vt:rowViewTuples) {   
+			if( ! vt.getMemberDefs()[innerRowAxisIndex].isEmpty() ) {
+				expandedRowTuples.addAll(pafDataService.expandTuple(vt, innerRowAxisIndex, rowAxes[innerRowAxisIndex], clientState));   
+			}
+		}
+		int colDimCount = colAxes.length;
+		int innerColAxisIndex = colDimCount -1;
+		for (ViewTuple vt:colViewTuples) {   
+			if( ! vt.getMemberDefs()[innerColAxisIndex].isEmpty() ) {
+				expandedColTuples.addAll(pafDataService.expandTuple(vt, innerColAxisIndex, colAxes[innerColAxisIndex], clientState));   
+			}
+		}
+		
+		// Compile a list of attribute dimensions used in this tuple or the page tuple. This
+		// information will be used to in an initial pass at filtering out invalid member 
+		// intersections. (TTN-1469)
+		String[] attributeDims = viewSection.getAttributeDims();
+		Set<String> tupleAttrDims = new HashSet<String>();
+		List<String> rowAxisDimList = Arrays.asList(rowAxes);
+		List<String> colAxisDimList = Arrays.asList(colAxes);
+		if (rowAxes.length > 0 && attributeDims != null && attributeDims.length > 1) {
+			// Attribute View
+			// Check for attributes on the tuple (page or current axis)
+			for (String attrDim : attributeDims) {
+				if (rowAxisDimList.contains(attrDim) || colAxisDimList.contains(attrDim)) {
+					tupleAttrDims.add(attrDim);
+				}
+			}
+		}
+		
+		// if Time are rows and Year are Columns or Year are Rows and Time are Columns, we need to perform time horizon validation 
+		// if the tuple doesn't contain at least one of these dimensions, No time horizon validation will be performed.
+		boolean bDoTimeHorizValidation = true, bTimeOnRow = false, bYearOnRow = false, bTimeOnCol = false, bYearOnCol = false;
+		int timeAxis = 0, yearAxis = 0;
+		String period = null, year = null;	
+
+		do {
+			// Search for time dimension
+			if (rowAxisDimList.contains(timeDim)) {
+				timeAxis = rowAxisDimList.indexOf(timeDim);
+				bTimeOnRow = true;
+			} else if (colAxisDimList.contains(timeDim)) {
+				timeAxis = colAxisDimList.indexOf(timeDim);
+				bTimeOnCol = true;
+			} else {
+				// Time dimension was not found - skip validation
+				bDoTimeHorizValidation = false;	
+				break;
+			}
+			
+			// Search for year dimension
+			if (rowAxisDimList.contains(yearDim)) {
+				yearAxis = rowAxisDimList.indexOf(yearDim);
+				bYearOnRow = true;
+			} else if (colAxisDimList.contains(yearDim)) {
+				yearAxis = colAxisDimList.indexOf(yearDim);
+				bYearOnCol = true;
+			} else {
+				// Year dimension was not found - skip validation
+				bDoTimeHorizValidation = false;	
+				break;
+			}
+		 } while (false);
 		
 
+		// Expand each symmetric tuple group (for tuples comprised of multiple dimensions)
+		for (int rowAxisIndex = innerRowAxisIndex - 1; rowAxisIndex >= 0; rowAxisIndex--) {
+			expandedRowTuples = pafDataService.expandSymetricTupleGroups(rowAxisIndex, expandedRowTuples.toArray(new ViewTuple[0]), rowAxes, tupleAttrDims, viewSection.getPageAxisDims(), viewSection.getAttributeDims(), clientState);
+		}
+		for (int colAxisIndex = innerColAxisIndex - 1; colAxisIndex >= 0; colAxisIndex--) {
+			expandedColTuples = pafDataService.expandSymetricTupleGroups(colAxisIndex, expandedColTuples.toArray(new ViewTuple[0]), colAxes, tupleAttrDims, viewSection.getPageAxisDims(), viewSection.getAttributeDims(), clientState);
+		}
+
+		List<ViewTuple> tuplesToLock = new ArrayList<ViewTuple>();
+		List<String> coordToLockList = new ArrayList<String>(); 
+		boolean bFoundValidTimeHorizPeriod = false;
+		// -- Now check each expanded view tuple
+		// Test for invalid time horizon coordinate when time and year on column or tuple
+		if ( bTimeOnRow && bYearOnCol ) {
+			for (ViewTuple viewTuple:expandedRowTuples) {
+			// Initialization
+				String[] memberArray = viewTuple.getMemberDefs();
+	
+				// If any tuple member is set to PAFBLANK, set the remaining members to PAFBLANK as well
+				if (pafDataService.isBlankViewTuple(viewTuple)) {
+					for (int i = 0; i < memberArray.length; i++) {
+						memberArray[i] = PafBaseConstants.PAF_BLANK;
+					}
+					viewTuple.setMemberDefs(memberArray);
+					continue;
+				}
+				// Compile a list of any tuples with invalid time / year combinations (TTN-1858 / TTN-1886).
+				if (bDoTimeHorizValidation) {
+					period = memberArray[timeAxis];
+					year = expandedColTuples.get(0).getMemberDefs()[yearAxis];
+					String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
+					if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
+						coordToLockList.add(PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period);
+						tuplesToLock.add(viewTuple);
+					}
+					else {
+						bFoundValidTimeHorizPeriod = true;
+					}
+				}			
+			}	
+		}
+		// -- Lastly, remove any filtered tuples
+		if( ! bFoundValidTimeHorizPeriod  && expandedRowTuples.size() != 0 && tuplesToLock.size() == expandedRowTuples.size() ) {
+			String errMsg = "The view can not be displayed since all the selected Year/Time combinations: "
+					+ StringUtils.arrayListToString(coordToLockList) + " are invalid. Please select different Year/Time combination(s).";
+			throw new PafException(errMsg, PafErrSeverity.Error);
+		}
+		expandedRowTuples.removeAll(coordToLockList);
 		
+		//reset collection and reinitialize
+		tuplesToLock.clear();
+		coordToLockList.clear();
+		bFoundValidTimeHorizPeriod = false;
+		if ( bTimeOnCol && bYearOnRow ) {
+			for (ViewTuple viewTuple:expandedColTuples) {
+			// Initialization
+				String[] memberArray = viewTuple.getMemberDefs();
+	
+				// If any tuple member is set to PAFBLANK, set the remaining members to PAFBLANK as well
+				if (pafDataService.isBlankViewTuple(viewTuple)) {
+					for (int i = 0; i < memberArray.length; i++) {
+						memberArray[i] = PafBaseConstants.PAF_BLANK;
+					}
+					viewTuple.setMemberDefs(memberArray);
+					continue;
+				}
+				// Compile a list of any tuples with invalid time / year combinations (TTN-1858 / TTN-1886).
+				if (bDoTimeHorizValidation) {
+					period = memberArray[timeAxis];
+					year = expandedRowTuples.get(0).getMemberDefs()[yearAxis];
+					String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
+					if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
+						coordToLockList.add(PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period);
+						tuplesToLock.add(viewTuple);
+					}
+					else {
+						bFoundValidTimeHorizPeriod = true;
+					}
+				}			
+			}	
+		}
+		if( ! bFoundValidTimeHorizPeriod  && expandedColTuples.size() != 0 && tuplesToLock.size() == expandedColTuples.size() ) {
+			String errMsg = "The view can not be displayed since all the selected Year/Time combinations: "
+					+ StringUtils.arrayListToString(coordToLockList) + " are invalid. Please select different Year/Time combination(s).";
+			throw new PafException(errMsg, PafErrSeverity.Error);
+		}
+		expandedColTuples.removeAll(coordToLockList);
 	}
 
 	/**

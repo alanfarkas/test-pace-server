@@ -2561,12 +2561,6 @@ public class PafDataService {
 			}
 		}
 		
-		// Expand each symmetric tuple group (for tuples comprised of multiple dimensions)
-		for (int axisIndex = innerAxisIndex - 1; axisIndex >= 0; axisIndex--) {
-			expandedTuples = expandSymetricTupleGroups(axisIndex, expandedTuples.toArray(new ViewTuple[0]), axes, tupleAttrDims, pageAxisDims, pageAxisMembers, clientState);
-		}
-
-		
 		// Run the expanded tuples through some final editing and filtering
 		logger.debug("Editing & Filtering Expanded View Tuples");
 
@@ -2606,6 +2600,7 @@ public class PafDataService {
 			} else {
 				// Year dimension was not found - skip validation
 				bDoTimeHorizValidation = false;	
+				break;
 			}
 			
 			// Test for invalid time horizon coordinate when time and year
@@ -2621,7 +2616,11 @@ public class PafDataService {
 		 } while (false);
 		
 
-			
+		// Expand each symmetric tuple group (for tuples comprised of multiple dimensions)
+		for (int axisIndex = innerAxisIndex - 1; axisIndex >= 0; axisIndex--) {
+			expandedTuples = expandSymetricTupleGroups(axisIndex, expandedTuples.toArray(new ViewTuple[0]), axes, tupleAttrDims, pageAxisDims, pageAxisMembers, clientState);
+		}
+
 		// -- Now edit/validate each expanded view tuple
 		for (ViewTuple viewTuple:expandedTuples) {
 
@@ -2679,7 +2678,7 @@ public class PafDataService {
 	 * @return List<ViewTuple>
 	 * @throws PafException 
 	 */
-	private List<ViewTuple> expandSymetricTupleGroups(int axisIndex, ViewTuple[] origViewTuples, String[] axes, Set<String> tupleAttrDims, String[] pageAxisDims, String[] pageAxisMembers, PafClientState clientState) throws PafException {
+	public List<ViewTuple> expandSymetricTupleGroups(int axisIndex, ViewTuple[] origViewTuples, String[] axes, Set<String> tupleAttrDims, String[] pageAxisDims, String[] pageAxisMembers, PafClientState clientState) throws PafException {
 
 		int tupleCount = origViewTuples.length;
 		int tupleInx = 0;
@@ -2925,7 +2924,7 @@ public class PafDataService {
 		return expandedTuples;
 	}
 
-	private boolean isBlankViewTuple(ViewTuple viewTuple) {
+	public boolean isBlankViewTuple(ViewTuple viewTuple) {
 
 		String[] members = viewTuple.getMemberDefs();
 		if (members != null) {
@@ -2949,7 +2948,7 @@ public class PafDataService {
 	 * @return List<ViewTuple>
 	 * @throws PafException 
 	 */
-	private List<ViewTuple> expandTuple(ViewTuple viewTuple, int axisIndex, String dim, PafClientState clientState) throws PafException {
+	public List<ViewTuple> expandTuple(ViewTuple viewTuple, int axisIndex, String dim, PafClientState clientState) throws PafException {
 		ArrayList<ViewTuple> expTuples = new ArrayList<ViewTuple>();
 		String term = viewTuple.getMemberDefs()[axisIndex];
 		if (term.contains("@")) {
