@@ -1260,35 +1260,41 @@ public abstract class PafDimTree {
 		PafDimMember member = getMember(memberName);
 		int memberIndex = allPeers.indexOf(member);
 		int offsetStart =  memberIndex + startIndex, offsetEnd =  memberIndex + endIndex;
-		boolean bLOutOfRange = false, bROutOfRange = false;
-		if( offsetStart != offsetEnd ) {
-			if( offsetStart < 0 ) {
-				offsetStart = 0;
-				bLOutOfRange = true;
-			}
-			if( offsetEnd >= allPeers.size() ) {
-				offsetEnd = allPeers.size() - 1;
-				bROutOfRange = true;
-			}
+		boolean bOutOfRange = false, hasValidMember = true;
+		
+		if( ( offsetStart < 0 && offsetEnd < 0 ) 
+				|| ( offsetStart >= allPeers.size()  && offsetEnd >= allPeers.size() ) ){
+			hasValidMember = false;
 		}
-		else { //offsetStart == offsetEnd ) {
-			if( offsetStart < 0 || offsetEnd >= allPeers.size() ) {
-				bLOutOfRange = bROutOfRange = true;
-			}
+		if( offsetStart < 0 ) {
+			offsetStart = 0;
+			bOutOfRange = true;
 		}
-		if( ( ! bLOutOfRange && bROutOfRange ) || ( bLOutOfRange && ! bROutOfRange ) ) {
-			String errMsg = "View Section [" + dim + "] - Tuple Specification (@FIRST_PLAN_YEAR, " + startIndex + ", " + endIndex + ")] references one or more members not contained in the Unit of Work.";
+		if( offsetEnd < 0 ) {
+			offsetEnd = 0;
+			bOutOfRange = true;
+		}
+		if( offsetStart >= allPeers.size() ) {
+			offsetStart = allPeers.size() - 1;
+			bOutOfRange = true;
+		}
+		if( offsetEnd >= allPeers.size() ) {
+			offsetEnd = allPeers.size() - 1;
+			bOutOfRange = true;
+		}
+		
+		if( bOutOfRange ) {
+			String errMsg = "View Section [" + dim + "] - Tuple Specification (" + memberName + ", " + startIndex + ", " + endIndex + ")] references one or more members not contained in the Unit of Work.";
 			logger.warn(errMsg);
 		}
-		else if( bLOutOfRange && bROutOfRange ) {
-			String errMsg = "View Section [" + dim + "] - Tuple Specification (@FIRST_PLAN_YEAR, " + startIndex + ", " + endIndex + ")] references one or more members not contained in the Unit of Work.";
-			logger.error(errMsg);
-			throw new IllegalArgumentException(errMsg);
-		}
+		
 		List<PafDimMember> offsetPeers = new ArrayList<PafDimMember>();
-		for (int i = offsetStart; i <= offsetEnd; i++) {
-			offsetPeers.add(allPeers.get(i));
+		if( hasValidMember ) {
+			for (int i = offsetStart; i <= offsetEnd; i++) {
+				offsetPeers.add(allPeers.get(i));
+			}
 		}
+		
 		return offsetPeers;
 	}
 
