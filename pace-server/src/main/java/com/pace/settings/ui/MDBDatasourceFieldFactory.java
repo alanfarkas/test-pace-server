@@ -62,7 +62,7 @@ public class MDBDatasourceFieldFactory extends PaceSettingsDefaultFieldFactory {
 			
 		requiredFieldSet.add(NAME);
 		requiredFieldSet.add(META_DATA_SERVICE_PROVIDER);
-	requiredFieldSet.add(TOOL_TIP);
+	   //requiredFieldSet.add(TOOL_TIP);
 		requiredFieldSet.add(DATA_SERVICE_PROVIDER);
 		requiredFieldSet.add(CONNECTION_STRING);
 		
