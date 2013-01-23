@@ -3794,7 +3794,6 @@ public class PafDataService {
 					|| (measureRuleset.getLiftAllMeasureList() != null && measureRuleset.getLiftAllMeasureList().length > 0)
 						|| (measureRuleset.getLiftExistingMeasureList() != null && measureRuleset.getLiftExistingMeasureList().length > 0) ) {
 			logger.info("Taking a snapshot of plannable data for lift allocation(s)");
-			dataCache.clearSnapshotValues();
 			dataCache.snapshotPlannableData();
 		}
 		

@@ -1373,6 +1373,10 @@ public class PafDataCache implements IPafDataCache {
 		memberFilter.put(versionDim, Arrays.asList(new String[]{planVersion}));
 		memberFilter.put(yearDim, planYears);
 		
+		// Initialize snapshot values
+		//TODO Only initialize plannable data blocks, not all snapshot blocks
+		clearSnapshotValues();
+
 		// Snapshot plannable data
 		snapshotFilteredData(memberFilter);
 	}
