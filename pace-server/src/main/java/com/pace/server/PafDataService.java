@@ -3134,7 +3134,7 @@ public class PafDataService {
 
 		case LEVEL:
 			if (expOp.getParms().length == 1) {
-				memberList = tree.getLowestLevelMembers();
+				memberList = tree.getLowestMembers(expOp.getParms()[0]);
 			} else {
 
 				memberList = tree.getMembersAtLevel(expOp.getParms()[0], Short.parseShort(expOp.getParms()[1]));
