@@ -45,6 +45,7 @@ import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.data.TimeSlice;
@@ -68,24 +69,24 @@ import com.pace.base.view.PafMVS;
  * 
  *  2) 	For time-based operations and functions, the time coordinate will be temporarily 
  *  	converted to a time horizon tree member format (combined time & year), and the year 
- *  	coordinate will be set to a dummy value (ex: "**YEAR.NA**").
- *  
- *  3)  For better scalability and more efficient data storage, each data block will incorporate
- *  	the time horizon tree into its dense dimension structure. Therefore, the year coordinate
- *  	on each data block key will be set to the dummy time horizon year value.
+ *  	coordinate will be set to a dummy value (ex: "**YEAR.NA**"). 
  *------------------------------------------------------------------------------------------------  
  */
 public class PafDataCache implements IPafDataCache {
 
-	private Map<Intersection, Integer> dataBlockIndexMap = null; // Maps data block key to an item in the data block pool
-	private List<DataBlock> dataBlockPool = null;				// Collection of populated data blocks
-	private LinkedList<Integer> deletedBlockIndexes = null;		// Surrogate keys of deleted blocks (Linked list for performance reasons)
+	private Map<Intersection, Integer> dataBlockIndexMap = null; 	// Maps data block key to an item in the data block pool
+	private List<DataBlock> dataBlockPool = null;					// Collection of populated data blocks
+	private Map<Intersection, Integer> snapshotIndexMap = null; 	// Maps data block key to an item in the snapshot pool
+	private List<DataBlock> snapshotPool = null;					// Collection of blocks that represent an earlier snapshot of selected	
+	private LinkedList<Integer> deletedBlockIndexes = null;			// Surrogate keys of deleted blocks (Linked list for performance reasons)
+	private LinkedList<Integer> deletedSnapshotIndexes = null;		// Surrogate keys of deleted snapshot blocks (Linked list for performance reasons)
 	private Map<String, Set<Intersection>> dataBlocksByVersion = null;	// Data block keys organized by version
 	private Map<Intersection, Set<Intersection>> aliasKeyLookup = null; // Identifies any alias keys for a given data block 
 	private Map<Intersection, Intersection> primaryKeyLookup = null; // Identifies the primary data block key associated with each alias key
 	private int axisCount = 0;						// Total number of defined dimensions (size of allDimensions)
 	private int blockSize = 0;						// Number of cells in a data block
 	private int dataBlockCount = 0;					// Number of existing data blocks
+	private int snapshotBlockCount = 0;				// Number of existing snapshot blocks
 	private int cellPropsBitCount = 0;				// Number of bits comprising each cell property set
 	private int[] axisSizes = null;					// # of members in each axis
 	private int[] coreKeyAxes = null; 				// The core dimension axes that comprise that data block key
@@ -232,10 +233,25 @@ public class PafDataCache implements IPafDataCache {
 		primaryKeyLookup = new HashMap<Intersection, Intersection>(200);
 		deletedBlockIndexes = new LinkedList<Integer>();
 
+		// Initialize snapshot data blocks
+		initSnapshotBlocks();
+		
 		// Log data cache statistics
 		String logMsg = LogUtil.timedStep("UOW creation and initialization", startTime);
 		performanceLogger.info(logMsg);
 
+	}
+
+
+	/**
+	 * Initialize snapshot data blocks
+	 */
+	private void initSnapshotBlocks() {
+		int maxPlanCoreBlockCount = getMaxPlanCoreDataBlockCount();
+		snapshotIndexMap = new HashMap<Intersection, Integer>(maxPlanCoreBlockCount);
+		snapshotPool = new ArrayList<DataBlock>(maxPlanCoreBlockCount);
+		deletedSnapshotIndexes = new LinkedList<Integer>();
+		snapshotBlockCount = 0;
 	}
 
 
@@ -497,6 +513,36 @@ public class PafDataCache implements IPafDataCache {
 		// each other.
 		for (int axisIndex = 0; axisIndex < coreKeyAxes.length; axisIndex++) {
 			memberCombinations = memberCombinations * getAxisSize(coreKeyAxes[axisIndex]);
+		}
+
+		// 
+		return memberCombinations;
+	}
+
+	/**
+	 *	Returns the maximum number of addressable plannable data blocks across the core
+	 *	dimensions
+	 *
+	 * @return The maximum number of addressable plannable data blocks across the core dimensions
+	 */
+	public int getMaxPlanCoreDataBlockCount() {
+
+		int memberCombinations = 1;
+
+		// Multiply the number of members in each core key dimension by
+		// each other. For the Version and Year dimensions, the number
+		// of plannable members are used.
+		for (int axisIndex = 0; axisIndex < coreKeyAxes.length; axisIndex++) {
+			
+			int axisSize = 0;
+			if (axisIndex == this.getVersionAxis()) {
+				axisSize = 1;
+			} else if (axisIndex == this.getYearAxis()) {
+				axisSize = this.getPlanYearSize();
+			} else {
+				axisSize = getAxisSize(coreKeyAxes[axisIndex]);
+			}
+			memberCombinations = memberCombinations * axisSize;
 		}
 
 		// 
@@ -1262,7 +1308,180 @@ public class PafDataCache implements IPafDataCache {
 
 	}
 
+
+	/**
+	 * Return "snapshot" value of specified intersection. If the requested intersection
+	 * is valid, but does not exist, then a zero value is returned.
+	 * 
+	 * @param cellIs Cell intersection
+	 * 
+	 * @return Snapshot value of specified intersection
+	 * @throws PafException 
+	 */
+	public double getSnapshotValue(Intersection cellIs) throws PafException {
+		double cellValue = 0;
+		
+		// Convert time horizon based intersection to time-year intersection
+		Intersection translatedIs = translateTimeHorizonIs(cellIs);
+		
+		// Get the cell address of the specified intersection
+		DataCacheCellAddress cellAddress = generateCellAddress(translatedIs);
+		Intersection dataBlockKey = cellAddress.getDataBlockKey();
+
+		// Look for underlying data block
+		DataBlock dataBlock = getSnapshotDataBlock(dataBlockKey).getDataBlock();
+
+		// Retrieve the cell value if the data block exists
+		if (dataBlock != null) {
+			
+			cellValue = dataBlock.getCellValue(cellAddress);
+			
+		} else {
+
+			// Data block does not exist - check if intersection is valid
+			if (isValidIntersection(translatedIs)) {
+				// Valid intersection - just return zero
+				cellValue = 0;
+			} else {
+				// Invalid intersection - throw error
+				String errMsg = "Data Cache error - Unable to get data cache cell value for invalid intersection: "
+						+ StringUtils.arrayToString(translatedIs.getCoordinates());
+				logger.error(errMsg);
+				throw new IllegalArgumentException(errMsg);
+			}
+		}
+
+		return cellValue;
+	}
+
+
+	/**
+	 * Take a snapshot of plannable data 
+	 * @throws PafException 
+	 */
+	public void snapshotPlannableData() throws PafException {
+		
+		final String versionDim = this.getVersionDim(), yearDim = this.getYearDim();
+		final String planVersion = this.getPlanVersion();
+		final List<String> planYears = new ArrayList<String>(this.getPlanYears());
+		
+		// Create member filter that represents all plannable intersections - the plan version
+		// across all plannable years. Because of limitations in our typical "member filter"
+		// structure, forward-plannable intersections are included as well, even though 
+		// technically they are non-plannable.
+		Map<String, List<String>> memberFilter = new HashMap<String, List<String>>();
+		memberFilter.put(versionDim, Arrays.asList(new String[]{planVersion}));
+		memberFilter.put(yearDim, planYears);
+		
+		// Snapshot plannable data
+		snapshotFilteredData(memberFilter);
+	}
+
+
+
+	/**
+	 * Snapshot plannable data blocks based on the supplied member filter (Version and/or Year dimensions)
+	 * 
+	 * @param memberFilter Member filter comprised of member lists by each filtered dimension
+	 * @throws PafException 
+	 */
+	public void snapshotFilteredData(Map<String, List<String>> memberFilter) throws PafException {
+		
+		// TODO At this point, only filters on the Version and Year dimensions are considered
+		final String versionDim = this.getVersionDim(), yearDim = this.getYearDim();
+		Set<Intersection> dataBlockKeys = null;
+		
+		// Check for missing member filter 
+		if (memberFilter == null || memberFilter.isEmpty()) {
+			String errMsg = "Unable to snapshot filtered data - member filter is null or empty";
+			logger.error(errMsg);
+			throw new IllegalArgumentException(errMsg);
+		}
 	
+		// Get the list of version filtered data blocks
+		if (memberFilter.get(versionDim) != null) {
+			dataBlockKeys = new HashSet<Intersection>();
+			List<String> filteredVersions = memberFilter.get(versionDim);
+			for (String version : filteredVersions) {
+				if (dataBlocksByVersion.get(version) !=null ) {
+					dataBlockKeys.addAll(dataBlocksByVersion.get(version));
+				}
+			}
+		} else {
+			dataBlockKeys = dataBlockIndexMap.keySet();
+		}
+
+
+		// Cycle through data blocks and snapshot the ones that match the year filter
+		List<String> filteredYears = memberFilter.get(yearDim);
+		for (Intersection dataBlockKey : dataBlockKeys) {
+			if (filteredYears != null) {
+				String yearCoord = dataBlockKey.getCoordinate(yearDim);
+				if (filteredYears.contains(yearCoord)) {
+					snapshotDataBlock(dataBlockKey);
+				}
+			} else {
+				snapshotDataBlock(dataBlockKey);
+			}
+		}
+
+	}
+
+
+
+	/**
+	 * Snapshot specified data block (make a stored copy)
+	 * 
+	 * @param key Data block key
+	 * @throws PafException 
+	 */
+	private void snapshotDataBlock(Intersection key) throws PafException {
+
+		int surrogateKey = 0;
+		DataBlock dataBlock = null;
+		DataBlockResponse dataBlockResp = null;
+		
+		
+		// Unlike regular data blocks, a link between alias snapshot blocks
+		// and base snapshot blocks will not be maintained. This was done
+		// mainly for simplification purposes, but also allows alias blocks
+		// to be snapshotted independently of their underlying base blocks.
+		
+		
+		// First verify that data block exists
+		dataBlockResp = getDataBlock(key);
+		dataBlock = dataBlockResp.getDataBlock();
+		if (dataBlock == null) {
+			String msg = "An attempt was made to snapshot a non-existent data block: "
+				+ key.toString() + " .";
+			logger.error(msg);
+			throw new IllegalArgumentException(msg);
+		}
+		
+		// Delete existing snapshot
+		DataBlockResponse snapshotDbResponse = getSnapshotDataBlock(key);
+		DataBlock snapshotDataBlock = snapshotDbResponse.getDataBlock();
+		if (snapshotDataBlock != null) {
+			deleteSnapshotDataBlock(key);
+		}
+		
+		// Add snapshot data block to pool. Attempt to reuse any previously deleted blocks.
+		if (deletedSnapshotIndexes.size() == 0) {
+			// Add index entry for new data block (index is auto-incremented)
+			surrogateKey = snapshotBlockCount;
+			snapshotPool.add(dataBlock);
+		} else {
+			// Reuse index of a deleted block
+			surrogateKey = deletedSnapshotIndexes.removeLast();
+			snapshotPool.set(surrogateKey, dataBlock);
+		}
+		snapshotIndexMap.put(key, surrogateKey);
+		snapshotBlockCount++;
+
+		
+	}
+
+
 	/**
 	 *	Set the value for a specific base intersection cell
 	 *
@@ -2132,6 +2351,7 @@ public class PafDataCache implements IPafDataCache {
 		if (!isValidDataBlock(key)) {
 			String msg = "An attempt was made to add the invalid data block: "
 				+ key.toString() + " to the data cache.";
+			logger.error(msg);
 			throw new IllegalArgumentException(msg);
 		}
 		
@@ -2257,8 +2477,7 @@ public class PafDataCache implements IPafDataCache {
 	private void addDataBlockKey(Intersection key) {
 	
 		// Add data block key to version collection
-		//TODO only primary block key should be added
-		String version = key.getCoordinate(this.getVersionAxis());
+		String version = key.getCoordinate(getVersionDim());
 		Set<Intersection> versionBlocks = dataBlocksByVersion.get(version);
 		if (versionBlocks != null) {
 			versionBlocks.add(key);
@@ -2283,7 +2502,7 @@ public class PafDataCache implements IPafDataCache {
 		DataBlock dataBlock = dataBlockResp.getDataBlock();
 		
 		if (dataBlock == null) {
-			String errMsg = "Data Cache Error - attempt to delete block deletion error - a data block with a key of [" 
+			String errMsg = "Data Cache Error - block deletion error - a data block with a key of [" 
 				+ key + "] does not exist";
 			logger.error(errMsg);
 			throw new IllegalArgumentException(errMsg);
@@ -2313,6 +2532,50 @@ public class PafDataCache implements IPafDataCache {
 		
 	}
 
+	/**
+	 *	Delete a snapshot data block from the data cache.
+	 *
+	 * @param key Data block key	
+	 * @throws PafException 
+	 */
+	private void deleteSnapshotDataBlock(Intersection key) throws PafException {
+		
+		// Retrieve the data block being deleted
+		DataBlockResponse dataBlockResp = getSnapshotDataBlock(key);
+		DataBlock dataBlock = dataBlockResp.getDataBlock();
+		
+		if (dataBlock == null) {
+			String errMsg = "Data Cache Error - block deletion error - a snapshot data block with a key of [" 
+				+ key + "] does not exist";
+			logger.error(errMsg);
+			throw new IllegalArgumentException(errMsg);
+		}
+		
+
+//		// If this is an alias data block key, remove key entry
+//		// from data block index and exit.
+//		if (isAliasDataBlockKey(key)) {
+//			dataBlockIndexMap.remove(key);
+//			return;
+//		}
+		
+		// Remove data block key from index collections
+//		deleteDataBlockKey(key);		
+		snapshotBlockCount--;
+
+		// Get the block's surrogate key against the data block pool
+		int surrogateKey = dataBlockResp.getSurrogateKey();
+
+		// Initialized deleted data block
+		snapshotPool.set(surrogateKey, null);
+		
+		// Add index of deleted block to collection so that 
+		// the block can be reused for a future data block addition. 
+		deletedSnapshotIndexes.add(surrogateKey);
+		
+	}
+
+
 
 	/**
 	 *	Remove data block key from lookup collections
@@ -2329,7 +2592,7 @@ public class PafDataCache implements IPafDataCache {
 		dataBlockIndexMap.remove(key);
 
 		// Remove key from data block by version collection
-		Set<Intersection> versionBlocks = dataBlocksByVersion.get(key.getCoordinate(getVersionAxis()));
+		Set<Intersection> versionBlocks = dataBlocksByVersion.get(key.getCoordinate(getVersionDim()));
 		if (versionBlocks != null) {
 			versionBlocks.remove(key);
 		}
@@ -2693,8 +2956,45 @@ public class PafDataCache implements IPafDataCache {
 		if (surrogateKey != null) {
 			dataBlock = dataBlockPool.get(surrogateKey);
 			if (dataBlock == null) {
-				// Index entry was found
-				String errMsg = "Data Cache Error - Non-existent data block at intersection: " 
+				// Index entry was found but data block is missing
+				String errMsg = "Data Cache Error - Missing data block at intersection: " 
+					+ StringUtils.arrayToString(dataBlockKey.getCoordinates());
+				throw new IllegalArgumentException(errMsg);
+			}
+		}
+		
+		// Return data block response
+		DataBlockResponse dataBlockResp = new DataBlockResponse();
+		dataBlockResp.setSurrogateKey(surrogateKey);
+		dataBlockResp.setDataBlock(dataBlock);
+		return dataBlockResp;
+	}
+
+
+	/**
+	 *	Return the "snapshot data block corresponding to the specified intersection.
+	 *  Additional information is also returned.
+	 *  
+	 *  If the data block is not found, then the returned data block will
+	 *  be a null value.
+	 *   
+	 * @param intersection Data block key
+	 * 
+	 * @return DataBlockResponse
+	 */
+	private DataBlockResponse getSnapshotDataBlock(Intersection dataBlockKey) {
+		
+		DataBlock dataBlock = null;
+		
+		// Find data block index entry
+		Integer  surrogateKey = snapshotIndexMap.get(dataBlockKey);
+		
+		// Get data block (if an index entry exists)
+		if (surrogateKey != null) {
+			dataBlock = snapshotPool.get(surrogateKey);
+			if (dataBlock == null) {
+				// Index entry was found but data block is missing
+				String errMsg = "Data Cache Error - Missing snapshot data block at intersection: " 
 					+ StringUtils.arrayToString(dataBlockKey.getCoordinates());
 				throw new IllegalArgumentException(errMsg);
 			}
@@ -2740,21 +3040,7 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @throws PafException
 	 */
-	public Map<Intersection, Double> updateDataCache(PafDataSlice pafDataSlice, PafDataSliceParms parms) throws PafException {
-		return updateDataCache(pafDataSlice, parms, false);
-	}
-	
-	/**
-	 * 	Update the data cache with the contents of the data slice
-	 * 
-	 * @param pafDataSlice Paf Data Slice
-	 * @param parms Object containing required PafDataSlice parameters
-	 * @param bReturnOrigValues If set to true, then a map containing the original values of any updated cells will be returned
-	 * 
-	 * @return Map containing updated cells and their original values (OPTIONAL)
-	 * @throws PafException
-	 */
-	public Map<Intersection, Double> updateDataCache(PafDataSlice pafDataSlice, PafDataSliceParms parms, boolean bReturnOrigValues) throws PafException {
+	public void updateDataCache(PafDataSlice pafDataSlice, PafDataSliceParms parms) throws PafException {
 
 		boolean hasPageDimensions = false;
 		int cols = 0, rows = 0;
@@ -2784,16 +3070,6 @@ public class PafDataCache implements IPafDataCache {
 			// data cache data. This intersection will get updated as
 			// we iterate through all the tuple members
 			Intersection cellIs = new Intersection(parms.getDimSequence());
-			
-			// Create cell value map (TTN-1793)
-			if (bReturnOrigValues) {
-				// Initialize map to number of data slice cells
-				int dsCellCount = rowTuples.length * colTuples.length;		
-				origCellValueMap = new HashMap<Intersection, Double>(dsCellCount);
-			} else {
-				// Tracking option not selected - just return an empty map
-				origCellValueMap = new HashMap<Intersection, Double>();
-			}
 			
 			
 			// Enter page headers into appropriate elements of the data  
@@ -2829,21 +3105,9 @@ public class PafDataCache implements IPafDataCache {
 					if (!hasAttributes || isValidAttributeIntersection(cellIs, attributeDims)) {
 						if (!this.isElapsedIs(cellIs)) {
 
-							// Track original data slice cell values (TTN-1793)
-							if (bReturnOrigValues) {
-								Intersection origCellIs = cellIs.clone();
-								// Don't re-add intersection if it's on the view more than once,
-								// as this will cause the user-updated value to overwrite the
-								// original value in the map.
-								if (!origCellValueMap.containsKey(origCellIs)) {
-									double cellValue = this.getCellValue(origCellIs);
-									origCellValueMap.put(origCellIs, cellValue);
-								}
-							}
-
 							// Update data cache
 							setCellValue(cellIs, dataSlice[sliceIndex]);
-							
+
 						}
 					}
 					sliceIndex++;
@@ -2861,7 +3125,6 @@ public class PafDataCache implements IPafDataCache {
 			throw pfe;
 		}
 
-		return origCellValueMap;
 	}
 
 
@@ -4447,6 +4710,12 @@ public class PafDataCache implements IPafDataCache {
 		}
 	}
 
+	/**
+	 *	Clears all snapshot values from the data cache
+	 */
+	public void clearSnapshotValues() {
+		initSnapshotBlocks();
+	}
 
 	/**
 	 *	Determines if the specified data cache intersection is

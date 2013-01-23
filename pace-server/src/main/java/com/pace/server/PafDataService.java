@@ -196,13 +196,30 @@ public class PafDataService {
 	private Map<String, Map<Integer, List<String>>> buildUowLoadDataSpec(UnitOfWork expandedUowSpec, PafClientState clientState) {
 
 		Map<String, Map<Integer, List<String>>> mdbDataSpecByVersion = new HashMap<String, Map<Integer, List<String>>>();
-		String versionDim = clientState.getMdbDef().getVersionDim();
-		int versionAxis = expandedUowSpec.getDimIndex(versionDim); 
+		String versionDim = clientState.getMdbDef().getVersionDim(), yearDim = clientState.getMdbDef().getYearDim();
+		int versionAxis = expandedUowSpec.getDimIndex(versionDim);
 		List<String> uowVersions = Arrays.asList(expandedUowSpec.getDimMembers(versionDim));
+		List<String> uowYears = Arrays.asList(expandedUowSpec.getDimMembers(yearDim));
 		List<String> extractedVersions = new ArrayList<String>();
+		Set<String> nonPlanYears = clientState.getLockedYears();
+		UnitOfWork filteredUowSpec = null;
 
 
-		// Check each version to see if they should be extracted from the mdb. Optimally, only the active planning
+		// Only plannable years will be loaded upon the initial load (TTN-1860).
+		List<String> planYears = new ArrayList<String>(uowYears);
+		planYears.removeAll(nonPlanYears);
+		if (planYears.isEmpty()) {
+			// No plannable years - just return empty data spec
+			return mdbDataSpecByVersion;
+		} else {
+			// Else - update the uow spec to filter on just the plan years
+			filteredUowSpec = expandedUowSpec.clone();
+			filteredUowSpec.setDimMembers(yearDim, planYears.toArray(new String[0]));
+		}
+		
+		
+		
+		// Next, check each version to see if they should be extracted from the mdb. Optimally, only the active planning
 		// version needs to be selected during the initial UOW load. 
 		
 
@@ -225,7 +242,7 @@ public class PafDataService {
     	// Add a data spec entry for each version being extracted that selects all uow
     	// intersections for that version
 		for (String version : extractedVersions) {
-			Map<Integer, List<String>> mdbDataSpec = expandedUowSpec.buildUowMap();
+			Map<Integer, List<String>> mdbDataSpec = filteredUowSpec.buildUowMap();
 			mdbDataSpec.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
 			mdbDataSpecByVersion.put(version, mdbDataSpec);
 		}
@@ -3728,7 +3745,6 @@ public class PafDataService {
 		PafViewSection currentViewSection = pafMVS.getViewSection();
 		String measureDim = mdbDef.getMeasureDim(), versionDim = mdbDef.getVersionDim(), timeDim = mdbDef.getTimeDim(), yearDim = mdbDef.getYearDim();
 		boolean hasAttributes = currentViewSection.hasAttributes();
-		boolean bTrackChangedCells = false;
 
 		if (newSlice.isCompressed()) {
 			logger.info("Uncompressing data slice" );
@@ -3771,16 +3787,20 @@ public class PafDataService {
 		}
 		measureRuleset = resolveRuleSetSettings(appSettings, measureRuleset);				// TTN-1792
 		
-		// Update the data cache with updated client data. Lift allocation requires that the original
+		// Take a back up of plannable data. Lift allocation requires that the original
 		// cell values are recorded (TTN-1793).
-		logger.info("Updating data cache with client data: " + sliceParms.toString() );
 		if ( (evalRequest.getLiftAllCells() != null && evalRequest.getLiftAllCells().getCoordCount() > 0)
 				|| (evalRequest.getLiftExistingCells() != null && evalRequest.getLiftExistingCells().getCoordCount() > 0) 
 					|| (measureRuleset.getLiftAllMeasureList() != null && measureRuleset.getLiftAllMeasureList().length > 0)
 						|| (measureRuleset.getLiftExistingMeasureList() != null && measureRuleset.getLiftExistingMeasureList().length > 0) ) {
-			bTrackChangedCells = true;
+			logger.info("Taking a snapshot of plannable data for lift allocation(s)");
+			dataCache.clearSnapshotValues();
+			dataCache.snapshotPlannableData();
 		}
-		Map<Intersection, Double> origViewCellValueMap = dataCache.updateDataCache(newSlice, sliceParms, bTrackChangedCells);
+		
+		// Update the data cache with updated client data. 
+		logger.info("Updating data cache with client data: " + sliceParms.toString() );
+		dataCache.updateDataCache(newSlice, sliceParms);
 
 		IEvalStrategy evalStrategy = new RuleBasedEvalStrategy();
 
@@ -3799,7 +3819,6 @@ public class PafDataService {
 		evalState.setAxisSortPriority(currentViewSection.getDimensionCalcSequence());
 		evalState.setDimSequence(currentViewSection.getDimensionsPriority());
 		evalState.setAttributeEval(hasAttributes);
-		evalState.setPreChangeViewCellValueMap(origViewCellValueMap);
 		evalState.setMeasureRuleSet(measureRuleset);
 
 		

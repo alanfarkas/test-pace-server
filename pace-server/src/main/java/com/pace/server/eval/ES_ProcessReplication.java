@@ -117,14 +117,8 @@ public class ES_ProcessReplication implements IEvalStep {
 
     	String versionDim = evalState.getVersionDim();
     	Set<String> varianceVersions = new HashSet<String>(dataCache.getVarianceVersions());
-    	Map<Intersection, Double> origCellValueMap = evalState.getPreChangeViewCellValueMap();
 
-//    	// Get the list of locked periods on the view
-//    	Set<String> lockedPeriods = evalState.getClientState().getLockedPeriods();
-//    	if (lockedPeriods == null) {
-//    		lockedPeriods = new HashSet<String>(0);  
-//    	}
-
+    	
 		// Sort replicated cells so that lower level intersections are handled first. 
 		// This is done to allow lower level replicated intersections to be created.
     	// Else their targets will get locked out by upper level intersections. 
@@ -161,13 +155,7 @@ public class ES_ProcessReplication implements IEvalStep {
     		// (TTN-1793).
     		double origCellValue, liftAmount = 0;
     		if (replicationType == ReplicationType.RSLiftAll || replicationType == ReplicationType.RSLiftExisting) {
-    			if (!origCellValueMap.containsKey(ix)) {
-    				String errMsg = "Unable to perform lift allocation - unable to retrieve original value of replicated cell: " 
-    						+ StringUtils.arrayToString(replicatedIx);
-    				logger.error(errMsg);
-    				throw new PafException(errMsg, PafErrSeverity.Error);
-    			}
-    			origCellValue= origCellValueMap.get(ix);
+    			origCellValue= dataCache.getSnapshotValue(ix);
     			liftAmount = replicatedValue - origCellValue;
     		} else if (replicationType == ReplicationType.LiftAll || replicationType == ReplicationType.LiftExisting) {
     			liftAmount = replicatedValue;
@@ -232,7 +220,7 @@ public class ES_ProcessReplication implements IEvalStep {
 			    				}
 			    				break;
 			    			case LiftAll: case RSLiftAll:			// TTN-1793
-			    				replicatedValue = origCellValueMap.get(i) + liftAmount;
+			    				replicatedValue = dataCache.getSnapshotValue(i) + liftAmount;
 			    				//update no matter what.
 			    				if(isVarVer){
 			    					//convert the variance version to a base version and update the value.
@@ -244,7 +232,7 @@ public class ES_ProcessReplication implements IEvalStep {
 			    				}
 			    				break;
 			    			case LiftExisting: case RSLiftExisting:	// TTN-1793
-			    				replicatedValue = origCellValueMap.get(i) + liftAmount;
+			    				replicatedValue = dataCache.getSnapshotValue(i) + liftAmount;
 			    				//update only if != to zero.
 			    				if(isVarVer){
 			    					if (getBaseVersionValue(i, evalState, dataCache) != 0){
