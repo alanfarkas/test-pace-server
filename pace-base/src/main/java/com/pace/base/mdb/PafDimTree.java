@@ -1254,8 +1254,9 @@ public abstract class PafDimTree {
 	 * @param startIndex offset start
 	 * @param endIndex offset end
 	 * @return List of Paf Dim Members
+	 * @throws PafException 
 	 */
-	public List<PafDimMember> getPeersByOffsets(String dim, String memberName, int startIndex, int endIndex) {
+	public List<PafDimMember> getPeersByOffsets(String memberName, int startIndex, int endIndex) throws PafException {
 		List<PafDimMember> allPeers = getIPeers(memberName);
 		PafDimMember member = getMember(memberName);
 		int memberIndex = allPeers.indexOf(member);
@@ -1284,8 +1285,9 @@ public abstract class PafDimTree {
 		}
 		
 		if( bOutOfRange ) {
-			String errMsg = "View Section [" + dim + "] - Tuple Specification (" + memberName + ", " + startIndex + ", " + endIndex + ")] references one or more members not contained in the Unit of Work.";
-			logger.warn(errMsg);
+			String errMsg = "Tuple Specification (" + memberName + ", " + startIndex + ", " + endIndex + ")] references one or more members not contained in the Unit of Work.";
+    		PafException pfe = new PafException(errMsg, PafErrSeverity.Error); 
+    		throw pfe;
 		}
 		
 		List<PafDimMember> offsetPeers = new ArrayList<PafDimMember>();
