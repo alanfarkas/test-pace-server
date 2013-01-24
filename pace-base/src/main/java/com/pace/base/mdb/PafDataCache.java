@@ -1470,14 +1470,15 @@ public class PafDataCache implements IPafDataCache {
 		}
 		
 		// Add snapshot data block to pool. Attempt to reuse any previously deleted blocks.
+		DataBlock clonedDataBlock = dataBlock.clone();
 		if (deletedSnapshotIndexes.size() == 0) {
 			// Add index entry for new data block (index is auto-incremented)
 			surrogateKey = snapshotBlockCount;
-			snapshotPool.add(dataBlock);
+			snapshotPool.add(clonedDataBlock);
 		} else {
 			// Reuse index of a deleted block
 			surrogateKey = deletedSnapshotIndexes.removeLast();
-			snapshotPool.set(surrogateKey, dataBlock);
+			snapshotPool.set(surrogateKey, clonedDataBlock);
 		}
 		snapshotIndexMap.put(key, surrogateKey);
 		snapshotBlockCount++;

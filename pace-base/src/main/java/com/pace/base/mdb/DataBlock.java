@@ -5,11 +5,15 @@ package com.pace.base.mdb;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafErrHandler;
+import com.pace.base.PafErrSeverity;
+import com.pace.base.utility.CollectionsUtil;
+
 /**
  * @author Alan Farkas
  *
  */
-public class DataBlock {
+public class DataBlock implements Cloneable {
 	double[][] cellValues = null; 			// Cell value array - [Measure][Time]
 	DataBlockProperties properties = null;	// Data block properties
 	
@@ -146,6 +150,33 @@ public class DataBlock {
 		setDirty(false);
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	public DataBlock clone() {
+		
+		DataBlock newDataBlock = null;
+
+		try {
+			newDataBlock = (DataBlock) super.clone();
+			if (this.cellValues != null) {
+				newDataBlock.cellValues = (double[][]) CollectionsUtil.deepCloneArray(cellValues);
+			}
+
+			if (this.properties != null) {
+				newDataBlock.properties = (DataBlockProperties) this.properties.clone();
+			}
+
+		} catch (CloneNotSupportedException cex) {
+			// this should never happen
+			PafErrHandler.handleException(cex, PafErrSeverity.Error);
+		}
+
+		return newDataBlock;
+		
+	}
+	
+
 	/*
 	 *	Represent the DataCache as a 2-dimensional array of data cells
 	 *

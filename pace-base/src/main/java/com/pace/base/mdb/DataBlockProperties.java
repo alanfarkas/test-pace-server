@@ -5,11 +5,15 @@ package com.pace.base.mdb;
 
 import java.util.BitSet;
 
+import com.pace.base.PafErrHandler;
+import com.pace.base.PafErrSeverity;
+import com.pace.base.utility.CollectionsUtil;
+
 /**
  * @author Alan Farkas
  *
  */
-public class DataBlockProperties {
+public class DataBlockProperties implements Cloneable {
 
 	private BitSet[] cellPropertyArray = null;		// Collection of properties for all data block cells.
 													//		- 	All properties corresponding to a single data
@@ -19,7 +23,7 @@ public class DataBlockProperties {
 	private static int BITS_PER_ARRAY_MEMBER = 64;	// BitSet contains 64 bits
 
 	/**
-	 * Intialize DataBlockProperties to hold a set of properties
+	 * Initialize DataBlockProperties to hold a set of properties
 	 * for each data block cell
 	 * 
 	 * @param rowCount Data block rows
@@ -154,5 +158,33 @@ public class DataBlockProperties {
 		this.isDirty = isDirty;
 	}
 
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	public DataBlockProperties clone() {
+		
+		DataBlockProperties newDbProperties = null;
+
+		try {
+			newDbProperties = (DataBlockProperties) super.clone();
+			
+			if (this.cellPropertyArray != null ) {
+				newDbProperties.cellPropertyArray = CollectionsUtil.deepCloneArray(cellPropertyArray);
+			}
+
+			if (this.cellPropsBlockSize != null) {
+				newDbProperties.cellPropsBlockSize = this.cellPropsBlockSize.clone();
+			}
+
+		} catch (CloneNotSupportedException cex) {
+			// this should never happen
+			PafErrHandler.handleException(cex, PafErrSeverity.Error);
+		}
+
+		return newDbProperties;
+		
+	}
+	
 
 }

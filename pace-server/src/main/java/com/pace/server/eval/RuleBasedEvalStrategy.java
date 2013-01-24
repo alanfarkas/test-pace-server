@@ -366,6 +366,14 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
     	    if (replicatedCells != null) {
     	    	replicatedCellList.addAll(Arrays.asList(replicatedCells));
     	    }
+    	    replicatedCells = sliceState.getRuleSetLiftAllCells();
+    	    if (replicatedCells != null) {
+    	    	replicatedCellList.addAll(Arrays.asList(replicatedCells));
+    	    }
+    	    replicatedCells = sliceState.getRuleSetLiftExistingCells();
+    	    if (replicatedCells != null) {
+    	    	replicatedCellList.addAll(Arrays.asList(replicatedCells));
+    	    }
     	    
      	    // Check the version member on each replicated cell intersection. If the 
     	    // version is a reference version then load it. Or, if the version is a 

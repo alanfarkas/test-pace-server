@@ -153,9 +153,9 @@ public class ES_ProcessReplication implements IEvalStep {
     		// is calculated by subtracting the original value of the allocated cell from the current value.
     		// For a lift allocation initiated from the client, the lift amount is just the value entered.
     		// (TTN-1793).
-    		double origCellValue, liftAmount = 0;
+    		double origCellValue = 0, liftAmount = 0;
     		if (replicationType == ReplicationType.RSLiftAll || replicationType == ReplicationType.RSLiftExisting) {
-    			origCellValue= dataCache.getSnapshotValue(ix);
+    			origCellValue = dataCache.getSnapshotValue(ix);
     			liftAmount = replicatedValue - origCellValue;
     		} else if (replicationType == ReplicationType.LiftAll || replicationType == ReplicationType.LiftExisting) {
     			liftAmount = replicatedValue;

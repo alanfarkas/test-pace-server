@@ -82,12 +82,20 @@ public class ES_RecalcMeasures extends ES_EvalBase implements IEvalStep {
         	this.addReplicatedIntersections(targets, evalState.getSliceState().getReplicateExistingCells(), 
         			measureDim, measure, evalState.getVarVersNames(),evalState.getVersionDim());
 
-        	// Lift all (TTN-1793)
+        	// Lift all - Client (TTN-1793)
         	this.addReplicatedIntersections(targets, evalState.getSliceState().getLiftAllCells(),
         			measureDim, measure, evalState.getVarVersNames(), evalState.getVersionDim());
 
-        	// Lift existing (TTN-1793)
+        	// Lift existing - Client (TTN-1793)
         	this.addReplicatedIntersections(targets, evalState.getSliceState().getLiftExistingCells(),
+        			measureDim, measure, evalState.getVarVersNames(), evalState.getVersionDim());
+
+        	// Lift all - Rule Set (TTN-1793)
+        	this.addReplicatedIntersections(targets, evalState.getSliceState().getRuleSetLiftAllCells(),
+        			measureDim, measure, evalState.getVarVersNames(), evalState.getVersionDim());
+
+        	// Lift existing - Rule Set (TTN-1793)
+        	this.addReplicatedIntersections(targets, evalState.getSliceState().getRuleSetLiftExistingCells(),
         			measureDim, measure, evalState.getVarVersNames(), evalState.getVersionDim());
 
     	}

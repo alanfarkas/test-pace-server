@@ -20,6 +20,7 @@ package com.pace.base.utility;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -385,25 +386,64 @@ public class CollectionsUtil {
 		return false;
 	}
 
-	
-  
-  public static void main(String[] argss) {
-    	
- //   	List<String> list = convertToList("abc^dce|^kjk^kjd|^lll^lll", "|^");
-    	List<String> list1 = new ArrayList<String>();
-    	list1.add("2001");
-    	list1.add("2002");
-    	list1.add("2003");
-    	List<String> list2 = new ArrayList<String>();
-    	list2.add("2002");
-    	
-    	List<String> list3 = (List<String>)diff(list1,list2);
-    	
-    	for (String str : list3) {
-    		System.out.println(str);
-    	}
-    	
-    }
 
-    
+	/**
+	 * Deep clone a multi-dimensional array of doubles
+	 * 
+	 * @param array Multi-dimensional array of doubles
+	 * @return double[][]
+	 */
+	public static double[][] deepCloneArray(double[][] array) {
+
+		double[][] newArray = null;
+		if (array != null) {
+			newArray = array.clone();
+			for(int i = 0; i < array.length; i++){
+				newArray[i] = array[i].clone();
+			}
+		}
+
+		return newArray;
+	}
+
+	/**
+	 * Deep clone a one-dimensional BitSet array
+	 * 
+	 * @param array One-dimensional BitSet array
+	 * @return BitSet[]
+	 */
+	public static BitSet[] deepCloneArray(BitSet[] array) {
+		BitSet[] newArray = null;
+		if (array != null) {
+			newArray = array.clone();
+			for(int i = 0; i < array.length; i++){
+				BitSet element = array[i];
+				if (element != null) {
+					newArray[i] = (BitSet) element.clone();
+				}
+			}
+		}
+
+		return newArray;
+	}
+
+	public static void main(String[] argss) {
+
+		//   	List<String> list = convertToList("abc^dce|^kjk^kjd|^lll^lll", "|^");
+		List<String> list1 = new ArrayList<String>();
+		list1.add("2001");
+		list1.add("2002");
+		list1.add("2003");
+		List<String> list2 = new ArrayList<String>();
+		list2.add("2002");
+
+		List<String> list3 = (List<String>)diff(list1,list2);
+
+		for (String str : list3) {
+			System.out.println(str);
+		}
+
+	}
+
+
 }
