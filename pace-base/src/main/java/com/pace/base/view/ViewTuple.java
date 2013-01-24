@@ -519,6 +519,24 @@ public class ViewTuple implements Cloneable, IPafCompressedObj {
 
 	}
 
+	public boolean containsEmptyMember() {
+
+		String[] memberDefsAr = getMemberDefs();
+
+		if (memberDefsAr != null) {
+
+			for (String memberDef : memberDefsAr) {
+				if (memberDef.isEmpty()) {
+					return true;
+				}
+			}
+
+		}
+
+		return false;
+
+	}
+
 	/* (non-Javadoc)
 	 * @see com.pace.base.IPafCompressedObj#compressData()
 	 */

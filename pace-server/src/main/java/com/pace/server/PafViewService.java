@@ -1462,8 +1462,8 @@ public class PafViewService {
 					colId++;
 
 					// if row or column are pafblank, process next col
-					if (rowTuple.containsPafBlank() || rowTuple.isMemberTag()
-							|| (colTuple.containsPafBlank()) || colTuple.isMemberTag()) {
+					if (rowTuple.containsEmptyMember() || rowTuple.containsPafBlank() || rowTuple.isMemberTag()
+							|| colTuple.containsEmptyMember() || colTuple.containsPafBlank() || colTuple.isMemberTag()) {
 						continue;
 					}
 
@@ -1729,8 +1729,8 @@ public class PafViewService {
 
 					// TODO: maybe remove this
 					// if row or column are pafblank or member tag, process next col
-					if (rowTuple.containsPafBlank() || rowTuple.isMemberTag()
-							|| (colTuple.containsPafBlank()) || colTuple.isMemberTag()) {
+					if (rowTuple.containsEmptyMember() || rowTuple.containsPafBlank() || rowTuple.isMemberTag()
+							|| colTuple.containsEmptyMember() || colTuple.containsPafBlank() || colTuple.isMemberTag()) {
 						continue;
 					}
 
@@ -1880,8 +1880,8 @@ public class PafViewService {
 					colId++;
 					
 					//if the row or column tuple contain blank or member tag, continue to next tuple
-					if (rowTuple.containsPafBlank() || rowTuple.isMemberTag()
-							|| colTuple.containsPafBlank() || colTuple.isMemberTag()) {
+					if (rowTuple.containsEmptyMember() || rowTuple.containsPafBlank() || rowTuple.isMemberTag()
+							|| colTuple.containsEmptyMember() || colTuple.containsPafBlank() || colTuple.isMemberTag()) {
 						continue;
 					}
 										
@@ -3978,16 +3978,13 @@ public class PafViewService {
 		int rowDimCount = rowAxes.length;
 		int innerRowAxisIndex = rowDimCount -1;
 		for (ViewTuple vt:rowViewTuples) {   
-			if( ! vt.getMemberDefs()[innerRowAxisIndex].isEmpty() ) {
-				expandedRowTuples.addAll(pafDataService.expandTuple(vt, innerRowAxisIndex, rowAxes[innerRowAxisIndex], clientState));   
-			}
+			expandedRowTuples.addAll(pafDataService.expandTuple(vt, innerRowAxisIndex, rowAxes[innerRowAxisIndex], clientState));   
 		}
+		
 		int colDimCount = colAxes.length;
 		int innerColAxisIndex = colDimCount -1;
 		for (ViewTuple vt:colViewTuples) {   
-			if( ! vt.getMemberDefs()[innerColAxisIndex].isEmpty() ) {
-				expandedColTuples.addAll(pafDataService.expandTuple(vt, innerColAxisIndex, colAxes[innerColAxisIndex], clientState));   
-			}
+			expandedColTuples.addAll(pafDataService.expandTuple(vt, innerColAxisIndex, colAxes[innerColAxisIndex], clientState));   
 		}
 		
 		// Compile a list of attribute dimensions used in this tuple or the page tuple. This
@@ -4057,7 +4054,7 @@ public class PafViewService {
 		// Test for invalid time horizon coordinate when time and year on column or tuple
 		if ( bTimeOnRow && bYearOnCol ) {
 			for (ViewTuple viewTuple:expandedRowTuples) {
-			// Initialization
+				// Initialization
 				String[] memberArray = viewTuple.getMemberDefs();
 	
 				// If any tuple member is set to PAFBLANK, set the remaining members to PAFBLANK as well
@@ -4072,15 +4069,17 @@ public class PafViewService {
 				if (bDoTimeHorizValidation) {
 					period = memberArray[timeAxis];
 					year = expandedColTuples.get(0).getMemberDefs()[yearAxis];
-					String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
-					if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
-						coordToLockList.add(PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period);
-						tuplesToLock.add(viewTuple);
+					if( period.isEmpty() && year.isEmpty() ) {
+						String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
+						if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
+							coordToLockList.add(PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period);
+							tuplesToLock.add(viewTuple);
+						}
+						else {
+							bFoundValidTimeHorizPeriod = true;
+						}
 					}
-					else {
-						bFoundValidTimeHorizPeriod = true;
-					}
-				}			
+				}
 			}	
 		}
 		// -- Lastly, remove any filtered tuples

@@ -2557,9 +2557,7 @@ public class PafDataService {
 
 		// Expand inner axis
 		for (ViewTuple vt:origViewTuples) {   
-			if( ! vt.getMemberDefs()[innerAxisIndex].isEmpty() ) {
-				expandedTuples.addAll(expandTuple(vt, innerAxisIndex, axes[innerAxisIndex], clientState));   
-			}
+			expandedTuples.addAll(expandTuple(vt, innerAxisIndex, axes[innerAxisIndex], clientState));   
 		}
 
 		// Compile a list of attribute dimensions used in this tuple or the page tuple. This
@@ -2578,6 +2576,11 @@ public class PafDataService {
 			}
 		}
 		
+		// Expand each symmetric tuple group (for tuples comprised of multiple dimensions)
+		for (int axisIndex = innerAxisIndex - 1; axisIndex >= 0; axisIndex--) {
+			expandedTuples = expandSymetricTupleGroups(axisIndex, expandedTuples.toArray(new ViewTuple[0]), axes, tupleAttrDims, pageAxisDims, pageAxisMembers, clientState);
+		}
+
 		// Run the expanded tuples through some final editing and filtering
 		logger.debug("Editing & Filtering Expanded View Tuples");
 
@@ -2633,11 +2636,6 @@ public class PafDataService {
 		 } while (false);
 		
 
-		// Expand each symmetric tuple group (for tuples comprised of multiple dimensions)
-		for (int axisIndex = innerAxisIndex - 1; axisIndex >= 0; axisIndex--) {
-			expandedTuples = expandSymetricTupleGroups(axisIndex, expandedTuples.toArray(new ViewTuple[0]), axes, tupleAttrDims, pageAxisDims, pageAxisMembers, clientState);
-		}
-
 		// -- Now edit/validate each expanded view tuple
 		for (ViewTuple viewTuple:expandedTuples) {
 
@@ -2655,10 +2653,12 @@ public class PafDataService {
 						
 			// Compile a list of any tuples with invalid time / year combinations (TTN-1858 / TTN-1886).
 			if (bDoTimeHorizValidation) {
-				if (!bTimeOnPage)
+				if (!bTimeOnPage) {
 					period = memberArray[timeAxis];
-				if (!bYearOnPage)
+				}
+				if (!bYearOnPage) {
 					year = memberArray[yearAxis];
+				}
 				String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
 				if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
 					invalidCoordList.add(PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period);
@@ -2871,7 +2871,7 @@ public class PafDataService {
 					// ViewService.ProcessInvalidTuples(). Tuples containing PafBlank or Member Tags are exempt 
 					// from the filtering process. (TTN-1469)
 					boolean validTupleExpansion = true;
-					if (hasAttributes && !viewTuple.containsPafBlank() && !viewTuple.isMemberTag()){
+					if (hasAttributes && !viewTuple.containsEmptyMember() && !viewTuple.containsPafBlank() && !viewTuple.isMemberTag()){
 						
 						// Cycle through each base dimension that has at least one attribute dimension
 						// on the current row/col tuple or page tuple. Then search the current axis, any
@@ -2967,32 +2967,36 @@ public class PafDataService {
 	 */
 	public List<ViewTuple> expandTuple(ViewTuple viewTuple, int axisIndex, String dim, PafClientState clientState) throws PafException {
 		ArrayList<ViewTuple> expTuples = new ArrayList<ViewTuple>();
-		String term = viewTuple.getMemberDefs()[axisIndex];
-		if (term.contains("@")) {
-			ExpOperation expOp = new ExpOperation(term);
-			String [] expTerms = resolveExpOperation(expOp, viewTuple.getParentFirst(), dim, clientState, true);
-			for (String expTerm : expTerms) {
-				if( expTerm != null && ! expTerm.isEmpty() ) {
-					ViewTuple vt = viewTuple.clone();
-					vt.getMemberDefs()[axisIndex] = expTerm;
-					expTuples.add(vt);
-				}
-			}
-		}
-		else {
-			//added code to handle terms that contain multiple members
-			if( term.contains(",") ) {
-				List<String> expTermList = StringUtils.stringToList(term, ",");
-				for (String expTerm : expTermList) {
-					if( expTerm != null && ! expTerm.isEmpty() ) {
-						ViewTuple vt = viewTuple.clone();
-						vt.getMemberDefs()[axisIndex] = expTerm;
-						expTuples.add(vt);
+		if( ! viewTuple.containsEmptyMember() ) {
+			String term = viewTuple.getMemberDefs()[axisIndex];
+			if( ! term.isEmpty() ) {
+				if (term.contains("@")) {
+					ExpOperation expOp = new ExpOperation(term);
+					String [] expTerms = resolveExpOperation(expOp, viewTuple.getParentFirst(), dim, clientState, true);
+					for (String expTerm : expTerms) {
+						if( expTerm != null && ! expTerm.isEmpty() ) {
+							ViewTuple vt = viewTuple.clone();
+							vt.getMemberDefs()[axisIndex] = expTerm;
+							expTuples.add(vt);
+						}
 					}
 				}
-			}
-			else {
-				expTuples.add(viewTuple);
+				else {
+					//added code to handle terms that contain multiple members
+					if( term.contains(",") ) {
+						List<String> expTermList = StringUtils.stringToList(term, ",");
+						for (String expTerm : expTermList) {
+							if( expTerm != null && ! expTerm.isEmpty() ) {
+								ViewTuple vt = viewTuple.clone();
+								vt.getMemberDefs()[axisIndex] = expTerm;
+								expTuples.add(vt);
+							}
+						}
+					}
+					else {
+						expTuples.add(viewTuple);
+					}
+				}
 			}
 		}
 		return expTuples;        
@@ -3180,18 +3184,16 @@ public class PafDataService {
 			
 		case OFFSET_MEMBERS:
 			memberList = new ArrayList<PafDimMember>();
-			if (expOp.getParms().length == 0) {
-				
-			}
 			String baseMember = expOp.getParms()[0];
 			int offsetStart = Short.parseShort(expOp.getParms()[1]);
 			int offsetEnd = Short.parseShort(expOp.getParms()[2]);
 			try {
-				List<PafDimMember> peers = tree.getPeersByOffsets(dim, baseMember, offsetStart, offsetEnd);
+				List<PafDimMember> peers = tree.getPeersByOffsets(baseMember, offsetStart, offsetEnd);
 				memberList.addAll(peers);
-			} catch( RuntimeException re ) {
-				throw re;
-			}
+			} catch( PafException re ) {
+				String errMsg = "View Section [" + dim + "] - " + re.getMessage();
+				logger.warn(errMsg);
+			} 
 			break;
 			
 		case PLAN_YEARS:
@@ -3228,6 +3230,19 @@ public class PafDataService {
 					memberList.add(newPafDimMember);
 				}
 			}
+			break;
+
+		case FIRST_PLAN_PERIOD:
+			parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_PERIOD;
+			parmVal = tokenCatalog.getProperty(parmKey);
+			if ( parmVal == null ) {
+				String errMsgDtl = "Unable to resolve the [" + parmKey + "] property";
+				logger.error(errMsgDtl);
+				throw new IllegalArgumentException(errMsgDtl);
+			}
+			memberList = new ArrayList<PafDimMember>();
+			newPafDimMember = tree.getMember(parmVal);
+			memberList.add(newPafDimMember);
 			break;
 
 		case FIRST_PLAN_YEAR:
