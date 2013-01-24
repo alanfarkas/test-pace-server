@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -256,8 +257,8 @@ public class StringUtils {
      * @return String
      */
     public static String arrayListToString(List<String> list) {
-    	
-    	Object[] array = list.toArray(new String[0]);
+    	Collections.sort(list);
+    	String[] array = list.toArray(new String[0]);
         return arrayToString(array);
     }
     
@@ -268,7 +269,6 @@ public class StringUtils {
      * @return String
      */
     public static String setToString(Set<String> set) {
-    	
     	return arrayListToString(new ArrayList<String>(set));
     }
     
@@ -460,4 +460,27 @@ public class StringUtils {
 		return arrayList;
 	}
 		
+    /**
+     * 
+     * Converts an list of strings to a string delimited by separator
+     *
+     * @param a array to convert
+     * @param separator separator to use
+     * @return
+     */
+    public static String arrayListToString(List<String> list, String separator) {
+    	Collections.sort(list);
+    	String[] array = list.toArray(new String[0]);
+    	return arrayToString(array, separator);
+      }
+
+    /**
+     *  convenience wrapper providing some default options.
+     *
+     * @param set Set of objects containing alpha-numeric characters
+     * @return String
+     */
+    public static String setToString(Set<String> set, String separator) {
+    	return arrayListToString(new ArrayList<String>(set), separator);
+    }
 }
