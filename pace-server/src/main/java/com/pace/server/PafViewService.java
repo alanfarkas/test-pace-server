@@ -4052,7 +4052,7 @@ public class PafViewService {
 		boolean bFoundValidTimeHorizPeriod = false;
 		// -- Now check each expanded view tuple
 		// Test for invalid time horizon coordinate when time and year on column or tuple
-		if ( bTimeOnRow && bYearOnCol ) {
+		if ( bTimeOnRow && bYearOnCol && expandedRowTuples.size() > 0 && expandedColTuples.size() > 0 ) {
 			for (ViewTuple viewTuple:expandedRowTuples) {
 				// Initialization
 				String[] memberArray = viewTuple.getMemberDefs();
@@ -4094,7 +4094,7 @@ public class PafViewService {
 		tuplesToLock.clear();
 		coordToLockList.clear();
 		bFoundValidTimeHorizPeriod = false;
-		if ( bTimeOnCol && bYearOnRow ) {
+		if ( bTimeOnCol && bYearOnRow && expandedColTuples.size() > 0  && expandedRowTuples.size() > 0 ) {
 			for (ViewTuple viewTuple:expandedColTuples) {
 			// Initialization
 				String[] memberArray = viewTuple.getMemberDefs();
