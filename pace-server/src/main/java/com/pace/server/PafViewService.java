@@ -4069,7 +4069,7 @@ public class PafViewService {
 				if (bDoTimeHorizValidation) {
 					period = memberArray[timeAxis];
 					year = expandedColTuples.get(0).getMemberDefs()[yearAxis];
-					if( period.isEmpty() && year.isEmpty() ) {
+					if( ! period.isEmpty() && ! year.isEmpty() ) {
 						String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
 						if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
 							coordToLockList.add(PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period);
@@ -4084,11 +4084,11 @@ public class PafViewService {
 		}
 		// -- Lastly, remove any filtered tuples
 		if( ! bFoundValidTimeHorizPeriod  && expandedRowTuples.size() != 0 && tuplesToLock.size() == expandedRowTuples.size() ) {
-			String errMsg = "The view can not be displayed since all the selected Year/Time combinations: "
-					+ StringUtils.arrayListToString(coordToLockList) + " are invalid. Please select different Year/Time combination(s).";
+			String errMsg = "The view can not be displayed since all the selected Year/Time combinations are invalid: "
+					+ StringUtils.arrayListToString(coordToLockList);
 			throw new PafException(errMsg, PafErrSeverity.Error);
 		}
-		expandedRowTuples.removeAll(coordToLockList);
+		expandedRowTuples.removeAll(tuplesToLock);
 		
 		//reset collection and reinitialize
 		tuplesToLock.clear();
@@ -4111,23 +4111,25 @@ public class PafViewService {
 				if (bDoTimeHorizValidation) {
 					period = memberArray[timeAxis];
 					year = expandedRowTuples.get(0).getMemberDefs()[yearAxis];
-					String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
-					if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
-						coordToLockList.add(PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period);
-						tuplesToLock.add(viewTuple);
-					}
-					else {
-						bFoundValidTimeHorizPeriod = true;
+					if( ! period.isEmpty() && ! year.isEmpty() ) {
+						String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
+						if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
+							coordToLockList.add(PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period);
+							tuplesToLock.add(viewTuple);
+						}
+						else {
+							bFoundValidTimeHorizPeriod = true;
+						}
 					}
 				}			
 			}	
 		}
 		if( ! bFoundValidTimeHorizPeriod  && expandedColTuples.size() != 0 && tuplesToLock.size() == expandedColTuples.size() ) {
-			String errMsg = "The view can not be displayed since all the selected Year/Time combinations: "
-					+ StringUtils.arrayListToString(coordToLockList) + " are invalid. Please select different Year/Time combination(s).";
+			String errMsg = "The view can not be displayed since all the selected Year/Time combinations are invalid: "
+					+ StringUtils.arrayListToString(coordToLockList);
 			throw new PafException(errMsg, PafErrSeverity.Error);
 		}
-		expandedColTuples.removeAll(coordToLockList);
+		expandedColTuples.removeAll(tuplesToLock);
 	}
 
 	/**

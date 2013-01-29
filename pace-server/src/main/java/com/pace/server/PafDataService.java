@@ -2629,7 +2629,7 @@ public class PafDataService {
 				String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
 				if (invalidTimeHorizonPeriods.contains(timeHorizCoord)) {
 					String invalidCoords = PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS + " / " + period;
-					String errMsg = invalidCoords + " is an invalid Year/Time combination. Please select a different Year/Time combination.";
+					String errMsg = "The view can not be displayed since all the selected Year/Time combinations are invalid: " + invalidCoords;
 					throw new PafException(errMsg, PafErrSeverity.Error);
 				}				
 			}
@@ -2670,8 +2670,8 @@ public class PafDataService {
 		
 		// -- Lastly, remove any filtered tuples
 		if( expandedTuples.size() != 0 && tuplesToRemove.size() == expandedTuples.size() ) {
-			String errMsg = "The view can not be displayed since all the selected Year/Time combinations: "
-					+ StringUtils.arrayListToString(invalidCoordList) + " are invalid. Please select different Year/Time combination(s).";
+			String errMsg = "The view can not be displayed since all the selected Year/Time combinations are invalid: "
+					+ StringUtils.arrayListToString(invalidCoordList);
 			throw new PafException(errMsg, PafErrSeverity.Error);
 		}
 		expandedTuples.removeAll(tuplesToRemove);
