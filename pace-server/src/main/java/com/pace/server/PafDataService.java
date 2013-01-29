@@ -3037,6 +3037,9 @@ public class PafDataService {
 			ExpOperation expOp = new ExpOperation(term);
 			expTerms = resolveExpOperation(expOp, parentFirst, dim, clientState, bIgnoreErrors);
 		}
+		else if( term.contains(",") ) {
+			expTerms = StringUtils.stringToArray(term, ",");
+		}
 		else {
 			expTerms = new String[] {term};
 		}
@@ -3276,7 +3279,7 @@ public class PafDataService {
 		// check if member list is empty. depending on method parm, either throw
 		// a fatal error or issue warning and return original member (TTN-1886).
 		String firstTerm = expOp.getParms()[0];
-		if (memberList.size() == 0) {
+		if (memberList.size() == 0 && ! firstTerm.isEmpty() ) {
 			if (bIgnoreErrors) {
 				String errMsg = "Unable to expand the member [" + firstTerm + "] in the dimension [" + dim
 						+ "] using the operation [" + expOp.toString() + "]";
@@ -3289,11 +3292,11 @@ public class PafDataService {
 
 		// return member names, if none the return original member (TTN-1886)
 		String[] memberNames = new String[memberList.size()];
-		if( ! firstTerm.isEmpty() && expOp.getOpCode() != ExpOpCode.OFFSET_MEMBERS ) {
+		if( expOp.getOpCode() != ExpOpCode.OFFSET_MEMBERS ) {
 			int i=0;
 			for (PafDimMember m : memberList)
 				memberNames[i++] = m.getKey();
-			if (memberNames.length == 0) {
+			if (memberNames.length == 0 && ! firstTerm.isEmpty() ) {
 				memberNames = new String[]{firstTerm};
 			}
 		}

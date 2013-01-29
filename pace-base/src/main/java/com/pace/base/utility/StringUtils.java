@@ -460,7 +460,22 @@ public class StringUtils {
 		return arrayList;
 	}
 		
-    /**
+	/**
+	 * 
+	 * Splits a string into a array based on a delimiter
+	 *
+	 * @param stringToSplit string to split
+	 * @param delim delimiter to split on
+	 * @return array of strings split on the delimiter
+	 */
+	public static String[] stringToArray(String stringToSplit, String delim) {
+		
+		List<String> arrayList = stringToList(stringToSplit, delim);
+		
+		return arrayList.toArray(new String[0]);
+	}
+
+	/**
      * 
      * Converts an list of strings to a string delimited by separator
      *
