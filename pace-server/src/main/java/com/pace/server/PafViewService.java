@@ -1462,8 +1462,7 @@ public class PafViewService {
 					colId++;
 
 					// if row or column are pafblank, process next col
-					if (rowTuple.containsEmptyMember() || rowTuple.containsPafBlank() || rowTuple.isMemberTag()
-							|| colTuple.containsEmptyMember() || colTuple.containsPafBlank() || colTuple.isMemberTag()) {
+					if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
 						continue;
 					}
 
@@ -1729,8 +1728,7 @@ public class PafViewService {
 
 					// TODO: maybe remove this
 					// if row or column are pafblank or member tag, process next col
-					if (rowTuple.containsEmptyMember() || rowTuple.containsPafBlank() || rowTuple.isMemberTag()
-							|| colTuple.containsEmptyMember() || colTuple.containsPafBlank() || colTuple.isMemberTag()) {
+					if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
 						continue;
 					}
 
@@ -1880,8 +1878,7 @@ public class PafViewService {
 					colId++;
 					
 					//if the row or column tuple contain blank or member tag, continue to next tuple
-					if (rowTuple.containsEmptyMember() || rowTuple.containsPafBlank() || rowTuple.isMemberTag()
-							|| colTuple.containsEmptyMember() || colTuple.containsPafBlank() || colTuple.isMemberTag()) {
+					if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
 						continue;
 					}
 										

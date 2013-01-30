@@ -14,6 +14,14 @@ import com.pace.base.PafErrSeverity;
 import com.pace.base.utility.PafXStream;
 import com.pace.base.utility.StringUtils;
 
+/**
+ * @author Alan
+ *
+ */
+/**
+ * @author Alan
+ *
+ */
 public class ViewTuple implements Cloneable, IPafCompressedObj {
 	
 	private Short order;
@@ -537,6 +545,22 @@ public class ViewTuple implements Cloneable, IPafCompressedObj {
 
 	}
 
+
+	/**
+	 * Return true if the tuple contains any "non-members"
+	 * 
+	 * @return True if the tuple contains any "non-members"
+	 */
+	public boolean containsNonMember() {
+		if (containsEmptyMember() || containsPafBlank() || isMemberTag()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
+	
 	/* (non-Javadoc)
 	 * @see com.pace.base.IPafCompressedObj#compressData()
 	 */

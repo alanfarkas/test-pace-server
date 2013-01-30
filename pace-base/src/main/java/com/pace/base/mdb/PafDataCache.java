@@ -213,7 +213,7 @@ public class PafDataCache implements IPafDataCache {
 		// Create memberIndexMap
 		memberIndexMap = createMemberIndexMap();
 
-		// Create keyIndexes Array
+		// Create arrays to facilitate cell addressing
 		createKeyIndexArrays();
 		
 		// Set cell property statistics
@@ -387,9 +387,9 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 *	Create indexed intersection elements array
+	 *	Create the set of internal arrays that manage the addressing of data blocks and cells intersections
 	 *
-	 * @return An array containing the indexed intersection elements by intersection section size
+	 * @return An  the set of internal arrays that manage the addressing of data blocks and cells intersections
 	 */
 	private void createKeyIndexArrays() {
 
@@ -402,7 +402,7 @@ public class PafDataCache implements IPafDataCache {
 		logger.debug("Creating coreKeyAxes &  coreKeyDims arrays...");
 		int minIsSize = coreDimensions.size();
 		int maxIsSize = allDimensions.size();
-		keyIndexesByIsSize = new int[maxIsSize + 1][];
+		keyIndexesByIsSize = new int[maxIsSize + 1][];		// 1-based array
 
 		coreKeyAxes = new int[minIsSize - NON_KEY_DIM_COUNT];
 		coreKeyDims = new String[coreKeyAxes.length];
@@ -425,15 +425,15 @@ public class PafDataCache implements IPafDataCache {
 		// size.
 		//
 		// The list of indexed axes, for each intersection size, is limited to the
-		// axis for each intersection dimension except Measure, Time and Year. 
+		// axis for each intersection dimension except Measure and Time. 
 		// 
-		// In following example Measure, Time, and Year at axes  0 and 2, respectively.
+		// In following example Measure and Time are at axes 1 and 3, respectively.
 		//
 		// 	Example:  	
-		//	Intersection Size		indexedAxes
-		//			  		7		[1][3][4][5][6]
-		//			  		8		[1][3][4][5][6][7]
-		//			  		9		[1][3][4][5][6][7][8]
+		//	Intersection Size		Intersection Axes				Indexed Axes
+		//			  		7		[0][1][2][3][4][5][6]			[0][2][4][5][6]
+		//			  		8		[0][1][2][3][4][5][6][7]		[0][2][4][5][6][7]
+		//			  		9		[0][1][2][3][4][5][6][7][8]		[0][2][4][5][6][7][8]
 		//
 		logger.debug("Creating keyIndexesBySize array");
 		keyIndexesByIsSize[minIsSize] = coreKeyAxes;

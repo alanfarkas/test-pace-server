@@ -99,6 +99,7 @@ import com.pace.base.utility.LevelGenParamUtil;
 import com.pace.base.utility.LogUtil;
 import com.pace.base.utility.StringOdometer;
 import com.pace.base.utility.StringUtils;
+import com.pace.base.view.PafAxis;
 import com.pace.base.view.PafMVS;
 import com.pace.base.view.PafView;
 import com.pace.base.view.PafViewSection;
@@ -1221,7 +1222,7 @@ public class PafDataService {
 
 		// Populate data cache with supporting reference data
 		UnitOfWork uowSpec = sliceParms.buildUowSpec(viewSection.getDimensionsPriority());
-		loadMdbViewData(dataCache, uowSpec, clientState, viewSection.hasAttributes());
+		loadMdbViewData(dataCache, uowSpec, clientState, viewSection);
 		
 		
 		// Calculate base version intersections on attribute view
@@ -1288,64 +1289,81 @@ public class PafDataService {
 	}
 
 	/**
-	 * 	Load mdb data intersections required to support the rendering of 
+	 * 	Load mdb data intersections, not initially loaded into the data cache, required to support the rendering of 
 	 *  the current view
 	 * 
 	 * @param dataCache Data cache
 	 * @param viewMemberSpec View member specification per dimension
 	 * @param clientState Client state object
-	 * @param isAttributeView If true, indicates the current view is an attribute view
+	 * @param viewSection View section
 	 * 
 	 * @throws PafException 
 	 */
-	private void loadMdbViewData(PafDataCache dataCache, UnitOfWork viewMemberSpec, PafClientState clientState, Boolean isAttributeView) throws PafException {
+	private void loadMdbViewData(PafDataCache dataCache, UnitOfWork viewMemberSpec, PafClientState clientState, PafViewSection viewSection) throws PafException {
 	
 		PafApplicationDef pafApp = clientState.getApp();
 		MdbDef mdbDef = pafApp.getMdbDef();
-		String measureDim = mdbDef.getMeasureDim(), timeDim = mdbDef.getTimeDim(), versionDim = mdbDef.getVersionDim();
+		String measureDim = mdbDef.getMeasureDim(), timeDim = mdbDef.getTimeDim(), versionDim = mdbDef.getVersionDim(), yearDim = mdbDef.getYearDim();
 		String planVersion = dataCache.getPlanVersion();
-		int versionAxis = dataCache.getVersionAxis();
+		String[]dcBaseDims = dataCache.getBaseDimensions();
+		int versionAxis = dataCache.getVersionAxis(), yearAxis = dataCache.getYearAxis();
 		UnitOfWork refDataSpec = null;
 		Map<String, Map<Integer, List<String>>> dataSpecByVersion = new HashMap<String, Map<Integer, List<String>>>();
 		MemberTreeSet uowTrees = clientState.getUowTrees();
+		PafDimTree yearTree = uowTrees.getTree(yearDim);
+
 
 		
+		// Determine which combinations of non-plannable years and versions are required by this view:
+		//
+		//  a) Reference Version by Any Non-Synthetic Year (Plannable or Non-Plannable Year)
+		//  b) Plan Version by Non-Plannable/Non-Synthetic Year
+		//
+		
 		// As a safeguard, filter out any versions not defined to the data cache. This
-		// prevents the attempted loading of a version the user doesn't have security 
+		// prevents the attempted loading of versions that the user doesn't have security 
 		// rights to, in the case of any unauthorized versions specified in the view.
 		List<String> viewVersions = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(versionDim)));
 		List<String> viewRefVersions = dataCache.getReferenceVersions();
 		viewRefVersions.retainAll(viewVersions);
-		Set<String> requiredRefVersions = null;
+		Set<String> requiredVersions = new HashSet<String>();
 		List<String> viewContribPctVersions = dataCache.getContribPctVersions();
 		viewContribPctVersions.retainAll(viewVersions);
 		List<String> viewVarVersions = dataCache.getVarianceVersions();
 		viewVarVersions.retainAll(viewVersions);
 
+		// Also, filter out any undefined and synthetic years (TTN-1860)
+		List<String> viewYears = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(yearDim)));
+		List<String> requiredYears = new ArrayList<String>(viewYears);
+		Set<String> syntheticYears = yearTree.getSyntheticMemberNames();
+		requiredYears.removeAll(syntheticYears);
+		List<String> nonPlanYears = new ArrayList<String>(clientState.getLockedYears());
+		nonPlanYears.retainAll(requiredYears);
+
 		
-		// Exit if no data to update
-		if (viewRefVersions.isEmpty() && viewContribPctVersions.isEmpty() && viewVarVersions.isEmpty()) {
+		// Exit if no data to load
+		if (viewRefVersions.isEmpty() && viewContribPctVersions.isEmpty() && viewVarVersions.isEmpty() && nonPlanYears.isEmpty()) {
 			return;
 		}
 		
 		
-		// First process reference and variance versions. Determine which reference 
-		// data intersections are needed to support view and any variance version
-		// calculations. 
-		requiredRefVersions = new HashSet<String>(dataCache.getComponentVersions(viewVarVersions));
-		requiredRefVersions.remove(planVersion);
-		requiredRefVersions.addAll(viewRefVersions);
-
-		
 		// Store the view's member specification in the format of a uow specification
-		// and clone for each reference version.
-		if (!isAttributeView) {
+		// that will later be cloned for each required version/year combination.
+		if (!viewSection.hasAttributes()) {
 
 			// Regular view - select all members on view, plus all uow measures 
 			// and time periods
 			refDataSpec = viewMemberSpec.clone();
 			refDataSpec.setDimMembers(measureDim, dataCache.getDimMembers(measureDim));
 			refDataSpec.setDimMembers(timeDim, dataCache.getDimMembers(timeDim));
+			
+			// Add in any synthetic member components (TTN-1870)
+			for (String baseDim : dcBaseDims) {
+				PafBaseTree baseTree = (PafBaseTree) clientState.getUowTrees().getTree(baseDim);
+				List<String> viewMembers = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(baseDim)));
+				viewMembers.addAll(baseTree.getSyntheticComponentMemberNames(viewMembers));
+				refDataSpec.setDimMembers(baseDim,viewMembers.toArray(new String[0]));
+			}
 			
 		} else {
 			
@@ -1359,7 +1377,6 @@ public class PafDataService {
 			// are calculated in Pace, only reference data for base members at the attribute
 			// mapping level will be selected for these base dimensions with attributes
 			// on the view.
-			String[]dcBaseDims = dataCache.getBaseDimensions();
 			refDataSpec = new UnitOfWork(dcBaseDims);
 			Set<String> viewDims = new HashSet<String>(Arrays.asList(viewMemberSpec.getDimensions()));
 			for (String baseDim : dcBaseDims) {
@@ -1381,20 +1398,56 @@ public class PafDataService {
 					List<PafDimMember> baseMembers = baseTree.getMembersAtLevel(baseTree.getRootNode().getKey(), level);
 					refDataSpec.setDimMembers(baseDim, PafDimTree.getMemberNames(baseMembers).toArray(new String[0]));
 				} else {
+					
 					// No associated attribute - just select members on the view
-					refDataSpec.setDimMembers(baseDim, viewMemberSpec.getDimMembers(baseDim));
+					List<String> viewMembers = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(baseDim)));
+					
+					// Add in any synthetic member components (TTN-1870)
+					viewMembers.addAll(baseTree.getSyntheticComponentMemberNames(viewMembers));
+					refDataSpec.setDimMembers(baseDim, viewMembers.toArray(new String[0]));
 				}
 			}
 		}
 
 	
+		// Determine the version & year combinations required by the view
+		Map<String, Set<String>> reqYearsByVersion = buildViewDataVersYearMap(viewSection, dataCache);
+		
+		// Compile the set of versions required to populate the view. Contribution % members
+		// are handled later.
+		// -- Reference Versions
+		requiredVersions.addAll(viewRefVersions);
+		// -- Versions needed to support any variance version calculations
+		requiredVersions.addAll(dataCache.getComponentVersions(viewVarVersions));
+		// -- Plan version
+		if (viewVersions.contains(planVersion)) {
+			requiredVersions.add(planVersion);
+		}
+
+		
 		// Take data specification, convert to a map, and clone it across each required 
-		// reference version.
-		for (String version : requiredRefVersions) {
+		// version. Plan version data will only be loaded for non-plannable years (TTN-1870).
+		for (String version : requiredVersions) {
+			
+			// Get the set of required years for the current version. For the plan version,
+			// only consider non-plannable years, since the plannable years are already 
+			// loaded. (TTN-1870)
+			Set<String> reqVersionYears = reqYearsByVersion.get(version);
+			reqVersionYears.retainAll(requiredYears);
+			if (version.equals(planVersion)) {
+				reqVersionYears.retainAll(nonPlanYears);
+			}
+			
+			// Skip to next version if there are no years to load
+			if (reqVersionYears.isEmpty()) continue;
+			
 			
 			// Clone data specification for current version
 			Map <Integer, List<String>> dataSpecAsMap = refDataSpec.buildUowMap();
 			dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
+			
+			// Update year specification to match set of required years (TTN-1870)
+			dataSpecAsMap.put(yearAxis, new ArrayList<String>(reqVersionYears));
 			
 			// Add filtered version-specific data specification to master map
 			dataSpecByVersion.put(version, dataSpecAsMap);
@@ -1524,6 +1577,104 @@ public class PafDataService {
 		// Calculate any synthetic member intersections
 		PafDataCacheCalc.calculateSyntheticMembers(clientState, dataCache, loadedMdbDataSpec);
 		
+	}
+
+
+	/**
+	 * Build a map that tracks all the referenced years, by version, across all view
+	 * section intersections.
+	 * 
+	 * @param viewSection View section
+	 * @param dataCache Data cache
+	 * @return Map of referenced view years by version
+	 */
+	private Map<String, Set<String>> buildViewDataVersYearMap(PafViewSection viewSection, PafDataCache dataCache) {
+		
+		Map<String, Set<String>> yearMap = new HashMap<String, Set<String>>();
+		ViewTuple[] rowTuples = viewSection.getRowTuples(), colTuples = viewSection.getColTuples();
+		Set<String> yearSet = null;
+		String versionDim = dataCache.getVersionDim(), yearDim = dataCache.getYearDim();
+		String version = null, year = null;
+		PafClientState clientState = dataCache.getClientState();
+		MemberTreeSet clientTrees = clientState.getUowTrees(); 
+		PafDimTree yearTree = clientTrees.getTree(yearDim);
+		boolean bVersionOnPage = false, bYearOnPage = false;
+		
+
+		// Look for version in Page Tuple
+		PafAxis versionAxis = viewSection.getAxis(versionDim);
+		if (versionAxis.getValue() == PafAxis.PAGE) {
+			version = viewSection.getDimensionMembers(versionDim)[0];
+			bVersionOnPage = true;
+		}
+		
+		// Look for year in Page Tuple
+		PafAxis yearAxis = viewSection.getAxis(yearDim);
+		if (yearAxis.getValue() == PafAxis.PAGE) {
+			year = viewSection.getDimensionMembers(yearDim)[0];
+			bYearOnPage = true;
+		}
+		
+		// If both version and year are page dims, get the required year(s) for 
+		// the page version and return map.
+		if (bVersionOnPage && bYearOnPage) {
+			yearSet = new HashSet<String>(Arrays.asList(new String[]{year}));
+			yearSet.addAll(yearTree.getSyntheticComponentMemberNames(year));
+			yearMap.put(version, yearSet);
+			return yearMap;
+		}
+		
+		
+		// Cycle through each row and column tuple combination and track all the years
+		// referenced for each version
+		for (ViewTuple rowTuple : rowTuples) {
+
+			// Skip tuples with invalid members (blanks, member tags, etc.)
+			if (rowTuple.containsNonMember()) continue;
+			
+			
+			// Attempt to get version and/or year values from row tuple
+			if (versionAxis.getValue() == PafAxis.ROW) {
+				int i = viewSection.getDimensionIndex(versionDim);
+				version = rowTuple.getMemberDefs()[i];
+			}
+			if (yearAxis.getValue() == PafAxis.ROW) {
+				int i = viewSection.getDimensionIndex(yearDim);
+				year = rowTuple.getMemberDefs()[i];
+			}
+			
+			// Cycle through each column tuple
+			for (ViewTuple colTuple : colTuples) {
+
+				// Skip tuples with invalid members (blanks, member tags, etc.)
+				if (colTuple.containsNonMember()) continue;
+
+				
+				// Attempt to get version and/or year values from column tuple
+				if (versionAxis.getValue() == PafAxis.COL) {
+					int i = viewSection.getDimensionIndex(versionDim);
+					version = colTuple.getMemberDefs()[i];
+				}
+				if (yearAxis.getValue() == PafAxis.COL) {
+					int i = viewSection.getDimensionIndex(yearDim);
+					year = colTuple.getMemberDefs()[i];
+				}
+				
+				// Track the version/year intersection in this row/col tuple combination
+				yearSet = yearMap.get(version);
+				if (yearSet == null) {
+					yearSet = new HashSet<String>();
+				}
+				yearSet.add(year);
+				yearSet.addAll(yearTree.getSyntheticComponentMemberNames(year));
+				yearMap.put(version, yearSet);
+				
+			}
+		}
+		
+		
+		// Return yearMap
+		return yearMap;
 	}
 
 
@@ -2871,7 +3022,7 @@ public class PafDataService {
 					// ViewService.ProcessInvalidTuples(). Tuples containing PafBlank or Member Tags are exempt 
 					// from the filtering process. (TTN-1469)
 					boolean validTupleExpansion = true;
-					if (hasAttributes && !viewTuple.containsEmptyMember() && !viewTuple.containsPafBlank() && !viewTuple.isMemberTag()){
+					if (hasAttributes && !viewTuple.containsNonMember()){
 						
 						// Cycle through each base dimension that has at least one attribute dimension
 						// on the current row/col tuple or page tuple. Then search the current axis, any

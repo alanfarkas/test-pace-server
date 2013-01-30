@@ -2,6 +2,7 @@ package com.pace.base.mdb;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -236,6 +237,68 @@ public abstract class PafDimTree {
  
     	return syntheticMembers;
     }
+
+
+	/**
+	 * Get the list of "real" members needed to calculate the specified
+	 * synthetic member.
+	 * 
+	 * @param memberName Member name
+	 * @return List of component members
+	 */
+	public List<PafDimMember> getSyntheticComponentMembers(String memberName) {
+		
+		List<PafDimMember> componentMembers = new ArrayList<PafDimMember>();
+		PafDimMember member = getMember(memberName);
+		
+		// Nothing to do is member is not synthetic
+		if (!member.isSynthetic()) return componentMembers;
+		
+		// Find the non-synthetic members needed to calculate the specified
+		// member. 
+		List<PafDimMember> children = member.getChildren();
+		for (PafDimMember child : children) {
+			if (child.isSynthetic()) {
+				// Child is synthetic - find its "real" member components
+				componentMembers.addAll(getSyntheticComponentMembers(child.getKey()));
+			} else {
+				// Child is "real"
+				componentMembers.add(child);
+			}
+		}
+
+		// Return component members
+		return componentMembers;
+	}
+	
+	/**
+	 * Get the list of "real" members needed to calculate the specified
+	 * synthetic member.
+	 * 
+	 * @param memberName Member name
+	 * @return List of component member names
+	 */
+	public List<String> getSyntheticComponentMemberNames(String memberName) {
+		return PafDimTree.getMemberNames(getSyntheticComponentMembers(memberName));
+	}
+
+	/**
+	 * Get the list of "real" members needed to calculate any synthetic 
+	 * members in the specified member list.
+	 * 
+	 * @param memberNames List of member names
+	 * @return List of component member names
+	 */
+	public List<String> getSyntheticComponentMemberNames(List<String> memberNames) {
+		
+		Set<String> componentMembers = new HashSet<String>();
+		for (String memberName : memberNames) {
+			componentMembers.addAll(getSyntheticComponentMemberNames(memberName));
+		}
+		
+		// Return component members
+		return new ArrayList<String>(componentMembers);
+	}
 
 
 	/**
