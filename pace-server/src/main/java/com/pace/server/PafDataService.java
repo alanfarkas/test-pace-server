@@ -1357,14 +1357,6 @@ public class PafDataService {
 			refDataSpec.setDimMembers(measureDim, dataCache.getDimMembers(measureDim));
 			refDataSpec.setDimMembers(timeDim, dataCache.getDimMembers(timeDim));
 			
-			// Add in any synthetic member components (TTN-1870)
-			for (String baseDim : dcBaseDims) {
-				PafBaseTree baseTree = (PafBaseTree) clientState.getUowTrees().getTree(baseDim);
-				List<String> viewMembers = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(baseDim)));
-				viewMembers.addAll(baseTree.getSyntheticComponentMemberNames(viewMembers));
-				refDataSpec.setDimMembers(baseDim,viewMembers.toArray(new String[0]));
-			}
-			
 		} else {
 			
 			// Attribute view - select the supporting base dimension intersections. All uow
@@ -1400,11 +1392,7 @@ public class PafDataService {
 				} else {
 					
 					// No associated attribute - just select members on the view
-					List<String> viewMembers = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(baseDim)));
-					
-					// Add in any synthetic member components (TTN-1870)
-					viewMembers.addAll(baseTree.getSyntheticComponentMemberNames(viewMembers));
-					refDataSpec.setDimMembers(baseDim, viewMembers.toArray(new String[0]));
+					refDataSpec.setDimMembers(baseDim, viewMemberSpec.getDimMembers(baseDim));
 				}
 			}
 		}
@@ -1567,7 +1555,19 @@ public class PafDataService {
 				
 		}
 		
-				
+		// Add in any synthetic member components (TTN-1870)
+		for (String version : dataSpecByVersion.keySet()) {
+			Map<Integer, List<String>> dataSpecAsMap = dataSpecByVersion.get(version);
+			for (int axis : dataSpecAsMap.keySet())  {
+				String baseDim = dataCache.getDimension(axis);
+				PafBaseTree baseTree = (PafBaseTree) clientState.getUowTrees().getTree(baseDim);
+				List<String> memberList = dataSpecAsMap.get(axis);
+				memberList.addAll(baseTree.getSyntheticComponentMemberNames(memberList));
+				dataSpecAsMap.put(axis, memberList);
+			}
+		}
+		
+		
 		// Update view reference data using data specification map
 		String dsId = mdbDef.getDataSourceId();
 		IPafConnectionProps connProps = clientState.getDataSources().get(dsId);
