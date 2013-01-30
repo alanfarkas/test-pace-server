@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-modules id="moduleCoreId" project-version="1.5.0">
     <wb-module deploy-name="pace">
-        <wb-resource deploy-path="/" source-path="/WebRoot"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <dependent-module archiveName="pace-ext-cmds-2.8.3.4.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-ext-cmds/pace-ext-cmds">
+        <wb-resource deploy-path="/" source-path="/WebRoot"/>
+        <dependent-module archiveName="pace-base-2.8.4.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-base/pace-base">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="pace-ext-funcs-2.8.3.4.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-ext-funcs/pace-ext-funcs">
+        <dependent-module archiveName="pace-ext-cmds-2.8.4.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-ext-cmds/pace-ext-cmds">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="pace-prvdr-mdb-esb-2.8.3.4.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-prvdr-mdb-esb/pace-prvdr-mdb-esb">
+        <dependent-module archiveName="pace-ext-funcs-2.8.4.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-ext-funcs/pace-ext-funcs">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pace-prvdr-mdb-esb-2.8.4.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pace-prvdr-mdb-esb/pace-prvdr-mdb-esb">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/pace-server/WebRoot/src"/>
