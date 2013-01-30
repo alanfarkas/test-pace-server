@@ -5,8 +5,6 @@ import com.pace.base.InvalidUserNameException;
 import com.pace.base.PafErrHandler;
 import com.pace.base.PafException;
 import com.pace.base.app.PafUserDef;
-import com.pace.base.ui.PafServer;
-import com.pace.server.PafMetaData;
 import com.pace.server.PafSecurityService;
 import com.pace.settings.data.MDBDatasourceContainer;
 import com.pace.settings.data.RDBDatasourceContainer;
