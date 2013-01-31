@@ -43,6 +43,7 @@ import com.pace.base.app.VersionType;
 import com.pace.base.app.VersionVarianceType;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.TimeSlice;
 import com.pace.base.funcs.IPafFunction;
@@ -620,7 +621,8 @@ public abstract class PafDataCacheCalc {
 		}
 		
 		
-		// Explode attribute intersection into corresponding base intersections
+		// Explode attribute intersection into corresponding base intersections. Iterator
+		// coordinates are in Time Horizon format (TTN-1597).
 		StringOdometer cacheIterator = EvalUtil.explodeAttributeIntersection(dataCache, attrIs, memberTrees);
 
 		// Exit if no intersections were found
@@ -631,17 +633,29 @@ public abstract class PafDataCacheCalc {
 		// Aggregate descendant base intersection values located in data cache.
 		//
 		// When the intersection being calculated is a non-aggregate measure, 
-		// any non-existing intersections are skipped so that the cell count 
-		// represents only the intersections that exist.
+		// a cell count will be maintained that allows the aggregate total
+		// to be averaged over the number of existing descendants intersections.
 		double total = 0;
-		int cellCount = 0;
+		int cellCount = 0, timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
 		while(cacheIterator.hasNext()) {
+			
+			// Get next intersection coordinates
 			String[] coords = cacheIterator.nextValue();		// TTN-1851
-			Intersection intersection = new Intersection(dataCache.getBaseDimensions(), coords);
-			if (measureType != MeasureType.NonAggregate || dataCache.isExistingIntersection(intersection)) {
-				double cellValue = dataCache.getCellValue(intersection);
-				total += cellValue;
-				cellCount++;
+			
+		    // Translate time horizon coordinates back into regular time & year coordinates (TTN-1597)
+			TimeSlice.translateTimeHorizonCoords(coords, timeAxis, yearAxis);
+			
+			// Get base intersection's cell value add it to total. 
+			double cellValue = dataCache.getBaseCellValue(coords);
+			total += cellValue;
+
+			// Non-Aggregate measure - increment cell count only if intersections exists.
+			if (measureType != MeasureType.NonAggregate) {
+				Intersection intersection = new Intersection(dataCache.getBaseDimensions(), coords);
+				if (dataCache.isExistingIntersection(intersection)) {
+					total += cellValue;
+					cellCount++;
+				}
 			}
 		}
 

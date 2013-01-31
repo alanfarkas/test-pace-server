@@ -640,7 +640,7 @@ public class EvalUtil {
 	/**
 	 * Explode a base intersection into its corresponding floor intersections 
 	 * 
-	 * @param is Attribute intersection
+	 * @param is Base intersection
 	 * @param evalState Evaluation state
 	 * @param bExplodeMeasures Indicates that measures should be exploded
 	 * 
@@ -658,7 +658,8 @@ public class EvalUtil {
 	    Map<String, List<String>> memberListMap = new HashMap<String, List<String>>();
 	    List<String> memberList;
 	    
-	        
+	    
+	    // Create a member filter that will be used to generate the intersections    
 	    for ( String dim : is.getDimensions() ) {
 	
 	    	// Don't do measure dimension children for now (unless indicated)
@@ -693,9 +694,11 @@ public class EvalUtil {
 	    	}
 	     	memberListMap.put(dim, memberList);
 	    }
-	
-	    // Convert time horizon intersections back to time/year intersections (TTN-1595)
+
+	    // Build intersections
 	    List<Intersection> floorIntersections =  IntersectionUtil.buildIntersections(memberListMap, is.getDimensions());
+
+	    // Convert time horizon intersections back to time/year intersections (TTN-1595)
 	    for (Intersection floorIs : floorIntersections) {
 	    	TimeSlice.translateTimeHorizonCoords(floorIs, timeDim, yearDim);
 	    }
@@ -789,6 +792,8 @@ public class EvalUtil {
 	
 		PafViewSection viewSection = dataCache.getPafMVS().getViewSection();
 		Map <String, List<String>> memberFilters = new HashMap<String, List<String>>();
+	    String timeDim = dataCache.getTimeDim(), yearDim = dataCache.getYearDim(); 
+		PafDimTree timeHorizonTree = memberTrees.getTree(dataCache.getTimeHorizonDim());			
 	    TimeBalance tb = TimeBalance.None;
 
 	    // Initialize time balance attribute for the measure in the dsCache intersection
@@ -819,6 +824,21 @@ public class EvalUtil {
 			PafBaseTree pafBaseTree = memberTrees.getBaseTree(baseDimension);
 			String baseMember = attrIs.getCoordinate(baseDimension);
 			
+	       	// Time dimension - use time horizon tree
+	    	if (baseDimension.equals(timeDim)) {
+	    		String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(baseMember, attrIs.getCoordinate(yearDim));
+	    		List<String> memberList = timeHorizonTree.getLowestMemberNames(timeHorizCoord);
+	    		memberFilters.put(baseDimension, memberList);
+	    		continue;
+	    	}
+	
+	    	// Year dimension - use time horizon default year member
+		    if (baseDimension.equals(yearDim)) {
+	    		List<String> memberList = Arrays.asList(new String[]{TimeSlice.getTimeHorizonYear()});
+	    		memberFilters.put(baseDimension, memberList);
+	    		continue;
+	    	}
+
 			// Get associated attribute dim names
 			Set<String> assocAttributes = new HashSet<String>();
 			assocAttributes.addAll(pafBaseTree.getAttributeDimNames());
@@ -995,12 +1015,14 @@ public class EvalUtil {
 		// Initialization
 		String[] baseDims = dataCache.getBaseDimensions();
 		Set<Intersection> convertedIntersections = new HashSet<Intersection>();
+		int timeAxis = dataCache.getTimeAxis(), yearAxis = dataCache.getYearAxis();
 	
 	
 		// Convert all intersections
 		for (Intersection attrIs: attrIntersections) {
 	
-			// Explode attribute intersection into corresponding base intersections
+			// Explode attribute intersection into corresponding base intersections. Iterator
+			// intersections are in Time Horizon format (TTN-1597).
 			StringOdometer baseIsIterator = explodeAttributeIntersection(dataCache, attrIs, memberTrees, explodedBaseDims);
 	
 			// Check for invalid attribute intersection
@@ -1009,6 +1031,11 @@ public class EvalUtil {
 				// Valid intersection - generate base intersections and add to collection
 				while(baseIsIterator.hasNext()) {
 					String[] baseCoords = baseIsIterator.nextValue();		// TTN-1851
+
+					// Translate time horizon coordinates back into regular time & year coordinates (TTN-1597)
+					TimeSlice.translateTimeHorizonCoords(baseCoords, timeAxis, yearAxis);
+					
+					// Create new intersection
 					Intersection baseIs = new Intersection(baseDims, baseCoords);		// TTN-1851
 					convertedIntersections.add(baseIs);
 				}

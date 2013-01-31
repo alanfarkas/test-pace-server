@@ -442,10 +442,8 @@ public class IntersectionUtil {
 	 *	Return an iterator that will generate the coordinates of the corresponding 
 	 *  descendant floor intersections for the specified base intersection.
 	 *  	 
-	 *  NOTE: 
-	 *  
-	 *  The returned iterator will generate time horizon coordinates. These must be
-	 *  converted back to time and year coordinates
+	 *  NOTE: The returned iterator will generate time horizon coordinates. These 
+	 *  must be converted back to time and year coordinates.
 	 * 
 	 * 
 	 * @param is Base (non-attribute) intersection
