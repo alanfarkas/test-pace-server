@@ -18,10 +18,10 @@
 	    <mkdir dir="${dist}"/>
 		
 	    <!-- Building Jar file -->
-	    <jar jarfile="${dist}/pace-base.jar" basedir="${bin}"/>
+	    <jar jarfile="${dist}/pace-base.jar" basedir="${bin}" excludes="*.properties" />
 		
 		<echo>"Deploying Jar file to local web server"</echo>
-		<copy todir="${server_proj_root}\client\dist" file = "${dist}/pace-base.jar"/> 		
+		<copy todir="${server_proj_root}\client\dist" file = "${dist}/pace-base.jar" /> 		
 		<echo message="  "/>
 	</target>
 </project>
