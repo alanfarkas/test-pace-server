@@ -29,13 +29,22 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<resources>
+			<resource>
+		        <filtering>true</filtering>
+				<directory>${basedir}/src/main/resources</directory>
+				<excludes>
+					<exclude>**/log4j.properties</exclude>
+				</excludes>
+			</resource>
+		</resources>
 	</build>
 
 	<issueManagement>
 		<system>Jira</system>
 		<url>http://ams.pace-planning.com/jira</url>
 	</issueManagement>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
