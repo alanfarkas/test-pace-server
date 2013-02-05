@@ -1349,8 +1349,13 @@ public abstract class PafDimTree {
 		
 		if( bOutOfRange ) {
 			String errMsg = "Tuple Specification (" + memberName + ", " + startIndex + ", " + endIndex + ")] references one or more members not contained in the Unit of Work.";
-    		PafException pfe = new PafException(errMsg, PafErrSeverity.Error); 
-    		throw pfe;
+			if( hasValidMember ) {
+				logger.warn(errMsg);
+			}
+			else {
+	    		PafException pfe = new PafException(errMsg, PafErrSeverity.Error); 
+	    		throw pfe;
+			}
 		}
 		
 		List<PafDimMember> offsetPeers = new ArrayList<PafDimMember>();

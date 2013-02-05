@@ -3339,15 +3339,17 @@ public class PafDataService {
 		case OFFSET_MEMBERS:
 			memberList = new ArrayList<PafDimMember>();
 			String baseMember = expOp.getParms()[0];
-			int offsetStart = Short.parseShort(expOp.getParms()[1]);
-			int offsetEnd = Short.parseShort(expOp.getParms()[2]);
-			try {
-				List<PafDimMember> peers = tree.getPeersByOffsets(baseMember, offsetStart, offsetEnd);
-				memberList.addAll(peers);
-			} catch( PafException re ) {
-				String errMsg = "View Section [" + dim + "] - " + re.getMessage();
-				logger.warn(errMsg);
-			} 
+			if( ! baseMember.isEmpty() ) {
+				int offsetStart = Short.parseShort(expOp.getParms()[1]);
+				int offsetEnd = Short.parseShort(expOp.getParms()[2]);
+				try {
+					List<PafDimMember> peers = tree.getPeersByOffsets(baseMember, offsetStart, offsetEnd);
+					memberList.addAll(peers);
+				} catch( PafException re ) {
+					String errMsg = "View Section [" + dim + "] - " + re.getMessage();
+					logger.warn(errMsg);
+				} 
+			}
 			break;
 			
 		case PLAN_YEARS:
@@ -3443,13 +3445,11 @@ public class PafDataService {
 
 		// return member names, if none the return original member (TTN-1886)
 		String[] memberNames = new String[memberList.size()];
-		if( expOp.getOpCode() != ExpOpCode.OFFSET_MEMBERS ) {
-			int i=0;
-			for (PafDimMember m : memberList)
-				memberNames[i++] = m.getKey();
-			if (memberNames.length == 0 && ! firstTerm.isEmpty() ) {
-				memberNames = new String[]{firstTerm};
-			}
+		int i=0;
+		for (PafDimMember m : memberList)
+			memberNames[i++] = m.getKey();
+		if (memberNames.length == 0 && ! firstTerm.isEmpty() && expOp.getOpCode() != ExpOpCode.OFFSET_MEMBERS ) {
+			memberNames = new String[]{firstTerm};
 		}
 		// return member names
 		return memberNames;
