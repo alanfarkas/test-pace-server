@@ -646,12 +646,12 @@ public abstract class PafDataCacheCalc {
 			TimeSlice.translateTimeHorizonCoords(coords, timeAxis, yearAxis);
 			
 			// Get base intersection's cell value add it to total. 
-			Intersection intersection = new Intersection(dataCache.getBaseDimensions(), coords);
-			double cellValue = dataCache.getCellValue(intersection);
+			double cellValue = dataCache.getBaseCellValue(coords);
 			total += cellValue;
 
 			// Non-Aggregate measure - increment cell count only if intersections exists.
 			if (measureType == MeasureType.NonAggregate) {
+				Intersection intersection = new Intersection(dataCache.getBaseDimensions(), coords);
 				if (dataCache.isExistingIntersection(intersection)) {
 					cellCount++;
 				}

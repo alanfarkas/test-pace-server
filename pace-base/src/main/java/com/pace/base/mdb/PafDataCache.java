@@ -802,11 +802,23 @@ public class PafDataCache implements IPafDataCache {
 	 *  coordinate
 	 *
 	 * @param cellIs Cell intersection
-	 * @return true if the intersection translates to a valid time horizon
+	 * @return true if the intersection translates to a valid time horizon coordinate
 	 */
 	public boolean hasValidTimeHorizonCoord(Intersection cellIs) {
 		
-		String period = cellIs.getCoordinate(getTimeAxis()), year = cellIs.getCoordinate(getYearAxis());
+		return hasValidTimeHorizonCoord(cellIs.getCoordinates());
+	}
+
+	/**
+	 *	Determines if the intersection coordinates translates to a valid 
+	 *  time horizon coordinate
+	 *
+	 * @param coords Cell intersection coordinates
+	 * @return true if the intersection coordinates translates to a valid time horizon coordinate
+	 */
+	public boolean hasValidTimeHorizonCoord(String[] coords) {
+		
+		String period = coords[getTimeAxis()], year = coords[getYearAxis()];
 		String timeHorizonCoord = TimeSlice.buildTimeHorizonCoord(period, year);
 		if (isMember(getTimeHorizonDim(), timeHorizonCoord)) {
 			return true;
@@ -1209,15 +1221,46 @@ public class PafDataCache implements IPafDataCache {
 	/**
 	 *	Return the cell value for the specified non-attribute intersection coordinates
 	 *
-	 * @param coords Array of dimension members that define a non-attribute intersection
+	 * @param baseCoords Array of dimension members that define a non-attribute intersection
 	 * @return Returns the cell value.
 	 * 
 	 * @throws PafException 
 	 */
-	public double getBaseCellValue(String[] coords) throws PafException {
+	public double getBaseCellValue(String[] baseCoords) throws PafException {
 
-		Intersection intersection = new Intersection(getBaseDimensions(), coords);
-		return getCellValue(intersection);
+		double cellValue = 0;
+		
+		// Get the cell address of the specified intersection
+		DataCacheCellAddress cellAddress = generateBaseCellAddress(baseCoords);
+		Intersection dataBlockKey = cellAddress.getDataBlockKey();
+
+		// Look for underlying data block
+		DataBlock dataBlock = getDataBlock(dataBlockKey).getDataBlock();
+
+		// Retrieve the cell value if the data block exists
+		if (dataBlock != null) {
+			
+			// Data block exists
+			cellValue = dataBlock.getCellValue(cellAddress);
+			
+		} else {
+
+			// Data block does not exist - check if intersection is valid
+			if (isValidIntersection(baseCoords)) {
+				// Valid intersection
+				cellValue = 0;
+
+			} else {
+				// Invalid intersection - throw error
+				String errMsg = "Data Cache error - Unable to get data cache cell value for invalid intersection: "
+						+ StringUtils.arrayToString(baseCoords);
+				logger.error(errMsg);
+				throw new IllegalArgumentException(errMsg);
+			}
+		}
+
+		return cellValue;
+
 	}
 
 	/**
@@ -1255,7 +1298,7 @@ public class PafDataCache implements IPafDataCache {
 		DataCacheCellAddress cellAddress = generateCellAddress(translatedIs);
 		Intersection dataBlockKey = cellAddress.getDataBlockKey();
 
-		// Determine if this is an alias intersection
+		// Determine if this is an attribute intersection
 		boolean isAttrIs = isAttributeIntersection(intersection);
 		
 		// Look for underlying data block
@@ -3210,6 +3253,41 @@ public class PafDataCache implements IPafDataCache {
 		return cellAddress;
 	}
 
+	/**
+	 *	Return the cell address for the specified base intersection coordinates
+	 *
+	 * @param baseCoords Base cell intersection coordinates
+	 * @return DataCacheCellAddress
+	 * 
+	 * @throws PafException 
+	 */
+	private DataCacheCellAddress generateBaseCellAddress(final String[] baseCoords) throws PafException {
+		
+		int measureAxis = this.getMeasureAxis();
+		int timeAxis = this.getTimeAxis();
+		DataCacheCellAddress cellAddress = new DataCacheCellAddress();
+
+		
+		// Translate offset version alias intersection to primary
+		// data cache intersection
+		String[] translatedCoords = translateOffsetVersionAliasIs(baseCoords);
+		
+		// Generate data block key that corresponds to the cell intersection
+		Intersection dataBlockKey = generateDataBlockKey(translatedCoords);
+		cellAddress.setDataBlockKey(dataBlockKey);
+		
+		// Set x coordinate (measure)
+		int measureIndex = getMemberIndex(translatedCoords[measureAxis], measureAxis);
+		cellAddress.setCoordX(measureIndex);
+
+		// Set y coordinate (time horizon - year/period) (TTN-1860)
+		int timeIndex = getMemberIndex(translatedCoords[timeAxis], timeAxis);
+		cellAddress.setCoordY(timeIndex);
+
+		// Return cell address
+		return cellAddress;
+	}
+
 
 	/**
 	 * Translate offset version alias intersection to its source data cache intersection
@@ -3226,12 +3304,42 @@ public class PafDataCache implements IPafDataCache {
 	 * sourced directly from the multidimensional database.
 	 * 
 	 * 
-	 * @param cellIs An cell intersection
+	 * @param cellIs A cell intersection
 	 * 
-	 * @return Translated intersection or original intersection, if not translation is needed.
+	 * @return Translated intersection or original intersection, if no translation is needed.
 	 * @throws PafException 
 	 */
 	private Intersection translateOffsetVersionAliasIs(Intersection cellIs) throws PafException {
+
+		// Translate coordinates
+		String[] translatedCoords = translateOffsetVersionAliasIs(cellIs.getCoordinates());
+		cellIs.setCoordinates(translatedCoords);
+		
+		// Return translated intersection
+		return cellIs;
+	}
+
+	/**
+	 * Translate offset version alias intersection to its source data cache intersection
+	 * 
+	 * An offset version intersection will be treated as an alias of
+	 * another data cache intersection, if it meets the following 
+	 * condition(s):
+	 * 
+	 * 1) The intersection's version dimension coordinate contains an
+	 *    offset version reference whose calculated source year falls
+	 *    inside the UOW.
+	 * 
+	 * Offset version intersections who don't meet this criteria are 
+	 * sourced directly from the multidimensional database.
+	 * 
+	 * 
+	 * @param cellIs A cell intersection's coordinates
+	 * 
+	 * @return Translated coordinates or original coordinates, if no translation is needed.
+	 * @throws PafException 
+	 */
+	private String[] translateOffsetVersionAliasIs(String[] coords) throws PafException {
 
 		final int versionAxis = this.getVersionAxis(), yearAxis = this.getYearAxis();
 		final String planVersion = this.getPlanVersion();
@@ -3240,16 +3348,16 @@ public class PafDataCache implements IPafDataCache {
 
 		// Check for offset version reference. If none found then return original
 		// intersection.
-		String version = cellIs.getCoordinate(versionAxis);
+		String version = coords[versionAxis];
 		VersionDef vd = getVersionDef(version);
 		if (vd.getType() != VersionType.Offset) {
-			return cellIs;
+			return coords;
 		}
 		
 		
 		// Calculate the offset version source year
 		VersionFormula vf = vd.getVersionFormula();
-		String yearCoord = cellIs.getCoordinate(yearAxis);
+		String yearCoord = coords[yearAxis];
 		String sourceYear = null;
 		final List<String> mdbYearList = this.getMdbYears();
 		try {
@@ -3262,15 +3370,15 @@ public class PafDataCache implements IPafDataCache {
 		// If source year falls inside the uow, then this intersection is an alias
 		// intersection and points to another intersection within the uow.
 		if (uowYearList.contains(sourceYear)) {
-			// Translate intersection
-			Intersection translatedIs = cellIs;
+			// Translate intersection coordinates
+			String[] translatedCoords = coords;
 			String sourceVersion = vf.getBaseVersionValue(planVersion);
-			translatedIs.setCoordinate(versionAxis, sourceVersion);
-			translatedIs.setCoordinate(yearAxis, sourceYear);
-			return translatedIs;			
+			translatedCoords[versionAxis] = sourceVersion;
+			translatedCoords[yearAxis] = sourceYear;
+			return translatedCoords;			
 		} else {
 			// No translation needed - return original intersection
-			return cellIs;
+			return coords;
 		}
 
 	}
@@ -3372,6 +3480,34 @@ public class PafDataCache implements IPafDataCache {
 		// given intersection size.  
 		int[] keyDimIndexes = keyIndexesByIsSize[intersection.getSize()];
 		dataBlockKey = intersection.createSubIntersection(keyDimIndexes);
+		
+		return dataBlockKey;
+	}
+
+	/**
+	 * 	Calculate the data block key for the specified base cell intersection
+	 *  coordinates.
+	 * 
+	 * @param baseCoords Base (non-attribute) intersection coordinates
+	 * @return Intersection
+	 */
+	private Intersection generateDataBlockKey(String[] baseCoords) {
+		
+		Intersection dataBlockKey = null;
+		
+		// The data block key is calculated by taking the intersection
+		// and removing the elements that correspond to the dimensions
+		// contained in the data block. 
+		//
+		// To reduce overhead, this method accesses a pre-built array 
+		// that contains the desired intersection elements for each
+		// given intersection size.  
+		int[] keyDimIndexes = keyIndexesByIsSize[baseCoords.length];
+		String[] coords = new String[coreKeyDims.length];
+		for (int i = 0; i < coreKeyDims.length; i++) {
+			coords[i] = baseCoords[keyDimIndexes[i]];
+		}
+		dataBlockKey = new Intersection(coreKeyDims, coords);
 		
 		return dataBlockKey;
 	}
@@ -4967,6 +5103,50 @@ public class PafDataCache implements IPafDataCache {
 		return true;
 	}
 
+	/**
+	 *	Determines if the specified intersection is a valid data cache intersection. This
+	 *  does not necessarily mean that the intersection exists in the data cache.
+	 *  
+	 *  This method does not check for attribute intersection validity
+	 *
+	 * @param baseCoords Non-attribute Cell intersection coordinates
+	 * @return True if the specified intersection is a valid data cache intersection
+	 */
+	public boolean isValidIntersection(String[] baseCoords) {
+
+		// Assume that intersection is not null
+		
+		// Check intersection size 
+		int isDimCount = baseCoords.length;
+		if (isDimCount != coreDimensions.size()) {
+			return false;
+		}
+		
+		// Check core dimension members in sequence by position
+		for (int axis = 0; axis < coreDimensions.size(); axis++) {
+			
+			// Get base dimension
+			String dim = this.getDimension(axis);
+			
+			//Validate member name
+			String member = baseCoords[axis];
+			if (!this.isMember(dim, member)) {
+				return false;
+			}
+		}
+
+		
+		// Lastly, check for valid time horizon coordinate (TTN-1595)
+		if (!this.hasValidTimeHorizonCoord(baseCoords)) {
+			return false;
+		}
+		
+
+		// Passed all checks - must be valid
+		return true;
+	}
+
+	
 	
 	/**
 	 *	Validate member filter used for retrieving filtered data cache data
