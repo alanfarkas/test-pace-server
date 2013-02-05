@@ -4930,6 +4930,7 @@ public class PafDataCache implements IPafDataCache {
 		return isFound;
 	}
 
+
 	/**
 	 *	Determines if the specified intersection exists in the data cache
 	 *
@@ -4947,6 +4948,33 @@ public class PafDataCache implements IPafDataCache {
 
 		// Get the data block key (this step also validates the measure and time members)
 		DataCacheCellAddress cellAddress = generateCellAddress(intersection);
+		
+		// Check if the data block exists
+		if (isExistingDataBlock(cellAddress.getDataBlockKey())) {
+			isFound = true;
+		}
+
+		// Return status
+		return isFound;
+	}
+
+	/**
+	 *	Determines if the specified base intersection exists in the data cache
+	 *
+	 * @param intersection Cell intersection coordinates
+	 * @return True if the specified intersection exists in the data cache
+	 * 
+	 * @throws PafException 
+	 */
+	public boolean isExistingBaseIntersection(String[] baseCoords) throws PafException {
+
+		boolean isFound = false;
+
+		// An intersection exists if its coordinates are valid and its corresponding
+		// data block exists. 
+
+		// Get the data block key (this step also validates the measure and time members)
+		DataCacheCellAddress cellAddress = generateBaseCellAddress(baseCoords);
 		
 		// Check if the data block exists
 		if (isExistingDataBlock(cellAddress.getDataBlockKey())) {

@@ -651,8 +651,7 @@ public abstract class PafDataCacheCalc {
 
 			// Non-Aggregate measure - increment cell count only if intersections exists.
 			if (measureType == MeasureType.NonAggregate) {
-				Intersection intersection = new Intersection(dataCache.getBaseDimensions(), coords);
-				if (dataCache.isExistingIntersection(intersection)) {
+				if (dataCache.isExistingBaseIntersection(coords)) {
 					cellCount++;
 				}
 			}
