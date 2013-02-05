@@ -20,7 +20,6 @@ package com.pace.base.mdb;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,10 +28,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.MemberTreeSet;
 
 /**
  * A Dimension Tree that holds a "real" (stored) dimension
