@@ -165,16 +165,17 @@ public class CompressionUtil {
 	public static String generateDynamicEscapeSequenceForArrayofArrays(IPafCompressedSingleObj[] arrayToCompress, String delimiter, String escapeChar){
 		
 		Integer greatestEscapeCounter = null;
-		for (int i = 0; i < arrayToCompress.length; i++) {
-			Integer escapeCounter = arrayToCompress[i].getDynamicEscapeCount(delimiter, escapeChar);
-
-			if(escapeCounter != null){	
-				if(greatestEscapeCounter == null || escapeCounter > greatestEscapeCounter){
-					greatestEscapeCounter = escapeCounter;
+		if( arrayToCompress != null ) {
+			for (int i = 0; i < arrayToCompress.length; i++) {
+				Integer escapeCounter = arrayToCompress[i].getDynamicEscapeCount(delimiter, escapeChar);
+	
+				if(escapeCounter != null){	
+					if(greatestEscapeCounter == null || escapeCounter > greatestEscapeCounter){
+						greatestEscapeCounter = escapeCounter;
+					}
 				}
 			}
 		}
-			
 		//Create escape character string
 		String escapeSequence = "";
 		int counter = 0;

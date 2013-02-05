@@ -736,105 +736,107 @@ public class PafViewService {
 			logger.info("Fetching view data: " + viewName);
 			for (PafViewSection viewSection : renderedView.getViewSections()) {
 				
-				boolean isViewSectionChanged = false;
-				
-				// Add view and all of it's view sections to "Materialized View
-				// Section" collection or use previous MVS entry if it exists
-				String mvsKey = PafMVS.generateKey(renderedView, viewSection);
-				PafMVS pafMVS = clientState.getMVS(mvsKey);
-				PafDataSliceParms prevDataSliceParms = null;
-				if (pafMVS == null ){
-					pafMVS = new PafMVS(renderedView, viewSection);
-					clientState.addMVS(pafMVS.getKey(), pafMVS);
-				} else {
-					// MVS exists - also get previous data slice parms
-					prevDataSliceParms = pafMVS.getDataSliceParms();
-				}
-			
-				// Populate data slice
-				PafDataSlice dataSlice = pafDataService.getDataSlice(renderedView, viewSection, clientState, false);
-				viewSection.setPafDataSlice(dataSlice);
-								
-				//Suppress Zeros ***********************************************************				
-				//Resolve the Suppress Zero Settings - view section specific settings override global settings
-				String appId = PafAppService.getInstance().getApplications().get(0).getAppId();
-				viewSection.setSuppressZeroSettings(PafAppService.getInstance().resolveSuppressZeroSettings(viewSection.getSuppressZeroSettings(), appId));
-								
-				LinkedHashSet<Integer> suppressedRows = new LinkedHashSet<Integer>();
-				LinkedHashSet<Integer> suppressedColumns = new LinkedHashSet<Integer>();
-				
-				//If it is possible for the user to make setting changes
-				if (viewSection.getSuppressZeroSettings().getEnabled() == true && 
-						viewSection.getSuppressZeroSettings().getVisible() == true){
+				if( ! viewSection.isEmpty() ) {
+					boolean isViewSectionChanged = false;
 					
-					//get settings from client
-					viewSection.getSuppressZeroSettings().setColumnsSuppressed(viewRequest.getColumnsSuppressed());
-					viewSection.getSuppressZeroSettings().setRowsSuppressed(viewRequest.getRowsSuppressed());
-					
-					if(viewSection.getSuppressZeroSettings().getRowsSuppressed() == true || viewSection.getSuppressZeroSettings().getColumnsSuppressed() == true){
-												
-				    	suppressZeros(viewSection, suppressedRows, suppressedColumns);
-				    	suppressTuples(viewSection, suppressedRows, suppressedColumns);
-				    	
-				    	if(prevDataSliceParms != null){
-					    	if(suppressedViewIsChanged(viewSection, prevDataSliceParms) == true){
-					    		renderedView.setDirtyFlag(true);
-					    		isViewSectionChanged = true;
-					    	}
-				    	}
+					// Add view and all of it's view sections to "Materialized View
+					// Section" collection or use previous MVS entry if it exists
+					String mvsKey = PafMVS.generateKey(renderedView, viewSection);
+					PafMVS pafMVS = clientState.getMVS(mvsKey);
+					PafDataSliceParms prevDataSliceParms = null;
+					if (pafMVS == null ){
+						pafMVS = new PafMVS(renderedView, viewSection);
+						clientState.addMVS(pafMVS.getKey(), pafMVS);
+					} else {
+						// MVS exists - also get previous data slice parms
+						prevDataSliceParms = pafMVS.getDataSliceParms();
 					}
-				}
-				else{
-					//otherwise use the original settings
-					if(viewSection.getSuppressZeroSettings().getRowsSuppressed() == true || 
-							viewSection.getSuppressZeroSettings().getColumnsSuppressed() == true){
+				
+					// Populate data slice
+					PafDataSlice dataSlice = pafDataService.getDataSlice(renderedView, viewSection, clientState, false);
+					viewSection.setPafDataSlice(dataSlice);
+									
+					//Suppress Zeros ***********************************************************				
+					//Resolve the Suppress Zero Settings - view section specific settings override global settings
+					String appId = PafAppService.getInstance().getApplications().get(0).getAppId();
+					viewSection.setSuppressZeroSettings(PafAppService.getInstance().resolveSuppressZeroSettings(viewSection.getSuppressZeroSettings(), appId));
+									
+					LinkedHashSet<Integer> suppressedRows = new LinkedHashSet<Integer>();
+					LinkedHashSet<Integer> suppressedColumns = new LinkedHashSet<Integer>();
+					
+					//If it is possible for the user to make setting changes
+					if (viewSection.getSuppressZeroSettings().getEnabled() == true && 
+							viewSection.getSuppressZeroSettings().getVisible() == true){
 						
-				    	suppressZeros(viewSection, suppressedRows, suppressedColumns);
-				    	suppressTuples(viewSection, suppressedRows, suppressedColumns);
-				    	
-				    	if(prevDataSliceParms != null){
-					    	if(suppressedViewIsChanged(viewSection, prevDataSliceParms) == true){
-					    		renderedView.setDirtyFlag(true);
-					    		isViewSectionChanged = true;
+						//get settings from client
+						viewSection.getSuppressZeroSettings().setColumnsSuppressed(viewRequest.getColumnsSuppressed());
+						viewSection.getSuppressZeroSettings().setRowsSuppressed(viewRequest.getRowsSuppressed());
+						
+						if(viewSection.getSuppressZeroSettings().getRowsSuppressed() == true || viewSection.getSuppressZeroSettings().getColumnsSuppressed() == true){
+													
+					    	suppressZeros(viewSection, suppressedRows, suppressedColumns);
+					    	suppressTuples(viewSection, suppressedRows, suppressedColumns);
+					    	
+					    	if(prevDataSliceParms != null){
+						    	if(suppressedViewIsChanged(viewSection, prevDataSliceParms) == true){
+						    		renderedView.setDirtyFlag(true);
+						    		isViewSectionChanged = true;
+						    	}
 					    	}
-				    	}
+						}
 					}
-				}
-				
-				// Set the suppressed flag
-				if (suppressedRows.size() > 0 || suppressedColumns.size() > 0){
-					viewSection.setSuppressed(true);
-				}else{
-					viewSection.setSuppressed(false);
-				}
-				
-				// Build data slice parameters after the suppression
-//				if (isViewSectionChanged) {
-					PafDataSliceParms sliceParms = pafDataService.buildDataSliceParms(viewSection);
-					pafMVS.setDataSliceParms(sliceParms);
-//				}
-				
-				// Populate cell note data
-				CellNoteCache noteCache = CellNoteCacheManager.getInstance().getNoteCache(viewRequest.getClientId() );
-				SimpleCellNote[] simpleCellNotes = noteCache.getAllNotes(viewSection.getDimensionsPriority());
-				viewSection.setCellNotes(simpleCellNotes);
-				
-				//TTN-1228
-				viewSection.setReadOnly(viewSection.isReadOnly() || clientState.getPlannerRole().isReadOnly());
-				
-				// 
-				// compress slice for return.
-				//try {
-					//if the data array is null set it to null.  The client checks for the null.
-					if (dataSlice.getData().length == 0){
-						dataSlice.setData(null);
-					}else{ 
-						//dataSlice.compressData();
+					else{
+						//otherwise use the original settings
+						if(viewSection.getSuppressZeroSettings().getRowsSuppressed() == true || 
+								viewSection.getSuppressZeroSettings().getColumnsSuppressed() == true){
+							
+					    	suppressZeros(viewSection, suppressedRows, suppressedColumns);
+					    	suppressTuples(viewSection, suppressedRows, suppressedColumns);
+					    	
+					    	if(prevDataSliceParms != null){
+						    	if(suppressedViewIsChanged(viewSection, prevDataSliceParms) == true){
+						    		renderedView.setDirtyFlag(true);
+						    		isViewSectionChanged = true;
+						    	}
+					    	}
+						}
 					}
-				//}
-//				catch (IOException iox) {
-//					throw new PafException(iox.getLocalizedMessage(), PafErrSeverity.Error);
-//				}
+					
+					// Set the suppressed flag
+					if (suppressedRows.size() > 0 || suppressedColumns.size() > 0){
+						viewSection.setSuppressed(true);
+					}else{
+						viewSection.setSuppressed(false);
+					}
+					
+					// Build data slice parameters after the suppression
+	//				if (isViewSectionChanged) {
+						PafDataSliceParms sliceParms = pafDataService.buildDataSliceParms(viewSection);
+						pafMVS.setDataSliceParms(sliceParms);
+	//				}
+					
+					// Populate cell note data
+					CellNoteCache noteCache = CellNoteCacheManager.getInstance().getNoteCache(viewRequest.getClientId() );
+					SimpleCellNote[] simpleCellNotes = noteCache.getAllNotes(viewSection.getDimensionsPriority());
+					viewSection.setCellNotes(simpleCellNotes);
+					
+					//TTN-1228
+					viewSection.setReadOnly(viewSection.isReadOnly() || clientState.getPlannerRole().isReadOnly());
+					
+					// 
+					// compress slice for return.
+					//try {
+						//if the data array is null set it to null.  The client checks for the null.
+						if (dataSlice.getData().length == 0){
+							dataSlice.setData(null);
+						}else{ 
+							//dataSlice.compressData();
+						}
+					//}
+	//				catch (IOException iox) {
+	//					throw new PafException(iox.getLocalizedMessage(), PafErrSeverity.Error);
+	//				}
+				}
 			}
 			
 			// resolve numeric formatting for measure/versions
@@ -858,18 +860,19 @@ public class PafViewService {
 			
 			for (PafViewSection viewSection : renderedView.getViewSections()) {
 				// Populate member tag data
+				if( ! viewSection.isEmpty() ) {
 				
-				//Member Tag Data cache
-				Map<SimpleMemberTagId,Map<Intersection, MemberTagData>> memberTags = new HashMap<SimpleMemberTagId,Map<Intersection, MemberTagData>>();
-				
-				viewSection = populateMemberTagIntersections(viewSection, new PafAxis(PafAxis.ROW), memberTags);
-				viewSection = populateMemberTagIntersections(viewSection, new PafAxis(PafAxis.COL), memberTags);
-				viewSection = populateMemberTagComments(viewSection, memberTags);
-				
-				//Resolve page headers
-				viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), tokenCatalog, viewName);		
-//				viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), clientState.generateTokenCatalog(new Properties()), viewName);		
-				
+					//Member Tag Data cache
+					Map<SimpleMemberTagId,Map<Intersection, MemberTagData>> memberTags = new HashMap<SimpleMemberTagId,Map<Intersection, MemberTagData>>();
+					
+					viewSection = populateMemberTagIntersections(viewSection, new PafAxis(PafAxis.ROW), memberTags);
+					viewSection = populateMemberTagIntersections(viewSection, new PafAxis(PafAxis.COL), memberTags);
+					viewSection = populateMemberTagComments(viewSection, memberTags);
+					
+					//Resolve page headers
+					viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), tokenCatalog, viewName);		
+	//				viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), clientState.generateTokenCatalog(new Properties()), viewName);		
+				}
 			}
 			
 		} catch (Exception ex) {
@@ -895,7 +898,9 @@ public class PafViewService {
 
 		// Resolve alias mappings on each view section
 		for (int i = 0; i < sections.length; i++) {
-			sections[i].setAliasMappings(aliasMappings);
+			if( ! sections[i].isEmpty() ) {
+				sections[i].setAliasMappings(aliasMappings);
+			}
 		}
 		return sections;
 	}
@@ -912,91 +917,92 @@ public class PafViewService {
 		Map<String, Map<String, PafAxis>> validMemberTagMap = getValidMemberTagMap();
 
 		for (PafViewSection section:sections) {
-			
-			// Initialization
-			ViewTuple[] rowTuples = section.getRowTuples();
-			ViewTuple[] colTuples = section.getColTuples();
-			Map<String, MemberTagCommentEntry> mtCommentEntryMap = section.getMemberTagCommentEntryMap();
-			List<MemberTagCommentEntry> visibleMtCommentEntries = new ArrayList<MemberTagCommentEntry>();
-			List<LockedCell> invalidMemberTagIntersections = new ArrayList<LockedCell>();
-			String sectionName = section.getName();
-			boolean isFirstTimeThruCols = true;
-
-			// Initialize the set of valid member tags for this view section (Lazy loaded)
-			if (!validMemberTagMap.containsKey(sectionName)) {
-				Map<String, PafAxis> validMemberTags = new HashMap<String, PafAxis>();
-				for (String memberTagName:memberTagDefs.keySet()) {
-					PafAxis axis = findValidMemberTagAxis(memberTagName, section);
-					if (axis != null) {
-						validMemberTags.put(memberTagName, axis);
+			if( ! section.isEmpty() ) {
+				// Initialization
+				ViewTuple[] rowTuples = section.getRowTuples();
+				ViewTuple[] colTuples = section.getColTuples();
+				Map<String, MemberTagCommentEntry> mtCommentEntryMap = section.getMemberTagCommentEntryMap();
+				List<MemberTagCommentEntry> visibleMtCommentEntries = new ArrayList<MemberTagCommentEntry>();
+				List<LockedCell> invalidMemberTagIntersections = new ArrayList<LockedCell>();
+				String sectionName = section.getName();
+				boolean isFirstTimeThruCols = true;
+	
+				// Initialize the set of valid member tags for this view section (Lazy loaded)
+				if (!validMemberTagMap.containsKey(sectionName)) {
+					Map<String, PafAxis> validMemberTags = new HashMap<String, PafAxis>();
+					for (String memberTagName:memberTagDefs.keySet()) {
+						PafAxis axis = findValidMemberTagAxis(memberTagName, section);
+						if (axis != null) {
+							validMemberTags.put(memberTagName, axis);
+						}
 					}
-				}
-				validMemberTagMap.put(sectionName, validMemberTags);
-			}
-			
-			// Create an array of valid member tag comments for this view section
-			Map<String, PafAxis> validMemberTags = validMemberTagMap.get(sectionName);			
-			for (String memberTagName:validMemberTags.keySet()) {
-				
-				// Reconcile possible overrides on member tag comment visible property
-				if (!mtCommentEntryMap.containsKey(memberTagName)) {
-					// No override on comment - Choose member tags with a default comment visible property of true
-					MemberTagDef mtDef = memberTagDefs.get(memberTagName);
-					if (mtDef.isCommentVisible()) {
-						MemberTagCommentEntry visibleMtCommentEntry = new MemberTagCommentEntry(memberTagName, mtDef.isCommentVisible());
-						visibleMtCommentEntries.add(visibleMtCommentEntry);
-					}
-				} else {
-					// Override on comment - Choose member tags whose comment visible override value is true
-					MemberTagCommentEntry overrideEntry = mtCommentEntryMap.get(memberTagName);
-					if (overrideEntry.isVisible()) {
-						MemberTagCommentEntry visibleMtCommentEntry = new MemberTagCommentEntry(memberTagName, overrideEntry.isVisible());
-						visibleMtCommentEntries.add(visibleMtCommentEntry);						
-					}
-
-				}
-			}
-			section.setMemberTagCommentEntries(visibleMtCommentEntries.toArray(new MemberTagCommentEntry[0]));
-			
-			// Apply member tag security to each row and column tuple. In addition, 
-			// each row/col tuple intersection will be checked to see if it is a 
-			// valid member tag intersection. 
-			for (int rowInx = 0; rowInx < rowTuples.length; rowInx++) {
-				
-				// Skip this row tuple if it doesn't contain a member tag and
-				// the column tuples have already been checked.
-				ViewTuple rowTuple = rowTuples[rowInx];
-				if (!rowTuple.isMemberTag() && !isFirstTimeThruCols) {
-					continue;
+					validMemberTagMap.put(sectionName, validMemberTags);
 				}
 				
-				// Apply member tag security to row tuple
-				rowTuple = applyMemberTagSecurityToTuple(rowTuple);
-				
-				// Check each column tuple
-				for (int colInx = 0; colInx < colTuples.length; colInx ++) {
-					ViewTuple colTuple = colTuples[colInx];
+				// Create an array of valid member tag comments for this view section
+				Map<String, PafAxis> validMemberTags = validMemberTagMap.get(sectionName);			
+				for (String memberTagName:validMemberTags.keySet()) {
 					
-					// Apply member tag security to column tuple
-					if (isFirstTimeThruCols) {
-						colTuple = applyMemberTagSecurityToTuple(colTuple);
+					// Reconcile possible overrides on member tag comment visible property
+					if (!mtCommentEntryMap.containsKey(memberTagName)) {
+						// No override on comment - Choose member tags with a default comment visible property of true
+						MemberTagDef mtDef = memberTagDefs.get(memberTagName);
+						if (mtDef.isCommentVisible()) {
+							MemberTagCommentEntry visibleMtCommentEntry = new MemberTagCommentEntry(memberTagName, mtDef.isCommentVisible());
+							visibleMtCommentEntries.add(visibleMtCommentEntry);
+						}
+					} else {
+						// Override on comment - Choose member tags whose comment visible override value is true
+						MemberTagCommentEntry overrideEntry = mtCommentEntryMap.get(memberTagName);
+						if (overrideEntry.isVisible()) {
+							MemberTagCommentEntry visibleMtCommentEntry = new MemberTagCommentEntry(memberTagName, overrideEntry.isVisible());
+							visibleMtCommentEntries.add(visibleMtCommentEntry);						
+						}
+	
+					}
+				}
+				section.setMemberTagCommentEntries(visibleMtCommentEntries.toArray(new MemberTagCommentEntry[0]));
+				
+				// Apply member tag security to each row and column tuple. In addition, 
+				// each row/col tuple intersection will be checked to see if it is a 
+				// valid member tag intersection. 
+				for (int rowInx = 0; rowInx < rowTuples.length; rowInx++) {
+					
+					// Skip this row tuple if it doesn't contain a member tag and
+					// the column tuples have already been checked.
+					ViewTuple rowTuple = rowTuples[rowInx];
+					if (!rowTuple.isMemberTag() && !isFirstTimeThruCols) {
+						continue;
 					}
 					
-					// Check if member tag intersection is invalid. An intersection is 
-					// invalid if it consists of a member tag on both the row and 
-					// column axes.
-					if (rowTuple.isMemberTag() && colTuple.isMemberTag()) {
-						// Add intersection to invalid member tag intersection collection (1-based)
-						LockedCell invalidMemberTagIntersection = new LockedCell(rowInx + 1, colInx + 1);
-						invalidMemberTagIntersections.add(invalidMemberTagIntersection);
+					// Apply member tag security to row tuple
+					rowTuple = applyMemberTagSecurityToTuple(rowTuple);
+					
+					// Check each column tuple
+					for (int colInx = 0; colInx < colTuples.length; colInx ++) {
+						ViewTuple colTuple = colTuples[colInx];
+						
+						// Apply member tag security to column tuple
+						if (isFirstTimeThruCols) {
+							colTuple = applyMemberTagSecurityToTuple(colTuple);
+						}
+						
+						// Check if member tag intersection is invalid. An intersection is 
+						// invalid if it consists of a member tag on both the row and 
+						// column axes.
+						if (rowTuple.isMemberTag() && colTuple.isMemberTag()) {
+							// Add intersection to invalid member tag intersection collection (1-based)
+							LockedCell invalidMemberTagIntersection = new LockedCell(rowInx + 1, colInx + 1);
+							invalidMemberTagIntersections.add(invalidMemberTagIntersection);
+						}
 					}
+					
+					isFirstTimeThruCols = false;
+					
 				}
-				
-				isFirstTimeThruCols = false;
-				
+				// Set the invalid member tag intersections on this view section
+				section.setInvalidMemberTagIntersectionsLC(invalidMemberTagIntersections.toArray(new LockedCell[0]));
 			}
-			// Set the invalid member tag intersections on this view section
-			section.setInvalidMemberTagIntersectionsLC(invalidMemberTagIntersections.toArray(new LockedCell[0]));
 		}
 		
 		// Return the updated view sections
@@ -1045,60 +1051,62 @@ public class PafViewService {
 		 */
 		
 		for (PafViewSection section:sections) {
+			if( ! section.isEmpty() ) {
 			
-			// Initialization
-			String[] dimensions = section.getDimensionsPriority(); // This is the order that the pace client is expecting
-			ViewTuple[] rowTuples = section.getRowTuples();
-			ViewTuple[] colTuples = section.getColTuples();
-			ArrayList<Intersection>  invalidReplicationIntersections = new ArrayList<Intersection>();
-			
-			// Determine which axis contains the version dimension. Skip section
-			// if version is a page dimension.
-			PafAxis versionAxis = section.getAxis(versionDim);
-			if (versionAxis.getValue() == PafAxis.PAGE) {
-				continue;
-			}
-			
-			// Iterate through each row and column checking for invalid replication
-			// intersections.
-			int versionDimIndex = section.getDimensionIndex(versionDim);
-			for (int rowInx = 0; rowInx < rowTuples.length; rowInx++) {
+				// Initialization
+				String[] dimensions = section.getDimensionsPriority(); // This is the order that the pace client is expecting
+				ViewTuple[] rowTuples = section.getRowTuples();
+				ViewTuple[] colTuples = section.getColTuples();
+				ArrayList<Intersection>  invalidReplicationIntersections = new ArrayList<Intersection>();
 				
-				ViewTuple rowTuple = rowTuples[rowInx];
-				for (int colInx = 0; colInx < colTuples.length; colInx ++) {
-					
-					ViewTuple colTuple = colTuples[colInx];
-					
-					// Set search tuple
-					ViewTuple searchTuple = null;
-					if (versionAxis.getValue() == PafAxis.ROW) {
-						searchTuple = rowTuple;						
-					} else {
-						searchTuple = colTuple;
-					}
-					
-					// Check for any contribution percent versions
-					String versionMember = searchTuple.getMemberDefs()[versionDimIndex];
-					if (contribPctVersions.contains(versionMember)) {
-						// Add intersection to invalid replication intersection collection 
-						Intersection viewIs = section.createDataCacheIntersection(rowInx, colInx);
-						invalidReplicationIntersections.add(viewIs);
-					}
+				// Determine which axis contains the version dimension. Skip section
+				// if version is a page dimension.
+				PafAxis versionAxis = section.getAxis(versionDim);
+				if (versionAxis.getValue() == PafAxis.PAGE) {
+					continue;
 				}
 				
-				
-			}
-			// Set the invalid replication coordinates on this view section
-			SimpleCoordList simpleCoordList = new SimpleCoordList(dimensions);
-			SimpleCoordList[] simpleCoordListArray = new SimpleCoordList[]{simpleCoordList};
-			List<String> coordList = new ArrayList<String>();
-			for (Intersection invalidReplicationIs : invalidReplicationIntersections) {
-				for (String dimension : dimensions) {
-					coordList.add(invalidReplicationIs.getCoordinate(dimension));					
+				// Iterate through each row and column checking for invalid replication
+				// intersections.
+				int versionDimIndex = section.getDimensionIndex(versionDim);
+				for (int rowInx = 0; rowInx < rowTuples.length; rowInx++) {
+					
+					ViewTuple rowTuple = rowTuples[rowInx];
+					for (int colInx = 0; colInx < colTuples.length; colInx ++) {
+						
+						ViewTuple colTuple = colTuples[colInx];
+						
+						// Set search tuple
+						ViewTuple searchTuple = null;
+						if (versionAxis.getValue() == PafAxis.ROW) {
+							searchTuple = rowTuple;						
+						} else {
+							searchTuple = colTuple;
+						}
+						
+						// Check for any contribution percent versions
+						String versionMember = searchTuple.getMemberDefs()[versionDimIndex];
+						if (contribPctVersions.contains(versionMember)) {
+							// Add intersection to invalid replication intersection collection 
+							Intersection viewIs = section.createDataCacheIntersection(rowInx, colInx);
+							invalidReplicationIntersections.add(viewIs);
+						}
+					}
+					
+					
 				}
+				// Set the invalid replication coordinates on this view section
+				SimpleCoordList simpleCoordList = new SimpleCoordList(dimensions);
+				SimpleCoordList[] simpleCoordListArray = new SimpleCoordList[]{simpleCoordList};
+				List<String> coordList = new ArrayList<String>();
+				for (Intersection invalidReplicationIs : invalidReplicationIntersections) {
+					for (String dimension : dimensions) {
+						coordList.add(invalidReplicationIs.getCoordinate(dimension));					
+					}
+				}
+				simpleCoordList.setCoordinates(coordList.toArray(new String[0]));
+				section.setInvalidReplicationIntersections(simpleCoordListArray);
 			}
-			simpleCoordList.setCoordinates(coordList.toArray(new String[0]));
-			section.setInvalidReplicationIntersections(simpleCoordListArray);
 		}
 		
 		// Return the updated view sections
@@ -1232,84 +1240,85 @@ public class PafViewService {
 			//for each section
 			for (PafViewSection viewSection : viewSections) {
 
-				//get the hierarchy format name from the view section
-				String hierarchyFormatName = viewSection.getHierarchyFormatName();
-
-				//if the hierarchy format name is not null, apply the hierarchy
-				//formatting to the current view section
-				if (hierarchyFormatName != null) {
-					
-					//if hierarchy format exist in the hier formats cache
-					if (hierarchyFormatsCache
-							.containsKey(hierarchyFormatName)) {
-
-						//get hierarchy from from cache
-						HierarchyFormat hierFormat = hierarchyFormatsCache
-								.get(hierarchyFormatName);
+				if( ! viewSection.isEmpty() ) {
+					//get the hierarchy format name from the view section
+					String hierarchyFormatName = viewSection.getHierarchyFormatName();
+	
+					//if the hierarchy format name is not null, apply the hierarchy
+					//formatting to the current view section
+					if (hierarchyFormatName != null) {
 						
-						//get hierarchy from the hierarchy format
-						Map<String, Dimension> dimensions = hierFormat
-								.getDimensions();
-						
-						//if dimensions exist, apply hierarchy formatting to col and row dimensions
-						if (dimensions != null) {
+						//if hierarchy format exist in the hier formats cache
+						if (hierarchyFormatsCache
+								.containsKey(hierarchyFormatName)) {
+	
+							//get hierarchy from from cache
+							HierarchyFormat hierFormat = hierarchyFormatsCache
+									.get(hierarchyFormatName);
 							
-							LevelGenType[] levelGenTypeAr = new LevelGenType [] {LevelGenType.LEVEL, LevelGenType.GEN};  
+							//get hierarchy from the hierarchy format
+							Map<String, Dimension> dimensions = hierFormat
+									.getDimensions();
 							
-							for (LevelGenType levelGenType : levelGenTypeAr) {
-							
-								int axisDimIndex = 0;
+							//if dimensions exist, apply hierarchy formatting to col and row dimensions
+							if (dimensions != null) {
 								
-								for (String dim : viewSection.getColAxisDims()) {
-	
-									if (dimensions.containsKey(dim)) {
-	
-										PafDimTree tree = pafDataService
-												.getDimTree(dim);
-	
-										for (ViewTuple viewTuple : viewSection
-												.getColTuples()) {
-	
-											applyHierarchyFormatingToDimension(
-													dimensions.get(dim), viewTuple,
-													axisDimIndex, tree, levelGenType);
-	
+								LevelGenType[] levelGenTypeAr = new LevelGenType [] {LevelGenType.LEVEL, LevelGenType.GEN};  
+								
+								for (LevelGenType levelGenType : levelGenTypeAr) {
+								
+									int axisDimIndex = 0;
+									
+									for (String dim : viewSection.getColAxisDims()) {
+		
+										if (dimensions.containsKey(dim)) {
+		
+											PafDimTree tree = pafDataService
+													.getDimTree(dim);
+		
+											for (ViewTuple viewTuple : viewSection
+													.getColTuples()) {
+		
+												applyHierarchyFormatingToDimension(
+														dimensions.get(dim), viewTuple,
+														axisDimIndex, tree, levelGenType);
+		
+											}
+		
+											// By taking this out, generation formatting
+											// will be applied to all dimensions
+											// break;
 										}
-	
-										// By taking this out, generation formatting
-										// will be applied to all dimensions
-										// break;
+										axisDimIndex++;
 									}
-									axisDimIndex++;
-								}
-	
-								axisDimIndex = 0;
-	
-								for (String dim : viewSection.getRowAxisDims()) {
-	
-									if (dimensions.containsKey(dim)) {
-	
-										PafDimTree tree = pafDataService
-												.getDimTree(dim);
-	
-										for (ViewTuple viewTuple : viewSection
-												.getRowTuples()) {
-	
-											applyHierarchyFormatingToDimension(
-													dimensions.get(dim), viewTuple,
-													axisDimIndex, tree, levelGenType);
+		
+									axisDimIndex = 0;
+		
+									for (String dim : viewSection.getRowAxisDims()) {
+		
+										if (dimensions.containsKey(dim)) {
+		
+											PafDimTree tree = pafDataService
+													.getDimTree(dim);
+		
+											for (ViewTuple viewTuple : viewSection
+													.getRowTuples()) {
+		
+												applyHierarchyFormatingToDimension(
+														dimensions.get(dim), viewTuple,
+														axisDimIndex, tree, levelGenType);
+											}
+		
+											//
+											// break;
 										}
-	
-										//
-										// break;
+										axisDimIndex++;
 									}
-									axisDimIndex++;
 								}
 							}
 						}
 					}
 				}
-
 			}
 		}
 
@@ -1407,247 +1416,249 @@ public class PafViewService {
 
 		for (PafViewSection section : sections) {
 
-			// index counters for both row and column
-			int rowId = 0;
-			
-			serverDimensionOrder = section.getDimensionsPriority();
-
-			ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
-			ArrayList<LockedCell> forwardPlannableList = new ArrayList<LockedCell>();
-			
-			Set<Intersection> lockedForwardPlannableIntersectionsSet = new HashSet<Intersection>();
-
-			// get row, col and page tuples
-			ViewTuple[] rowTuples = section.getRowTuples();
-			ViewTuple[] colTuples = section.getColTuples();
-			PageTuple[] pageTuples = section.getPageTuples();
-
-			// get axis where version dimension resides
-			PafAxis versionAxis = section.getAxis(mdbDef.getVersionDim());
-
-			String versionMember = null;
-
-
-			// map dimensions to axis. key = dimensions name, value = actual
-			// axis obj
-//			Map<String, PafAxis> mappedDimensions = mapDimensionsToAxis(section);
-
-			Map<String, String> mappedDimsWithMembers = new HashMap<String, String>();
-
-			for (PageTuple pageTuple : section.getPageTuples()) {
-				mappedDimsWithMembers.put(pageTuple.getAxis(), pageTuple
-						.getMember());
-			}
-
-			// loop over each row tuple, then over col tuple
-			for (ViewTuple rowTuple : rowTuples) {
-				rowId++;
-
-				// create row members
-				// ArrayList<String> rowMembers = new ArrayList<String>();
-				ArrayList<String> rowMembers = getTupleMemberDefs(rowTuple);
-
-				int rowMemberIndex = 0;
-
-				for (String dimension : section.getRowAxisDims()) {
-					mappedDimsWithMembers.put(dimension, rowMembers.get(rowMemberIndex++));
+			if( ! section.isEmpty() ) {
+				// index counters for both row and column
+				int rowId = 0;
+				
+				serverDimensionOrder = section.getDimensionsPriority();
+	
+				ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
+				ArrayList<LockedCell> forwardPlannableList = new ArrayList<LockedCell>();
+				
+				Set<Intersection> lockedForwardPlannableIntersectionsSet = new HashSet<Intersection>();
+	
+				// get row, col and page tuples
+				ViewTuple[] rowTuples = section.getRowTuples();
+				ViewTuple[] colTuples = section.getColTuples();
+				PageTuple[] pageTuples = section.getPageTuples();
+	
+				// get axis where version dimension resides
+				PafAxis versionAxis = section.getAxis(mdbDef.getVersionDim());
+	
+				String versionMember = null;
+	
+	
+				// map dimensions to axis. key = dimensions name, value = actual
+				// axis obj
+	//			Map<String, PafAxis> mappedDimensions = mapDimensionsToAxis(section);
+	
+				Map<String, String> mappedDimsWithMembers = new HashMap<String, String>();
+	
+				for (PageTuple pageTuple : section.getPageTuples()) {
+					mappedDimsWithMembers.put(pageTuple.getAxis(), pageTuple
+							.getMember());
 				}
-
-				int colId = 0;
-
-				// loop over all column tuples and then determine if
-				// intersection is locked
-				for (ViewTuple colTuple : colTuples) {
-
-					colId++;
-
-					// if row or column are pafblank, process next col
-					if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
-						continue;
+	
+				// loop over each row tuple, then over col tuple
+				for (ViewTuple rowTuple : rowTuples) {
+					rowId++;
+	
+					// create row members
+					// ArrayList<String> rowMembers = new ArrayList<String>();
+					ArrayList<String> rowMembers = getTupleMemberDefs(rowTuple);
+	
+					int rowMemberIndex = 0;
+	
+					for (String dimension : section.getRowAxisDims()) {
+						mappedDimsWithMembers.put(dimension, rowMembers.get(rowMemberIndex++));
 					}
-
-					// get version member from col or row
-					switch (versionAxis.getValue()) {
-					case PafAxis.PAGE:
-						
-						// get version member
-						for (PageTuple tuple : pageTuples) {
-							if (tuple.getAxis().equals(mdbDef.getVersionDim())) {
-								versionMember = tuple.getMember();
-								break;
-							}
+	
+					int colId = 0;
+	
+					// loop over all column tuples and then determine if
+					// intersection is locked
+					for (ViewTuple colTuple : colTuples) {
+	
+						colId++;
+	
+						// if row or column are pafblank, process next col
+						if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
+							continue;
 						}
-						// if page version is not an active version, lock page tuple
-						if ( ! activeVersions.contains(versionMember)) {
-							
-							switch (section.getPrimaryFormattingAxis()) {
-							case (PafAxis.COL):
-								colTuple.setPlannable(false);
-								break;
-							case (PafAxis.ROW):
-								rowTuple.setPlannable(false);
-							}
-							
-							//add to locked cell
-							notPlannableList.add(new LockedCell(rowId, colId));
-							continue;
-						}					
-						break;
-
-					case PafAxis.COL:
-
-						versionMember = getVersionMember(section.getColAxisDims(), colTuple);					
-						if ( ! activeVersions.contains(versionMember)) {				
-							colTuple.setPlannable(false);
-							notPlannableList.add(new LockedCell(rowId, colId));
-							continue;
-						}					
-						break;
-
-					case PafAxis.ROW:
-
-						versionMember = getVersionMember(section.getRowAxisDims(), rowTuple);					
-						if ( ! activeVersions.contains(versionMember)) {					
-							rowTuple.setPlannable(false);
-							notPlannableList.add(new LockedCell(rowId, colId));
-							continue;					
-						}				
-						break;
-					}
-
-					// get version type from cache
-					VersionType versionType = versionsTypeCache.get(versionMember);
-					
-					// if null, loop
-					if (versionType == null) {
-						continue;
-					}
-					
-
-					ArrayList<String> colMembers = getTupleMemberDefs(colTuple);
-
-					/*
-					 * if version is not plannable, then add row and column
-					 * indexes to appropriate arrays and add intersection to
-					 * locked intersection set.
-					 */
-
-					int colMemberIndex = 0;
-
-					// map dimensions with members
-					for (String dimension : section.getColAxisDims()) {
-						mappedDimsWithMembers.put(dimension, colMembers.get(colMemberIndex++));
-					}
-
-					// holds the order of the members based on server dimension
-					// order
-					String[] coords = new String[serverDimensionOrder.length];
-
-					int coordMemberIndex = 0;
-
-					// populate the members
-					for (String dimension : serverDimensionOrder) {
-						coords[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
-					}
-
-					// lock all tuples if the version is non-plannable 
-					if (versionType.equals(VersionType.NonPlannable)) {
-
-						// add cell to non plannable list
-						notPlannableList.add(new LockedCell(rowId, colId));
-												
+	
+						// get version member from col or row
 						switch (versionAxis.getValue()) {
 						case PafAxis.PAGE:
-							switch (section.getPrimaryFormattingAxis()) {
-							case (PafAxis.COL):
+							
+							// get version member
+							for (PageTuple tuple : pageTuples) {
+								if (tuple.getAxis().equals(mdbDef.getVersionDim())) {
+									versionMember = tuple.getMember();
+									break;
+								}
+							}
+							// if page version is not an active version, lock page tuple
+							if ( ! activeVersions.contains(versionMember)) {
+								
+								switch (section.getPrimaryFormattingAxis()) {
+								case (PafAxis.COL):
+									colTuple.setPlannable(false);
+									break;
+								case (PafAxis.ROW):
+									rowTuple.setPlannable(false);
+								}
+								
+								//add to locked cell
+								notPlannableList.add(new LockedCell(rowId, colId));
+								continue;
+							}					
+							break;
+	
+						case PafAxis.COL:
+	
+							versionMember = getVersionMember(section.getColAxisDims(), colTuple);					
+							if ( ! activeVersions.contains(versionMember)) {				
+								colTuple.setPlannable(false);
+								notPlannableList.add(new LockedCell(rowId, colId));
+								continue;
+							}					
+							break;
+	
+						case PafAxis.ROW:
+	
+							versionMember = getVersionMember(section.getRowAxisDims(), rowTuple);					
+							if ( ! activeVersions.contains(versionMember)) {					
+								rowTuple.setPlannable(false);
+								notPlannableList.add(new LockedCell(rowId, colId));
+								continue;					
+							}				
+							break;
+						}
+	
+						// get version type from cache
+						VersionType versionType = versionsTypeCache.get(versionMember);
+						
+						// if null, loop
+						if (versionType == null) {
+							continue;
+						}
+						
+	
+						ArrayList<String> colMembers = getTupleMemberDefs(colTuple);
+	
+						/*
+						 * if version is not plannable, then add row and column
+						 * indexes to appropriate arrays and add intersection to
+						 * locked intersection set.
+						 */
+	
+						int colMemberIndex = 0;
+	
+						// map dimensions with members
+						for (String dimension : section.getColAxisDims()) {
+							mappedDimsWithMembers.put(dimension, colMembers.get(colMemberIndex++));
+						}
+	
+						// holds the order of the members based on server dimension
+						// order
+						String[] coords = new String[serverDimensionOrder.length];
+	
+						int coordMemberIndex = 0;
+	
+						// populate the members
+						for (String dimension : serverDimensionOrder) {
+							coords[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
+						}
+	
+						// lock all tuples if the version is non-plannable 
+						if (versionType.equals(VersionType.NonPlannable)) {
+	
+							// add cell to non plannable list
+							notPlannableList.add(new LockedCell(rowId, colId));
+													
+							switch (versionAxis.getValue()) {
+							case PafAxis.PAGE:
+								switch (section.getPrimaryFormattingAxis()) {
+								case (PafAxis.COL):
+									colTuple.setPlannable(false);
+									break;
+								case (PafAxis.ROW):
+									rowTuple.setPlannable(false);
+								}
+								break;
+	
+							case PafAxis.COL:
+	
 								colTuple.setPlannable(false);
 								break;
-							case (PafAxis.ROW):
+	
+							case PafAxis.ROW:
+	
 								rowTuple.setPlannable(false);
+								break;
+	
 							}
-							break;
-
-						case PafAxis.COL:
-
-							colTuple.setPlannable(false);
-							break;
-
-						case PafAxis.ROW:
-
-							rowTuple.setPlannable(false);
-							break;
-
-						}
-
-				   /*
-					* if forward plannable, lock each tuple intersection
-					* that contains a locked period, using the locked period
-					* information from the client state (TTN-1595). 
-					* 
-					* Also lock any tuple intersections where the year is locked (TTN-1860).
-					*  
-					*/
-
-					} else if (versionType.equals(VersionType.Plannable) || versionType.equals(VersionType.ForwardPlannable)) {
-
-						String timeMember = getMember(timeDim, section, rowTuple, colTuple);
-						String yearMember = getMember(yearDim, section, rowTuple, colTuple);
-						Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
-						Set<String> lockedPeriods = lockedPeriodMap.get(yearMember);
-						if ((versionType.equals(VersionType.Plannable) && lockedYears.contains(yearMember))	// TTN-1860 non-plannable year support
-								|| lockedPeriods.contains(timeMember)) {
-
-							forwardPlannableList.add(new LockedCell(rowId, colId));
-
-							//only add the forward plannable intersections for planning version
-							if ( versionMember.equals(baseVersion)) {
-								lockedForwardPlannableIntersectionsSet.add(new Intersection(serverDimensionOrder, coords));
+	
+					   /*
+						* if forward plannable, lock each tuple intersection
+						* that contains a locked period, using the locked period
+						* information from the client state (TTN-1595). 
+						* 
+						* Also lock any tuple intersections where the year is locked (TTN-1860).
+						*  
+						*/
+	
+						} else if (versionType.equals(VersionType.Plannable) || versionType.equals(VersionType.ForwardPlannable)) {
+	
+							String timeMember = getMember(timeDim, section, rowTuple, colTuple);
+							String yearMember = getMember(yearDim, section, rowTuple, colTuple);
+							Map<String, Set<String>> lockedPeriodMap = clientState.getLockedPeriodMap();
+							Set<String> lockedPeriods = lockedPeriodMap.get(yearMember);
+							if ((versionType.equals(VersionType.Plannable) && lockedYears.contains(yearMember))	// TTN-1860 non-plannable year support
+									|| lockedPeriods.contains(timeMember)) {
+	
+								forwardPlannableList.add(new LockedCell(rowId, colId));
+	
+								//only add the forward plannable intersections for planning version
+								if ( versionMember.equals(baseVersion)) {
+									lockedForwardPlannableIntersectionsSet.add(new Intersection(serverDimensionOrder, coords));
+								}
+	
+	//						The following tuple locking code has been commented out as it erroneously locking cells on
+	//							multi-year views. Based on initial testing, it doesn't look like this code was needed (TTN-1860).
+	//							
+	//							// lock the tuple based on time axis. if time is
+	//							// on page, use primary formatting axis, if on
+	//							// col axis, lock column tuple. if on row axis, 
+	//							// lock row tuple.
+	//							PafAxis timeAxis = section.getAxis(mdbDef.getTimeDim());
+	//							switch (timeAxis.getValue()) {
+	//							case PafAxis.PAGE:
+	//
+	//								switch (section.getPrimaryFormattingAxis()) {
+	//								case (PafAxis.COL):
+	//									colTuple.setPlannable(false);
+	//								break;
+	//								case (PafAxis.ROW):
+	//									rowTuple.setPlannable(false);
+	//								break;
+	//								}
+	//
+	//							case PafAxis.COL:
+	//
+	//								colTuple.setPlannable(false);
+	//								break;
+	//
+	//							case PafAxis.ROW:
+	//
+	//								rowTuple.setPlannable(false);
+	//								break;
+	//
+	//							}
 							}
-
-//						The following tuple locking code has been commented out as it erroneously locking cells on
-//							multi-year views. Based on initial testing, it doesn't look like this code was needed (TTN-1860).
-//							
-//							// lock the tuple based on time axis. if time is
-//							// on page, use primary formatting axis, if on
-//							// col axis, lock column tuple. if on row axis, 
-//							// lock row tuple.
-//							PafAxis timeAxis = section.getAxis(mdbDef.getTimeDim());
-//							switch (timeAxis.getValue()) {
-//							case PafAxis.PAGE:
-//
-//								switch (section.getPrimaryFormattingAxis()) {
-//								case (PafAxis.COL):
-//									colTuple.setPlannable(false);
-//								break;
-//								case (PafAxis.ROW):
-//									rowTuple.setPlannable(false);
-//								break;
-//								}
-//
-//							case PafAxis.COL:
-//
-//								colTuple.setPlannable(false);
-//								break;
-//
-//							case PafAxis.ROW:
-//
-//								rowTuple.setPlannable(false);
-//								break;
-//
-//							}
 						}
 					}
 				}
+	
+	
+	
+				clientState.addLockedForwardPlannableInterMap(section.getName(), lockedForwardPlannableIntersectionsSet);
+	
+				section.setNotPlannableLockedCells(notPlannableList
+						.toArray(new LockedCell[0]));
+				section.setForwardPlannableLockedCell(forwardPlannableList
+						.toArray(new LockedCell[0]));
 			}
-
-
-
-			clientState.addLockedForwardPlannableInterMap(section.getName(), lockedForwardPlannableIntersectionsSet);
-
-			section.setNotPlannableLockedCells(notPlannableList
-					.toArray(new LockedCell[0]));
-			section.setForwardPlannableLockedCell(forwardPlannableList
-					.toArray(new LockedCell[0]));
 
 		}
 
@@ -1674,162 +1685,163 @@ public class PafViewService {
 		// for each section, see if measure is not plannable and if not, lock
 		for (PafViewSection section : sections) {
 			
-			//get all dimensions in order
-			serverDimensionOrder = section.getDimensionsPriority();
-
-			// get measures axis
-			PafAxis measureAxis = section.getAxis(mdbDef.getMeasureDim());
-
-			// index counters for both row and column
-			int rowId = 0;
-
-			//get current not plannable list
-			ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
-			if (section.getNotPlannableLockedCells() != null)
-				notPlannableList.addAll(Arrays.asList(section.getNotPlannableLockedCells()));
-
-			// get row tuples
-			ViewTuple[] rowTuples = section.getRowTuples();
-
-			// get column tuples
-			ViewTuple[] colTuples = section.getColTuples();
-
-			// used to map a dimension to a member
-			Map<String, String> mappedDimsWithMembers = new HashMap<String, String>();
-
-			// map page tuple members to dimensions
-			for (PageTuple pageTuple : section.getPageTuples()) {
-				mappedDimsWithMembers.put(pageTuple.getAxis(), pageTuple
-						.getMember());
-			}
-
-			// loop over each row tuple, then over col tuple
-			for (ViewTuple rowTuple : rowTuples) {
-				rowId++;
-
-				// create row members
-				ArrayList<String> rowMembers = getTupleMemberDefs(rowTuple);
-
-				int rowMemberIndex = 0;
-
-				// populate dimension map with dimension and row members
-				for (String dimension : section.getRowAxisDims()) {
-					mappedDimsWithMembers.put(dimension, rowMembers
-							.get(rowMemberIndex++));
+			if( ! section.isEmpty() ) {
+				//get all dimensions in order
+				serverDimensionOrder = section.getDimensionsPriority();
+	
+				// get measures axis
+				PafAxis measureAxis = section.getAxis(mdbDef.getMeasureDim());
+	
+				// index counters for both row and column
+				int rowId = 0;
+	
+				//get current not plannable list
+				ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
+				if (section.getNotPlannableLockedCells() != null)
+					notPlannableList.addAll(Arrays.asList(section.getNotPlannableLockedCells()));
+	
+				// get row tuples
+				ViewTuple[] rowTuples = section.getRowTuples();
+	
+				// get column tuples
+				ViewTuple[] colTuples = section.getColTuples();
+	
+				// used to map a dimension to a member
+				Map<String, String> mappedDimsWithMembers = new HashMap<String, String>();
+	
+				// map page tuple members to dimensions
+				for (PageTuple pageTuple : section.getPageTuples()) {
+					mappedDimsWithMembers.put(pageTuple.getAxis(), pageTuple
+							.getMember());
 				}
-
-				int colId = 0;
-
-				// loop over all column tuples and then determine if
-				// intersection is locked
-				for (ViewTuple colTuple : colTuples) {
-
-					colId++;
-
-					// TODO: maybe remove this
-					// if row or column are pafblank or member tag, process next col
-					if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
-						continue;
+	
+				// loop over each row tuple, then over col tuple
+				for (ViewTuple rowTuple : rowTuples) {
+					rowId++;
+	
+					// create row members
+					ArrayList<String> rowMembers = getTupleMemberDefs(rowTuple);
+	
+					int rowMemberIndex = 0;
+	
+					// populate dimension map with dimension and row members
+					for (String dimension : section.getRowAxisDims()) {
+						mappedDimsWithMembers.put(dimension, rowMembers
+								.get(rowMemberIndex++));
 					}
-
-					// get column members in a list
-					ArrayList<String> colMembers = getTupleMemberDefs(colTuple);
-
-					int colMemberIndex = 0;
-
-					for (String dimension : section.getColAxisDims()) {
-						mappedDimsWithMembers.put(dimension, colMembers
-								.get(colMemberIndex++));
-					}
-
-					// get measure member
-					String measureMember = mappedDimsWithMembers.get(pafApp
-							.getMdbDef().getMeasureDim());
-
-					// populate member order
-					String[] coordMemberOrder = new String[serverDimensionOrder.length];
-					int coordMemberIndex = 0;
-					for (String dimension : serverDimensionOrder) {
-						coordMemberOrder[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
-					}
-
-					// by default, measure is plannable
-					boolean measurePlannable = true;
-					
-					//TTN-1413: Read Only Measures
-					//if client state contains read only measure, set plannable to false
-					if ( measureMember != null && clientState.getReadOnlyMeasures().contains(measureMember) ) {
-						measurePlannable = false;
-					} else if (measureMember != null && measuresPlannableCache.containsKey(measureMember)) {
-						measurePlannable = measuresPlannableCache.get(measureMember);
-					} 
-					
-					// if measure is not plannable lock cell and intersection
-					if ( !measurePlannable ) {
-
-						// add to not plannable list
-						notPlannableList.add(new LockedCell(rowId, colId));
+	
+					int colId = 0;
+	
+					// loop over all column tuples and then determine if
+					// intersection is locked
+					for (ViewTuple colTuple : colTuples) {
+	
+						colId++;
+	
+						// TODO: maybe remove this
+						// if row or column are pafblank or member tag, process next col
+						if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
+							continue;
+						}
+	
+						// get column members in a list
+						ArrayList<String> colMembers = getTupleMemberDefs(colTuple);
+	
+						int colMemberIndex = 0;
+	
+						for (String dimension : section.getColAxisDims()) {
+							mappedDimsWithMembers.put(dimension, colMembers
+									.get(colMemberIndex++));
+						}
+	
+						// get measure member
+						String measureMember = mappedDimsWithMembers.get(pafApp
+								.getMdbDef().getMeasureDim());
+	
+						// populate member order
+						String[] coordMemberOrder = new String[serverDimensionOrder.length];
+						int coordMemberIndex = 0;
+						for (String dimension : serverDimensionOrder) {
+							coordMemberOrder[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
+						}
+	
+						// by default, measure is plannable
+						boolean measurePlannable = true;
 						
-						switch (measureAxis.getValue()) {
-						case PafAxis.PAGE:
-
-							switch (section.getPrimaryFormattingAxis()) {
-							case (PafAxis.COL):
+						//TTN-1413: Read Only Measures
+						//if client state contains read only measure, set plannable to false
+						if ( measureMember != null && clientState.getReadOnlyMeasures().contains(measureMember) ) {
+							measurePlannable = false;
+						} else if (measureMember != null && measuresPlannableCache.containsKey(measureMember)) {
+							measurePlannable = measuresPlannableCache.get(measureMember);
+						} 
+						
+						// if measure is not plannable lock cell and intersection
+						if ( !measurePlannable ) {
+	
+							// add to not plannable list
+							notPlannableList.add(new LockedCell(rowId, colId));
+							
+							switch (measureAxis.getValue()) {
+							case PafAxis.PAGE:
+	
+								switch (section.getPrimaryFormattingAxis()) {
+								case (PafAxis.COL):
+									colTuple.setPlannable(false);
+									break;
+								case (PafAxis.ROW):
+									rowTuple.setPlannable(false);
+								}
+	
+								break;
+	
+							case PafAxis.COL:
+	
 								colTuple.setPlannable(false);
 								break;
-							case (PafAxis.ROW):
+	
+							case PafAxis.ROW:
+	
 								rowTuple.setPlannable(false);
+								break;
+	
 							}
-
-							break;
-
-						case PafAxis.COL:
-
-							colTuple.setPlannable(false);
-							break;
-
-						case PafAxis.ROW:
-
-							rowTuple.setPlannable(false);
-							break;
-
 						}
 					}
+	
 				}
-
-			}
-			
-
-			// remove any non-plannable cells from the locked forward plannable cells collection
-			LockedCell[] lockedForwardPlannableCells = section.getForwardPlannableLockedCell();
-			if ( lockedForwardPlannableCells != null ) {
-
-				//create a temp locked forward plannable cell set to hold all the locked cells
-				Set<LockedCell> lockedForwardPlannableCellSet = new TreeSet<LockedCell>();
 				
-				//create a temp set, so searching is faster.
-				Set<LockedCell> tempNonPlannable = new HashSet<LockedCell>();
-				tempNonPlannable.addAll(notPlannableList);
-				
-				//populate set with forward locked cells
-				for (LockedCell lockedCell : lockedForwardPlannableCells) {
-					//don't add non plannable locked cells
-					if(! tempNonPlannable.contains(lockedCell)) {
-						lockedForwardPlannableCellSet.add(lockedCell);
+	
+				// remove any non-plannable cells from the locked forward plannable cells collection
+				LockedCell[] lockedForwardPlannableCells = section.getForwardPlannableLockedCell();
+				if ( lockedForwardPlannableCells != null ) {
+	
+					//create a temp locked forward plannable cell set to hold all the locked cells
+					Set<LockedCell> lockedForwardPlannableCellSet = new TreeSet<LockedCell>();
+					
+					//create a temp set, so searching is faster.
+					Set<LockedCell> tempNonPlannable = new HashSet<LockedCell>();
+					tempNonPlannable.addAll(notPlannableList);
+					
+					//populate set with forward locked cells
+					for (LockedCell lockedCell : lockedForwardPlannableCells) {
+						//don't add non plannable locked cells
+						if(! tempNonPlannable.contains(lockedCell)) {
+							lockedForwardPlannableCellSet.add(lockedCell);
+						}
 					}
-				}
-						
-				//set the fp lc on the view section
-				section.setForwardPlannableLockedCell(lockedForwardPlannableCellSet.toArray(new LockedCell[0]));
+							
+					//set the fp lc on the view section
+					section.setForwardPlannableLockedCell(lockedForwardPlannableCellSet.toArray(new LockedCell[0]));
+					
+				}	
 				
-			}	
-			
-			
-			
-			
-			// create unique locked cells array from non plannable list
-			section.setNotPlannableLockedCells(notPlannableList.toArray(new LockedCell[0]));
-
+				
+				
+				
+				// create unique locked cells array from non plannable list
+				section.setNotPlannableLockedCells(notPlannableList.toArray(new LockedCell[0]));
+			}
 		}
 
 		return sections;
@@ -1851,52 +1863,53 @@ public class PafViewService {
 		// for each section 
 		for (PafViewSection section : sections) {
 			
-			// index counters for both row and column
-			int rowId = 0;
-
-			//get current not plannable list
-			ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
-			if (section.getNotPlannableLockedCells() != null)
-				notPlannableList.addAll(Arrays.asList(section.getNotPlannableLockedCells()));
-			
-			// get row tuples
-			ViewTuple[] rowTuples = section.getRowTuples();
-
-			// get column tuples
-			ViewTuple[] colTuples = section.getColTuples();
-			
-			// loop over each row tuple, then over col tuple
-			for (ViewTuple rowTuple : rowTuples) {
-				rowId++;
-									
-				int colId = 0;
-
-				// loop over all column tuples and then determine if
-				// intersection is locked
-				for (ViewTuple colTuple : colTuples) {
-					
-					colId++;
-					
-					//if the row or column tuple contain blank or member tag, continue to next tuple
-					if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
-						continue;
-					}
+			if( ! section.isEmpty() ) {
+				// index counters for both row and column
+				int rowId = 0;
+	
+				//get current not plannable list
+				ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
+				if (section.getNotPlannableLockedCells() != null)
+					notPlannableList.addAll(Arrays.asList(section.getNotPlannableLockedCells()));
+				
+				// get row tuples
+				ViewTuple[] rowTuples = section.getRowTuples();
+	
+				// get column tuples
+				ViewTuple[] colTuples = section.getColTuples();
+				
+				// loop over each row tuple, then over col tuple
+				for (ViewTuple rowTuple : rowTuples) {
+					rowId++;
 										
-					//if row is not plannable, or if col is not plannable, add to not plannable list
-					if ( (rowTuple.getPlannable() != null && ! rowTuple.getPlannable()) || (colTuple.getPlannable() != null && ! colTuple.getPlannable() )) {
+					int colId = 0;
+	
+					// loop over all column tuples and then determine if
+					// intersection is locked
+					for (ViewTuple colTuple : colTuples) {
 						
-						notPlannableList.add(new LockedCell(rowId, colId));						
+						colId++;
 						
-					}				
-					
+						//if the row or column tuple contain blank or member tag, continue to next tuple
+						if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
+							continue;
+						}
+											
+						//if row is not plannable, or if col is not plannable, add to not plannable list
+						if ( (rowTuple.getPlannable() != null && ! rowTuple.getPlannable()) || (colTuple.getPlannable() != null && ! colTuple.getPlannable() )) {
+							
+							notPlannableList.add(new LockedCell(rowId, colId));						
+							
+						}				
+						
+					}
+	
 				}
-
+				
+				// set on view section by creating a unique locked cell array
+				section.setNotPlannableLockedCells(notPlannableList.toArray(new LockedCell[0]));
+	
 			}
-			
-			// set on view section by creating a unique locked cell array
-			section.setNotPlannableLockedCells(notPlannableList.toArray(new LockedCell[0]));
-
-			
 		}
 		
 		return sections;
@@ -2997,165 +3010,167 @@ public class PafViewService {
 
 			for (PafViewSection section : sections) {
 
-				int measureVersionAxis = getMeasureVersionAxis(section);
-				String measureDim = pafApp.getMdbDef().getMeasureDim();
-				String versionDim = pafApp.getMdbDef().getVersionDim();
-
-				switch (measureVersionAxis) {
-
-				case (PafViewSection.MEASURE_PAGE_AXIS | PafViewSection.VERSION_PAGE_AXIS):
-
-					String measureMember = null;
-					String versionMember = null;
-
-					for (PageTuple pageTuple : section.getPageTuples()) {
-						if (pageTuple.getAxis().equals(measureDim)) {
-							measureMember = pageTuple.getMember();
-						} else if (pageTuple.getAxis().equals(versionDim)) {
-							versionMember = pageTuple.getMember();
-						}
-					}
-
-					if (section.getPrimaryFormattingAxis() == PafAxis.ROW) {
-						resolvePageNumericFormatting(section.getRowTuples(),
-								versionMember, measureMember);
-					} else if (section.getPrimaryFormattingAxis() == PafAxis.COL) {
-						resolvePageNumericFormatting(section.getColTuples(),
-								versionMember, measureMember);
-					}
-
-					break;
-
-				case (PafViewSection.MEASURE_COL_AXIS | PafViewSection.VERSION_COL_AXIS):
-
-					Integer measureNdx = null;
-					Integer versionNdx = null;
-
-					String[] colDims = section.getColAxisDims();
-
-					if (colDims != null) {
-
-						measureNdx = getArrayIndex(colDims, measureDim);
-						versionNdx = getArrayIndex(colDims, versionDim);
-
-						resolveTupleNumericFormatting(section.getColTuples(),
-								versionNdx, measureNdx);
-
-					}
-
-					break;
-
-				case (PafViewSection.MEASURE_ROW_AXIS | PafViewSection.VERSION_ROW_AXIS):
-
-					measureNdx = 0;
-					versionNdx = 0;
-
-					String[] rowDims = section.getRowAxisDims();
-
-					if (rowDims != null) {
-
-						measureNdx = getArrayIndex(rowDims, measureDim);
-						versionNdx = getArrayIndex(rowDims, versionDim);
-
-						resolveTupleNumericFormatting(section.getRowTuples(),
-								versionNdx, measureNdx);
-
-					}
-
-					break;
-
-				case (PafViewSection.MEASURE_COL_AXIS | PafViewSection.VERSION_ROW_AXIS):
-
-					measureNdx = getArrayIndex(section.getColAxisDims(),
-							measureDim);
-					versionNdx = getArrayIndex(section.getRowAxisDims(),
-							versionDim);
-
-					applyNumericFormattingToMeasuresOnly(
-							section.getColTuples(), measureNdx);
-					applyNumericFormattingToVersionsOnly(
-							section.getRowTuples(), versionNdx);
-
-					break;
-
-				case (PafViewSection.MEASURE_ROW_AXIS | PafViewSection.VERSION_COL_AXIS):
-
-					measureNdx = getArrayIndex(section.getRowAxisDims(),
-							measureDim);
-					versionNdx = getArrayIndex(section.getColAxisDims(),
-							versionDim);
-
-					applyNumericFormattingToMeasuresOnly(
-							section.getRowTuples(), measureNdx);
-					applyNumericFormattingToVersionsOnly(
-							section.getColTuples(), versionNdx);
-
-					break;
-
-				case (PafViewSection.MEASURE_PAGE_AXIS | PafViewSection.VERSION_COL_AXIS):
-				case (PafViewSection.MEASURE_PAGE_AXIS | PafViewSection.VERSION_ROW_AXIS):
-				case (PafViewSection.VERSION_PAGE_AXIS | PafViewSection.MEASURE_COL_AXIS):
-				case (PafViewSection.VERSION_PAGE_AXIS | PafViewSection.MEASURE_ROW_AXIS):
-
-					measureMember = null;
-					versionMember = null;
-					versionNdx = null;
-					measureNdx = null;
-
-					if ((measureVersionAxis & PafViewSection.MEASURE_PAGE_AXIS) > 0) {
-
+				if( ! section.isEmpty() ) {
+					int measureVersionAxis = getMeasureVersionAxis(section);
+					String measureDim = pafApp.getMdbDef().getMeasureDim();
+					String versionDim = pafApp.getMdbDef().getVersionDim();
+	
+					switch (measureVersionAxis) {
+	
+					case (PafViewSection.MEASURE_PAGE_AXIS | PafViewSection.VERSION_PAGE_AXIS):
+	
+						String measureMember = null;
+						String versionMember = null;
+	
 						for (PageTuple pageTuple : section.getPageTuples()) {
 							if (pageTuple.getAxis().equals(measureDim)) {
 								measureMember = pageTuple.getMember();
-							}
-						}
-
-						if ((measureVersionAxis & PafViewSection.VERSION_COL_AXIS) > 0) {
-
-							versionNdx = getArrayIndex(
-									section.getColAxisDims(), versionDim);
-
-							applyNumericFormatsWithProvidedMeasure(section
-									.getColTuples(), measureMember, versionNdx);
-
-						} else if ((measureVersionAxis & PafViewSection.VERSION_ROW_AXIS) > 0) {
-
-							versionNdx = getArrayIndex(
-									section.getRowAxisDims(), versionDim);
-
-							applyNumericFormatsWithProvidedMeasure(section
-									.getRowTuples(), measureMember, versionNdx);
-
-						}
-
-					} else if ((measureVersionAxis & PafViewSection.VERSION_PAGE_AXIS) > 0) {
-
-						for (PageTuple pageTuple : section.getPageTuples()) {
-							if (pageTuple.getAxis().equals(versionDim)) {
+							} else if (pageTuple.getAxis().equals(versionDim)) {
 								versionMember = pageTuple.getMember();
 							}
 						}
-
-						if ((measureVersionAxis & PafViewSection.MEASURE_COL_AXIS) > 0) {
-
-							measureNdx = getArrayIndex(
-									section.getColAxisDims(), measureDim);
-
-							applyNumericFormatsWithProvidedVersion(section
-									.getColTuples(), versionMember, measureNdx);
-
-						} else if ((measureVersionAxis & PafViewSection.MEASURE_ROW_AXIS) > 0) {
-
-							measureNdx = getArrayIndex(
-									section.getRowAxisDims(), measureDim);
-
-							applyNumericFormatsWithProvidedVersion(section
-									.getRowTuples(), versionMember, measureNdx);
-
+	
+						if (section.getPrimaryFormattingAxis() == PafAxis.ROW) {
+							resolvePageNumericFormatting(section.getRowTuples(),
+									versionMember, measureMember);
+						} else if (section.getPrimaryFormattingAxis() == PafAxis.COL) {
+							resolvePageNumericFormatting(section.getColTuples(),
+									versionMember, measureMember);
 						}
+	
+						break;
+	
+					case (PafViewSection.MEASURE_COL_AXIS | PafViewSection.VERSION_COL_AXIS):
+	
+						Integer measureNdx = null;
+						Integer versionNdx = null;
+	
+						String[] colDims = section.getColAxisDims();
+	
+						if (colDims != null) {
+	
+							measureNdx = getArrayIndex(colDims, measureDim);
+							versionNdx = getArrayIndex(colDims, versionDim);
+	
+							resolveTupleNumericFormatting(section.getColTuples(),
+									versionNdx, measureNdx);
+	
+						}
+	
+						break;
+	
+					case (PafViewSection.MEASURE_ROW_AXIS | PafViewSection.VERSION_ROW_AXIS):
+	
+						measureNdx = 0;
+						versionNdx = 0;
+	
+						String[] rowDims = section.getRowAxisDims();
+	
+						if (rowDims != null) {
+	
+							measureNdx = getArrayIndex(rowDims, measureDim);
+							versionNdx = getArrayIndex(rowDims, versionDim);
+	
+							resolveTupleNumericFormatting(section.getRowTuples(),
+									versionNdx, measureNdx);
+	
+						}
+	
+						break;
+	
+					case (PafViewSection.MEASURE_COL_AXIS | PafViewSection.VERSION_ROW_AXIS):
+	
+						measureNdx = getArrayIndex(section.getColAxisDims(),
+								measureDim);
+						versionNdx = getArrayIndex(section.getRowAxisDims(),
+								versionDim);
+	
+						applyNumericFormattingToMeasuresOnly(
+								section.getColTuples(), measureNdx);
+						applyNumericFormattingToVersionsOnly(
+								section.getRowTuples(), versionNdx);
+	
+						break;
+	
+					case (PafViewSection.MEASURE_ROW_AXIS | PafViewSection.VERSION_COL_AXIS):
+	
+						measureNdx = getArrayIndex(section.getRowAxisDims(),
+								measureDim);
+						versionNdx = getArrayIndex(section.getColAxisDims(),
+								versionDim);
+	
+						applyNumericFormattingToMeasuresOnly(
+								section.getRowTuples(), measureNdx);
+						applyNumericFormattingToVersionsOnly(
+								section.getColTuples(), versionNdx);
+	
+						break;
+	
+					case (PafViewSection.MEASURE_PAGE_AXIS | PafViewSection.VERSION_COL_AXIS):
+					case (PafViewSection.MEASURE_PAGE_AXIS | PafViewSection.VERSION_ROW_AXIS):
+					case (PafViewSection.VERSION_PAGE_AXIS | PafViewSection.MEASURE_COL_AXIS):
+					case (PafViewSection.VERSION_PAGE_AXIS | PafViewSection.MEASURE_ROW_AXIS):
+	
+						measureMember = null;
+						versionMember = null;
+						versionNdx = null;
+						measureNdx = null;
+	
+						if ((measureVersionAxis & PafViewSection.MEASURE_PAGE_AXIS) > 0) {
+	
+							for (PageTuple pageTuple : section.getPageTuples()) {
+								if (pageTuple.getAxis().equals(measureDim)) {
+									measureMember = pageTuple.getMember();
+								}
+							}
+	
+							if ((measureVersionAxis & PafViewSection.VERSION_COL_AXIS) > 0) {
+	
+								versionNdx = getArrayIndex(
+										section.getColAxisDims(), versionDim);
+	
+								applyNumericFormatsWithProvidedMeasure(section
+										.getColTuples(), measureMember, versionNdx);
+	
+							} else if ((measureVersionAxis & PafViewSection.VERSION_ROW_AXIS) > 0) {
+	
+								versionNdx = getArrayIndex(
+										section.getRowAxisDims(), versionDim);
+	
+								applyNumericFormatsWithProvidedMeasure(section
+										.getRowTuples(), measureMember, versionNdx);
+	
+							}
+	
+						} else if ((measureVersionAxis & PafViewSection.VERSION_PAGE_AXIS) > 0) {
+	
+							for (PageTuple pageTuple : section.getPageTuples()) {
+								if (pageTuple.getAxis().equals(versionDim)) {
+									versionMember = pageTuple.getMember();
+								}
+							}
+	
+							if ((measureVersionAxis & PafViewSection.MEASURE_COL_AXIS) > 0) {
+	
+								measureNdx = getArrayIndex(
+										section.getColAxisDims(), measureDim);
+	
+								applyNumericFormatsWithProvidedVersion(section
+										.getColTuples(), versionMember, measureNdx);
+	
+							} else if ((measureVersionAxis & PafViewSection.MEASURE_ROW_AXIS) > 0) {
+	
+								measureNdx = getArrayIndex(
+										section.getRowAxisDims(), measureDim);
+	
+								applyNumericFormatsWithProvidedVersion(section
+										.getRowTuples(), versionMember, measureNdx);
+	
+							}
+						}
+	
+						break;
 					}
-
-					break;
 				}
 			}
 		}
@@ -3192,7 +3207,6 @@ public class PafViewService {
 						|| pt.getMember().contains("@FIRST_PLAN_PERIOD")  ) {
 					pt.setMember(replaceUserMultiYear(pt.getMember(), clientState));
 				}
-
 			}
 			
 			// process row tuples
@@ -3785,62 +3799,63 @@ public class PafViewService {
 
 			for (PafViewSection section : sections) {
 
-				PafAxis measureAxis = section.getAxis(measureDim);
-
-				String measureMember = null;
-
-				boolean measurePlannable = false;
-
-				switch (measureAxis.getValue()) {
-
-				case PafAxis.PAGE:
-
-					for (PageTuple tuple : section.getPageTuples()) {
-						if (tuple.getAxis().equals(measureDim)) {
-							measureMember = tuple.getMember();
-							break;
+				if( ! section.isEmpty() ) {
+					PafAxis measureAxis = section.getAxis(measureDim);
+	
+					String measureMember = null;
+	
+					boolean measurePlannable = false;
+	
+					switch (measureAxis.getValue()) {
+	
+					case PafAxis.PAGE:
+	
+						for (PageTuple tuple : section.getPageTuples()) {
+							if (tuple.getAxis().equals(measureDim)) {
+								measureMember = tuple.getMember();
+								break;
+							}
 						}
+	
+						measurePlannable = measuresPlannableCache
+								.get(measureMember);
+	
+						if (section.getPrimaryFormattingAxis() == PafAxis.ROW) {
+	
+							for (ViewTuple tuple : section.getRowTuples()) {
+	
+								tuple = applyMeasureSecurityToTuple(
+										measurePlannable, tuple);
+	
+							}
+	
+						} else if (section.getPrimaryFormattingAxis() == PafAxis.COL) {
+	
+							for (ViewTuple tuple : section.getColTuples()) {
+	
+								tuple = applyMeasureSecurityToTuple(
+										measurePlannable, tuple);
+	
+							}
+	
+						}
+	
+						break;
+					case PafAxis.COL:
+	
+						section.setColTuples(applyMeasureSecurityToTuples(section
+								.getColAxisDims(), section.getColTuples()));
+	
+						break;
+					case PafAxis.ROW:
+	
+						section.setRowTuples(applyMeasureSecurityToTuples(section
+								.getRowAxisDims(), section.getRowTuples()));
+	
+						break;
+	
 					}
-
-					measurePlannable = measuresPlannableCache
-							.get(measureMember);
-
-					if (section.getPrimaryFormattingAxis() == PafAxis.ROW) {
-
-						for (ViewTuple tuple : section.getRowTuples()) {
-
-							tuple = applyMeasureSecurityToTuple(
-									measurePlannable, tuple);
-
-						}
-
-					} else if (section.getPrimaryFormattingAxis() == PafAxis.COL) {
-
-						for (ViewTuple tuple : section.getColTuples()) {
-
-							tuple = applyMeasureSecurityToTuple(
-									measurePlannable, tuple);
-
-						}
-
-					}
-
-					break;
-				case PafAxis.COL:
-
-					section.setColTuples(applyMeasureSecurityToTuples(section
-							.getColAxisDims(), section.getColTuples()));
-
-					break;
-				case PafAxis.ROW:
-
-					section.setRowTuples(applyMeasureSecurityToTuples(section
-							.getRowAxisDims(), section.getRowTuples()));
-
-					break;
-
 				}
-
 			}
 
 		}

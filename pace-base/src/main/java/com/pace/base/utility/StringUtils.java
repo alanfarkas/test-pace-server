@@ -498,4 +498,20 @@ public class StringUtils {
     public static String setToString(Set<String> set, String separator) {
     	return arrayListToString(new ArrayList<String>(set), separator);
     }
+    
+	public static boolean containsEmptyItem(String[] strAry) {
+
+		if (strAry != null) {
+
+			for (String memberDef : strAry) {
+				if (memberDef.isEmpty()) {
+					return true;
+				}
+			}
+
+		}
+
+		return false;
+
+	}
 }

@@ -351,12 +351,14 @@ public class PafServiceProvider implements IPafService {
 			// Compress each cloned view section
 			if(viewRequest.isCompressResponse() == true){
 				for(PafViewSection viewSection : compressedView.getViewSections()){
-					try {
-						viewSection.compressData();
-					} catch (IOException e) {
-						String errMsg = Messages.getString("PafServiceProvider.35"); //$NON-NLS-1$
-						logger.error(errMsg);
-						throw new PafException(errMsg, PafErrSeverity.Error);
+					if( ! viewSection.isEmpty() ) {
+						try {
+							viewSection.compressData();
+						} catch (IOException e) {
+							String errMsg = Messages.getString("PafServiceProvider.35"); //$NON-NLS-1$
+							logger.error(errMsg);
+							throw new PafException(errMsg, PafErrSeverity.Error);
+						}
 					}
 				}
 			}

@@ -2578,15 +2578,22 @@ public class PafDataService {
 			PafViewService.getInstance().processInvalidTuples(viewSection, clientState);
 			if (viewSection.getRowTuples().length > 0){
 				viewSection.setRowTuples(generateHeaderGroupNo(viewSection.getRowTuples(),viewSection.getRowAxisDims(), viewSection.isRowHeaderRepeated()));
-			} else {
+			} 
+			else {
 				viewSection.setEmpty(true);
 			}
 			if (viewSection.getColTuples().length > 0)
 			{
 				viewSection.setColTuples(generateHeaderGroupNo(viewSection.getColTuples(), viewSection.getColAxisDims(), viewSection.isColHeaderRepeated()));
-			} else {
+			} 
+			else {
 				viewSection.setEmpty(true);
 			}
+			
+			if( viewSection.pageAxisContainsEmptyMember() ) {
+				viewSection.setEmpty(true);
+			}
+			
 		}
 		logger.debug("Completed exapanding tuples for view: " + view.getName());        
 		return view;

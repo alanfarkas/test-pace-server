@@ -23,6 +23,7 @@ import com.pace.base.db.membertags.MemberTagCommentPosition;
 import com.pace.base.db.membertags.MemberTagViewSectionData;
 import com.pace.base.mdb.SortingTuples;
 import com.pace.base.utility.CompressionUtil;
+import com.pace.base.utility.StringUtils;
 
 public class PafViewSection implements Cloneable, IPafCompressedObj {
 		
@@ -269,6 +270,20 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 			pageAxisMembers[i++] = pageTuple.getMember();
 		}
 		return pageAxisMembers;
+	}
+	
+	/**
+	 *  Return the page members
+	 *
+	 * @return String[]
+	 */
+	public boolean pageAxisContainsEmptyMember() {	
+		if( StringUtils.containsEmptyItem(getPageAxisMembers()) ) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	
 	public String[] getRowAxisDims() {
