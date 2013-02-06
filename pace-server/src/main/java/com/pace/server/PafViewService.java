@@ -3975,6 +3975,7 @@ public class PafViewService {
 		Set<String> invalidTimeHorizonPeriods = clientState.getInvalidTimeHorizonPeriods();
 		List<ViewTuple> expandedRowTuples = new ArrayList<ViewTuple>();
 		List<ViewTuple> expandedColTuples = new ArrayList<ViewTuple>();
+		List<ViewTuple> blankTupleList = new ArrayList<ViewTuple>();
 		
 		// Initialization
 		for (String a : rowAxes) {
@@ -4075,6 +4076,7 @@ public class PafViewService {
 						memberArray[i] = PafBaseConstants.PAF_BLANK;
 					}
 					viewTuple.setMemberDefs(memberArray);
+					blankTupleList.add(viewTuple);
 					continue;
 				}
 				// Compile a list of any tuples with invalid time / year combinations (TTN-1858 / TTN-1886).
@@ -4095,16 +4097,16 @@ public class PafViewService {
 			}	
 		}
 		// -- Lastly, remove any filtered tuples
-		if( ! bFoundValidTimeHorizPeriod  && expandedRowTuples.size() != 0 && tuplesToLock.size() == expandedRowTuples.size() ) {
+		if( ! bFoundValidTimeHorizPeriod  && expandedRowTuples.size() != 0 && tuplesToLock.size() + blankTupleList.size() == expandedRowTuples.size() ) {
 			String errMsg = "The view can not be displayed since all the selected Year/Time combinations are invalid: "
 					+ StringUtils.arrayListToString(coordToLockList);
 			throw new PafException(errMsg, PafErrSeverity.Error);
 		}
-		expandedRowTuples.removeAll(tuplesToLock);
 		
 		//reset collection and reinitialize
 		tuplesToLock.clear();
 		coordToLockList.clear();
+		blankTupleList.clear();
 		bFoundValidTimeHorizPeriod = false;
 		if ( bTimeOnCol && bYearOnRow && expandedColTuples.size() > 0  && expandedRowTuples.size() > 0 ) {
 			for (ViewTuple viewTuple:expandedColTuples) {
@@ -4117,6 +4119,7 @@ public class PafViewService {
 						memberArray[i] = PafBaseConstants.PAF_BLANK;
 					}
 					viewTuple.setMemberDefs(memberArray);
+					blankTupleList.add(viewTuple);
 					continue;
 				}
 				// Compile a list of any tuples with invalid time / year combinations (TTN-1858 / TTN-1886).
@@ -4136,12 +4139,11 @@ public class PafViewService {
 				}			
 			}	
 		}
-		if( ! bFoundValidTimeHorizPeriod  && expandedColTuples.size() != 0 && tuplesToLock.size() == expandedColTuples.size() ) {
+		if( ! bFoundValidTimeHorizPeriod  && expandedColTuples.size() != 0 && tuplesToLock.size() + blankTupleList.size()  == expandedColTuples.size() ) {
 			String errMsg = "The view can not be displayed since all the selected Year/Time combinations are invalid: "
 					+ StringUtils.arrayListToString(coordToLockList);
 			throw new PafException(errMsg, PafErrSeverity.Error);
 		}
-		expandedColTuples.removeAll(tuplesToLock);
 	}
 
 	/**

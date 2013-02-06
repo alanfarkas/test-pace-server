@@ -2749,8 +2749,6 @@ public class PafDataService {
 		//
 		// Validating the case where the time and year are on different axis, but are either a row or column
 		// dimension, cannot be done here, but will be done in some later logic (TTN-1858 / TTN-1886)
-		List<ViewTuple> tuplesToRemove = new ArrayList<ViewTuple>();
-		List<String> invalidCoordList = new ArrayList<String>(); 
 		boolean bDoTimeHorizValidation = true, bTimeOnPage = false, bYearOnPage = false;
 		int timeAxis = 0, yearAxis = 0;
 		String period = null, year = null;
@@ -2794,6 +2792,9 @@ public class PafDataService {
 		 } while (false);
 		
 
+		List<ViewTuple> tuplesToRemove = new ArrayList<ViewTuple>();
+		List<String> invalidCoordList = new ArrayList<String>(); 
+		List<ViewTuple> blankTupleList = new ArrayList<ViewTuple>();
 		// -- Now edit/validate each expanded view tuple
 		for (ViewTuple viewTuple:expandedTuples) {
 
@@ -2806,9 +2807,7 @@ public class PafDataService {
 					memberArray[i] = PafBaseConstants.PAF_BLANK;
 				}
 				viewTuple.setMemberDefs(memberArray);
-				if (bDoTimeHorizValidation) {
-					tuplesToRemove.add(viewTuple);
-				}
+				blankTupleList.add(viewTuple);
 				continue;
 			}
 						
@@ -2830,13 +2829,12 @@ public class PafDataService {
 		}
 		
 		// -- Lastly, remove any filtered tuples
-		if( expandedTuples.size() != 0 && tuplesToRemove.size() == expandedTuples.size() ) {
+		if( expandedTuples.size() != 0 && tuplesToRemove.size() + blankTupleList.size() == expandedTuples.size() ) {
 			String errMsg = "The view can not be displayed since all the selected Year/Time combinations are invalid: "
 					+ StringUtils.arrayListToString(invalidCoordList);
 			throw new PafException(errMsg, PafErrSeverity.Error);
 		}
 		expandedTuples.removeAll(tuplesToRemove);
-		
 
 		logger.debug("Completed expanding tuples.");
 		return expandedTuples.toArray(new ViewTuple[0]);
