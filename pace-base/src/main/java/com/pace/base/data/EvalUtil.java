@@ -818,35 +818,20 @@ public class EvalUtil {
 		int baseDimCount = baseDimensions.length;
 		Set<String> viewAttributes = new HashSet<String>(Arrays.asList(viewSection.getAttributeDims()));
 		for (int axisInx = 0; axisInx < baseDimCount; axisInx++) {
-	
+
 			// Get current base member and tree
 			String baseDimension = baseDimensions[axisInx];
 			PafBaseTree pafBaseTree = memberTrees.getBaseTree(baseDimension);
 			String baseMember = attrIs.getCoordinate(baseDimension);
-			
-	       	// Time dimension - use time horizon tree
-	    	if (baseDimension.equals(timeDim)) {
-	    		String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(baseMember, attrIs.getCoordinate(yearDim));
-	    		List<String> memberList = timeHorizonTree.getLowestMemberNames(timeHorizCoord);
-	    		memberFilters.put(baseDimension, memberList);
-	    		continue;
-	    	}
-	
-	    	// Year dimension - use time horizon default year member
-		    if (baseDimension.equals(yearDim)) {
-	    		List<String> memberList = Arrays.asList(new String[]{TimeSlice.getTimeHorizonYear()});
-	    		memberFilters.put(baseDimension, memberList);
-	    		continue;
-	    	}
 
 			// Get associated attribute dim names
 			Set<String> assocAttributes = new HashSet<String>();
 			assocAttributes.addAll(pafBaseTree.getAttributeDimNames());
-	
+
 			// Does this base dimension have any associated attributes on view section?
 			assocAttributes.retainAll(viewAttributes);
 			if (assocAttributes.size() > 0) {
-				
+
 				// Yes - Add list of component base members to member filter
 				List<String> memberList = AttributeUtil.getComponentBaseMembers(dataCache, baseDimension, assocAttributes, attrIs, memberTrees);
 				if (memberList.size() == 0) {
@@ -856,38 +841,59 @@ public class EvalUtil {
 				// Convert set of component base members to a list and add to member filter
 				// hash map.
 				memberFilters.put(baseDimension, memberList);
-				
+
 			} else {
-	
-				// No attribute dimensions
+
+				// No associated attribute dimensions
 				List<String> memberList = new ArrayList<String>();
-				if (explodedBaseDims != null && explodedBaseDims.contains(baseDimension)) {
-					// Base dimension explosion - just pick lowest level descendants under member
-					List<PafDimMember> floorMembers = pafBaseTree.getLowestMembers(baseMember);
-					// Logic for member list is different for time dimension
-					if (!baseDimension.equals(dataCache.getTimeDim()) || tb == TimeBalance.None) {
-						// If not time dimension or time balance none measure just add floor members
-						for (PafDimMember floorMember : floorMembers) {
-							memberList.add(floorMember.getKey());
+				if (explodedBaseDims != null)  {
+
+					// Exploded base dimensions. Time and year dimension have custom logic. Because of the
+					// time horizon explosion logic, regardless of whether its been selected, the year 
+					// dimension needs to be processed when the time dimension explosion is selected. (TTN-1597)
+					if (explodedBaseDims.contains(baseDimension) 
+							|| (explodedBaseDims.contains(timeDim) && baseDimension.equals(yearDim))) {
+
+						// Time dimension - use time horizon tree
+						if (baseDimension.equals(timeDim)) {
+							String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(baseMember, attrIs.getCoordinate(yearDim));
+							List<String> floorMembers = timeHorizonTree.getLowestMemberNames(timeHorizCoord);
+							if (tb == TimeBalance.None) {
+								// If time balance none measure, just add floor members
+								memberList = floorMembers;
+							} else if (tb == TimeBalance.First) {
+								// Time balance first - add first floor descendant
+								memberList.add(floorMembers.get(0));
+							} else if (tb == TimeBalance.Last) {
+								// Time balance last - add last descendant
+								memberList.add(floorMembers.get(floorMembers.size() - 1));
+							}
+							memberList = timeHorizonTree.getLowestMemberNames(timeHorizCoord);
+							memberFilters.put(baseDimension, memberList);
+							continue;
 						}
-					} else if (tb == TimeBalance.First) {
-						// Time balance first - add first floor descendant
-						memberList.add(floorMembers.get(0).getKey());
-					} else if (tb == TimeBalance.Last) {
-						// Time balance last - add last descendant
-						memberList.add(floorMembers.get(floorMembers.size() - 1).getKey());
-					}
-				} else {
-					// No base dimension explosion - just add current base member to filter
-					memberList.add(baseMember);
-				}	
-				
-				// Add selected floor members to member filter
-				//TODO use exiting floor utility since it handles elapsed periods, etc.
-				memberFilters.put(baseDimension, memberList);
-			}	
+
+						// Year dimension - use time horizon default year member
+						if (baseDimension.equals(yearDim)) {
+							memberList = Arrays.asList(new String[]{TimeSlice.getTimeHorizonYear()});
+							memberFilters.put(baseDimension, memberList);
+							continue;
+						}
+
+						// Base dimension explosion - just pick lowest level descendants under member
+						memberList = pafBaseTree.getLowestMemberNames(baseMember);
+					} else {
+						// No base dimension explosion - just add current base member to filter
+						memberList.add(baseMember);
+					}	
+
+					// Add selected floor members to member filter
+					//TODO use exiting floor utility since it handles elapsed periods, etc.
+					memberFilters.put(baseDimension, memberList);
+				}
+			}
 		}
-	
+
 		// Return iterator
 		StringOdometer cacheIterator = new StringOdometer(memberFilters, baseDimensions);
 		return cacheIterator;
