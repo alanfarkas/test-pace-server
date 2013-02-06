@@ -2806,6 +2806,9 @@ public class PafDataService {
 					memberArray[i] = PafBaseConstants.PAF_BLANK;
 				}
 				viewTuple.setMemberDefs(memberArray);
+				if (bDoTimeHorizValidation) {
+					tuplesToRemove.add(viewTuple);
+				}
 				continue;
 			}
 						
