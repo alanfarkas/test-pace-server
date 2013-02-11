@@ -2708,7 +2708,7 @@ public abstract class PafDimTree {
 	}
 
 	public String findLowestCommonAncestor(List<String> terms) {
-		if( terms != null && terms.size() != 0 ) {
+		if( terms != null && terms.size() > 1 ) {
 			String term = terms.get(0);
 			PafDimMember base = getMember(terms.get(0));
 			PafDimMember parent = base.getParent();
