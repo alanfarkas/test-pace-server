@@ -431,8 +431,16 @@ public class PafDataService {
 				// term. Skip this operation for the year dimension, since the year 
 				// dimension already comes in expanded with the root as the first term.
 				if (discontigMbrGrps.size() == 0 && !dim.equals(yearDim)) {
-					dimMemberList.add(0, dim);
-					discontigMbrGrps.add(0,new ArrayList<String>(Arrays.asList(new String[]{dim})));
+					//TTN-1953 Improve UOW Root Naming for filtered dimensions 
+					//using the lowest common ancestor for the root of discontiguous dimension hierarchy
+					PafDimTree tree =  null;
+					if ( bUseClientTrees )
+						tree = clientState.getUowTrees().getTree(dim);
+					else
+						tree = baseTrees.get(dim);
+					String comAnce = tree.findLowestCommonAncestor(expandTerms(terms, dim, expansionCS));
+					dimMemberList.add(0, comAnce);
+					discontigMbrGrps.add(0,new ArrayList<String>(Arrays.asList(new String[]{comAnce})));
 				}
 				discontigMbrGrps.add(expandedMbrs);
 			}
@@ -465,6 +473,15 @@ public class PafDataService {
 		return dimMemberList;
 	}
 
+
+	private List<String> expandTerms(String[] terms, String dim, PafClientState expansionCS) throws PafException  {
+		List<String> dimMemberList = new ArrayList<String>();
+		for( String term : terms ) {
+			List<String> expandedMbrs = new ArrayList<String>(Arrays.asList(expandExpression(term, true, dim, expansionCS)));
+			dimMemberList.addAll(expandedMbrs);
+		}
+		return dimMemberList;
+	}
 
 	/**
 	 *	Expand out the members in a unit of work

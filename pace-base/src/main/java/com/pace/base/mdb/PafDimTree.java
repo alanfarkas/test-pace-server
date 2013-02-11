@@ -2707,4 +2707,45 @@ public abstract class PafDimTree {
 		return true;
 	}
 
+	public String findLowestCommonAncestor(List<String> terms) {
+		if( terms != null && terms.size() != 0 ) {
+			String term = terms.get(0);
+			PafDimMember base = getMember(terms.get(0));
+			PafDimMember parent = base.getParent();
+			//the base is the root
+	        if (parent == null) 
+	            return term;
+	        //traverse up to find lowest common ancestor
+	        while (parent != null) {
+				boolean bFound = true;
+				//go thru rest of terms and check if this member is ancestor of others as well
+				for( int i = 1; i<terms.size(); i++ ) {
+					term = terms.get(i);
+					PafDimMember dimMember = getMember(term);
+					if( findMemberInSubTree( parent, dimMember ) == false ) {
+						bFound = false;
+						break;
+					}
+				}
+				//if not found, continue traversing up to find common ancestor
+				if( ! bFound )
+					parent = parent.getParent();
+				else 
+					return parent.getKey();
+			}
+		}
+		return null;
+	}
+	
+	private boolean findMemberInSubTree(PafDimMember parent, PafDimMember target ) {
+		List<PafDimMember> nodes = parent.getChildren();
+		for (PafDimMember node : nodes ) {
+			if( node.getKey() == target.getKey() )
+				return true;
+			if( findMemberInSubTree(node, target) == true )
+				return true;
+		}
+		return false;
+	}
+	
 }
