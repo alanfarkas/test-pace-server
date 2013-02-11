@@ -253,7 +253,8 @@ public class EsbData implements IMdbData{
 
 			// Filter out existing intersections - skip version, if no data to load
 			Map<Integer, List<String>> memberMap = mdbDataSpec.get(version);
-			Map<Integer, List<String>> filteredMemberMap = dataCache.getFilteredRefDataSpec(memberMap);
+			List<Intersection> dataBlockKeysToLoad = new ArrayList<Intersection>();
+			Map<Integer, List<String>> filteredMemberMap = dataCache.getFilteredRefDataSpec(memberMap, dataBlockKeysToLoad);
 			if (filteredMemberMap.isEmpty()) {
 				logMsg = "UpdateDataCache() - all requested data is already loaded - no data update is required";
 				logger.info(logMsg);
@@ -336,6 +337,22 @@ public class EsbData implements IMdbData{
 			// Update data cache with Essbase data for selected version
 			int retrievedCells = loadCubeData(esbCubeView, mdxQuery, dataCache, dcLoadRemapSpec);
 			mdxCellCount += retrievedCells;
+			
+			// Assume that if a data block was not load, its because there was no corresponding data in
+			// the multi-dimensional database. Add each empty data block to a special collection so that 
+			// no future attempts will be made to load these empty blocks. (TTN-1860)
+			if (retrievedCells == 0) {				
+				// No data was loaded, all data block keys must be empty in the mdb
+				dataCache.addEmptyMdbBlocks(dataBlockKeysToLoad);
+				
+			} else {	
+				// Check each data block key, marking each non-existent data block as empty in the mdb
+				for (Intersection dbKey : dataBlockKeysToLoad) {
+					if (!dataCache.isExistingDataBlock(dbKey)) {
+						dataCache.addEmptyMdbBlock(dbKey);
+					}
+				}
+			}
 
 		}
 		logMsg = "[" + StringUtils.commaFormat(mdxCellCount) + "] total cells retrieved from Essbase.";

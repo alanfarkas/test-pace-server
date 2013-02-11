@@ -20,6 +20,7 @@ package com.pace.base.mdb;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -45,7 +46,6 @@ import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
-import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.data.TimeSlice;
@@ -82,7 +82,9 @@ public class PafDataCache implements IPafDataCache {
 	private LinkedList<Integer> deletedSnapshotIndexes = null;		// Surrogate keys of deleted snapshot blocks (Linked list for performance reasons)
 	private Map<String, Set<Intersection>> dataBlocksByVersion = null;	// Data block keys organized by version
 	private Map<Intersection, Set<Intersection>> aliasKeyLookup = null; // Identifies any alias keys for a given data block 
-	private Map<Intersection, Intersection> primaryKeyLookup = null; // Identifies the primary data block key associated with each alias key
+	private Map<Intersection, Intersection> primaryKeyLookup = null; 	// Identifies the primary data block key associated with each alias key
+	private Set<Intersection> emptyMdbBlocks = null;						// Keys of data blocks that were referenced in the Mdb but not loaded because they were empty
+	private Map<String, Set<Intersection>> emptyMdbBlocksByVersion = null;	// Empty mdb block keys by version
 	private int axisCount = 0;						// Total number of defined dimensions (size of allDimensions)
 	private int blockSize = 0;						// Number of cells in a data block
 	private int dataBlockCount = 0;					// Number of existing data blocks
@@ -232,6 +234,8 @@ public class PafDataCache implements IPafDataCache {
 		aliasKeyLookup = new HashMap<Intersection, Set<Intersection>>(200);
 		primaryKeyLookup = new HashMap<Intersection, Intersection>(200);
 		deletedBlockIndexes = new LinkedList<Integer>();
+		emptyMdbBlocks = new HashSet<Intersection>(200);
+		emptyMdbBlocksByVersion = new HashMap<String, Set<Intersection>>(getVersionSize());
 
 		// Initialize snapshot data blocks
 		initSnapshotBlocks();
@@ -2538,6 +2542,39 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
+	 *  Add empty mdb block key to lookup collections
+	 *  
+	 * @param key Data block key
+	 */
+	public void addEmptyMdbBlock(Intersection key) {
+	
+		// Add empty mdb block key to collections
+		emptyMdbBlocks.add(key);
+		String version = key.getCoordinate(getVersionDim());
+		Set<Intersection> versionBlocks = emptyMdbBlocksByVersion.get(version);
+		if (versionBlocks != null) {
+			versionBlocks.add(key);
+		} else {
+			versionBlocks = new HashSet<Intersection>();
+			versionBlocks.add(key);
+			emptyMdbBlocksByVersion.put(version, versionBlocks);
+		}	
+	}
+
+
+	/**
+	 *  Add empty mdb block keys to lookup collections
+	 *  
+	 * @param keys collection of data block keys
+	 */
+	public void addEmptyMdbBlocks(Collection<Intersection> keys) {
+		for (Intersection key : keys) {
+			addEmptyMdbBlock(key);
+		}
+	}
+
+
+	/**
 	 *	Delete a data block from the data cache.
 	 *
 	 * @param key Data block key	
@@ -2653,10 +2690,39 @@ public class PafDataCache implements IPafDataCache {
 				primaryKeyLookup.remove(aliasKey);
 			}
 		}
-		
-		
+				
 	}
 
+
+	/**
+	 *	Remove empty mdb block key from lookup collections
+	 *
+	 * @param key Data block key
+	 */
+	private void deleteEmptyMdbBlock(Intersection key) {
+
+		// Remove key from main data block lookup
+		emptyMdbBlocks.remove(key);
+
+		// Remove key from data block by version collection
+		Set<Intersection> versionBlocks = emptyMdbBlocksByVersion.get(key.getCoordinate(getVersionDim()));
+		if (versionBlocks != null) {
+			versionBlocks.remove(key);
+		}
+
+	}
+		
+	/**
+	 *	Remove empty mdb block keys from lookup collections
+	 *
+	 * @param keys Collection of data block key
+	 */
+	private void deleteEmptyMdbBlocks(Collection<Intersection> keys) {
+		for (Intersection key : keys) {
+			deleteEmptyMdbBlock(key);
+		}
+	}
+		
 
 	/**
 	 * Returns true if the data block contains attribute intersections
@@ -2960,6 +3026,8 @@ public class PafDataCache implements IPafDataCache {
 		int deletedBlockCount = 0;
 		if (versionFilter != null && !versionFilter.isEmpty()) {
 			for (String version : versionFilter) {
+				
+				// Delete data blocks
 				List<Intersection> dataBlockKeys = null;
 				if (dataBlocksByVersion.get(version) !=null ) {
 					dataBlockKeys = new ArrayList<Intersection>(dataBlocksByVersion.get(version));
@@ -2967,6 +3035,12 @@ public class PafDataCache implements IPafDataCache {
 						deleteDataBlock(key);
 						deletedBlockCount++;
 					}
+				}
+				
+				// Delete list of empty mdb blocks (TTN-1860)
+				dataBlockKeys = new ArrayList<Intersection>(emptyMdbBlocksByVersion.get(version));
+				if (dataBlockKeys != null) {
+					deleteEmptyMdbBlocks(dataBlockKeys);
 				}
 			}
 		}
@@ -3518,10 +3592,11 @@ public class PafDataCache implements IPafDataCache {
 	 *  map
 	 *  
 	 * @param memberSpecByAxis Defines a subset of reference data in the data cache 
+	 * @param dataBlocksToLoad Used to return the list of data block keys that will be loaded
 	 * 
 	 * @return
 	 */
-	public Map<Integer, List<String>> getFilteredRefDataSpec(Map<Integer, List<String>> memberSpecByAxis) {
+	public Map<Integer, List<String>> getFilteredRefDataSpec(Map<Integer, List<String>> memberSpecByAxis, List<Intersection> dataBlocksToLoad) {
 		
 		long filterStartTime = System.currentTimeMillis();
 		String logMsg = null;
@@ -3554,20 +3629,20 @@ public class PafDataCache implements IPafDataCache {
 		StringOdometer dataBlockIterator = new StringOdometer(memberLists);
 		//List<Intersection> representedDataBlockKeys = IntersectionUtil.buildIntersections(memberLists, indexedCoreDims);
 
-		// Get list of keys for any requested data blocks that don't yet exist
-		List<Intersection> requiredKeys = new ArrayList<Intersection>();
+		// Get list of keys for any requested data blocks that don't yet exist and don't
+		// correspond to empty data blocks in the multi-dimensional database.
 		while (dataBlockIterator.hasNext()) { 
 			String[] coords = dataBlockIterator.nextValue();
 			Intersection dataBlockKey = new Intersection(coreKeyDims, coords);		// TTN-1851
-			if (!isExistingDataBlock(dataBlockKey)) {
-				requiredKeys.add(dataBlockKey);
+			if (!isExistingDataBlock(dataBlockKey) && !isEmptyMdbDataBlock(dataBlockKey)) {   //TTN-1860
+				dataBlocksToLoad.add(dataBlockKey);
 			}
 		}
 		
 		
 		// Build a data spec that defines a superset of all non-existing data blocks
 		// that need to be loaded.
-		if (!requiredKeys.isEmpty()) {
+		if (!dataBlocksToLoad.isEmpty()) {
 			
 			// Iterate through the required data block keys and compile a
 			// unique list of required members by dimension. 
@@ -3575,7 +3650,7 @@ public class PafDataCache implements IPafDataCache {
 			for (String dim : coreKeyDims) {
 				memberSets.put(dim, new HashSet<String>());
 			}
-			for (Intersection dataBlockKey : requiredKeys) {
+			for (Intersection dataBlockKey : dataBlocksToLoad) {
 				for (String dim : coreKeyDims) {
 					memberSets.get(dim).add(dataBlockKey.getCoordinate(dim));
 				}
@@ -4906,6 +4981,27 @@ public class PafDataCache implements IPafDataCache {
 		for (Intersection intersection : intersections) {
 			setEmptyIntersection(intersection);
 		}
+	}
+
+
+	/**
+	 *	Determines if the specified data block was referenced in the  
+	 *  multi-dimensional database but not loaded because it was empty.
+	 *
+	 * @param key Data block key
+	 * @return True if the specified data block exists in the data cache
+	 */
+	public boolean isEmptyMdbDataBlock(Intersection key) {
+
+		boolean isFound = false;
+
+		// Look for data block
+		if (emptyMdbBlocks.contains(key)) {
+			isFound = true;
+		}
+
+		// Return status
+		return isFound;
 	}
 
 
