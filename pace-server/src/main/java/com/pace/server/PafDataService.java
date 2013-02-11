@@ -1332,10 +1332,13 @@ public class PafDataService {
 		List<String> viewVarVersions = dataCache.getVarianceVersions();
 		viewVarVersions.retainAll(viewVersions);
 
-		// Also, filter out any undefined and synthetic years (TTN-1860)
+		// Add in any years that are components to any synthetic years on view (TTN-1860)
 		List<String> viewYears = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(yearDim)));
 		List<String> requiredYears = new ArrayList<String>(viewYears);
 		Set<String> syntheticYears = yearTree.getSyntheticMemberNames();
+		requiredYears.addAll(yearTree.getSyntheticComponentMemberNames(syntheticYears));
+		
+		// Also, filter out any undefined and synthetic years (TTN-1860)
 		requiredYears.removeAll(syntheticYears);
 		List<String> nonPlanYears = new ArrayList<String>(clientState.getLockedYears());
 		nonPlanYears.retainAll(requiredYears);
@@ -1380,7 +1383,7 @@ public class PafDataService {
 				}
 				
 				// Check remaining base dimensions for associated attributes
-				PafBaseTree baseTree = (PafBaseTree) clientState.getUowTrees().getTree(baseDim);
+				PafBaseTree baseTree = uowTrees.getBaseTree(baseDim);
 				Set<String> associatedAttrDims = new HashSet<String> (baseTree.getAttributeDimNames());
 				associatedAttrDims.retainAll(viewDims);
 				if (associatedAttrDims.size() > 0) {
@@ -1421,6 +1424,7 @@ public class PafDataService {
 			// only consider non-plannable years, since the plannable years are already 
 			// loaded. (TTN-1870)
 			Set<String> reqVersionYears = reqYearsByVersion.get(version);
+			reqVersionYears.addAll(yearTree.getSyntheticComponentMemberNames(reqVersionYears));
 			reqVersionYears.retainAll(requiredYears);
 			if (version.equals(planVersion)) {
 				reqVersionYears.retainAll(nonPlanYears);
@@ -1560,9 +1564,9 @@ public class PafDataService {
 			Map<Integer, List<String>> dataSpecAsMap = dataSpecByVersion.get(version);
 			for (int axis : dataSpecAsMap.keySet())  {
 				String baseDim = dataCache.getDimension(axis);
-				PafBaseTree baseTree = (PafBaseTree) clientState.getUowTrees().getTree(baseDim);
+				PafDimTree dimTree = uowTrees.getTree(baseDim);
 				List<String> memberList = dataSpecAsMap.get(axis);
-				memberList.addAll(baseTree.getSyntheticComponentMemberNames(memberList));
+				memberList.addAll(dimTree.getSyntheticComponentMemberNames(memberList));
 				dataSpecAsMap.put(axis, memberList);
 			}
 		}

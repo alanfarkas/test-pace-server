@@ -3586,14 +3586,12 @@ public class PafDataCache implements IPafDataCache {
 				filteredRefDataSpec.put(this.getAxisIndex(dim),
 						new ArrayList<String>(memberSets.get(dim)));
 			}
-			// Add in all defined measure, time, and year members
+			// Add in all dense block members (all defined measure and time members)
 			//TODO Rolling Forecast - need to combine replace time&year with time horizon coord - might need to reflect this in UOW definition
 			filteredRefDataSpec.put(getMeasureAxis(),
 					Arrays.asList(getAxisMembers(getMeasureAxis())));
 			filteredRefDataSpec.put(getTimeAxis(),
 					Arrays.asList(getAxisMembers(getTimeAxis())));
-			filteredRefDataSpec.put(getYearAxis(),					
-					Arrays.asList(getAxisMembers(getYearAxis())));		// Year is now a dense dimension (TTN-1595)
 		}
 		
 		// Return filtered data spec

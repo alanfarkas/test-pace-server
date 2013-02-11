@@ -289,7 +289,7 @@ public abstract class PafDimTree {
 	 * @param memberNames List of member names
 	 * @return List of component member names
 	 */
-	public List<String> getSyntheticComponentMemberNames(List<String> memberNames) {
+	public List<String> getSyntheticComponentMemberNames(Collection<String> memberNames) {
 		
 		Set<String> componentMembers = new HashSet<String>();
 		for (String memberName : memberNames) {
@@ -299,6 +299,7 @@ public abstract class PafDimTree {
 		// Return component members
 		return new ArrayList<String>(componentMembers);
 	}
+
 
 
 	/**
