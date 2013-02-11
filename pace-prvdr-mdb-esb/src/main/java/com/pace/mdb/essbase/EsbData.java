@@ -342,11 +342,12 @@ public class EsbData implements IMdbData{
 			// the multi-dimensional database. Add each empty data block to a special collection so that 
 			// no future attempts will be made to load these empty blocks. (TTN-1860)
 			if (retrievedCells == 0) {				
-				// No data was loaded, all data block keys must be empty in the mdb
+				// No data was loaded, all data blocks to be loaded must be empty in the mdb
 				dataCache.addEmptyMdbBlocks(dataBlockKeysToLoad);
 				
 			} else {	
-				// Check each data block key, marking each non-existent data block as empty in the mdb
+				// Check each data block key that was supposed to be loaded, marking each non-existent
+				// data block as empty in the mdb.
 				for (Intersection dbKey : dataBlockKeysToLoad) {
 					if (!dataCache.isExistingDataBlock(dbKey)) {
 						dataCache.addEmptyMdbBlock(dbKey);
