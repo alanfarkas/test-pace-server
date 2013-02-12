@@ -845,7 +845,7 @@ public class PafViewService {
 
 			sections = lockMeasureIntersections(sections, clientState); //ok
 			
-			sections = addNonPlannableTuplesToClientState(sections);
+			sections = addNonPlannableTuplesToClientState(sections, viewRequest.getSessionCells());
 
 			sections = applyReplicationSecurity(sections);
 
@@ -1850,15 +1850,16 @@ public class PafViewService {
 	/**
 	 *  Checks the tuples to see if they are not plannable.  If not plannable, then
 	 *  a locked cell is added to the non plannable locked cell list and added to the 
-	 *  array of hte view section.
-	 * 
-	 * @param Complex
-	 *            view section array
+	 *  array of the view section.
+	 *  
+	 * @param sections Complex view section array
+	 * @param sessionLockCells Array of session lock cells
 	 * 
 	 * @return Complex view section array
 	 */
-	private PafViewSection[] addNonPlannableTuplesToClientState(PafViewSection[] sections) {
+	private PafViewSection[] addNonPlannableTuplesToClientState(PafViewSection[] sections, SimpleCoordList[] sessionLockCells) {
 	
+		
 		// for each section 
 		for (PafViewSection section : sections) {
 			
@@ -1866,56 +1867,133 @@ public class PafViewService {
 				// index counters for both row and column
 				int rowId = 0;
 	
+				// track each cell's dimension member coordinates (TTN-1893)
+				String[] viewDims = section.getDimensionsPriority();
+				String[] coords = new String[viewDims.length];
+				Map<String, String> mappedDimsWithMembers = new HashMap<String, String>();
+				 
+				// initialize session lock tracking variables (TTN-1893)
+				Set<LockedCell> fpLockedCellSet = null;
+				List<LockedCell> sessionLockedCellList = new ArrayList<LockedCell>();
+				Set<Intersection> explodedSessionLocks  = null;
+				
+				// translate session locks into attribute view intersections (TTN-1893)
+				if (section.hasAttributes()) {		     
+				    // convert locked cells arrays to sets for fast lookup 
+				    fpLockedCellSet = new HashSet<LockedCell>(Arrays.asList(section.getForwardPlannableLockedCell()));
+				    
+				    // translate any existing sessions locks to intersections on the current attribute view section 
+				    explodedSessionLocks = calculateAttrViewSessionLocks(section, sessionLockCells);
+				 
+				}
+				
 				//get current not plannable list
 				ArrayList<LockedCell> notPlannableList = new ArrayList<LockedCell>();
 				if (section.getNotPlannableLockedCells() != null)
 					notPlannableList.addAll(Arrays.asList(section.getNotPlannableLockedCells()));
 				
+				// get page dimension coordinates (TTN-1893)
+				for (PageTuple pageTuple: section.getPageTuples()){
+					mappedDimsWithMembers.put(pageTuple.getAxis(), pageTuple.getMember());
+				}
+							
+
 				// get row tuples
 				ViewTuple[] rowTuples = section.getRowTuples();
-	
+
 				// get column tuples
 				ViewTuple[] colTuples = section.getColTuples();
-				
+
 				// loop over each row tuple, then over col tuple
 				for (ViewTuple rowTuple : rowTuples) {
 					rowId++;
-										
-					int colId = 0;
-	
+
+					// get row dimension coordinates (TTN-1893)
+					List<String> rowMembers = getTupleMemberDefs(rowTuple);					
+					int rowMemberIndex = 0;
+					for (String dimension : section.getRowAxisDims()){
+						mappedDimsWithMembers.put(dimension, rowMembers.get(rowMemberIndex++));
+					}
+
 					// loop over all column tuples and then determine if
 					// intersection is locked
+					int colId = 0;
 					for (ViewTuple colTuple : colTuples) {
-						
+
 						colId++;
-						
+
+						// get column dimension coordinates (TTN-1893)
+						List<String> colMembers = getTupleMemberDefs(colTuple);					
+						int colMemberIndex = 0;
+						for (String dimension : section.getColAxisDims()){
+							mappedDimsWithMembers.put(dimension, colMembers.get(colMemberIndex++));
+						}
+
 						//if the row or column tuple contain blank or member tag, continue to next tuple
 						if (rowTuple.containsNonMember() || colTuple.containsNonMember()) {
 							continue;
 						}
-											
+
 						//if row is not plannable, or if col is not plannable, add to not plannable list
 						if ( (rowTuple.getPlannable() != null && ! rowTuple.getPlannable()) || (colTuple.getPlannable() != null && ! colTuple.getPlannable() )) {
-							
 							notPlannableList.add(new LockedCell(rowId, colId));						
-							
 						}				
-						
+
+						// apply attribute view session lock (TTN-1893)
+						if (section.hasAttributes()) { 
+
+							// translate current view cell into an intersection
+							int coordMemberIndex = 0;
+							for (String dimension : section.getDimensionsPriority()){
+								coords[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
+							}
+							Intersection currentIs = new Intersection(viewDims, coords);
+							
+							// is current cell a potential session lock cell?
+							if (explodedSessionLocks.contains(currentIs)) {
+
+								// only apply session lock if the cell is not previously locked or protected
+								if (!section.invalidAttrIntersections().contains(currentIs)) {
+
+									LockedCell currentLockedCell = new LockedCell(rowId, colId);
+									if (!notPlannableList.contains(currentLockedCell) && !fpLockedCellSet.contains(currentLockedCell)) {
+										sessionLockedCellList.add(currentLockedCell);
+									}
+								}
+							}
+						}
+
 					}
-	
 				}
-				
+
 				// set on view section by creating a unique locked cell array
 				section.setNotPlannableLockedCells(notPlannableList.toArray(new LockedCell[0]));
-	
+
+			    // set view section session lock property (TTN-1893)
+				section.setSessionLockedCells(sessionLockedCellList.toArray(new LockedCell[0]));
 			}
 		}
-		
+
 		return sections;
 
 	}
-	
 
+	/**
+	 *	Translate client session locks into intersections on the supplied view session
+	 *
+	 * @param section View Section
+	 * @param sessionLockCells Client session lock cells
+	 * 
+	 * @return Set of exploded session lock intersections
+	 */
+	private Set<Intersection> calculateAttrViewSessionLocks(PafViewSection section, SimpleCoordList[] sessionLockCells) {
+		// TODO Auto-generated method stub
+		Set<Intersection> viewSessionLocks = new HashSet<Intersection>();
+		return viewSessionLocks;
+
+	}
+
+	
 	/**
 	 *  Populate member tag data intersections on specified axis
 	 *

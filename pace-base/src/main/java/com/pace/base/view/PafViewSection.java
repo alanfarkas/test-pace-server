@@ -78,6 +78,8 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 
 	private LockedCell[] forwardPlannableLockedCell = null;
 	
+	private LockedCell[] sessionLockedCells = null;
+
 	private String generationFormatName;
 	
 	private String hierarchyFormatName;
@@ -116,7 +118,9 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
     
     private String compForwardPlannableLockedCell;
     
-	private String compCellNotes;
+    private String compSessionLockedCells;
+
+    private String compCellNotes;
     
 	private String compRowMemberTagData;
 
@@ -819,6 +823,13 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 			forwardPlannableLockedCell = null;
 		}
 		
+		// compress session lock cells (TTN-1893)
+		if(sessionLockedCells != null){
+			compSessionLockedCells = compressLockedCells(sessionLockedCells);
+			sessionLockedCells = null;
+		}
+		
+		
 		if (invalidReplicationIntersections != null) {	
 			for (SimpleCoordList invalidReplicationIs : invalidReplicationIntersections) {				
 				try {
@@ -1201,6 +1212,34 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 
 	public void setSortingTuples(SortingTuples sortingTuples) {
 		this.sortingTuples = sortingTuples;
+	}
+
+	/**
+	 * @return the sessionLockedCells
+	 */
+	public LockedCell[] getSessionLockedCells() {
+		return sessionLockedCells;
+	}
+
+	/**
+	 * @param sessionLockedCells the sessionLockedCells to set
+	 */
+	public void setSessionLockedCells(LockedCell[] sessionLockedCells) {
+		this.sessionLockedCells = sessionLockedCells;
+	}
+
+	/**
+	 * @return the compSessionLockedCells
+	 */
+	public String getCompSessionLockedCells() {
+		return compSessionLockedCells;
+	}
+
+	/**
+	 * @param compSessionLockedCells the compSessionLockedCells to set
+	 */
+	public void setCompSessionLockedCells(String compSessionLockedCells) {
+		this.compSessionLockedCells = compSessionLockedCells;
 	}
 	
 }
