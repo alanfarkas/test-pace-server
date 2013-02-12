@@ -1191,7 +1191,7 @@ public abstract class PafDataCacheCalc {
 		}
 
 		// Create a time/year filter. Select all uow time horizon periods, as synthetic members
-		// need to be populated across elapsed and no-elapsed periods.
+		// need to be populated across elapsed and non-elapsed periods.
 		timeFilter.put(yearDim, Arrays.asList(TimeSlice.getTimeHorizonYear()));
 		List<String> openTimeHorizonPeriods = timeHorizonTree.getMemberNames(TreeTraversalOrder.POST_ORDER);
 		timeFilter.put(timeDim, openTimeHorizonPeriods);
@@ -1220,9 +1220,19 @@ public abstract class PafDataCacheCalc {
 					if (dim.equals(measureDim)) {
 						members.removeAll(recalcMeasures);
 					}
+
+					// Add filtered members to calculation filter
 					if (!members.isEmpty()) {
+						// Ensure that synthetic members are calculated across all other 
+						// dimensions (TTN-1860).
+						PafDimTree dimTree = uowTrees.getTree(dim);
+						members.addAll(dimTree.getSyntheticMemberNames());
+						
+						// Add members to filter
 						baseDimCalcFilter.put(dim, members);
-					}					
+						
+					}
+					
 				}
 			}
 

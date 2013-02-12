@@ -251,10 +251,10 @@ public class EsbData implements IMdbData{
 		Set<String> extractedVersions = mdbDataSpec.keySet();
 		for (String version: extractedVersions) {
 
-			// Filter out existing intersections - skip version, if no data to load
+			// Filter out existing  and synthetic intersections - skip version, if no data to load
 			Map<Integer, List<String>> memberMap = mdbDataSpec.get(version);
 			List<Intersection> dataBlockKeysToLoad = new ArrayList<Intersection>();
-			Map<Integer, List<String>> filteredMemberMap = dataCache.getFilteredRefDataSpec(memberMap, dataBlockKeysToLoad);
+			Map<Integer, List<String>> filteredMemberMap = dataCache.getFilteredRefDataSpec(memberMap, dataBlockKeysToLoad, dataCache.getDimTrees());
 			if (filteredMemberMap.isEmpty()) {
 				logMsg = "UpdateDataCache() - all requested data is already loaded - no data update is required";
 				logger.info(logMsg);

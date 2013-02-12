@@ -3593,10 +3593,11 @@ public class PafDataCache implements IPafDataCache {
 	 *  
 	 * @param memberSpecByAxis Defines a subset of reference data in the data cache 
 	 * @param dataBlocksToLoad Used to return the list of data block keys that will be loaded
+	 * @param dimTrees Uow dimension trees
 	 * 
 	 * @return
 	 */
-	public Map<Integer, List<String>> getFilteredRefDataSpec(Map<Integer, List<String>> memberSpecByAxis, List<Intersection> dataBlocksToLoad) {
+	public Map<Integer, List<String>> getFilteredRefDataSpec(Map<Integer, List<String>> memberSpecByAxis, List<Intersection> dataBlocksToLoad, MemberTreeSet dimTrees) {
 		
 		long filterStartTime = System.currentTimeMillis();
 		String logMsg = null;
@@ -3625,6 +3626,15 @@ public class PafDataCache implements IPafDataCache {
 				memberList = new ArrayList<String>(Arrays.asList(getAxisMembers(axis)));
 			}
 			memberLists[i] = memberList;
+			
+			// Filter out any synthetic members. There is no point in
+			// loading them since they are calculated in Pace. (TTN-1860)
+			String dim = coreKeyDims[i];
+			PafDimTree dimTree = dimTrees.getTree(dim);
+			if (dimTree.hasSyntheticMembers()) {
+				memberList.removeAll(dimTree.getSyntheticMemberNames());
+			}
+			
 		}
 		StringOdometer dataBlockIterator = new StringOdometer(memberLists);
 		//List<Intersection> representedDataBlockKeys = IntersectionUtil.buildIntersections(memberLists, indexedCoreDims);
