@@ -845,7 +845,7 @@ public class PafViewService {
 
 			sections = lockMeasureIntersections(sections, clientState); //ok
 			
-			sections = addNonPlannableTuplesToClientState(sections, viewRequest.getSessionCells());
+			sections = addNonPlannableTuplesToClientState(sections, viewRequest.getSessionLockedCells());
 
 			sections = applyReplicationSecurity(sections);
 

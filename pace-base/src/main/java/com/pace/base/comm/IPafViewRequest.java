@@ -9,6 +9,6 @@ public interface IPafViewRequest {
 	public PafUserSelection[] getUserSelections();
 	public boolean getRowsSuppressed();
 	public boolean getColumnsSuppressed();
-	public SimpleCoordList[] getSessionCells();
+	public SimpleCoordList[] getSessionLockedCells();
 
 }

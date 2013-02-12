@@ -37,7 +37,7 @@ public class ViewRequest extends PafRequest implements IPafViewRequest{
     private boolean isCompressResponse = false;
     private boolean rowsSuppressed;
     private boolean columnsSuppressed;
-	private SimpleCoordList[] sessionCells;
+	private SimpleCoordList[] sessionLockedCells;
 
     public String getViewName() {
         return viewName;
@@ -86,16 +86,16 @@ public class ViewRequest extends PafRequest implements IPafViewRequest{
 	}
 
 	/**
-	 * @return the sessionCells
+	 * @return the sessionLockedCells
 	 */
-	public SimpleCoordList[] getSessionCells() {
-		return sessionCells;
+	public SimpleCoordList[] getSessionLockedCells() {
+		return sessionLockedCells;
 	}
 
 	/**
-	 * @param sessionCells the sessionCells to set
+	 * @param sessionLockedCells the sessionLockedCells to set
 	 */
-	public void setSessionCells(SimpleCoordList[] sessionCells) {
-		this.sessionCells = sessionCells;
+	public void setSessionLockedCells(SimpleCoordList[] sessionLockedCells) {
+		this.sessionLockedCells = sessionLockedCells;
 	}
 }

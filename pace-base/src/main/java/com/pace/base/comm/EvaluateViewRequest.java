@@ -40,7 +40,7 @@ public class EvaluateViewRequest extends PafRequest implements IPafViewRequest{
     private SimpleCoordList replicateAllCells;
     private SimpleCoordList liftExistingCells;
     private SimpleCoordList liftAllCells;
-	private SimpleCoordList[] sessionCells;
+	private SimpleCoordList[] sessionLockedCells;
 
     
     private String protectedFormulas[];
@@ -183,16 +183,16 @@ public class EvaluateViewRequest extends PafRequest implements IPafViewRequest{
 	}
 
 	/**
-	 * @return the sessionCells
+	 * @return the sessionLockedCells
 	 */
-	public SimpleCoordList[] getSessionCells() {
-		return sessionCells;
+	public SimpleCoordList[] getSessionLockedCells() {
+		return sessionLockedCells;
 	}
 	/**
-	 * @param sessionCells The session cells to set
+	 * @param sessionLockedCells The session locked cells to set
 	 */
-	public void setSessionCells(SimpleCoordList[] sessionCells) {
-		this.sessionCells = sessionCells;
+	public void setSessionLockedCells(SimpleCoordList[] sessionLockedCells) {
+		this.sessionLockedCells = sessionLockedCells;
 	}
 
 	public void setColumnsSuppressed(boolean columnsSuppressed) {
