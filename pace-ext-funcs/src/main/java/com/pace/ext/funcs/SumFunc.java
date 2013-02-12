@@ -61,7 +61,9 @@ public class SumFunc extends AbstractFunction {
 //    	evalState.getCurrentLockedCells().removeAll(potentialAllocTargets);
     	
     	// Aggregate current intersection across the selected measures
-    	aggMeasures(sourceIs, inputMsrs, dataCache, evalState);
+    	Set<String> aggMeasures = new HashSet<String>(inputMsrs);
+    	aggMeasures.add(msrToSum);
+    	aggMeasures(sourceIs, aggMeasures, dataCache, evalState);
     	
     	// Return the sum of the aggregated measures
         double sum = dataCache.getCellValue(sourceIs);  
@@ -150,8 +152,8 @@ public class SumFunc extends AbstractFunction {
     	int index = 1;
     	inputMsrs.clear();
     	
-     	// initialize with floor measures
-    	for (PafDimMember msrMbr : measureTree.getIDescendants(msrToSum)) {
+     	// initialize with descendants of measure to sum
+    	for (PafDimMember msrMbr : measureTree.getDescendants(msrToSum)) {
     		inputMsrs.add(msrMbr.getKey());      		
     	}
     	
@@ -179,7 +181,7 @@ public class SumFunc extends AbstractFunction {
 		/*
 		 * The trigger intersections for the @ALLOC function are:
 		 *
-		 * 1. Any changed intersection containing the input measures 
+		 * 1. Any changed intersection containing the descendants of the measure to sum 
 		 * 
 		 */
 		
