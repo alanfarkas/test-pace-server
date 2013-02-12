@@ -20,6 +20,7 @@ package com.pace.server.comm;
 
 import com.pace.base.comm.IPafViewRequest;
 import com.pace.base.comm.PafRequest;
+import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.view.PafUserSelection;
 
 
@@ -36,6 +37,7 @@ public class ViewRequest extends PafRequest implements IPafViewRequest{
     private boolean isCompressResponse = false;
     private boolean rowsSuppressed;
     private boolean columnsSuppressed;
+	private SimpleCoordList[] sessionCells;
 
     public String getViewName() {
         return viewName;
@@ -81,5 +83,19 @@ public class ViewRequest extends PafRequest implements IPafViewRequest{
 
 	public boolean getColumnsSuppressed() {
 		return columnsSuppressed;
+	}
+
+	/**
+	 * @return the sessionCells
+	 */
+	public SimpleCoordList[] getSessionCells() {
+		return sessionCells;
+	}
+
+	/**
+	 * @param sessionCells the sessionCells to set
+	 */
+	public void setSessionCells(SimpleCoordList[] sessionCells) {
+		this.sessionCells = sessionCells;
 	}
 }

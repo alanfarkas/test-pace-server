@@ -75,7 +75,6 @@ import com.pace.base.project.ProjectElementId;
 import com.pace.base.state.PafClientState;
 import com.pace.base.ui.PrintStyle;
 import com.pace.base.ui.PrintStyles;
-import com.pace.base.utility.CollectionsUtil;
 import com.pace.base.utility.CompressionUtil;
 import com.pace.base.utility.PafViewSectionUtil;
 import com.pace.base.utility.StringUtils;
