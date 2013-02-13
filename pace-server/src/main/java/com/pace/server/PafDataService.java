@@ -4923,7 +4923,6 @@ public class PafDataService {
 		final StopWatch sw = new StopWatch("getDescendants");
 		final PafDataCache dataCache = getDataCache(clientState.getClientId());
 		final String[] baseDims = dataCache.getBaseDimensions();
-		final Set<String> lockedTimeHorizPeriods = clientState.getLockedTimeHorizonPeriods();
 		Set<Coordinates> floorCoordsSet = new HashSet<Coordinates>(10000), ancestorCoordsSet = new HashSet<Coordinates>(ancestorCells.length);
 		
 
@@ -4945,13 +4944,9 @@ public class PafDataService {
 			if(ancestorCell.isCompressed())
 				ancestorCell.uncompressData();
 		
-			// Explode the parent cell to its floor descendants (filtering out any parents with invalid 
-			// or locked time horizon periods) 
+			// Explode the parent cell to its floor descendants 
 			Intersection ancestorIs = new Intersection(ancestorCell.getAxis(), ancestorCell.getCoordinates());
-			String timeHorizPeriod = TimeSlice.buildTimeHorizonCoord(ancestorIs, dataCache.getMdbDef());
-			if (lockedTimeHorizPeriods.contains(timeHorizPeriod))
-				continue;
-			List<Coordinates> floorCoords= IntersectionUtil.buildFloorCoordinates(ancestorIs, dataCache);
+			List<Coordinates> floorCoords = explodeSessionLock(ancestorIs, clientState);
 
 			// Convert list of intersections to SimpleCoordList and place in result array
 			sw.start("CreateSimpleCoordList" );
@@ -5005,6 +5000,83 @@ public class PafDataService {
 		
 		// Return results
 		return resultCoordLists;
+	}
+
+
+	/**
+	 * Explode session lock cells into their underlying base coordinates
+	 * 
+	 * @param sessionLockedCells Array of simple coordinate lists containing each session lock cell
+	 * @param clientState Client state
+	 * 
+	 * @return Set of exploded base coordinates 
+	 */
+	public Set<Coordinates> explodeSessionLocks(SimpleCoordList[] sessionLockedCells, PafClientState clientState) {
+		
+		final PafDataCache dataCache = getDataCache(clientState.getClientId());
+		Set<Coordinates> explodedCoordSet = new HashSet<Coordinates>(10000);
+
+		// Cycle through each session lock cell and explode to its floor descendants. Exploded
+		// descendants are stored on client state so that they can be lazy loaded. Intermediate 
+		// parent cells are added in a later step. 
+		for (int i = 0; i <  sessionLockedCells.length; i++) {
+		 
+			// Convert simple coordinates list to intersection set
+			Set<Intersection> sessionLockIsSet = IntersectionUtil.convertSimpleCoordListToIntersectionSet(sessionLockedCells[i]);
+			
+			// Cycle through each intersection in set
+			for (Intersection sessionLockIs : sessionLockIsSet) {
+
+				// Get coordinates of floor intersection
+				List<Coordinates> floorCoords = explodeSessionLock(sessionLockIs, clientState);
+				
+				// Accumulate all exploded floor intersections.
+				explodedCoordSet.addAll(floorCoords);
+			}
+				
+		}
+
+		// Get the coordinates of any parent intersections whose children have all been included
+		// in the set of exploded floor intersections
+		Set<Coordinates>parentCoordsSet = IntersectionUtil.getLockedBaseParentCoords(explodedCoordSet, dataCache, explodedCoordSet);
+		
+		// Add parents to exploded intersection set
+		explodedCoordSet.addAll(parentCoordsSet);
+				
+		// Return results
+	    return explodedCoordSet;
+	}
+
+
+	/**
+	 * Explode session lock intersection into its underlying base coordinates
+	 * 
+	 * @param sessionLockIs Session lock intersection
+	 * @param clientState Client state
+	 * 
+	 * @return List of exploded base coordinates
+	 */
+	private List<Coordinates> explodeSessionLock(Intersection sessionLockIs, PafClientState clientState) {
+
+		final Set<String> lockedTimeHorizPeriods = clientState.getLockedTimeHorizonPeriods();
+		final PafDataCache dataCache = getDataCache(clientState.getClientId());
+		List<Coordinates> floorCoords = null;
+
+		// Get exploded session lock coordinates. If they don't already exist on the
+		// client state then they must be computed.
+		floorCoords = clientState.getExplodedSessionLocks(sessionLockIs);
+		if (floorCoords.isEmpty()) {
+			// Explode the parent cell to its floor descendants (filtering out any parents with invalid 
+			// or locked time horizon periods) 
+			String timeHorizPeriod = TimeSlice.buildTimeHorizonCoord(sessionLockIs, dataCache.getMdbDef());
+			if (!lockedTimeHorizPeriods.contains(timeHorizPeriod)) {
+				floorCoords= IntersectionUtil.buildFloorCoordinates(sessionLockIs, dataCache);	
+				clientState.addExplodedSessionLocks(sessionLockIs, floorCoords);
+			}
+		}
+
+		// Return floor coordinates
+		return floorCoords;
 	}
  
 }

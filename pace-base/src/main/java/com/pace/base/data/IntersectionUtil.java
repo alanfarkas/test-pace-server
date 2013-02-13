@@ -37,6 +37,7 @@ import com.pace.base.state.IPafEvalState;
 import com.pace.base.utility.CollectionsUtil;
 import com.pace.base.utility.IOdometer;
 import com.pace.base.utility.StringOdometer;
+import com.pace.base.utility.StringUtils;
 
 /**
  * General purpose intersection-based utilities. 
@@ -976,6 +977,69 @@ public class IntersectionUtil {
 		// Construct and return the SimpleCoordList
 		SimpleCoordList simpleCoordList = new SimpleCoordList(dimensions, coordList.toArray(new String[0]));
 		return simpleCoordList;
+	}
+
+
+	/**
+	 * Convert a simple coordinate list into a set of intersections
+	 * 
+	 * @param simpleCoordList Simple coordinate list
+	 * @return Intersection set
+	 */
+	public static Set<Intersection> convertSimpleCoordListToIntersectionSet(SimpleCoordList simpleCoordList) {
+
+		Set<Intersection> isSet = null;
+		
+		// Check for null coordinate list or components
+		if (simpleCoordList == null) return new HashSet<Intersection>();
+        if (simpleCoordList.getCoordinates() == null) return new HashSet<Intersection>();
+        if (simpleCoordList.getAxis() == null) return new HashSet<Intersection>();
+				
+		// Convert simple coordinate list
+		String[] dims = simpleCoordList.getAxis();
+        int dimCount = simpleCoordList.getAxis().length, coordCount = simpleCoordList.getCoordCount();
+		int isCount = coordCount / dimCount;
+        isSet = new HashSet<Intersection>(isCount);
+        for (int i = 0; i < isCount; i++) {
+            String[] coords = new String[dimCount];
+            for (int j = 0; j < dimCount; j++) {
+                coords[j] = simpleCoordList.getCoordinates()[(i*dimCount)+j];
+            }
+            isSet.add(new Intersection(dims, coords));
+         }
+		
+		// Return converted intersections
+		return isSet;
+	}
+
+	/**
+	 * Convert an array of simple coordinate list into a set of intersections
+	 * 
+	 * @param simpleCoordListAr Array of simple coordinate lists
+	 * @return Intersection set
+	 */
+	public static Set<Intersection> convertSimpleCoordListToIntersectionSet(SimpleCoordList[] simpleCoordListAr) {
+		
+		Set<Intersection> isSet = null;
+		int coordCount = 0;
+		
+		// Check for null array
+		if (simpleCoordListAr == null) return new HashSet<Intersection>();
+		
+		// Get a count of all coordinates and initialize return set
+		for (SimpleCoordList simpleCoordList : simpleCoordListAr) {
+			if (simpleCoordList != null && simpleCoordList.getAxis() !=null  && simpleCoordList.getCoordinates() != null) 
+				coordCount += simpleCoordList.getCoordCount() / simpleCoordList.getAxis().length;
+		}
+		isSet = new HashSet<Intersection>(coordCount);
+		
+		// Convert each simple coordinate list
+		for (SimpleCoordList simpleCoordList : simpleCoordListAr) {
+			isSet.addAll(convertSimpleCoordListToIntersectionSet(simpleCoordList));
+		}
+		
+		// Return converted intersections
+		return isSet;
 	}
 
 

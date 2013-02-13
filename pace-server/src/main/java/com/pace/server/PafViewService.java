@@ -51,7 +51,9 @@ import com.pace.base.app.VersionType;
 import com.pace.base.comm.IPafViewRequest;
 import com.pace.base.comm.PafViewTreeItem;
 import com.pace.base.comm.SimpleCoordList;
+import com.pace.base.data.Coordinates;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.data.TimeSlice;
@@ -64,6 +66,7 @@ import com.pace.base.db.membertags.MemberTagViewSectionData;
 import com.pace.base.db.membertags.SimpleMemberTagId;
 import com.pace.base.mdb.AttributeUtil;
 import com.pace.base.mdb.PafBaseTree;
+import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataSliceParms;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimMemberProps;
@@ -664,6 +667,8 @@ public class PafViewService {
 
 		PafView definedView = null, renderedView = null;
 		String viewName = viewRequest.getViewName();
+		Set<Coordinates> explodedSessionLocks = new HashSet<Coordinates>();
+		boolean bSessionLocksExploded = false;
 
 		logger.info("View Requested: " + viewName
 				+ " by client: " + viewRequest.getClientId());
@@ -679,6 +684,9 @@ public class PafViewService {
 				loadVersionsCache();
 			}
 
+			// Get data cache (TTN-1893)
+			PafDataCache dataCache = pafDataService.getDataCache(clientState.getClientId());
+			
 			// try to find the view by name in the view cache
 			for (int i = 0; i < viewCache.length; i++) {
 				
@@ -704,6 +712,7 @@ public class PafViewService {
 
 			// get current paf app
 			pafApp = clientState.getApp();
+			
 
 			Properties tokenCatalog = clientState.generateTokenCatalog(new Properties());
 			clientState.setTokenCatalog(tokenCatalog);
@@ -822,6 +831,13 @@ public class PafViewService {
 					//TTN-1228
 					viewSection.setReadOnly(viewSection.isReadOnly() || clientState.getPlannerRole().isReadOnly());
 					
+					// Explode session locks for later attribute view processing. Only do once per 
+					// getView() request. Don't bother doing if view section is read only. (TTN-1893)
+					if (viewSection.hasAttributes() && !bSessionLocksExploded && !viewSection.isReadOnly()) {
+						explodedSessionLocks = pafDataService.explodeSessionLocks(viewRequest.getSessionLockedCells(), clientState);
+						bSessionLocksExploded = true;
+					}
+
 					// 
 					// compress slice for return.
 					//try {
@@ -845,7 +861,7 @@ public class PafViewService {
 
 			sections = lockMeasureIntersections(sections, clientState); //ok
 			
-			sections = addNonPlannableTuplesToClientState(sections, viewRequest.getSessionLockedCells());
+			sections = addNonPlannableTuplesToClientState(sections, explodedSessionLocks, dataCache);
 
 			sections = applyReplicationSecurity(sections);
 
@@ -1853,12 +1869,14 @@ public class PafViewService {
 	 *  array of the view section.
 	 *  
 	 * @param sections Complex view section array
-	 * @param sessionLockCells Array of session lock cells
+	 * @param explodedSessionLocks Set of exploded session lock coordinates
+	 * @param dataCache Data cache
 	 * 
 	 * @return Complex view section array
 	 */
-	private PafViewSection[] addNonPlannableTuplesToClientState(PafViewSection[] sections, SimpleCoordList[] sessionLockCells) {
+	private PafViewSection[] addNonPlannableTuplesToClientState(PafViewSection[] sections, Set<Coordinates> explodedSessionLocks, PafDataCache dataCache) {
 	
+		String[] baseDims = dataCache.getBaseDimensions();
 		
 		// for each section 
 		for (PafViewSection section : sections) {
@@ -1873,18 +1891,15 @@ public class PafViewService {
 				Map<String, String> mappedDimsWithMembers = new HashMap<String, String>();
 				 
 				// initialize session lock tracking variables (TTN-1893)
-				Set<LockedCell> fpLockedCellSet = null;
+				Set<LockedCell> fpLockedCellSet = new HashSet<LockedCell>();
+				Set<LockedCell> invalidAttrCellSet = new HashSet<LockedCell>();
 				List<LockedCell> sessionLockedCellList = new ArrayList<LockedCell>();
-				Set<Intersection> explodedSessionLocks  = null;
-				
-				// translate session locks into attribute view intersections (TTN-1893)
 				if (section.hasAttributes()) {		     
 				    // convert locked cells arrays to sets for fast lookup 
-				    fpLockedCellSet = new HashSet<LockedCell>(Arrays.asList(section.getForwardPlannableLockedCell()));
-				    
-				    // translate any existing sessions locks to intersections on the current attribute view section 
-				    explodedSessionLocks = calculateAttrViewSessionLocks(section, sessionLockCells);
-				 
+				    if (section.getForwardPlannableLockedCell() != null) 
+				    	fpLockedCellSet.addAll(Arrays.asList(section.getForwardPlannableLockedCell()));
+				    if (section.getInvalidAttrIntersectionsLC() != null) 
+				    	invalidAttrCellSet.addAll(Arrays.asList(section.getInvalidAttrIntersectionsLC()));				    
 				}
 				
 				//get current not plannable list
@@ -1936,30 +1951,35 @@ public class PafViewService {
 
 						//if row is not plannable, or if col is not plannable, add to not plannable list
 						if ( (rowTuple.getPlannable() != null && ! rowTuple.getPlannable()) || (colTuple.getPlannable() != null && ! colTuple.getPlannable() )) {
-							notPlannableList.add(new LockedCell(rowId, colId));						
+							notPlannableList.add(new LockedCell(rowId, colId));	
+							continue;
 						}				
 
-						// apply attribute view session lock (TTN-1893)
-						if (section.hasAttributes()) { 
+						// apply session lock, if attribute view (TTN-1893)
+						if (section.hasAttributes() && !explodedSessionLocks.isEmpty()) { 
 
-							// translate current view cell into an intersection
+							
+							// don't attempt to apply session lock if the cell is invalid or  previously locked or protected
+							LockedCell currLockedCell = new LockedCell(rowId, colId);
+							if (invalidAttrCellSet.contains(currLockedCell) || notPlannableList.contains(currLockedCell) 
+									|| fpLockedCellSet.contains(currLockedCell)) {
+								continue;
+							}
+
+							// get coordinates of current view cell
 							int coordMemberIndex = 0;
 							for (String dimension : section.getDimensionsPriority()){
 								coords[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
 							}
-							Intersection currentIs = new Intersection(viewDims, coords);
 							
-							// is current cell a potential session lock cell?
-							if (explodedSessionLocks.contains(currentIs)) {
-
-								// only apply session lock if the cell is not previously locked or protected
-								if (!section.invalidAttrIntersections().contains(currentIs)) {
-
-									LockedCell currentLockedCell = new LockedCell(rowId, colId);
-									if (!notPlannableList.contains(currentLockedCell) && !fpLockedCellSet.contains(currentLockedCell)) {
-										sessionLockedCellList.add(currentLockedCell);
-									}
-								}
+							// strip off attribute components
+							String[] baseCoords = new String[baseDims.length];
+							System.arraycopy(coords, 0, baseCoords, 0, baseDims.length);
+							Coordinates baseCoordinates = new Coordinates(baseCoords);						
+													
+							// is current cell a session lock cell?
+							if (explodedSessionLocks.contains(baseCoordinates)) {
+								sessionLockedCellList.add(currLockedCell);
 							}
 						}
 
@@ -1975,21 +1995,6 @@ public class PafViewService {
 		}
 
 		return sections;
-
-	}
-
-	/**
-	 *	Translate client session locks into intersections on the supplied view session
-	 *
-	 * @param section View Section
-	 * @param sessionLockCells Client session lock cells
-	 * 
-	 * @return Set of exploded session lock intersections
-	 */
-	private Set<Intersection> calculateAttrViewSessionLocks(PafViewSection section, SimpleCoordList[] sessionLockCells) {
-		// TODO Auto-generated method stub
-		Set<Intersection> viewSessionLocks = new HashSet<Intersection>();
-		return viewSessionLocks;
 
 	}
 

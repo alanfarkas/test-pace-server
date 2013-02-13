@@ -186,7 +186,7 @@ public class EvaluateViewRequest extends PafRequest implements IPafViewRequest{
 	 * @return the sessionLockedCells
 	 */
 	public SimpleCoordList[] getSessionLockedCells() {
-		return sessionLockedCells;
+        return CompressionUtil.tryToUncompress(sessionLockedCells);
 	}
 	/**
 	 * @param sessionLockedCells The session locked cells to set

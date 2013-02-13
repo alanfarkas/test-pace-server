@@ -45,6 +45,7 @@ import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
 import com.pace.base.comm.ClientInitRequest;
 import com.pace.base.comm.PafPlannerConfig;
+import com.pace.base.data.Coordinates;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.TimeSlice;
@@ -109,6 +110,7 @@ public class PafClientState implements IPafClientState {
     private String firstPlanPeriod = null;
     private String firstTimeHorizonPlanPeriod = null;
     private Properties tokenCatalog = new Properties();
+    private Map<Intersection, List<Coordinates>> explodedSessionLocks = new HashMap<Intersection, List<Coordinates>>();
 
     public Properties getTokenCatalog() {
 		return tokenCatalog;
@@ -1058,5 +1060,45 @@ public class PafClientState implements IPafClientState {
 		this.invalidTimeSlices = invalidTimeSlices;
 	}
 
+	/**
+	 * @return the explodedSessionLocks
+	 */
+	public Map<Intersection, List<Coordinates>> getExplodedSessionLocks() {
+		return explodedSessionLocks;
+	}
+
+	/**
+	 * @param explodedSessionLocks the explodedSessionLocks to set
+	 */
+	public void setExplodedSessionLocks(Map<Intersection, List<Coordinates>> explodedSessionLocks) {
+		this.explodedSessionLocks = explodedSessionLocks;
+	}
+
+	/**
+	 * Return the exploded session lock coordinates for the specified cell intersection
+	 * 
+	 * @param cellIs Cell intersection
+	 * @return List of exploded session lock coordinates
+	 */
+	public List<Coordinates> getExplodedSessionLocks(Intersection cellIs) {
+		
+		List<Coordinates> explodedLocks = null;
+		if (explodedSessionLocks.containsKey(cellIs)) {
+			explodedLocks = explodedSessionLocks.get(cellIs);
+		} else {
+			explodedLocks = new ArrayList<Coordinates>();
+		}
+		return explodedLocks;
+	}
+
+	/**
+	 * Add exploded session lock coordinates for the specified intersection
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param explodedCoordList List of coordinates for each exploded intersection
+	 */
+	public void addExplodedSessionLocks(Intersection cellIs, List<Coordinates> explodedCoordList) {
+		explodedSessionLocks.put(cellIs, explodedCoordList);
+	}
 
 }

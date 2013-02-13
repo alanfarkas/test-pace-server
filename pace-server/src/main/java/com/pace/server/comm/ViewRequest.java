@@ -21,6 +21,7 @@ package com.pace.server.comm;
 import com.pace.base.comm.IPafViewRequest;
 import com.pace.base.comm.PafRequest;
 import com.pace.base.comm.SimpleCoordList;
+import com.pace.base.utility.CompressionUtil;
 import com.pace.base.view.PafUserSelection;
 
 
@@ -89,7 +90,7 @@ public class ViewRequest extends PafRequest implements IPafViewRequest{
 	 * @return the sessionLockedCells
 	 */
 	public SimpleCoordList[] getSessionLockedCells() {
-		return sessionLockedCells;
+		return CompressionUtil.tryToUncompress(sessionLockedCells);
 	}
 
 	/**
