@@ -833,8 +833,9 @@ public class PafViewService {
 					
 					// Explode session locks for later attribute view processing. Only do once per 
 					// getView() request. Don't bother doing if view section is read only. (TTN-1893)
-					if (viewSection.hasAttributes() && !bSessionLocksExploded && !viewSection.isReadOnly()) {
-						explodedSessionLocks = pafDataService.explodeSessionLocks(viewRequest.getSessionLockedCells(), clientState);
+					SimpleCoordList[] sessionLockedCells = viewRequest.getSessionLockedCells();
+					if (sessionLockedCells !=null && viewSection.hasAttributes() && !bSessionLocksExploded && !viewSection.isReadOnly()) {
+						explodedSessionLocks = pafDataService.explodeSessionLocks(sessionLockedCells, clientState);
 						bSessionLocksExploded = true;
 					}
 
