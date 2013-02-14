@@ -5066,6 +5066,13 @@ public class PafDataService {
 		// client state then they must be computed.
 		floorCoords = clientState.getExplodedSessionLocks(sessionLockIs);
 		if (floorCoords.isEmpty()) {
+			
+			// Ignore any invalid intersections from client (most likely invalid attribute intersections)
+			if (!dataCache.isValidIntersection(sessionLockIs) 
+					|| (dataCache.isAttributeIntersection(sessionLockIs) && dataCache.isInvalidAttributeIntersection(sessionLockIs))) {
+				return new ArrayList<Coordinates>();
+			}
+			
 			// Explode the parent cell to its floor descendants (filtering out any parents with invalid 
 			// or locked time horizon periods) 
 			String timeHorizPeriod = TimeSlice.buildTimeHorizonCoord(sessionLockIs, dataCache.getMdbDef());
