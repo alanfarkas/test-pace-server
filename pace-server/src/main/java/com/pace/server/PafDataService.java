@@ -4957,11 +4957,14 @@ public class PafDataService {
 		    // Compress SimpleCoordList
 		    sw.start("CompressSimpleCoordList" );
 		    try {
-		    	resultCoordList.compressData();
+		    	if (resultCoordList != null)
+		    		resultCoordList.compressData();
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
 			}
-		    uowPerfLogger.info("coord list length: " + Integer.toString(resultCoordList.getCoordCount()));
+		    int coordCount = 0;
+		    if (resultCoordList != null) coordCount = resultCoordList.getCoordCount();
+		    uowPerfLogger.info("coord list length: " + Integer.toString(coordCount));
 		    sw.stop();
 		    uowPerfLogger.info(sw.prettyPrint());
 		    
