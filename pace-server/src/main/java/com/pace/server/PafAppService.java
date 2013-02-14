@@ -624,6 +624,7 @@ public class PafAppService {
 		String[] uowPeriods = timeTree.getMemberKeys();
 		String[] uowYears = yearTree.getMemberKeys();
 		Set<String> readOnlyYears = yearTree.getReadOnlyMemberNames();		// TTN-1860 - non-plannable year support
+		String timeHorizRoot = timeHorizTree.getRootNode().getKey();
 		for (String year : uowYears) {
 			for (String period : uowPeriods) {
 				String timeHorizCoord = TimeSlice.buildTimeHorizonCoord(period, year);
@@ -637,11 +638,18 @@ public class PafAppService {
 					// Lock any period where the year is read-only (TTN-1860)
 					lockedPeriodMap.get(year).add(period);
 					lockedTimeHorizPeriods.add(timeHorizCoord);
+				} else if (uowYears.length > 1 && timeHorizCoord.equals(timeHorizRoot)) {
+					// Lock the root member of the multi-year time horizon tree, as it is non-plannable (TTN-1860 / TTN-1597)
+					lockedPeriodMap.get(year).add(period);
+					lockedTimeHorizPeriods.add(timeHorizCoord);
 				}
 			}
 		}
 		lockedTimeHorizPeriods.addAll(invalidTimeHorizPeriods);
 		lockedTimeSlices.addAll(invalidTimeSlices);
+
+
+		
 	
 		// Store client state collections
 		clientState.setLockedTimeSlices(lockedTimeSlices);
