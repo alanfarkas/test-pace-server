@@ -946,6 +946,10 @@ public class IntersectionUtil {
 
 		List<String> coordList = new ArrayList<String>();
 		
+		// Check for null or empty values
+		if (dimensions == null || dimensions.length == 0) return null;
+		if (coordinatesList == null || coordinatesList.isEmpty()) return null;
+		
 		// Iterate through all intersections and assemble all coordinates into a single list
 		for (Coordinates coordinates : coordinatesList) {
 			coordList.addAll(Arrays.asList(coordinates.getCoordinates()));		
