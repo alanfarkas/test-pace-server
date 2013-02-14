@@ -224,7 +224,7 @@ public class PafDataCache implements IPafDataCache {
 		// Initialize data block index and data block pool. To minimize the
 		// the time it takes to initially populate the data cache, the index
 		// and pool are pre-allocated to hold all initially defined blocks.
-		blockSize = getMeasureSize() * getTimeHorizonSize();
+		blockSize = getMeasureSize() * getTimeSize();
 		int maxCoreBlockCount = getMaxCoreDataBlockCount();
 		dataBlockIndexMap = new HashMap<Intersection, Integer>(maxCoreBlockCount * 2);  // Allocate additional space for attribute blocks
 		dataBlockPool = new ArrayList<DataBlock>(maxCoreBlockCount *2);  				// Allocate additional space for attribute blocks 
@@ -2425,7 +2425,7 @@ public class PafDataCache implements IPafDataCache {
 		}
 		
 		// Create new data block
-		dataBlock = new DataBlock(this.getMeasureSize(), this.getTimeHorizonSize(), this.cellPropsBitCount);
+		dataBlock = new DataBlock(this.getMeasureSize(), this.getTimeSize(), this.cellPropsBitCount);
 
 		// Add data block to pool. Attempt to reuse any previously deleted blocks.
 		if (deletedBlockIndexes.size() == 0) {
