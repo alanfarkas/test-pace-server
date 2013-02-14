@@ -89,7 +89,7 @@ public class WOSFunc extends AbstractFunction {
 
     		// Advance to next week
     		prevCumSales = cumSales;
-    		tempIs = dataCache.shiftIntersection(tempIs, timeDim, 1, bWrap);
+    		tempIs = dataCache.shiftIntersection(tempIs, timeDim, 1, true, bWrap);
     		pos = periodCount;
 
     		// Check if we've reached max periods

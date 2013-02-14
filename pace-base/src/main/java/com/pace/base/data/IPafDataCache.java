@@ -41,7 +41,8 @@ public interface IPafDataCache {
 	public void setCellValue(Intersection target, double allocValue) throws PafException;
 	public Intersection shiftIntersection(Intersection cellIs);
 	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset);
-	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap);
+	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, final boolean bCrossYears);
+	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, final boolean bCrossYears, final boolean bWrap);
 	public boolean hasValidTimeHorizonCoord(Intersection cellIs);
 	public Intersection getFirstDescendantIs(Intersection cellIs, String dim, int level);
 	public Intersection getLastDescendantIs(Intersection cellIs, String dim, int level);

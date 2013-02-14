@@ -35,10 +35,13 @@ import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
 
 /**
- * Implements a next function. It looks up the value of the a particular intersection in the data cache
- * ie. @Next(BOP_DLR, Time, 1)
+ * Implements a next function. It looks up the value of the a particular intersection in the data cache.
+ * 
+ * Usage: @Next(Measure Name, optional dimension, optional offset, bCrossYears)
+ * 
+ * Example: @Next(BOP_DLR, Time, 1, true)
  * would return the value of at the intersection, that starts at the source intersection, but is invoked
- * for the measure BOP_DLR, and is offset in the Time dimension + 1
+ * for the measure BOP_DLR, and is offset in the Time dimension + 1, and will cross years.
  *
  * @version	x.xx
  * @author jim
@@ -53,6 +56,7 @@ public class F_Next extends AbstractFunction {
 	PafDimTree offsetTree = null;       	
    	PafApplicationDef app = null; 
 	String measureDim = null;
+	boolean bCrossYears = true;
 	
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 
@@ -67,7 +71,7 @@ public class F_Next extends AbstractFunction {
     	}
     	  	
     	try {
-    		dataIs = dataCache.shiftIntersection(dataIs, offsetDim, offset);
+    		dataIs = dataCache.shiftIntersection(dataIs, offsetDim, offset, bCrossYears);
     		if (dataIs != null) {
     			result = dataCache.getCellValue(dataIs);
     		}
@@ -174,6 +178,12 @@ public class F_Next extends AbstractFunction {
 				String errMsg = "Illegal integer value of: [" + index + "] supplied for index parm in @Next function";
 				throw new IllegalArgumentException(errMsg);
 			}
+    	}
+
+    	// Parse cross years parm (TTN-1597)
+    	if (parms.length > 3 )  {
+    		index = parms[3];
+    		bCrossYears = Boolean.valueOf(index);
     	}
 
     	this.isInitialized = true;

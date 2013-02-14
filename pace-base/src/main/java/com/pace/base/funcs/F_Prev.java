@@ -53,7 +53,8 @@ public class F_Prev extends AbstractFunction {
 	PafDimTree offsetTree = null;       	
    	PafApplicationDef app = null; 
 	String measureDim = null;
-   	
+	boolean bCrossYears = true;
+  	
 	
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
 
@@ -67,7 +68,7 @@ public class F_Prev extends AbstractFunction {
     	}
 
     	try {
-    		dataIs = dataCache.shiftIntersection(dataIs, offsetDim, offset);
+    		dataIs = dataCache.shiftIntersection(dataIs, offsetDim, offset, bCrossYears);
     		if (dataIs != null) {
     			result = dataCache.getCellValue(dataIs);
     		}
@@ -176,6 +177,12 @@ public class F_Prev extends AbstractFunction {
 			}
     	}
     	
+    	// Parse cross years parm (TTN-1597)
+    	if (parms.length > 3 )  {
+    		index = parms[3];
+    		bCrossYears = Boolean.valueOf(index);
+    	}
+
     	this.isInitialized = true;
 	}
     

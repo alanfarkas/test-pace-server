@@ -1755,7 +1755,7 @@ public class PafDataCache implements IPafDataCache {
 	public Intersection getNextIntersection(final Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
 	
 		Intersection nextIs = cellIs.clone();
-		nextIs = shiftIntersection(cellIs, offsetDim, offset, bWrap);
+		nextIs = shiftIntersection(cellIs, offsetDim, offset, true, bWrap);
 		return nextIs;
 	}
 
@@ -1788,7 +1788,27 @@ public class PafDataCache implements IPafDataCache {
 	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
 	 */
 	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset) {
-		return shiftIntersection(cellIs, offsetDim, offset, false);		
+		return shiftIntersection(cellIs, offsetDim, offset, true);		
+	}
+
+	/**
+	 * Shift the specified intersection to the next cell intersection along the specified
+	 * offset dimension. A backwards shift will be performed if a negative offset is 
+	 * supplied.
+
+	 * The intersection will be set to a null value will be returned if 
+	 * the offset points to an out of bounds location.
+	 * 
+	 * This function should be used in place of the getNextIntersection() and getPrevInstersection()
+	 * methods if the value of cellIs can be modified without any ill effects.
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * @param bCrossYears Indicates that the shift should span years
+	 */
+	public Intersection shiftIntersection(Intersection cellIs, String offsetDim, int offset, boolean bCrossYears) {
+		return shiftIntersection(cellIs, offsetDim, offset, bCrossYears, false);		
 	}
 
 	/**
@@ -1804,19 +1824,22 @@ public class PafDataCache implements IPafDataCache {
 	 * @param cellIs Cell intersection
 	 * @param offsetDim Offset dimension
 	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * @param bCrossYears Indicates that the shift should span years
 	 * @param bWrap Indicates if search along the offset dimension should wrap around to the beginning/end of the tree
 	 */
-	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
+	public Intersection shiftIntersection(Intersection cellIs, final String offsetDim, final int offset, 
+			final boolean bCrossYears, final boolean bWrap) {
 	
 		PafDimTree offsetTree = null;
 		PafDimMember nextMbr = null;
 		String currMbrName = null; 
+		String currYear = cellIs.getCoordinate(getYearAxis());
 
 		
 		// If time dimension is selected, use time horizon dimension for shift
 		if (offsetDim.equals(getTimeDim())) {
 			offsetTree = getDimTrees().getTree(getTimeHorizonDim());
-			currMbrName = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeAxis()), cellIs.getCoordinate(getYearAxis()));
+			currMbrName = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeAxis()), currYear);
 			nextMbr = offsetTree.getPeer(currMbrName, offset, bWrap);		
 			if (nextMbr != null) {
 				TimeSlice.applyTimeHorizonCoord(cellIs, nextMbr.getKey(), getAppDef().getMdbDef());
@@ -1835,7 +1858,14 @@ public class PafDataCache implements IPafDataCache {
 			}
 		}
 		
-			return cellIs;
+		// Check if we've crossed years, if spanning of years is not allowed (TTN-1597)
+		if (!bCrossYears) {
+			String nextYear = cellIs.getCoordinate(getYearAxis());
+			if (!nextYear.equals(currYear)) cellIs = null;
+		}
+
+
+		return cellIs;
 	}
 
 
