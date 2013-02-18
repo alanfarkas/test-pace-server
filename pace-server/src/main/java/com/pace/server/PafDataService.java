@@ -4004,7 +4004,15 @@ public class PafDataService {
 		// Create slice state object (holds info about evaluation request sent over from the client)
 		SliceState sliceState = new SliceState(evalRequest);
 		sliceState.setDataSliceParms(sliceParms);
-				
+		
+		// If attribute evaluation, add exploded session locks to locked cell collection (TTN-1893)
+		Set<Intersection> sessionLockedIsSet = currentViewSection.sessionLockedIntersections();
+		if (hasAttributes && !sessionLockedIsSet.isEmpty()) {
+        	Set<Intersection> lockedCellSet = new HashSet<Intersection>(Arrays.asList(sliceState.getLockedCells()));
+        	lockedCellSet.addAll(sessionLockedIsSet);
+			sliceState.setLockedCells(lockedCellSet.toArray(new Intersection[0]));			
+		}
+		
 		// Convert user changes that correspond to lift allocation measures to lift allocation
 		// changes. This involves taking these user change intersections and moving them into 
 		// the appropriate lift collections. (TTN-1793)

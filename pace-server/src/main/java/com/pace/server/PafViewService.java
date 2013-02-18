@@ -669,6 +669,7 @@ public class PafViewService {
 		String viewName = viewRequest.getViewName();
 		Set<Coordinates> explodedSessionLocks = new HashSet<Coordinates>();
 		boolean bSessionLocksExploded = false;
+		PafMVS pafMVS = null;
 
 		logger.info("View Requested: " + viewName
 				+ " by client: " + viewRequest.getClientId());
@@ -750,7 +751,7 @@ public class PafViewService {
 					// Add view and all of it's view sections to "Materialized View
 					// Section" collection or use previous MVS entry if it exists
 					String mvsKey = PafMVS.generateKey(renderedView, viewSection);
-					PafMVS pafMVS = clientState.getMVS(mvsKey);
+					pafMVS = clientState.getMVS(mvsKey);
 					PafDataSliceParms prevDataSliceParms = null;
 					if (pafMVS == null ){
 						pafMVS = new PafMVS(renderedView, viewSection);
@@ -758,6 +759,10 @@ public class PafViewService {
 					} else {
 						// MVS exists - also get previous data slice parms
 						prevDataSliceParms = pafMVS.getDataSliceParms();
+						// .. and Update view and view section (TTN-1893)
+						pafMVS.setView(renderedView);
+						pafMVS.setViewSection(viewSection);
+
 					}
 				
 					// Populate data slice
@@ -889,6 +894,7 @@ public class PafViewService {
 					viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), tokenCatalog, viewName);		
 	//				viewSection = resolvePageHeaders(viewSection, clientState.getPlanningVersion().getName(), viewRequest.getUserSelections(), clientState.generateTokenCatalog(new Properties()), viewName);		
 				}
+				
 			}
 			
 		} catch (Exception ex) {
@@ -1895,6 +1901,7 @@ public class PafViewService {
 				Set<LockedCell> fpLockedCellSet = new HashSet<LockedCell>();
 				Set<LockedCell> invalidAttrCellSet = new HashSet<LockedCell>();
 				List<LockedCell> sessionLockedCellList = new ArrayList<LockedCell>();
+				Set<Intersection> sessionLockedIsSet = new HashSet<Intersection>();
 				if (section.hasAttributes()) {		     
 				    // convert locked cells arrays to sets for fast lookup 
 				    if (section.getForwardPlannableLockedCell() != null) 
@@ -1969,7 +1976,7 @@ public class PafViewService {
 
 							// get coordinates of current view cell
 							int coordMemberIndex = 0;
-							for (String dimension : section.getDimensionsPriority()){
+							for (String dimension : viewDims){
 								coords[coordMemberIndex++] = mappedDimsWithMembers.get(dimension);
 							}
 							
@@ -1981,6 +1988,7 @@ public class PafViewService {
 							// is current cell a session lock cell?
 							if (explodedSessionLocks.contains(baseCoordinates)) {
 								sessionLockedCellList.add(currLockedCell);
+								sessionLockedIsSet.add(new Intersection(viewDims, coords.clone()));
 							}
 						}
 
@@ -1990,8 +1998,9 @@ public class PafViewService {
 				// set on view section by creating a unique locked cell array
 				section.setNotPlannableLockedCells(notPlannableList.toArray(new LockedCell[0]));
 
-			    // set view section session lock property (TTN-1893)
+			    // set view section session lock properties (TTN-1893)
 				section.setSessionLockedCells(sessionLockedCellList.toArray(new LockedCell[0]));
+				section.sessionLockedIntersections(sessionLockedIsSet);
 			}
 		}
 
@@ -4047,7 +4056,7 @@ public class PafViewService {
 	 */
 	private void processInvalidTimeHorizTuples(PafViewSection viewSection, PafClientState clientState) throws PafException {
 		
-		// Filter out any col/tuple combinations that correspond to invalid time horizon coorindates
+		// Filter out any col/tuple combinations that correspond to invalid time horizon coordinates
 		ViewTuple[] rowViewTuples = viewSection.getRowTuples();
 		ViewTuple[] colViewTuples = viewSection.getColTuples();
 		String[] rowAxes = viewSection.getRowAxisDims();

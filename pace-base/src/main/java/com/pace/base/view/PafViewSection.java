@@ -79,6 +79,8 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 	private LockedCell[] forwardPlannableLockedCell = null;
 	
 	private LockedCell[] sessionLockedCells = null;
+	
+	private Set<Intersection> sessionLockedIntersections = null;;
 
 	private String generationFormatName;
 	
@@ -742,6 +744,13 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 		this.invalidAttrIntersections = invalidAttrIntersections;
 	}
 	
+	/**
+	 * @return the invalidAttrIntersections
+	 * 
+	 * Since we don't want to pass this property down to the client, a 
+	 * non-standard getter name is used so this property won't get
+	 * picked up by the soap layer.
+	 */
 	public Set<Intersection> invalidAttrIntersections() {
 		if (invalidAttrIntersections != null) {
 			return invalidAttrIntersections;
@@ -1240,6 +1249,27 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 	 */
 	public void setCompSessionLockedCells(String compSessionLockedCells) {
 		this.compSessionLockedCells = compSessionLockedCells;
+	}
+
+	/**
+	 * @return the sessionLockedIntersections
+	 * 
+	 * Since we don't want to pass this property down to the client, a 
+	 * non-standard getter name is used so this property won't get
+	 * picked up by the soap layer.
+	 */
+	public Set<Intersection> sessionLockedIntersections() {
+		if (sessionLockedIntersections != null) {
+			return sessionLockedIntersections;
+		}
+		return new HashSet<Intersection>();
+	}
+
+	/**
+	 * @param sessionLockedIntersections the sessionLockedIntersections to set
+	 */
+	public void sessionLockedIntersections(Set<Intersection> sessionLockedIntersections) {
+		this.sessionLockedIntersections = sessionLockedIntersections;
 	}
 	
 }
