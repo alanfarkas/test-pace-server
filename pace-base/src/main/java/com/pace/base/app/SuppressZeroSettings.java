@@ -28,7 +28,7 @@ package com.pace.base.app;
  * @version	1.00
  *
  */
-public class SuppressZeroSettings {
+public class SuppressZeroSettings  implements Cloneable {
 
 	//enabled or not
 	private Boolean enabled = false;
@@ -132,16 +132,17 @@ public class SuppressZeroSettings {
 		
 		StringBuffer strBuff = new StringBuffer(40);
 		
-		strBuff.append("Enabled: " + enabled);
+		strBuff.append("Suppress Zero Settings: \n");
+		strBuff.append("\tEnabled: " + enabled);
 		strBuff.append("\n");
-		strBuff.append("Visible: " + visible);
+		strBuff.append("\tVisible: " + visible);
 		strBuff.append("\n");
-		strBuff.append("Are Zero Rows Suppressed: " + rowsSuppressed);
+		strBuff.append("\tAre Zero Rows Suppressed: " + rowsSuppressed);
 		strBuff.append("\n");
-		strBuff.append("Are Zero Columns Suppressed: " + columnsSuppressed);
+		strBuff.append("\tAre Zero Columns Suppressed: " + columnsSuppressed);
 		strBuff.append("\n");		
 		
-		return super.toString();
+		return strBuff.toString();
 	}
 
 	/* (non-Javadoc)
@@ -195,6 +196,14 @@ public class SuppressZeroSettings {
 		} else if (!visible.equals(other.visible))
 			return false;
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public SuppressZeroSettings clone() throws CloneNotSupportedException {
+		return (SuppressZeroSettings) super.clone();
 	}
 	
 	

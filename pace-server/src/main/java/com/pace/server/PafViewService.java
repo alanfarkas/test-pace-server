@@ -676,14 +676,6 @@ public class PafViewService {
 
 
 		try {
-			// reload view cache every time if in debug mode. always reload
-			// measures and versions
-			if (PafMetaData.isDebugMode()) {
-				loadViewCache();
-			} else {
-				loadMeasuresCache();
-				loadVersionsCache();
-			}
 
 			// Get data cache (TTN-1893)
 			PafDataCache dataCache = pafDataService.getDataCache(clientState.getClientId());
@@ -3550,20 +3542,17 @@ public class PafViewService {
 	 * Populate the paf view tree items from the view cache.
 	 *	 
 	 * @return PafViewTreeItem[]
+	 * @throws PafException 
 	 */
-	public PafViewTreeItem[] getViewTreeItems() {
+	public PafViewTreeItem[] getViewTreeItems() throws PafException  {
 		// TODO Implement client specific view tree
 		// TODO Implement hierarchical view trees
-		
-		//if in debug mode, reload view cache
-		if (PafMetaData.isDebugMode()) {
-			loadViewCache();
-		}
 		
 		//get global alias mappings
 		Map<String, AliasMapping> globalAliasMappingSet = PafMetaData.getGlobalAliasMappingsByDim();  //TTN-1454
 		
 		String appId = PafAppService.getInstance().getApplications().get(0).getAppId();
+		PafAppService appService = PafAppService.getInstance();
 		
 		PafViewTreeItem entry[] = new PafViewTreeItem[viewCache.length];
 		int i = 0;
@@ -3579,7 +3568,19 @@ public class PafViewService {
 			if( view.getViewSectionNames() != null ) {
 				SuppressZeroSettings[] suppressZeroSettings = new SuppressZeroSettings [view.getViewSectionNames().length];
 				for(PafViewSection viewSection : view.getViewSections()){
-					suppressZeroSettings[j] = PafAppService.getInstance().resolveSuppressZeroSettings(viewSection.getSuppressZeroSettings(), appId);			
+					SuppressZeroSettings vsSuppressZeroSettings = viewSection.getSuppressZeroSettings(), clonedSuppressZeroSettings = null;
+
+					// Clone suppress zero settings object so that the view cache is not altered (TTN-1903)
+					if (vsSuppressZeroSettings != null) {
+						try {
+							clonedSuppressZeroSettings = vsSuppressZeroSettings.clone();
+						} catch (CloneNotSupportedException e) {
+							logger.warn("Exception getting view tree items: " + e.getMessage());
+							e.printStackTrace();
+							throw new PafException(e);
+						}
+					}
+					suppressZeroSettings[j] = appService.resolveSuppressZeroSettings(clonedSuppressZeroSettings, appId);			
 				}
 				
 				entry[i].setSuppressZeroSettings(suppressZeroSettings);

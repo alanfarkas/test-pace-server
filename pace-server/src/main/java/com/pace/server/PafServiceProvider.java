@@ -1293,16 +1293,16 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 	/**
 	 * This method maps the String view or view group name with the actual view
-	 * object.
+	 * object for a collection used by the client to populate the view menu.
 	 * 
 	 * @param viewTreeItemNames
 	 *            name of tree view items, could be view names or view group
 	 *            names
 	 * @return PafViewTreeItem[]
+	 * @throws PafException 
 	 */
 
-	private PafViewTreeItem[] generateViewTreeItemsFromViewTreeItemNames(
-			String[] viewTreeItemNames) {
+	private PafViewTreeItem[] generateViewTreeItemsFromViewTreeItemNames(String[] viewTreeItemNames) throws PafException  {
 
 		// create an empty list of view tree items
 		ArrayList<PafViewTreeItem> viewTreeItemsList = new ArrayList<PafViewTreeItem>();

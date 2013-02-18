@@ -421,6 +421,10 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 			}
 		}
 		
+		if (suppressZeroSettings != null) {
+			strBuff.append("\n" + suppressZeroSettings + "\n");
+		}
+		
 		return strBuff.toString();
 	}
 
@@ -461,6 +465,11 @@ public class PafViewSection implements Cloneable, IPafCompressedObj {
 			}
 		}
 
+		// Clone suppress zero settings (TTN-1903)
+		if (this.suppressZeroSettings != null) {
+			viewSection.suppressZeroSettings = suppressZeroSettings.clone();
+		}
+		
 //		System.out.println(this);
 //		System.out.println(viewSection);
 
