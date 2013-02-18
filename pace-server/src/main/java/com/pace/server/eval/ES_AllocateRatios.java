@@ -75,6 +75,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		
 		String[] axisAllocSeq = evalState.getAxisAllocPriority();
 		String[] axisSortSeq = evalState.getAxisSortPriority();
+		String[] dimSequence = evalState.getDimSequence();
 //		MemberTreeSet uowTrees = evalState.getClientState().getUowTrees();
 		PafDataCache dataCache = evalState.getDataCache();
 		PafDimMember currMember = null;
@@ -145,10 +146,17 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 			List<String> targetNames = new ArrayList<String>();
 			
 			for (Intersection is : lockList ) {
+
+				// Ignore any intersections that don't match the dimensionality of the underlying view section. 
+				// These are most likely due to session lock processing. (TTN-1893)
+				if (!Arrays.deepEquals(is.getDimensions(), dimSequence)) 
+					continue;
+
 				// Get the member coordinate corresponding to the allocated dimension. Time
 				// dimension allocation requires special logic (TTN-1595).
 				currMemberName = EvalUtil.getIsCoord(is, dim, evalState);
 //				currMemberName = is.getCoordinate(dim);
+				
 				currMember = dimTree.getMember(currMemberName);
 				
 				// if no children along this dimension, no possibility for a ratio allocation

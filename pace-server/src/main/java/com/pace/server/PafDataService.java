@@ -4005,12 +4005,18 @@ public class PafDataService {
 		SliceState sliceState = new SliceState(evalRequest);
 		sliceState.setDataSliceParms(sliceParms);
 		
-		// If attribute evaluation, add exploded session locks to locked cell collection (TTN-1893)
-		Set<Intersection> sessionLockedIsSet = currentViewSection.sessionLockedIntersections();
-		if (hasAttributes && !sessionLockedIsSet.isEmpty()) {
-        	Set<Intersection> lockedCellSet = new HashSet<Intersection>(Arrays.asList(sliceState.getLockedCells()));
-        	lockedCellSet.addAll(sessionLockedIsSet);
-			sliceState.setLockedCells(lockedCellSet.toArray(new Intersection[0]));			
+		// If attribute evaluation, add user session locks to locked cell collection. View session
+		// locks are additionally added for ratio allocation processing. (TTN-1893)
+		if (hasAttributes) {
+			SimpleCoordList[] simpleClientSessionLocks = evalRequest.getSessionLockedCells();
+			if (simpleClientSessionLocks !=null && simpleClientSessionLocks.length > 0) {
+				Set<Intersection> lockedCellSet = new HashSet<Intersection>(Arrays.asList(sliceState.getLockedCells()));
+				Set<Intersection> clientSessionLocks = IntersectionUtil.convertSimpleCoordListToIntersectionSet(simpleClientSessionLocks);
+				lockedCellSet.addAll(clientSessionLocks);
+				Set<Intersection> viewSessionLocks = currentViewSection.sessionLockedIntersections();
+				lockedCellSet.addAll(viewSessionLocks);
+				sliceState.setLockedCells(lockedCellSet.toArray(new Intersection[0]));	
+			}
 		}
 		
 		// Convert user changes that correspond to lift allocation measures to lift allocation
