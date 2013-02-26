@@ -142,29 +142,24 @@ public class RuleMngr {
         List<RuleSet> ruleSetList = getMsrRuleSetsForConfig(plannerConfig, app);
         
     
-        // add time dimension rule sets
-        String timeDim = app.getMdbDef().getTimeDim();
-        tree = treeSet.getTree(timeDim);   
-        rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.First, timeDim );
-        if (rs != null)
-        	ruleSetList.add(rs); 
-        rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.Last, timeDim );
-        if (rs != null) 
-        	ruleSetList.add(rs);
-    
-        // add virtual time horizon dimension rule sets (TTN-1956)
-        timeDim = PafBaseConstants.TIME_HORIZON_DIM;
-        tree = treeSet.getTree(timeDim);   
-        rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.First, timeDim );
-        if (rs != null)
-        	ruleSetList.add(rs); 
-        rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.Last, timeDim );
-        if (rs != null) 
-        	ruleSetList.add(rs);
+        // add time dimension rule sets. also include time horizon dim for multi-year protection
+        // rules (TTN-1956).
+//        String[] timeDims = new String[]{app.getMdbDef().getTimeDim(), PafBaseConstants.TIME_HORIZON_DIM};
+        String[] timeDims = new String[]{app.getMdbDef().getTimeDim()};
+        for (String timeDim : timeDims) {
+        	tree = treeSet.getTree(timeDim);   
+        	rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.First, timeDim );
+        	if (rs != null)
+        		ruleSetList.add(rs); 
+        	rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.Last, timeDim );
+        	if (rs != null) 
+        		ruleSetList.add(rs);
+        }
     
 
         
-        // We stopped sending down the hierarchical rule sets after attribute dimension logic
+        // *** We stopped sending down the hierarchical dim rule sets after attribute dimension logic was added
+        // *** to the server, because there was too much overhead to process all those dimensions.
         // add hierarchical rule sets
        /* for (String dimName : mdbDef.getHierDims()) {
             rs = createHierarchyRuleSet(treeSet.getTree(dimName), TimeBalance.None, dimName);
