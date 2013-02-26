@@ -36,9 +36,13 @@ import com.pace.base.state.IPafEvalState;
 
 /**
  * Implements a previous function. It looks up the value of the a particular intersection in the datacache
- * ie. @Prev(BOP_DLR, Time, 1)
+ * 
+ *
+ * Usage: @Prev(Measure Name, optional dimension, optional offset, bCrossYears)
+ * 
+ * Example @Prev(BOP_DLR, Time, 1, true)
  * would return the value of at the intersection, that starts at the source intersection, but is invoked
- * for the measure BOP_DLR, and is offset in the Time dimension - 1
+ * for the measure BOP_DLR, and is offset in the Time dimension - 1, and will cross years
  *
  * @version	2.8.2.0
  * @author jwatkins
@@ -96,7 +100,7 @@ public class F_Prev extends AbstractFunction {
     			}
     		}
 
-    		// Unforseen error - just throw original exception
+    		// Unforeseen error - just throw original exception
     		throw(e);
     	}
 	

@@ -99,7 +99,7 @@ public class F_Next extends AbstractFunction {
 				}
 			}
 			
-			// Unforseen error - just throw original exception
+			// Unforeseen error - just throw original exception
 			throw(e);
 		}
 		

@@ -290,20 +290,17 @@ public class EvalUtil {
         	offsetDim=evalState.getTimeDim();
         else
         	offsetDim = function.getParms()[1];
-                
-        PafDimTree offsetTree = evalState.getClientState().getUowTrees().getTree(offsetDim);
-        PafDimMember member = offsetTree.getMember(source.getCoordinate(offsetDim));
-        PafDimMember offsetMember;
-        if (function.getOpCode().equals("@PREV"))
-//        	dataCache.shiftIntersection(newIs, offsetDim, 1, false);
-            offsetMember = offsetTree.getNextSibling(member, false);
-        else
-//        	dataCache.shiftIntersection(cellIs, offsetDim, -1, false);
-            offsetMember = offsetTree.getPrevSibling(member, false);
+
         
-        if (offsetMember == null) return null;
+        // Shift intersection along time horizon (TTN-1597)
+       if (function.getOpCode().equals("@PREV")) {
+       		// @Prev function - shift one peer period forward
+        	dataCache.shiftIntersection(newIs, offsetDim, 1, false);
+        } else {
+        	// @Next function - shift one peer period back
+        	dataCache.shiftIntersection(newIs, offsetDim, -1, false);
+        }
         
-        newIs.setCoordinate(offsetDim, offsetMember.getKey());
         return newIs;
     }    
     
@@ -313,28 +310,21 @@ public class EvalUtil {
         // assume time dim if not specified
         PafDataCache dataCache = evalState.getDataCache();
         String treeDim;
-        PafDimTree offsetTree;
 
         if (function.getParms().length == 1) 
         	treeDim = evalState.getClientState().getApp().getMdbDef().getTimeDim();
         else
         	treeDim = function.getParms()[1];
         	
-        offsetTree = evalState.getClientState().getUowTrees().getTree(treeDim);
+        // Shift intersection along time horizon (TTN-1597)
+        if (function.getOpCode().equals("@PREV")) {
+        	// @Prev function - shift one peer period back
+        	dataCache.shiftIntersection(newIs, treeDim, -1, false);
+        } else {
+        	// @Next function - shift one peer period forward
+        	dataCache.shiftIntersection(newIs, treeDim, 1, false);
+        }
 
-        PafDimMember member = offsetTree.getMember(source.getCoordinate(treeDim));
-        
-        PafDimMember offsetMember;
-        if (function.getOpCode().equals("@PREV"))
-            offsetMember = offsetTree.getPrevSibling(member, false);
- //   	dataCache.shiftIntersection(newIs, offsetDim, -1, false);
-       else
-            offsetMember = offsetTree.getNextSibling(member, false);
-//    	dataCache.shiftIntersection(newIs, offsetDim, 1, false);
-        
-        if (offsetMember == null) return null;
-        
-        newIs.setCoordinate(treeDim, offsetMember.getKey());
         return newIs;
     }
 
