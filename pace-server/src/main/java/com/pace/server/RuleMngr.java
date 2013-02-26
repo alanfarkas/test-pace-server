@@ -138,28 +138,34 @@ public class RuleMngr {
     	RuleSet rs;
     	PafDimTree tree;
         
-        // get measure based rulesets and filter for users current configuration
+        // get measure based rule sets and filter for users current configuration
         List<RuleSet> ruleSetList = getMsrRuleSetsForConfig(plannerConfig, app);
         
     
-        // add time rulesets
+        // add time dimension rule sets
         String timeDim = app.getMdbDef().getTimeDim();
-        tree = treeSet.getTree(timeDim);
-        
+        tree = treeSet.getTree(timeDim);   
         rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.First, timeDim );
         if (rs != null)
-        	ruleSetList.add(rs);
-        
+        	ruleSetList.add(rs); 
         rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.Last, timeDim );
         if (rs != null) 
         	ruleSetList.add(rs);
     
-//        pmack
-//        rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.None, timeDim);
-//        if (rs != null)
-//        	ruleSetList.add(rs);        
-              
-        // add hierarchical rulesets
+        // add virtual time horizon dimension rule sets (TTN-1956)
+        timeDim = PafBaseConstants.TIME_HORIZON_DIM;
+        tree = treeSet.getTree(timeDim);   
+        rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.First, timeDim );
+        if (rs != null)
+        	ruleSetList.add(rs); 
+        rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.Last, timeDim );
+        if (rs != null) 
+        	ruleSetList.add(rs);
+    
+
+        
+        // We stopped sending down the hierarchical rule sets after attribute dimension logic
+        // add hierarchical rule sets
        /* for (String dimName : mdbDef.getHierDims()) {
             rs = createHierarchyRuleSet(treeSet.getTree(dimName), TimeBalance.None, dimName);
             if (rs != null) {
