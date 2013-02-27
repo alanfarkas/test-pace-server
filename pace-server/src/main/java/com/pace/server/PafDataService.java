@@ -1441,25 +1441,27 @@ public class PafDataService {
 			// only consider non-plannable years, since the plannable years are already 
 			// loaded. (TTN-1870)
 			Set<String> reqVersionYears = reqYearsByVersion.get(version);
-			reqVersionYears.addAll(yearTree.getSyntheticComponentMemberNames(reqVersionYears));
-			reqVersionYears.retainAll(requiredYears);
-			if (version.equals(planVersion)) {
-				reqVersionYears.retainAll(nonPlanYears);
+			if( reqVersionYears != null ) {
+				reqVersionYears.addAll(yearTree.getSyntheticComponentMemberNames(reqVersionYears));
+				reqVersionYears.retainAll(requiredYears);
+				if (version.equals(planVersion)) {
+					reqVersionYears.retainAll(nonPlanYears);
+				}
+				
+				// Skip to next version if there are no years to load
+				if (reqVersionYears.isEmpty()) continue;
+				
+				
+				// Clone data specification for current version
+				Map <Integer, List<String>> dataSpecAsMap = refDataSpec.buildUowMap();
+				dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
+				
+				// Update year specification to match set of required years (TTN-1870)
+				dataSpecAsMap.put(yearAxis, new ArrayList<String>(reqVersionYears));
+				
+				// Add filtered version-specific data specification to master map
+				dataSpecByVersion.put(version, dataSpecAsMap);
 			}
-			
-			// Skip to next version if there are no years to load
-			if (reqVersionYears.isEmpty()) continue;
-			
-			
-			// Clone data specification for current version
-			Map <Integer, List<String>> dataSpecAsMap = refDataSpec.buildUowMap();
-			dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{version})));
-			
-			// Update year specification to match set of required years (TTN-1870)
-			dataSpecAsMap.put(yearAxis, new ArrayList<String>(reqVersionYears));
-			
-			// Add filtered version-specific data specification to master map
-			dataSpecByVersion.put(version, dataSpecAsMap);
 		}
 		
 		
