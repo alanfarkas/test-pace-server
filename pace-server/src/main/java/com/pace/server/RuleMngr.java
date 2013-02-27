@@ -144,8 +144,8 @@ public class RuleMngr {
     
         // add time dimension rule sets. also include time horizon dim for multi-year protection
         // rules (TTN-1956).
-//        String[] timeDims = new String[]{app.getMdbDef().getTimeDim(), PafBaseConstants.TIME_HORIZON_DIM};
-        String[] timeDims = new String[]{app.getMdbDef().getTimeDim()};
+        String[] timeDims = new String[]{app.getMdbDef().getTimeDim(), PafBaseConstants.TIME_HORIZON_DIM};
+//        String[] timeDims = new String[]{app.getMdbDef().getTimeDim()};
         for (String timeDim : timeDims) {
         	tree = treeSet.getTree(timeDim);   
         	rs = RuleMngr.createHierarchyRuleSet(tree, TimeBalance.First, timeDim );
