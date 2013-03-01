@@ -157,11 +157,6 @@
 			<version>1.6.3</version>
 		</dependency>
 		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j</artifactId>
-			<version>1.5</version>
-		</dependency>
-		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin</artifactId>
 			<version>6.7.2</version>
@@ -199,7 +194,7 @@
 			<scope>compile</scope>
 			<version>0.9.3</version>
 		</dependency>
-		<dependency>
+ 		<dependency>
 			<groupId>com.orientechnologies</groupId>
 			<artifactId>orientdb</artifactId>
 			<version>1.1.0</version>
