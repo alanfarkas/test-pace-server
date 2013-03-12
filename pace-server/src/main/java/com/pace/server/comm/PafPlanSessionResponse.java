@@ -44,6 +44,8 @@ public class PafPlanSessionResponse {
     private String[] ruleSetList;
     private boolean replicateEnabled;
     private boolean replicateAllEnabled;
+    private boolean liftEnabled;
+	private boolean liftAllEnabled;
 
     
 	public PafPlanSessionResponse() {}
@@ -189,4 +191,19 @@ public class PafPlanSessionResponse {
 	}
 
 
+    public boolean isLiftEnabled() {
+		return liftEnabled;
+	}
+
+	public void setLiftEnabled(boolean liftEnabled) {
+		this.liftEnabled = liftEnabled;
+	}
+
+	public boolean isLiftAllEnabled() {
+		return liftAllEnabled;
+	}
+
+	public void setLiftAllEnabled(boolean liftAllEnabled) {
+		this.liftAllEnabled = liftAllEnabled;
+	}
 }

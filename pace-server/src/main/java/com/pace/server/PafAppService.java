@@ -448,10 +448,8 @@ public class PafAppService {
 		//if isUserFilteredMultiSelect is null, retrieve global setting from appset
 		if (plannerConfig.getIsUserFilteredMultiSelect() == null) {
 			// then try to use a global setting
-			if (appSet != null ) {
-				if( appSet.isGlobalUserFilteredMultiSelect() ) {
-					plannerConfig.setIsUserFilteredMultiSelect(true);
-				}
+			if (appSet != null && appSet.isGlobalUserFilteredMultiSelect() ) {
+				plannerConfig.setIsUserFilteredMultiSelect(true);
 			}
 			// default behavior is false if null and no global setting
 			else {

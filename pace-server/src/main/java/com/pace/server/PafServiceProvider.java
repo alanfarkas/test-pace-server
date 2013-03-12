@@ -1083,6 +1083,32 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				
 			}
 			
+			//TTN-1957:	Add Lift Allocation configurability to Pace Server
+			//if getLiftEnabled is null, retrieve global setting from appset
+			//if Lift exists on planner config, use it, else if app settings 
+			//exists, use global, otherwise default to true
+			if ( pafPlannerConfig.getLiftEnabled() != null ) {
+				
+				planResponse.setLiftEnabled(pafPlannerConfig.getLiftEnabled());
+				
+			} else if ( clientState.getApp().getAppSettings() != null  ) {
+				
+				planResponse.setLiftEnabled(clientState.getApp().getAppSettings().isGlobalLiftEnabled());
+				
+			}
+
+			//if Lift All exists on planner config, use it, else if app settings 
+			//exists, use global, otherwise default to true
+			if ( pafPlannerConfig.getLiftAllEnabled() != null ) {
+				
+				planResponse.setLiftAllEnabled(pafPlannerConfig.getLiftAllEnabled());
+				
+			} else if ( clientState.getApp().getAppSettings() != null  ) {
+				
+				planResponse.setLiftAllEnabled(clientState.getApp().getAppSettings().isGlobalLiftAllEnabled());
+				
+			}
+
 			//get unit of work
 			UnitOfWork uow = clientState.getUnitOfWork();
 			
