@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.poi.hssf.record.formula.functions.T;
-
 import com.Ostermiller.util.StringTokenizer;
 
 /**
