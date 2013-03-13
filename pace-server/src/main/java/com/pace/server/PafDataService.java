@@ -4152,6 +4152,8 @@ public class PafDataService {
 						
 			securityGroups = session.createQuery("from SecurityGroup where application.name = '" + app + "'").list();	
 			
+			//TTN-1965 (Commit the transaction)  I don't think you need a transaction here, but if it's here you must commit it.
+			tx.commit();
 			
 		} catch (RuntimeException ex) {
 
