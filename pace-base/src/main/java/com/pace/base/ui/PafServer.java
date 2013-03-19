@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 
 import com.pace.base.PafBaseConstants;
+import com.pace.base.server.ServerPlatform;
 
 public class PafServer implements Comparable, Cloneable {
 
@@ -33,6 +34,7 @@ public class PafServer implements Comparable, Cloneable {
 	private boolean https;
 	private String osServiceName;
 	private Integer jmsMessagingPort;
+	private ServerPlatform serverPlatform;
 		
 	private static final Logger logger = Logger
 			.getLogger(PafServer.class);
@@ -370,6 +372,17 @@ public class PafServer implements Comparable, Cloneable {
 		this.serviceReceiveTimeoutInMilliseconds = serviceReceiveTimeoutInMilliseconds;
 	}
 	
+	public ServerPlatform getServerPlatform() {
+		return serverPlatform;
+	}
+
+	public void setServerPlatform(ServerPlatform serverPlatform) {
+		this.serverPlatform = serverPlatform;
+	}
+
+
+
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -387,7 +400,10 @@ public class PafServer implements Comparable, Cloneable {
 				+ ", doesNotPromptOnHotDeploy=" + doesNotPromptOnHotDeploy
 				+ ", doesNotPromptOnHotRefresh=" + doesNotPromptOnHotRefresh
 				+ ", https=" + https + ", osServiceName=" + osServiceName
-				+ ", jmsMessagingPort=" + jmsMessagingPort + "]";
+				+ ", jmsMessagingPort=" + jmsMessagingPort 
+				+ ", serviceConnectionTimeoutInMilliseconds=" + serviceConnectionTimeoutInMilliseconds
+				+ ", serviceReceiveTimeoutInMilliseconds=" + serviceReceiveTimeoutInMilliseconds
+				+ ", serverPlatform=" + serverPlatform + "]";
 	}
 
 	/* (non-Javadoc)
