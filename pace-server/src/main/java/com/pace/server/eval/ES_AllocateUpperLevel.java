@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.SortOrder;
 import com.pace.base.app.MdbDef;
@@ -36,6 +37,7 @@ import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.EvalState;
+import com.pace.base.utility.LogUtil;
 
 /**
  * Performs one step in an evaluation strategy.
@@ -50,6 +52,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
     
     @SuppressWarnings("unused")
 	private static final Logger logger = Logger.getLogger(ES_AllocateUpperLevel.class);
+	private static Logger evalPerfLogger = Logger.getLogger(PafBaseConstants.PERFORMANCE_LOGGER_EVAL);
 
     
     public void performEvaluation(EvalState evalState) throws PafException {
@@ -153,6 +156,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);            
 //        if (logger.isDebugEnabled()) logger.debug(LogUtil.timedStep("Sorting intersections in axis sequence", stepTime));
 
+        logger.info("Allocating upper level changes...");
         stepTime = System.currentTimeMillis();
         for (Intersection intersection : allocCells) {
         	dataCache = allocateChange(intersection, evalState, dataCache);
@@ -160,7 +164,9 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 
         // unlock any allocations at end of step if specified
         if (!evalState.getRule().isLockAllocation())
-        	evalState.getCurrentLockedCells().removeAll(unlockIntersections);         
+        	evalState.getCurrentLockedCells().removeAll(unlockIntersections);    
+        
+        evalPerfLogger.info(LogUtil.timedStep("Allocation step", stepTime));
 
         logEvalDetail(this, evalState, dataCache);
         

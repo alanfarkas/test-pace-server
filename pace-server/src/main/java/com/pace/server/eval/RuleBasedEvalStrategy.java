@@ -556,6 +556,8 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		List<String> timePeriods = evalState.getTimePeriodList();
 		evalState.setTimeSliceMode(true);
+		logger.info(Messages.getString("RuleBasedEvalStrategy.83")); //$NON-NLS-1$
+		long stepTime = System.currentTimeMillis();
 
 		// process all rule groups in this subset in time slice order
 		for (String timeSlice : timePeriods) {
@@ -601,6 +603,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 				}   
 			}   
 		}    
+		logger.info(LogUtil.timedStep(Messages.getString("RuleBasedEvalStrategy.90"), stepTime)); //$NON-NLS-1$
 
 		// now do an aggregation and recalc pass
 		for (RuleGroup rg : ruleGroups ) {       
@@ -649,9 +652,10 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 			// in order to handle balance sets all processes work with lists.
 			List<RuleGroup> currentSet = new ArrayList<RuleGroup>();
 
-			// if balance set, add all rulegroups into list, else just add the rulegroup
+			// if balance set, add all rule groups into list, else just add the rule group
 			if ( ruleGroup.getBalanceSetKey() != null && !ruleGroup.getBalanceSetKey().equals("")) { //$NON-NLS-1$
-				currentSet = balanceSets.get(ruleGroup.getBalanceSetKey());
+				String bsKey = ruleGroup.getBalanceSetKey();
+				currentSet = balanceSets.get(bsKey);
 			}
 			else {
 				currentSet.add(ruleGroup);
