@@ -1440,7 +1440,7 @@ public class PafDataService {
 			// Get the set of required years for the current version. For the plan version,
 			// only consider non-plannable years, since the plannable years are already 
 			// loaded. (TTN-1870)
-			Set<String> reqVersionYears = reqYearsByVersion.get(version);
+			Set<String> reqVersionYears = new HashSet<String>(reqYearsByVersion.get(version));
 			if( reqVersionYears != null ) {
 				reqVersionYears.addAll(yearTree.getSyntheticComponentMemberNames(reqVersionYears));
 				reqVersionYears.retainAll(requiredYears);
@@ -1692,6 +1692,19 @@ public class PafDataService {
 				yearSet.addAll(yearTree.getSyntheticComponentMemberNames(year));
 				yearMap.put(version, yearSet);
 				
+				// Add in any component versions for any derived versions
+				List<String> componentVersions = dataCache.getComponentVersions(Arrays.asList((new String[]{version})));
+				for (String componentVersion : componentVersions) {
+					if (!yearMap.containsKey(componentVersion)) {
+						// Version hasn't yet been mapped
+						yearMap.put(componentVersion, yearSet);
+					} else {
+						// Version has already been mapped - add in additional years
+						Set<String> existingYears = yearMap.get(componentVersion);
+						yearSet.addAll(existingYears);
+						yearMap.put(componentVersion, yearSet);
+					}
+				}
 			}
 		}
 		

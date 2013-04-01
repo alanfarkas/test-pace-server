@@ -688,6 +688,10 @@ public class PafDataCache implements IPafDataCache {
 			
 			VersionDef versionDef = getVersionDef(derivedVersion);
 			
+				// Skip version if not derived version
+				if (!this.getDerivedVersions().contains(derivedVersion))
+						continue;
+				
 				// Get base version
 				VersionFormula versionFormula = versionDef.getVersionFormula();
 				String baseVersion = versionFormula.getBaseVersion();
