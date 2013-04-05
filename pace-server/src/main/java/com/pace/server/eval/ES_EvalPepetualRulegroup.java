@@ -63,9 +63,8 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
         String measureDim = mdbDef.getMeasureDim();
         
-		HashSet<Intersection> newChngCells = new HashSet<Intersection>();
-		HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>();
-		
+		HashSet<Intersection> newChngCells = new HashSet<Intersection>(5000);
+		HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>(5000);
 		Intersection calcIntersection;
 
 		IPafFunction measFunc = null;
@@ -73,8 +72,9 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
                 measFunc = evalState.getRule().getFormula().extractResultFunction();
 
 		stepTime = System.currentTimeMillis();       
-		Set<Intersection> chngCells = new HashSet<Intersection>(500);
-		
+		Set<Intersection> chngSet = new HashSet<Intersection>(500);
+        chngSet.addAll(evalState.getOrigLockedCells()); 
+        
 		stepTime = System.currentTimeMillis();
 		Rule leadingRule;
 		
@@ -85,12 +85,13 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 			// if any lookback function is used on the right side of the equation then that time slice must also
 			// be added to the pool
 			
-            chngCells = impactingChangeList(evalState.getRule(), evalState);
+            chngSet = impactingChangeList(evalState.getRule(), evalState);
             
-			for (Intersection is : chngCells) {
+            
+			for (Intersection is : chngSet) {
 				// does this intersection change force the current rule to evaluate?
 				// 1st criteria, it has to be a component of this rule.
-//                if ( EvalUtil.changeTriggersFormula( is, evalState.getRule(), evalState) ) {
+                if ( EvalUtil.changeTriggersFormula( is, evalState.getRule(), evalState) ) {
 					// it will if it is the highest priority rule within this group that can execute
 					// this is true if the left hand term for every other rule above this rule is
 					// locked.
@@ -124,7 +125,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 							cellsToCalc.put(calcIntersection, leadingRule.getFormula());
 						}
 					}
-//				}		
+				}		
 			}
 		}
 		//now we must consider changes in other locations depending on the rule we're processing
@@ -148,13 +149,13 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
             }
 			if (offsetTimeMember != null) {
 				if (evalState.getChangedCellsByTime().get(offsetTimeMember.getKey()) != null)
-					chngCells.addAll(evalState.getChangedCellsByTime().get(offsetTimeMember.getKey()));
+					chngSet.addAll(evalState.getChangedCellsByTime().get(offsetTimeMember.getKey()));
 			} 
 			
 			
 //			chngCells.addAll(measFunc.getDirtyIntersections(evalState));
 			
-			for (Intersection is : chngCells) {
+			for (Intersection is : chngSet) {
 				// does this intersection change force the current rule to evaluate?
 				// 1st criteria, it has to be a component of this rule.
                 if ( EvalUtil.changeTriggersFormula( is, evalState.getRule(), evalState) ) {
@@ -208,7 +209,8 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 			// any cell that is changed from formula evaluation is a potential target for allocation
 			// Normally evaluation results are not locked or allocated to preserve shape
 			// However this can be overridden by a rule flag
-			if (evalState.getRule().isLockSystemEvaluationResult()) {
+			if (evalState.getRule().isLockSystemEvaluationResult() ||
+					evalState.getRule().getLockUserEvaluationResult() ) {
 				evalState.getCurrentLockedCells().addAll(newChngCells);
 				evalState.addAllAllocations(newChngCells);
 			}
