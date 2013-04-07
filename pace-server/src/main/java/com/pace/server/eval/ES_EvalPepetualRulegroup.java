@@ -73,7 +73,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 
 		stepTime = System.currentTimeMillis();       
 		Set<Intersection> chngSet = new HashSet<Intersection>(500);
-        chngSet.addAll(evalState.getOrigLockedCells()); 
+//        chngSet.addAll(evalState.getOrigLockedCells()); 
         
 		stepTime = System.currentTimeMillis();
 		Rule leadingRule;
