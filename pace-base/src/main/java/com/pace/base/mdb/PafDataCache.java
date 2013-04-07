@@ -3072,9 +3072,11 @@ public class PafDataCache implements IPafDataCache {
 				}
 				
 				// Delete list of empty mdb blocks (TTN-1860)
-				dataBlockKeys = new ArrayList<Intersection>(emptyMdbBlocksByVersion.get(version));
-				if (dataBlockKeys != null) {
-					deleteEmptyMdbBlocks(dataBlockKeys);
+				if (emptyMdbBlocksByVersion.get(version) != null) {
+					dataBlockKeys = new ArrayList<Intersection>(emptyMdbBlocksByVersion.get(version));
+					if (dataBlockKeys != null) {
+						deleteEmptyMdbBlocks(dataBlockKeys);
+					}
 				}
 			}
 		}
