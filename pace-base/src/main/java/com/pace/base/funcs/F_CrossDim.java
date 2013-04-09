@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -40,7 +41,7 @@ import com.pace.base.data.MemberTreeSet;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.state.IPafEvalState;
-import com.pace.base.utility.CollectionsUtil;
+import com.pace.base.state.PafClientState;
 import com.pace.base.utility.StringOdometer;
 
 /**
@@ -68,9 +69,11 @@ public class F_CrossDim extends AbstractFunction {
 
 		// Get required arguments if not already parsed
 //		if (overrideParms == null) {
-			overrideParms = parseCrossDimParms(sourceIs, evalState.getClientState().getUowTrees());
+		// Generate token catalog
+			Properties tokenCatalog = evalState.getClientState().generateTokenCatalog(new Properties());
+			overrideParms = parseCrossDimParms(sourceIs, evalState.getClientState(), tokenCatalog);
 //		}
-		
+
 		// Clone current intersection
 		Intersection crossDimIs = sourceIs.clone();
 		
@@ -104,11 +107,12 @@ public class F_CrossDim extends AbstractFunction {
 	 *	will be skipped. This is necessary for trigger intersection processing.
 	 *
 	 * @param sourceIs Source intersection
-	 * @param uowTrees Unit of work trees
+	 * @param clientState ClientState
+	 * @param tokenCatalog Token catalog
 	 *
 	 * @return Intersection
 	 */
-	private Intersection parseCrossDimParms(Intersection sourceIs, MemberTreeSet uowTrees) {
+	private Intersection parseCrossDimParms(Intersection sourceIs, PafClientState clientState, Properties tokenCatalog) {
 		
 		try {
 			int dimCount = parms.length / 2;
@@ -132,7 +136,7 @@ public class F_CrossDim extends AbstractFunction {
 				if (sourceIs != null) {
 					currMember = sourceIs.getCoordinate(dim);
 				}
-				members.add(resolveMemberSpec(dim, memberSpec, uowTrees, currMember));
+				members.add(resolveMemberSpec(dim, memberSpec, clientState, currMember, tokenCatalog));
 			}
 			overrideParms = new Intersection();
 			overrideParms.setDimensions((dims.toArray(new String[0])));
@@ -159,14 +163,16 @@ public class F_CrossDim extends AbstractFunction {
 	 *
 	 * @param dimension Dimension name
 	 * @param memberSpec Member specification
-	 * @param uowTrees Unit of work trees
+	 * @param clientState ClientState
 	 * @param currMbrName Current intersection member
+	 * @param tokenCatalog Token catalog
 	 * 
 	 * @return Member name
 	 */
-	private String resolveMemberSpec(String dimension, String memberSpec, MemberTreeSet uowTrees, String currMbrName) {
+	private String resolveMemberSpec(String dimension, String memberSpec, PafClientState clientState, String currMbrName, Properties tokenCatalog) {
 		
-		String resolvedMemberSpec = null;
+		String resolvedMemberSpec = null, key = null, validDim = null;
+		String timeDim = clientState.getMdbDef().getTimeDim(), yearDim = clientState.getMdbDef().getYearDim();
 		
 		// If not a token, then just return member name (original membSpec value)
 		if (!memberSpec.startsWith(PafBaseConstants.FUNC_TOKEN_START_CHAR)) {
@@ -174,7 +180,7 @@ public class F_CrossDim extends AbstractFunction {
 		}
 		
 		// Get dimension tree and current member
-		PafDimTree dimTree = uowTrees.getTree(dimension);
+		PafDimTree dimTree = clientState.getUowTrees().getTree(dimension);
 		PafDimMember currMember = dimTree.getMember(currMbrName);
 		
 		// Check for PARENT token
@@ -198,6 +204,60 @@ public class F_CrossDim extends AbstractFunction {
 			return resolvedMemberSpec;
 		}
 		
+		// Check for FIRST_PLAN_YEAR token (TTN-1597)
+		key = PafBaseConstants.FUNC_TOKEN_FIRST_PLAN_YEAR; 
+		validDim = yearDim;
+		if (memberSpec.equalsIgnoreCase(key)) {
+			if (dimension.equals(validDim)) {
+				// Return token value
+				resolvedMemberSpec = tokenCatalog.getProperty(key);
+				functionDims.add(dimension);
+				return resolvedMemberSpec;
+			} else {
+				// Return error - token only valid on year dimension
+				String errMsg = "@CrossDim signature error - the token: " + key
+						+ " is only valid on the [" + validDim + "] dimension";
+				logger.error(errMsg);
+				throw new IllegalArgumentException(errMsg);
+			}
+		}
+		
+		// Check for FIRST_NONPLAN_YEAR token (TTN-1597)
+		key = PafBaseConstants.FUNC_TOKEN_FIRST_NONPLAN_YEAR; 
+		validDim = yearDim;
+		if (memberSpec.equalsIgnoreCase(key)) {
+			if (dimension.equals(validDim)) {
+				// Return token value
+				resolvedMemberSpec = tokenCatalog.getProperty(key);
+				functionDims.add(dimension);
+				return resolvedMemberSpec;
+			} else {
+				// Return error - token only valid on year dimension
+				String errMsg = "@CrossDim signature error - the token: " + key
+						+ " is only valid on the [" + validDim + "] dimension";
+				logger.error(errMsg);
+				throw new IllegalArgumentException(errMsg);
+			}
+		}
+		
+		// Check for FIRST_PLAN_PERIOD token (TTN-1597)
+		key = PafBaseConstants.FUNC_TOKEN_FIRST_PLAN_PERIOD; 
+		validDim = timeDim;
+		if (memberSpec.equalsIgnoreCase(key)) {
+			if (dimension.equals(validDim)) {
+				// Return token value
+				resolvedMemberSpec = tokenCatalog.getProperty(key);
+				functionDims.add(dimension);
+				return resolvedMemberSpec;
+			} else {
+				// Return error - token only valid on year dimension
+				String errMsg = "@CrossDim signature error - the token: " + key
+						+ " is only valid on the [" + validDim + "] dimension";
+				logger.error(errMsg);
+				throw new IllegalArgumentException(errMsg);
+			}
+		}
+		
 		// Invalid token	
 		String errMsg = "@CrossDim signature error - invalid token specified";
 		logger.error(errMsg);
@@ -214,7 +274,8 @@ public class F_CrossDim extends AbstractFunction {
 
 		// Get required arguments if not already parsed
 //		if (overrideParms == null) {
-			overrideParms = parseCrossDimParms(null, null);
+		// Generate token catalog
+			overrideParms = parseCrossDimParms(null, null, null);
 //		}
 		
 		Map<String, Set<String>> filterMap = new HashMap<String, Set<String>>(); 
@@ -269,7 +330,7 @@ public class F_CrossDim extends AbstractFunction {
     	
     	Map<String, Set<String>> dependencyMap = new HashMap<String, Set<String>>();
     	
-		overrideParms = parseCrossDimParms(null, null);
+		overrideParms = parseCrossDimParms(null, null, null);
 		
 		// Check each set of function parms
 		int dimCount = parms.length / 2;
