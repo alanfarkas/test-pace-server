@@ -603,6 +603,9 @@ public class PafClientState implements IPafClientState {
 		//-- @FIRST_PLAN_YEAR (TTN-1881)
 		parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_YEAR;
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		//-- [FIRST_PLAN_YEAR] (TTN-1597)
+		parmKey = PafBaseConstants.FUNC_TOKEN_FIRST_PLAN_YEAR;
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		
 		//-- [FIRST.NONPLAN.YEAR] (TTN-1881)
 		parmKey = tokenStartChar + PafBaseConstants.CC_TOKEN_FIRST_NONPLAN_YEAR + tokenEndChar;
@@ -614,6 +617,9 @@ public class PafClientState implements IPafClientState {
 		//-- @FIRST_NONPLAN_YEAR (TTN-1881)
 		parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_NONPLAN_YEAR;
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		//-- [FIRST_NONPLAN_YEAR] (TTN-1597)
+		parmKey = PafBaseConstants.FUNC_TOKEN_FIRST_NONPLAN_YEAR;
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		
 		//-- [FIRST.PLAN.PERIOD] (TTN-1881)
 		parmKey = tokenStartChar + PafBaseConstants.CC_TOKEN_FIRST_PLAN_PERIOD + tokenEndChar;
@@ -624,6 +630,9 @@ public class PafClientState implements IPafClientState {
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		//-- @FIRST_PLAN_PERIOD (TTN-1881)
 		parmKey = PafBaseConstants.VIEW_TOKEN_FIRST_PLAN_PERIOD;
+		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
+		//-- [FIRST_PLAN_PERIOD] (TTN-1597)
+		parmKey = PafBaseConstants.FUNC_TOKEN_FIRST_PLAN_PERIOD;
 		tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
 		
 		// Get user selection properties for the active view

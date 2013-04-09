@@ -172,6 +172,9 @@ public class PafBaseConstants {
 	// function tokens
 	public static final String FUNC_TOKEN_PARENT = "[PARENT]";
 	public static final String FUNC_TOKEN_UOWROOT = "[UOWROOT]";
+	public static final String FUNC_TOKEN_FIRST_PLAN_YEAR = "[FIRST_PLAN_YEAR]";
+	public static final String FUNC_TOKEN_FIRST_NONPLAN_YEAR = "[FIRST_NONPLAN_YEAR]";
+	public static final String FUNC_TOKEN_FIRST_PLAN_PERIOD = "[FIRST_PLAN_PERIOD]";
 	public static final String FUNC_TOKEN_START_CHAR = "[";
 	
 	// header tokens
