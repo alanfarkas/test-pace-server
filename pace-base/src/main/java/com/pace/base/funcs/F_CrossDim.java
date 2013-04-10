@@ -172,7 +172,6 @@ public class F_CrossDim extends AbstractFunction {
 	private String resolveMemberSpec(String dimension, String memberSpec, PafClientState clientState, String currMbrName, Properties tokenCatalog) {
 		
 		String resolvedMemberSpec = null, key = null, validDim = null;
-		String timeDim = clientState.getMdbDef().getTimeDim(), yearDim = clientState.getMdbDef().getYearDim();
 		
 		// If not a token, then just return member name (original membSpec value)
 		if (!memberSpec.startsWith(PafBaseConstants.FUNC_TOKEN_START_CHAR)) {
@@ -205,6 +204,7 @@ public class F_CrossDim extends AbstractFunction {
 		}
 		
 		// Check for FIRST_PLAN_YEAR token (TTN-1597)
+		String yearDim = clientState.getMdbDef().getYearDim();
 		key = PafBaseConstants.FUNC_TOKEN_FIRST_PLAN_YEAR; 
 		validDim = yearDim;
 		if (memberSpec.equalsIgnoreCase(key)) {
@@ -241,6 +241,7 @@ public class F_CrossDim extends AbstractFunction {
 		}
 		
 		// Check for FIRST_PLAN_PERIOD token (TTN-1597)
+		String timeDim = clientState.getMdbDef().getTimeDim();
 		key = PafBaseConstants.FUNC_TOKEN_FIRST_PLAN_PERIOD; 
 		validDim = timeDim;
 		if (memberSpec.equalsIgnoreCase(key)) {
