@@ -159,7 +159,7 @@ public class F_Next extends AbstractFunction {
     	app = evalState.getAppDef();
     	measureDim = app.getMdbDef().getMeasureDim();
 		
-		String index;
+		String index, crossYears;
 				
      	if (parms.length > 1 ) 
     		offsetDim = parms[1];
@@ -182,8 +182,8 @@ public class F_Next extends AbstractFunction {
 
     	// Parse cross years parm (TTN-1597)
     	if (parms.length > 3 )  {
-    		index = parms[3];
-    		bCrossYears = Boolean.valueOf(index);
+    		crossYears = parms[3];
+    		bCrossYears = Boolean.parseBoolean(crossYears);
     	}
 
     	this.isInitialized = true;

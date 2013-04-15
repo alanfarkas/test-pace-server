@@ -191,7 +191,7 @@ public class EvalUtil {
         boolean[] funcFlags = formula.getFunctionTermFlags();
         double[] values = new double[terms.length];
         IPafFunction function = null;
-          
+       
     	//lookup each term
     	for (int i = 0; i < terms.length; i++) {
             // funcflags indicate a complex function that must be evaluated differently
@@ -284,21 +284,28 @@ public class EvalUtil {
         Intersection newIs = source.clone();
 
         PafDataCache dataCache = evalState.getDataCache();
-        String offsetDim;
+        String treeDim;
+        boolean bCrossYears = true;
         
         if (function.getParms().length == 1) 
-        	offsetDim=evalState.getTimeDim();
-        else
-        	offsetDim = function.getParms()[1];
+        	treeDim=evalState.getTimeDim();
+        else {
+        	treeDim = function.getParms()[1];
+        	// Check for "cross years" parm (TTN-1597) - default if "true"
+        	if (function.getParms().length > 3) {
+        		String crossYears = function.getParms()[3];
+        		bCrossYears = Boolean.parseBoolean(crossYears);
+        	}
+        }
 
         
         // Shift intersection along time horizon (TTN-1597)
-       if (function.getOpCode().equals("@PREV")) {
-       		// @Prev function - shift one peer period forward
-        	dataCache.shiftIntersection(newIs, offsetDim, 1, false);
+        if (function.getOpCode().equals("@PREV")) {
+        	// @Prev function - shift one peer period back
+        	newIs = dataCache.shiftIntersection(newIs, treeDim, 1, bCrossYears, false);
         } else {
-        	// @Next function - shift one peer period back
-        	dataCache.shiftIntersection(newIs, offsetDim, -1, false);
+        	// @Next function - shift one peer period forward
+        	newIs = dataCache.shiftIntersection(newIs, treeDim, -1, bCrossYears, false);
         }
         
         return newIs;
@@ -309,20 +316,27 @@ public class EvalUtil {
         
         // assume time dim if not specified
         PafDataCache dataCache = evalState.getDataCache();
-        String treeDim;
+        String treeDim; 
+        boolean bCrossYears = true;
 
         if (function.getParms().length == 1) 
         	treeDim = evalState.getClientState().getApp().getMdbDef().getTimeDim();
-        else
+        else {
         	treeDim = function.getParms()[1];
+        	// Check for "cross years" parm (TTN-1597) - default if "true"
+        	if (function.getParms().length > 3) {
+        		String crossYears = function.getParms()[3];
+        		bCrossYears = Boolean.parseBoolean(crossYears);
+        	}
+        }
         	
         // Shift intersection along time horizon (TTN-1597)
         if (function.getOpCode().equals("@PREV")) {
         	// @Prev function - shift one peer period back
-        	dataCache.shiftIntersection(newIs, treeDim, -1, false);
+        	newIs = dataCache.shiftIntersection(newIs, treeDim, -1, bCrossYears, false);
         } else {
         	// @Next function - shift one peer period forward
-        	dataCache.shiftIntersection(newIs, treeDim, 1, false);
+        	newIs = dataCache.shiftIntersection(newIs, treeDim, 1, bCrossYears, false);
         }
 
         return newIs;
@@ -335,7 +349,8 @@ public class EvalUtil {
 //    	if (evalState.getConsumedByRulegroup().contains(is))
 //    		return false;
     	
-        String measure = is.getCoordinate(evalState.getAppDef().getMdbDef().getMeasureDim());
+    	PafDataCache dataCache = evalState.getDataCache();
+        String measure = is.getCoordinate(dataCache.getMeasureAxis());
         Formula formula = rule.getFormula();
         
         // if no trigger measures, just parse the components of the expression
@@ -359,6 +374,16 @@ public class EvalUtil {
         	// no trigger, onward to next term
         	termIndex++;	
         	}
+        	
+//      		// check for measure allocation (TTN-1729)
+//        	if (rule.isMeasureAllocation()) {
+//        		String resultMeas = formula.getResultMeasure();
+//        		PafDimTree measureTree = evalState.getEvaluationTree(evalState.getMsrDim());
+//        		List<String> desc = PafDimTree.getMemberNames(measureTree.getDescendants(resultMeas));
+//        		if (desc.contains(measure)) {
+//        			return true;
+//        		}
+//        	}
         }
         
         // trigger measure check

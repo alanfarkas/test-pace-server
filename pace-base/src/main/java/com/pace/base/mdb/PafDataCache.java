@@ -1863,7 +1863,7 @@ public class PafDataCache implements IPafDataCache {
 		}
 		
 		// Check if we've crossed years, if spanning of years is not allowed (TTN-1597)
-		if (!bCrossYears) {
+		if (!bCrossYears && cellIs !=null) {
 			String nextYear = cellIs.getCoordinate(getYearAxis());
 			if (!nextYear.equals(currYear)) cellIs = null;
 		}
@@ -2251,7 +2251,37 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return First floor intersection
 	 */
-	public Intersection getFirstFloorIs(Intersection cellIs, String dim) {
+	public Intersection getFirstFloorIs(final Intersection cellIs, final String dim) {
+
+		Intersection firstFloorIs = cellIs.clone();
+		PafDimTree dimTree = null;
+		PafDimMember firstFloorMbr = null;
+		
+		// If time dimension is selected, substitute time horizon dimension for query
+		if (dim.equals(getTimeDim())) {
+			dimTree = getDimTrees().getTree(getTimeHorizonDim());
+			firstFloorMbr = dimTree.getFirstFloorMbr();
+			TimeSlice.applyTimeHorizonCoord(firstFloorIs, firstFloorMbr.getKey(), this.getMdbDef());
+		} else {
+			dimTree = getDimTrees().getTree(dim);
+			firstFloorMbr = dimTree.getFirstFloorMbr();
+			firstFloorIs.setCoordinate(this.getTimeDim(), firstFloorMbr.getKey());
+		}
+		
+		return firstFloorIs;
+	}
+
+	/**
+	 * Return the first floor intersection along the specified dimension, 
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension
+	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
+	 * @param year Optional parameter that specifies which year to confine search to
+	 * 
+	 * @return First floor intersection
+	 */
+	public Intersection getFirstFloorIs(final Intersection cellIs, final String dim, final String genLevelScope, final String year) {
 
 		Intersection firstFloorIs = cellIs.clone();
 		PafDimTree dimTree = null;
