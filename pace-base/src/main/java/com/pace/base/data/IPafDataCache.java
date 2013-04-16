@@ -50,5 +50,6 @@ public interface IPafDataCache {
 	public Intersection getFirstFloorIs(final Intersection cellIs, final String dim);
 	public Intersection getFirstFloorIs(final Intersection cellIs, final String timeDim, final String genLevel, final String yearMbr);
 	public Intersection getLastFloorIs(Intersection cellIs, String dim);
+	public boolean isBaseIntersection(Intersection sourceIs);
 
 }

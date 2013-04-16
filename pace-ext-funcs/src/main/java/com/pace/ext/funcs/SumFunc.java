@@ -15,7 +15,9 @@ import com.pace.base.PafException;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.MemberTreeSet;
 import com.pace.base.funcs.AbstractFunction;
+import com.pace.base.mdb.DcTrackChangeOpt;
 import com.pace.base.mdb.PafBaseTree;
 import com.pace.base.mdb.PafDataCache;
 import com.pace.base.mdb.PafDataCacheCalc;
@@ -63,7 +65,10 @@ public class SumFunc extends AbstractFunction {
     	// Aggregate current intersection across the selected measures
     	Set<String> aggMeasures = new HashSet<String>(inputMsrs);
     	aggMeasures.add(msrToSum);
-    	aggMeasures(sourceIs, aggMeasures, dataCache, evalState);
+    	if (dataCache.isBaseIntersection(sourceIs))
+    		aggMeasures(sourceIs, aggMeasures, dataCache, evalState);
+    	else
+    		aggAttrMeasures(sourceIs, aggMeasures, dataCache, evalState);
     	
     	// Return the sum of the aggregated measures
         double sum = dataCache.getCellValue(sourceIs);  
@@ -73,7 +78,7 @@ public class SumFunc extends AbstractFunction {
     
 
 	/**
-	 * Aggregate an intersection across a set of measures
+	 * Aggregate a base intersection across a set of measures
 	 * 
 	 * @param cellIs Intersection to aggregate
 	 * @param measureSet Set of measures
@@ -102,6 +107,37 @@ public class SumFunc extends AbstractFunction {
 
 		// Aggregate the measure children
 		PafDataCacheCalc.aggDimension(msrDim, (PafDataCache) dataCache, msrTree, filters);
+
+	}
+
+	/**
+	 * Aggregate an attribute intersection across a set of measures
+	 * 
+	 * @param cellIs Attribute intersection to aggregate
+	 * @param measureSet Set of measures
+	 * 
+	 * @throws PafException 
+	 */
+	protected static void aggAttrMeasures(Intersection cellIs, Set<String> measureSet, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
+		
+    	// Convenience variables
+      	MemberTreeSet memberTrees = evalState.getClientState().getUowTrees();
+        int measureAxis = dataCache.getMeasureAxis();
+
+       	// Explode attribute intersection into base intersection components
+		Set<Intersection> baseIsSet = EvalUtil.getBaseIntersections((PafDataCache) dataCache, cellIs, memberTrees);
+
+		// Aggregate the measure children of each exploded base intersection
+		for (Intersection baseIs : baseIsSet) {
+	  		aggMeasures(baseIs, measureSet, dataCache, evalState);
+		}
+		
+		// Re-calculate attribute intersection across each aggregated measure
+		Intersection tempIs = cellIs.clone();
+		for (String aggMeasure : measureSet) {
+			tempIs.setCoordinate(measureAxis, aggMeasure);
+			PafDataCacheCalc.calcAttributeIntersection((PafDataCache) dataCache, tempIs, memberTrees, DcTrackChangeOpt.APPEND);
+		}
 
 	}
 

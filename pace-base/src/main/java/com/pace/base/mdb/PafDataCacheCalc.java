@@ -596,6 +596,21 @@ public abstract class PafDataCacheCalc {
 	 *
 	 * @param dataCache Data cache
 	 * @param attrIs Attribute intersection
+	 * @param memberTrees Collection of attribute and base trees corresponding to uow
+	 * 
+	 * @throws PafException 
+	 */
+	public static void calcAttributeIntersection(final PafDataCache dataCache, final Intersection attrIs, final MemberTreeSet memberTrees, DcTrackChangeOpt trackChanges) throws PafException {	
+		String measure = attrIs.getCoordinate(dataCache.getMeasureAxis());
+		MeasureType measureType = dataCache.getMeasureType(measure);
+		calcAttributeIntersection(dataCache, attrIs, measureType, memberTrees, trackChanges);
+	}
+	
+	/**
+	 *	Calculate a specific attribute intersection
+	 *
+	 * @param dataCache Data cache
+	 * @param attrIs Attribute intersection
 	 * @param measureType Measure type of intersection being calculated
 	 * @param memberTrees Collection of attribute and base trees corresponding to uow
 	 * 
