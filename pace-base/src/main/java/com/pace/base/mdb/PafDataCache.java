@@ -3452,11 +3452,17 @@ public class PafDataCache implements IPafDataCache {
 	private Intersection translateOffsetVersionAliasIs(Intersection cellIs) throws PafException {
 
 		// Translate coordinates
-		String[] translatedCoords = translateOffsetVersionAliasIs(cellIs.getCoordinates());
-		cellIs.setCoordinates(translatedCoords);
+		String[] isCoords = cellIs.getCoordinates();
+		String[] translatedCoords = translateOffsetVersionAliasIs(isCoords);
+		if (isCoords != translatedCoords) {
+			// Return translated intersection
+			Intersection translatedIs = new Intersection(cellIs.getDimensions(), translatedCoords);
+			return translatedIs;
+		} else {
+			// No translation needed - return original intersection
+			return cellIs;
+		}
 		
-		// Return translated intersection
-		return cellIs;
 	}
 
 	/**
@@ -3511,7 +3517,7 @@ public class PafDataCache implements IPafDataCache {
 		// intersection and points to another intersection within the uow.
 		if (uowYearList.contains(sourceYear)) {
 			// Translate intersection coordinates
-			String[] translatedCoords = coords;
+			String[] translatedCoords = coords.clone();
 			String sourceVersion = vf.getBaseVersionValue(planVersion);
 			translatedCoords[versionAxis] = sourceVersion;
 			translatedCoords[yearAxis] = sourceYear;
