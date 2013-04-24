@@ -13,8 +13,12 @@ import com.pace.base.PafBaseConstants;
 import com.pace.base.server.ServerPlatform;
 
 public class PafServer implements Comparable, Cloneable {
-
+	private static final Long DEFAULT_SERVER_URL_TIMEOUT_IN_MILLISECONDS = 200L;
+	private static final Long DEFAULT_WEBSERVICE_CONNECTION_TIMEOUT_IN_MILLISECONDS = 60000L;
+	private static final Long DEFAULT_WEBSERVICE_RECEIEVE_TIMEOUT_IN_MILLISECONDS = 180000L;
+	private static final Long SERVER_STARTUP_TIMEOUT_DEFAULT = 300000L;
 	private static final String WSDL = "?wsdl";
+	
 	private String name;
 	private String host;
 	private Integer port;
@@ -23,8 +27,8 @@ public class PafServer implements Comparable, Cloneable {
 	private String webappName;
 	private String wsdlServiceName;
 	private Long urlTimeoutInMilliseconds;
-	private transient Long serviceConnectionTimeoutInMilliseconds;
-	private transient Long serviceReceiveTimeoutInMilliseconds;
+	private transient Long serviceConnectionTimeoutInMilliseconds = 60000L;
+	private transient Long serviceReceiveTimeoutInMilliseconds = 180000L;
 	private String startupFile;
 	private String shutdownFile;
 	private Integer jndiPort;
@@ -35,7 +39,89 @@ public class PafServer implements Comparable, Cloneable {
 	private String osServiceName;
 	private Integer jmsMessagingPort;
 	private ServerPlatform serverPlatform;
+	private boolean isServerRunning;
+	
+	public boolean isServerRunning() {
+		return isServerRunning;
+	}
+	
+	public void setServerRunning(boolean isServerRunning) {
+		this.isServerRunning = isServerRunning;
+	}
+	
+	public boolean isTheServerRunning() {
+		// set default
+		HttpURLConnection httpConnection = null;
+		boolean serverRunning = false;
+		String url = null;
+		try {
+			
+			//try to get pafserver from url
+			url = getCompleteWSDLService();         
+			//cast to http connection
+			httpConnection = (HttpURLConnection) new URL(url).openConnection();
+			
+			httpConnection.setRequestMethod("GET");
+			
 		
+			//if paf server exists
+			//if pafserver has specified url timeout
+			if ( getUrlTimeoutInMilliseconds() != null ) {
+			
+				//try to convert into an int, catch runtime if problem and ignore
+				try {
+					
+					urlTimeoutInMilliseconds = getUrlTimeoutInMilliseconds();
+					
+				} catch (RuntimeException re) {
+					
+					logger.error("There was a problem coverting " + getUrlTimeoutInMilliseconds() + " to an integer.");
+					
+				}
+				
+			}            	
+			  
+			if ( logger.isDebugEnabled()) {
+					logger.debug("Setting connection timeout to " + urlTimeoutInMilliseconds + " for url " + url);
+			}
+		
+			//set timeout
+			httpConnection.setConnectTimeout(urlTimeoutInMilliseconds.intValue());	
+			
+			//if successful http status, server/app is running
+			if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK ) {
+				
+				serverRunning = true;
+				logger.info("Successfully connected to url '" + url +"'");
+				
+			} else {
+				
+				logger.info("Couldn't connect to url '" + url +"'");
+				
+			}                                    
+                        
+		} catch (MalformedURLException e) {
+			logger.error("MalformedURLException: " + e.getMessage());
+		} catch (IOException e) {
+			logger.warn("URL IOException: " + e.getMessage());
+		}  finally {
+			
+			if ( httpConnection != null ) {
+			  logger.debug("About to disconnect from url: " + url);
+          	  httpConnection.disconnect();
+          	  logger.debug("Successfully disconnected from url: " + url);
+            }
+			
+		}
+		
+		// log info
+		logger.info("URL: '" + url + "' is alive: " + serverRunning); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		setServerRunning(serverRunning);
+		return serverRunning;
+	}
+
+
 	private static final Logger logger = Logger
 			.getLogger(PafServer.class);
 	public PafServer() {		
@@ -256,7 +342,7 @@ public class PafServer implements Comparable, Cloneable {
 	 * @return Returns the serverStartupTimeoutInMilliseconds.
 	 */
 	public Long getServerStartupTimeoutInMilliseconds() {
-		return serverStartupTimeoutInMilliseconds;
+		return serverStartupTimeoutInMilliseconds!=null?serverStartupTimeoutInMilliseconds:SERVER_STARTUP_TIMEOUT_DEFAULT;
 	}
 
 	/**
@@ -271,7 +357,7 @@ public class PafServer implements Comparable, Cloneable {
 	 * @return the urlTimeoutInMilliseconds
 	 */
 	public Long getUrlTimeoutInMilliseconds() {
-		return urlTimeoutInMilliseconds;
+		return urlTimeoutInMilliseconds!=null?urlTimeoutInMilliseconds:DEFAULT_SERVER_URL_TIMEOUT_IN_MILLISECONDS;
 	}
 
 	/**
@@ -346,7 +432,7 @@ public class PafServer implements Comparable, Cloneable {
 	 * @return the serviceConnectionTimeoutInMilliseconds
 	 */
 	public Long getServiceConnectionTimeoutInMilliseconds() {
-		return serviceConnectionTimeoutInMilliseconds;
+		return serviceConnectionTimeoutInMilliseconds!=null?serviceConnectionTimeoutInMilliseconds:DEFAULT_WEBSERVICE_CONNECTION_TIMEOUT_IN_MILLISECONDS;
 	}
 
 	/**
@@ -361,7 +447,7 @@ public class PafServer implements Comparable, Cloneable {
 	 * @return the serviceReceieveTimeoutInMilliseconds
 	 */
 	public Long getServiceReceiveTimeoutInMilliseconds() {
-		return serviceReceiveTimeoutInMilliseconds;
+		return serviceReceiveTimeoutInMilliseconds!=null?serviceReceiveTimeoutInMilliseconds:DEFAULT_WEBSERVICE_RECEIEVE_TIMEOUT_IN_MILLISECONDS;
 	}
 
 	/**
@@ -435,88 +521,6 @@ public class PafServer implements Comparable, Cloneable {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
-	}
-	
-	
-	public  boolean isServerRunning(PafServer server,int urlTimeoutInMilliseconds) {
-
-		// set default
-		boolean isServerRunning = false;
-		
-		HttpURLConnection httpConnection = null;
-		String url = null;
-		
-		try {
-			
-			
-						
-			//try to get pafserver from url
-			
-			url = server.getCompleteWSDLService();         
-			//cast to http connection
-			httpConnection = (HttpURLConnection) new URL(url).openConnection();
-			
-			httpConnection.setRequestMethod("GET");
-			
-		
-			//if paf server exists
-			if ( server != null ) {
-			
-				//if pafserver has specified url timeout
-				if ( server.getUrlTimeoutInMilliseconds() != null ) {
-				
-					//try to convert into an int, catch runtime if problem and ignore
-					try {
-						
-						urlTimeoutInMilliseconds = server.getUrlTimeoutInMilliseconds().intValue();
-						
-					} catch (RuntimeException re) {
-						
-						logger.error("There was a problem coverting " + server.getUrlTimeoutInMilliseconds() + " to an integer.");
-						
-					}
-					
-				}            	
-			}
-			  
-		if ( logger.isDebugEnabled()) {
-						logger.debug("Setting connection timeout to " + urlTimeoutInMilliseconds + " for url " + url);
-			}
-		
-			//set timeout
-			httpConnection.setConnectTimeout(urlTimeoutInMilliseconds);	
-			
-			//if successful http status, server/app is running
-			if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK ) {
-				
-				isServerRunning = true;
-				logger.info("Successfully connected to url '" + url +"'");
-				
-			} else {
-				
-				logger.info("Couldn't connect to url '" + url +"'");
-				
-			}                                    
-                        
-		} catch (MalformedURLException e) {
-			logger.error("MalformedURLException: " + e.getMessage());
-		} catch (IOException e) {
-			logger.warn("URL IOException: " + e.getMessage());
-		}  finally {
-			
-			if ( httpConnection != null ) {
-			  logger.debug("About to disconnect from url: " + url);
-          	  httpConnection.disconnect();
-          	  logger.debug("Successfully disconnected from url: " + url);
-            }
-			
-		}
-		
-		// log info
-		logger.info("URL: '" + url + "' is alive: " + isServerRunning); //$NON-NLS-1$ //$NON-NLS-2$
-
-		// return true if server is running or false if not.
-		return isServerRunning;
 	}
 	
 }
