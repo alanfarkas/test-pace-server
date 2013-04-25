@@ -14,8 +14,8 @@ import com.pace.base.server.ServerPlatform;
 
 public class PafServer implements Comparable, Cloneable {
 	private static final Long DEFAULT_SERVER_URL_TIMEOUT_IN_MILLISECONDS = 200L;
-	private static final Long DEFAULT_WEBSERVICE_CONNECTION_TIMEOUT_IN_MILLISECONDS = 60000L;
-	private static final Long DEFAULT_WEBSERVICE_RECEIEVE_TIMEOUT_IN_MILLISECONDS = 180000L;
+//	private static final Long DEFAULT_WEBSERVICE_CONNECTION_TIMEOUT_IN_MILLISECONDS = 60000L;
+//	private static final Long DEFAULT_WEBSERVICE_RECEIEVE_TIMEOUT_IN_MILLISECONDS = 180000L;
 	private static final Long SERVER_STARTUP_TIMEOUT_DEFAULT = 300000L;
 	private static final String WSDL = "?wsdl";
 	
@@ -27,8 +27,8 @@ public class PafServer implements Comparable, Cloneable {
 	private String webappName;
 	private String wsdlServiceName;
 	private Long urlTimeoutInMilliseconds;
-	private transient Long serviceConnectionTimeoutInMilliseconds = 60000L;
-	private transient Long serviceReceiveTimeoutInMilliseconds = 180000L;
+//	private transient Long serviceConnectionTimeoutInMilliseconds = 60000L;
+//	private transient Long serviceReceiveTimeoutInMilliseconds = 180000L;
 	private String startupFile;
 	private String shutdownFile;
 	private Integer jndiPort;
@@ -428,35 +428,35 @@ public class PafServer implements Comparable, Cloneable {
 	}
 			
 
-	/**
-	 * @return the serviceConnectionTimeoutInMilliseconds
-	 */
-	public Long getServiceConnectionTimeoutInMilliseconds() {
-		return serviceConnectionTimeoutInMilliseconds!=null?serviceConnectionTimeoutInMilliseconds:DEFAULT_WEBSERVICE_CONNECTION_TIMEOUT_IN_MILLISECONDS;
-	}
-
-	/**
-	 * @param serviceConnectionTimeoutInMilliseconds the serviceConnectionTimeoutInMilliseconds to set
-	 */
-	public void setServiceConnectionTimeoutInMilliseconds(
-			Long serviceConnectionTimeoutInMilliseconds) {
-		this.serviceConnectionTimeoutInMilliseconds = serviceConnectionTimeoutInMilliseconds;
-	}
-
-	/**
-	 * @return the serviceReceieveTimeoutInMilliseconds
-	 */
-	public Long getServiceReceiveTimeoutInMilliseconds() {
-		return serviceReceiveTimeoutInMilliseconds!=null?serviceReceiveTimeoutInMilliseconds:DEFAULT_WEBSERVICE_RECEIEVE_TIMEOUT_IN_MILLISECONDS;
-	}
-
-	/**
-	 * @param serviceReceieveTimeoutInMilliseconds the serviceReceieveTimeoutInMilliseconds to set
-	 */
-	public void setServiceReceiveTimeoutInMilliseconds(
-			Long serviceReceiveTimeoutInMilliseconds) {
-		this.serviceReceiveTimeoutInMilliseconds = serviceReceiveTimeoutInMilliseconds;
-	}
+//	/**
+//	 * @return the serviceConnectionTimeoutInMilliseconds
+//	 */
+//	public Long getServiceConnectionTimeoutInMilliseconds() {
+//		return serviceConnectionTimeoutInMilliseconds!=null?serviceConnectionTimeoutInMilliseconds:DEFAULT_WEBSERVICE_CONNECTION_TIMEOUT_IN_MILLISECONDS;
+//	}
+//
+//	/**
+//	 * @param serviceConnectionTimeoutInMilliseconds the serviceConnectionTimeoutInMilliseconds to set
+//	 */
+//	public void setServiceConnectionTimeoutInMilliseconds(
+//			Long serviceConnectionTimeoutInMilliseconds) {
+//		this.serviceConnectionTimeoutInMilliseconds = serviceConnectionTimeoutInMilliseconds;
+//	}
+//
+//	/**
+//	 * @return the serviceReceieveTimeoutInMilliseconds
+//	 */
+//	public Long getServiceReceiveTimeoutInMilliseconds() {
+//		return serviceReceiveTimeoutInMilliseconds!=null?serviceReceiveTimeoutInMilliseconds:DEFAULT_WEBSERVICE_RECEIEVE_TIMEOUT_IN_MILLISECONDS;
+//	}
+//
+//	/**
+//	 * @param serviceReceieveTimeoutInMilliseconds the serviceReceieveTimeoutInMilliseconds to set
+//	 */
+//	public void setServiceReceiveTimeoutInMilliseconds(
+//			Long serviceReceiveTimeoutInMilliseconds) {
+//		this.serviceReceiveTimeoutInMilliseconds = serviceReceiveTimeoutInMilliseconds;
+//	}
 	
 	public ServerPlatform getServerPlatform() {
 		return serverPlatform;
@@ -487,8 +487,8 @@ public class PafServer implements Comparable, Cloneable {
 				+ ", doesNotPromptOnHotRefresh=" + doesNotPromptOnHotRefresh
 				+ ", https=" + https + ", osServiceName=" + osServiceName
 				+ ", jmsMessagingPort=" + jmsMessagingPort 
-				+ ", serviceConnectionTimeoutInMilliseconds=" + serviceConnectionTimeoutInMilliseconds
-				+ ", serviceReceiveTimeoutInMilliseconds=" + serviceReceiveTimeoutInMilliseconds
+//				+ ", serviceConnectionTimeoutInMilliseconds=" + serviceConnectionTimeoutInMilliseconds
+//				+ ", serviceReceiveTimeoutInMilliseconds=" + serviceReceiveTimeoutInMilliseconds
 				+ ", serverPlatform=" + serverPlatform + "]";
 	}
 
