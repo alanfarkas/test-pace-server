@@ -42,6 +42,7 @@ public class AppSettings {
 	private boolean globalReplicateAllEnabled;
 	private boolean globalLiftEnabled;					//1793 - Lift Allocation
 	private boolean globalLiftAllEnabled; 				//1793 - Lift Allocation
+	private boolean globalSessionLocksEnabled;
 	private boolean isGlobalUserFilteredUow;
 	private boolean isGlobalUserFilteredMultiSelect;	// TTN 1733 - multi-select 
 	private boolean isGlobalDataFilteredUow;
@@ -420,6 +421,14 @@ public class AppSettings {
 	public void setGlobalUserFilteredMultiSelect(
 			boolean isGlobalUserFilteredMultiSelect) {
 		this.isGlobalUserFilteredMultiSelect = isGlobalUserFilteredMultiSelect;
+	}
+
+	public boolean isGlobalSessionLocksEnabled() {
+		return globalSessionLocksEnabled;
+	}
+
+	public void setGlobalSessionLocksEnabled(boolean globalSessionLocksEnabled) {
+		this.globalSessionLocksEnabled = globalSessionLocksEnabled;
 	}
 
 	
