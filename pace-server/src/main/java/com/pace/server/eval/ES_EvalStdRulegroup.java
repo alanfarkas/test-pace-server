@@ -58,8 +58,8 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
         String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
        	Map<String, MeasureDef> measureCat = evalState.getAppDef().getMeasureDefs();
         
-        HashSet<Intersection> newChngCells = new HashSet<Intersection>(1000);
-        HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>(1000);
+        HashSet<Intersection> newChngCells = new HashSet<Intersection>(100000);
+        HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>(100000);
         Intersection calcIntersection;
 
 		IPafFunction measFunc = null;
@@ -77,7 +77,7 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
        
         stepTime = System.currentTimeMillis();   
         
-        HashSet<Intersection> cellsToLock = new HashSet<Intersection>(1000);
+        HashSet<Intersection> cellsToLock = new HashSet<Intersection>(100000);
 
         if (logger.isDebugEnabled())
         	logger.debug(LogUtil.timedStep("Finding newly changed cells out of " + evalState.getCurrentChangedCells().size() + " cells", stepTime));        
@@ -202,8 +202,9 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                 }
             }
         }
-        if (logger.isDebugEnabled())    
+        if (logger.isDebugEnabled()) {
         	logger.debug(LogUtil.timedStep("Identified " + cellsToCalc.size() + " cells to calculate", stepTime));
+        }
                
         stepTime = System.currentTimeMillis();
 
@@ -235,6 +236,9 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                 		newChngCells.remove(srcIs);
                 		continue;
                 	}
+                	if (logger.isDebugEnabled() ) {
+                		// calculate an average evaluation time
+                	}
 
                     EvalUtil.evalFormula(cellsToCalc.get(is), msrDim, is, dataCache, evalState);  
                 }
@@ -245,8 +249,20 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
 
         }
         
-        if (logger.isDebugEnabled())
-        	logger.debug(LogUtil.timedStep("Calculated " + cellsToCalc.size() + " cells", stepTime));
+        if (logger.isDebugEnabled()) {
+        	String avgTime;
+        	if (cellsToCalc.size() > 0)  {
+        		double d =  (System.currentTimeMillis() - stepTime);
+        		d = d / cellsToCalc.size() ;
+        		avgTime = ", avg: " + Double.toString(d) + " ms";
+        	}
+        		else
+        		avgTime = ", avg: n/a ";
+        	String msg = "Calculated " + cellsToCalc.size() + " cells, " + evalState.getRule() + avgTime;
+        		
+            logger.debug(LogUtil.timedStep(msg, stepTime));
+        			
+        }
 
         //place all triggering intersections into this bucket to indicate they have been processed by this rule
         

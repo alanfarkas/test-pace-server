@@ -877,7 +877,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 			// Create member index lists on each dimension - used to sort allocation
 			// intersections in evaluation processing (TTN-1391)
-			Map<String, HashMap<String, Integer>> memberIndexLists = dataService.getUowMemberIndexLists(treeSet);
+			Map<String, Map<String, Integer>> memberIndexLists = dataService.getUowMemberIndexLists(treeSet);
 			clientState.setMemberIndexLists(memberIndexLists);
 			
 			// calculate dynamic rule sets for the client

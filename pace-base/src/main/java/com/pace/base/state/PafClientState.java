@@ -80,7 +80,7 @@ public class PafClientState implements IPafClientState {
     private PafApplicationDef app;
     private PafSecurityToken securityToken;
     private MemberTreeSet uowTrees;
-	private Map<String, HashMap<String, Integer>> memberIndexLists;
+	private Map<String, Map<String, Integer>> memberIndexLists;
 	private UnitOfWork unitOfWork;
     private Map<String, List<RuleSet>> ruleSets;
     private String currentMsrRulesetName;
@@ -152,7 +152,7 @@ public class PafClientState implements IPafClientState {
 	 *
 	 * @return Map<String, HashMap<String, Integer>>
 	 */
-	public Map<String, HashMap<String, Integer>> getMemberIndexLists() {
+	public Map<String, Map<String, Integer>> getMemberIndexLists() {
 		return memberIndexLists;
 	}
 
@@ -161,7 +161,7 @@ public class PafClientState implements IPafClientState {
 	 *
 	 * @param memberIndexLists Member index lists
 	 */
-	public void setMemberIndexLists(Map<String, HashMap<String, Integer>> memberIndexLists) {
+	public void setMemberIndexLists(Map<String, Map<String, Integer>> memberIndexLists) {
 		this.memberIndexLists = memberIndexLists;
 	}
 

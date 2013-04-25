@@ -1165,11 +1165,11 @@ public class PafDataService {
 	 * @param treeSet Member tree set
 	 * @return Map<String, HashMap<String, Integer>>
 	 */
-	protected Map<String, HashMap<String, Integer>> getUowMemberIndexLists(MemberTreeSet treeSet) {
+	protected Map<String, Map<String, Integer>> getUowMemberIndexLists(MemberTreeSet treeSet) {
 		
 		// Create member index lists on each dimension - used to sort allocation
 		// intersections in evaluation processing (TTN-1391)
-		Map<String, HashMap<String, Integer>> memberIndexLists = new HashMap<String, HashMap<String, Integer>>();
+		Map<String, Map<String, Integer>> memberIndexLists = new HashMap<String, Map<String, Integer>>();
 		for (String dim : treeSet.getTreeDimensions()) {
 			PafDimTree uowTree = treeSet.getTree(dim);
 			memberIndexLists.put(dim, createMemberIndexList(uowTree, TreeTraversalOrder.PRE_ORDER));

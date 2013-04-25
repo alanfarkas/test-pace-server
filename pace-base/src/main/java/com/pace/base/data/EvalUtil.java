@@ -116,13 +116,24 @@ public class EvalUtil {
      */
     @SuppressWarnings("unchecked")
 	public
-	static Intersection[] sortIntersectionsByAxis(Intersection[] changedCells, Map<String, HashMap<String, Integer>> memberIndexLists, 
+	static Intersection[] sortIntersectionsByAxis(Intersection[] changedCells, Map<String, Map<String, Integer>> memberIndexLists, 
     		String axis[], SortOrder sortOrder) {
         List<Intersection> intersections = Arrays.asList(changedCells);
 //        Collections.sort(intersections, new DimSortComparator(PafDataService.getInstance().getMemberIndexLists(), axis, sortOrder));
         Collections.sort(intersections, new DimSortComparator(memberIndexLists, axis, sortOrder));
         return intersections.toArray(new Intersection[0]);
     }
+
+    @SuppressWarnings("unchecked")
+	public
+	static List<Intersection> sortIntersectionListByAxis(List<Intersection> intersections, Map<String, Map<String, Integer>> memberIndexLists, 
+    		String axis[], SortOrder sortOrder) {
+//        Collections.sort(intersections, new DimSortComparator(PafDataService.getInstance().getMemberIndexLists(), axis, sortOrder));
+        Collections.sort(intersections, new DimSortComparator(memberIndexLists, axis, sortOrder));
+        return intersections;
+    }
+        
+           
     
     /**
      *	Sorts a list of intersection objects by position in hierarchy

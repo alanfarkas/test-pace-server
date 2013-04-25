@@ -1609,8 +1609,11 @@ public abstract class PafDimTree {
         
         List<PafDimMember> memberList = null;
         TreeTraversalMethod traversalMethod = null;
+        
+        if (logger.isDebugEnabled() ) {
         logger.debug("Getting descendants of member [" + branchName + "] down to "
         		+ levelGenType + ": " + levelGen);
+        }
         
         // Check if branch exists
         getMember(branchName);
@@ -1623,7 +1626,7 @@ public abstract class PafDimTree {
         }
         
         // Traverse tree
-        memberList = treeTraversal(getMembers().get(branchName), new ArrayList<PafDimMember>(), traversalMethod, levelGen, parentFirst);
+        memberList = treeTraversal(getMembers().get(branchName), new ArrayList<PafDimMember>(1000), traversalMethod, levelGen, parentFirst);
         
         // Return list of descendants
         return memberList;

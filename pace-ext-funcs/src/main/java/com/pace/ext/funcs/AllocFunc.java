@@ -67,8 +67,9 @@ public class AllocFunc extends AbstractFunction {
     	// Convenience variables
       	String msrDim = dataCache.getMeasureDim();
         String[] axisSortSeq = evalState.getAxisSortPriority();
-        Set<Intersection> allocIntersections = new HashSet<Intersection>(evalState.getLoadFactor());
-        Set<Intersection> allocMsrIntersections = new HashSet<Intersection>(evalState.getLoadFactor());
+        //it's ok to use lists here since the collection processed into them is a set, guaranteeing uniqueness
+        List<Intersection> allocIntersections = new ArrayList<Intersection>(evalState.getLoadFactor());
+        List<Intersection> allocMsrIntersections = new ArrayList<Intersection>(evalState.getLoadFactor());
         PafDimTree measureTree = evalState.getClientState().getUowTrees().getTree(msrDim);
 
  	
@@ -116,14 +117,17 @@ public class AllocFunc extends AbstractFunction {
     	// the first "msrToAlloc" intersection do not need to be re-allocated, even
     	// though they currently are.
     	// no need reason to recalculate them. (TTN-1743)
-    	Intersection[] allocCells = EvalUtil.sortIntersectionsByAxis(allocIntersections.toArray(new Intersection[0]), 
+    	List<Intersection> allocCells = EvalUtil.sortIntersectionListByAxis(allocIntersections, 
     			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
     	
-
+//    	Intersection[] allocCells = allocIntersections.toArray(new Intersection[0]);
+//    	Intersection[] allocMsrCells = allocMsrIntersections.toArray(new Intersection[0]);
+    	
     	// Exit if we're not at the top allocation measure. (TTN-1743)
-    	Intersection[] allocMsrCells = EvalUtil.sortIntersectionsByAxis(allocMsrIntersections.toArray(new Intersection[0]), 
+    	List<Intersection> allocMsrCells = EvalUtil.sortIntersectionListByAxis(allocMsrIntersections, 
     			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
-    	Intersection topMsrToAllocIs = allocMsrCells[allocMsrCells.length - 1];
+    	
+    	Intersection topMsrToAllocIs = allocMsrCells.get(allocMsrCells.size() - 1);
     	if (!sourceIs.equals(topMsrToAllocIs)) {
     		// actual intersection in question should remain unchanged by this operation
     		return dataCache.getCellValue(sourceIs);
@@ -223,7 +227,8 @@ public class AllocFunc extends AbstractFunction {
 
     	int parmIndex = 0;
     	// quick check to get out if it looks like these have been validated already
-//    	if (this.isValidated) return;
+    	if (this.isValidated) return;
+
     	
     	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
     	String measureDim = evalState.getAppDef().getMdbDef().getMeasureDim();

@@ -19,6 +19,7 @@
 package com.pace.server.eval;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -149,16 +150,18 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         
         
         String[] axisSortSeq = evalState.getAxisSortPriority();
-        Intersection[] allocCells;
+        List<Intersection> sortedCellList;
 
         stepTime = System.currentTimeMillis();
-        allocCells = EvalUtil.sortIntersectionsByAxis(allocIntersections.toArray(new Intersection[0]), 
+
+        List<Intersection> al = Arrays.asList(allocIntersections.toArray(new Intersection[0]));
+        sortedCellList = EvalUtil.sortIntersectionListByAxis(al, 
         		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);            
 //        if (logger.isDebugEnabled()) logger.debug(LogUtil.timedStep("Sorting intersections in axis sequence", stepTime));
 
         logger.info("Allocating upper level changes...");
         stepTime = System.currentTimeMillis();
-        for (Intersection intersection : allocCells) {
+        for (Intersection intersection : sortedCellList) {
         	dataCache = allocateChange(intersection, evalState, dataCache);
         }
 
