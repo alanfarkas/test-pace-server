@@ -117,8 +117,7 @@ public class AllocFunc extends AbstractFunction {
     	// the first "msrToAlloc" intersection do not need to be re-allocated, even
     	// though they currently are.
     	// no need reason to recalculate them. (TTN-1743)
-    	List<Intersection> allocCells = EvalUtil.sortIntersectionListByAxis(allocIntersections, 
-    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
+
     	
 //    	Intersection[] allocCells = allocIntersections.toArray(new Intersection[0]);
 //    	Intersection[] allocMsrCells = allocMsrIntersections.toArray(new Intersection[0]);
@@ -132,7 +131,9 @@ public class AllocFunc extends AbstractFunction {
     		// actual intersection in question should remain unchanged by this operation
     		return dataCache.getCellValue(sourceIs);
     	}
-
+    	
+    	List<Intersection> allocCells = EvalUtil.sortIntersectionListByAxis(allocIntersections, 
+    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
 
     	// Check if the measures dimension is last axis dimension. (TTN-1743)
     	if (!axisSortSeq[axisSortSeq.length - 1].equals(msrDim)) {
@@ -147,6 +148,8 @@ public class AllocFunc extends AbstractFunction {
     	// assumes that any component/descendant measures were already allocated in a 
     	// previous rule step. (TTN-1743)
     	allocatedTargets = new HashSet<Intersection>(evalState.getLoadFactor());
+    	
+    	
         for (Intersection allocCell : allocCells) {
 
         	// Find the targets of the cell to allocate
