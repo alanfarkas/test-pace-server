@@ -79,12 +79,12 @@ public class DimSortComparator implements Comparator<Intersection> {
             
             if (sortOrder == SortOrder.Ascending) {
 //              	 if (true) return 1;             	
-                if (axisVal1 < axisVal1) return 1;
-                else if (axisVal1 > axisVal1) return -1;         
+                if (axisVal1 < axisVal2) return 1;
+                else if (axisVal1 > axisVal2) return -1;         
             }
             else {
-                if (axisVal1 < axisVal1) return -1;
-                else if (axisVal1 > axisVal1) return 1;      
+                if (axisVal1 < axisVal2) return -1;
+                else if (axisVal1 > axisVal2) return 1;      
             }
         }
         
