@@ -249,8 +249,8 @@ public class UnitOfWork{
         return pafDimSpecs;
 	}
 	
-	public int getMemberCount(){
-		int count = 1;
+	public long getMemberCount(){
+		long count = 1;
 		for (String dim : dimensions) {
 			count = count * dimMembers.get(dim).length;
 		}
