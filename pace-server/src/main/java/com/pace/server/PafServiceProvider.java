@@ -3458,7 +3458,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			List<String> versions = new ArrayList<String>(Arrays.asList(sizingWorkUnit.getDimMembers(versionDim)));
 			versions.removeAll(clientState.getApp().getDerivedVersions());
 			sizingWorkUnit.setDimMembers(versionDim, versions.toArray(new String[0]));
-			int uowCellCount = sizingWorkUnit.getMemberCount();
+			long uowCellCount = sizingWorkUnit.getMemberCount();
 			
 			// If the cell count falls within the bounds, then update the unit of work in the client state
 			if ((sizeMax == null || uowCellCount <= sizeMax) && uowCellCount > 0){

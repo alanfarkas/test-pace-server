@@ -2,14 +2,14 @@ package com.pace.server.comm;
 
 
 public class PafGetFilteredUOWSizeResponse {
-	private Integer uowCellCount = null;
+	private Long uowCellCount = null;
 	private String[] emptyDimensions = null;
 
-	public void setUowCellCount(Integer uowCellCount) {
+	public void setUowCellCount(Long uowCellCount) {
 		this.uowCellCount = uowCellCount;
 	}
 
-	public Integer getUowCellCount() {
+	public Long getUowCellCount() {
 		return uowCellCount;
 	}
 
