@@ -40,15 +40,15 @@ public class AppSettings {
 	private Integer globalUowSizeMax;
 	private boolean globalReplicateEnabled;	
 	private boolean globalReplicateAllEnabled;
-	private boolean globalLiftEnabled;					//1793 - Lift Allocation
-	private boolean globalLiftAllEnabled; 				//1793 - Lift Allocation
-	private boolean globalSessionLocksEnabled;
+	private boolean globalLiftEnabled;					//TTN 1793 - Lift Allocation
+	private boolean globalLiftAllEnabled; 				//TTN 1793 - Lift Allocation
+	private boolean globalSessionLocksEnabled;			//TTN 1996 - Session Lock
 	private boolean isGlobalUserFilteredUow;
 	private boolean isGlobalUserFilteredMultiSelect;	// TTN 1733 - multi-select 
 	private boolean isGlobalDataFilteredUow;
 	private UserFilterSpec globalUserFilterSpec;
 	private DataFilterSpec globalDataFilterSpec;
- 	private boolean enableRounding = false;
+ 	private boolean enableRounding ;
  	private Set<String> week53Years;					// TTN-1858 - Week 53 Support
  	private Set<String> week53Members;					// TTN-1858 - Week 53 Support
  	private AppColors appColors;
