@@ -19,7 +19,10 @@
 package com.pace.base.data;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.pace.base.SortOrder;
 
 /**
  * Value object holding the coordinates for an intersection of an arbitrary
@@ -33,9 +36,12 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 
 	private String[] dimensions;
 	private String[] coordinates;
-	private int[] memberIndex; // supports fast sorting.
 	transient private int hashCode;
-
+	
+	// supports fast sorting, static values for comparison and a pointer to the map for regenerating them on sets.
+	transient private int[] memberIndex; 
+	transient private Map <String, Map<String, Integer>>memberSequences; 
+	
 	public Intersection(String[] dimensions) {
 		this.dimensions = dimensions;
 		this.coordinates = new String[dimensions.length];
@@ -348,10 +354,64 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 		hashCode = 0;
 	}
 
+	private void calculateSortIndex() {
+		for (int i = 0; i < this.memberIndex.length; i++ ) {
+			this.memberIndex[i] = memberSequences.get(dimensions[i]).get(coordinates[i]);	
+		}		
+	}
+	
 	@Override
-	public int compareTo(Intersection i) {
+	public int compareTo(Intersection that) {
+		if (this.memberSequences == null || that.memberSequences == null) {
+			throw new UnsupportedOperationException("This intersection doesn't support implicit sorting, " + this.toString() + " : " + that.toString() );
+		}
+		
+		// lazy initialize intersections for sorting.		
+		if (this.memberIndex == null) this.calculateSortIndex();
+		if (this.memberIndex == null) that.calculateSortIndex();
+		
+		// check for fast sort, intersections are comparable
+		if (this.memberIndex.length == that.memberIndex.length) {
+			for (int i=0; i < memberIndex.length; i++) {
+				if (this.memberIndex[i] < that.memberIndex[i]) return -1;
+				else if (this.memberIndex[i] > that.memberIndex[i]) return 1;
+			}
+			return 0;
+		}
+		
+		// have to do slow comparison for mismatched dimensionality
+		// find the intersection with the longer axisSequence, should be a superset of the other
+		String[] axisSequence;
+		if (this.dimensions.length > that.dimensions.length)
+			axisSequence = this.dimensions;
+		else
+			axisSequence = that.dimensions;
+		
+		
+        Map <String, Integer> axisSeq;
+        String axis, o1Coord, o2Coord;
+        int axisVal1, axisVal2;
+        for (String dim : axisSequence) {
+            o1Coord = this.getCoordinate(dim);
+            o2Coord = that.getCoordinate(dim);
 
+            
+            // Allow for this comparator to use the same axis sequence for both attribute
+            // and non-attribute intersections during attribute evaluation. (TTN-1506) 
+            if (o1Coord == null || o2Coord == null) {
+            	// Just skip to the next axis, if one or both intersections don't contain
+            	// the current axis. Hopefully it's both, since the intent is to compare
+            	// like intersections to each other.
+            	continue;
+            }
+
+           
+            axisVal1 = memberSequences.get(dim).get(o1Coord);
+            axisVal2 = memberSequences.get(dim).get(o2Coord);
+    	
+             if (axisVal1 < axisVal2) return 1;
+                else if (axisVal1 > axisVal2) return -1;   
+        }
 		return 0;
 	}
-
 }

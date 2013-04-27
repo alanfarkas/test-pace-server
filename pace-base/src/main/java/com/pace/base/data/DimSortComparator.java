@@ -54,10 +54,10 @@ public class DimSortComparator implements Comparator<Intersection> {
         
     	
         Map <String, Integer> axisSeq;
-        String axis, o1Coord, o2Coord;
+        String o1Coord, o2Coord;
         int axisVal1, axisVal2;
-        for (int i = 0; i < axisSequence.length; i++) {
-            axis = axisSequence[i];
+        for (String axis : axisSequence) {
+            //axis = axisSequence[i];
             axisSeq = memberSeqs.get(axis);
             o1Coord = i1.getCoordinate(axis);
             o2Coord = i2.getCoordinate(axis);
