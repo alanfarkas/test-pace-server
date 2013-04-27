@@ -63,7 +63,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         final String timeDim = evalState.getTimeHorizonDim();
         final MdbDef mdbDef = evalState.getAppDef().getMdbDef();
        
-
+        logger.debug("Beginning allocation for " + evalState.getMeasureName() );
         // opt out if flag set for this rule
         if ( evalState.getRule().isSkipAllocation() ) return;        
         
@@ -73,8 +73,8 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         	return;
         }
 
-        HashSet<Intersection> allocIntersections = new HashSet<Intersection>( evalState.getLoadFactor() * 10 );
-        HashSet<Intersection> skipIS = new HashSet<Intersection>();
+        HashSet<Intersection> allocIntersections = new HashSet<Intersection>( evalState.getLoadFactor() * 10  );
+        HashSet<Intersection> skipIS = new HashSet<Intersection>( evalState.getLoadFactor() );
         unlockIntersections.clear();
         
         allocIntersections.addAll(evalState.getAllocationsByMsr(evalState.getMeasureName()));

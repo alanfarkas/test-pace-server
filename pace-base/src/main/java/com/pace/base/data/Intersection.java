@@ -227,12 +227,18 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 		Intersection i = new Intersection();
 		i.coordinates = new String[this.coordinates.length];
 		i.dimensions = new String[this.coordinates.length];
+		if (this.memberIndex != null)
+			i.memberIndex = new int[this.coordinates.length];
+		
 
 		for (int j = 0; j < this.coordinates.length; j++) {
 			i.coordinates[j] = this.coordinates[j];
 			i.dimensions[j] = this.dimensions[j];
+			if (this.memberIndex != null)			
+				i.memberIndex[j] = this.memberIndex[j];
 		}
 		
+		i.hashCode = this.hashCode;
 		i.memberSequences = this.memberSequences;
 
 		return i;

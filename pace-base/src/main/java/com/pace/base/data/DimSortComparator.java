@@ -45,7 +45,6 @@ public class DimSortComparator implements Comparator<Intersection> {
         this.sortOrder = sortOrder;
     }
     
-    public int compare2(Intersection o1, Intersection o2) { return 1; }
     
     public int compare(Intersection i1, Intersection i2) {
            
@@ -54,17 +53,17 @@ public class DimSortComparator implements Comparator<Intersection> {
 
     	
     	// first check for an "enhanced sorting intersection" and use if possible
-      	
-    	if (i1.isSortable() && i2.isSortable()) {
-    		return i1.compareTo(i2);
-    	}
-    	else {
-        	i1.makeSortable(memberSeqs);
-        	i2.makeSortable(memberSeqs);
-    		return i1.compareTo(i2);        	
-    	}
   	
-/*  	
+//    	if (i1.isSortable() && i2.isSortable()) {
+//    		return i1.compareTo(i2);
+//    	}
+//    	else {
+//        	i1.makeSortable(memberSeqs);
+//        	i2.makeSortable(memberSeqs);
+//    		return i1.compareTo(i2);        	
+//    	}
+  	
+
         Map <String, Integer> axisSeq;
         String o1Coord, o2Coord;
         int axisVal1, axisVal2;
@@ -97,7 +96,7 @@ public class DimSortComparator implements Comparator<Intersection> {
             }
         }
         return 0;
-        */
+
     }
     
 }

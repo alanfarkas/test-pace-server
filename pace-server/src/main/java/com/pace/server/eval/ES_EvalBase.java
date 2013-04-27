@@ -53,8 +53,8 @@ public abstract class ES_EvalBase implements IEvalStep {
     public abstract void performEvaluation(EvalState evalState) throws PafException; 
 
     protected Set<Intersection> impactingChangeList(Rule rule, EvalState evalState ) throws PafException {
-        Set<Intersection> impactList = new HashSet<Intersection>();
-        Set<Intersection> changeSet = new HashSet<Intersection>(500);
+        Set<Intersection> impactList = new HashSet<Intersection>(5000);
+        Set<Intersection> changeSet = new HashSet<Intersection>(5000);
         String msrDim = evalState.getAppDef().getMdbDef().getMeasureDim();
         String timeDim = evalState.getAppDef().getMdbDef().getTimeDim();
         

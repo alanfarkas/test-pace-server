@@ -96,7 +96,7 @@ public class ES_Aggregate extends ES_EvalBase implements IEvalStep {
             
             // build measure dimension/member filter object.
             Map<String, List<String>> aggFilter = new HashMap<String, List<String>>(1);
-            List<String> mbrs = new ArrayList<String>(1);
+            List<String> mbrs = new ArrayList<String>(1000);
 			mbrs.add(measure);
 
 			// if measure allocation, include current measure's descendants (TTN-1927)

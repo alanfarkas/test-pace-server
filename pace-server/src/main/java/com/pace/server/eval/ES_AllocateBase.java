@@ -50,7 +50,7 @@ public abstract class ES_AllocateBase extends ES_EvalBase implements IEvalStep {
     // be removed from allocation, but aren't. Also holds changes allocated, but again no 
     // found value.
 //    protected HashSet<Intersection> processedIntersections = new HashSet<Intersection>();
-    protected Set<Intersection> unlockIntersections = new HashSet<Intersection>(50000);
+    protected Set<Intersection> unlockIntersections = new HashSet<Intersection>(5000);
     
     public abstract void performEvaluation(EvalState evalState) throws PafException; 
     

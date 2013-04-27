@@ -63,8 +63,8 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
         String measureDim = mdbDef.getMeasureDim();
         
-		HashSet<Intersection> newChngCells = new HashSet<Intersection>(5000);
-		HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>(5000);
+		HashSet<Intersection> newChngCells = new HashSet<Intersection>(500);
+		HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>(500);
 		Intersection calcIntersection;
 
 		IPafFunction measFunc = null;
@@ -72,10 +72,9 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
                 measFunc = evalState.getRule().getFormula().extractResultFunction();
 
 		stepTime = System.currentTimeMillis();       
-		Set<Intersection> chngSet = new HashSet<Intersection>(500);
+		Set<Intersection> chngSet = new HashSet<Intersection>(5000);
 //        chngSet.addAll(evalState.getOrigLockedCells()); 
         
-		stepTime = System.currentTimeMillis();
 		Rule leadingRule;
 		
 		// if the rule currently being examined isn't a measure function, then only changes within the current time slice need to be
@@ -225,7 +224,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 	}
 
     private Set<Intersection> calculatePriorTimeIntersections(Intersection calcIntersection, EvalState evalState) {
-        Set<Intersection> locks = new HashSet<Intersection>();
+        Set<Intersection> locks = new HashSet<Intersection>(500);
         
         // setup some local variables
         PafDimTree timeTree = evalState.getTimeSubTree();
