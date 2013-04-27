@@ -29,10 +29,11 @@ import java.util.Set;
  * @author JWatkins
  * 
  */
-public class Intersection implements ICoords {
+public class Intersection implements ICoords, Cloneable, Comparable<Intersection> {
 
 	private String[] dimensions;
 	private String[] coordinates;
+	private int[] memberIndex; // supports fast sorting.
 	transient private int hashCode;
 
 	public Intersection(String[] dimensions) {
@@ -194,7 +195,7 @@ public class Intersection implements ICoords {
 		return sb.toString();
 	}
 
-	public Intersection() {
+	private Intersection() {
 	} // used only for cloning
 
 
@@ -345,6 +346,12 @@ public class Intersection implements ICoords {
 	public void setCoordinate(int axis, String value) {
 		getCoordinates()[axis] = value;
 		hashCode = 0;
+	}
+
+	@Override
+	public int compareTo(Intersection i) {
+
+		return 0;
 	}
 
 }

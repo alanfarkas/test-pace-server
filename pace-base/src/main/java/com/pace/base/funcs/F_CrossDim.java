@@ -138,9 +138,7 @@ public class F_CrossDim extends AbstractFunction {
 				}
 				members.add(resolveMemberSpec(dim, memberSpec, clientState, currMember, tokenCatalog));
 			}
-			overrideParms = new Intersection();
-			overrideParms.setDimensions((dims.toArray(new String[0])));
-			overrideParms.setCoordinates(members.toArray(new String[0]));
+			overrideParms = new Intersection(dims.toArray(new String[0]), members.toArray(new String[0]));
 			return overrideParms;
 			
 		} catch (RuntimeException e) {

@@ -672,7 +672,7 @@ public class PafMemberTagManager extends PafClientDbManager {
 			for(MemberTagData mtData : memberTagDataList){
 				
 				if (mtData.getMemberTagCoordSet() != null && mtData.getMemberTagCoordSet().size() > 0){
-					Intersection intersection = new Intersection();
+
 					String[] dimensions = new String[mtData.getMemberTagCoordSet().size()];
 					String[] coordinates = new String[mtData.getMemberTagCoordSet().size()];
 
@@ -685,11 +685,9 @@ public class PafMemberTagManager extends PafClientDbManager {
 						counter++;
 					}
 
-					intersection.setDimensions(dimensions);
-					intersection.setCoordinates(coordinates);
 
 					//Add the Intersection object and its corresponding MemberTagData object to the map
-					memberTagMap.put(intersection, mtData);
+					memberTagMap.put(new Intersection(dimensions, coordinates), mtData);
 				}
 			}
 		}
@@ -760,8 +758,7 @@ public class PafMemberTagManager extends PafClientDbManager {
 			while (i < simpleCoordList.getCoordinates().length)
 			{
 				//Construct Intersection object
-				Intersection intersectionToFind = new Intersection();
-				intersectionToFind.setDimensions(sortedAxisArray);
+				Intersection intersectionToFind = new Intersection(sortedAxisArray);
 				
 				for(int j = 0; j < simpleCoordList.getAxis().length; j++){
 					intersectionToFind.setCoordinate(simpleCoordList.getAxis()[j], simpleCoordList.getCoordinates()[i]);
