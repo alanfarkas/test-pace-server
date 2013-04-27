@@ -52,21 +52,26 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 		this.dimensions = dimensions;
 	}
 
-	public Intersection(String[] dimensions, List<String> coordinates) {
-		this(dimensions, coordinates.toArray(new String[0]));
-	}
+// Remvoing unused convenience constructors	
+	
+//	public Intersection(String[] dimensions, List<String> coordinates) {
+//		this(dimensions, coordinates.toArray(new String[0]));
+//	}
 
 
-	/**
-	 * @param dimensions Intersection dimensions
-	 * @param coordinates Intersection coordinates
-	 * @param dimensionOrder Specifies the desired order of dimension coordinates in the new intersection
-	 */
-	public Intersection(List<String> dimensions, List<String> coordinates, List<String> dimensionOrder) {
-		this(dimensions, coordinates.toArray(new String[0]), dimensionOrder);
-	}
+//	/**
+//	 * @param dimensions Intersection dimensions
+//	 * @param coordinates Intersection coordinates
+//	 * @param dimensionOrder Specifies the desired order of dimension coordinates in the new intersection
+//	 */
+//	public Intersection(List<String> dimensions, List<String> coordinates, List<String> dimensionOrder) {
+//		this(dimensions, coordinates.toArray(new String[0]), dimensionOrder);
+//	}
 
-
+	
+	
+	
+	
 	/**
 	 * @param dimensions Intersection dimensions
 	 * @param coordinates Intersection coordinates
@@ -91,6 +96,16 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 		
 		this.dimensions = dimensionOrder.toArray(new String[0]);
 		this.coordinates = orderedCoords;
+	}
+	
+	
+	/**
+	 * @param memberSequences
+	 * 
+	 * Utility method to enable high speed sorting on an intersection after it's created using one of the other constructors.
+	 */
+	public void makeSortable(Map <String, Map<String, Integer>> memberSequences) {
+		this.memberSequences = memberSequences;
 	}
 
 
@@ -217,6 +232,8 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 			i.coordinates[j] = this.coordinates[j];
 			i.dimensions[j] = this.dimensions[j];
 		}
+		
+		i.memberSequences = this.memberSequences;
 
 		return i;
 	}
@@ -240,38 +257,39 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 		return matchStr;
 	}
 
-	public static Intersection createIntersection(String[] dims,
-			List<String> pageMembers, List<String> rowMembers,
-			List<String> colMembers) {
-
-		Intersection intersection = new Intersection(dims);
-
-		String[] members = intersection.getCoordinates();
-		int index = 0;
-
-		if (pageMembers != null) {
-			for (String pageMember : pageMembers) {
-				members[index++] = pageMember;
-			}
-		}
-		
-		if ( colMembers != null ) {
-			for (String colMember : colMembers) {
-				members[index++] = colMember;
-			}
-		}
-		
-		if ( rowMembers != null ) {
-			for (String rowMember : rowMembers) {
-				members[index++] = rowMember;
-			}
-		}
-		
-		intersection.setCoordinates(members);
-
-		return intersection;
-
-	}
+	
+//	public static Intersection createIntersection(String[] dims,
+//			List<String> pageMembers, List<String> rowMembers,
+//			List<String> colMembers) {
+//
+//		Intersection intersection = new Intersection(dims);
+//
+//		String[] members = intersection.getCoordinates();
+//		int index = 0;
+//
+//		if (pageMembers != null) {
+//			for (String pageMember : pageMembers) {
+//				members[index++] = pageMember;
+//			}
+//		}
+//		
+//		if ( colMembers != null ) {
+//			for (String colMember : colMembers) {
+//				members[index++] = colMember;
+//			}
+//		}
+//		
+//		if ( rowMembers != null ) {
+//			for (String rowMember : rowMembers) {
+//				members[index++] = rowMember;
+//			}
+//		}
+//		
+//		intersection.setCoordinates(members);
+//
+//		return intersection;
+//
+//	}
 
 	/**
 	 * Generate a copy of this intersection comprised of only
@@ -359,6 +377,7 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 	}
 
 	private void calculateSortIndex() {
+		memberIndex = new int[dimensions.length];
 		for (int i = 0; i < this.memberIndex.length; i++ ) {
 			this.memberIndex[i] = memberSequences.get(dimensions[i]).get(coordinates[i]);	
 		}		
@@ -379,7 +398,7 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 		
 		// lazy initialize intersections for sorting.		
 		if (this.memberIndex == null) this.calculateSortIndex();
-		if (this.memberIndex == null) that.calculateSortIndex();
+		if (that.memberIndex == null) that.calculateSortIndex();
 		
 		// check for fast sort, intersections are comparable
 		if (this.memberIndex.length == that.memberIndex.length) {
@@ -414,8 +433,7 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
             	// like intersections to each other.
             	continue;
             }
-
-           
+   
             axisVal1 = memberSequences.get(dim).get(o1Coord);
             axisVal2 = memberSequences.get(dim).get(o2Coord);
     	
