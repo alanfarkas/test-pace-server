@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.pace.base.SortOrder;
 
 /**
  * Value object holding the coordinates for an intersection of an arbitrary
@@ -117,6 +116,7 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 	public void setCoordinates(String[] coordinates) {
 		this.coordinates = coordinates;
 		this.hashCode = 0;
+		this.memberIndex = null;
 	}
 
 	public String[] getDimensions() {
@@ -125,6 +125,8 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 
 	public void setDimensions(String[] dimensions) {
 		this.dimensions = dimensions;
+		this.hashCode = 0;
+		this.memberIndex = null;		
 	}
 
 	public String getCoordinate(String dimension) {
@@ -149,6 +151,7 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 			if (dim.equals(dimension)) {
 				coordinates[i] = value;
 				hashCode = 0;
+				memberIndex = null;
 				return;
 			}
 			i++;
@@ -352,12 +355,20 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 	public void setCoordinate(int axis, String value) {
 		getCoordinates()[axis] = value;
 		hashCode = 0;
+		this.memberIndex = null;
 	}
 
 	private void calculateSortIndex() {
 		for (int i = 0; i < this.memberIndex.length; i++ ) {
 			this.memberIndex[i] = memberSequences.get(dimensions[i]).get(coordinates[i]);	
 		}		
+	}
+	
+	// interim property to support whether it supports fast sorting
+	public boolean isSortable() {
+//		return false;
+		if (memberSequences == null) return false;
+		else return true;
 	}
 	
 	@Override
@@ -388,8 +399,7 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 			axisSequence = that.dimensions;
 		
 		
-        Map <String, Integer> axisSeq;
-        String axis, o1Coord, o2Coord;
+        String o1Coord, o2Coord;
         int axisVal1, axisVal2;
         for (String dim : axisSequence) {
             o1Coord = this.getCoordinate(dim);

@@ -51,6 +51,11 @@ public class DimSortComparator implements Comparator<Intersection> {
            
         // sorts like an alphabetical order. If 1st axis determines priority consider sorted,
         // else continue until tie is resolved.
+    	
+    	// first check for an "enhanced sorting intersection" and use if possible
+//    	if (i1.isSortable() && i2.isSortable()) {
+//    		return i1.compareTo(i2);
+//    	}
         
     	
         Map <String, Integer> axisSeq;
