@@ -20,6 +20,7 @@ package com.pace.server.eval;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -155,9 +156,15 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
 
         stepTime = System.currentTimeMillis();
 
-        List<Intersection> al = Arrays.asList(allocIntersections.toArray(new Intersection[0]));
-        sortedCellList = EvalUtil.sortIntersectionListByAxis(al, 
-        		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);            
+        // Attempt localized implementation of fast sorting.
+        sortedCellList = Arrays.asList(allocIntersections.toArray(new Intersection[0]));
+        for (Intersection i : sortedCellList) {
+        	i.makeSortable(evalState.getClientState().getMemberIndexLists());
+        }
+        Collections.sort(sortedCellList);
+        
+//        sortedCellList = EvalUtil.sortIntersectionListByAxis(al, 
+//        		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);            
 //        if (logger.isDebugEnabled()) logger.debug(LogUtil.timedStep("Sorting intersections in axis sequence", stepTime));
 
         if (logger.isDebugEnabled())
