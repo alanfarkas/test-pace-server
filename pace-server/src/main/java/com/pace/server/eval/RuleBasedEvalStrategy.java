@@ -556,7 +556,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 		List<String> timePeriods = evalState.getTimePeriodList();
 		evalState.setTimeSliceMode(true);
-		logger.info(Messages.getString("RuleBasedEvalStrategy.83")); //$NON-NLS-1$
+		logger.info(Messages.getString("RuleBasedEvalStrategy.83") + ruleGroups.get(0).getBalanceSetKey() ); //$NON-NLS-1$
 		long stepTime = System.currentTimeMillis();
 
 		// process all rule groups in this subset in time slice order
@@ -592,7 +592,8 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 				// 1st process aggregate measures
 				logger.debug(Messages.getString("RuleBasedEvalStrategy.61"));             //$NON-NLS-1$
 				for (int r = rg.getRules().length-1; r >= 0 ; r--) {
-					logger.info(Messages.getString("RuleBasedEvalStrategy.62") + rg.getRules()[r].toString()); //$NON-NLS-1$
+					if (logger.isDebugEnabled() )
+							logger.debug(Messages.getString("RuleBasedEvalStrategy.62") + rg.getRules()[r].toString()); //$NON-NLS-1$
 					evalState.setRule(rg.getRules()[r]);
 
 					evalPerpetualRulegroup.performEvaluation(evalState); 
@@ -603,11 +604,13 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 				}   
 			}   
 		}    
+		
 		logger.info(LogUtil.timedStep(Messages.getString("RuleBasedEvalStrategy.90") + " : " + ruleGroups.get(0).getBalanceSetKey(), stepTime)); //$NON-NLS-1$
 
 		// now do an aggregation and recalc pass
-		for (RuleGroup rg : ruleGroups ) {       
-			logger.debug(Messages.getString("RuleBasedEvalStrategy.63") + rg.getRuleGroupId()); //$NON-NLS-1$
+		for (RuleGroup rg : ruleGroups ) {   
+			if (logger.isDebugEnabled() )			
+				logger.debug(Messages.getString("RuleBasedEvalStrategy.63") + rg.getRuleGroupId()); //$NON-NLS-1$
 			long rgStartTime = System.currentTimeMillis();
 			evalState.setRuleGroup(rg);
 
