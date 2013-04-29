@@ -22,6 +22,7 @@ package com.pace.server.eval;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -85,8 +86,13 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 
 
 		// Sort locked intersections resulting from user locks and cell changes
-		Intersection[] lockList = EvalUtil.sortIntersectionsByAxis(evalState.getUserLocksAndChangedCells().toArray(new Intersection[0]), 
-				evalState.getClientState().getMemberIndexLists(), axisSortSeq, SortOrder.Ascending); 
+		List<Intersection> lockList = Arrays.asList(evalState.getUserLocksAndChangedCells().toArray(new Intersection[0]));
+		
+		for (Intersection i : lockList ) {
+			i.makeSortable(evalState.getClientState().getMemberIndexLists());
+		}
+		
+		Collections.sort(lockList);
 
 		// remove all intersections that are non aggregate or exist in elapsed periods
 		List<Intersection> tempList = new ArrayList<Intersection>();
@@ -126,7 +132,7 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 		}
 		
 		// Reassign pruned list to original collection
-		lockList = tempList.toArray(new Intersection[0]);
+		lockList = tempList;
 		
 
 		// process in dimension priority sequence
@@ -142,7 +148,8 @@ public class ES_AllocateRatios extends ES_AllocateBase implements IEvalStep {
 			
 			// check each locked intersection for ratio allocation scenario
 			// list must be processed in top down order in order to waterfall down the ratio allocations
-			lockList = EvalUtil.sortIntersectionsByAxis(tempList.toArray(new Intersection[0]), evalState.getClientState().getMemberIndexLists(), evalState.getAxisSortPriority(), SortOrder.Ascending);
+			Collections.sort(lockList);
+//			lockList = EvalUtil.sortIntersectionsByAxis(tempList.toArray(new Intersection[0]), evalState.getClientState().getMemberIndexLists(), evalState.getAxisSortPriority(), SortOrder.Ascending);
 			List<String> targetNames = new ArrayList<String>();
 			
 			for (Intersection is : lockList ) {
