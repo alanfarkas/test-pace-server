@@ -1,6 +1,7 @@
 package com.pace.ext.funcs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -93,6 +94,9 @@ public class AllocFunc extends AbstractFunction {
     		// belonging to "msrToAlloc" and the ones belonging to the "msrToAlloc"
     		// components.
     		String measure = lockedCell.getCoordinate(msrDim);
+    		
+    		// attempt to set for fast sorting...
+			lockedCell.makeSortable(evalState.getClientState().getMemberIndexLists());
 			if (this.aggMsrs.contains(measure)) {
 				allocIntersections.add(lockedCell);
 				if (measure.equals(msrToAlloc)) {
@@ -123,17 +127,24 @@ public class AllocFunc extends AbstractFunction {
 //    	Intersection[] allocMsrCells = allocMsrIntersections.toArray(new Intersection[0]);
     	
     	// Exit if we're not at the top allocation measure. (TTN-1743)
-    	List<Intersection> allocMsrCells = EvalUtil.sortIntersectionListByAxis(allocMsrIntersections, 
-    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
+    	// try to implement fast sorting
     	
-    	Intersection topMsrToAllocIs = allocMsrCells.get(allocMsrCells.size() - 1);
+//    	List<Intersection> allocMsrCells = EvalUtil.sortIntersectionListByAxis(allocMsrIntersections, 
+//    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);
+    	
+    	Collections.sort(allocMsrIntersections);
+    	
+    	
+    	Intersection topMsrToAllocIs = allocMsrIntersections.get(allocMsrIntersections.size() - 1);
     	if (!sourceIs.equals(topMsrToAllocIs)) {
     		// actual intersection in question should remain unchanged by this operation
     		return dataCache.getCellValue(sourceIs);
     	}
     	
-    	List<Intersection> allocCells = EvalUtil.sortIntersectionListByAxis(allocIntersections, 
-    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
+//    	List<Intersection> allocCells = EvalUtil.sortIntersectionListByAxis(allocIntersections, 
+//    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
+    	
+    	Collections.sort(allocIntersections);
 
     	// Check if the measures dimension is last axis dimension. (TTN-1743)
     	if (!axisSortSeq[axisSortSeq.length - 1].equals(msrDim)) {
@@ -150,7 +161,7 @@ public class AllocFunc extends AbstractFunction {
     	allocatedTargets = new HashSet<Intersection>(evalState.getLoadFactor());
     	
     	
-        for (Intersection allocCell : allocCells) {
+        for (Intersection allocCell : allocIntersections) {
 
         	// Find the targets of the cell to allocate
         	Set<Intersection> allocTargets = new HashSet<Intersection>();
