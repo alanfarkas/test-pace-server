@@ -219,7 +219,7 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 		return sb.toString();
 	}
 
-	private Intersection() {
+	public Intersection() {
 	} // used only for cloning
 
 
