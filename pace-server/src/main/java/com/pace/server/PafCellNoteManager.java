@@ -207,7 +207,7 @@ public class PafCellNoteManager extends PafClientDbManager {
 
 		logger.debug("DEBUG - Start getCellNotes(String, String, Map<String, Set<String>>) - " + new Date());
 		
-		if ( applicationId == null || dataSourceId == null || dimensionMemberMapSet == null ) {
+		if ( applicationId == null || dataSourceId == null || dimensionMemberMapSet == null || dimensionMemberMapSet.size() == 0 ) {
 			return null;
 		}
 		
@@ -220,101 +220,98 @@ public class PafCellNoteManager extends PafClientDbManager {
 								
 		Set<String> dimensionNameSet = dimensionMemberMapSet.keySet();
 				
-		if ( dimensionNameSet != null && dimensionNameSet.size() > 0 ) {
-				
-			String[] dynamicColumnNames = new String[dimensionNameSet.size()];
-			
-			int dimensionCnt = 0;
-			
-			//populate dynamic Column Name set
-			for (String dimensionName : dimensionNameSet ) {
-			
-				String dynamicColumnName = "query_" + dimensionCnt;
-				
-				dynamicColumnNames[dimensionCnt++] = dynamicColumnName;
-				
-			}
+		String[] dynamicColumnNames = new String[dimensionNameSet.size()];
 		
-			strBuff.append("select id, ");
+		int dimensionCnt = 0;
+		
+		//populate dynamic Column Name set
+		for (String dimensionName : dimensionNameSet ) {
+		
+			String dynamicColumnName = "query_" + dimensionCnt;
 			
-			dimensionCnt = 0;
+			dynamicColumnNames[dimensionCnt++] = dynamicColumnName;
 			
-			for (String dynamicColumnName : dynamicColumnNames ) {
-				
-				strBuff.append(dynamicColumnName);
-				
-				if ( ++dimensionCnt == dynamicColumnNames.length ) {
-					strBuff.append(' ');
-				} else {
-					strBuff.append(", ");
-				}
-				
-			}
-			
-			strBuff.append(" from ( ");
-			strBuff.append("SELECT cn.id, ");
-			
-			dimensionCnt = 0;
-			
-			for (String dimensionName : dimensionNameSet ) {
-				
-				Set<String> memberNameSet = dimensionMemberMapSet.get(dimensionName);
-												
-				strBuff.append("max(case when d.name = '" + dimensionName + "' and cnm.member_name in ( ");
-				
-				int memberCnt = 0;
-				
-				for (String memberName : memberNameSet ) {
-					
-					strBuff.append("'" + memberName + "'");
-					
-					if ( ++memberCnt != memberNameSet.size()) {
-						strBuff.append(", ");
-					}									
-					
-				}
-								
-				strBuff.append(") then 1 else 0 end) AS " + dynamicColumnNames[dimensionCnt]);
-				
-				if ( ++dimensionCnt != dimensionNameSet.size()) {
-					strBuff.append(", ");
-				} else {
-					strBuff.append(' ');
-				}
-				
-			}
-			
-			strBuff.append("FROM cell_notes cn, cell_note_mappings cnm, DIMENSIONS d, applications a, datasources ds ");
-			strBuff.append("Where cn.ID = cnm.cell_note_id ");
-			strBuff.append("AND cnm.dimension_id=d.ID ");
-			strBuff.append("AND cn.application_id = a.id ");
-			strBuff.append("AND cn.data_source_id = ds.id ");
-			strBuff.append("and a.name = '"+ applicationId +"' ");
-			strBuff.append("and ds.name = '" + dataSourceId + "' ");
-			strBuff.append("and d.enabled = 'T' ");
-			strBuff.append("group by cn.id) as tmpTable ");
-			
-			int dynamicColumnCount = 0;
-			
-			for (String dynamicColumnName : dynamicColumnNames ) {
-				
-				if ( dynamicColumnCount == 0 ) {
-					strBuff.append("where ");
-				} else {
-					strBuff.append("and ");
-				}
-				
-				strBuff.append(dynamicColumnName + " = 1 ");
-				
-				
-				dynamicColumnCount++;
-				
-			}
-			
-			strBuff.append(") as filtered_table ");
-			strBuff.append("where cn.id = filtered_table.id");		
-									
 		}
+	
+		strBuff.append("select id, ");
+		
+		dimensionCnt = 0;
+		
+		for (String dynamicColumnName : dynamicColumnNames ) {
+			
+			strBuff.append(dynamicColumnName);
+			
+			if ( ++dimensionCnt == dynamicColumnNames.length ) {
+				strBuff.append(' ');
+			} else {
+				strBuff.append(", ");
+			}
+			
+		}
+		
+		strBuff.append(" from ( ");
+		strBuff.append("SELECT cn.id, ");
+		
+		dimensionCnt = 0;
+		
+		for (String dimensionName : dimensionNameSet ) {
+			
+			Set<String> memberNameSet = dimensionMemberMapSet.get(dimensionName);
+											
+			strBuff.append("max(case when d.name = '" + dimensionName + "' and cnm.member_name in ( ");
+			
+			int memberCnt = 0;
+			
+			for (String memberName : memberNameSet ) {
+				
+				strBuff.append("'" + memberName + "'");
+				
+				if ( ++memberCnt != memberNameSet.size()) {
+					strBuff.append(", ");
+				}									
+				
+			}
+							
+			strBuff.append(") then 1 else 0 end) AS " + dynamicColumnNames[dimensionCnt]);
+			
+			if ( ++dimensionCnt != dimensionNameSet.size()) {
+				strBuff.append(", ");
+			} else {
+				strBuff.append(' ');
+			}
+			
+		}
+		
+		strBuff.append("FROM cell_notes cn, cell_note_mappings cnm, DIMENSIONS d, applications a, datasources ds ");
+		strBuff.append("Where cn.ID = cnm.cell_note_id ");
+		strBuff.append("AND cnm.dimension_id=d.ID ");
+		strBuff.append("AND cn.application_id = a.id ");
+		strBuff.append("AND cn.data_source_id = ds.id ");
+		strBuff.append("and a.name = '"+ applicationId +"' ");
+		strBuff.append("and ds.name = '" + dataSourceId + "' ");
+		strBuff.append("and d.enabled = 'T' ");
+		strBuff.append("group by cn.id) as tmpTable ");
+		
+		int dynamicColumnCount = 0;
+		
+		for (String dynamicColumnName : dynamicColumnNames ) {
+			
+			if ( dynamicColumnCount == 0 ) {
+				strBuff.append("where ");
+			} else {
+				strBuff.append("and ");
+			}
+			
+			strBuff.append(dynamicColumnName + " = 1 ");
+			
+			
+			dynamicColumnCount++;
+			
+		}
+		
+		strBuff.append(") as filtered_table ");
+		strBuff.append("where cn.id = filtered_table.id");		
+									
 				
 		logger.debug(strBuff.toString());		
 		
