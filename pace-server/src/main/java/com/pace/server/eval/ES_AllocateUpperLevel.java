@@ -63,7 +63,8 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         final String timeDim = evalState.getTimeHorizonDim();
         final MdbDef mdbDef = evalState.getAppDef().getMdbDef();
        
-        logger.debug("Beginning allocation for " + evalState.getMeasureName() );
+        if (logger.isDebugEnabled())
+        	logger.debug("Beginning allocation for " + evalState.getMeasureName() );
         // opt out if flag set for this rule
         if ( evalState.getRule().isSkipAllocation() ) return;        
         
@@ -159,7 +160,8 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         		evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);            
 //        if (logger.isDebugEnabled()) logger.debug(LogUtil.timedStep("Sorting intersections in axis sequence", stepTime));
 
-        logger.info("Allocating upper level changes...");
+        if (logger.isDebugEnabled())
+        	logger.debug("Allocating upper level changes");
         stepTime = System.currentTimeMillis();
         for (Intersection intersection : sortedCellList) {
         	dataCache = allocateChange(intersection, evalState, dataCache);
@@ -169,7 +171,8 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         if (!evalState.getRule().isLockAllocation())
         	evalState.getCurrentLockedCells().removeAll(unlockIntersections);    
         
-        evalPerfLogger.info(LogUtil.timedStep("Allocation step", stepTime));
+        if (logger.isDebugEnabled())
+        	evalPerfLogger.debug(LogUtil.timedStep("Allocation step", stepTime));
 
         logEvalDetail(this, evalState, dataCache);
         
