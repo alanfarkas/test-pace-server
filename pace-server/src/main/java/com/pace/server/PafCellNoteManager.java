@@ -290,7 +290,7 @@ public class PafCellNoteManager extends PafClientDbManager {
 		strBuff.append("and a.name = '"+ applicationId +"' ");
 		strBuff.append("and ds.name = '" + dataSourceId + "' ");
 		strBuff.append("and d.enabled = 'T' ");
-		strBuff.append("group by cn.id) as tmpTable ");
+		strBuff.append("group by cn.id) tmpTable ");
 		
 		int dynamicColumnCount = 0;
 		
@@ -309,7 +309,7 @@ public class PafCellNoteManager extends PafClientDbManager {
 			
 		}
 		
-		strBuff.append(") as filtered_table ");
+		strBuff.append(") filtered_table ");
 		strBuff.append("where cn.id = filtered_table.id");		
 									
 				
