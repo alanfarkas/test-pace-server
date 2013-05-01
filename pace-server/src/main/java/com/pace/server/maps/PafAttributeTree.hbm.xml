@@ -4,7 +4,7 @@
 <hibernate-mapping package="com.pace.base.mdb">
  <class name="PafAttributeTree" table="PAF_ATTR_TREE">
   <id column="member_tree_id" type="int">
-   <generator class="identity"/>
+			<generator class="native"><param name="sequence">seq_id_inc_by_1</param></generator>
   </id>
   <one-to-one cascade="all"
    class="PafAttributeMember" name="rootNode"/>

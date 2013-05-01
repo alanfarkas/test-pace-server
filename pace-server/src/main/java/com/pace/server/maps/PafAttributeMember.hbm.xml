@@ -5,7 +5,7 @@
        <hibernate-mapping package="com.pace.base.mdb">
             <class name="PafAttributeMember" table="PAF_ATTR_MBR" >
                 <id column="member_id" type="int">
-                	<generator class="identity"/>
+			<generator class="native"><param name="sequence">seq_id_inc_by_1</param></generator>
 		        </id>
 
 				<property name="key" column="member_name" type="string" length="80"/>
