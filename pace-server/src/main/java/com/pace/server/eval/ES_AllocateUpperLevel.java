@@ -157,14 +157,14 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         stepTime = System.currentTimeMillis();
 
         // Attempt localized implementation of fast sorting.
-//        sortedCellList = Arrays.asList(allocIntersections.toArray(new Intersection[0]));
-//        for (Intersection i : sortedCellList) {
-//        	i.makeSortable(evalState.getClientState().getMemberIndexLists());
-//        }
-//        Collections.sort(sortedCellList);
+        sortedCellList = Arrays.asList(allocIntersections.toArray(new Intersection[0]));
+        for (Intersection i : sortedCellList) {
+        	i.makeSortable(evalState.getClientState().getMemberIndexLists());
+        }
+        Collections.sort(sortedCellList);
+             
+//        sortedCellList = EvalUtil.sortIntersectionListByAxis(Arrays.asList(allocIntersections.toArray(new Intersection[0])), evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);    
         
-        
-        sortedCellList = EvalUtil.sortIntersectionListByAxis(Arrays.asList(allocIntersections.toArray(new Intersection[0])), evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);            
         if (logger.isDebugEnabled()) logger.debug(LogUtil.timedStep("Sorting intersections in axis sequence", stepTime));
 
         if (logger.isDebugEnabled())

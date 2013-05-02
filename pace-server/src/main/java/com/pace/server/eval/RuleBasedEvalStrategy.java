@@ -600,8 +600,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 
 					// Allocate upper level changes
 					allocateUpper.performEvaluation(evalState);
-
-				}   
+				}
 			}   
 		}    
 		

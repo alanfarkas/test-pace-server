@@ -409,8 +409,8 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 		// check for fast sort, intersections are comparable
 		if (this.memberIndex.length == that.memberIndex.length) {
 			for (int i=0; i < memberIndex.length; i++) {
-				if (this.memberIndex[i] < that.memberIndex[i]) return -1;
-				else if (this.memberIndex[i] > that.memberIndex[i]) return 1;
+				if (this.memberIndex[i] < that.memberIndex[i]) return 1;
+				else if (this.memberIndex[i] > that.memberIndex[i]) return -1;
 			}
 			return 0;
 		}

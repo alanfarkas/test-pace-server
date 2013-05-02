@@ -212,6 +212,14 @@ public class EvalState implements IPafEvalState, Cloneable {
 			this.addChangedCellByTime(is);
 		}
 		
+		// process locked cells into indexed stacks as well
+		// too dangerous at this juncture, but should probably be done and could improve performance
+//		for (Intersection is : this.origLockedCells ) {
+//			this.addChangedCellByMsr(is);
+//			this.addChangedCellByTime(is);			
+//		}
+//		
+		
 		//TODO (AF) filter out elapsed periods
 		this.addAllAllocations(this.currentLockedCells);
 		this.addAllAllocations(this.currentChangedCells);

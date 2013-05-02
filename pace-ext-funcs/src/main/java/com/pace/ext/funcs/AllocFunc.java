@@ -96,7 +96,7 @@ public class AllocFunc extends AbstractFunction {
     		String measure = lockedCell.getCoordinate(msrDim);
     		
     		// attempt to set for fast sorting...
-//			lockedCell.makeSortable(evalState.getClientState().getMemberIndexLists());
+			lockedCell.makeSortable(evalState.getClientState().getMemberIndexLists());
     		
 			if (this.aggMsrs.contains(measure)) {
 				allocIntersections.add(lockedCell);
@@ -130,10 +130,10 @@ public class AllocFunc extends AbstractFunction {
     	// Exit if we're not at the top allocation measure. (TTN-1743)
     	// try to implement fast sorting
     	
-//    	List<Intersection> allocMsrCells = EvalUtil.sortIntersectionListByAxis(allocMsrIntersections, 
-//    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);
+    	EvalUtil.sortIntersectionListByAxis(allocMsrIntersections, 
+    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);
     	
-    	Collections.sort(allocMsrIntersections);
+//    	Collections.sort(allocMsrIntersections);
     	
     	
     	Intersection topMsrToAllocIs = allocMsrIntersections.get(allocMsrIntersections.size() - 1);
@@ -343,12 +343,20 @@ public class AllocFunc extends AbstractFunction {
     	   					
 		// Add in alloc measure
      	Set<Intersection> allocIsxs = changedCellsByMsr.get(msrToAlloc);
-     	if (allocIsxs == null) {
-     		triggerIntersections = new HashSet<Intersection>(0);
+     	if (allocIsxs == null || allocIsxs.isEmpty() ) {
+     		triggerIntersections = new HashSet<Intersection>();
      	}
      	else {
        		triggerIntersections = new HashSet<Intersection>( 2 * allocIsxs.size() );
      		triggerIntersections.addAll(allocIsxs);
+     	}
+     	
+     	// check locked buckets as well
+     	int axis = evalState.getDataCache().getAxisIndex(evalState.getMsrDim());
+     	for (Intersection is : evalState.getCurrentLockedCells() ) {
+     		if (is.getCoordinate(axis).equals(msrToAlloc)) {
+     			triggerIntersections.add(is);
+     		}
      	}
 
 		return triggerIntersections;
