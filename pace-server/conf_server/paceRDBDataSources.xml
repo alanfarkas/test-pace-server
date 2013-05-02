@@ -1,4 +1,3 @@
-<!-- Derby 10.8.2.2 -->
 <list>
   <RdbProps>
     <name>pafDB</name>
@@ -47,53 +46,3 @@
     </hibernateProperties>
   </RdbProps>
 </list>
-<!-- Oracle 11.2.0.3 -->
-<!-- 
-<list>
-  <RdbProps>
-    <name>pafDB</name>
-    <hibernateProperties>
-      <property name="hibernate.connection.username" value="pafDB"/>
-      <property name="hibernate.connection.password" value="Pafsys123"/>
-      <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
-      <property name="hibernate.connection.url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>
-      <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
-      <property name="hibernate.connection.driver_class" value="oracle.jdbc.driver.OracleDriver"/>
-    </hibernateProperties>
-  </RdbProps>
-  <RdbProps>
-    <name>pafClientCache</name>
-    <hibernateProperties>
-      <property name="hibernate.connection.username" value="pafClientCache"/>
-      <property name="hibernate.connection.password" value="Pafsys123"/>
-      <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
-      <property name="hibernate.show_sql" value="false"/>
-      <property name="hibernate.connection.url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>
-      <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
-      <property name="hibernate.connection.driver_class" value="oracle.jdbc.driver.OracleDriver"/>
-    </hibernateProperties>
-  </RdbProps>
-  <RdbProps>
-    <name>pafExtAttr</name>
-    <hibernateProperties>
-      <property name="hibernate.connection.username" value="pafExtAttr"/>
-      <property name="hibernate.connection.password" value="Pafsys123"/>
-      <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
-      <property name="hibernate.connection.url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>
-      <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
-      <property name="hibernate.connection.driver_class" value="oracle.jdbc.driver.OracleDriver"/>
-    </hibernateProperties>
-  </RdbProps>
-  <RdbProps>
-    <name>pafSecurity</name>
-    <hibernateProperties>
-      <property name="hibernate.connection.username" value="pafSecurity"/>
-      <property name="hibernate.connection.password" value="Pafsys123"/>
-      <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
-      <property name="hibernate.connection.url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>
-      <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
-      <property name="hibernate.connection.driver_class" value="oracle.jdbc.driver.OracleDriver"/>
-    </hibernateProperties>
-  </RdbProps>
-</list>
--->
