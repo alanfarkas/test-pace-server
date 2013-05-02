@@ -96,7 +96,8 @@ public class AllocFunc extends AbstractFunction {
     		String measure = lockedCell.getCoordinate(msrDim);
     		
     		// attempt to set for fast sorting...
-			lockedCell.makeSortable(evalState.getClientState().getMemberIndexLists());
+//			lockedCell.makeSortable(evalState.getClientState().getMemberIndexLists());
+    		
 			if (this.aggMsrs.contains(measure)) {
 				allocIntersections.add(lockedCell);
 				if (measure.equals(msrToAlloc)) {
@@ -141,10 +142,10 @@ public class AllocFunc extends AbstractFunction {
     		return dataCache.getCellValue(sourceIs);
     	}
     	
-//    	List<Intersection> allocCells = EvalUtil.sortIntersectionListByAxis(allocIntersections, 
-//    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
+    	EvalUtil.sortIntersectionListByAxis(allocIntersections, 
+    			evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);  
     	
-    	Collections.sort(allocIntersections);
+//    	Collections.sort(allocIntersections);
 
     	// Check if the measures dimension is last axis dimension. (TTN-1743)
     	if (!axisSortSeq[axisSortSeq.length - 1].equals(msrDim)) {
