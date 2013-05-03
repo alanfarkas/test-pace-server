@@ -76,7 +76,6 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         }
 
         HashSet<Intersection> allocIntersections = new HashSet<Intersection>( evalState.getLoadFactor() * 10  );
-        HashSet<Intersection> skipIS = new HashSet<Intersection>( evalState.getLoadFactor() );
         unlockIntersections.clear();
         
         allocIntersections.addAll(evalState.getAllocationsByMsr(evalState.getMeasureName()));
@@ -136,13 +135,10 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
             // if in time slice mode, 1st filter down to only allocations in the current time slice
             for (Intersection is : allocIntersections) {
 //              if ( !is.getCoordinate(timeDim).equalsIgnoreCase(evalState.getCurrentTimeSlice())) skipIS.add(is);
-            	if (!TimeSlice.buildTimeHorizonCoord(is, mdbDef).equals(evalState.getCurrentTimeSlice())) skipIS.add(is);	// TTN-1595
+            	// just remove the intersection from the collection to be allocated.
+            	if (!TimeSlice.buildTimeHorizonCoord(is, mdbDef).equals(evalState.getCurrentTimeSlice())) allocIntersections.remove(is);	// TTN-1595
             }
         }
-
-        
-        // remove all the intersections calculated in the previous steps
-        allocIntersections.removeAll(skipIS);
 
         // if nothing left to allocate skip out
         if (allocIntersections.size() == 0) {
@@ -157,13 +153,13 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         stepTime = System.currentTimeMillis();
 
         // Attempt localized implementation of fast sorting.
-        sortedCellList = Arrays.asList(allocIntersections.toArray(new Intersection[0]));
-        for (Intersection i : sortedCellList) {
-        	i.makeSortable(evalState.getClientState().getMemberIndexLists());
-        }
-        Collections.sort(sortedCellList);
+//        sortedCellList = Arrays.asList(allocIntersections.toArray(new Intersection[0]));
+//        for (Intersection i : sortedCellList) {
+//        	i.makeSortable(evalState.getClientState().getMemberIndexLists());
+//        }
+//        Collections.sort(sortedCellList);
              
-//        sortedCellList = EvalUtil.sortIntersectionListByAxis(Arrays.asList(allocIntersections.toArray(new Intersection[0])), evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);    
+        sortedCellList = EvalUtil.sortIntersectionListByAxis(Arrays.asList(allocIntersections.toArray(new Intersection[0])), evalState.getClientState().getMemberIndexLists(),axisSortSeq, SortOrder.Ascending);    
         
         if (logger.isDebugEnabled()) logger.debug(LogUtil.timedStep("Sorting intersections in axis sequence", stepTime));
 
