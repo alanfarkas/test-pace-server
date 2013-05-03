@@ -76,6 +76,7 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
         }
 
         HashSet<Intersection> allocIntersections = new HashSet<Intersection>( evalState.getLoadFactor() * 10  );
+        HashSet<Intersection> skipIS = new HashSet<Intersection>( evalState.getLoadFactor()  );        
         unlockIntersections.clear();
         
         allocIntersections.addAll(evalState.getAllocationsByMsr(evalState.getMeasureName()));
@@ -136,10 +137,14 @@ public class ES_AllocateUpperLevel extends ES_AllocateBase implements IEvalStep 
             for (Intersection is : allocIntersections) {
 //              if ( !is.getCoordinate(timeDim).equalsIgnoreCase(evalState.getCurrentTimeSlice())) skipIS.add(is);
             	// just remove the intersection from the collection to be allocated.
-            	if (!TimeSlice.buildTimeHorizonCoord(is, mdbDef).equals(evalState.getCurrentTimeSlice())) allocIntersections.remove(is);	// TTN-1595
+            	if (!TimeSlice.buildTimeHorizonCoord(is, mdbDef).equals(evalState.getCurrentTimeSlice())) skipIS.add(is);	// TTN-1595
             }
         }
-
+        
+        
+        // remove all the intersections calculated in the previous steps
+        allocIntersections.removeAll(skipIS);
+        
         // if nothing left to allocate skip out
         if (allocIntersections.size() == 0) {
 //            if (logger.isDebugEnabled()) logger.debug("No changes to allocate");
