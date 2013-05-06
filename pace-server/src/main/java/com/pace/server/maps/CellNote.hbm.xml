@@ -7,7 +7,7 @@
   <!-- <cache usage="read-write"/>  -->
   <id name="id" type="int">
    <column name="ID"/>
-			<generator class="native"><param name="sequence">seq_id_inc_by_1</param></generator>
+			<generator class="native"><param name="sequence">cellnotes_id_seq</param></generator>
   </id>
   <property generated="never" lazy="false" name="text" type="string">
    <column length="1000" name="TEXT" not-null="true">

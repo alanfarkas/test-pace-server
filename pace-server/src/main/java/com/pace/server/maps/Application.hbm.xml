@@ -6,7 +6,7 @@
     <class name="com.pace.base.db.Application" table="APPLICATIONS">
         <comment></comment>
         <id column="id" type="int">
-			<generator class="native"><param name="sequence">seq_id_inc_by_1</param></generator>
+			<generator class="native"><param name="sequence">app_id_seq</param></generator>
 	    </id>
         <property name="name" type="string">
             <column name="NAME" not-null="true">

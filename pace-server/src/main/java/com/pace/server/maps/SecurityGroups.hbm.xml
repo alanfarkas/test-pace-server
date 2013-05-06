@@ -8,7 +8,7 @@
  <class name="SecurityGroup" table="SECURITY_GROUPS">
   <id name="id" type="int">
    <column name="ID"/>
-			<generator class="native"><param name="sequence">seq_id_inc_by_1</param></generator>
+			<generator class="native"><param name="sequence">secgrp_id_seq</param></generator>
   </id>
   <property generated="never" lazy="false" name="securityDomainNameTxt" type="string">
    <column name="SECURITY_DOMAIN_NAME_TXT" not-null="true" unique="true"/>
