@@ -28,6 +28,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafException;
+import com.pace.base.data.EvalUtil;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.IPafFunction;
 import com.pace.base.mdb.PafDataCache;
@@ -144,7 +145,7 @@ public abstract class ES_EvalBase implements IEvalStep {
             				for (Intersection intersection:changedCells) {
             					for (String period:periods) {
             						Intersection periodIs = intersection.clone();
-            						periodIs.setCoordinate(timeDim,period);
+            						EvalUtil.setIsCoord(periodIs, timeDim, period, evalState);  // TTN-1597
             						changeSet.add(periodIs);       				
             					}
             				}
