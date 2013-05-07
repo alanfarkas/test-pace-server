@@ -555,7 +555,8 @@ public class EvalUtil {
         			for (Intersection intersection:changedCells) {
         				for (String period:periods) {
             				Intersection periodIs = intersection.clone();
-        					periodIs.setCoordinate(timeDim,period);
+//        					periodIs.setCoordinate(timeDim,period);
+    						EvalUtil.setIsCoord(periodIs, timeDim, period, evalState);  // TTN-1597
         					changeSet.add(periodIs);       				
         				}
         			}
