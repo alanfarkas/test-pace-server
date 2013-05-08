@@ -31,6 +31,7 @@ import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDimTree;
+import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
 
 
@@ -53,8 +54,9 @@ public class F_PrevCum extends AbstractFunction {
    	protected static int MEASURE_ARGS = 1, REQUIRED_ARGS = 1, MAX_ARGS = 3;
 
    	// parameter variables
-	private String offsetDim;
-	private int offset;
+	private String offsetDim, levelGenParm, yearMbr;
+	private int offset, levelGen;
+	private LevelGenType levelGenType;
 	
 	PafDimTree offsetTree;
 	Map<String, Set<String>> filterMap = new HashMap<String, Set<String>>();    
@@ -73,13 +75,18 @@ public class F_PrevCum extends AbstractFunction {
     	// create testing intersection and assign measure from parameter string
     	Intersection dataIs = sourceIs.clone();
 		dataIs.setCoordinate( msrDim, this.getMeasureName() );
-		        
-        // accumulate values
-       double result  = dataCache.getCumTotal(dataIs, offsetDim, offset);
 
-       return result;
+		// accumulate values
+		double result;
+		if (parms.length < 4) {
+			result = dataCache.getCumTotal(dataIs, offsetDim, offset);
+		} else {
+			result = dataCache.getCumTotal(dataIs, offsetDim, offset, levelGenType, levelGen, yearMbr);
+		}
+
+		return result;
     }
-    
+
     /**
      *  Parse and validate function parameters 
      *
@@ -153,9 +160,19 @@ public class F_PrevCum extends AbstractFunction {
 		else { 
 			offset = 1;
 		}
-    	
-    	this.isValidated = true;
-	}
+
+		// Gen/Level parm
+		if (parms.length > 3) {
+			levelGenParm = parms[3];
+		}
+
+		// Year member parm
+		if (parms.length > 4) {
+			yearMbr = parms[3];
+		}
+
+		this.isValidated = true;
+    }
     
 
 	@Override

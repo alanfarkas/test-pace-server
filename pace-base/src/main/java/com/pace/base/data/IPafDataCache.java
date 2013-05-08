@@ -3,6 +3,7 @@ package com.pace.base.data;
 import java.util.List;
 
 import com.pace.base.PafException;
+import com.pace.base.mdb.PafDimTree.LevelGenType;
 
 /**
  * Interface that provides access to data cache; used in custom functions
@@ -19,9 +20,11 @@ public interface IPafDataCache {
 	public double getCumMbrCount(Intersection cellIs);
 	public double getCumMbrCount(Intersection cellIs, String cumDim);
 	public double getCumMbrCount(Intersection cellIs, String cumDim, int level);
+	public double getCumMbrCount(final Intersection sourceIs, final String cumDim, final LevelGenType levelGenType, final int levelGen, final String yearMbr);
 	public double getCumTotal(Intersection cellIs) throws PafException;
 	public double getCumTotal(Intersection cellIs, String cumDim) throws PafException;
 	public double getCumTotal(Intersection cellIs, String cumDim, int offset) throws PafException;
+	public double getCumTotal(Intersection dataIs, String timeDim, int offset, LevelGenType levelGenType, int levelGen, String yearMbr) throws PafException;
 	public int getMeasureAxis();    
 	public String getMeasureDim();    
 	public double getNextCellValue(Intersection dataIs) throws PafException;    
@@ -48,7 +51,7 @@ public interface IPafDataCache {
 	public Intersection getLastDescendantIs(Intersection cellIs, final String dim, final int level);
 	public List<Intersection> getDescIntersectionsAtLevel(Intersection cellIs, String dim, int level);
 	public Intersection getFirstFloorIs(final Intersection cellIs, final String dim);
-	public Intersection getFirstFloorIs(final Intersection cellIs, final String timeDim, final String genLevel, final String yearMbr);
+	public Intersection getFirstFloorIs(final Intersection dataIs, final String timeDim, final LevelGenType levelGenType, final int levelGen, final String yearMbr);
 	public Intersection getLastFloorIs(Intersection cellIs, String dim);
 	public boolean isBaseIntersection(Intersection sourceIs);
 

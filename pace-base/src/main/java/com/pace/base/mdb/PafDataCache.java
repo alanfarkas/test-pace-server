@@ -49,6 +49,7 @@ import com.pace.base.data.Intersection;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.data.TimeSlice;
+import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.EvalState;
 import com.pace.base.state.PafClientState;
 import com.pace.base.utility.LogUtil;
@@ -2028,6 +2029,23 @@ public class PafDataCache implements IPafDataCache {
 		return cumMembers.size();
 	}
 	
+	/**
+	 * Provides a count of the descendants, at the specified level, of  the current intersection,
+	 * and it's left peers along the specified dimension. 
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param cumDim Dimension being accumulated
+	 * @param level The level of the members being accumulated
+	 * 
+	 * @return Cumulative total
+	 */	
+	public double getCumMbrCount(Intersection sourceIs, String cumDim,
+			LevelGenType levelGenType, int levelGen, String yearMbr) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
 		
 	/**
 	 * Returns the cumulative total of specified intersection along the time dimension
@@ -2085,6 +2103,28 @@ public class PafDataCache implements IPafDataCache {
 		
 		return result;
 	}
+
+
+	/**
+	 * Returns the cumulative total of specified intersection, along the specified dimension,
+	 * up through the nth previous intersection. An offset of 0 indicates that all intersections
+	 * leading up to, and including, the specified intersection will be accumulated. 
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param cumDim Dimension being accumulated
+	 * @param offset Specifies a relative position, along the cum dimension, that will be used to retrieve the desired intersection
+	 * 
+	 * @return Cumulative total
+	 * @throws PafException 
+	 */	
+	@Override
+	public double getCumTotal(Intersection dataIs, String timeDim, int offset,
+			LevelGenType levelGenType, int levelGen, String yearMbr)
+			throws PafException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 
 
 	/**
@@ -2301,6 +2341,22 @@ public class PafDataCache implements IPafDataCache {
 		return firstFloorIs;
 	}
 
+
+	/**
+	 * Return the first floor intersection along the specified dimension, 
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension
+	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
+	 * @param year Optional parameter that specifies which year to confine search to
+	 * 
+	 * @return First floor intersection
+	 */
+	public Intersection getFirstFloorIs(Intersection dataIs, String timeDim,
+			LevelGenType levelGenType, int levelGen, String yearMbr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	/**
 	 * Return the last floor intersection along the specified dimension
@@ -5543,5 +5599,6 @@ public class PafDataCache implements IPafDataCache {
 		}
 		return stringBuffer.toString();
 	}
+
 
 }

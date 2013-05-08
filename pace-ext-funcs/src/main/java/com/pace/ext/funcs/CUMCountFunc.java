@@ -29,6 +29,7 @@ import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
+import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
 
 /**
@@ -47,14 +48,16 @@ public class CUMCountFunc extends AbstractFunction {
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) {
   
     	double result = 0;
-    	int level = -1;
-        String cumDim = null;
+    	int levelGen = -1;
+        String cumDim = null, levelGenParm = null, yearMbr = null;
+        LevelGenType levelGenType = null;
     	
         // Get the cum member count based on which function parameters have been supplied.
         // Default parameter handling is performed within the called CumMbrCount methods.       
         if ( parms.length == 0 ){
         	// No parameters have been supplied
         	result = dataCache.getCumMbrCount(sourceIs);
+        	return result;
         } else {
         	// Dimension name has been supplied
         	cumDim = parms[0];
@@ -62,11 +65,24 @@ public class CUMCountFunc extends AbstractFunction {
         		result = dataCache.getCumMbrCount(sourceIs, cumDim);
         	} else {
         		// Level number has been supplied
-        		level = Integer.valueOf(parms[1]);
-        		result = dataCache.getCumMbrCount(sourceIs, cumDim, level);
+        		levelGenParm = parms[1];
+        		try {
+					levelGen = Integer.valueOf(levelGenParm);
+					levelGenType = LevelGenType.LEVEL;
+	        		result = dataCache.getCumMbrCount(sourceIs, cumDim, levelGen);
+	        		return result;
+				} catch (NumberFormatException e) {
+					// TODO Auto-generated catch block
+				}
         	}
         }
 
+		// Year member parm
+		if (parms.length > 2)
+			yearMbr = parms[2];
+		
+
+		result = dataCache.getCumMbrCount(sourceIs, cumDim, levelGenType, levelGen, yearMbr);
         return result;
     	
 //	// Pre multi-year version of code    	

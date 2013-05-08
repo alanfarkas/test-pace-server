@@ -30,11 +30,16 @@ import com.pace.base.data.Intersection;
 import com.pace.base.data.TimeSlice;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
+import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
 
 /**
  * Implements a beginning of period function for the specified measure and 
- * dimension. ie. @BOP(SLS_DLR, Time)
+ * dimension.  
+ * 
+ * Function Signature: @BOP(MEASURE, TIME DIMENSION, GEN/LEVEL, YEAR)
+ * 
+ * Example: @BOP(SLS_DLR, Time, G3, FY2007)
  * 
  * This function would return the intersection for SLS_DLR that is at the first
  * floor member, within the current UOW, of the Time dimension (or whatever
@@ -42,6 +47,8 @@ import com.pace.base.state.IPafEvalState;
  * 
  * Other dimensions besides Time can be supplied to this function. If no
  * dimension is supplied, then the Time dimension will be used by default.
+ * 
+ * Two additional "scope" variables can be defined: Gen/Level and Year
  * 
  * @version x.xx
  * @author jim
@@ -56,22 +63,39 @@ public class F_Bop extends AbstractFunction {
 			IPafEvalState evalState) throws PafException {
 
 		double result;
+		String timeDim, levelGenParm = null, yearMbr = null;
 		PafApplicationDef app = evalState.getAppDef();
+		int levelGen = 0;
+		LevelGenType levelGenType = null;
 
 		Intersection dataIs = sourceIs.clone();
 
+		// Measure parm
 		if (parms.length > 0)
 			dataIs.setCoordinate(app.getMdbDef().getMeasureDim(), parms[0]);
 
-		String offsetDim;
+		// Time dimension parm
 		if (parms.length > 1)
-			offsetDim = parms[1];
+			timeDim = parms[1];
 		else
-			offsetDim = app.getMdbDef().getTimeDim();
+			timeDim = app.getMdbDef().getTimeDim();
 
-		dataIs = dataCache.getFirstFloorIs(dataIs, offsetDim);
-		result = dataCache.getCellValue(dataIs);
-
+		// Gen/Level parm
+		if (parms.length <= 2) {
+			// No Gen/Level Parm
+			dataIs = dataCache.getFirstFloorIs(dataIs, timeDim);
+			result = dataCache.getCellValue(dataIs);			
+			return result;
+		} else {
+			levelGenParm = parms[2];
+		}
+		
+		// Year member parm
+		if (parms.length > 3)
+			yearMbr = parms[3];
+		
+		dataIs = dataCache.getFirstFloorIs(dataIs,  timeDim, levelGenType, levelGen, yearMbr);
+		result = dataCache.getCellValue(dataIs);			
 		return result;
 	}
 

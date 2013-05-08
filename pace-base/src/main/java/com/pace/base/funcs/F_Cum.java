@@ -28,12 +28,16 @@ import com.pace.base.app.PafApplicationDef;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
+import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
 
 /**
  * Implements a cumulative function. It totals up all the intersections along a particular
  * dimensional axis. The default axis is the time dimension (ie. @CUM(SLS_DLR, Time))
  *
+ * Function Signature: @BOP(MEASURE, TIME DIMENSION, GEN/LEVEL, YEAR)
+ *
+ * Example: @BOP(SLS_DLR, Time, G3, FY2007)
  * @version	x.xx
  * @author jim
  *
@@ -46,8 +50,10 @@ public class F_Cum extends AbstractFunction {
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
     	double result = 0;
     	PafApplicationDef app = evalState.getAppDef();
-
-    	Intersection dataIs = sourceIs.clone();
+		String timeDim, levelGenParm = null, yearMbr = null;
+		int levelGen = 0;
+		LevelGenType levelGenType = null;
+		Intersection dataIs = sourceIs.clone();
     	
         // usual use case is to provide a measure parameter this operation will apply to
     	if ( parms.length > 0 )
@@ -55,17 +61,26 @@ public class F_Cum extends AbstractFunction {
     	
         // by default this accumulates values along the time dimension, however the dimension
         // of accumulation can be altered.
-    	String offsetDim;
     	if (parms.length > 1 ) 
-    		offsetDim = parms[1];
-    	else 
-    		offsetDim = app.getMdbDef().getTimeDim();
-    	
-        
-        // add all the cumulative values
-       result  = dataCache.getCumTotal(dataIs, offsetDim);
-    	
-       return result;
+			timeDim = parms[1];
+		else
+			timeDim = app.getMdbDef().getTimeDim();
+
+		// Gen/Level parm
+		if (parms.length <= 2) {
+			// No Gen/Level parm
+		    result  = dataCache.getCumTotal(dataIs, timeDim);
+			return result;
+		} else {
+			levelGenParm = parms[2];
+		}
+		
+		// Year member parm
+		if (parms.length > 3)
+			yearMbr = parms[3];
+ 
+		result = dataCache.getCumTotal(dataIs,  timeDim, 1, levelGenType, levelGen, yearMbr);
+		return result;
     }
     
 
