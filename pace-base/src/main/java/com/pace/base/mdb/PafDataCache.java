@@ -2039,10 +2039,23 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return Cumulative total
 	 */	
-	public double getCumMbrCount(Intersection sourceIs, String cumDim,
-			LevelGenType levelGenType, int levelGen, String yearMbr) {
-		// TODO Auto-generated method stub
-		return 0;
+	public double getCumMbrCount(Intersection cellIs, String cumDim,LevelGenType levelGenType, int levelGen, String yearMbr) {
+
+      	// Get list of cum members for the specified level
+		String cumMember;
+		PafDimTree cumTree;
+		if (cumDim.equals(getTimeDim())) {
+			// Use time horizon tree whenever the time dimension is specified
+			cumTree = getDimTrees().getTree(getTimeHorizonDim());
+			cumMember = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeAxis()), cellIs.getCoordinate(getYearAxis()));
+		} else {
+			cumTree = getDimTrees().getTree(cumDim);			
+			cumMember = cellIs.getCoordinate(axisIndexMap.get(cumDim));
+		}	
+		List<PafDimMember> cumMembers = cumTree.getCumMembers(cumMember, levelGen);
+
+		// Return number of cum members
+		return cumMembers.size();
 	}
 
 
@@ -2117,12 +2130,24 @@ public class PafDataCache implements IPafDataCache {
 	 * @return Cumulative total
 	 * @throws PafException 
 	 */	
-	@Override
-	public double getCumTotal(Intersection dataIs, String timeDim, int offset,
-			LevelGenType levelGenType, int levelGen, String yearMbr)
+	public double getCumTotal(Intersection cellIs, String cumDim, int offset, LevelGenType levelGenType, int levelGen, String yearMbr)
 			throws PafException {
-		// TODO Auto-generated method stub
-		return 0;
+
+		double result = 0;
+ 		
+		// Determine the last intersection to be accumulated
+		Intersection lastIs = getPrevIntersection(cellIs, cumDim, offset);
+		
+		// Accumulate the values for all intersections up through the specified offset
+		// position.
+		while (lastIs != null) {
+			// To account for any cell changes that haven't yet been aggregated 
+			// (ex. perpetual inventory process), we aggregate at the floor level.
+			result += EvalUtil.sumFloorIntersections(lastIs, evalState);
+			lastIs = shiftIntersection(lastIs, cumDim, -1);
+		}
+		
+		return result;
 	}
 
 
@@ -2311,6 +2336,7 @@ public class PafDataCache implements IPafDataCache {
 		return firstFloorIs;
 	}
 
+
 	/**
 	 * Return the first floor intersection along the specified dimension, 
 	 * 
@@ -2321,7 +2347,7 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return First floor intersection
 	 */
-	public Intersection getFirstFloorIs(final Intersection cellIs, final String dim, final String genLevelScope, final String year) {
+	public Intersection getFirstFloorIs(Intersection cellIs, String dim, LevelGenType levelGenType, int levelGen, String yearMbr) {
 
 		Intersection firstFloorIs = cellIs.clone();
 		PafDimTree dimTree = null;
@@ -2339,23 +2365,6 @@ public class PafDataCache implements IPafDataCache {
 		}
 		
 		return firstFloorIs;
-	}
-
-
-	/**
-	 * Return the first floor intersection along the specified dimension, 
-	 * 
-	 * @param cellIs Cell intersection
-	 * @param dim Dimension
-	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
-	 * @param year Optional parameter that specifies which year to confine search to
-	 * 
-	 * @return First floor intersection
-	 */
-	public Intersection getFirstFloorIs(Intersection dataIs, String timeDim,
-			LevelGenType levelGenType, int levelGen, String yearMbr) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	/**
