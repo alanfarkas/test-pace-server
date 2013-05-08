@@ -164,6 +164,13 @@ public class F_PrevCum extends AbstractFunction {
 		// Gen/Level parm
 		if (parms.length > 3) {
 			levelGenParm = parms[3];
+			try {
+				parseLevelGenParm(levelGenParm, levelGenType, levelGen);
+			} catch (IllegalArgumentException e) {
+				errMsg += "[" + levelGenParm + "] is not a valid level/gen specification";
+				logger.error(errMsg);
+				throw new PafException(errMsg, PafErrSeverity.Error);
+			}
 		}
 
 		// Year member parm

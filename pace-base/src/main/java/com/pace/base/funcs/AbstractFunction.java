@@ -12,6 +12,7 @@ import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
+import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
 import com.pace.base.utility.StringOdometer;
 
@@ -253,4 +254,45 @@ public abstract class AbstractFunction implements IPafFunction {
     	
     }
     
+	/**
+	 * Parses the levelGen parm into its component parts
+	 * 
+	 * @param levelGenParm Level/Gen specification (ex. 'G3', 'L1'). A non-prefixed number will be assumed to be a level specification
+	 * @param levelGenType Returned Level/Gen Type (either Level or Gen)
+	 * @param levelGen Level/Gen number
+	 */
+	public void parseLevelGenParm(final String levelGenParm, LevelGenType levelGenType, int levelGen) throws IllegalArgumentException  {
+
+		// Check for a simple level specification
+		try {
+			levelGen = Integer.valueOf(levelGenParm);
+			levelGenType = LevelGenType.LEVEL;
+			return;
+		} catch (NumberFormatException e) {
+			// Not a level specification 
+		}
+		
+		// Validate level/gen specification
+		String firstChar = levelGenParm.substring(0, 1);
+		if (firstChar.equals("L")) {
+			levelGenType = LevelGenType.LEVEL;
+		} else if (firstChar.equals("G")) {
+			levelGenType = levelGenType.GEN;
+		} else {
+			// Illegal Parm
+			String errMsg = "Illegal Level/Gen parameter [" + levelGenParm + "] passed to Pace rule function ";
+			throw new IllegalArgumentException(errMsg);
+		}
+
+		// Check numeric component
+		try {
+			levelGen = Integer.valueOf(levelGenParm.substring(1));
+		} catch (NumberFormatException e) {
+			// Not a valid integer
+			String errMsg = "Illegal Level/Gen parameter [" + levelGenParm + "] passed to Pace rule function ";
+			throw new IllegalArgumentException(errMsg);
+		}
+		
+	}
+
 }

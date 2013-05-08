@@ -23,6 +23,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
+import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.data.EvalUtil;
@@ -46,11 +49,13 @@ import com.pace.base.state.IPafEvalState;
 
 public class F_Cum extends AbstractFunction {
 	Map<String, Set<String>> filterMap = new HashMap<String, Set<String>>(); 
+	private static Logger logger = Logger.getLogger(F_Cum.class);	
 	
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
     	double result = 0;
     	PafApplicationDef app = evalState.getAppDef();
 		String timeDim, levelGenParm = null, yearMbr = null;
+    	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
 		int levelGen = 0;
 		LevelGenType levelGenType = null;
 		Intersection dataIs = sourceIs.clone();
@@ -73,6 +78,13 @@ public class F_Cum extends AbstractFunction {
 			return result;
 		} else {
 			levelGenParm = parms[2];
+			try {
+				parseLevelGenParm(levelGenParm, levelGenType, levelGen);
+			} catch (IllegalArgumentException e) {
+				errMsg += "[" + levelGenParm + "] is not a valid level/gen specification";
+				logger.error(errMsg);
+				throw new PafException(errMsg, PafErrSeverity.Error);
+			}
 		}
 		
 		// Year member parm

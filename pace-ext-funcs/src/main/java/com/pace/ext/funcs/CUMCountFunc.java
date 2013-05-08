@@ -22,11 +22,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
+import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
+import com.pace.base.funcs.F_Cum;
 import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.PafDimTree.LevelGenType;
@@ -45,11 +49,14 @@ import com.pace.base.state.IPafEvalState;
  */
 public class CUMCountFunc extends AbstractFunction {
 
-    public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) {
+	private static Logger logger = Logger.getLogger(CUMCountFunc.class);	
+
+    public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
   
     	double result = 0;
     	int levelGen = -1;
         String cumDim = null, levelGenParm = null, yearMbr = null;
+    	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
         LevelGenType levelGenType = null;
     	
         // Get the cum member count based on which function parameters have been supplied.
@@ -63,17 +70,21 @@ public class CUMCountFunc extends AbstractFunction {
         	cumDim = parms[0];
         	if ( parms.length == 1 ) {
         		result = dataCache.getCumMbrCount(sourceIs, cumDim);
+        		return result;
         	} else {
-        		// Level number has been supplied
+        		// Level/gen specification has been supplied
         		levelGenParm = parms[1];
-        		try {
-					levelGen = Integer.valueOf(levelGenParm);
-					levelGenType = LevelGenType.LEVEL;
-	        		result = dataCache.getCumMbrCount(sourceIs, cumDim, levelGen);
-	        		return result;
-				} catch (NumberFormatException e) {
-					// TODO Auto-generated catch block
-				}
+    			try {
+    				parseLevelGenParm(levelGenParm, levelGenType, levelGen);
+    				if (levelGenType == LevelGenType.LEVEL) {
+    					result = dataCache.getCumMbrCount(sourceIs, cumDim, levelGen);
+    					return result;
+    				}
+    			} catch (IllegalArgumentException e) {
+    				errMsg += "[" + levelGenParm + "] is not a valid level/gen specification";
+    				logger.error(errMsg);
+    				throw new PafException(errMsg, PafErrSeverity.Error);
+    			}
         	}
         }
 
