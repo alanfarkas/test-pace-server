@@ -109,6 +109,7 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 	
 
 	public RuleBasedEvalStrategy() {
+		logger.info("Instantiating Evaluation Strategy");
 	}
 
 
@@ -168,11 +169,11 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 			processRuleGroup(balanceSets, rg, processedRuleGroups, evalState);
 		}
 
-		logger.info(Messages.getString("RuleBasedEvalStrategy.7"));          //$NON-NLS-1$
-		logger.info(Messages.getString("RuleBasedEvalStrategy.8")); //$NON-NLS-1$
-		logger.info(System.currentTimeMillis() - startTime + Messages.getString("RuleBasedEvalStrategy.9")); //$NON-NLS-1$
-		logger.info(Messages.getString("RuleBasedEvalStrategy.10"));              //$NON-NLS-1$
-		logger.info(Messages.getString("RuleBasedEvalStrategy.11") + evalState.getCurrentChangedCells().size());              //$NON-NLS-1$
+		performanceLogger.info(Messages.getString("RuleBasedEvalStrategy.7"));          //$NON-NLS-1$
+		performanceLogger.info(Messages.getString("RuleBasedEvalStrategy.8")); //$NON-NLS-1$
+		performanceLogger.info(System.currentTimeMillis() - startTime + Messages.getString("RuleBasedEvalStrategy.9")); //$NON-NLS-1$
+		performanceLogger.info(Messages.getString("RuleBasedEvalStrategy.10"));              //$NON-NLS-1$
+		performanceLogger.info(Messages.getString("RuleBasedEvalStrategy.11") + evalState.getCurrentChangedCells().size());              //$NON-NLS-1$
 
 		String dcStats = LogUtil.dcStats(dataCache, initialDcStats);
 		logger.info(dcStats);
@@ -289,7 +290,9 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 		List<RuleGroup> processedRuleGroups = new ArrayList<RuleGroup>(); 
 
 		// Process all rule groups
+		int rgCnt = 0;
 		for (RuleGroup rg : ruleSet.getRuleGroups() ) {
+			rgCnt++;
 			processRuleGroup(balanceSets, rg, processedRuleGroups, evalState);
 		}
 
@@ -300,10 +303,12 @@ public class RuleBasedEvalStrategy implements IEvalStrategy {
 //		if (evalState.getSliceState() != null)     
 //			dataCache = PafDataCacheCalc.calcVersionDim(dataCache,evalState.getSliceState().getDataSliceParms(), memberTrees);
 
+
 		logger.info(Messages.getString("RuleBasedEvalStrategy.25"));          //$NON-NLS-1$
 		logger.info(Messages.getString("RuleBasedEvalStrategy.26")); //$NON-NLS-1$
 		logger.info(System.currentTimeMillis() - startTime + Messages.getString("RuleBasedEvalStrategy.27")); //$NON-NLS-1$
 		logger.info(evalState.getCurrentChangedCells().size() + Messages.getString("RuleBasedEvalStrategy.28"));    		 //$NON-NLS-1$
+		logger.info(rgCnt + " rulegroups processed");
 		logger.info(Messages.getString("RuleBasedEvalStrategy.29"));              //$NON-NLS-1$
          
 

@@ -202,7 +202,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
         if (logger.isDebugEnabled())
         	logger.debug(LogUtil.timedStep("Calculating " + newChngCells.size() + " newly changed cells", stepTime));
 		
-		
+		stepTime = System.currentTimeMillis();		
 		if (newChngCells.size() > 0) {
 			
 			// any cell that is changed from formula evaluation is a potential target for allocation
@@ -217,7 +217,9 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 			evalState.addAllChangedCells(newChngCells);
 			evalState.setStateChanged(true);
 		}
-    
+        if (logger.isDebugEnabled())
+        	logger.debug(LogUtil.timedStep("Adding " + newChngCells.size() + " newly changed cells to buckets", stepTime));
+        
 		if (logger.isDebugEnabled())
         	logger.debug(LogUtil.timedStep("Evaluate measures step complete", startTime));
 

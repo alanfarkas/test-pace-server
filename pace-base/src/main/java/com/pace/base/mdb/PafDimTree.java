@@ -1754,7 +1754,7 @@ public abstract class PafDimTree {
  		
  		PafDimMember firstDescendant = null;
  		
- 		logger.debug("Getting first descendant of member [" + memberName + "] at level [" + level +"]");
+// 		logger.debug("Getting first descendant of member [" + memberName + "] at level [" + level +"]");
  		 		
  		// Walk left side tree until we reached the floor or we've found
  		// a descendant with the desired level. This method allows us to
@@ -1782,7 +1782,7 @@ public abstract class PafDimTree {
  		
  		PafDimMember lastDescendant = null;
  		
- 		logger.debug("Getting last descendant of member [" + memberName + "] at level [" + level +"]");
+// 		logger.debug("Getting last descendant of member [" + memberName + "] at level [" + level +"]");
  		
   		// Walk left side tree until we reached the floor or we've found
  		// a descendant with the desired level. This method allows us to
@@ -1869,7 +1869,9 @@ public abstract class PafDimTree {
         
         List<PafDimMember> memberList = null;
         
-        logger.debug("Getting all members at level: " + level + " under member [" + branchName + "]");
+//        if (logger.isDebugEnabled()) {
+//        	logger.debug("Getting all members at level: " + level + " under member [" + branchName + "]");
+//        }
         // Check if branch exists
         getMember(branchName);
         
@@ -1894,7 +1896,9 @@ public abstract class PafDimTree {
         
         short level = (short) this.getLowestAbsLevelInTree();
         
-        logger.debug("Getting all members at level: " + level + " under member [" + branchName + "]");
+//        if (logger.isDebugEnabled()) {
+//        	logger.debug("Getting all members at level: " + level + " under member [" + branchName + "]");
+//        }
         // Check if branch exists
         getMember(branchName);
         

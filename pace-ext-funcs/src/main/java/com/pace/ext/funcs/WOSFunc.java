@@ -25,7 +25,7 @@ import com.pace.base.state.IPafEvalState;
  * currently support measures that are both Recalc and Time Balance.
  * 
  * 
- * The calling signature of this function is '@WOS(Sales_Measure, Inventory_Measure, optional_Wrap_Year, Flag, optional Period_Level, optional Max_Periods)'.
+ * The calling signature of this function is '@WOS(Sales_Measure, Inventory_Measure, optional_Wrap_Year Flag, optional Period_Level, optional Max_Periods)'.
  * This function can be used against weeks or days, or any other Time dimension level.
  * 
  * TB First logic will be used on upper level time members.
