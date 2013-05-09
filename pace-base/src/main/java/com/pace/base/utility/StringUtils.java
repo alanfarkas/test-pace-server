@@ -578,7 +578,7 @@ public class StringUtils {
 				}
 	
 				// Convert tabs to blanks
-				line.replace("\\t", "    ");
+				line = line.replace("\\t", "    ");
 	
 				// Look for sql delimiter
 				int pos = line.indexOf(SQL_DELIM);

@@ -4906,7 +4906,6 @@ public class PafDataService {
 		String[] baseDims = dc.getBaseDimensions();	
 		
 		// Initialize arrays
-		List<Double> row = new ArrayList<Double>(asst.getNumCols());
 		double[][] data = new double[asst.getNumRows()][asst.getNumCols()];
 		
 

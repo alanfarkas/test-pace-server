@@ -2747,7 +2747,7 @@ public abstract class PafDimTree {
 	private boolean findMemberInSubTree(PafDimMember parent, PafDimMember target ) {
 		List<PafDimMember> nodes = parent.getChildren();
 		for (PafDimMember node : nodes ) {
-			if( node.getKey() == target.getKey() )
+			if( node.getKey().equals(target.getKey()) )
 				return true;
 			if( findMemberInSubTree(node, target) == true )
 				return true;

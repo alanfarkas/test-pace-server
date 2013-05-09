@@ -1399,7 +1399,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		PafViewTreeItem currentViewEntity = null;
 
 		// get invalid views and error messages from paf view service
-		Map<String, String> invalidViewsMap = PafViewService
+		Map<String, String> invalidViewsMap = viewService
 				.getInvalidViewsMap();
 
 		if (invalidViewsMap == null) {
@@ -3497,7 +3497,6 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		
 		PafClientState clientState = clients.get(queryRequest.getClientId());
 		List<PafDimMember> dimMembers = new ArrayList<PafDimMember>();
-		List<String> dimMemberNames = new ArrayList<String>();
 		
 		PafBaseTree t = clientState.getMdbBaseTrees().get(dim);
 		

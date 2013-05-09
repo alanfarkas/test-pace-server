@@ -318,7 +318,7 @@ public class PafViewServiceTest extends TestCase {
 			for(int j = 0; j < columnCount; j++){
 				if (areRowsSuppressed = true && dataSlice.getData()[k] != 0){
 					zeroFlag = false;
-				}else if(areColumnsSuppressed = true){ // get the row 0 columns with a zero data value
+				}else if(areColumnsSuppressed == true){ // get the row 0 columns with a zero data value
 					if(i == 0){
 						suppressedColumns.add(j);
 					}
@@ -327,13 +327,13 @@ public class PafViewServiceTest extends TestCase {
 				k++;
 			}
 			
-			if (areRowsSuppressed = true){
+			if (areRowsSuppressed == true){
 				if (zeroFlag == true){
 					suppressedRows.add(i);
 				}
 			}
 			
-			if(areColumnsSuppressed = true){
+			if(areColumnsSuppressed == true){
 				suppressedColumns.retainAll(columnsWithZeros);
 				columnsWithZeros.clear();
 			}

@@ -125,7 +125,7 @@ public class PafViewService {
 	
 	private PafApplicationDef pafApp = null;
 	
-	static private Map<String, String> invalidViewsMap;
+	private Map<String, String> invalidViewsMap;
 	
 	private Map<String, String> invalidViewSectionsMap;
 	
@@ -2033,7 +2033,7 @@ public class PafViewService {
 			viewSection.setRowMemberTagData(mtViewSectionDataArray);
 		} else {
 			String errMsg = "Invalid axis type of: [" + mtAxis.getValue() + "] passed to populateMemberTagIntersections";
-			logger.equals(errMsg);
+			logger.warn(errMsg);
 			throw new IllegalArgumentException(errMsg);
 		}
 		
@@ -4022,15 +4022,15 @@ public class PafViewService {
 	/**
 	 * @return Returns the invalidViewsMap.
 	 */
-	public static Map<String, String> getInvalidViewsMap() {
+	public Map<String, String> getInvalidViewsMap() {
 		return invalidViewsMap;
 	}
 
 	/**
 	 * @param invalidViewsMap The invalidViewsMap to set.
 	 */
-	public static void setInvalidViewsMap(Map<String, String> invalidViewsMap) {
-		PafViewService.invalidViewsMap = invalidViewsMap;
+	public void setInvalidViewsMap(Map<String, String> invalidViewsMap) {
+		this.invalidViewsMap = invalidViewsMap;
 	}
 	
 

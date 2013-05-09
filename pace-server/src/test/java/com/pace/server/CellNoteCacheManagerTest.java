@@ -393,7 +393,6 @@ public void testMulti() {
 	
 	private PafClientState createClientState() {
 		
-		ClientInitRequest req = new ClientInitRequest();
 		
 		PafClientState cs = testCommonParms.getClientState();
 		
