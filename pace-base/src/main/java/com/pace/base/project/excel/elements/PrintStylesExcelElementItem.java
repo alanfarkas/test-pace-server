@@ -297,7 +297,7 @@ public class PrintStylesExcelElementItem<T extends Map<String, PrintStyle>> exte
 				}
 			}
 			if( printStyle.getName() != null ) {
-				printStylesMap.put(GUIDUtil.getGUID(), printStyle);
+				printStylesMap.put(printStyle.getGUID(), printStyle);
 			}
 		}
 		return (T) printStylesMap;
