@@ -100,7 +100,7 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
         // iterate through all intersections that have changed to this point
         for (Intersection is: chngSet) {
         	// test if this intersection should cause the current rule to calculate
-//            if ( EvalUtil.changeTriggersFormula( is, evalState.getRule(), evalState) ) { // this logic should refactored into impacting change lists
+            if ( EvalUtil.changeTriggersFormula( is, evalState.getRule(), evalState) ) { // this logic should refactored into impacting change lists
             	// if the intersection causes this rule to fire, determine the leading rule to use 
             	
             	// if the current formula has a recalc measure on the left, the leading rule is this rule.
@@ -200,7 +200,7 @@ public class ES_EvalStdRulegroup extends ES_EvalBase implements IEvalStep {
                         }
                     }
                 }
-//            } // change triggers intersection
+            } // change triggers intersection
         }
         if (logger.isDebugEnabled()) {
         	logger.debug(LogUtil.timedStep("Identified " + cellsToCalc.size() + " cells to calculate", stepTime));
