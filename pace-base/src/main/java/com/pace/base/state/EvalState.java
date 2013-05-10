@@ -132,6 +132,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 	private String msrDim;
 	private String timeDim;
 	private String versionDim;
+	private String yearDim;
 	private String[] axisAllocPriority;		// The dimensions to use for allocation
 	private String[] axisSortPriority;		// The dimensions to use for intersection sorting
 	private String[] dimSequence;
@@ -177,6 +178,7 @@ public class EvalState implements IPafEvalState, Cloneable {
 		this.msrDim = appDef.getMdbDef().getMeasureDim();
 		this.timeDim = appDef.getMdbDef().getTimeDim();
 		this.versionDim = appDef.getMdbDef().getVersionDim();
+		this.yearDim = appDef.getMdbDef().getYearDim();
 		
 		// slice state is null in the case of default evaluations
 		if (sliceState != null) {
@@ -550,11 +552,44 @@ public class EvalState implements IPafEvalState, Cloneable {
 
 
 
+//	public void addAllChangedCells(Set<Intersection> iss) {
+//		for (Intersection is : iss) {
+//			addChangedCell(is);
+//		}
+//	}
+	
+	// rewritten to save some assignments in large operations
 	public void addAllChangedCells(Set<Intersection> iss) {
+		if (iss == null || iss.isEmpty() ) return;
+		
+		int msrIndex = dataCache.getAxisIndex(msrDim);
+		int timeIndex = dataCache.getAxisIndex(timeDim);
+		int yearIndex = dataCache.getAxisIndex(yearDim);
+		String msrName; String timeName;
+		
 		for (Intersection is : iss) {
-			addChangedCell(is);
+			// add to measures collections
+			msrName = is.getCoordinate(msrIndex);
+			if (!changedCellsByMsr.containsKey(msrName)) {
+				changedCellsByMsr.put(msrName, new HashSet<Intersection>(LG_CHNG_LOAD));
+			}
+			changedCellsByMsr.get(msrName).add(is);			
+			
+			// String timeName = TimeSlice.buildTimeHorizonCoord(is, appDef.getMdbDef());	// TTN-1595
+			// sorry alan, that's a whole lot of jumping around and assignment for this....
+			timeName = is.getCoordinate(yearIndex) + PafBaseConstants.TIME_HORIZON_MBR_DELIM + is.getCoordinate(timeIndex);	
+			
+			if (!changedCellsByTime.containsKey(timeName)) {
+				changedCellsByTime.put(timeName, new HashSet<Intersection>(LG_CHNG_LOAD));
+			}
+			changedCellsByTime.get(timeName).add(is);			
+			
 		}
-	}    
+		
+		currentChangedCells.addAll(iss);
+	}	
+	
+	
 
 	private void addChangedCellByMsr(Intersection is) {
 		String msrName = is.getCoordinate(getMsrDim());

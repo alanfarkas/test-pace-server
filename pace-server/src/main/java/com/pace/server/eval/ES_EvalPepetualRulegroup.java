@@ -63,8 +63,8 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 		MdbDef mdbDef = evalState.getAppDef().getMdbDef();
         String measureDim = mdbDef.getMeasureDim();
         
-		HashSet<Intersection> newChngCells = new HashSet<Intersection>(500);
-		HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>(500);
+		HashSet<Intersection> newChngCells = new HashSet<Intersection>(50000);
+		HashMap<Intersection, Formula> cellsToCalc = new HashMap<Intersection, Formula>(50000);
 		Intersection calcIntersection;
 
 		IPafFunction measFunc = null;
@@ -208,8 +208,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 			// any cell that is changed from formula evaluation is a potential target for allocation
 			// Normally evaluation results are not locked or allocated to preserve shape
 			// However this can be overridden by a rule flag
-			if (evalState.getRule().isLockSystemEvaluationResult() ||
-					evalState.getRule().getLockUserEvaluationResult() ) {
+			if (evalState.getRule().isLockSystemEvaluationResult()  ) {
 				evalState.getCurrentLockedCells().addAll(newChngCells);
 				evalState.addAllAllocations(newChngCells);
 			}
