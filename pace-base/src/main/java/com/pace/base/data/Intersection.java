@@ -215,7 +215,7 @@ public class Intersection implements ICoords, Cloneable, Comparable<Intersection
 		for (String coord : coordinates)
 			sb.append(coord + ", ");
 		sb.deleteCharAt(sb.lastIndexOf(","));
-		sb.append(")");
+		sb.append(')');
 		return sb.toString();
 	}
 

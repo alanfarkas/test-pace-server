@@ -239,7 +239,7 @@ public class StringUtils {
 				arrayString.append(elementOpenChars + array[i].toString()
 						+ elementCloseChars + elementDelim);
 				if (i % elementsPerLine == 0)
-					arrayString.append("\n");
+					arrayString.append('\n');
 			} else {
 				arrayString.append(elementOpenChars + array[i].toString()
 						+ elementCloseChars + stringCloseChars);

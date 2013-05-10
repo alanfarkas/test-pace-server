@@ -4641,7 +4641,7 @@ public class PafDataService {
 				for (String member : expressionList) {
 					// An orphan is any member who's parent is not the root of the tree
 					PafDimMember parentNode = dimTree.getMember(member).getParent();
-					if (parentNode != null && parentNode.getKey() != root) {
+					if (parentNode != null && !parentNode.getKey().equals(root) ) {
 						orphanMembers.add(member);
 					}
 				}

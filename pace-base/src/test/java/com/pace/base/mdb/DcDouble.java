@@ -2761,7 +2761,7 @@ public class DcDouble  {
 				for (int timeIndex = 0; timeIndex < timeSize; timeIndex++ ) {
 					stringBuffer.append(String.format(format, dataBlock[measureIndex][timeIndex]));
 				}
-				stringBuffer.append("\n");
+				stringBuffer.append('\n');
 			}
 		}
 		return stringBuffer.toString();

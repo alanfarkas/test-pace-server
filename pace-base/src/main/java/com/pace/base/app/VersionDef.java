@@ -224,7 +224,7 @@ public class VersionDef {
 				crossDimSpec.append(", ");
 			} else {
 				// Last member spec - finalize function call
-				crossDimSpec.append(")");
+				crossDimSpec.append(')');
 			}
 				
 		}

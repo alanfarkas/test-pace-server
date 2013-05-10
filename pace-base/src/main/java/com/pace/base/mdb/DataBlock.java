@@ -193,7 +193,7 @@ public class DataBlock implements Cloneable {
 			for (int colIndex = 0; colIndex < colCount; colIndex++ ) {
 				stringBuffer.append(String.format(format, cellValues[rowIndex][colIndex]));
 			}
-			stringBuffer.append("\n");
+			stringBuffer.append('\n');
 		}
 		return stringBuffer.toString();
 	}

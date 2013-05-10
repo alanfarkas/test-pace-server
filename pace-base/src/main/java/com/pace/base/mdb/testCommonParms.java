@@ -711,7 +711,7 @@ public abstract class testCommonParms {
 			for (PafDimMember member : members) {
 				int generation = member.getMemberProps().getGenerationNumber();
 				for (int i = 0; i < generation; i++)
-					System.out.print("\t");
+					System.out.print('\t');
 				logger.info(member.getKey());
 			}
 			logger.info(""); 

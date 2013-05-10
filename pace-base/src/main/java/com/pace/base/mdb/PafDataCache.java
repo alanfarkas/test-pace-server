@@ -598,7 +598,7 @@ public class PafDataCache implements IPafDataCache {
 		
 		// Current usage stats
 		sb.append(this.getCurrentUsageStatsString());
-		sb.append("\n");
+		sb.append('\n');
 		
 		// Max usage stats
 		if (this.getPlanYearSize() > 0) {
@@ -3833,9 +3833,11 @@ public class PafDataCache implements IPafDataCache {
 		
 		int baseDimCount = baseDimensions.length;
 		String[][] members = new String[baseDimCount][];
-		for (int i = 0; i < baseDimCount; i++) {
-			members[i] = memberCatalog[i];
-		}
+//		for (int i = 0; i < baseDimCount; i++) {
+//			members[i] = memberCatalog[i];
+//		}
+		System.arraycopy(memberCatalog, 0, members, 0, baseDimCount);
+		
 		UnitOfWork unitOfWork = new UnitOfWork(baseDimensions, members);
 		
 		return unitOfWork;

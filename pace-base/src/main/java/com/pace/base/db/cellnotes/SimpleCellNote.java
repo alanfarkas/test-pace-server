@@ -175,7 +175,7 @@ public class SimpleCellNote implements IPafCompressedObj {
 				strBuff.append(member);
 				
 				if ( ++cnt != dimensionMemberMap.size() ) {
-					strBuff.append("|");
+					strBuff.append('|');
 				}
 				
 			}
@@ -284,7 +284,7 @@ public class SimpleCellNote implements IPafCompressedObj {
 		strBuff.append("\n\tKey: " + this.generateKey());
 		strBuff.append("\n\tApplication: " + this.getApplicationName());
 		strBuff.append("\n\tDataSource: " + this.getDataSourceName());
-		strBuff.append("\n");
+		strBuff.append('\n');
 		
 		
 		return strBuff.toString();

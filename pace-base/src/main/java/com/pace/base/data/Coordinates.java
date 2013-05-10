@@ -118,7 +118,7 @@ public class Coordinates implements ICoords {
 		for (String coord : coordinates)
 			sb.append(coord + ", ");
 		sb.deleteCharAt(sb.lastIndexOf(","));
-		sb.append(")");
+		sb.append(')');
 		return sb.toString();
 	}
 
@@ -130,9 +130,11 @@ public class Coordinates implements ICoords {
 		Coordinates i = new Coordinates();
 		i.coordinates = new String[this.coordinates.length];
 
-		for (int j = 0; j < this.coordinates.length; j++) {
-			i.coordinates[j] = this.coordinates[j];
-		}
+//		for (int j = 0; j < this.coordinates.length; j++) {
+//			i.coordinates[j] = this.coordinates[j];
+//		}
+		
+		System.arraycopy(this.coordinates, 0, i.coordinates, 0, this.coordinates.length);
 
 		return i;
 	}

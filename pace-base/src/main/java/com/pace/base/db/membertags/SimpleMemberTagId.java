@@ -35,7 +35,7 @@ public class SimpleMemberTagId {
 		// Display simple member tag data
 		strBuff.append("\n\tApplication: " + this.appName);
 		strBuff.append("\n\tName: " + this.memberTagName);
-		strBuff.append("\n");
+		strBuff.append('\n');
 		
 		return strBuff.toString();
 	}

@@ -124,7 +124,7 @@ public class PafDataSlice implements IPafCompressedObj {
 			for (int colIdx = 0; colIdx < columnCount; colIdx++ ) {
 				stringBuffer.append(String.format(format, data[cellIdx++]));
 			}
-			stringBuffer.append("\n");
+			stringBuffer.append('\n');
 		}
 		return stringBuffer.toString();
 	}

@@ -1,0 +1,18 @@
+int revs = 10000000;
+int max = 100;
+double data[][][][] = new double[max][max][max][max];Random r = new Random();
+
+long start = System.nanoTime();
+for (int i = 0 ; i < revs ; i++ ) {
+	// calculate random position
+	int p1 = r.nextInt(max);
+	int p2 = r.nextInt(max);	
+	int p3 = r.nextInt(max); 
+	int p4 = r.nextInt(max);	
+	
+	double value = Math.random() + Math.random() + Math.random() + Math.random();
+	data[p1][p2][p3][p4] = value;
+}
+
+long now = System.nanoTime();double d = now - start;d = d / 1000000;double ips = (revs / d) * 1000;System.out.print("\nDuration: " + d + " ms, Intersections / sec: " + ips  );
+

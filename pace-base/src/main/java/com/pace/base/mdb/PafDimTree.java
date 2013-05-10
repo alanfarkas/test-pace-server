@@ -2581,8 +2581,8 @@ public abstract class PafDimTree {
     		// indentation routine
     		int gen = member.getMemberProps().getGenerationNumber();
     		for (int i = 0; i < gen; i++)
-    			stringBuffer.append("\t");
-    		stringBuffer.append(member + "\n");
+    			stringBuffer.append('\t');
+    		stringBuffer.append(member).append('\n');
     	}	
     	return stringBuffer.toString();
     }

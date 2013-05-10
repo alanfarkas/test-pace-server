@@ -134,13 +134,13 @@ public class SuppressZeroSettings  implements Cloneable {
 		
 		strBuff.append("Suppress Zero Settings: \n");
 		strBuff.append("\tEnabled: " + enabled);
-		strBuff.append("\n");
+		strBuff.append('\n');
 		strBuff.append("\tVisible: " + visible);
-		strBuff.append("\n");
+		strBuff.append('\n');
 		strBuff.append("\tAre Zero Rows Suppressed: " + rowsSuppressed);
-		strBuff.append("\n");
+		strBuff.append('\n');
 		strBuff.append("\tAre Zero Columns Suppressed: " + columnsSuppressed);
-		strBuff.append("\n");		
+		strBuff.append('\n');		
 		
 		return strBuff.toString();
 	}

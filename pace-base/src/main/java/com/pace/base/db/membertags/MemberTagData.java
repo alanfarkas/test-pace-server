@@ -271,7 +271,7 @@ public class MemberTagData {
 		strBuff.append("\n\tType: " + this.memberTagType);
 		strBuff.append("\n\tCreator: " + this.creator);
 		strBuff.append("\n\tLast Updated: " + this.lastUpdated);
-		strBuff.append("\n");
+		strBuff.append('\n');
 		
 		
 		return strBuff.toString();

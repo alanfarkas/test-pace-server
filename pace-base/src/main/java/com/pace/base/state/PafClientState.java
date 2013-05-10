@@ -710,7 +710,7 @@ public class PafClientState implements IPafClientState {
 			StringBuffer memberBuffer = new StringBuffer();
 			for (String member : uowMembers) {
 				memberBuffer.append(dQuotes(member));
-				memberBuffer.append(",");		// Comma delimit list of members
+				memberBuffer.append(',');		// Comma delimit list of members
 			}
 			parmValue = memberBuffer.substring(0, memberBuffer.length() - 1); 
 			tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
@@ -722,7 +722,7 @@ public class PafClientState implements IPafClientState {
 			memberBuffer = new StringBuffer();
 			for (PafDimMember member : uowFloorMembers) {
 				memberBuffer.append(dQuotes(member.getKey()));
-				memberBuffer.append(",");		// Comma delimit list of members
+				memberBuffer.append(',');		// Comma delimit list of members
 			}
 			parmValue = memberBuffer.substring(0, memberBuffer.length() - 1); 
 			tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);
@@ -734,7 +734,7 @@ public class PafClientState implements IPafClientState {
 			memberBuffer = new StringBuffer();
 			for (PafDimMember member : uowDimFloorMembers) {
 				memberBuffer.append(dQuotes(member.getKey()));
-				memberBuffer.append(",");		// Comma delimit list of members
+				memberBuffer.append(',');		// Comma delimit list of members
 			}
 			parmValue = memberBuffer.substring(0, memberBuffer.length() - 1); 
 			tokenCatalog.setProperty(parmKey.toUpperCase(), parmValue);

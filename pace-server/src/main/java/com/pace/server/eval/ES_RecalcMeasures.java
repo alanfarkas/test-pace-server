@@ -38,7 +38,7 @@ public class ES_RecalcMeasures extends ES_EvalBase implements IEvalStep {
         
         stepTime = System.currentTimeMillis();
 
-        Set<Intersection> targets = new HashSet<Intersection>();
+        Set<Intersection> targets = new HashSet<Intersection>(evalState.getLoadFactor() * 100);
         Intersection is;
  
         

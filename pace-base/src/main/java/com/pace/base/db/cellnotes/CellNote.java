@@ -404,7 +404,7 @@ public class CellNote {
 				strBuff.append(member);
 				
 				if ( ++cnt != dimensionMemberMap.size() ) {
-					strBuff.append("|");
+					strBuff.append('|');
 				}
 				
 			}
@@ -479,7 +479,7 @@ public class CellNote {
 		if ( this.getDataSource() != null ) {
 			strBuff.append("\n\tDataSource: " + this.getDataSource().getName());
 		}
-		strBuff.append("\n");
+		strBuff.append('\n');
 		
 		
 		return strBuff.toString();

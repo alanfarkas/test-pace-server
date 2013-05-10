@@ -271,7 +271,7 @@ public class PafServer implements Comparable, Cloneable {
 		
 		StringBuilder sb = new StringBuilder(getCompleteAppUrl());		
 		
-		sb.append("/");
+		sb.append('/');
 		sb.append(PafBaseConstants.PACE_SERVER_SETTINGS_CONTEXT_NAME);
 		
 		return sb.toString();
@@ -283,7 +283,7 @@ public class PafServer implements Comparable, Cloneable {
 		
 		if ( wsdlServiceName != null ) {
 			if( ! wsdlServiceName.equals(WSDL)) {
-				sb.append("/");
+				sb.append('/');
 			} 
 		
 			sb.append(wsdlServiceName);
