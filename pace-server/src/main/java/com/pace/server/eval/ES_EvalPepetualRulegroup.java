@@ -90,7 +90,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 			for (Intersection is : chngSet) {
 				// does this intersection change force the current rule to evaluate?
 				// 1st criteria, it has to be a component of this rule.
-                if ( EvalUtil.changeTriggersFormula( is, evalState.getRule(), evalState) ) {
+//                if ( EvalUtil.changeTriggersFormula( is, evalState.getRule(), evalState) ) { // this function is currently off because the logic is refactored into impactingChangeList()
 					// it will if it is the highest priority rule within this group that can execute
 					// this is true if the left hand term for every other rule above this rule is
 					// locked.
@@ -124,7 +124,7 @@ public class ES_EvalPepetualRulegroup extends ES_EvalBase implements IEvalStep {
 							cellsToCalc.put(calcIntersection, leadingRule.getFormula());
 						}
 					}
-				}		
+//				}		
 			}
 		}
 		//now we must consider changes in other locations depending on the rule we're processing
