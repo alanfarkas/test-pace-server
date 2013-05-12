@@ -1,5 +1,5 @@
 /**
- * Data block peoperties
+ * Data block properties
  */
 package com.pace.base.mdb;
 
@@ -28,7 +28,7 @@ public class DataBlockProperties implements Cloneable {
 	 * 
 	 * @param rowCount Data block rows
 	 * @param colCount Data block columns
-	 * @param cellPropsBitCount Number of property bits for a singe cell
+	 * @param cellPropsBitCount Number of property bits for a single cell
 	 */
 	public DataBlockProperties(int rowCount, int colCount, int cellPropsBitCount) {
 		
