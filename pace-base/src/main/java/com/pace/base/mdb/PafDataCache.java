@@ -121,7 +121,8 @@ public class PafDataCache implements IPafDataCache {
 	private PafMVS pafMVS = null;
 	private MemberTreeSet dimTrees = null;
 	private Map<String, PafBaseTree> mdbBaseTrees = null;
-	private List<String> mdbYears = null;								// List of years in mdb year tree
+	private List<String> mdbLeafYears = null;							// List of leaf years in mdb year tree
+	private List<String> leafYears = null;								// List of years in mdb year tree
 	private EvalState evalState = null;
 	private PafClientState clientState = null;
 	private boolean isDirty = true;					// Indicates that the data cache has been updated
@@ -285,19 +286,35 @@ public class PafDataCache implements IPafDataCache {
 		return mdbBaseTrees;
 	}
 
+
 	/**
-	 * Return list of years in the current multi-dimensional database 
+	 * Return list of leaf years in the data cache 
 	 * 
-	 * @return
+	 * @return List of data cache leaf years
 	 */
-	public List<String> getMdbYears() {
+	public List<String> getLeafYears() {
 		
-		if (mdbYears == null) {
+		if (leafYears == null) {
+			// This collection is lazy loaded
+			final PafDimTree yearTree = dimTrees.getTree(this.getYearDim());
+			leafYears = yearTree.getLowestMemberNames(yearTree.getRootNode().getKey());
+		}
+		return leafYears;
+	}
+
+	/**
+	 * Return list of leaf years in the current multi-dimensional database 
+	 * 
+	 * @return List of mdb leaf years
+	 */
+	public List<String> getMdbLeafYears() {
+		
+		if (mdbLeafYears == null) {
 			// This collection is lazy loaded
 			final PafDimTree mdbYearTree = mdbBaseTrees.get(this.getYearDim());
-			mdbYears = mdbYearTree.getLowestMemberNames(mdbYearTree.getRootNode().getKey());
+			mdbLeafYears = mdbYearTree.getLowestMemberNames(mdbYearTree.getRootNode().getKey());
 		}
-		return mdbYears;
+		return mdbLeafYears;
 	}
 
 
@@ -674,23 +691,23 @@ public class PafDataCache implements IPafDataCache {
 
 	/**
 	 *	Return a list of versions that are components for any of the
-	 *  specified derived versions
+	 *  specified derived or offset versions
 	 *  
-	 * @param derivedVersions List of derived versions to inspect
+	 * @param complexVersions List of derived or offset versions to inspect
 	 * @return List of component versions
 	 */
-	public List<String> getComponentVersions(List<String> derivedVersions) {
+	public List<String> getComponentVersions(List<String> complexVersions) {
 
 		Set<String> componentVersions = new HashSet<String>();
 
 
 		// Cycle through each derived version and look for component members
-		for (String derivedVersion : derivedVersions) {
+		for (String complexVersion : complexVersions) {
 			
-			VersionDef versionDef = getVersionDef(derivedVersion);
+			VersionDef versionDef = getVersionDef(complexVersion);
 			
-				// Skip version if not derived version
-				if (!this.getDerivedVersions().contains(derivedVersion))
+				// Skip version if not derived or offset version
+				if (!this.getDerivedVersions().contains(complexVersion) && !this.getOffsetVersions().contains(complexVersions))
 						continue;
 				
 				// Get base version
@@ -700,8 +717,8 @@ public class PafDataCache implements IPafDataCache {
 				
 				// Determine the comparison version
 				String compareVersion = null;
-				if (versionDef.getType() == VersionType.Variance) {
-					// Variance version - use compare version property
+				if (versionDef.getType() == VersionType.Variance || versionDef.getType() == VersionType.Offset) {
+					// Variance or Offset version - use compare version property
 					compareVersion = versionFormula.getCompareVersion(); 
 				} else if (versionDef.getType() == VersionType.ContribPct) {
 					// Contribution percent - search for possible compare version
@@ -2352,7 +2369,27 @@ public class PafDataCache implements IPafDataCache {
 		Intersection firstFloorIs = cellIs.clone();
 		PafDimTree dimTree = null;
 		PafDimMember firstFloorMbr = null;
+		String branch = null, timeDim = null;
 		
+		// If time dimension is selected, substitute time horizon dimension for query
+		if (dim.equals(getTimeDim())) {
+			timeDim = getTimeHorizonDim();
+			// Check if year member is specified (only valid if Time dimension is being traversed)
+			if (yearMbr == null) {
+				// No year member specification
+				branch = cellIs.getCoordinate(timeDim);				
+			} else {
+				// Year member specified - pick
+			}
+		} else {
+			timeDim = dim;
+			branch = cellIs.getCoordinate(timeDim);
+		}
+
+		// Get first floor member within scope
+		dimTree = getDimTrees().getTree(timeDim);
+//		dimTree.getDescendants(branch, levelGenType, levelGen, branch, false);
+//		dimTree.getMembersAtLevel(branchName, level);
 		// If time dimension is selected, substitute time horizon dimension for query
 		if (dim.equals(getTimeDim())) {
 			dimTree = getDimTrees().getTree(getTimeHorizonDim());
@@ -3501,7 +3538,9 @@ public class PafDataCache implements IPafDataCache {
 	 * another data cache intersection, if it meets the following 
 	 * condition(s):
 	 * 
-	 * 1) The intersection's version dimension coordinate contains an
+	 * 1) The year coordinate member is a leaf node
+	 * 
+	 * 2) The intersection's version dimension coordinate contains an
 	 *    offset version reference whose calculated source year falls
 	 *    inside the UOW.
 	 * 
@@ -3537,10 +3576,12 @@ public class PafDataCache implements IPafDataCache {
 	 * another data cache intersection, if it meets the following 
 	 * condition(s):
 	 * 
-	 * 1) The intersection's version dimension coordinate contains an
+	 * 1) The year coordinate member is a leaf node
+	 * 
+	 * 2) The intersection's version dimension coordinate contains an
 	 *    offset version reference whose calculated source year falls
 	 *    inside the UOW.
-	 * 
+	 *  
 	 * Offset version intersections who don't meet this criteria are 
 	 * sourced directly from the multidimensional database.
 	 * 
@@ -3554,7 +3595,7 @@ public class PafDataCache implements IPafDataCache {
 
 		final int versionAxis = this.getVersionAxis(), yearAxis = this.getYearAxis();
 		final String planVersion = this.getPlanVersion();
-		final List<String> uowYearList = Arrays.asList(this.getYears());
+		
 		
 
 		// Check for offset version reference. If none found then return original
@@ -3565,12 +3606,17 @@ public class PafDataCache implements IPafDataCache {
 			return coords;
 		}
 		
-		
-		// Calculate the offset version source year
-		VersionFormula vf = vd.getVersionFormula();
+		// Also skip translation if the year coordinate is not a leaf member (TTN-2017)
+		List<String> uowLeafYears = this.getLeafYears();
 		String yearCoord = coords[yearAxis];
+		if (!uowLeafYears.contains(yearCoord)) {
+			return coords;
+		}
+
+		// Calculate the offset version source year	
+		VersionFormula vf = vd.getVersionFormula();
 		String sourceYear = null;
-		final List<String> mdbYearList = this.getMdbYears();
+		final List<String> mdbYearList = this.getMdbLeafYears();
 		try {
 			sourceYear = vf.calcOffsetVersionSourceYear(yearCoord, mdbYearList);
 		} catch (Exception e) {
@@ -3580,7 +3626,7 @@ public class PafDataCache implements IPafDataCache {
 
 		// If source year falls inside the uow, then this intersection is an alias
 		// intersection and points to another intersection within the uow.
-		if (uowYearList.contains(sourceYear)) {
+		if (uowLeafYears.contains(sourceYear)) {
 			// Translate intersection coordinates
 			String[] translatedCoords = coords.clone();
 			String sourceVersion = vf.getBaseVersionValue(planVersion);
@@ -4257,6 +4303,17 @@ public class PafDataCache implements IPafDataCache {
 	public List<String> getVarianceVersions() {
 
 		List<String> varianceVersions = getVersionsByType(VersionType.Variance);
+		return varianceVersions;
+	}
+
+	/**
+	 *	Return list of offset versions
+	 *
+	 * @return List<String>
+	 */
+	public List<String> getOffsetVersions() {
+
+		List<String> varianceVersions = getVersionsByType(VersionType.Offset);
 		return varianceVersions;
 	}
 

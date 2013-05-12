@@ -238,6 +238,17 @@ public class VersionFormula {
 	 * @return
 	 */
 	public String calcOffsetVersionSourceYear(String baseYear, List<String> yearList) {
+		return calcOffsetVersionSourceYear(baseYear, yearList, true);
+	}
+	
+	/**
+	 * @param baseYear
+	 * @param yearList
+	 * @param bThowError Indicates that an error should be thrown if the calculated offset version year is not contained in the list of years
+	 * 
+	 * @return
+	 */
+	public String calcOffsetVersionSourceYear(String baseYear, List<String> yearList, boolean bThrowError) {
 
 		String sourceYear = null;
 		
@@ -245,15 +256,18 @@ public class VersionFormula {
 		int index = yearList.indexOf(baseYear);
 		int offsetYearInx = index + yearOffset;
 		if (offsetYearInx < 0 ||  offsetYearInx >= yearList.size()) {
-			String logMsg = "The Year Offset of: [" + yearOffset + "] applied to the base year: [" 
+			// Offset year is not contained in year list. Either throw error or return null
+			if (bThrowError) {
+				String logMsg = "The Year Offset of: [" + yearOffset + "] applied to the base year: [" 
 					+ baseYear + "] results in a Year member not defined in the OLAP Cube Year Dimension"; 
-			throw new IllegalArgumentException(logMsg);
+				throw new IllegalArgumentException(logMsg);
+			} else return null;
 		}
 		sourceYear = yearList.get(index + yearOffset);
 		
 		return sourceYear;
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
