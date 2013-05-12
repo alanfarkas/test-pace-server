@@ -55,6 +55,7 @@ import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.PafDimSpec;
 import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
+import com.pace.base.app.VersionFormula;
 import com.pace.base.comm.EvaluateViewRequest;
 import com.pace.base.comm.PafPlannerConfig;
 import com.pace.base.comm.SimpleCoordList;
@@ -1328,7 +1329,8 @@ public class PafDataService {
 		Map<String, Map<Integer, List<String>>> dataSpecByVersion = new HashMap<String, Map<Integer, List<String>>>();
 		MemberTreeSet uowTrees = clientState.getUowTrees();
 		PafDimTree yearTree = uowTrees.getTree(yearDim);
-
+		List<String> leafYears = dataCache.getLeafYears();
+		List<String> nonPlanYears = new ArrayList<String>(clientState.getLockedYears());
 
 		
 		// Determine which combinations of non-plannable years and versions are required by this view:
@@ -1348,6 +1350,8 @@ public class PafDataService {
 		viewContribPctVersions.retainAll(viewVersions);
 		List<String> viewVarVersions = dataCache.getVarianceVersions();
 		viewVarVersions.retainAll(viewVersions);
+		List<String> viewOffsetVersions = dataCache.getOffsetVersions();
+		viewOffsetVersions.retainAll(viewVersions);
 
 		// Add in any years that are components to any synthetic years on view (TTN-1860)
 		List<String> viewYears = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(yearDim)));
@@ -1357,12 +1361,13 @@ public class PafDataService {
 		
 		// Also, filter out any undefined and synthetic years (TTN-1860)
 		requiredYears.removeAll(syntheticYears);
-		List<String> nonPlanYears = new ArrayList<String>(clientState.getLockedYears());
-		nonPlanYears.retainAll(requiredYears);
+		List<String> viewNonPlanYears = new ArrayList<String>(clientState.getLockedYears());
+		viewNonPlanYears.retainAll(requiredYears);
 
 		
 		// Exit if no data to load
-		if (viewRefVersions.isEmpty() && viewContribPctVersions.isEmpty() && viewVarVersions.isEmpty() && nonPlanYears.isEmpty()) {
+		if (viewRefVersions.isEmpty() && viewContribPctVersions.isEmpty() && viewVarVersions.isEmpty() 
+				&& viewOffsetVersions.isEmpty() && viewNonPlanYears.isEmpty()) {
 			return;
 		}
 		
@@ -1421,8 +1426,8 @@ public class PafDataService {
 		// Determine the version & year combinations required by the view
 		Map<String, Set<String>> reqYearsByVersion = buildViewDataVersYearMap(viewSection, dataCache);
 		
-		// Compile the set of versions required to populate the view. Contribution % members
-		// are handled later.
+		// Compile the set of versions required to populate the view. Offset Versions
+		// & Contribution % members are handled later.
 		// -- Reference Versions
 		requiredVersions.addAll(viewRefVersions);
 		// -- Versions needed to support any variance version calculations
@@ -1445,7 +1450,7 @@ public class PafDataService {
 				reqVersionYears.addAll(yearTree.getSyntheticComponentMemberNames(reqVersionYears));
 				reqVersionYears.retainAll(requiredYears);
 				if (version.equals(planVersion)) {
-					reqVersionYears.retainAll(nonPlanYears);
+					reqVersionYears.retainAll(viewNonPlanYears);
 				}
 				
 				// Skip to next version if there are no years to load
@@ -1465,6 +1470,72 @@ public class PafDataService {
 		}
 		
 		
+		// Offset versions - Populate additional UOW intersections for any base
+		// versions (on or off the view) that meets one of the following criteria:
+		// (TTN-2017)
+		//
+		// 	1. Base version is the plan version and the offset year is a non-plannable
+		//     year inside the uow. 
+		//
+		// 			OR 
+		//
+		//	2. Base version is not the plan version and the offset year (either plannable
+		//     or non-plannable) falls inside the uow.
+		//
+		//
+		// NOTES: 
+		// 1. Plan version data in a read-only or a 'not loaded' year would have already
+		// 	  been loaded in the initial uow load. 
+		//
+		// 2. Data for any offset version in which the offset year falls outside the uow, 
+		//	  is stored directly in the offset version itself, instead of being linked
+		//	  to the corresponding base version intersection. 
+        // 
+		// 3. Some data specifications, that were previously generated earlier in this method,
+		//    may be updated in the following logic. 
+		//
+		for (String version : viewOffsetVersions) {
+			
+			// Get offset version formula properties
+			VersionFormula vf = dataCache.getVersionDef(version).getVersionFormula();
+			String baseVersion = vf.getBaseVersionValue(vf.getBaseVersion());
+			
+			// Determine which offset version data needs to be loaded in each required view year
+			Set<String> requiredOffsetYears = new HashSet<String>();
+			for (String requiredYear : requiredYears) {
+
+				// Calculate the offset version source year		
+				String sourceYear  = vf.calcOffsetVersionSourceYear(requiredYear, leafYears, false);
+				
+				// Load data for source year if it meets the criteria specified above 
+				if (sourceYear != null) {
+					if (!baseVersion.equals(planVersion) || nonPlanYears.contains(sourceYear))
+						requiredOffsetYears.add(sourceYear);
+				}							
+			}
+		
+			// Skip to next offset version if nothing to load
+			if (requiredOffsetYears.isEmpty()) continue;
+			
+			// Update year specification on previously defined data specification for base 
+			// version. If none exists, then pull the default data specification for the view
+			// and add a new data specification to the master map
+			Map <Integer, List<String>> dataSpecAsMap = null;
+			List<String> currentPulledYears = null;
+			if (dataSpecByVersion.containsKey(baseVersion)) {
+				dataSpecAsMap = dataSpecByVersion.get(baseVersion);
+				currentPulledYears = dataSpecAsMap.get(yearAxis);
+				currentPulledYears.addAll(requiredOffsetYears);
+			} else {
+				dataSpecAsMap = refDataSpec.buildUowMap();
+				dataSpecAsMap.put(versionAxis, new ArrayList<String>(Arrays.asList(new String[]{baseVersion})));
+				dataSpecAsMap.put(yearAxis, new ArrayList<String>(requiredOffsetYears));
+				dataSpecByVersion.put(baseVersion, dataSpecAsMap);
+			}
+			
+
+		}
+
 		
 		// Contribution % versions - Populate additional UOW intersections for any base
 		// reference versions (on or off the view) that meets one of the following criteria:
@@ -1578,6 +1649,7 @@ public class PafDataService {
 				
 		}
 		
+
 		// Add in any synthetic member components (TTN-1870)
 		for (String version : dataSpecByVersion.keySet()) {
 			Map<Integer, List<String>> dataSpecAsMap = dataSpecByVersion.get(version);

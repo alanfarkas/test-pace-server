@@ -221,7 +221,7 @@ public class EsbData implements IMdbData{
 		final int versionAxis = dataCache.getVersionAxis(), yearAxis = dataCache.getYearAxis();
 		final String versionDim = dataCache.getVersionDim(), yearDim = dataCache.getYearDim();
 		Map<String, Map<Integer, List<String>>> loadedMdbDataSpec = new HashMap<String, Map<Integer, List<String>>>();   // Track data that was actually loaded
-		final List<String> mdbYears = dataCache.getMdbYears();    
+		final List<String> mdbYears = dataCache.getMdbLeafYears();    
 		EsbCubeView esbCubeView = null;
 		
 
