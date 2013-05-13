@@ -1355,7 +1355,7 @@ public class PafDataService {
 
 		// Add in any years that are components to any synthetic years on view (TTN-1860)
 		List<String> viewYears = new ArrayList<String>(Arrays.asList(viewMemberSpec.getDimMembers(yearDim)));
-		List<String> requiredYears = new ArrayList<String>(viewYears);
+		Set<String> requiredYears = new HashSet<String>(viewYears);
 		Set<String> syntheticYears = yearTree.getSyntheticMemberNames();
 		requiredYears.addAll(yearTree.getSyntheticComponentMemberNames(syntheticYears));
 		
