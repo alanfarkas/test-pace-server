@@ -46,6 +46,7 @@ import com.pace.base.comm.SimpleCoordList;
 import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
+import com.pace.base.data.IntersectionUtil;
 import com.pace.base.data.MemberTreeSet;
 import com.pace.base.data.PafDataSlice;
 import com.pace.base.data.TimeSlice;
@@ -123,6 +124,7 @@ public class PafDataCache implements IPafDataCache {
 	private Map<String, PafBaseTree> mdbBaseTrees = null;
 	private List<String> mdbLeafYears = null;							// List of leaf years in mdb year tree
 	private List<String> leafYears = null;								// List of years in mdb year tree
+	private Integer timeHorizGenOffset = null;							// Gen difference between member in time horizon tree and corresponding member in time tree;
 	private EvalState evalState = null;
 	private PafClientState clientState = null;
 	private boolean isDirty = true;					// Indicates that the data cache has been updated
@@ -2360,47 +2362,65 @@ public class PafDataCache implements IPafDataCache {
 	 * @param cellIs Cell intersection
 	 * @param dim Dimension
 	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
-	 * @param year Optional parameter that specifies which year to confine search to
+	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
 	 * 
 	 * @return First floor intersection
+	 * @throws PafException 
 	 */
-	public Intersection getFirstFloorIs(Intersection cellIs, String dim, LevelGenType levelGenType, int levelGen, String yearMbr) {
+	public Intersection getFirstFloorIs(Intersection cellIs, String dim, LevelGenType levelGenType, int levelGen, String yearMbr) throws PafException {
 
 		Intersection firstFloorIs = cellIs.clone();
 		PafDimTree dimTree = null;
-		PafDimMember firstFloorMbr = null;
-		String branch = null, timeDim = null;
+		PafDimMember firstFloorMbr = null, timeMbr = null;
+		String timeCoord = null, treeRoot = null;
+		int genOffset = 0;
 		
-		// If time dimension is selected, substitute time horizon dimension for query
-		if (dim.equals(getTimeDim())) {
-			timeDim = getTimeHorizonDim();
-			// Check if year member is specified (only valid if Time dimension is being traversed)
-			if (yearMbr == null) {
-				// No year member specification
-				branch = cellIs.getCoordinate(timeDim);				
-			} else {
-				// Year member specified - pick
-			}
-		} else {
-			timeDim = dim;
-			branch = cellIs.getCoordinate(timeDim);
-		}
-
-		// Get first floor member within scope
-		dimTree = getDimTrees().getTree(timeDim);
-//		dimTree.getDescendants(branch, levelGenType, levelGen, branch, false);
-//		dimTree.getMembersAtLevel(branchName, level);
+		
 		// If time dimension is selected, substitute time horizon dimension for query
 		if (dim.equals(getTimeDim())) {
 			dimTree = getDimTrees().getTree(getTimeHorizonDim());
-			firstFloorMbr = dimTree.getFirstFloorMbr();
-			TimeSlice.applyTimeHorizonCoord(firstFloorIs, firstFloorMbr.getKey(), this.getMdbDef());
+			timeCoord = IntersectionUtil.getIsCoord(cellIs, dim, this);
+
+			// For generation search, we need to match desired gen to time horizon tree
+			if (levelGenType == LevelGenType.GEN) {
+				genOffset = getTimeHorizGenOffset();
+			}
+
+			// Check if year member is specified (only valid if Time dimension is being traversed)
+			if (yearMbr == null) {
+				// No year member specification
+				treeRoot = dimTree.getRootNode().getKey();	
+			} else {
+				// Check if current time coordinate is contained in selected year. If not,
+				// return null
+				TimeSlice timeSlice = new TimeSlice(timeCoord);
+				String yearCoord = timeSlice.getYear();
+				if (yearCoord != yearMbr) {
+					return null;
+				}
+				// Year member specified - use a pruned copy of time horizon tree under specified year
+				PafDimTree timeTree = getDimTrees().getTree(getTimeDim());
+				treeRoot = TimeSlice.buildTimeHorizonCoord(timeTree.getRootNode().getKey(), yearMbr);
+				dimTree = dimTree.getSubTreeCopy(treeRoot);
+			}
+			
 		} else {
 			dimTree = getDimTrees().getTree(dim);
-			firstFloorMbr = dimTree.getFirstFloorMbr();
-			firstFloorIs.setCoordinate(this.getTimeDim(), firstFloorMbr.getKey());
+			treeRoot = dimTree.getRootNode().getKey();
+			timeCoord = cellIs.getCoordinate(dim);
 		}
+		timeMbr = dimTree.getMember(timeCoord);
+
 		
+		// Find the ancestor that matches the specified scope
+		PafDimMember ancestorMbr = null;
+		ancestorMbr = dimTree.getAncestor(timeMbr, levelGenType, levelGen + genOffset);
+		
+		// Get the first floor descendant within specified scope
+		firstFloorMbr = dimTree.getFirstDescendant(ancestorMbr.getKey());
+		
+		// Update floor intersection and return value
+		IntersectionUtil.setIsCoord(firstFloorIs, dim, firstFloorMbr.getKey(), evalState);	
 		return firstFloorIs;
 	}
 
@@ -4139,6 +4159,28 @@ public class PafDataCache implements IPafDataCache {
 		return getAxisSize(getTimeHorizonAxis());
 	}
 
+	/**
+	 * Return the member generation offset between members in the time horizon tree and
+	 * their corresponding members in the time dimension tree
+	 * 
+	 * @return
+	 */
+	public int getTimeHorizGenOffset() {
+		
+		if (timeHorizGenOffset == null) {
+			// This collection is lazy loaded
+			PafDimTree timeTree = getDimTrees().getTree(getTimeDim());
+			PafDimMember firstTimeFloorMbr = timeTree.getFirstFloorMbr();
+			int timeFloorGen = firstTimeFloorMbr.getMemberProps().getGenerationNumber();
+			PafDimTree timeHorizTree = getDimTrees().getTree(getTimeHorizonDim());
+			PafDimMember firstTimeHorizFloorMbr = timeHorizTree.getFirstFloorMbr();
+			int timeHorizFloorGen = firstTimeHorizFloorMbr.getMemberProps().getGenerationNumber();
+			timeHorizGenOffset = timeHorizFloorGen - timeFloorGen;
+		}
+		return timeHorizGenOffset;
+	}
+	
+	
 	/**
 	 *	Returns the axis number corresponding to the Version dimension
 	 *

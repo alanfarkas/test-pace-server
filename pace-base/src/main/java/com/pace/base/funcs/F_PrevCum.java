@@ -21,6 +21,7 @@ package com.pace.base.funcs;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -54,7 +55,7 @@ public class F_PrevCum extends AbstractFunction {
    	protected static int MEASURE_ARGS = 1, REQUIRED_ARGS = 1, MAX_ARGS = 3;
 
    	// parameter variables
-	private String offsetDim, levelGenParm, yearMbr;
+	private String offsetDim, levelGenParm, yearParm, yearMbr;
 	private int offset, levelGen;
 	private LevelGenType levelGenType;
 	
@@ -175,7 +176,17 @@ public class F_PrevCum extends AbstractFunction {
 
 		// Year member parm
 		if (parms.length > 4) {
-			yearMbr = parms[3];
+			yearParm = parms[4];
+			Properties tokenCatalog = evalState.getClientState().generateTokenCatalog(new Properties());
+			String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
+			PafDimTree yearTree = evalState.getEvaluationTree(yearDim);
+			try {
+				yearMbr = parseYearParm(yearParm, yearTree, tokenCatalog, true);
+			} catch (IllegalArgumentException e) {
+				errMsg += "[" + yearParm + "] is not a valid year specification";
+				logger.error(errMsg);
+				throw new PafException(errMsg, PafErrSeverity.Error);
+			}
 		}
 
 		this.isValidated = true;

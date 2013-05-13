@@ -21,6 +21,7 @@ package com.pace.base.funcs;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -31,7 +32,6 @@ import com.pace.base.app.PafApplicationDef;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.data.TimeSlice;
-import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
@@ -66,10 +66,12 @@ public class F_Bop extends AbstractFunction {
 	public double calculate(Intersection sourceIs, IPafDataCache dataCache,
 			IPafEvalState evalState) throws PafException {
 
-		double result;
-		String timeDim, levelGenParm = null, yearMbr = null;
+		double result = 0;
+		String timeDim, levelGenParm = null, yearParm = null, yearMbr = null;
     	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
 		PafApplicationDef app = evalState.getAppDef();
+		String yearDim = app.getMdbDef().getYearDim();
+		PafDimTree yearTree = evalState.getEvaluationTree(yearDim);
 		int levelGen = 0;
 		LevelGenType levelGenType = null;
 
@@ -103,11 +105,22 @@ public class F_Bop extends AbstractFunction {
 		}
 		
 		// Year member parm
-		if (parms.length > 3)
-			yearMbr = parms[3];
+		if (parms.length > 3) {
+			yearParm = parms[3];
+			Properties tokenCatalog = evalState.getClientState().generateTokenCatalog(new Properties());
+			try {
+				yearMbr = parseYearParm(yearParm, yearTree, tokenCatalog, true);
+			} catch (IllegalArgumentException e) {
+				errMsg += "[" + yearParm + "] is not a valid year specification";
+				logger.error(errMsg);
+				throw new PafException(errMsg, PafErrSeverity.Error);
+			}
+		}
 		
 		dataIs = dataCache.getFirstFloorIs(dataIs,  timeDim, levelGenType, levelGen, yearMbr);
-		result = dataCache.getCellValue(dataIs);			
+		if (dataIs != null)
+			result = dataCache.getCellValue(dataIs);			
+		
 		return result;
 	}
 

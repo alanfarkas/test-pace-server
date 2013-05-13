@@ -51,7 +51,7 @@ public interface IPafDataCache {
 	public Intersection getLastDescendantIs(Intersection cellIs, final String dim, final int level);
 	public List<Intersection> getDescIntersectionsAtLevel(Intersection cellIs, String dim, int level);
 	public Intersection getFirstFloorIs(final Intersection cellIs, final String dim);
-	public Intersection getFirstFloorIs(final Intersection dataIs, final String timeDim, final LevelGenType levelGenType, final int levelGen, final String yearMbr);
+	public Intersection getFirstFloorIs(final Intersection dataIs, final String timeDim, final LevelGenType levelGenType, final int levelGen, final String yearMbr) throws PafException;
 	public Intersection getLastFloorIs(Intersection cellIs, String dim);
 	public boolean isBaseIntersection(Intersection sourceIs);
 

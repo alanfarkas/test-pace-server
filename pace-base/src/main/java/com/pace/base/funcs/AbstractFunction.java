@@ -5,13 +5,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
+import com.pace.base.PafBaseConstants;
 import com.pace.base.PafException;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.MeasureType;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
+import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
 import com.pace.base.utility.StringOdometer;
@@ -277,7 +280,7 @@ public abstract class AbstractFunction implements IPafFunction {
 		if (firstChar.equals("L")) {
 			levelGenType = LevelGenType.LEVEL;
 		} else if (firstChar.equals("G")) {
-			levelGenType = levelGenType.GEN;
+			levelGenType = LevelGenType.GEN;
 		} else {
 			// Illegal Parm
 			String errMsg = "Illegal Level/Gen parameter [" + levelGenParm + "] passed to Pace rule function ";
@@ -295,4 +298,69 @@ public abstract class AbstractFunction implements IPafFunction {
 		
 	}
 
+
+	/**
+	 * Parse and validate the year parameter and resolve token values
+	 * 
+	 * @param yearParm Year specification or year token
+	 * @param yearTree Year dimension tree
+	 * @param tokenCatalog Token catalog
+	 * 
+	 * @return Parsed year specification
+	 * @throws IllegalArgumentException
+	 */
+	public String parseYearParm(final String yearParm, PafDimTree yearTree, Properties tokenCatalog) throws IllegalArgumentException  {
+		return parseYearParm(yearParm, yearTree, tokenCatalog, false);
+	}
+		
+	/**
+	 * Parse and validate the year parameter and resolve token values
+	 * 
+	 * @param yearParm Year specification or year token
+	 * @param yearTree Year dimension tree
+	 * @param tokenCatalog Token catalog
+	 * @param bIgnoreNull Indicates that a null value for the year should be ignored 
+	 * 
+	 * @return Parsed year specification
+	 * @throws IllegalArgumentException
+	 */
+	public String parseYearParm(final String yearParm, PafDimTree yearTree, Properties tokenCatalog, boolean bIgnoreNull) throws IllegalArgumentException  {
+
+		String key = null, yearValue = yearParm;
+		
+		// Check for null value
+		if (yearParm == null) {
+			if (bIgnoreNull) {
+				return null;
+			} else {
+				// Illegal Parm
+				String errMsg = "Illegal Year parameter of  [null] passed to Pace rule function ";
+				throw new IllegalArgumentException(errMsg);				
+			}
+		}
+		
+						
+		// Check for FIRST_PLAN_YEAR token
+		key = PafBaseConstants.FUNC_TOKEN_FIRST_PLAN_YEAR; 
+		if (yearParm.equalsIgnoreCase(key)) {
+			// Return token value
+			yearValue = tokenCatalog.getProperty(key);
+		}
+		
+		// Check for FIRST_NONPLAN_YEAR token 
+		if (yearParm.equalsIgnoreCase(key)) {
+			// Return token value
+			yearValue = tokenCatalog.getProperty(key);
+		}
+		
+
+		// Check for valid year member
+		if (!yearTree.hasMember(yearValue)) {
+			// Illegal Parm
+			String errMsg = "Illegal Year parameter [" + yearParm + "] passed to Pace rule function ";
+			throw new IllegalArgumentException(errMsg);			
+		}
+		
+		return yearValue;
+	}
 }

@@ -19,19 +19,16 @@
 package com.pace.ext.funcs;
 
 import java.util.HashSet;
-import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
-import com.pace.base.app.PafApplicationDef;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
-import com.pace.base.funcs.F_Cum;
-import com.pace.base.mdb.PafDimMember;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
@@ -55,7 +52,7 @@ public class CUMCountFunc extends AbstractFunction {
   
     	double result = 0;
     	int levelGen = -1;
-        String cumDim = null, levelGenParm = null, yearMbr = null;
+        String cumDim = null, levelGenParm = null, yearParm = null,  yearMbr = null;
     	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
         LevelGenType levelGenType = null;
     	
@@ -88,11 +85,21 @@ public class CUMCountFunc extends AbstractFunction {
         	}
         }
 
-		// Year member parm
-		if (parms.length > 2)
-			yearMbr = parms[2];
+        // Year member parm
+        if (parms.length > 2) {
+        	yearParm = parms[2];
+        	Properties tokenCatalog = evalState.getClientState().generateTokenCatalog(new Properties());
+        	String yearDim = evalState.getAppDef().getMdbDef().getYearDim();
+        	PafDimTree yearTree = evalState.getEvaluationTree(yearDim);
+        	try {
+        		yearMbr = parseYearParm(yearParm, yearTree, tokenCatalog, true);
+        	} catch (IllegalArgumentException e) {
+        		errMsg += "[" + yearParm + "] is not a valid year specification";
+        		logger.error(errMsg);
+        		throw new PafException(errMsg, PafErrSeverity.Error);
+        	}
+        }
 		
-
 		result = dataCache.getCumMbrCount(sourceIs, cumDim, levelGenType, levelGen, yearMbr);
         return result;
     	

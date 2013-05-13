@@ -118,7 +118,7 @@ public abstract class PafDimTree {
     public abstract PafDimTree getSubTreeCopy(String branch, int depth) throws PafException;
      
 	/**
-     *	Get copy of paf dim attribute tree using specified root down to specified generation
+     *	Get copy of paf dim tree using specified root down to specified generation
 	 *
 	 * @param root
 	 * @param lowestGen
@@ -1021,6 +1021,38 @@ public abstract class PafDimTree {
 	}
 
 	/**
+	 *  Return the ancestor of the specified member at the specified generation or level
+	 *
+	 * @param member Tree member
+	 * @param gen Member generation
+	 * 
+	 * @return PafDimMember
+	 */
+	public PafDimMember getAncestor(PafDimMember member, LevelGenType levelGenType, int genLevel) {
+		
+		if (levelGenType == LevelGenType.GEN) return getAncestor(member, genLevel);
+		
+         PafDimMember ancestor = member;
+         int ancestorLvl = ancestor.getMemberProps().getLevelNumber();
+        
+         // Validate gen
+         if (genLevel < 0) {
+        	 String errMsg = "Illegal level value of [" + genLevel + "] passed to getAncestor."
+        	 	+ " The generation value must be greater than or equal to 0"; 
+        	 throw new IllegalArgumentException(errMsg);
+         }
+         
+         // Search for ancestor that matches the specified generation
+         while (ancestorLvl < genLevel) {
+        	 ancestor = ancestor.getParent();
+        	 ancestorLvl = ancestor.getMemberProps().getLevelNumber();        
+         }
+        
+         // Return ancestor
+        return ancestor;
+	}
+
+	/**
      *	Returns a list of ancestor member objects for the member name passed in.
      *  This method should not be used for shared members.
      *
@@ -1740,7 +1772,21 @@ public abstract class PafDimTree {
         return memberList;
     }
        
+
     /**
+     *  Return the first descendant of the specified at the floor of the  
+     *  tree. If the member has no descendants, then it will
+     *  be returned.
+     *
+     * @param memberName Name of member to return the first descendant for
+     * 
+     * @return PafDimMember 
+     */
+ 	public PafDimMember getFirstDescendant(String memberName) {
+ 		return getFirstDescendant(memberName, (short) 0);
+ 	}
+
+ 	/**
      *  Return the first descendant of the specified paf dim tree member at 
      *  the specified level. If the member has no descendants, then it will
      *  be returned.
