@@ -718,11 +718,32 @@ public class PafViewService {
 			renderedView = replaceUserOperators(renderedView, viewRequest.getUserSelections(), clientState);
 		
 			//TTN 900 - Print Settings - populate PrintStyle object if the view is not using the embedded print style
-			if( renderedView.getViewPrintState() != null && globalPrintStyleCache != null ) {
-				if( renderedView.getViewPrintState() == ViewPrintState.GLOBAL )
-					renderedView.setPrintStyle(globalPrintStyleCache.get(renderedView.getGlobalPrintStyleGUID()));
-				else if( renderedView.getViewPrintState() == ViewPrintState.DEFAULT ) {
+			if( renderedView.getViewPrintState() != null ) {
+				if( globalPrintStyleCache != null ) {
+					if( renderedView.getViewPrintState() == ViewPrintState.GLOBAL ) {
+						if( renderedView.getGlobalPrintStyleGUID() != null ) {
+							if( globalPrintStyleCache.get(renderedView.getGlobalPrintStyleGUID()) != null ) {
+								renderedView.setPrintStyle(globalPrintStyleCache.get(renderedView.getGlobalPrintStyleGUID()));
+							}
+							else {
+								renderedView.setPrintStyle(printStyles.getDefaultPrintStyle());
+								renderedView.setViewPrintState(ViewPrintState.DEFAULT);
+							}
+						}
+						else {
+							renderedView.setPrintStyle(printStyles.getDefaultPrintStyle());
+							renderedView.setViewPrintState(ViewPrintState.DEFAULT);
+						}
+					}
+					else if( renderedView.getViewPrintState() == ViewPrintState.DEFAULT ) {
+						renderedView.setPrintStyle(printStyles.getDefaultPrintStyle());
+					}
+				}
+			}
+			else {
+				if( globalPrintStyleCache != null ) {
 					renderedView.setPrintStyle(printStyles.getDefaultPrintStyle());
+					renderedView.setViewPrintState(ViewPrintState.DEFAULT);
 				}
 			}
 			
