@@ -100,8 +100,9 @@ public class F_CrossDim extends AbstractFunction {
 			result = dataCache.getCellValue(crossDimIs);
 		} catch (IllegalArgumentException iae) {
 			// Ignore invalid intersection error when attempting to pull an intersection
-			// invalid combination of synthetic year root and time member coordinate.
-			// (TTN-2025)
+			// with an invalid combination of synthetic year root and time member.
+			// The synthetic year root is only valid in combination with the UOWROOT
+			// of the time dimension.  (TTN-2025)
 			String yearCoord = crossDimIs.getCoordinate(dataCache.getYearAxis());
 			PafDimTree yearTree = evalState.getEvaluationTree(dataCache.getYearDim());
 			if (yearTree.getSyntheticMemberNames().contains(yearCoord)
