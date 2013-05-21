@@ -93,13 +93,29 @@ public class F_CrossDim extends AbstractFunction {
 		
 		
 		lockRecalcComps(sourceIs, crossDimIs, evalState);
-		
+
 		// Return value of cross dimensional intersection
-		double result = dataCache.getCellValue(crossDimIs);
+		double result;
+		try {
+			result = dataCache.getCellValue(crossDimIs);
+		} catch (IllegalArgumentException iae) {
+			// Ignore invalid intersection error when attempting to pull an intersection
+			// invalid combination of synthetic year root and time member coordinate.
+			// (TTN-2025)
+			String yearCoord = crossDimIs.getCoordinate(dataCache.getYearAxis());
+			PafDimTree yearTree = evalState.getEvaluationTree(dataCache.getYearDim());
+			if (yearTree.getSyntheticMemberNames().contains(yearCoord)
+					&& !dataCache.hasValidTimeHorizonCoord(crossDimIs)) {
+				result = 0;
+			} else {
+				// Else, throw error
+				throw iae;
+			}
+		}
 		return result;
 	}
 
-				
+
 	/**
 	 *	Parse function parameters
 	 *

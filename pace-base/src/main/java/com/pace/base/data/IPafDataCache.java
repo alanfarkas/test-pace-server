@@ -26,6 +26,7 @@ public interface IPafDataCache {
 	public double getCumTotal(Intersection cellIs, String cumDim, int offset) throws PafException;
 	public double getCumTotal(Intersection dataIs, String timeDim, int offset, LevelGenType levelGenType, int levelGen, String yearMbr) throws PafException;
 	public int getMeasureAxis();    
+	public int getYearAxis();
 	public String getMeasureDim();    
 	public double getNextCellValue(Intersection dataIs) throws PafException;    
 	public double getNextCellValue(Intersection dataIs, String offsetDim, int offset) throws PafException;    
