@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="pace-prvdr-mdb-esb" default="deploy" basedir=".">
 	
-	<property name="pace_ver" value="2.8.3.4"/>
+	<property name="pace_ver" value="2.8.4.0"/>
 	<property name="debuglevel" value="source,lines,vars"/>
 	<property name="target" value="1.6"/>
 	<property name="source" value="1.6"/>
