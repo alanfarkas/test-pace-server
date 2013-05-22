@@ -1878,7 +1878,7 @@ public abstract class PafDimTree {
         
         List<PafDimMember> memberList = null;
         
-        logger.debug("Getting all members at generation: " + gen + " under member [" + branchName + "]");
+        //logger.debug("Getting all members at generation: " + gen + " under member [" + branchName + "]");
         // Check if branch exists
         getMember(branchName);
         
@@ -1889,6 +1889,7 @@ public abstract class PafDimTree {
         return memberList;
         
     }
+
 
     public SortedMap<Integer, List<PafDimMember>> getMembersByGen() {
         if (membersByGen.size() == 0) {  
@@ -1902,6 +1903,26 @@ public abstract class PafDimTree {
         }
         
         return membersByGen;
+    }
+
+
+    /**
+     *  Return the descendants of selected branch at the specified generation or level
+     *
+     * @param branchName Name of tree branch to get descendants for
+     * @param levelGenType Specifies whether search is by level or generation
+     * @param levelGen Level or generation of selected members
+     * 
+     * @return ArrayList of descendant paf dim tree members
+     */
+    public List<PafDimMember> getMembersAtLevelGen(String branchName, LevelGenType levelGenType, int levelGen) {
+
+    	if (levelGenType == LevelGenType.LEVEL) {
+    		return getMembersAtLevel(branchName, levelGen);
+    	} else {
+    		return getMembersAtGen(branchName, levelGen);
+    	}
+
     }
 
     /**

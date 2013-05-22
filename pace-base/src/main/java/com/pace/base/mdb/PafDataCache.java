@@ -74,6 +74,18 @@ import com.pace.base.view.PafMVS;
  *  	coordinate will be set to a dummy value (ex: "**YEAR.NA**"). 
  *------------------------------------------------------------------------------------------------  
  */
+/**
+ * @author Alan
+ *
+ */
+/**
+ * @author Alan
+ *
+ */
+/**
+ * @author Alan
+ *
+ */
 public class PafDataCache implements IPafDataCache {
 
 	private Map<Intersection, Integer> dataBlockIndexMap = null; 	// Maps data block key to an item in the data block pool
@@ -2145,6 +2157,9 @@ public class PafDataCache implements IPafDataCache {
 	 * @param cellIs Cell intersection
 	 * @param cumDim Dimension being accumulated
 	 * @param offset Specifies a relative position, along the cum dimension, that will be used to retrieve the desired intersection
+	 * @param genLevelType Generation or Level Optional parameter that specifies the dimension branch to confine search to
+	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
+	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
 	 * 
 	 * @return Cumulative total
 	 * @throws PafException 
@@ -2154,21 +2169,111 @@ public class PafDataCache implements IPafDataCache {
 
 		double result = 0;
  		
+		// Get the list of intersections to be accumulated
+		List<Intersection> cumIsList = getLPeerIntersections(cellIs,  cumDim, levelGenType, levelGen, yearMbr);
+		
 		// Determine the last intersection to be accumulated
 		Intersection lastIs = getPrevIntersection(cellIs, cumDim, offset);
 		
+		// Exit if boundary condition is reached (or if no intersections to accumulate)
+		int lastIndex = cumIsList.lastIndexOf(lastIs);
+		if (lastIndex == -1) return result;
+		
+		
 		// Accumulate the values for all intersections up through the specified offset
-		// position.
-		while (lastIs != null) {
+		// position in the specified scope.
+		int index = 0;
+		for (Intersection cumIs : cumIsList) {
 			// To account for any cell changes that haven't yet been aggregated 
 			// (ex. perpetual inventory process), we aggregate at the floor level.
-			result += EvalUtil.sumFloorIntersections(lastIs, evalState);
-			lastIs = shiftIntersection(lastIs, cumDim, -1);
+			result += EvalUtil.sumFloorIntersections(cumIs, evalState);
+			
+			// Check for boundary condition
+			if (index == lastIndex) break;
+			
+			// Set index to next intersection
+			index++;
 		}
 		
 		return result;
 	}
 
+
+
+	/**
+	 * Return a list of left peer intersections based within the specified scope
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension
+	 * @param genLevelType Generation or Level Optional parameter that specifies the dimension branch to confine search to
+	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
+	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
+	 * 
+	 * @return First floor intersection
+	 * @throws PafException 
+	 */
+	public List<Intersection> getLPeerIntersections(Intersection cellIs, String dim, LevelGenType levelGenType, 
+			int levelGen, String yearMbr) throws PafException {
+
+		List<Intersection> lPeerIsList = new ArrayList<Intersection>();
+		PafDimTree dimTree = null;
+		PafDimMember timeMbr = null;
+		String timeCoord = null, treeRoot = null;
+		int genOffset = 0;
+
+
+		// If time dimension is selected, substitute time horizon dimension for query
+		if (dim.equals(getTimeDim())) {
+			dimTree = getDimTrees().getTree(getTimeHorizonDim());
+			timeCoord = IntersectionUtil.getIsCoord(cellIs, dim, this);
+
+			// For generation search, we need to match desired gen to time horizon tree
+			if (levelGenType == LevelGenType.GEN) {
+				genOffset = getTimeHorizGenOffset();
+			}
+
+			// Check if year member is specified (only valid if Time dimension is being traversed)
+			if (yearMbr == null) {
+				// No year member specification
+				treeRoot = dimTree.getRootNode().getKey();	
+			} else {
+				// Check if current time coordinate is contained in selected year. If not,
+				// return null
+				TimeSlice timeSlice = new TimeSlice(timeCoord);
+				String yearCoord = timeSlice.getYear();
+				if (!yearCoord.equals(yearMbr)) {
+					return null;
+				}
+				// Year member specified - use a pruned copy of time horizon tree under specified year
+				PafDimTree timeTree = getDimTrees().getTree(getTimeDim());
+				treeRoot = TimeSlice.buildTimeHorizonCoord(timeTree.getRootNode().getKey(), yearMbr);
+				dimTree = dimTree.getSubTreeCopy(treeRoot);
+			}
+
+		} else {
+			dimTree = getDimTrees().getTree(dim);
+			treeRoot = dimTree.getRootNode().getKey();
+			timeCoord = cellIs.getCoordinate(dim);
+		}
+		timeMbr = dimTree.getMember(timeCoord);
+
+
+		// Find the ancestor that matches the specified scope
+		PafDimMember ancestorMbr = null;
+		ancestorMbr = dimTree.getAncestor(timeMbr, levelGenType, levelGen + genOffset);
+
+		// Get the descendant members within specified scope and use them to generate
+		// the peer intersections
+		List<PafDimMember> peers = dimTree.getMembersAtLevelGen(ancestorMbr.getKey(), levelGenType, levelGen);
+		for (PafDimMember peer : peers) {
+			Intersection peerIs = cellIs.clone();
+			EvalUtil.setIsCoord(peerIs, dim, peer.getKey(), evalState);
+			lPeerIsList.add(peerIs);
+		}
+		
+		// Return peer intersections
+		return lPeerIsList;
+	}
 
 
 	/**
@@ -2361,6 +2466,7 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param dim Dimension
+	 * @param genLevelType Generation or Level Optional parameter that specifies the dimension branch to confine search to
 	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
 	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
 	 * 
