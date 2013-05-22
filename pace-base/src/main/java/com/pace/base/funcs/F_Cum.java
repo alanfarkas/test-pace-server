@@ -103,7 +103,7 @@ public class F_Cum extends AbstractFunction {
 			}
 		}
 
-		result = dataCache.getCumTotal(dataIs,  timeDim, 1, parsedLG.getLevelGenType(), parsedLG.getLevelGen(), yearMbr);
+		result = dataCache.getCumTotal(dataIs,  timeDim, 0, parsedLG.getLevelGenType(), parsedLG.getLevelGen(), yearMbr);
 		return result;
     }
     

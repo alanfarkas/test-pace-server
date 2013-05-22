@@ -2170,12 +2170,13 @@ public class PafDataCache implements IPafDataCache {
 		double result = 0;
  		
 		// Get the list of intersections to be accumulated
-		List<Intersection> cumIsList = getLPeerIntersections(cellIs,  cumDim, levelGenType, levelGen, yearMbr);
+		List<Intersection> cumIsList = getILPeerIntersections(cellIs,  cumDim, levelGenType, levelGen, yearMbr);
 		
 		// Determine the last intersection to be accumulated
 		Intersection lastIs = getPrevIntersection(cellIs, cumDim, offset);
 		
 		// Exit if boundary condition is reached (or if no intersections to accumulate)
+		if (lastIs == null) return result;
 		int lastIndex = cumIsList.lastIndexOf(lastIs);
 		if (lastIndex == -1) return result;
 		
@@ -2189,7 +2190,7 @@ public class PafDataCache implements IPafDataCache {
 			result += EvalUtil.sumFloorIntersections(cumIs, evalState);
 			
 			// Check for boundary condition
-			if (index == lastIndex) break;
+			if (index > lastIndex) break;
 			
 			// Set index to next intersection
 			index++;
@@ -2201,7 +2202,7 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * Return a list of left peer intersections based within the specified scope
+	 * Return a list of left peer intersections within the specified scope along with the queried member
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param dim Dimension
@@ -2209,7 +2210,33 @@ public class PafDataCache implements IPafDataCache {
 	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
 	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
 	 * 
-	 * @return First floor intersection
+	 * @return List of left peer intersections
+	 * @throws PafException 
+	 */
+	public List<Intersection> getILPeerIntersections(Intersection cellIs, String dim, LevelGenType levelGenType, 
+			int levelGen, String yearMbr) throws PafException {
+		
+		List<Intersection> iLPeerIsList = getLPeerIntersections(cellIs, dim, levelGenType, levelGen, yearMbr);
+		if (iLPeerIsList != null) {
+			iLPeerIsList.add(cellIs);
+		} else {
+			// A null value indicates that the cell intersection doesn't match the specified year member
+			iLPeerIsList = new ArrayList<Intersection>();
+		}
+		return iLPeerIsList;
+		
+	}
+
+		/**
+	 * Return a list of left peer intersections bwithin the specified scope
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension
+	 * @param genLevelType Generation or Level Optional parameter that specifies the dimension branch to confine search to
+	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
+	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
+	 * 
+	 * @return List of left peer intersections
 	 * @throws PafException 
 	 */
 	public List<Intersection> getLPeerIntersections(Intersection cellIs, String dim, LevelGenType levelGenType, 
@@ -2262,13 +2289,16 @@ public class PafDataCache implements IPafDataCache {
 		PafDimMember ancestorMbr = null;
 		ancestorMbr = dimTree.getAncestor(timeMbr, levelGenType, levelGen + genOffset);
 
-		// Get the descendant members within specified scope and use them to generate
-		// the peer intersections
-		List<PafDimMember> peers = dimTree.getMembersAtLevelGen(ancestorMbr.getKey(), levelGenType, levelGen);
-		for (PafDimMember peer : peers) {
-			Intersection peerIs = cellIs.clone();
-			EvalUtil.setIsCoord(peerIs, dim, peer.getKey(), evalState);
-			lPeerIsList.add(peerIs);
+		// Get the list of descendant peers (all members at same level) within the 
+		// specified scope and use them to generate the peer intersections
+		List<String> lPeers = PafDimTree.getMemberNames(dimTree.getLPeers(timeMbr.getKey()));
+		int level = timeMbr.getMemberProps().getLevelNumber();
+		List<String> descPeers = PafDimTree.getMemberNames(dimTree.getMembersAtLevel(ancestorMbr.getKey(), (short) level));
+		lPeers.retainAll(descPeers);
+		for (String lPeer : lPeers) {
+			Intersection lPeerIs = cellIs.clone();
+			EvalUtil.setIsCoord(lPeerIs, dim, lPeer, evalState);
+			lPeerIsList.add(lPeerIs);
 		}
 		
 		// Return peer intersections
