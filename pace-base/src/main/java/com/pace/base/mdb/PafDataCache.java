@@ -2395,7 +2395,7 @@ public class PafDataCache implements IPafDataCache {
 				// return null
 				TimeSlice timeSlice = new TimeSlice(timeCoord);
 				String yearCoord = timeSlice.getYear();
-				if (yearCoord != yearMbr) {
+				if (!yearCoord.equals(yearMbr)) {
 					return null;
 				}
 				// Year member specified - use a pruned copy of time horizon tree under specified year
