@@ -29,6 +29,7 @@ import com.pace.base.PafException;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.funcs.AbstractFunction;
+import com.pace.base.funcs.ParsedLevelGen;
 import com.pace.base.mdb.PafDimTree;
 import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
@@ -51,10 +52,9 @@ public class CUMCountFunc extends AbstractFunction {
     public double calculate(Intersection sourceIs, IPafDataCache dataCache, IPafEvalState evalState) throws PafException {
   
     	double result = 0;
-    	int levelGen = -1;
         String cumDim = null, levelGenParm = null, yearParm = null,  yearMbr = null;
     	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
-        LevelGenType levelGenType = null;
+        ParsedLevelGen parsedLG = null;
     	
         // Get the cum member count based on which function parameters have been supplied.
         // Default parameter handling is performed within the called CumMbrCount methods.       
@@ -72,9 +72,9 @@ public class CUMCountFunc extends AbstractFunction {
         		// Level/gen specification has been supplied
         		levelGenParm = parms[1];
     			try {
-    				parseLevelGenParm(levelGenParm, levelGenType, levelGen);
-    				if (levelGenType == LevelGenType.LEVEL) {
-    					result = dataCache.getCumMbrCount(sourceIs, cumDim, levelGen);
+    				parsedLG = parseLevelGenParm(levelGenParm);
+    				if (parsedLG.getLevelGenType() == LevelGenType.LEVEL) {
+    					result = dataCache.getCumMbrCount(sourceIs, cumDim, parsedLG.getLevelGen());
     					return result;
     				}
     			} catch (IllegalArgumentException e) {
@@ -100,7 +100,7 @@ public class CUMCountFunc extends AbstractFunction {
         	}
         }
 		
-		result = dataCache.getCumMbrCount(sourceIs, cumDim, levelGenType, levelGen, yearMbr);
+		result = dataCache.getCumMbrCount(sourceIs, cumDim, parsedLG.getLevelGenType(), parsedLG.getLevelGen(), yearMbr);
         return result;
     	
 //	// Pre multi-year version of code    	
