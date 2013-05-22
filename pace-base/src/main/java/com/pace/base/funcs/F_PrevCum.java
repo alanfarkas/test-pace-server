@@ -56,8 +56,8 @@ public class F_PrevCum extends AbstractFunction {
 
    	// parameter variables
 	private String offsetDim, levelGenParm, yearParm, yearMbr;
-	private int offset, levelGen;
-	private LevelGenType levelGenType;
+	private int offset;
+	private ParsedLevelGen parsedLG;
 	
 	PafDimTree offsetTree;
 	Map<String, Set<String>> filterMap = new HashMap<String, Set<String>>();    
@@ -82,7 +82,7 @@ public class F_PrevCum extends AbstractFunction {
 		if (parms.length < 4) {
 			result = dataCache.getCumTotal(dataIs, offsetDim, offset);
 		} else {
-			result = dataCache.getCumTotal(dataIs, offsetDim, offset, levelGenType, levelGen, yearMbr);
+			result = dataCache.getCumTotal(dataIs, offsetDim, offset, parsedLG.getLevelGenType(), parsedLG.getLevelGen(), yearMbr);
 		}
 
 		return result;
@@ -166,7 +166,7 @@ public class F_PrevCum extends AbstractFunction {
 		if (parms.length > 3) {
 			levelGenParm = parms[3];
 			try {
-				parseLevelGenParm(levelGenParm, levelGenType, levelGen);
+				parsedLG = parseLevelGenParm(levelGenParm);
 			} catch (IllegalArgumentException e) {
 				errMsg += "[" + levelGenParm + "] is not a valid level/gen specification";
 				logger.error(errMsg);

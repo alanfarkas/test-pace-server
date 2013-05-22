@@ -72,8 +72,7 @@ public class F_Bop extends AbstractFunction {
 		PafApplicationDef app = evalState.getAppDef();
 		String yearDim = app.getMdbDef().getYearDim();
 		PafDimTree yearTree = evalState.getEvaluationTree(yearDim);
-		int levelGen = 0;
-		LevelGenType levelGenType = null;
+		ParsedLevelGen parsedLG = null;
 
 		Intersection dataIs = sourceIs.clone();
 
@@ -96,7 +95,7 @@ public class F_Bop extends AbstractFunction {
 		} else {
 			levelGenParm = parms[2];
 			try {
-				parseLevelGenParm(levelGenParm, levelGenType, levelGen);
+				parsedLG = parseLevelGenParm(levelGenParm);
 			} catch (IllegalArgumentException e) {
 				errMsg += "[" + levelGenParm + "] is not a valid level/gen specification";
 				logger.error(errMsg);
@@ -117,7 +116,7 @@ public class F_Bop extends AbstractFunction {
 			}
 		}
 		
-		dataIs = dataCache.getFirstFloorIs(dataIs,  timeDim, levelGenType, levelGen, yearMbr);
+		dataIs = dataCache.getFirstFloorIs(dataIs,  timeDim, parsedLG.getLevelGenType(), parsedLG.getLevelGen(), yearMbr);
 		if (dataIs != null)
 			result = dataCache.getCellValue(dataIs);			
 		

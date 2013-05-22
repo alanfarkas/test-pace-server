@@ -60,9 +60,8 @@ public class F_Cum extends AbstractFunction {
 		PafDimTree yearTree = evalState.getEvaluationTree(yearDim);
 		String timeDim, levelGenParm = null, yearParm = null, yearMbr = null;
     	String errMsg = "Error in [" + this.getClass().getName() + "] - ";
-		int levelGen = 0;
-		LevelGenType levelGenType = null;
-		Intersection dataIs = sourceIs.clone();
+    	ParsedLevelGen parsedLG = null;
+    	Intersection dataIs = sourceIs.clone();
     	
         // usual use case is to provide a measure parameter this operation will apply to
     	if ( parms.length > 0 )
@@ -83,7 +82,7 @@ public class F_Cum extends AbstractFunction {
 		} else {
 			levelGenParm = parms[2];
 			try {
-				parseLevelGenParm(levelGenParm, levelGenType, levelGen);
+				parsedLG = parseLevelGenParm(levelGenParm);
 			} catch (IllegalArgumentException e) {
 				errMsg += "[" + levelGenParm + "] is not a valid level/gen specification";
 				logger.error(errMsg);
@@ -104,7 +103,7 @@ public class F_Cum extends AbstractFunction {
 			}
 		}
 
-		result = dataCache.getCumTotal(dataIs,  timeDim, 1, levelGenType, levelGen, yearMbr);
+		result = dataCache.getCumTotal(dataIs,  timeDim, 1, parsedLG.getLevelGenType(), parsedLG.getLevelGen(), yearMbr);
 		return result;
     }
     

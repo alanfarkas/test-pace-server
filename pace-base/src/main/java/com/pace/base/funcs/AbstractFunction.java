@@ -264,13 +264,18 @@ public abstract class AbstractFunction implements IPafFunction {
 	 * @param levelGenType Returned Level/Gen Type (either Level or Gen)
 	 * @param levelGen Level/Gen number
 	 */
-	public void parseLevelGenParm(final String levelGenParm, LevelGenType levelGenType, int levelGen) throws IllegalArgumentException  {
+	public ParsedLevelGen parseLevelGenParm(final String levelGenParm) throws IllegalArgumentException  {
 
+		 LevelGenType levelGenType; 
+		 int levelGen = 0;
+		 ParsedLevelGen parsedLG;
+		 
 		// Check for a simple level specification
 		try {
 			levelGen = Integer.valueOf(levelGenParm);
 			levelGenType = LevelGenType.LEVEL;
-			return;
+			parsedLG = new ParsedLevelGen(levelGenType, levelGen);
+			return parsedLG;
 		} catch (NumberFormatException e) {
 			// Not a level specification 
 		}
@@ -289,13 +294,16 @@ public abstract class AbstractFunction implements IPafFunction {
 
 		// Check numeric component
 		try {
-			levelGen = Integer.valueOf(levelGenParm.substring(1));
+			String numComponent = levelGenParm.substring(1);
+			levelGen = Integer.valueOf(numComponent);
 		} catch (NumberFormatException e) {
 			// Not a valid integer
 			String errMsg = "Illegal Level/Gen parameter [" + levelGenParm + "] passed to Pace rule function ";
 			throw new IllegalArgumentException(errMsg);
 		}
 		
+		parsedLG = new ParsedLevelGen(levelGenType, levelGen);
+		return parsedLG;
 	}
 
 
