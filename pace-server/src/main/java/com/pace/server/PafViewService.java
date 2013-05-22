@@ -5112,7 +5112,10 @@ public class PafViewService {
 						return true;
 					}
 					
-					if (! member.equalsIgnoreCase(rows[k][l++])){
+					// Check if new view section is longer than old view section  (TTN-2020)
+					if (k > rows.length -1) return true;
+					
+					if ( ! member.equalsIgnoreCase(rows[k][l++])){
 						return true;  //There is a difference between the prev and new view on the rows
 					}
 				}
