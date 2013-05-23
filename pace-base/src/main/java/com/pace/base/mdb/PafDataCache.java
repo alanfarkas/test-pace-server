@@ -2226,7 +2226,7 @@ public class PafDataCache implements IPafDataCache {
 		
 	}
 
-		/**
+	/**
 	 * Return a list of left peer intersections within the specified scope
 	 * 
 	 * @param cellIs Cell intersection
