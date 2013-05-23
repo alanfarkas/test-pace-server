@@ -32,7 +32,6 @@ import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDimTree;
-import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
 
 
@@ -41,7 +40,10 @@ import com.pace.base.state.IPafEvalState;
  * so as to avoid the "nesting of custom functions". It returns the running cumulative value
  * of a measure, if added up along a particular dimension (default is time). However, it 
  * stops and the "previous" point in time to the current position in the time hierarchy.
+
  * Signature = @PrevCum(MsrName, Dimension, Offset)
+ * Function Signature: @PREV_CUM(MEASURE, TIME DIMENSION, OFFSET, GEN/LEVEL, YEAR)
+ * Example: @CUM(SLS_DLR, Time, 1, G3, FY2007)
  *
  * @version	2.8.2.0
  * @author jwatkins

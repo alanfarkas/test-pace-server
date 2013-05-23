@@ -33,16 +33,15 @@ import com.pace.base.data.EvalUtil;
 import com.pace.base.data.IPafDataCache;
 import com.pace.base.data.Intersection;
 import com.pace.base.mdb.PafDimTree;
-import com.pace.base.mdb.PafDimTree.LevelGenType;
 import com.pace.base.state.IPafEvalState;
 
 /**
  * Implements a cumulative function. It totals up all the intersections along a particular
  * dimensional axis. The default axis is the time dimension (ie. @CUM(SLS_DLR, Time))
  *
- * Function Signature: @BOP(MEASURE, TIME DIMENSION, GEN/LEVEL, YEAR)
- *
- * Example: @BOP(SLS_DLR, Time, G3, FY2007)
+ * Function Signature: @CUM(MEASURE, TIME DIMENSION, GEN/LEVEL, YEAR)
+ * Example: @CUM(SLS_DLR, Time, G3, FY2007)
+ * 
  * @version	x.xx
  * @author jim
  *

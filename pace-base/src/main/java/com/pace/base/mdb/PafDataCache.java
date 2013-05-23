@@ -1978,6 +1978,33 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 	/**
+	 * Returns the prev cell intersection along the specified offset dimension
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param offsetDim Offset dimension
+	 * @param offset Specifies a relative position, along the offset dimension, that will be used to retrieve the desired intersection
+	 * @param filteredYear Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
+	 * 
+	 * @return Cell intersection
+	 */
+
+	public Intersection getPrevIntersection(Intersection cellIs, String offsetDim, int offset, String filteredYear) {
+		
+		// Apply year filter (only applicable if time dimension is selected for traversal)
+		if (filteredYear != null && offsetDim.equals(getTimeDim())) {
+			Intersection filteredIs = cellIs.clone();
+			filteredIs.setCoordinate(this.getYearAxis(), filteredYear);
+			if (this.hasValidTimeHorizonCoord(filteredIs)) {
+				return getPrevIntersection(filteredIs, offsetDim, offset);
+			} else {
+				return null;
+			}
+		}
+		
+		return getPrevIntersection(cellIs, offsetDim, offset);
+	}
+
+	/**
 	 * Returns the prev cell intersection along the specified offset dimension. A null value
 	 * will be returned if the offset points to an out of bounds location and bWrap is 
 	 * set to false.
@@ -2151,29 +2178,31 @@ public class PafDataCache implements IPafDataCache {
 
 	/**
 	 * Returns the cumulative total of specified intersection, along the specified dimension,
-	 * up through the nth previous intersection. An offset of 0 indicates that all intersections
-	 * leading up to, and including, the specified intersection will be accumulated. 
+	 * up through the nth previous intersection and in the specified scope. An offset of 0 
+	 * indicates that all intersections leading up to, and including, the specified intersection 
+	 * will be accumulated. 
+	 * 
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param cumDim Dimension being accumulated
 	 * @param offset Specifies a relative position, along the cum dimension, that will be used to retrieve the desired intersection
-	 * @param genLevelType Generation or Level Optional parameter that specifies the dimension branch to confine search to
-	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
-	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
+	 * @param genLevelType Specifies whether the scope of the accumulation is Generation or Level based
+	 * @param genLevel Specifies the level or generation of the dimension branch to confine accumulation to
+	 * @param filteredYear Optional parameter that specifies which year to confine accumulation to (ignored if 'dim' is not the Time dimension)
 	 * 
 	 * @return Cumulative total
 	 * @throws PafException 
 	 */	
-	public double getCumTotal(Intersection cellIs, String cumDim, int offset, LevelGenType levelGenType, int levelGen, String yearMbr)
+	public double getCumTotal(Intersection cellIs, String cumDim, int offset, LevelGenType levelGenType, int levelGen, String filteredYear)
 			throws PafException {
 
 		double result = 0;
  	
 		// Get the list of intersections to be accumulated
-		List<Intersection> cumIsList = getILPeerIntersections(cellIs,  cumDim, levelGenType, levelGen, yearMbr);
+		List<Intersection> cumIsList = getILPeerIntersections(cellIs,  cumDim, levelGenType, levelGen, filteredYear);
 		
 		// Determine the last intersection to be accumulated
-		Intersection lastIs = getPrevIntersection(cellIs, cumDim, offset);
+		Intersection lastIs = getPrevIntersection(cellIs, cumDim, offset, filteredYear);
 		
 		// Exit if boundary condition is reached (or if no intersections to accumulate)
 		if (lastIs == null) return result;
@@ -2201,107 +2230,104 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * Return a list of left peer intersections within the specified scope along with the queried member
-	 * 
-	 * @param cellIs Cell intersection
-	 * @param dim Dimension
-	 * @param genLevelType Generation or Level Optional parameter that specifies the dimension branch to confine search to
-	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
-	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
-	 * 
-	 * @return List of left peer intersections
-	 * @throws PafException 
-	 */
-	public List<Intersection> getILPeerIntersections(Intersection cellIs, String dim, LevelGenType levelGenType, 
-			int levelGen, String yearMbr) throws PafException {
-		
-		List<Intersection> iLPeerIsList = getLPeerIntersections(cellIs, dim, levelGenType, levelGen, yearMbr);
-		if (iLPeerIsList != null) {
-			iLPeerIsList.add(cellIs);
-		} else {
-			// A null value indicates that the cell intersection doesn't match the specified year member
-			iLPeerIsList = new ArrayList<Intersection>();
-		}
-		return iLPeerIsList;
-		
-	}
-
-	/**
 	 * Return a list of left peer intersections within the specified scope
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param dim Dimension
-	 * @param genLevelType Generation or Level Optional parameter that specifies the dimension branch to confine search to
-	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
-	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
+	 * @param genLevelType Specifies whether the scope of the traversal is Generation or Level based
+	 * @param genLevel Specifies the level or generation of the dimension branch to confine search to
+	 * @param filteredYear Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
 	 * 
 	 * @return List of left peer intersections
 	 * @throws PafException 
 	 */
 	public List<Intersection> getLPeerIntersections(Intersection cellIs, String dim, LevelGenType levelGenType, 
 			int levelGen, String yearMbr) throws PafException {
+		
+		// Get all left peer intersections
+		List<Intersection> lPeerIsList = getILPeerIntersections(cellIs, dim, levelGenType, levelGen, yearMbr);
+		
+		// Remove current intersection (could be translated, if year filter was specified)
+		if (lPeerIsList.size() > 1) {
+			lPeerIsList.remove(lPeerIsList.size() -1);
+		}
 
-		List<Intersection> lPeerIsList = new ArrayList<Intersection>();
+		return lPeerIsList;
+		
+	}
+
+	/**
+	 * Return the list of left peer intersections within the specified scope along with the queried member
+	 * 
+	 * @param cellIs Cell intersection
+	 * @param dim Dimension
+	 * @param genLevelType Specifies whether the scope of the traversal is Generation or Level based
+	 * @param genLevel Specifies the level or generation of the dimension branch to confine search to
+	 * @param filteredYear Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
+	 * 
+	 * @return List of left peer intersections
+	 * @throws PafException 
+	 */
+	public List<Intersection> getILPeerIntersections(Intersection cellIs, String dim, LevelGenType levelGenType, 
+			int levelGen, String filteredYear) throws PafException {
+
+		List<Intersection> iLPeerIsList = new ArrayList<Intersection>();
 		PafDimTree dimTree = null;
 		PafDimMember timeMbr = null;
-		String timeCoord = null, treeRoot = null;
-		int genOffset = 0;
-
+		String timeCoord = null, ancestor = null, cumPeriod = null;
+		int cumLevel = 0;
 
 		// If time dimension is selected, substitute time horizon dimension for query
 		if (dim.equals(getTimeDim())) {
 			dimTree = getDimTrees().getTree(getTimeHorizonDim());
-			timeCoord = IntersectionUtil.getIsCoord(cellIs, dim, this);
-
-			// For generation search, we need to match desired gen to time horizon tree
-			if (levelGenType == LevelGenType.GEN) {
-				genOffset = getTimeHorizGenOffset();
-			}
-
-			// Check if year member is specified (only valid if Time dimension is being traversed)
-			if (yearMbr == null) {
-				// No year member specification
-				treeRoot = dimTree.getRootNode().getKey();	
-			} else {
-				// Check if current time coordinate is contained in selected year. If not,
-				// return null
-				TimeSlice timeSlice = new TimeSlice(timeCoord);
-				String yearCoord = timeSlice.getYear();
-				if (!yearCoord.equals(yearMbr)) {
-					return null;
-				}
-				// Year member specified - use a pruned copy of time horizon tree under specified year
-				PafDimTree timeTree = getDimTrees().getTree(getTimeDim());
-				treeRoot = TimeSlice.buildTimeHorizonCoord(timeTree.getRootNode().getKey(), yearMbr);
-				dimTree = dimTree.getSubTreeCopy(treeRoot);
-			}
-
 		} else {
 			dimTree = getDimTrees().getTree(dim);
-			treeRoot = dimTree.getRootNode().getKey();
-			timeCoord = cellIs.getCoordinate(dim);
 		}
+		timeCoord = IntersectionUtil.getIsCoord(cellIs, dim, this);
 		timeMbr = dimTree.getMember(timeCoord);
-
+		cumPeriod = timeMbr.getKey();
+		cumLevel = timeMbr.getMemberProps().getLevelNumber();
 
 		// Find the ancestor that matches the specified scope
 		PafDimMember ancestorMbr = null;
-		ancestorMbr = dimTree.getAncestor(timeMbr, levelGenType, levelGen + genOffset);
+		ancestorMbr = dimTree.getAncestor(timeMbr, levelGenType, levelGen);
+		ancestor = ancestorMbr.getKey();
 
+		// Apply year filter (only applicable if time dimension is selected for traversal)
+		if (filteredYear != null && dim.equals(getTimeDim())) {
+
+			// Apply filter to scope member
+			TimeSlice filteredAncestorTS = new TimeSlice(ancestor);
+			filteredAncestorTS.setYear(filteredYear);
+			ancestor = filteredAncestorTS.getTimeHorizonPeriod();
+			
+			// Apply filter to accumulation period
+			TimeSlice filteredCumPeriodTS = new TimeSlice(cumPeriod);
+			filteredCumPeriodTS.setYear(filteredYear);
+			cumPeriod = filteredCumPeriodTS.getTimeHorizonPeriod();
+			
+			// Return empty list if filtered accumulation period doesn't exist (e.g. WK53)
+			if (!dimTree.hasMember(cumPeriod)) {
+				return iLPeerIsList;
+			} else {
+				// Else update cum level
+				cumLevel = dimTree.getMember(cumPeriod).getMemberProps().getLevelNumber();
+			}
+		}
+		
 		// Get the list of descendant peers (all members at same level) within the 
 		// specified scope and use them to generate the peer intersections
-		List<String> lPeers = PafDimTree.getMemberNames(dimTree.getLPeers(timeMbr.getKey()));
-		int level = timeMbr.getMemberProps().getLevelNumber();
-		List<String> descPeers = PafDimTree.getMemberNames(dimTree.getMembersAtLevel(ancestorMbr.getKey(), (short) level));
-		lPeers.retainAll(descPeers);
-		for (String lPeer : lPeers) {
+		List<String> iLPeers = PafDimTree.getMemberNames(dimTree.getILPeers(cumPeriod));
+		List<String> descPeers = PafDimTree.getMemberNames(dimTree.getMembersAtLevel(ancestor, (short) cumLevel));
+		iLPeers.retainAll(descPeers);
+		for (String iLPeer : iLPeers) {
 			Intersection lPeerIs = cellIs.clone();
-			EvalUtil.setIsCoord(lPeerIs, dim, lPeer, evalState);
-			lPeerIsList.add(lPeerIs);
+			EvalUtil.setIsCoord(lPeerIs, dim, iLPeer, evalState);
+			iLPeerIsList.add(lPeerIs);
 		}
 		
 		// Return peer intersections
-		return lPeerIsList;
+		return iLPeerIsList;
 	}
 
 
@@ -2494,8 +2520,8 @@ public class PafDataCache implements IPafDataCache {
 	 * Find the first floor intersection along the specified dimension with the specified scope
 	 * 
 	 * @param cellIs Cell intersection
-	 * @param dim Dimension to traversal
-	 * @param genLevelType Specifies whether the scope of the traversal is Generation of Level based
+	 * @param dim Dimension to traverse
+	 * @param genLevelType Specifies whether the scope of the traversal is Generation or Level based
 	 * @param genLevel Specifies the level or generation of the dimension branch to confine search to
 	 * @param filteredYear Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
 	 * 
@@ -2508,7 +2534,6 @@ public class PafDataCache implements IPafDataCache {
 		PafDimTree dimTree = null;
 		PafDimMember firstFloorMbr = null, timeMbr = null;
 		String timeCoord = null;
-		int genOffset = 0;
 		
 		
 		// If time dimension is selected, substitute time horizon dimension for query
@@ -2523,7 +2548,7 @@ public class PafDataCache implements IPafDataCache {
 		
 		// Find the ancestor that matches the specified scope
 		PafDimMember ancestorMbr = null;
-		ancestorMbr = dimTree.getAncestor(timeMbr, levelGenType, levelGen + genOffset);
+		ancestorMbr = dimTree.getAncestor(timeMbr, levelGenType, levelGen);
 		String ancestor = ancestorMbr.getKey();
 		
 		// Apply year filter (only applicable if time dimension is selected for traversal)
