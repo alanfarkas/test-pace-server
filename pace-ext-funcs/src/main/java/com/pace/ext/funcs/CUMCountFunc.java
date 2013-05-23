@@ -73,7 +73,8 @@ public class CUMCountFunc extends AbstractFunction {
         		levelGenParm = parms[1];
     			try {
     				parsedLG = parseLevelGenParm(levelGenParm);
-    				if (parsedLG.getLevelGenType() == LevelGenType.LEVEL) {
+    				// Call simpler data cache method if LEVEL and no year parm has been specified
+    				if (parsedLG.getLevelGenType() == LevelGenType.LEVEL & parms.length == 2) {
     					result = dataCache.getCumMbrCount(sourceIs, cumDim, parsedLG.getLevelGen());
     					return result;
     				}

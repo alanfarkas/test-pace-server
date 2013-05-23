@@ -2127,7 +2127,7 @@ public class PafDataCache implements IPafDataCache {
 			cumMember = cellIs.getCoordinate(axisIndexMap.get(cumDim));
 		}	
 		
-		
+	
 		List<PafDimMember> cumMembers = cumTree.getCumMembers(cumMember, levelGenType, levelGen);
 
 		// Return number of cum members
