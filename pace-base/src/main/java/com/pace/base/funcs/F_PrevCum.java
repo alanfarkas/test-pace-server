@@ -41,9 +41,8 @@ import com.pace.base.state.IPafEvalState;
  * of a measure, if added up along a particular dimension (default is time). However, it 
  * stops and the "previous" point in time to the current position in the time hierarchy.
 
- * Signature = @PrevCum(MsrName, Dimension, Offset)
  * Function Signature: @PREV_CUM(MEASURE, TIME DIMENSION, OFFSET, GEN/LEVEL, YEAR)
- * Example: @CUM(SLS_DLR, Time, 1, G3, FY2007)
+ * Example: @PREV_CUM(SLS_DLR, Time, 1, G3, FY2007)
  *
  * @version	2.8.2.0
  * @author jwatkins
@@ -208,7 +207,7 @@ public class F_PrevCum extends AbstractFunction {
         
         // if their has been a receipt change prior to this time slice, also evaluate
         // the left hand measure in the intersection = (curent msr, cur ts, rcptchg1, rcptchg2...)
-        // .or pretend their is a change in the current time period for the measure so that the
+        // or pretend there is a change in the current time period for the measure so that the
         // cumulative recalcs in this period
         Set<Intersection> chngBaseMsrs = evalState.getChangedCellsByMsr().get(measureName);
         Set<Intersection> iSet = null;      
@@ -217,7 +216,6 @@ public class F_PrevCum extends AbstractFunction {
         	iSet = new HashSet<Intersection>(chngBaseMsrs.size() * 2);   
             for (Intersection is : chngBaseMsrs) {
                 currentChange = is.clone();
-//                currentChange.setCoordinate(timeDim, evalState.getCurrentTimeSlice());
                 EvalUtil.setIsCoord(is, timeDim, evalState.getCurrentTimeSlice(), evalState);			// TTN-1595
                 iSet.add(currentChange);
             }

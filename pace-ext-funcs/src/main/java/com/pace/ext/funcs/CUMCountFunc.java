@@ -101,41 +101,7 @@ public class CUMCountFunc extends AbstractFunction {
         }
 		
 		result = dataCache.getCumMbrCount(sourceIs, cumDim, parsedLG.getLevelGenType(), parsedLG.getLevelGen(), yearMbr);
-        return result;
-    	
-//	// Pre multi-year version of code    	
-//    	double result = 0;
-//    	int level = 0;
-//        PafApplicationDef app = evalState.getAppDef();
-//        String cumDim = null;
-//    	
-//       	// Determine which dimension is being accumulated
-//    	if ( parms.length > 0 ){
-//    		// TODO Check if valid dimension is specified
-//    		cumDim = parms[0];
-//    	} else {
-//    		cumDim = app.getMdbDef().getTimeDim();
-//    	}
-//
-//       	PafDimTree cumTree = evalState.getDataCacheTrees().getTree(cumDim);
-//    	
-//       	// Check for level option
-//    	if ( parms.length > 1 ){
-//    		// TODO Check for valid integer / maybe default level to lowest level in tree
-//    		level = Integer.valueOf(parms[1]);
-//    	} else {
-//    		// If no level specified, then default to lowest level in localized time tree
-//    		level = cumTree.getLowestAbsLevelInTree();
-//    	}
-//
-//       	// Get list of cum members for the specified level
-//
-//       	String currentMember = sourceIs.getCoordinate(cumDim);
-//       	List<PafDimMember> cumMembers = cumTree.getCumMembers(currentMember, level);
-//       	
-//    	// Return "cumulative count" (number of cum members)
-//       	result = cumMembers.size();
-//        return result;
+        return result;    	
     }
     
 	@Override

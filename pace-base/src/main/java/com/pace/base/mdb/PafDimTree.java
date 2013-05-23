@@ -1167,23 +1167,45 @@ public abstract class PafDimTree {
 
 	/**
 	 *	Return the list of members that are needed to get a cumulative
-	 *  total for the selected member at the specified level
+	 *  total for the selected member at the specified gen/level
 	 * 
 	 * @param memberName Member name
-	 * @param cumLevel The member level to use for generating the list of cum members
+	 * @param genLevelType Specifies whether the scope of the selection is Generation or Level based
+	 * @param genLevel Specifies the level or generation of the dimension branch to use for generating the list of cum members
 	 *
 	 * @return List of Paf Dim Members
 	 */
-	public List<PafDimMember> getCumMembers(String cumMember, LevelGenType levelGenType, int levelGen, String yearMbr) {
+	public List<PafDimMember> getCumMembers(String memberName, LevelGenType levelGenType, int levelGen) {
 		
 		// Use simpler version of method if LEVEL search and no year is specified
-		if (levelGenType == LevelGenType.LEVEL && yearMbr == null) {
-			return getCumMembers(cumMember, levelGen);
+		if (levelGenType == LevelGenType.LEVEL) {
+			return getCumMembers(memberName, levelGen);
 		}
 		
-		// If year member is specified, check if it match
-		// TODO Auto-generated method stub
-		return null;
+		List<PafDimMember> cumMembers = null;
+		PafDimMember lastCumMember = null;
+		
+		// Get member properties
+		PafDimMember member = getMember(memberName);
+		PafDimMemberProps memberProps = member.getMemberProps();
+		int memberGen = memberProps.getGenerationNumber();
+			
+		// Determine the last member in cum range. 
+		if (memberGen >= levelGen) {
+			// If member level = cum generation, then last member in cum range = selected member.
+			//
+			// A Cum generation that is less than the generation of the selected member is invalid 
+			// and will be handled as if the cum generation = the cum generation of the selected member.
+				lastCumMember = member;
+		} else {
+			// Else set the last member in cum range as the last descendant at specified generation
+			List<PafDimMember> descendants = getDescendants(member.getKey(), LevelGenType.GEN, levelGen);
+			lastCumMember = descendants.get(descendants.size() - 1);
+		} 
+		
+		// Return all members in cum range, at the specified level (left peers)
+		cumMembers = getILPeers(lastCumMember.getKey());
+		return cumMembers;
 	}
 
 	/**

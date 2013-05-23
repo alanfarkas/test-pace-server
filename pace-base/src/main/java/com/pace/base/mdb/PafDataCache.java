@@ -1987,7 +1987,6 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @return Cell intersection
 	 */
-
 	public Intersection getPrevIntersection(Intersection cellIs, String offsetDim, int offset, String filteredYear) {
 		
 		// Apply year filter (only applicable if time dimension is selected for traversal)
@@ -2093,24 +2092,46 @@ public class PafDataCache implements IPafDataCache {
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param cumDim Dimension being accumulated
-	 * @param level The level of the members being accumulated
+	 * @param genLevelType Specifies whether the scope of the traversal is Generation or Level based
+	 * @param genLevel Specifies the level or generation of the dimension branch to confine search to
+	 * @param filteredYear Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
 	 * 
 	 * @return Cumulative total
 	 */	
-	public double getCumMbrCount(Intersection cellIs, String cumDim,LevelGenType levelGenType, int levelGen, String yearMbr) {
+	public double getCumMbrCount(Intersection cellIs, String cumDim,LevelGenType levelGenType, int levelGen, String filteredYear) {
 
       	// Get list of cum members for the specified level
 		String cumMember;
 		PafDimTree cumTree;
+		Intersection filteredIs = null;
 		if (cumDim.equals(getTimeDim())) {
+
 			// Use time horizon tree whenever the time dimension is specified
 			cumTree = getDimTrees().getTree(getTimeHorizonDim());
-			cumMember = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeAxis()), cellIs.getCoordinate(getYearAxis()));
+			String yearCoord = cellIs.getCoordinate(getYearAxis());
+
+			// Apply year filter (only applicable if time dimension is selected for traversal)
+			if (filteredYear == null)  {
+				yearCoord = cellIs.getCoordinate(getYearAxis());
+			} else {
+				yearCoord = filteredYear;
+			}
+	
+			// Get the cum member and validate it
+			cumMember = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeAxis()), yearCoord);
+			
+			// Return zero if cum member is not valid
+			if (!this.hasValidTimeHorizonCoord(filteredIs)) {
+				return 0;
+			}
+			
 		} else {
 			cumTree = getDimTrees().getTree(cumDim);			
 			cumMember = cellIs.getCoordinate(axisIndexMap.get(cumDim));
 		}	
-		List<PafDimMember> cumMembers = cumTree.getCumMembers(cumMember, levelGenType, levelGen, yearMbr);
+		
+		
+		List<PafDimMember> cumMembers = cumTree.getCumMembers(cumMember, levelGenType, levelGen);
 
 		// Return number of cum members
 		return cumMembers.size();
