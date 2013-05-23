@@ -356,6 +356,7 @@ public abstract class AbstractFunction implements IPafFunction {
 		}
 		
 		// Check for FIRST_NONPLAN_YEAR token 
+		key = PafBaseConstants.FUNC_TOKEN_FIRST_NONPLAN_YEAR; 
 		if (yearParm.equalsIgnoreCase(key)) {
 			// Return token value
 			yearValue = tokenCatalog.getProperty(key);

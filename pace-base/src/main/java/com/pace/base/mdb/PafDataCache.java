@@ -1791,7 +1791,7 @@ public class PafDataCache implements IPafDataCache {
 	public Intersection getNextIntersection(final Intersection cellIs, final String offsetDim, final int offset, final boolean bWrap) {
 	
 		Intersection nextIs = cellIs.clone();
-		nextIs = shiftIntersection(cellIs, offsetDim, offset, true, bWrap);
+		nextIs = shiftIntersection(nextIs, offsetDim, offset, true, bWrap);
 		return nextIs;
 	}
 
@@ -2168,7 +2168,7 @@ public class PafDataCache implements IPafDataCache {
 			throws PafException {
 
 		double result = 0;
- 		
+ 	
 		// Get the list of intersections to be accumulated
 		List<Intersection> cumIsList = getILPeerIntersections(cellIs,  cumDim, levelGenType, levelGen, yearMbr);
 		
@@ -2180,7 +2180,6 @@ public class PafDataCache implements IPafDataCache {
 		int lastIndex = cumIsList.lastIndexOf(lastIs);
 		if (lastIndex == -1) return result;
 		
-		
 		// Accumulate the values for all intersections up through the specified offset
 		// position in the specified scope.
 		int index = 0;
@@ -2190,7 +2189,7 @@ public class PafDataCache implements IPafDataCache {
 			result += EvalUtil.sumFloorIntersections(cumIs, evalState);
 			
 			// Check for boundary condition
-			if (index > lastIndex) break;
+			if (index == lastIndex) break;
 			
 			// Set index to next intersection
 			index++;
@@ -2228,7 +2227,7 @@ public class PafDataCache implements IPafDataCache {
 	}
 
 		/**
-	 * Return a list of left peer intersections bwithin the specified scope
+	 * Return a list of left peer intersections within the specified scope
 	 * 
 	 * @param cellIs Cell intersection
 	 * @param dim Dimension
