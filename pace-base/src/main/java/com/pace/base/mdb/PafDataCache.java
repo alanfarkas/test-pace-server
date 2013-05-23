@@ -2103,7 +2103,6 @@ public class PafDataCache implements IPafDataCache {
       	// Get list of cum members for the specified level
 		String cumMember;
 		PafDimTree cumTree;
-		Intersection filteredIs = null;
 		if (cumDim.equals(getTimeDim())) {
 
 			// Use time horizon tree whenever the time dimension is specified
@@ -2113,18 +2112,16 @@ public class PafDataCache implements IPafDataCache {
 			// Apply year filter (only applicable if time dimension is selected for traversal)
 			if (filteredYear == null)  {
 				yearCoord = cellIs.getCoordinate(getYearAxis());
+				cumMember = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeAxis()), yearCoord);
 			} else {
-				yearCoord = filteredYear;
+				cumMember = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeAxis()), filteredYear);
+
+				// Return zero if cum member is not valid
+				if (!cumTree.hasMember(cumMember)) {
+					return 0;
+				}
 			}
-	
-			// Get the cum member and validate it
-			cumMember = TimeSlice.buildTimeHorizonCoord(cellIs.getCoordinate(getTimeAxis()), yearCoord);
-			
-			// Return zero if cum member is not valid
-			if (!this.hasValidTimeHorizonCoord(filteredIs)) {
-				return 0;
-			}
-			
+				
 		} else {
 			cumTree = getDimTrees().getTree(cumDim);			
 			cumMember = cellIs.getCoordinate(axisIndexMap.get(cumDim));
