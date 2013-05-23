@@ -412,6 +412,11 @@ public abstract class AttributeUtil {
 		}
 		Intersection baseMemberIs = new Intersection(baseMemberDims, baseMemberCoords);
 	
+		// Check for any unmapped attribute members (TTN-1893)
+		if (i < memberIsDimCount) {
+			return new ArrayList<String>();
+		}
+		
 		// Return pre-tabulated component member list, if it exists
 		componentMembers = dataCache.getComponentBaseMembers(baseMemberIs);
 		if (!componentMembers.isEmpty()) {
