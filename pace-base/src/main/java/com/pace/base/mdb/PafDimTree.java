@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import com.pace.base.PafErrSeverity;
 import com.pace.base.PafException;
+import com.pace.base.mdb.PafDimTree.LevelGenType;
 
 /**
  * An n-ary tree structure for storing multidimensional members and their associated properties.
@@ -1163,6 +1164,27 @@ public abstract class PafDimTree {
 		return cumMembers;
 	}
 
+
+	/**
+	 *	Return the list of members that are needed to get a cumulative
+	 *  total for the selected member at the specified level
+	 * 
+	 * @param memberName Member name
+	 * @param cumLevel The member level to use for generating the list of cum members
+	 *
+	 * @return List of Paf Dim Members
+	 */
+	public List<PafDimMember> getCumMembers(String cumMember, LevelGenType levelGenType, int levelGen, String yearMbr) {
+		
+		// Use simpler version of method if LEVEL search and no year is specified
+		if (levelGenType == LevelGenType.LEVEL && yearMbr == null) {
+			return getCumMembers(cumMember, levelGen);
+		}
+		
+		// If year member is specified, check if it match
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	/**
 	 *	Return the list of members that are at the same level as the specified member,
@@ -2821,5 +2843,6 @@ public abstract class PafDimTree {
 		}
 		return false;
 	}
+
 	
 }

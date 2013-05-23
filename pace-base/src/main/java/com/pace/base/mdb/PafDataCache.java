@@ -2083,7 +2083,7 @@ public class PafDataCache implements IPafDataCache {
 			cumTree = getDimTrees().getTree(cumDim);			
 			cumMember = cellIs.getCoordinate(axisIndexMap.get(cumDim));
 		}	
-		List<PafDimMember> cumMembers = cumTree.getCumMembers(cumMember, levelGen);
+		List<PafDimMember> cumMembers = cumTree.getCumMembers(cumMember, levelGenType, levelGen, yearMbr);
 
 		// Return number of cum members
 		return cumMembers.size();
@@ -2491,68 +2491,50 @@ public class PafDataCache implements IPafDataCache {
 
 
 	/**
-	 * Return the first floor intersection along the specified dimension, 
+	 * Find the first floor intersection along the specified dimension with the specified scope
 	 * 
 	 * @param cellIs Cell intersection
-	 * @param dim Dimension
-	 * @param genLevelType Generation or Level Optional parameter that specifies the dimension branch to confine search to
-	 * @param genLevel Generation/level Optional parameter that specifies the dimension branch to confine search to
-	 * @param yearMbr Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
+	 * @param dim Dimension to traversal
+	 * @param genLevelType Specifies whether the scope of the traversal is Generation of Level based
+	 * @param genLevel Specifies the level or generation of the dimension branch to confine search to
+	 * @param filteredYear Optional parameter that specifies which year to confine search to (ignored if 'dim' is not the Time dimension)
 	 * 
 	 * @return First floor intersection
 	 * @throws PafException 
 	 */
-	public Intersection getFirstFloorIs(Intersection cellIs, String dim, LevelGenType levelGenType, int levelGen, String yearMbr) throws PafException {
+	public Intersection getFirstFloorIs(Intersection cellIs, String dim, LevelGenType levelGenType, int levelGen, String filteredYear) throws PafException {
 
 		Intersection firstFloorIs = cellIs.clone();
 		PafDimTree dimTree = null;
 		PafDimMember firstFloorMbr = null, timeMbr = null;
-		String timeCoord = null, treeRoot = null;
+		String timeCoord = null;
 		int genOffset = 0;
 		
 		
 		// If time dimension is selected, substitute time horizon dimension for query
 		if (dim.equals(getTimeDim())) {
 			dimTree = getDimTrees().getTree(getTimeHorizonDim());
-			timeCoord = IntersectionUtil.getIsCoord(cellIs, dim, this);
-
-			// For generation search, we need to match desired gen to time horizon tree
-			if (levelGenType == LevelGenType.GEN) {
-				genOffset = getTimeHorizGenOffset();
-			}
-
-			// Check if year member is specified (only valid if Time dimension is being traversed)
-			if (yearMbr == null) {
-				// No year member specification
-				treeRoot = dimTree.getRootNode().getKey();	
-			} else {
-				// Check if current time coordinate is contained in selected year. If not,
-				// return null
-				TimeSlice timeSlice = new TimeSlice(timeCoord);
-				String yearCoord = timeSlice.getYear();
-				if (!yearCoord.equals(yearMbr)) {
-					return null;
-				}
-				// Year member specified - use a pruned copy of time horizon tree under specified year
-				PafDimTree timeTree = getDimTrees().getTree(getTimeDim());
-				treeRoot = TimeSlice.buildTimeHorizonCoord(timeTree.getRootNode().getKey(), yearMbr);
-				dimTree = dimTree.getSubTreeCopy(treeRoot);
-			}
-			
 		} else {
 			dimTree = getDimTrees().getTree(dim);
-			treeRoot = dimTree.getRootNode().getKey();
-			timeCoord = cellIs.getCoordinate(dim);
 		}
+		timeCoord = IntersectionUtil.getIsCoord(cellIs, dim, this);			
 		timeMbr = dimTree.getMember(timeCoord);
 
 		
 		// Find the ancestor that matches the specified scope
 		PafDimMember ancestorMbr = null;
 		ancestorMbr = dimTree.getAncestor(timeMbr, levelGenType, levelGen + genOffset);
+		String ancestor = ancestorMbr.getKey();
 		
-		// Get the first floor descendant within specified scope
-		firstFloorMbr = dimTree.getFirstDescendant(ancestorMbr.getKey());
+		// Apply year filter (only applicable if time dimension is selected for traversal)
+		if (filteredYear != null && dim.equals(getTimeDim())) {
+			TimeSlice filteredAncestorTS = new TimeSlice(ancestor);
+			filteredAncestorTS.setYear(filteredYear);
+			ancestor = filteredAncestorTS.getTimeHorizonPeriod();
+		}
+		
+		// Get the first floor descendant within specified scope and year
+		firstFloorMbr = dimTree.getFirstDescendant(ancestor);
 		
 		// Update floor intersection and return value
 		IntersectionUtil.setIsCoord(firstFloorIs, dim, firstFloorMbr.getKey(), evalState);	

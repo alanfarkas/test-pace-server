@@ -261,8 +261,9 @@ public abstract class AbstractFunction implements IPafFunction {
 	 * Parses the levelGen parm into its component parts
 	 * 
 	 * @param levelGenParm Level/Gen specification (ex. 'G3', 'L1'). A non-prefixed number will be assumed to be a level specification
-	 * @param levelGenType Returned Level/Gen Type (either Level or Gen)
-	 * @param levelGen Level/Gen number
+     *
+	 * @return Parsed level/gen info
+	 * @throws IllegalArgumentException
 	 */
 	public ParsedLevelGen parseLevelGenParm(final String levelGenParm) throws IllegalArgumentException  {
 
@@ -296,6 +297,12 @@ public abstract class AbstractFunction implements IPafFunction {
 		try {
 			String numComponent = levelGenParm.substring(1);
 			levelGen = Integer.valueOf(numComponent);
+			if ((levelGenType == LevelGenType.LEVEL && levelGen < 0)
+					|| (levelGenType == LevelGenType.GEN && levelGen < 1)) {
+				// Invalid level or gen
+				String errMsg = "Illegal Level/Gen parameter [" + levelGenParm + "] passed to Pace rule function ";
+				throw new IllegalArgumentException(errMsg);				
+			}
 		} catch (NumberFormatException e) {
 			// Not a valid integer
 			String errMsg = "Illegal Level/Gen parameter [" + levelGenParm + "] passed to Pace rule function ";
