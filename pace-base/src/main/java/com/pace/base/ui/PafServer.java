@@ -60,29 +60,16 @@ public class PafServer implements Comparable, Cloneable {
 			url = getCompleteWSDLService();         
 			//cast to http connection
 			httpConnection = (HttpURLConnection) new URL(url).openConnection();
-			
 			httpConnection.setRequestMethod("GET");
 			
-		
 			//if paf server exists
 			//if pafserver has specified url timeout
 			if ( getUrlTimeoutInMilliseconds() != null ) {
-			
-				//try to convert into an int, catch runtime if problem and ignore
-				try {
-					
-					urlTimeoutInMilliseconds = getUrlTimeoutInMilliseconds();
-					
-				} catch (RuntimeException re) {
-					
-					logger.error("There was a problem coverting " + getUrlTimeoutInMilliseconds() + " to an integer.");
-					
-				}
-				
+				urlTimeoutInMilliseconds = getUrlTimeoutInMilliseconds();
 			}            	
 			  
 			if ( logger.isDebugEnabled()) {
-					logger.debug("Setting connection timeout to " + urlTimeoutInMilliseconds + " for url " + url);
+				logger.debug("Setting connection timeout to " + urlTimeoutInMilliseconds + " for url " + url);
 			}
 		
 			//set timeout
@@ -109,7 +96,9 @@ public class PafServer implements Comparable, Cloneable {
 			if ( httpConnection != null ) {
 			  logger.debug("About to disconnect from url: " + url);
           	  httpConnection.disconnect();
+          	  httpConnection.setRequestProperty("Connection", "close");
           	  logger.debug("Successfully disconnected from url: " + url);
+          	  httpConnection = null;
             }
 			
 		}
@@ -120,7 +109,6 @@ public class PafServer implements Comparable, Cloneable {
 		setServerRunning(serverRunning);
 		return serverRunning;
 	}
-
 
 	private static final Logger logger = Logger
 			.getLogger(PafServer.class);
@@ -466,6 +454,9 @@ public class PafServer implements Comparable, Cloneable {
 		this.serverPlatform = serverPlatform;
 	}
 
+	public static void main(String[] vargs) {
+		
+	}
 
 
 
