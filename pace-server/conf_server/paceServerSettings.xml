@@ -17,7 +17,7 @@
   <clearCellNotes>false</clearCellNotes>
   <clearAllCellNotes>false</clearAllCellNotes>
   <authMode>nativeMode</authMode>
-  <clientUpdateUrl>http://ams.pace-planning.com/builds/releases/2.8.3.4/installations/planning/setup.exe/setup.exe</clientUpdateUrl>
-  <clientMinVersion>2.8.3.4</clientMinVersion>
+  <clientUpdateUrl>http://ams.pace-planning.com/builds/releases/2.8.4.0/installations/planning/setup.exe/setup.exe</clientUpdateUrl>
+  <clientMinVersion>2.8.4.0</clientMinVersion>
   <pafServerHome>../../</pafServerHome>
 </ServerSettings>
