@@ -10,6 +10,15 @@ package com.pace.db;
 public class PacePOJO {
 	private String clientId;
 	private String sessionId;
+	
+	public PacePOJO(){super();}
+	
+	public PacePOJO(String clientId, String sessionId) {
+		super();
+		this.clientId = clientId;
+		this.sessionId = sessionId;
+	}
+	
 	public String getClientId() {
 		return clientId;
 	}

@@ -4949,7 +4949,7 @@ public class PafDataService {
 		}
 	}
 
-	public PaceClusteredDataSet clusterDataset(PaceDataSet inData) {
+	public PaceClusteredDataSet clusterDataset(PaceDataSet inData, int numOfClusters, int maxIterations) {
 		PaceClusteredDataSet dataSet = new PaceClusteredDataSet();
 		List<EuclideanIntegerPoint> points = new ArrayList<EuclideanIntegerPoint>();
 		IntArrayList iPoint = new IntArrayList( inData.getColCount() );
@@ -4963,12 +4963,12 @@ public class PafDataService {
 			iPoint.clear();
 		}
 		
-		dataSet.setClusters(MathOp.clusterData(points));
+		dataSet.setClusters(MathOp.clusterData(points, numOfClusters, maxIterations));
 		return dataSet;
 	}
 
 
-	public PaceDataSet buildAsstDataSet(AsstSet asst) throws PafException {
+	public PaceDataSet buildAsstDataSet(AsstSet asst, PafDimSpec years, PafDimSpec version) throws PafException {
 		
 		// Look at each location to cluster and convert the measures in question into metrics in an array.
 		// For each product filtered to, treat it as another metric for that location. In effect this produces
@@ -4982,11 +4982,11 @@ public class PafDataService {
 		
 
 		Map<String, List<String>> memberFilter = new HashMap<String, List<String>>();
-		memberFilter.put("Product", Arrays.asList(asst.getDimToMeasure().getExpressionList() ) );
-		memberFilter.put("Time", Arrays.asList(asst.getTimePeriods().getExpressionList() ) );			
-		memberFilter.put(dc.getMeasureDim(), Arrays.asList(asst.getMeasures().getExpressionList() ) );
-		memberFilter.put(dc.getVersionDim(), Arrays.asList(dc.getPlanVersion()));
-		memberFilter.put(dc.getYearDim(), Arrays.asList(dc.getYears()[0]));
+		memberFilter.put("Product", asst.getDimToMeasure().getExpressionList());
+		memberFilter.put(dc.getTimeDim(), asst.getTimePeriods().getExpressionList());			
+		memberFilter.put(dc.getMeasureDim(), asst.getMeasures().getExpressionList());
+		memberFilter.put(dc.getVersionDim(), Arrays.asList(version.getExpressionList()));
+		memberFilter.put(dc.getYearDim(), Arrays.asList(years.getExpressionList()));
 		
 		
 		

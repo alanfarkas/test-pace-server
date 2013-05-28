@@ -21,13 +21,13 @@ import cern.colt.matrix.DoubleMatrix2D;
  *
  */
 public class MathOp {
-	static public List<Cluster<EuclideanIntegerPoint>> clusterData(List<EuclideanIntegerPoint> dataPoints) {
+	static public List<Cluster<EuclideanIntegerPoint>> clusterData(List<EuclideanIntegerPoint> dataPoints, int numOfClusters, int maxIterations) {
 		
 		        KMeansPlusPlusClusterer<EuclideanIntegerPoint> transformer =
 		            new KMeansPlusPlusClusterer<EuclideanIntegerPoint>(new Random(1746432956321l));
 
-		        List<Cluster<EuclideanIntegerPoint>> clusters =
-		            transformer.cluster(dataPoints, 2, 100);
+		        //List<Cluster<EuclideanIntegerPoint>> clusters = transformer.cluster(dataPoints, 2, 100);
+		        List<Cluster<EuclideanIntegerPoint>> clusters = transformer.cluster(dataPoints, numOfClusters, maxIterations);
 		        
 //		        assertEquals(3, clusters.size());
 //		        boolean cluster1Found = false;

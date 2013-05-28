@@ -16,7 +16,7 @@ public class PaceDataSet extends PacePOJO {
 
 	
 	public PaceDataSet(double[][] inData) {
-
+		super();
 		data = DoubleFactory2D.dense.make(inData);
 	}
 	

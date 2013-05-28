@@ -5,24 +5,32 @@
  */
 package com.pace.server.assortment;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.pace.base.app.PafDimSpec;
+import com.pace.base.app.PafDimSpec2;
 import com.pace.db.PacePOJO;
-import com.pace.server.PaceDataSet;
 
 /**
  * @author jim
  *
  */
 public class AsstSet extends PacePOJO {
-	String label;
+	private String label;
+	private PafDimSpec2 timePeriods;		
+	private PafDimSpec2 dimToMeasure;	
+	private PafDimSpec2 dimToCluster;
+	private PafDimSpec2 measures;
 	
-	PafDimSpec timePeriods = new PafDimSpec();		
-	PafDimSpec dimToMeasure = new PafDimSpec();	
-	PafDimSpec dimToCluster = new PafDimSpec();
-	PafDimSpec measures = new PafDimSpec();
+	public AsstSet(String clientId, String sessionId) {
+		super(clientId, sessionId);
+	}
+	
+	public AsstSet(String label) {
+		super();
+		this.label = label;
+	}
+
+	public AsstSet() {
+		super();
+	}	
 	
 	public String getLabel() {
 		return label;
@@ -34,7 +42,7 @@ public class AsstSet extends PacePOJO {
 	public int getNumRows() {
 		// accessor access forces load of underlying property
 		if (getDimToCluster() != null)
-			return dimToCluster.getExpressionList().length;
+			return dimToCluster.getExpressionList().size();
 		else
 			return 0;
 	}
@@ -44,42 +52,35 @@ public class AsstSet extends PacePOJO {
 		if (getTimePeriods() == null || getDimToMeasure() == null || getDimToCluster() == null || getMeasures() == null) 
 			return 0;
 		else
-			return getTimePeriods().getExpressionList().length * 
-					getDimToMeasure().getExpressionList().length *
-					getMeasures().getExpressionList().length;
+			return getTimePeriods().getExpressionList().size() * 
+					getDimToMeasure().getExpressionList().size() *
+					getMeasures().getExpressionList().size();
 	}
 
 	
 	
-	public PafDimSpec getTimePeriods() {
+	public PafDimSpec2 getTimePeriods() {
 		return timePeriods;
 	}
-	public void setTimePeriods(PafDimSpec timePeriods) {
+	public void setTimePeriods(PafDimSpec2 timePeriods) {
 		this.timePeriods = timePeriods;
 	}
-	public PafDimSpec getDimToMeasure() {
+	public PafDimSpec2 getDimToMeasure() {
 		return dimToMeasure;
 	}
-	public void setDimToMeasure(PafDimSpec dimToMeasure) {
+	public void setDimToMeasure(PafDimSpec2 dimToMeasure) {
 		this.dimToMeasure = dimToMeasure;
 	}
-	public PafDimSpec getDimToCluster() {
+	public PafDimSpec2 getDimToCluster() {
 		return dimToCluster;
 	}
-	public void setDimToCluster(PafDimSpec dimToCluster) {
+	public void setDimToCluster(PafDimSpec2 dimToCluster) {
 		this.dimToCluster = dimToCluster;
 	}
-	public PafDimSpec getMeasures() {
+	public PafDimSpec2 getMeasures() {
 		return measures;
 	}
-	public void setMeasures(PafDimSpec measures) {
+	public void setMeasures(PafDimSpec2 measures) {
 		this.measures = measures;
 	}
-	
-	public AsstSet() {
-		super();
-	}	
-	
-
-
 }
