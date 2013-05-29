@@ -3616,10 +3616,12 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			List<StringRow> rows = new ArrayList<StringRow>();
 			int i;
 			
-			
+			int clusterCount = 0;
+			int rowCount = 0;
 			// cluster
 			for (Cluster<EuclideanIntegerPoint> c : clusters.getClusters() ){
 				// row
+				clusterCount++;
 				for (EuclideanIntegerPoint point : c.getPoints() ) {
 					// value
 					row = new String[point.getPoint().length];
@@ -3627,9 +3629,13 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 					for (Integer I : point.getPoint() ) {
 						row[i++] = I.toString();
 					}
+					//Get the member name (id)
+					String id = clusters.getClusterRowMap().get(rowCount);
+					//Get the cluster number
+					int clusterNumber = clusters.getClusterKeys().get(id);
 					// add row
-					rows.add(new StringRow(row));
-					
+					rows.add(new StringRow(id, clusterNumber, row));
+					rowCount++;
 				}
 			}
 			

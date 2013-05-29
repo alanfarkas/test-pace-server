@@ -34,6 +34,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.math3.stat.clustering.Cluster;
 import org.apache.commons.math3.stat.clustering.EuclideanIntegerPoint;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
@@ -107,6 +108,7 @@ import com.pace.base.view.PafViewSection;
 import com.pace.base.view.PageTuple;
 import com.pace.base.view.ViewTuple;
 import com.pace.server.assortment.AsstSet;
+import com.pace.server.comm.StringRow;
 import com.pace.server.eval.ES_ProcessReplication;
 import com.pace.server.eval.IEvalStrategy;
 import com.pace.server.eval.MathOp;
@@ -4950,20 +4952,48 @@ public class PafDataService {
 	}
 
 	public PaceClusteredDataSet clusterDataset(PaceDataSet inData, int numOfClusters, int maxIterations) {
+		//This map will keep track of the cluster member name and associated points.
+		Map<EuclideanIntegerPoint, String> pointMap = new HashMap<EuclideanIntegerPoint, String>(inData.getRowCount());
+		//Map of row number, member name
+		Map<Integer, String> clusterRowMap = new HashMap<Integer, String>(inData.getRowCount());
 		PaceClusteredDataSet dataSet = new PaceClusteredDataSet();
 		List<EuclideanIntegerPoint> points = new ArrayList<EuclideanIntegerPoint>();
 		IntArrayList iPoint = new IntArrayList( inData.getColCount() );
 		for (int i=0 ; i < inData.getRowCount(); i++) {
+			String clusterKey = inData.getClusterRowMap().get(i);
 			for (double d : inData.getRow(i) ) {
 				// build row of data points
 				iPoint.add( (int) Math.round(d) );
 			}
 			// add row as euclidean point
-			points.add(new EuclideanIntegerPoint(iPoint.elements().clone()));	
+			EuclideanIntegerPoint intPoint = new EuclideanIntegerPoint(iPoint.elements().clone());
+			//Add the points to a map. 
+			pointMap.put(intPoint, clusterKey);
+			points.add(intPoint);	
 			iPoint.clear();
 		}
+		//Perform the cluster.
+		List<Cluster<EuclideanIntegerPoint>> clusters = MathOp.clusterData(points, numOfClusters, maxIterations);
+		//Create a map of cluster member to cluster number.
+		Map<String, Integer>  clusterMap = new HashMap<String, Integer>();
+		//Loop thur the clusters and fill the map of ClusterNumber, List<MemberName>
+		int clusterCount = 0;
+		int rowCount = 0;
+		for(Cluster<EuclideanIntegerPoint> cluster : clusters){
+			clusterCount++;
+			for (EuclideanIntegerPoint point : cluster.getPoints() ) {
+				String member = pointMap.get(point);
+				clusterRowMap.put(rowCount, member);
+				clusterMap.put(member, clusterCount);
+				rowCount++;
+			}
+			
+		}
 		
-		dataSet.setClusters(MathOp.clusterData(points, numOfClusters, maxIterations));
+		dataSet.setClusterRowMap(clusterRowMap);
+		dataSet.setClusterKeys(clusterMap);
+		dataSet.setClusterData(inData);
+		dataSet.setClusters(clusters);
 		return dataSet;
 	}
 
@@ -4988,7 +5018,7 @@ public class PafDataService {
 		memberFilter.put(dc.getVersionDim(), Arrays.asList(version.getExpressionList()));
 		memberFilter.put(dc.getYearDim(), Arrays.asList(years.getExpressionList()));
 		
-		
+		Map<Integer, String>  locationIndex = new HashMap<Integer, String> ();
 		
 		StringOdometer so;
 		int iRow = 0; int iCol = 0;
@@ -5001,10 +5031,11 @@ public class PafDataService {
 			while (so.hasNext()) {
 				data[iRow][iCol++] = dc.getCellValue(baseDims, so.nextValue());
 			}
+			locationIndex.put(iRow, loc);
 			iRow++;
 		}
 		
-		PaceDataSet dataSet = new PaceDataSet(data);		
+		PaceDataSet dataSet = new PaceDataSet(data, locationIndex);		
 		return dataSet;
 	}
 	

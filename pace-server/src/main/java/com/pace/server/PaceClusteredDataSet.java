@@ -9,8 +9,9 @@ import org.apache.commons.math3.stat.clustering.EuclideanIntegerPoint;
 
 public class PaceClusteredDataSet {
 	private PaceDataSet clusterData;
-	private Map<Integer, String[]>clusterKeys = new HashMap<Integer, String[]>();
 	
+	private Map<String, Integer>clusterKeys = new HashMap<String, Integer>();
+	private Map<Integer, String> clusterRowMap = new HashMap<Integer, String>();
 	private List<Cluster<EuclideanIntegerPoint>> clusters;
 
 	public PaceDataSet getClusterData() {
@@ -21,11 +22,11 @@ public class PaceClusteredDataSet {
 		this.clusterData = clusterData;
 	}
 
-	public Map<Integer, String[]> getClusterKeys() {
+	public Map<String, Integer> getClusterKeys() {
 		return clusterKeys;
 	}
 
-	public void setClusterKeys(Map<Integer, String[]> clusterKeys) {
+	public void setClusterKeys(Map<String, Integer> clusterKeys) {
 		this.clusterKeys = clusterKeys;
 	}
 
@@ -35,6 +36,14 @@ public class PaceClusteredDataSet {
 
 	public void setClusters(List<Cluster<EuclideanIntegerPoint>> clusters) {
 		this.clusters = clusters;
+	}
+
+	public Map<Integer, String> getClusterRowMap() {
+		return clusterRowMap;
+	}
+
+	public void setClusterRowMap(Map<Integer, String> clusterRowMap) {
+		this.clusterRowMap = clusterRowMap;
 	}
 	
 }

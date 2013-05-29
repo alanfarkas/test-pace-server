@@ -5,7 +5,24 @@ import java.util.Arrays;
 import java.util.List;
 
 public class StringRow {
-	String id;
+	private String id;
+	private String[] items;
+	private int key;
+	
+	public StringRow() {}
+
+	public StringRow(int key, String[] items){
+		this.items = items;
+		this.key = key;
+	}
+	
+	public StringRow(String id, int key, String[] items){
+		this.id = id;
+		this.items = items;
+		this.key = key;
+	}
+	
+	
 	/**
 	 * @return the id
 	 */
@@ -20,7 +37,7 @@ public class StringRow {
 		this.id = id;
 	}
 
-	String[] items;
+
 
 	public StringRow(String[] s) {
 		items=s;
@@ -40,7 +57,7 @@ public class StringRow {
 		this.items = items;
 	}
 	
-	public StringRow() {}
+	
 
 	public void add(String s) {
 		if (items == null) {
@@ -51,5 +68,17 @@ public class StringRow {
 			newitems.add(s);
 			items = newitems.toArray(new String[0]);			
 		}
+	}
+
+
+
+	public int getKey() {
+		return key;
+	}
+
+
+
+	public void setKey(int key) {
+		this.key = key;
 	}
 }
