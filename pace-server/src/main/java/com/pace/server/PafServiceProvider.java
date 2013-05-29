@@ -3497,12 +3497,13 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		PafClientState clientState = clients.get(queryRequest.getClientId());
 		List<PafDimMember> dimMembers = new ArrayList<PafDimMember>();
 		
-		PafBaseTree t = clientState.getMdbBaseTrees().get(dim);
+		PafBaseTree t = clientState.getUowTrees().getBaseTree(dim);
 		
 		//get direct selected members at the specified level
 		
 		if (expr != null && expr.length>0) {
 			for (String e : expr) {
+				//TODO Look at how level is being set in Client GUI
 				dimMembers.addAll(t.getMembersAtLevel(e, level));			
 			}
 		}
@@ -3524,7 +3525,10 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		// process member names into basemembers
 		// should have some level checking here as basemembers might not match corresponding level
 		for (String aname : attribBaseNames) {
-			dimMembers.add(t.getMember(aname));
+			// Attribute tree contains base member mappings for members outside UOW
+			if (t.hasMember(aname)) {
+				dimMembers.add(t.getMember(aname));
+			}
 		}
 
 		// dimMembers should now hold all selected members
