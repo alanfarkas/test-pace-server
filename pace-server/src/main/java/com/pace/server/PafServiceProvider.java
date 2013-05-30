@@ -133,6 +133,7 @@ import com.pace.server.assortment.AsstSet;
 import com.pace.server.comm.AttributeDimInfo;
 import com.pace.server.comm.ClusterResultSetRequest;
 import com.pace.server.comm.ClusteredResultSetResponse;
+import com.pace.server.comm.ClusteredResultSetSaveRequest;
 import com.pace.server.comm.CreateAsstRequest;
 import com.pace.server.comm.CreateAsstResponse;
 import com.pace.server.comm.PaceDescendantsRequest;
@@ -3668,6 +3669,93 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		return response;
 	}
 	
+	public PafResponse saveClusteredResultSet(ClusteredResultSetSaveRequest request) throws RemoteException, PafSoapException {
+		
+		String clientId = request.getClientId();
+		String sessinoId = request.getSessionToken();
+		ClusteredResultSetResponse response = new ClusteredResultSetResponse();
+		
+		try{
+			pushToNDCStack(clientId);
+			
+//			AsstSet asst = dataStore.getAsstSet(clientId, sessinoId);
+//			
+//			asst.setMeasures(dataStore.createPafDimSpec(request.getMeasuresDimSpec().getDimension(), Arrays.asList(request.getMeasuresDimSpec().getExpressionList())));
+//			asst.setTimePeriods(dataStore.createPafDimSpec(request.getTimeDimSpec().getDimension(), Arrays.asList(request.getTimeDimSpec().getExpressionList())));
+//			asst.setLabel(request.getLabel());
+//			
+//			dataStore.saveAsst(asst);
+//			
+//			asst = dataStore.getAsstSet(clientId, sessinoId);
+//			
+//			PaceDataSet inData;
+//			
+//			try {
+//				inData = dataService.buildAsstDataSet(asst, request.getYearsDimSpec(), request.getVersionDimSpec());
+//			} catch (PafException e) {
+//				throw e.getPafSoapException();
+//			}
+//			
+//			//This throws an error.  I think it's due to the double[][] data property.
+//			//dataStore.storePaceDataSet(clientId, sessinoId, inData);
+//			
+//			PaceClusteredDataSet clusters = dataService.clusterDataset(inData, request.getNumOfClusters(), request.getMaxIterations());
+//			String[] row = null;
+//			List<StringRow> rows = new ArrayList<StringRow>();
+//			int i;
+//			
+//			int clusterCount = 0;
+//			int rowCount = 0;
+//			// cluster
+//			for (Cluster<EuclideanIntegerPoint> c : clusters.getClusters() ){
+//				// row
+//				clusterCount++;
+//				for (EuclideanIntegerPoint point : c.getPoints() ) {
+//					// value
+//					row = new String[point.getPoint().length];
+//					i = 0;
+//					for (Integer I : point.getPoint() ) {
+//						row[i++] = I.toString();
+//					}
+//					//Get the member name (id)
+//					String id = clusters.getClusterRowMap().get(rowCount);
+//					//Get the cluster number
+//					int clusterNumber = clusters.getClusterKeys().get(id);
+//					// add row
+//					rows.add(new StringRow(id, clusterNumber, row));
+//					rowCount++;
+//				}
+//			}
+//			
+//			// generate header
+//			StringRow hdr = new StringRow();
+//			for (String s : asst.getDimToMeasure().getExpressionList() ) {
+//				for (String m : asst.getMeasures().getExpressionList() ) {
+//					//for(String l : asst.getDimToCluster().getExpressionList()){
+//						hdr.add(s + ", " + m );
+//						//hdr.add(s + ", " + m + ", " + l);
+//					//}
+//				}
+//			}
+//
+//			response.setHeader(hdr);
+//			response.setData(rows.toArray(new StringRow[0]));
+//			response.setMeasures(asst.getMeasures().getExpressionList());
+//			response.setDimToCluster(asst.getDimToCluster().getExpressionList());
+//			response.setDimToMeasure(asst.getDimToMeasure().getExpressionList());
+//			response.setVersion(Arrays.asList(request.getVersionDimSpec().getExpressionList()));
+//			response.setYears(Arrays.asList(request.getYearsDimSpec().getExpressionList()));
+//			response.setTime(Arrays.asList(request.getTimeDimSpec().getExpressionList()));
+			
+		} catch (RuntimeException re) {
+			handleRuntimeException(re);
+			
+		} finally {
+			popFromNDCStack(clientId);
+		}
+		return response;
+	}
+
 	/**
 	 * Logs off the current user.  This method cleans up the UOW Cache
 	 * tied to the client id.
