@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -922,7 +923,8 @@ public abstract class PafDimTree {
 	 */
 	public Set<String> filterTree(Set<String> validMemberNames, boolean isRollupFiltered) {
 
-		Set<String> prunedMemberNames = new HashSet<String>();
+		Set<String> prunedBranchNames = new HashSet<String>();
+		Set<PafDimMember> prunedMembers = new HashSet<PafDimMember>();
 
 		// Prune invalid members from the tree. The member search
 		// list must be initialized via a tree traversal since 
@@ -934,24 +936,30 @@ public abstract class PafDimTree {
 			if (!validMemberNames.contains(member.getKey())) {
 				// Member is invalid
 				if (isRollupFiltered || member.getMemberProps().getLevelNumber() == 0) {
-					// Only filter member if level 0 or rollup filtering is selected
-					removeBranch(member);
-					prunedMemberNames.add(member.getKey());
+					// Only filter member if level 0 or roll-up filtering is selected
+					prunedMembers.addAll(removeBranch(member));
+					prunedBranchNames.add(member.getKey());
 				}
 			}
 		}
 		
-		// Remove all occurrences of pruned members from shared members collection (TTN-1355)
-        List<PafDimMember> sharedMembers = new ArrayList<PafDimMember>(getSharedMembers());
-        for (PafDimMember sharedMember : sharedMembers) {
-        	if (prunedMemberNames.contains(sharedMember.getKey())) {
-        		getSharedMembers().remove(sharedMember);
-        	}
-        }
+		// Remove all occurrences of pruned members from shared members collection (TTN-1355).
+		//
+		// Need to rebuild list of shared members because for some reason it was impossible to
+		// remove any of the pruned members from the shared member collection directly. It's 
+		// possible that this behavior has something to do with the fact that this logic is 
+		// referencing the PafDimMember object directly, but the underlying object in the 
+		// shared member collection is the PafBaseMember, as sub-class of PafDimMember.
+		Set<PafDimMember> validSharedMembers = new HashSet<PafDimMember>(getSharedMembers().size());
+		for (PafDimMember sharedMember : sharedMembers) {
+			if (!prunedMembers.contains(sharedMember)) {
+				validSharedMembers.add(sharedMember);
+			}
+		}
+		sharedMembers = validSharedMembers;
 		
-				
 		// Return names of pruned members
-		return prunedMemberNames;
+		return prunedBranchNames;
 	}
 
 	/**
@@ -2499,21 +2507,28 @@ public abstract class PafDimTree {
      *	Removed specified branch from dim tree
      *
      * @param branchKey
+     * @return Set of removed members
      */
-    public void removeBranch(PafDimMember branch) {
+    public Set<PafDimMember> removeBranch(PafDimMember branch) {
 
+    	Set<PafDimMember> removedMembers = new HashSet<PafDimMember>();
+    	
      	// recursively call on children
     	if (branch.hasChildren()) {
     		// build iterable list copy of children to avoid concurrent modification issues
     		List<PafDimMember> children = new ArrayList<PafDimMember>();
     		children.addAll(branch.getChildren());
     		for (PafDimMember mbrChild : children) {
-    			removeBranch(mbrChild);
+    			removedMembers.addAll(removeBranch(mbrChild));
     		}
     	}
 
     	// now I'm a leaf for sure
     	removeLeaf(branch);
+    	removedMembers.add(branch);
+    	
+    	return removedMembers;
+    	
     }
 
     /**
@@ -2544,6 +2559,7 @@ public abstract class PafDimTree {
     			members.remove(memberName);
     		}
     	}
+     	
     }
     
     /**
