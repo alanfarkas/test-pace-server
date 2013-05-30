@@ -3673,7 +3673,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		
 		String clientId = request.getClientId();
 		String sessinoId = request.getSessionToken();
-		ClusteredResultSetResponse response = new ClusteredResultSetResponse();
+		PafResponse response = new PafResponse();
 		
 		try{
 			pushToNDCStack(clientId);
