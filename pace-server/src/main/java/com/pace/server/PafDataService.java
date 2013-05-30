@@ -4953,7 +4953,7 @@ public class PafDataService {
 
 	public PaceClusteredDataSet clusterDataset(PaceDataSet inData, int numOfClusters, int maxIterations) {
 		//This map will keep track of the cluster member name and associated points.
-		Map<EuclideanIntegerPoint, String> pointMap = new HashMap<EuclideanIntegerPoint, String>(inData.getRowCount());
+		Map<EuclideanIntegerPoint, List<String>> pointMap = new HashMap<EuclideanIntegerPoint, List<String>>(inData.getRowCount());
 		//Map of row number, member name
 		Map<Integer, String> clusterRowMap = new HashMap<Integer, String>(inData.getRowCount());
 		PaceClusteredDataSet dataSet = new PaceClusteredDataSet();
@@ -4963,12 +4963,21 @@ public class PafDataService {
 			String clusterKey = inData.getClusterRowMap().get(i);
 			for (double d : inData.getRow(i) ) {
 				// build row of data points
-				iPoint.add( (int) Math.round(d) );
+				iPoint.add( new Integer ((int) Math.round(d)) );
 			}
 			// add row as euclidean point
 			EuclideanIntegerPoint intPoint = new EuclideanIntegerPoint(iPoint.elements().clone());
-			//Add the points to a map. 
-			pointMap.put(intPoint, clusterKey);
+			//Add the points to a map, similar point are grouped together. 
+			if(pointMap.containsKey(intPoint)){
+				List<String> temp = pointMap.get(intPoint);
+				temp.add(clusterKey);
+				pointMap.put(intPoint, temp);
+			} else {
+				List<String> temp = new ArrayList<String>();
+				temp.add(clusterKey);
+				pointMap.put(intPoint, temp);
+			}
+			
 			points.add(intPoint);	
 			iPoint.clear();
 		}
@@ -4982,12 +4991,20 @@ public class PafDataService {
 		for(Cluster<EuclideanIntegerPoint> cluster : clusters){
 			clusterCount++;
 			for (EuclideanIntegerPoint point : cluster.getPoints() ) {
-				String member = pointMap.get(point);
+				//Get the list of points.
+				List<String> members = pointMap.get(point);
+				//Get the last member (which was entered first)
+				String member = members.get(members.size() -1);
+				//Add the RowNumber, Member to the map.
 				clusterRowMap.put(rowCount, member);
+				//Add the Member, Cluster # to the map.
 				clusterMap.put(member, clusterCount);
+				//Remove the item that was just used.
+				members.remove(members.size() -1);
+				//Put the list back into the map.
+				pointMap.put(point, members);
 				rowCount++;
 			}
-			
 		}
 		
 		dataSet.setClusterRowMap(clusterRowMap);
