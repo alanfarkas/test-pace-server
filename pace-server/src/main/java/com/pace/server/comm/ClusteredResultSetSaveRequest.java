@@ -1,6 +1,7 @@
 package com.pace.server.comm;
 
 import java.util.List;
+import java.util.Map;
 
 import com.pace.base.comm.PafRequest;
 
@@ -15,11 +16,11 @@ public class ClusteredResultSetSaveRequest extends PafRequest {
 	private List<String> years;
 	private List<String> time;
 	private List<String> version;
-	private List<String[]> clusters;
+	private Map<String, Integer> clusters;
 	
 	public ClusteredResultSetSaveRequest(){super();}
 	public ClusteredResultSetSaveRequest(String assortment, StringRow header, StringRow[] data, List<String> measures, List<String> dimToCluster, List<String> dimToMeasure, 
-			List<String> years, List<String> time, List<String> version, List<String[]> clusters){
+			List<String> years, List<String> time, List<String> version, Map<String, Integer>  clusters){
 		super();
 		this.assortment = assortment;
 		this.header = header;
@@ -86,14 +87,14 @@ public class ClusteredResultSetSaveRequest extends PafRequest {
 	/**
 	 * @return the clusters
 	 */
-	public List<String[]> getClusters() {
+	public Map<String, Integer>  getClusters() {
 		return clusters;
 	}
 
 	/**
 	 * @param clusters the clusters to set
 	 */
-	public void setClusters(List<String[]> clusters) {
+	public void setClusters(Map<String, Integer>  clusters) {
 		this.clusters = clusters;
 	}
 	/**
