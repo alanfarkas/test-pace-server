@@ -38,6 +38,7 @@ import com.pace.base.data.PafDataSlice;
 import com.pace.base.view.PafView;
 import com.pace.server.comm.ClusterResultSetRequest;
 import com.pace.server.comm.ClusteredResultSetResponse;
+import com.pace.server.comm.ClusteredResultSetSaveRequest;
 import com.pace.server.comm.CreateAsstRequest;
 import com.pace.server.comm.CreateAsstResponse;
 import com.pace.server.comm.PaceDescendantsRequest;
@@ -754,6 +755,12 @@ public interface IPafService extends Remote {
 	
 	
 	
-	
-
+	/**
+	 * Save the clustered result set to the server.
+	 * @param request The Saved Clustered Result Set request.
+	 * @return
+	 * @throws RemoteException
+	 * @throws PafSoapException
+	 */
+	public PafResponse saveClusteredResultSet(ClusteredResultSetSaveRequest request) throws RemoteException, PafSoapException;
 }

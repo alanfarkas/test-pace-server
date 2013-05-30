@@ -15,11 +15,11 @@ public class ClusteredResultSetSaveRequest extends PafRequest {
 	private List<String> years;
 	private List<String> time;
 	private List<String> version;
-	private List<String>[] clusters;
+	private List<String[]> clusters;
 	
 	public ClusteredResultSetSaveRequest(){super();}
 	public ClusteredResultSetSaveRequest(String assortment, StringRow header, StringRow[] data, List<String> measures, List<String> dimToCluster, List<String> dimToMeasure, 
-			List<String> years, List<String> time, List<String> version, List<String>[] clusters){
+			List<String> years, List<String> time, List<String> version, List<String[]> clusters){
 		super();
 		this.assortment = assortment;
 		this.header = header;
@@ -86,14 +86,14 @@ public class ClusteredResultSetSaveRequest extends PafRequest {
 	/**
 	 * @return the clusters
 	 */
-	public List<String>[] getClusters() {
+	public List<String[]> getClusters() {
 		return clusters;
 	}
 
 	/**
 	 * @param clusters the clusters to set
 	 */
-	public void setClusters(List<String>[] clusters) {
+	public void setClusters(List<String[]> clusters) {
 		this.clusters = clusters;
 	}
 	/**
