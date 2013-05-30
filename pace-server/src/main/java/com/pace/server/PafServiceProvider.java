@@ -3651,6 +3651,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				}
 			}
 
+			response.setClusters(clusters.getClusterKeys());
 			response.setHeader(hdr);
 			response.setData(rows.toArray(new StringRow[0]));
 			response.setMeasures(asst.getMeasures().getExpressionList());

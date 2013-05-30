@@ -4,6 +4,7 @@
 package com.pace.server.comm;
 
 import java.util.List;
+import java.util.Map;
 
 import com.pace.base.comm.PafResponse;
 
@@ -20,6 +21,7 @@ public class ClusteredResultSetResponse extends PafResponse {
 	private List<String> years;
 	private List<String> time;
 	private List<String> version;
+	private Map<String, Integer> clusters;
 	
 	public ClusteredResultSetResponse(){super();}
 	
@@ -70,6 +72,14 @@ public class ClusteredResultSetResponse extends PafResponse {
 	}
 	public void setVersion(List<String> version) {
 		this.version = version;
+	}
+
+	public Map<String, Integer> getClusters() {
+		return clusters;
+	}
+
+	public void setClusters(Map<String, Integer> clusters) {
+		this.clusters = clusters;
 	}
 
 }
