@@ -6,6 +6,7 @@ import com.pace.base.comm.PafRequest;
 
 public class ClusteredResultSetSaveRequest extends PafRequest {
 
+	private String assortment;
 	private StringRow header;
 	private StringRow[] data;
 	private List<String> measures;
@@ -17,10 +18,11 @@ public class ClusteredResultSetSaveRequest extends PafRequest {
 	private List<String>[] clusters;
 	
 	public ClusteredResultSetSaveRequest(){super();}
-	public ClusteredResultSetSaveRequest(StringRow header, StringRow[] data, List<String> measures, List<String> dimToCluster, List<String> dimToMeasure, 
+	public ClusteredResultSetSaveRequest(String assortment, StringRow header, StringRow[] data, List<String> measures, List<String> dimToCluster, List<String> dimToMeasure, 
 			List<String> years, List<String> time, List<String> version, List<String>[] clusters){
 		super();
-		this.header =header;
+		this.assortment = assortment;
+		this.header = header;
 		this.data = data;
 		this.measures = measures;
 		this.dimToCluster = dimToCluster;
@@ -93,6 +95,18 @@ public class ClusteredResultSetSaveRequest extends PafRequest {
 	 */
 	public void setClusters(List<String>[] clusters) {
 		this.clusters = clusters;
+	}
+	/**
+	 * @return the assortment
+	 */
+	public String getAssortment() {
+		return assortment;
+	}
+	/**
+	 * @param assortmentName the assortment to set
+	 */
+	public void setAssortment(String assortment) {
+		this.assortment = assortment;
 	}
 
 }
