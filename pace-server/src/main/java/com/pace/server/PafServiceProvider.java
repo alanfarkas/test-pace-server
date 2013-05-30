@@ -3746,6 +3746,8 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 //			response.setVersion(Arrays.asList(request.getVersionDimSpec().getExpressionList()));
 //			response.setYears(Arrays.asList(request.getYearsDimSpec().getExpressionList()));
 //			response.setTime(Arrays.asList(request.getTimeDimSpec().getExpressionList()));
+			String assortmentName = request.getAssortment();
+			response.setResponseMsg("Assortment: [" + assortmentName + "] was succsessfully created");
 			
 		} catch (RuntimeException re) {
 			handleRuntimeException(re);
