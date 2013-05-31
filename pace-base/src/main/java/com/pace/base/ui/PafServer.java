@@ -72,11 +72,11 @@ public class PafServer implements Comparable, Cloneable {
 			if (retCode == HttpURLConnection.HTTP_OK ) {
 				
 				serverRunning = true;
-				logger.info("Successfully connected to url '" + url +"'");
+				logger.debug("Successfully connected to url '" + url +"'");
 				
 			} else {
 				
-				logger.info("Couldn't connect to url '" + url +"'");
+				logger.debug("Couldn't connect to url '" + url +"'");
 				
 			}                                    
                         
@@ -100,7 +100,7 @@ public class PafServer implements Comparable, Cloneable {
 		}
 		
 		// log info
-		logger.info("URL: '" + url + "' is alive: " + serverRunning); //$NON-NLS-1$ //$NON-NLS-2$
+		logger.debug("URL: '" + url + "' is alive: " + serverRunning); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		return serverRunning;
 	}
