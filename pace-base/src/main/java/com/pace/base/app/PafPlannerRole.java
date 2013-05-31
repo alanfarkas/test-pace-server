@@ -42,6 +42,7 @@ public class PafPlannerRole implements Cloneable {
     private String seasonIds[] = null;    
     private Season[] seasons = null;    
     private boolean readOnly;
+    private boolean assortmentRole = false;
 
 
     /**
@@ -124,6 +125,20 @@ public class PafPlannerRole implements Cloneable {
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
 	}
+
+	/**
+	 * @return the assortmentRole
+	 */
+	public boolean isAssortmentRole() {
+		return assortmentRole;
+	}
+	/**
+	 * @param assortmentRole the assortmentRole to set
+	 */
+	public void setAssortmentRole(boolean assortmentRole) {
+		this.assortmentRole = assortmentRole;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -216,7 +231,5 @@ public class PafPlannerRole implements Cloneable {
 		
 		return pafPlannerRole;
 	}
-	
-	
 
 }
