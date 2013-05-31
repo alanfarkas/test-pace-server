@@ -3645,8 +3645,11 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			for (String s : asst.getDimToMeasure().getExpressionList() ) {
 				for (String m : asst.getMeasures().getExpressionList() ) {
 					//for(String l : asst.getDimToCluster().getExpressionList()){
-						hdr.add(s + ", " + m );
+					for(String t : asst.getTimePeriods().getExpressionList()){
+						//hdr.add(s + ", " + m );
+						hdr.add(s + ", " + m + ", " + t);
 						//hdr.add(s + ", " + m + ", " + l);
+					}
 					//}
 				}
 			}
