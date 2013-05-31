@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 import org.apache.log4j.Logger;
-
 
 import com.pace.base.PafBaseConstants;
 import com.pace.base.server.ServerPlatform;
@@ -39,15 +39,6 @@ public class PafServer implements Comparable, Cloneable {
 	private String osServiceName;
 	private Integer jmsMessagingPort;
 	private ServerPlatform serverPlatform;
-	private boolean isServerRunning;
-	
-	public boolean isServerRunning() {
-		return isServerRunning;
-	}
-	
-	public void setServerRunning(boolean isServerRunning) {
-		this.isServerRunning = isServerRunning;
-	}
 	
 	public boolean isTheServerRunning() {
 		// set default
@@ -60,24 +51,12 @@ public class PafServer implements Comparable, Cloneable {
 			url = getCompleteWSDLService();         
 			//cast to http connection
 			httpConnection = (HttpURLConnection) new URL(url).openConnection();
-			
-			httpConnection.setRequestMethod("GET");
-			
 		
 			//if paf server exists
 			//if pafserver has specified url timeout
 			if ( getUrlTimeoutInMilliseconds() != null ) {
 			
-				//try to convert into an int, catch runtime if problem and ignore
-				try {
-					
 					urlTimeoutInMilliseconds = getUrlTimeoutInMilliseconds();
-					
-				} catch (RuntimeException re) {
-					
-					logger.error("There was a problem coverting " + getUrlTimeoutInMilliseconds() + " to an integer.");
-					
-				}
 				
 			}            	
 			  
@@ -88,8 +67,9 @@ public class PafServer implements Comparable, Cloneable {
 			//set timeout
 			httpConnection.setConnectTimeout(urlTimeoutInMilliseconds.intValue());	
 			
+			int retCode = httpConnection.getResponseCode();
 			//if successful http status, server/app is running
-			if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK ) {
+			if (retCode == HttpURLConnection.HTTP_OK ) {
 				
 				serverRunning = true;
 				logger.info("Successfully connected to url '" + url +"'");
@@ -101,10 +81,15 @@ public class PafServer implements Comparable, Cloneable {
 			}                                    
                         
 		} catch (MalformedURLException e) {
-			logger.error("MalformedURLException: " + e.getMessage());
+			logger.error("Malformed URL Exception: " + e.getMessage());
+		} catch (SocketTimeoutException e) {
+			logger.warn("Socket Timeout Exception: " + e.getMessage());
 		} catch (IOException e) {
 			logger.warn("URL IOException: " + e.getMessage());
-		}  finally {
+		} catch (Exception e) {
+			logger.warn("URL Exception: " + e.getMessage());
+		}
+		finally {
 			
 			if ( httpConnection != null ) {
 			  logger.debug("About to disconnect from url: " + url);
@@ -117,7 +102,6 @@ public class PafServer implements Comparable, Cloneable {
 		// log info
 		logger.info("URL: '" + url + "' is alive: " + serverRunning); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		setServerRunning(serverRunning);
 		return serverRunning;
 	}
 
