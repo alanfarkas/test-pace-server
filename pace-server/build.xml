@@ -222,7 +222,7 @@
 		<exec executable="${proj_root}\pafwsclientcompile-cxf-wsdl2java.bat">
 			<arg line="${proj_root}" />
 		</exec>
-		<jar jarfile="${client_dir}\dist\pace-client.jar" basedir="${client_dir}\classes" excludes="*.java" />
+		<jar jarfile="${client_dir}\dist\pace-client.jar" basedir="${client_dir}\classes" excludes="**/*.java" />
 		
 		
 	</target>	
