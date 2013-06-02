@@ -42,7 +42,7 @@ public class PafPlannerRole implements Cloneable {
     private String seasonIds[] = null;    
     private Season[] seasons = null;    
     private boolean readOnly;
-    private boolean assortmentRole = false;
+    private transient boolean assortmentRole = false;
 
 
     /**
