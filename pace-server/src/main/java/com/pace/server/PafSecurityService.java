@@ -1185,30 +1185,43 @@ public class PafSecurityService {
 
 		// Add season id to list of season ids
 		List<String> seasonIds = new ArrayList<String>(Arrays.asList(plannerRole.getSeasonIds()));
-		String seasonId = season.getId();
-		if (!seasonIds.contains(seasonId)) {
-			seasonIds.add(seasonId);
-			plannerRole.setSeasonIds(seasonIds.toArray(new String[0]));	
-		}
-		
-		// Add season to list of seasons. Replace any season with the same name.
+		String id = season.getId();
 		boolean seasonWasFound = false;
-		List<Season> existingSeasons = new ArrayList<Season>(Arrays.asList(plannerRole.getSeasons()));
 		int i = 0;
-		while (i < existingSeasons.size()) {
-			Season existingSeason = existingSeasons.get(i); 
-			if (existingSeason.getId().equals(seasonId)) {
+		for (String seasonId : seasonIds) {
+			if (seasonId.equalsIgnoreCase(seasonId)) {
 				seasonWasFound = true;
 				break;
 			}
 			i++;
 		}
 		if (seasonWasFound) {
-			existingSeasons.set(i, season);
+			// Update id in case the case was changed
+			seasonIds.set(i, id);
 		} else {
-			existingSeasons.add(season);
+			// Season id not found - add it
+			seasonIds.add(id);
 		}
-		plannerRole.setSeasons(existingSeasons.toArray(new Season[0]));
+		plannerRole.setSeasonIds(seasonIds.toArray(new String[0]));	
+		
+//		// Add season to list of seasons. Replace any season with the same name.
+//		boolean seasonWasFound = false;
+//		List<Season> existingSeasons = new ArrayList<Season>(Arrays.asList(plannerRole.getSeasons()));
+//		int i = 0;
+//		while (i < existingSeasons.size()) {
+//			Season existingSeason = existingSeasons.get(i); 
+//			if (existingSeason.getId().equals(seasonId)) {
+//				seasonWasFound = true;
+//				break;
+//			}
+//			i++;
+//		}
+//		if (seasonWasFound) {
+//			existingSeasons.set(i, season);
+//		} else {
+//			existingSeasons.add(season);
+//		}
+//		plannerRole.setSeasons(existingSeasons.toArray(new Season[0]));
 		
 	}
 }

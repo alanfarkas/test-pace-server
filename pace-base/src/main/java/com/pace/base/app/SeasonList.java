@@ -18,7 +18,9 @@
  */
 package com.pace.base.app;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -58,6 +60,23 @@ public class SeasonList implements Cloneable {
         
     }
 
+	/**
+	 * Remove all occurrences of seasons with the specified id
+	 * 
+	 * @param seasonId
+	 */
+	public void removeSeasonById(String seasonId) {
+		
+		List<Season> seasonsToRemove = new ArrayList<Season>();
+		for (Season season : Seasons) {
+			if (season.getId().equalsIgnoreCase(seasonId)) {
+				seasonsToRemove.add(season);
+			}
+		}
+		
+		Seasons.removeAll(seasonsToRemove);
+	}
+   
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -161,5 +180,6 @@ public class SeasonList implements Cloneable {
 		return clonedSeasonList;		
 		
 	}
+
     
 }

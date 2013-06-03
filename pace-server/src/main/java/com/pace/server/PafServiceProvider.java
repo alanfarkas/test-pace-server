@@ -74,6 +74,7 @@ import com.pace.base.app.PafSecurityGroup;
 import com.pace.base.app.PafUserDef;
 import com.pace.base.app.PafUserNamesSecurityGroup;
 import com.pace.base.app.Season;
+import com.pace.base.app.SeasonList;
 import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionType;
@@ -3701,6 +3702,9 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			PafClientState clientState = clients.get(request.getClientId());
 			PafApplicationDef app = clientState.getApp();
 			MdbDef mdbDef = app.getMdbDef();
+			String timeDim = mdbDef.getTimeDim();
+			MemberTreeSet clientTrees = clientState.getUowTrees();
+			PafDimTree timeTree = clientTrees.getTree(timeDim);
 
 			// Get current security / role info
 			PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
@@ -3711,8 +3715,35 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			clusterSeason.setId(assortmentLabel);
 			clusterSeason.setOpen(true);
 			clusterSeason.setPlannableYears(plannableYears.toArray(new String[0]));
-			clusterSeason.setTimePeriod(timePeriods.get(0));
-			app.getSeasonList().addSeason(clusterSeason);
+			String periodSpec = null;
+			PafDimSpec[] otherDims = null;
+			if (timePeriods.size() == 1) {
+				periodSpec = "@IDESCENDENTS(" + timePeriods.get(0) + ")";
+			} else {
+				// Get range of peer members
+				String timePeriodStart = timePeriods.get(0);
+				String timePeriodEnd = timePeriods.get(1);
+				List<PafDimMember> peers = timeTree.getIRPeers(timePeriodStart);
+				List<String> periods = new ArrayList<String>();
+				for (PafDimMember peer : peers) {
+					String memberName = peer.getKey();
+					periods.add(memberName);
+					if (timePeriodEnd.equals(memberName)) {
+						break;
+					}
+				}
+				PafDimSpec dimSpec = new PafDimSpec();
+				dimSpec.setDimension(timeDim);
+				dimSpec.setExpressionList(periods.toArray(new String[0]));
+				otherDims = new PafDimSpec[1];
+				otherDims[0] = dimSpec;
+			}
+			clusterSeason.setTimePeriod(periodSpec);
+			clusterSeason.setOtherDims(otherDims);
+			SeasonList seasonList = app.getSeasonList();
+			String seasonId = clusterSeason.getId();
+			seasonList.removeSeasonById(seasonId);
+			seasonList.addSeason(clusterSeason);
 					
 			// Add Season to Assortment Planner Role	
 			//PafPlannerConfig assortmentRoleConfig = findPafPlannerConfig(assortmentRole, assortmentCycle);
@@ -3741,76 +3772,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			int alan = 0;
 			alan++;
 
-//			AsstSet asst = dataStore.getAsstSet(clientId, sessinoId);
-//			
-//			asst.setMeasures(dataStore.createPafDimSpec(request.getMeasuresDimSpec().getDimension(), Arrays.asList(request.getMeasuresDimSpec().getExpressionList())));
-//			asst.setTimePeriods(dataStore.createPafDimSpec(request.getTimeDimSpec().getDimension(), Arrays.asList(request.getTimeDimSpec().getExpressionList())));
-//			asst.setLabel(request.getLabel());
-//			
-//			dataStore.saveAsst(asst);
-//			
-//			asst = dataStore.getAsstSet(clientId, sessinoId);
-//			
-//			PaceDataSet inData;
-//			
-//			try {
-//				inData = dataService.buildAsstDataSet(asst, request.getYearsDimSpec(), request.getVersionDimSpec());
-//			} catch (PafException e) {
-//				throw e.getPafSoapException();
-//			}
-//			
-//			//This throws an error.  I think it's due to the double[][] data property.
-//			//dataStore.storePaceDataSet(clientId, sessinoId, inData);
-//			
-//			PaceClusteredDataSet clusters = dataService.clusterDataset(inData, request.getNumOfClusters(), request.getMaxIterations());
-//			String[] row = null;
-//			List<StringRow> rows = new ArrayList<StringRow>();
-//			int i;
-//			
-//			int clusterCount = 0;
-//			int rowCount = 0;
-//			// cluster
-//			for (Cluster<EuclideanIntegerPoint> c : clusters.getClusters() ){
-//				// row
-//				clusterCount++;
-//				for (EuclideanIntegerPoint point : c.getPoints() ) {
-//					// value
-//					row = new String[point.getPoint().length];
-//					i = 0;
-//					for (Integer I : point.getPoint() ) {
-//						row[i++] = I.toString();
-//					}
-//					//Get the member name (id)
-//					String id = clusters.getClusterRowMap().get(rowCount);
-//					//Get the cluster number
-//					int clusterNumber = clusters.getClusterKeys().get(id);
-//					// add row
-//					rows.add(new StringRow(id, clusterNumber, row));
-//					rowCount++;
-//				}
-//			}
-//			
-//			// generate header
-//			StringRow hdr = new StringRow();
-//			for (String s : asst.getDimToMeasure().getExpressionList() ) {
-//				for (String m : asst.getMeasures().getExpressionList() ) {
-//					//for(String l : asst.getDimToCluster().getExpressionList()){
-//						hdr.add(s + ", " + m );
-//						//hdr.add(s + ", " + m + ", " + l);
-//					//}
-//				}
-//			}
-//
-//			response.setHeader(hdr);
-//			response.setData(rows.toArray(new StringRow[0]));
-//			response.setMeasures(asst.getMeasures().getExpressionList());
-//			response.setDimToCluster(asst.getDimToCluster().getExpressionList());
-//			response.setDimToMeasure(asst.getDimToMeasure().getExpressionList());
-//			response.setVersion(Arrays.asList(request.getVersionDimSpec().getExpressionList()));
-//			response.setYears(Arrays.asList(request.getYearsDimSpec().getExpressionList()));
-//			response.setTime(Arrays.asList(request.getTimeDimSpec().getExpressionList()));
-			String assortmentName = request.getAssortment();
-			response.setResponseMsg("Assortment: [" + assortmentName + "] was succsessfully created");
+			response.setResponseMsg("Assortment: [" + assortmentLabel + "] was succsessfully created");
 			
 		} catch (RuntimeException re) {
 			handleRuntimeException(re);
