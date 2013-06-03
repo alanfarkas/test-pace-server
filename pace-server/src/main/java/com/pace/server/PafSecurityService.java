@@ -379,7 +379,8 @@ public class PafSecurityService {
 				}
 			} 
 		} else {	// TTN-2032:Clustering
-			msrsToUse = new HashSet<String>(Arrays.asList(clusterMeasureSpec.getExpressionList()));
+			msrsToUse.add(mdbDef.getMeasureDim()); // the ever popular
+			msrsToUse.addAll(Arrays.asList(clusterMeasureSpec.getExpressionList()));
 		}
 		// setup the workunit if we made it through all rulesets without running
 		// into the "use all case".
