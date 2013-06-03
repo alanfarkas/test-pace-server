@@ -1156,7 +1156,7 @@ public class PafSecurityService {
 				chArList.add((char) i);
 			}
 
-			//initilize char[] with size
+			//Initialize char[] with size
 			passwordCharArray = new char[chArList.size()];
 
 			int i = 0;
@@ -1170,5 +1170,45 @@ public class PafSecurityService {
 
 		//return password char array
 		return passwordCharArray;
+	}
+
+	/**
+	 * Add or replace a season in the specified role
+	 * 
+	 * @param roleName Role name
+	 * @param season Season object
+	 */
+	public static void addOrReplaceSeason(String role, Season season) {
+		
+		// Get role
+		PafPlannerRole plannerRole = PafSecurityService.getPlannerRole(role);
+
+		// Add season id to list of season ids
+		List<String> seasonIds = new ArrayList<String>(Arrays.asList(plannerRole.getSeasonIds()));
+		String seasonId = season.getId();
+		if (!seasonIds.contains(seasonId)) {
+			seasonIds.add(seasonId);
+			plannerRole.setSeasonIds(seasonIds.toArray(new String[0]));	
+		}
+		
+		// Add season to list of seasons. Replace any season with the same name.
+		boolean seasonWasFound = false;
+		List<Season> existingSeasons = new ArrayList<Season>(Arrays.asList(plannerRole.getSeasons()));
+		int i = 0;
+		while (i < existingSeasons.size()) {
+			Season existingSeason = existingSeasons.get(i); 
+			if (existingSeason.getId().equals(seasonId)) {
+				seasonWasFound = true;
+				break;
+			}
+			i++;
+		}
+		if (seasonWasFound) {
+			existingSeasons.set(i, season);
+		} else {
+			existingSeasons.add(season);
+		}
+		plannerRole.setSeasons(existingSeasons.toArray(new Season[0]));
+		
 	}
 }

@@ -22,11 +22,14 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,6 +62,7 @@ import com.pace.base.PafNotAuthorizedSoapException;
 import com.pace.base.PafSecurityToken;
 import com.pace.base.PafSoapException;
 import com.pace.base.app.AppSettings;
+import com.pace.base.app.MdbDef;
 import com.pace.base.app.MeasureDef;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.PafDimSpec;
@@ -3677,11 +3681,66 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		
 		String clientId = request.getClientId();
 		String sessinoId = request.getSessionToken();
+		String assortmentLabel = request.getAssortment();
+		List<String> timePeriods = request.getTime();
+		List<String> plannableYears = request.getYears();
 		PafResponse response = new PafResponse();
+
+		final String clusterDim = "Location", assortmentRole = "Assortment Planner", assortmentCycle = null;
+		final int clusterLevel = 0;
+		final String CLUSTER_PREFIX = "Cluster ";
+		SortedMap<String, List<String>> clusterMap = new TreeMap<String, List<String>>();
+		
 		
 		try{
 			pushToNDCStack(clientId);
 			
+			// Validate Parameters
+
+			// Get app info
+			PafClientState clientState = clients.get(request.getClientId());
+			PafApplicationDef app = clientState.getApp();
+			MdbDef mdbDef = app.getMdbDef();
+
+			// Get current security / role info
+			PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
+			Season season = clientState.getPlanSeason();
+			
+			// Clone season
+			Season clusterSeason = season.clone();
+			clusterSeason.setId(assortmentLabel);
+			clusterSeason.setOpen(true);
+			clusterSeason.setPlannableYears(plannableYears.toArray(new String[0]));
+			clusterSeason.setTimePeriod(timePeriods.get(0));
+			app.getSeasonList().addSeason(clusterSeason);
+					
+			// Add Season to Assortment Planner Role	
+			//PafPlannerConfig assortmentRoleConfig = findPafPlannerConfig(assortmentRole, assortmentCycle);
+			//PafPlannerRole plannerRole = PafSecurityService.getPlannerRole(assortmentRole);
+			PafSecurityService.addOrReplaceSeason(assortmentRole, clusterSeason);
+			
+			// Organize entities by cluster number
+			Map<String, Integer> clusterSelections = request.getClusters();
+			for (String entity : clusterSelections.keySet()) {
+				int clusterNo = clusterSelections.get(entity);
+				String clusterKey = String.format("%s%02d", CLUSTER_PREFIX, clusterNo);
+				List<String> entityList = null;
+				if (clusterMap.containsKey(clusterKey)) {
+					entityList = clusterMap.get(clusterKey);
+				} else {
+					entityList = new ArrayList<String>();
+				}
+				entityList.add(entity);
+				clusterMap.put(clusterKey, entityList);
+			}
+			
+			// Clone Season
+			
+			
+			
+			int alan = 0;
+			alan++;
+
 //			AsstSet asst = dataStore.getAsstSet(clientId, sessinoId);
 //			
 //			asst.setMeasures(dataStore.createPafDimSpec(request.getMeasuresDimSpec().getDimension(), Arrays.asList(request.getMeasuresDimSpec().getExpressionList())));

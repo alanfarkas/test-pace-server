@@ -29,7 +29,7 @@ import com.pace.base.PafBaseConstants;
  */
 public class PafServerConstants {
 
-	public static final String SERVER_VERSION = "2.8.4.0 GA";
+	public static final String SERVER_VERSION = "2.8.5.0";
 
 	public static String SERVER_SETTINGS_FILE = PafMetaData.getConfigServerDirPath()  + PafBaseConstants.FN_ServerSettings;
 	public static String LDAP_SETTINGS_FILE = PafMetaData.getConfigServerDirPath()  + PafBaseConstants.FN_LdapSettings;
