@@ -1,6 +1,7 @@
 package com.pace.base.app;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -48,7 +49,26 @@ public class Season implements Cloneable {
     public void setOtherDims(PafDimSpec[] otherDims) {
         this.otherDims = otherDims;
     }
-    /**
+ 
+	/**
+	 * Get dim spec for selected dimension
+	 * 
+	 * @param dim Dimension name
+	 * @return PafDimSpec for selected dimension
+	 */
+	public PafDimSpec getOtherDim(String dim) {
+		if (otherDims != null) {
+			for (PafDimSpec otherDim : otherDims) {
+				if (otherDim.getDimension().equalsIgnoreCase(dim)) {
+					return otherDim;
+				}
+			}
+		}
+		// Dimension not found - return null
+		return null;
+	}
+
+	/**
      * @return Returns the years.
      */
     public String[] getYears() {
@@ -216,6 +236,5 @@ public class Season implements Cloneable {
 		
 		return clonedSeason;
 	}
-    
-    
+        
 }

@@ -327,12 +327,22 @@ public class PafSecurityService {
 
 		PafApplicationDef app = clientState.getApp();
 		MdbDef mdbDef = app.getMdbDef();
+		final String measureDim = mdbDef.getMeasureDim(), timeDim = mdbDef.getTimeDim(), 
+				planTypeDim = mdbDef.getPlanTypeDim(), versionDim = mdbDef.getVersionDim();
 		UnitOfWork workUnit = new UnitOfWork(mdbDef.getAllDims());
 
 		PafPlannerRole role = getPlannerRole(selectedRole);
 		Season season = app.getSeasonList().getSeasonById(
 				seasonId);
 
+		
+		// Get clustering parameters (TTN-2032:Clustering)
+		boolean isAssortmentRole = role.isAssortmentRole();
+		PafDimSpec clusterMeasureSpec = season.getOtherDim(measureDim);
+		PafDimSpec clusterTimeSpec = season.getOtherDim(timeDim);
+		PafDimSpec clusterPlanTypeSpec = season.getOtherDim(planTypeDim);
+		PafDimSpec clusterVersionSpec = season.getOtherDim(versionDim);
+		
 		// Handle the constant dimensions
 
 		// Measures
@@ -349,23 +359,28 @@ public class PafSecurityService {
 
 		Set<String> msrsToUse = new HashSet<String>();
 		boolean useAll = false;
-		for (RuleSet rs : RuleMngr.getInstance().getMsrRuleSetsForConfig(
-				clientState.getPlannerConfig(), app)) {
-			if (rs.getMeasureList() == null || rs.getMeasureList().length < 1) {
-                
-                // just load all and exit loop
-				workUnit.setDimMembers(mdbDef.getMeasureDim(), 
-                        clientState.getApp().getMeasureDefs().keySet().toArray(new String[0]));
-                
-				useAll = true;
-				break;
-			}
-			
-			for (String msrName : rs.getMeasureList()) {
-					msrsToUse.add(msrName);
-			}				
-		}
+		if (!isAssortmentRole) { // TTN-2032:Clustering
+			for (RuleSet rs : RuleMngr.getInstance().getMsrRuleSetsForConfig(
+					clientState.getPlannerConfig(), app)) {
+				if (rs.getMeasureList() == null
+						|| rs.getMeasureList().length < 1) {
 
+					// just load all and exit loop
+					workUnit.setDimMembers(mdbDef.getMeasureDim(),
+							clientState.getApp().getMeasureDefs().keySet()
+									.toArray(new String[0]));
+
+					useAll = true;
+					break;
+				}
+
+				for (String msrName : rs.getMeasureList()) {
+					msrsToUse.add(msrName);
+				}
+			} 
+		} else {	// TTN-2032:Clustering
+			msrsToUse = new HashSet<String>(Arrays.asList(clusterMeasureSpec.getExpressionList()));
+		}
 		// setup the workunit if we made it through all rulesets without running
 		// into the "use all case".
 		if (!useAll) {
@@ -375,16 +390,28 @@ public class PafSecurityService {
 					.toArray(new String[0]));
 		}
 
-		// Get plantype, time, and version
-		String planType = role.getPlanType();
-		String cycle = season.getPlanCycle();
-		String version = app.findPlanCycleVersion(cycle);
-		String time = season.getTimePeriod();
+		// Process plantype, time and version
+		String planType = null, version = null, time = null; 
+		if (!isAssortmentRole) {
+			// Get plantype, time, and version
+			planType = role.getPlanType();
+			String cycle = season.getPlanCycle();
+			version = app.findPlanCycleVersion(cycle);
+			time = season.getTimePeriod();
 
-		// Add planType and time to the unit of work
-		workUnit.setDimMembers(mdbDef.getPlanTypeDim(),
-				new String[] { planType });
-		workUnit.setDimMembers(mdbDef.getTimeDim(), new String[] { time });
+			// Add planType and time to the unit of work
+			workUnit.setDimMembers(mdbDef.getPlanTypeDim(),
+					new String[] { planType });
+			workUnit.setDimMembers(mdbDef.getTimeDim(), new String[] { time });
+		} else {
+			// Process alternate time period, plan type, and version for assortment planning (TTN-2032:Clustering)
+				String[] planTypeAr = clusterPlanTypeSpec.getExpressionList();
+				version = clusterVersionSpec.getExpressionList()[0];
+				String[] timeAr = clusterTimeSpec.getExpressionList();
+				workUnit.setDimMembers(planTypeDim, planTypeAr);
+				workUnit.setDimMembers(mdbDef.getTimeDim(), timeAr);		
+		}
+		
 
 		// Add years to unit of work. Add in year root if uow
 		// contains multiple years (TTN-1595).

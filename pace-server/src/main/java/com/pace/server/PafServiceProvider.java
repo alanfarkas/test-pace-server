@@ -249,6 +249,10 @@ public class PafServiceProvider implements IPafService {
 	/** The clients. */
 	private static ConcurrentHashMap<String, PafClientState> clients = new ConcurrentHashMap<String, PafClientState>();
 	
+	/** Assortment planning objects */
+	private static ConcurrentHashMap<String, Integer> assortments = new ConcurrentHashMap<String, Integer>(); // assortmentLabel, slot
+	private static ConcurrentHashMap<Integer, String> assortSlots = new ConcurrentHashMap<Integer, String>(); // slot, assortmentLabel
+	
 	private DataStore dataStore = new DataStore();
 
 	/**
@@ -3680,18 +3684,17 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 	
 	public PafResponse saveClusteredResultSet(ClusteredResultSetSaveRequest request) throws RemoteException, PafSoapException {
 		
-		String clientId = request.getClientId();
-		String sessinoId = request.getSessionToken();
-		String assortmentLabel = request.getAssortment();
-		List<String> timePeriods = request.getTime();
-		List<String> plannableYears = request.getYears();
+		final String clientId = request.getClientId(), sessinoId = request.getSessionToken(), assortmentLabel = request.getAssortment();
+		final String locationDim = request.getLocationDim(), productDim = request.getProductDim();
+		final List<String> timePeriods = request.getTime(), plannableYears = request.getYears(), products = request.getDimToMeasure();
+		final List<String> measures = request.getMeasures(), version = request.getVersion();
+		final String assortmentRole = "Assortment Planner", assortmentCycle = null;
+		final int clusterLevel = 0, SLOTS = 30;
+		final String CLUSTER_PREFIX = "Cluster ", PLANTYPE_PREFIX = "Assort";
+		SortedMap<String, List<String>> clusterMap = new TreeMap<String, List<String>>();
+		List<PafDimSpec> otherDims = new ArrayList<PafDimSpec>();
 		PafResponse response = new PafResponse();
 
-		final String clusterDim = "Location", assortmentRole = "Assortment Planner", assortmentCycle = null;
-		final int clusterLevel = 0;
-		final String CLUSTER_PREFIX = "Cluster ";
-		SortedMap<String, List<String>> clusterMap = new TreeMap<String, List<String>>();
-		
 		
 		try{
 			pushToNDCStack(clientId);
@@ -3702,7 +3705,8 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			PafClientState clientState = clients.get(request.getClientId());
 			PafApplicationDef app = clientState.getApp();
 			MdbDef mdbDef = app.getMdbDef();
-			String timeDim = mdbDef.getTimeDim();
+			String timeDim = mdbDef.getTimeDim(), measureDim = mdbDef.getMeasureDim(), 
+					versionDim = mdbDef.getVersionDim(), planTypeDim = mdbDef.getPlanTypeDim();
 			MemberTreeSet clientTrees = clientState.getUowTrees();
 			PafDimTree timeTree = clientTrees.getTree(timeDim);
 
@@ -3711,35 +3715,82 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			Season season = clientState.getPlanSeason();
 			
 			// Clone season
+			// -- Set Periods (Use otherDims collection)
 			Season clusterSeason = season.clone();
 			clusterSeason.setId(assortmentLabel);
 			clusterSeason.setOpen(true);
 			clusterSeason.setPlannableYears(plannableYears.toArray(new String[0]));
-			String periodSpec = null;
-			PafDimSpec[] otherDims = null;
+			clusterSeason.setTimePeriod(null);
+			PafDimSpec timeSpec = new PafDimSpec();
+			timeSpec.setDimension(timeDim);
+			List<String> periodList = new ArrayList<String>();
 			if (timePeriods.size() == 1) {
-				periodSpec = "@IDESCENDENTS(" + timePeriods.get(0) + ")";
+				String period = "@IDESCENDENTS(" + timePeriods.get(0) + ")";
+				periodList.add(period);
 			} else {
 				// Get range of peer members
 				String timePeriodStart = timePeriods.get(0);
 				String timePeriodEnd = timePeriods.get(1);
 				List<PafDimMember> peers = timeTree.getIRPeers(timePeriodStart);
-				List<String> periods = new ArrayList<String>();
 				for (PafDimMember peer : peers) {
 					String memberName = peer.getKey();
-					periods.add(memberName);
+					periodList.add(memberName);
 					if (timePeriodEnd.equals(memberName)) {
 						break;
 					}
 				}
-				PafDimSpec dimSpec = new PafDimSpec();
-				dimSpec.setDimension(timeDim);
-				dimSpec.setExpressionList(periods.toArray(new String[0]));
-				otherDims = new PafDimSpec[1];
-				otherDims[0] = dimSpec;
 			}
-			clusterSeason.setTimePeriod(periodSpec);
-			clusterSeason.setOtherDims(otherDims);
+			timeSpec.setExpressionList(periodList.toArray(new String[0]));
+			otherDims.add(timeSpec);
+
+			// -- Set Measures
+			PafDimSpec measureSpec = new PafDimSpec();
+			measureSpec.setDimension(measureDim);
+			measureSpec.setExpressionList(measures.toArray(new String[0]));
+			otherDims.add(measureSpec);
+			
+			// -- Set Version
+			PafDimSpec versionSpec = new PafDimSpec();
+			versionSpec.setDimension(versionDim);
+			versionSpec.setExpressionList(version.toArray(new String[0]));
+			otherDims.add(versionSpec);
+			
+			// -- Find available slot
+			boolean slotWasFound = false;
+			int slot = 1;
+			String key = assortmentLabel;
+			if (assortments.contains(key)) {
+				slot = assortments.get(key);
+				slotWasFound = true;
+			} else {
+				// Look for an available slot
+				slot = assortSlots.size() + 1;
+				while (slot <= SLOTS) {
+					String status = assortSlots.putIfAbsent(slot, key);
+					if (status == null) {
+						slotWasFound = true;
+						break;
+					}
+					slot++;
+				}
+				if (slotWasFound) {
+					assortments.put(key, slot);
+				} else {
+					String errMsg = String.format("Unable to save assortment: [%s] - no available slots", key);
+					throw new IllegalArgumentException(errMsg);
+				}
+			}
+			// -- Set Plan Type
+			PafDimSpec planTypeSpec = new PafDimSpec();
+			planTypeSpec.setDimension(planTypeDim);
+			String planType = String.format("%s%02d", PLANTYPE_PREFIX, slot); 
+			planTypeSpec.setExpressionList(new String[]{planType});
+			otherDims.add(planTypeSpec);
+			
+			// -- Store clustered dimension specs
+			clusterSeason.setOtherDims(otherDims.toArray(new PafDimSpec[0]));
+			
+			// Persist season
 			SeasonList seasonList = app.getSeasonList();
 			String seasonId = clusterSeason.getId();
 			seasonList.removeSeasonById(seasonId);
@@ -3765,16 +3816,12 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				clusterMap.put(clusterKey, entityList);
 			}
 			
-			// Clone Season
 			
-			
-			
-			int alan = 0;
-			alan++;
-
+			// Save was successful			
 			response.setResponseMsg("Assortment: [" + assortmentLabel + "] was succsessfully created");
 			
 		} catch (RuntimeException re) {
+			response.setResponseMsg(re.getMessage());
 			handleRuntimeException(re);
 			
 		} finally {
