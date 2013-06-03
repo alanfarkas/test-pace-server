@@ -10,6 +10,8 @@ public class ClusteredResultSetSaveRequest extends PafRequest {
 	private String assortment;
 	private StringRow header;
 	private StringRow[] data;
+	private String productDim;
+	private String locationDim;
 	private List<String> measures;
 	private List<String> dimToCluster;
 	private List<String> dimToMeasure;
@@ -108,6 +110,30 @@ public class ClusteredResultSetSaveRequest extends PafRequest {
 	 */
 	public void setAssortment(String assortment) {
 		this.assortment = assortment;
+	}
+	/**
+	 * @return the productDim
+	 */
+	public String getProductDim() {
+		return productDim;
+	}
+	/**
+	 * @param productDim the productDim to set
+	 */
+	public void setProductDim(String productDim) {
+		this.productDim = productDim;
+	}
+	/**
+	 * @return the locationDim
+	 */
+	public String getLocationDim() {
+		return locationDim;
+	}
+	/**
+	 * @param locationDim the locationDim to set
+	 */
+	public void setLocationDim(String locationDim) {
+		this.locationDim = locationDim;
 	}
 
 }
