@@ -342,6 +342,12 @@ public class PafSecurityService {
 		PafDimSpec clusterTimeSpec = season.getOtherDim(timeDim);
 		PafDimSpec clusterPlanTypeSpec = season.getOtherDim(planTypeDim);
 		PafDimSpec clusterVersionSpec = season.getOtherDim(versionDim);
+		PafDimSpec[] otherDims = season.getOtherDims();
+		int locInx = otherDims.length - 1, prodInx = locInx - 1;
+		PafDimSpec clusterProductSpec = otherDims[prodInx];
+		String productDim = clusterProductSpec.getDimension();
+		PafDimSpec clusterLocationSpec = otherDims[locInx];
+		String locationDim = clusterLocationSpec.getDimension();
 		
 		// Handle the constant dimensions
 
@@ -523,7 +529,14 @@ public class PafSecurityService {
 			workUnit.setDimMembers(dimSpec.getDimension(), dimSpec
 					.getExpressionList());
 		}
-
+		
+		// Process alternate hierarchical roll-ups assortment planning (TTN-2032:Clustering)
+		if (role.isAssortmentRole()) {
+			String[] productAr = clusterProductSpec.getExpressionList();
+			workUnit.setDimMembers(productDim, productAr);
+			String[] locationAr = clusterLocationSpec.getExpressionList();
+			workUnit.setDimMembers(locationDim, locationAr);
+		}
 		return workUnit;
 	}
 

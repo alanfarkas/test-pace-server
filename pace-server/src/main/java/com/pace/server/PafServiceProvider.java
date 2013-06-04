@@ -3686,7 +3686,8 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		
 		final String clientId = request.getClientId(), sessinoId = request.getSessionToken(), assortmentLabel = request.getAssortment();
 		final String locationDim = request.getLocationDim(), productDim = request.getProductDim();
-		final List<String> timePeriods = request.getTime(), plannableYears = request.getYears(), products = request.getDimToMeasure();
+		final List<String> timePeriods = request.getTime(), plannableYears = request.getYears();
+		final List<String> products = request.getDimToMeasure(), locations = request.getDimToCluster();
 		final List<String> measures = request.getMeasures(), version = request.getVersion();
 		final String assortmentRole = "Assortment Planner", assortmentCycle = null;
 		final int clusterLevel = 0, SLOTS = 30;
@@ -3759,7 +3760,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			boolean slotWasFound = false;
 			int slot = 1;
 			String key = assortmentLabel;
-			if (assortments.contains(key)) {
+			if (assortments.containsKey(key)) {
 				slot = assortments.get(key);
 				slotWasFound = true;
 			} else {
@@ -3773,19 +3774,32 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 					}
 					slot++;
 				}
-				if (slotWasFound) {
-					assortments.put(key, slot);
-				} else {
-					String errMsg = String.format("Unable to save assortment: [%s] - no available slots", key);
-					throw new IllegalArgumentException(errMsg);
-				}
 			}
+			if (slotWasFound) {
+				assortments.put(key, slot);
+			} else {
+				String errMsg = String.format("Unable to save assortment: [%s] - no available slots", key);
+				throw new IllegalArgumentException(errMsg);
+			}
+
 			// -- Set Plan Type
 			PafDimSpec planTypeSpec = new PafDimSpec();
 			planTypeSpec.setDimension(planTypeDim);
 			String planType = String.format("%s%02d", PLANTYPE_PREFIX, slot); 
 			planTypeSpec.setExpressionList(new String[]{planType});
 			otherDims.add(planTypeSpec);
+			
+			// -- Set Products
+			PafDimSpec prodSpec = new PafDimSpec();
+			prodSpec.setDimension(productDim);
+			prodSpec.setExpressionList(products.toArray(new String[0]));
+			otherDims.add(prodSpec);
+			
+			// -- Set Locations
+			PafDimSpec locSpec = new PafDimSpec();
+			locSpec.setDimension(locationDim);
+			locSpec.setExpressionList(locations.toArray(new String[0]));
+			otherDims.add(locSpec);
 			
 			// -- Store clustered dimension specs
 			clusterSeason.setOtherDims(otherDims.toArray(new PafDimSpec[0]));
