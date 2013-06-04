@@ -1213,11 +1213,11 @@ public class PafSecurityService {
 
 		// Add season id to list of season ids
 		List<String> seasonIds = new ArrayList<String>(Arrays.asList(plannerRole.getSeasonIds()));
-		String id = season.getId();
+		String newId = season.getId();
 		boolean seasonWasFound = false;
 		int i = 0;
 		for (String seasonId : seasonIds) {
-			if (seasonId.equalsIgnoreCase(seasonId)) {
+			if (seasonId.equalsIgnoreCase(newId)) {
 				seasonWasFound = true;
 				break;
 			}
@@ -1225,10 +1225,10 @@ public class PafSecurityService {
 		}
 		if (seasonWasFound) {
 			// Update id in case the case was changed
-			seasonIds.set(i, id);
+			seasonIds.set(i, newId);
 		} else {
 			// Season id not found - add it
-			seasonIds.add(id);
+			seasonIds.add(newId);
 		}
 		plannerRole.setSeasonIds(seasonIds.toArray(new String[0]));	
 		
