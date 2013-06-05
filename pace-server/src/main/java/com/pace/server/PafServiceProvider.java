@@ -3685,13 +3685,13 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 	public PafResponse saveClusteredResultSet(ClusteredResultSetSaveRequest request) throws RemoteException, PafSoapException {
 		
 		final String clientId = request.getClientId(), sessinoId = request.getSessionToken(), assortmentLabel = request.getAssortment();
-		final String locationDim = request.getLocationDim(), productDim = request.getProductDim();
+		final String locationDim = request.getLocationDim(), productDim = request.getProductDim(), assortmentDim = "Assortment";
 		final List<String> timePeriods = request.getTime(), plannableYears = request.getYears();
 		final List<String> products = request.getDimToMeasure(), locations = request.getDimToCluster();
 		final List<String> measures = request.getMeasures(), version = request.getVersion();
 		final String assortmentRole = "Assortment Planner", assortmentCycle = null;
 		final int clusterLevel = 0, SLOTS = 30;
-		final String CLUSTER_PREFIX = "Cluster ", PLANTYPE_PREFIX = "Assort";
+		final String CLUSTER_PREFIX = "Cluster ", ASSORTMENT_PREFIX = "Assort";
 		SortedMap<String, List<String>> clusterMap = new TreeMap<String, List<String>>();
 		List<PafDimSpec> otherDims = new ArrayList<PafDimSpec>();
 		PafResponse response = new PafResponse();
@@ -3713,6 +3713,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 
 			// Get current security / role info
 			PafPlannerConfig plannerConfig = clientState.getPlannerConfig();
+			String plannerPlanType = clientState.getPlannerRole().getPlanType();
 			Season season = clientState.getPlanSeason();
 			
 			// Clone season
@@ -3744,11 +3745,11 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			timeSpec.setExpressionList(periodList.toArray(new String[0]));
 			otherDims.add(timeSpec);
 
-			// -- Set Measures
-			PafDimSpec measureSpec = new PafDimSpec();
-			measureSpec.setDimension(measureDim);
-			measureSpec.setExpressionList(measures.toArray(new String[0]));
-			otherDims.add(measureSpec);
+//			// -- Set Measures
+//			PafDimSpec measureSpec = new PafDimSpec();
+//			measureSpec.setDimension(measureDim);
+//			measureSpec.setExpressionList(measures.toArray(new String[0]));
+//			otherDims.add(measureSpec);
 			
 			// -- Set Version
 			PafDimSpec versionSpec = new PafDimSpec();
@@ -3757,6 +3758,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			otherDims.add(versionSpec);
 			
 			// -- Find available slot
+			//TODO Update to make this non case-insensitive
 			boolean slotWasFound = false;
 			int slot = 1;
 			String key = assortmentLabel;
@@ -3785,7 +3787,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			// -- Set Plan Type
 			PafDimSpec planTypeSpec = new PafDimSpec();
 			planTypeSpec.setDimension(planTypeDim);
-			String planType = String.format("%s%02d", PLANTYPE_PREFIX, slot); 
+			String planType = plannerPlanType; 
 			planTypeSpec.setExpressionList(new String[]{planType});
 			otherDims.add(planTypeSpec);
 			
@@ -3800,6 +3802,13 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			locSpec.setDimension(locationDim);
 			locSpec.setExpressionList(locations.toArray(new String[0]));
 			otherDims.add(locSpec);
+			
+			// -- Set Assortment
+			PafDimSpec assortmentSpec = new PafDimSpec();
+			assortmentSpec.setDimension(assortmentDim);
+			String assortment = String.format("%s%02d", ASSORTMENT_PREFIX, slot); 
+			assortmentSpec.setExpressionList(new String[]{assortment});
+			otherDims.add(assortmentSpec);
 			
 			// -- Store clustered dimension specs
 			clusterSeason.setOtherDims(otherDims.toArray(new PafDimSpec[0]));

@@ -342,19 +342,22 @@ public class PafSecurityService {
 		PafDimSpec clusterTimeSpec = season.getOtherDim(timeDim);
 		PafDimSpec clusterPlanTypeSpec = season.getOtherDim(planTypeDim);
 		PafDimSpec clusterVersionSpec = season.getOtherDim(versionDim);
-		PafDimSpec[] otherDims = season.getOtherDims();
-		int locInx = 0, prodInx = 0 ;
 		PafDimSpec clusterProductSpec = null;
-		String productDim = null;
 		PafDimSpec clusterLocationSpec = null;
-		String locationDim = null;
+		PafDimSpec clusterAssortSpec = null;
+		PafDimSpec[] otherDims = season.getOtherDims();
+		int locInx = 0, prodInx = 0, assortInx = 0;
+		String productDim = null, locationDim = null, assortmentDim = null;
 		if (otherDims != null) {
-			locInx = otherDims.length - 1; 
+			assortInx = otherDims.length - 1; 
+			locInx = assortInx - 1; 
 			prodInx = locInx - 1;
 			clusterProductSpec = otherDims[prodInx];
 			productDim = clusterProductSpec.getDimension();
 			clusterLocationSpec = otherDims[locInx];
 			locationDim = clusterLocationSpec.getDimension();
+			clusterAssortSpec = otherDims[assortInx];
+			assortmentDim = clusterAssortSpec.getDimension();
 		}
 		
 		// Handle the constant dimensions
@@ -373,7 +376,7 @@ public class PafSecurityService {
 
 		Set<String> msrsToUse = new HashSet<String>();
 		boolean useAll = false;
-		if (!isAssortmentRole) { // TTN-2032:Clustering
+//		if (!isAssortmentRole) { // TTN-2032:Clustering
 			for (RuleSet rs : RuleMngr.getInstance().getMsrRuleSetsForConfig(
 					clientState.getPlannerConfig(), app)) {
 				if (rs.getMeasureList() == null
@@ -392,10 +395,11 @@ public class PafSecurityService {
 					msrsToUse.add(msrName);
 				}
 			} 
-		} else {	// TTN-2032:Clustering
-			msrsToUse.add(mdbDef.getMeasureDim()); // the ever popular
-			msrsToUse.addAll(Arrays.asList(clusterMeasureSpec.getExpressionList()));
-		}
+//		} else {	// TTN-2032:Clustering
+//			msrsToUse.add(mdbDef.getMeasureDim()); // the ever popular
+//			msrsToUse.addAll(Arrays.asList(clusterMeasureSpec.getExpressionList()));
+//		}
+			
 		// setup the workunit if we made it through all rulesets without running
 		// into the "use all case".
 		if (!useAll) {
@@ -544,6 +548,8 @@ public class PafSecurityService {
 			workUnit.setDimMembers(productDim, productAr);
 			String[] locationAr = clusterLocationSpec.getExpressionList();
 			workUnit.setDimMembers(locationDim, locationAr);
+			String[] assortmentAr = clusterAssortSpec.getExpressionList();
+			workUnit.setDimMembers(assortmentDim, assortmentAr);
 		}
 		return workUnit;
 	}
