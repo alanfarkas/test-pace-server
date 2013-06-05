@@ -3691,7 +3691,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		final List<String> measures = request.getMeasures(), version = request.getVersion();
 		final String assortmentRole = "Assortment Planner", assortmentCycle = null;
 		final int clusterLevel = 0, SLOTS = 30;
-		final String CLUSTER_PREFIX = "Cluster ", ASSORTMENT_PREFIX = "Assort";
+		final String CLUSTER_PREFIX = "Cluster ", ASSORTMENT_PREFIX = "Assort", ASSORTMENT_ROOT = "AssortmentTotal";
 		SortedMap<String, List<String>> clusterMap = new TreeMap<String, List<String>>();
 		List<PafDimSpec> otherDims = new ArrayList<PafDimSpec>();
 		PafResponse response = new PafResponse();
@@ -3767,8 +3767,14 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				slotWasFound = true;
 			} else {
 				// Look for an available slot
+				int maxSlots = SLOTS;
+				PafDimTree assortTree = dataService.getDimTree(assortmentDim);
+				if (assortTree.hasMember(ASSORTMENT_ROOT)) {
+					// Dyanmically calculate max available slots
+					maxSlots = assortTree.getMembersAtLevel(ASSORTMENT_ROOT, 0).size();
+				}
 				slot = assortSlots.size() + 1;
-				while (slot <= SLOTS) {
+				while (slot <= maxSlots) {
 					String status = assortSlots.putIfAbsent(slot, key);
 					if (status == null) {
 						slotWasFound = true;
