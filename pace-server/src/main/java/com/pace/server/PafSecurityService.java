@@ -343,11 +343,19 @@ public class PafSecurityService {
 		PafDimSpec clusterPlanTypeSpec = season.getOtherDim(planTypeDim);
 		PafDimSpec clusterVersionSpec = season.getOtherDim(versionDim);
 		PafDimSpec[] otherDims = season.getOtherDims();
-		int locInx = otherDims.length - 1, prodInx = locInx - 1;
-		PafDimSpec clusterProductSpec = otherDims[prodInx];
-		String productDim = clusterProductSpec.getDimension();
-		PafDimSpec clusterLocationSpec = otherDims[locInx];
-		String locationDim = clusterLocationSpec.getDimension();
+		int locInx = 0, prodInx = 0 ;
+		PafDimSpec clusterProductSpec = null;
+		String productDim = null;
+		PafDimSpec clusterLocationSpec = null;
+		String locationDim = null;
+		if (otherDims != null) {
+			locInx = otherDims.length - 1; 
+			prodInx = locInx - 1;
+			clusterProductSpec = otherDims[prodInx];
+			productDim = clusterProductSpec.getDimension();
+			clusterLocationSpec = otherDims[locInx];
+			locationDim = clusterLocationSpec.getDimension();
+		}
 		
 		// Handle the constant dimensions
 
