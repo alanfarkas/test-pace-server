@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.essbase.api.metadata.IEssMember.EEssConsolidationType;
 import com.pace.base.PafException;
 import com.pace.base.data.Intersection;
 
@@ -537,6 +538,87 @@ public class PafBaseTree extends PafDimTree {
         return newTree;
 	}
 
+
+	/**
+	 * Create a copy of this tree containing the supplied member lists and synthetic branches
+
+	 * @param rootAlias Alias of synthetic root member
+	 * @param clusterMap Sorted map of members by cluster
+	 * 
+	 * @return Synthetic tree
+	 * @throws PafException 
+	 */
+	public PafBaseTree getSynthenticTreeCopy(Map<String, List<String>> clusterMap, String rootAlias) throws PafException {
+	
+		PafBaseTree newTree = null;
+
+		// Create new root node
+		PafBaseMember newRootNode = getRootNode().getShallowDiscCopy();
+		PafDimMemberProps rootProps = newRootNode.getMemberProps();		
+		rootProps.setSynthetic(true);
+		rootProps.setAllAliases(getAliasTableNames(), rootAlias);
+
+		// Create new tree
+		newTree = new PafBaseTree(newRootNode, getAliasTableNames());
+        newTree.setAttributeDimInfo(getAttributeDimInfo());
+        newTree.setDiscontig(true);
+        
+        // Add all cluster branches and their children
+        int clusterMemberNo = 100;
+        for (String clusterName : clusterMap.keySet()) {
+
+        	// Add cluster branch
+        	PafBaseMemberProps clusterProps = new PafBaseMemberProps();
+        	clusterProps.setSynthetic(true);
+        	clusterProps.setAllAliases(getAliasTableNames(), clusterName);
+        	clusterProps.setConsolidationType(EEssConsolidationType.ADDITION);
+        	clusterProps.setGenerationNumber(rootProps.getGenerationNumber() + 1);
+        	clusterProps.setLevelNumber(rootProps.getLevelNumber() - 1);
+        	clusterMemberNo++; 
+        	clusterProps.setMemberNumber(clusterMemberNo); // TODO Fix member no methodology
+        	PafBaseMember clusterNode = new PafBaseMember(clusterName, clusterProps);
+        	newTree.addChild(newRootNode, clusterNode);
+  
+        	// Add cluster children    
+        	List<String> childNames = clusterMap.get(clusterName);
+          	for (String childName : childNames) {
+
+//        		if (child.getMemberProps().getLevelNumber() >= lowestLvl) {
+        			
+ //       			// Skip member if not contained in optional member filter
+ //       			if (isFiltered && !optionalMemberFilter.contains(child.getKey()))
+ //      				continue;
+        			
+        			// Clone child
+          			PafBaseMember child = getMember(childName);
+        			PafBaseMember childCopy = child.getShallowDiscCopy();
+      			
+         			        			
+        			// Add child node to branch copy
+//        			tree.addChild(copyMember.getKey(), childCopy);
+        			newTree.addChild(clusterNode, childCopy); // TTN-1347
+        			
+ //       			// Add descendants of current child to tree (recursive call)
+ //       			addChildCopies(tree, (PafBaseMember) child, childCopy, lowestLvl, optionalMemberFilter);           
+ //       		}                    
+        	}
+        }
+		
+//		// Add all discontiguous branches - assume the members in each list are 
+//        // arranged in a post-order sort. Filter out any occurrence of the 
+//        // tree root, since it's already added.
+//        for (int i = 0; i < discontigMemberLists.size(); i++) {
+//        	List<String> memberList = new ArrayList<String>(discontigMemberLists.get(i));
+//        	String branchRootName = memberList.get(0);
+//        	if (branchRootName.equals(rootName)) {
+//        		memberList.remove(memberList.indexOf(rootName));
+//        		if (memberList.isEmpty()) continue;
+//        	}
+//        	newTree.addChildCopies(newTree, getMember(branchRootName).getParent(), newRootNode, 0, memberList );
+//        }
+
+        return newTree;
+	}
 
 	/**
      *  Return a "Simple" version of the PafBaseTree

@@ -3803,10 +3803,32 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			prodSpec.setExpressionList(products.toArray(new String[0]));
 			otherDims.add(prodSpec);
 			
+			// Organize entities by cluster number
+			Map<String, Integer> clusterSelections = request.getClusters();
+			List<String> prodList = new ArrayList<String>();
+			for (String entity : clusterSelections.keySet()) {
+				int clusterNo = clusterSelections.get(entity);
+				String clusterKey = String.format("%s%02d", CLUSTER_PREFIX, clusterNo);
+				List<String> entityList = null;
+				if (clusterMap.containsKey(clusterKey)) {
+					entityList = clusterMap.get(clusterKey);
+				} else {
+					entityList = new ArrayList<String>();
+				}
+				entityList.add(entity);
+				clusterMap.put(clusterKey, entityList);
+			}
+			dataService.addClusterMap(assortmentLabel, clusterMap);
+			for (String clusterKey : clusterMap.keySet()) {
+				prodList.add(clusterKey);
+				prodList.addAll(clusterMap.get(clusterKey));				
+			}
+
 			// -- Set Locations
 			PafDimSpec locSpec = new PafDimSpec();
 			locSpec.setDimension(locationDim);
-			locSpec.setExpressionList(locations.toArray(new String[0]));
+//			locSpec.setExpressionList(locations.toArray(new String[0]));
+			locSpec.setExpressionList(prodList.toArray(new String[0]));
 			otherDims.add(locSpec);
 			
 			// -- Set Assortment
@@ -3829,23 +3851,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			//PafPlannerConfig assortmentRoleConfig = findPafPlannerConfig(assortmentRole, assortmentCycle);
 			//PafPlannerRole plannerRole = PafSecurityService.getPlannerRole(assortmentRole);
 			PafSecurityService.addOrReplaceSeason(assortmentRole, clusterSeason);
-			
-			// Organize entities by cluster number
-			Map<String, Integer> clusterSelections = request.getClusters();
-			for (String entity : clusterSelections.keySet()) {
-				int clusterNo = clusterSelections.get(entity);
-				String clusterKey = String.format("%s%02d", CLUSTER_PREFIX, clusterNo);
-				List<String> entityList = null;
-				if (clusterMap.containsKey(clusterKey)) {
-					entityList = clusterMap.get(clusterKey);
-				} else {
-					entityList = new ArrayList<String>();
-				}
-				entityList.add(entity);
-				clusterMap.put(clusterKey, entityList);
-			}
-			
-			
+						
 			// Save was successful			
 			response.setResponseMsg("Assortment: [" + assortmentLabel + "] was succsessfully created");
 			

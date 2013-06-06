@@ -54,6 +54,7 @@ import com.pace.base.app.DimType;
 import com.pace.base.app.MdbDef;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.PafDimSpec;
+import com.pace.base.app.Season;
 import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionFormula;
@@ -137,6 +138,11 @@ public class PafDataService {
 //	private HashMap<String, HashMap<String, Integer>> memberIndexLists = new HashMap<String, HashMap<String, Integer>>();
 //	private Map <String, HashMap<String,PafBaseTree>> uowCacheSubTrees = new HashMap<String, HashMap<String,PafBaseTree>>();
 	private Map <String, Set<Intersection>> systemLockedIntersections = new HashMap<String, Set<Intersection>> ();
+	
+	/** Assortment planning objects */
+	private static ConcurrentHashMap<String, Map<String, List<String>>> clusterMaps 
+					= new ConcurrentHashMap<String, Map<String, List<String>>>(); // assortmentLabel, clusterMap
+
 
 	/**
 	 *	Load uow cache for selected client state
@@ -406,8 +412,10 @@ public class PafDataService {
 		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
 		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
 		String yearDim = clientState.getApp().getMdbDef().getYearDim();
+		boolean isAssortmentRole = clientState.getPlannerRole().isAssortmentRole();
+		final String clusteredDim = "Location"; // TODO Make the clustered dim dynamic
 
-
+		
 		// Check for discontiguous hierarchies. A hierarchy is considered discontiguous
 		// if it consists of more than one member specification. Measures and Version
 		// dimensions are ignored, since these hierarchies do not aggregate and have 
@@ -441,7 +449,15 @@ public class PafDataService {
 						tree = clientState.getUowTrees().getTree(dim);
 					else
 						tree = baseTrees.get(dim);
-					String comAnce = tree.findLowestCommonAncestor(expandTerms(terms, dim, expansionCS));
+					// The synthetic root is the common highest ancestor.
+					String comAnce;
+					if (isAssortmentRole && dim.equals(clusteredDim)) {
+						// If assortment role and the clustered dimension, then the synthetic root
+						// is just the root of the tree (TTN-2032)
+						comAnce = tree.getRootNode().getKey();
+					} else {
+						comAnce = tree.findLowestCommonAncestor(expandTerms(terms, dim, expansionCS));						
+					}
 					dimMemberList.add(0, comAnce);
 					discontigMbrGrps.add(0,new ArrayList<String>(Arrays.asList(new String[]{comAnce})));
 				}
@@ -797,6 +813,9 @@ public class PafDataService {
 		String yearDim = mdbDef.getYearDim();
 		String[] uowMbrNames = null;
 		UnitOfWork expandedUow = null;
+		boolean isAssortmentRole = clientState.getPlannerRole().isAssortmentRole();
+		final String clusterdDim = "Location"; //TODO Make clusteredDim dynamic
+		final String CLUSTERED_DIM_ROOT_ALIAS = "Cluster Total";
 		
 		
 		//Get the dimension members.  Use the optional workUnit parameter if it is not null
@@ -853,6 +872,21 @@ public class PafDataService {
 			return tree;
 		} 
 	
+		// Process clustered dimension (TTN-2032)
+		if (isAssortmentRole && dim.equals(clusterdDim)) {
+			String[] clusterMembers = expandedUow.getDimMembers(clusterdDim);
+			String seasonId = clientState.getPlanSeason().getId();
+			Map<String, List<String>> clusterMap = getClusterMaps().get(seasonId);
+			if (clusterMap == null) {
+				String errMsg = String.format("Error encountered while trying to build the clustered tree [%s]. Unable to find the cluster map for season [%s]", dim, seasonId);
+				throw new PafException(errMsg, PafErrSeverity.Error);
+			}
+			String rootAlias = CLUSTERED_DIM_ROOT_ALIAS;
+//			copy = createClusterTree(baseTree, clusterMembers, rootAlias);
+			copy = baseTree.getSynthenticTreeCopy(clusterMap, rootAlias);
+			return copy;
+		}
+		
 		// All other dimensions - Start out by making a tree copy
 		SortedMap<Integer, List<PafBaseMember>> treeMap = getMembersByGen(dim, uowMbrNames, mdbDef);
 		PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);
@@ -5237,6 +5271,28 @@ public class PafDataService {
 
 		// Return floor coordinates
 		return floorCoords;
+	}
+
+
+	/**
+	 * @return the clusterMaps
+	 */
+	public static ConcurrentHashMap<String, Map<String, List<String>>> getClusterMaps() {
+		return clusterMaps;
+	}
+
+
+	/**
+	 * @param clusterMaps the clusterMaps to set
+	 */
+	public static void setClusterMaps(ConcurrentHashMap<String, Map<String, List<String>>> clusterMaps) {
+		PafDataService.clusterMaps = clusterMaps;
+	}
+
+
+	public void addClusterMap(String assortmentLabel, SortedMap<String, List<String>> clusterMap) {
+		clusterMaps.put(assortmentLabel, clusterMap);
+		
 	}
  
 }
