@@ -3685,7 +3685,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 	public PafResponse saveClusteredResultSet(ClusteredResultSetSaveRequest request) throws RemoteException, PafSoapException {
 		
 		final String clientId = request.getClientId(), sessinoId = request.getSessionToken(), assortmentLabel = request.getAssortment();
-		final String locationDim = request.getLocationDim(), productDim = request.getProductDim(), assortmentDim = "Assortment";
+		final String locationDim = request.getLocationDim(), productDim = request.getProductDim(), assortmentDim = "Assort";
 		final List<String> timePeriods = request.getTime(), plannableYears = request.getYears();
 		final List<String> products = request.getDimToMeasure(), locations = request.getDimToCluster();
 		final List<String> measures = request.getMeasures(), version = request.getVersion();
