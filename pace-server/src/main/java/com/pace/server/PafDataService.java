@@ -882,7 +882,6 @@ public class PafDataService {
 				throw new PafException(errMsg, PafErrSeverity.Error);
 			}
 			String rootAlias = CLUSTERED_DIM_ROOT_ALIAS;
-//			copy = createClusterTree(baseTree, clusterMembers, rootAlias);
 			copy = baseTree.getSynthenticTreeCopy(clusterMap, rootAlias);
 			return copy;
 		}

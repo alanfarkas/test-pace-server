@@ -884,7 +884,7 @@ public class PafViewService {
 
 			sections = applyReplicationSecurity(sections);
 
-			sections = applyHierarchyFormatting(sections); //ok
+			sections = applyHierarchyFormatting(sections, clientState.getUowTrees()); //ok
 
 			sections = applyMeasureSecurity(sections); //?
 			
@@ -1265,10 +1265,11 @@ public class PafViewService {
 	 * @param viewSections
 	 *            all the paf view sections to have Hierarchy formatting
 	 *            applied to
+	 * @param uowTrees UOW Trees
 	 * 
 	 * @return PafViewSection Array
 	 */
-	private PafViewSection[] applyHierarchyFormatting(PafViewSection[] viewSections) {
+	private PafViewSection[] applyHierarchyFormatting(PafViewSection[] viewSections, MemberTreeSet uowTrees) {
 
 		if (viewSections != null) {
 
@@ -1284,16 +1285,13 @@ public class PafViewService {
 					if (hierarchyFormatName != null) {
 						
 						//if hierarchy format exist in the hier formats cache
-						if (hierarchyFormatsCache
-								.containsKey(hierarchyFormatName)) {
+						if (hierarchyFormatsCache.containsKey(hierarchyFormatName)) {
 	
 							//get hierarchy from from cache
-							HierarchyFormat hierFormat = hierarchyFormatsCache
-									.get(hierarchyFormatName);
+							HierarchyFormat hierFormat = hierarchyFormatsCache.get(hierarchyFormatName);
 							
 							//get hierarchy from the hierarchy format
-							Map<String, Dimension> dimensions = hierFormat
-									.getDimensions();
+							Map<String, Dimension> dimensions = hierFormat.getDimensions();
 							
 							//if dimensions exist, apply hierarchy formatting to col and row dimensions
 							if (dimensions != null) {
@@ -1308,8 +1306,8 @@ public class PafViewService {
 		
 										if (dimensions.containsKey(dim)) {
 		
-											PafDimTree tree = pafDataService
-													.getDimTree(dim);
+											//PafDimTree tree = pafDataService.getDimTree(dim);
+											PafDimTree tree = uowTrees.getTree(dim);  // TTN-2032 Clustering
 		
 											for (ViewTuple viewTuple : viewSection
 													.getColTuples()) {
@@ -1330,14 +1328,11 @@ public class PafViewService {
 									axisDimIndex = 0;
 		
 									for (String dim : viewSection.getRowAxisDims()) {
+										if (dimensions.containsKey(dim)) {		
+											//PafDimTree tree = pafDataService.getDimTree(dim);
+											PafDimTree tree = uowTrees.getTree(dim);  // TTN-2032 Clustering
 		
-										if (dimensions.containsKey(dim)) {
-		
-											PafDimTree tree = pafDataService
-													.getDimTree(dim);
-		
-											for (ViewTuple viewTuple : viewSection
-													.getRowTuples()) {
+											for (ViewTuple viewTuple : viewSection.getRowTuples()) {
 		
 												applyHierarchyFormatingToDimension(
 														dimensions.get(dim), viewTuple,

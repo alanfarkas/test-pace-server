@@ -3805,7 +3805,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			
 			// Organize entities by cluster number
 			Map<String, Integer> clusterSelections = request.getClusters();
-			List<String> prodList = new ArrayList<String>();
+			List<String> locList = new ArrayList<String>();
 			for (String entity : clusterSelections.keySet()) {
 				int clusterNo = clusterSelections.get(entity);
 				String clusterKey = String.format("%s%02d", CLUSTER_PREFIX, clusterNo);
@@ -3820,15 +3820,15 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			}
 			dataService.addClusterMap(assortmentLabel, clusterMap);
 			for (String clusterKey : clusterMap.keySet()) {
-				prodList.add(clusterKey);
-				prodList.addAll(clusterMap.get(clusterKey));				
+				locList.add(clusterKey);
+				locList.addAll(clusterMap.get(clusterKey));				
 			}
 
 			// -- Set Locations
 			PafDimSpec locSpec = new PafDimSpec();
 			locSpec.setDimension(locationDim);
 //			locSpec.setExpressionList(locations.toArray(new String[0]));
-			locSpec.setExpressionList(prodList.toArray(new String[0]));
+			locSpec.setExpressionList(locList.toArray(new String[0]));
 			otherDims.add(locSpec);
 			
 			// -- Set Assortment
