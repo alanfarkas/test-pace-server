@@ -809,6 +809,7 @@ public class PafDataService {
 		PafBaseTree baseTree, copy;
 		MdbDef mdbDef = clientState.getMdbDef();
 		String measureDim = mdbDef.getMeasureDim();
+		String timeDim = mdbDef.getTimeDim();
 		String versionDim = mdbDef.getVersionDim();
 		String yearDim = mdbDef.getYearDim();
 		String[] uowMbrNames = null;
@@ -816,6 +817,7 @@ public class PafDataService {
 		boolean isAssortmentRole = clientState.getPlannerRole().isAssortmentRole();
 		final String clusterdDim = "Location"; //TODO Make clusteredDim dynamic
 		final String CLUSTERED_DIM_ROOT_ALIAS = "Cluster Total";
+		final String ASSORT_PERIOD_DIM_ROOT_ALIAS = "[TOT ASSORT PERIOD]";
 		
 		
 		//Get the dimension members.  Use the optional workUnit parameter if it is not null
@@ -874,7 +876,7 @@ public class PafDataService {
 	
 		// Process clustered dimension (TTN-2032)
 		if (isAssortmentRole && dim.equals(clusterdDim)) {
-			String[] clusterMembers = expandedUow.getDimMembers(clusterdDim);
+//			String[] clusterMembers = expandedUow.getDimMembers(clusterdDim);
 			String seasonId = clientState.getPlanSeason().getId();
 			Map<String, List<String>> clusterMap = getClusterMaps().get(seasonId);
 			if (clusterMap == null) {
@@ -891,12 +893,14 @@ public class PafDataService {
 		PafBaseMember root = treeMap.get(treeMap.firstKey()).get(0);
 		if (expandedUow.isDiscontigDim(dim)) {
 			String rootAlias = null;
-			if (!dim.equals(yearDim)) {
+			if (isAssortmentRole && dim.equals(timeDim)) {
+				rootAlias = ASSORT_PERIOD_DIM_ROOT_ALIAS;
+			} else if (!dim.equals(yearDim)) {
 				rootAlias = PafBaseConstants.SYNTHETIC_ROOT_ALIAS_PREFIX + root.getKey() + PafBaseConstants.SYNTHETIC_ROOT_ALIAS_SUFFIX;
 			} else {
 				rootAlias = PafBaseConstants.SYNTHETIC_YEAR_ROOT_ALIAS;			
 			}
-			copy = baseTree.getDiscSubTreeCopy(expandedUow.getDiscontigMemberGroups(dim), root.getKey(), rootAlias);
+			copy = baseTree.getDiscSubTreeCopy(expandedUow.getDiscontigMemberGroups(dim), root.getKey(), rootAlias, mdbDef);
 		} else if (baseTree.hasSharedMembers()) {
 			// Shared members exist, get whole branch since generations on 
 			// shared members may be higher than original member

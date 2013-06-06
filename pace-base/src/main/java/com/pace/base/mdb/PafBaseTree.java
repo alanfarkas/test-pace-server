@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 
 import com.essbase.api.metadata.IEssMember.EEssConsolidationType;
 import com.pace.base.PafException;
+import com.pace.base.app.MdbDef;
 import com.pace.base.data.Intersection;
 
 /**
@@ -503,11 +504,12 @@ public class PafBaseTree extends PafDimTree {
 	 * @param discontigMemberLists List of discontiguous member lists that map to members in this tree
 	 * @param rootName Name of root member
 	 * @param rootAlias Alias of synthetic root member
+	 * @param mdbDef MDB definition object
 	 * 
 	 * @return Discontiguous tree
 	 * @throws PafException 
 	 */
-	public PafBaseTree getDiscSubTreeCopy(List<List<String>> discontigMemberLists, String rootName, String rootAlias) throws PafException {
+	public PafBaseTree getDiscSubTreeCopy(List<List<String>> discontigMemberLists, String rootName, String rootAlias, MdbDef mdbDef) throws PafException {
 	
 		PafBaseTree newTree = null;
 
@@ -535,7 +537,19 @@ public class PafBaseTree extends PafDimTree {
         	newTree.addChildCopies(newTree, getMember(branchRootName).getParent(), newRootNode, 0, memberList );
         }
 
-        return newTree;
+		// If time tree, adjust level and gen properties of root - an attempt to
+        // fix client protection issues (TTN-2032)
+        if (mdbDef.getTimeDim().equals(this.getId())) {
+			PafDimMember firstChild = newTree.getFirstChild(rootName);
+			int childGen = firstChild.getMemberProps().getGenerationNumber();
+			newTree.delFromGenTree(newRootNode);
+			newTree.delFromLvlTree(newRootNode);
+			memberProps.setGenerationNumber(childGen - 1);
+			memberProps.setLevelNumber(newTree.getHighestAbsLevelInTree() + 1);
+			newTree.addToGenTree(newRootNode);
+			newTree.addToLvlTree(newRootNode);
+		}
+		return newTree;
 	}
 
 
@@ -604,18 +618,6 @@ public class PafBaseTree extends PafDimTree {
         	}
         }
 		
-//		// Add all discontiguous branches - assume the members in each list are 
-//        // arranged in a post-order sort. Filter out any occurrence of the 
-//        // tree root, since it's already added.
-//        for (int i = 0; i < discontigMemberLists.size(); i++) {
-//        	List<String> memberList = new ArrayList<String>(discontigMemberLists.get(i));
-//        	String branchRootName = memberList.get(0);
-//        	if (branchRootName.equals(rootName)) {
-//        		memberList.remove(memberList.indexOf(rootName));
-//        		if (memberList.isEmpty()) continue;
-//        	}
-//        	newTree.addChildCopies(newTree, getMember(branchRootName).getParent(), newRootNode, 0, memberList );
-//        }
 
         return newTree;
 	}

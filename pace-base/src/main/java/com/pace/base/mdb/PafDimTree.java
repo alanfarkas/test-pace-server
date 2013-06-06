@@ -746,7 +746,7 @@ public abstract class PafDimTree {
      *
      * @param member Tree member
      */
-    private void delFromGenTree(PafDimMember member) {
+    protected void delFromGenTree(PafDimMember member) {
 
     	// Remove member from generation tree map (if generation entry exists). 
     	// Also remove the generation entry if it no longer contains
@@ -773,7 +773,7 @@ public abstract class PafDimTree {
     *
     * @param member Tree member
     */
-   private void delFromLvlTree(PafDimMember member) {
+   protected void delFromLvlTree(PafDimMember member) {
 
 	   // Remove member from level tree map (if level entry exists). 
 	   // Also remove the level entry if it no longer contains any 
