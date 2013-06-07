@@ -543,7 +543,7 @@ public class PafSecurityService {
 		}
 		
 		// Process alternate hierarchical roll-ups assortment planning (TTN-2032:Clustering)
-		if (role.isAssortmentRole()) {
+		if (isAssortmentRole) {
 			String[] productAr = clusterProductSpec.getExpressionList();
 			workUnit.setDimMembers(productDim, productAr);
 			String[] locationAr = clusterLocationSpec.getExpressionList();

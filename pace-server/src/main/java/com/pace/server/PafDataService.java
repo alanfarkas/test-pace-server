@@ -54,6 +54,7 @@ import com.pace.base.app.DimType;
 import com.pace.base.app.MdbDef;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.PafDimSpec;
+import com.pace.base.app.PafPlannerRole;
 import com.pace.base.app.Season;
 import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
@@ -412,10 +413,16 @@ public class PafDataService {
 		String measureDim = clientState.getApp().getMdbDef().getMeasureDim();
 		String versionDim = clientState.getApp().getMdbDef().getVersionDim();
 		String yearDim = clientState.getApp().getMdbDef().getYearDim();
-		boolean isAssortmentRole = clientState.getPlannerRole().isAssortmentRole();
+		boolean isAssortmentRole = false;
 		final String clusteredDim = "Location"; // TODO Make the clustered dim dynamic
 
 		
+		// Get assortment role status (TTN-2032)
+		PafPlannerRole plannerRole = clientState.getPlannerRole();
+		if (plannerRole != null) {
+			isAssortmentRole = plannerRole.isAssortmentRole();
+		}
+
 		// Check for discontiguous hierarchies. A hierarchy is considered discontiguous
 		// if it consists of more than one member specification. Measures and Version
 		// dimensions are ignored, since these hierarchies do not aggregate and have 
@@ -814,12 +821,18 @@ public class PafDataService {
 		String yearDim = mdbDef.getYearDim();
 		String[] uowMbrNames = null;
 		UnitOfWork expandedUow = null;
-		boolean isAssortmentRole = clientState.getPlannerRole().isAssortmentRole();
+		boolean isAssortmentRole = false;
 		final String clusterdDim = "Location"; //TODO Make clusteredDim dynamic
 		final String CLUSTERED_DIM_ROOT_ALIAS = "Cluster Total";
 		final String ASSORT_PERIOD_DIM_ROOT_ALIAS = "[TOT ASSORT PERIOD]";
 		
 		
+		// Get assortment role status (TTN-2032)
+		PafPlannerRole plannerRole = clientState.getPlannerRole();
+		if (plannerRole != null) {
+			isAssortmentRole = plannerRole.isAssortmentRole();
+		}
+
 		//Get the dimension members.  Use the optional workUnit parameter if it is not null
 		if(optionalWorkUnit != null){
 			expandedUow = optionalWorkUnit;
