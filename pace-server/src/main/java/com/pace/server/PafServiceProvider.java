@@ -3691,7 +3691,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		final List<String> measures = request.getMeasures(), version = request.getVersion();
 		final String assortmentRole = "Assortment Planner", assortmentCycle = null;
 		final int clusterLevel = 0, SLOTS = 30;
-		final String CLUSTER_PREFIX = "Cluster ", ASSORTMENT_PREFIX = "Assort", ASSORTMENT_ROOT = "AssortmentTotal";
+		final String CLUSTER_PREFIX = "Cluster ", ASSORTMENT_PREFIX = "Assort", ASSORTMENT_ROOT = "AssortTotal";
 		SortedMap<String, List<String>> clusterMap = new TreeMap<String, List<String>>();
 		List<PafDimSpec> otherDims = new ArrayList<PafDimSpec>();
 		PafResponse response = new PafResponse();
