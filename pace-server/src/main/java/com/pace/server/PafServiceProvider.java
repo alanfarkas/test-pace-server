@@ -3519,22 +3519,32 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 		}
 
 		// get members correcsponding to the selected attributes
-		List<String> attribBaseNames = new ArrayList<String>();
+		List<String> validBaseMemberNames = new ArrayList<String>();
 		if (queryRequest.getAttributes() != null) {
 			for (PafDimSpec spec : queryRequest.getAttributes()) {
 				PafAttributeTree at = clientState.getUowTrees().getAttributeTree(spec.getDimension() );
+				Set<String> attribBaseMemberNames = new HashSet<String>();
 				for ( String e : spec.getExpressionList() ) {
 					List<String> attribNames = at.getLowestMemberNames(e);
 					for (String aname : attribNames) {
-						attribBaseNames.addAll(at.getBaseMemberNames(aname));
+						attribBaseMemberNames.addAll(at.getBaseMemberNames(aname));
 					}
 				}
+				
+				// If 1st time through loop then initialize existing base members set
+				if (validBaseMemberNames.isEmpty()) {
+					validBaseMemberNames.addAll(attribBaseMemberNames);
+				} else {
+					// Else, get intersection of base members associated with each processed attribute
+					validBaseMemberNames.retainAll(attribBaseMemberNames);
+				}
+
 			}
 		}
 		
 		// process member names into basemembers
 		// should have some level checking here as basemembers might not match corresponding level
-		for (String aname : attribBaseNames) {
+		for (String aname : validBaseMemberNames) {
 			// Attribute tree contains base member mappings for members outside UOW
 			if (t.hasMember(aname)) {
 				dimMembers.add(t.getMember(aname));
