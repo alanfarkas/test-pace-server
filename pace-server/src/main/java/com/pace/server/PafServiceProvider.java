@@ -249,9 +249,6 @@ public class PafServiceProvider implements IPafService {
 	/** The clients. */
 	private static ConcurrentHashMap<String, PafClientState> clients = new ConcurrentHashMap<String, PafClientState>();
 	
-	/** Assortment planning objects */
-	private static ConcurrentHashMap<String, Integer> assortments = new ConcurrentHashMap<String, Integer>(); // assortmentLabel, slot
-	private static ConcurrentHashMap<Integer, String> assortSlots = new ConcurrentHashMap<Integer, String>(); // slot, assortmentLabel
 	
 	private DataStore dataStore = new DataStore();
 
@@ -3770,22 +3767,21 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			// -- Find available slot
 			//TODO Update to make this non case-insensitive
 			boolean slotWasFound = false;
-			int slot = 1;
 			String key = assortmentLabel;
-			if (assortments.containsKey(key)) {
-				slot = assortments.get(key);
+			Integer slot = dataService.getAssortmentSlot(key);			
+			if (slot != null) {
 				slotWasFound = true;
 			} else {
 				// Look for an available slot
 				int maxSlots = SLOTS;
 				PafDimTree assortTree = dataService.getDimTree(assortmentDim);
 				if (assortTree.hasMember(ASSORTMENT_ROOT)) {
-					// Dyanmically calculate max available slots
+					// Dynamically calculate max available slots
 					maxSlots = assortTree.getMembersAtLevel(ASSORTMENT_ROOT, 0).size();
 				}
-				slot = assortSlots.size() + 1;
+				slot = dataService.getAssortSlotCount() + 1;
 				while (slot <= maxSlots) {
-					String status = assortSlots.putIfAbsent(slot, key);
+					String status = dataService.addAssortmentSlot(slot, key);
 					if (status == null) {
 						slotWasFound = true;
 						break;
@@ -3794,7 +3790,7 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 				}
 			}
 			if (slotWasFound) {
-				assortments.put(key, slot);
+				dataService.addAssortment(key, slot);
 			} else {
 				String errMsg = String.format("Unable to save assortment: [%s] - no available slots", key);
 				throw new IllegalArgumentException(errMsg);
@@ -3817,10 +3813,10 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			Map<String, String> clusterSelections = request.getClusters();
 			List<String> locList = new ArrayList<String>();
 			for (String entity : clusterSelections.keySet()) {
-				//FIXME temp fix so the code compiles
 				//int clusterNo = clusterSelections.get(entity);
-				String clusterNo = clusterSelections.get(entity);
-				String clusterKey = String.format("%s%02d", CLUSTER_PREFIX, clusterNo);
+				//String clusterNo = clusterSelections.get(entity);
+				//String clusterKey = String.format("%s%02d", CLUSTER_PREFIX, clusterNo);
+				String clusterKey = clusterSelections.get(entity);
 				List<String> entityList = null;
 				if (clusterMap.containsKey(clusterKey)) {
 					entityList = clusterMap.get(clusterKey);

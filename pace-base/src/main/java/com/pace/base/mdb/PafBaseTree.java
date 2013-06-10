@@ -589,7 +589,6 @@ public class PafBaseTree extends PafDimTree {
         	clusterProps.setGenerationNumber(rootProps.getGenerationNumber() + 1);
         	clusterProps.setLevelNumber(rootProps.getLevelNumber() - 1);
         	clusterMemberNo++; 
-        	clusterProps.setMemberNumber(clusterMemberNo); // TODO Fix member no methodology
         	PafBaseMember clusterNode = new PafBaseMember(clusterName, clusterProps);
         	newTree.addChild(newRootNode, clusterNode);
   
@@ -609,8 +608,7 @@ public class PafBaseTree extends PafDimTree {
       			
          			        			
         			// Add child node to branch copy
-//        			tree.addChild(copyMember.getKey(), childCopy);
-        			newTree.addChild(clusterNode, childCopy); // TTN-1347
+        			newTree.addChild(clusterNode, childCopy); 
         			
  //       			// Add descendants of current child to tree (recursive call)
  //       			addChildCopies(tree, (PafBaseMember) child, childCopy, lowestLvl, optionalMemberFilter);           
