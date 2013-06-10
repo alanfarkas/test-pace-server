@@ -3814,10 +3814,12 @@ public PafResponse reinitializeClientState(PafRequest cmdRequest) throws RemoteE
 			otherDims.add(prodSpec);
 			
 			// Organize entities by cluster number
-			Map<String, Integer> clusterSelections = request.getClusters();
+			Map<String, String> clusterSelections = request.getClusters();
 			List<String> locList = new ArrayList<String>();
 			for (String entity : clusterSelections.keySet()) {
-				int clusterNo = clusterSelections.get(entity);
+				//FIXME temp fix so the code compiles
+				//int clusterNo = clusterSelections.get(entity);
+				String clusterNo = clusterSelections.get(entity);
 				String clusterKey = String.format("%s%02d", CLUSTER_PREFIX, clusterNo);
 				List<String> entityList = null;
 				if (clusterMap.containsKey(clusterKey)) {
