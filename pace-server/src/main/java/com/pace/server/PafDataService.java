@@ -55,7 +55,6 @@ import com.pace.base.app.MdbDef;
 import com.pace.base.app.PafApplicationDef;
 import com.pace.base.app.PafDimSpec;
 import com.pace.base.app.PafPlannerRole;
-import com.pace.base.app.Season;
 import com.pace.base.app.UnitOfWork;
 import com.pace.base.app.VersionDef;
 import com.pace.base.app.VersionFormula;
@@ -110,7 +109,6 @@ import com.pace.base.view.PafViewSection;
 import com.pace.base.view.PageTuple;
 import com.pace.base.view.ViewTuple;
 import com.pace.server.assortment.AsstSet;
-import com.pace.server.comm.StringRow;
 import com.pace.server.eval.ES_ProcessReplication;
 import com.pace.server.eval.IEvalStrategy;
 import com.pace.server.eval.MathOp;
@@ -1328,10 +1326,13 @@ public class PafDataService {
 			}
 
 			// Compute impacted attribute intersections on view
-			stepDesc = "Attribute aggregation and recalc";
+			stepDesc = "Attribute aggregation and recalc on view";
+			logger.info(String.format("%s...", stepDesc));
 			startTime = System.currentTimeMillis();
 			dataCache = PafDataCacheCalc.calcAttributeIntersections(dataCache, clientState, sliceParms, null, DcTrackChangeOpt.NONE);
-			logger.info(LogUtil.timedStep(stepDesc, startTime));				
+			String logMsg = LogUtil.timedStep(stepDesc, startTime);
+			logger.info(logMsg);
+			evalPerfLogger.info(logMsg);
 		}
 
 		// Calculate any derived versions on the view
@@ -2867,7 +2868,6 @@ public class PafDataService {
 		String axisList = "";
 		Set<String> invalidTimeHorizonPeriods = clientState.getInvalidTimeHorizonPeriods();
 		List <ViewTuple>expandedTuples = new ArrayList<ViewTuple>();
-
 		
 		// Initialization
 		for (String a : axes) {
@@ -2875,10 +2875,6 @@ public class PafDataService {
 		}
 		logger.debug("Expanding tuples for axis: " + axisList);  
 
-		// Expand inner axis
-		for (ViewTuple vt:origViewTuples) {   
-			expandedTuples.addAll(expandTuple(vt, innerAxisIndex, axes[innerAxisIndex], clientState));   
-		}
 
 		// Compile a list of attribute dimensions used in this tuple or the page tuple. This
 		// information will be used to in an initial pass at filtering out invalid member 
@@ -2896,9 +2892,35 @@ public class PafDataService {
 			}
 		}
 		
+		// Determine the axis expansion order. Expand the base dimensions first,
+		// followed by any attribute dimensions. Process inner dimensions before
+		// outer dimensions. Axes are listed in reverse order. (TTN-2050)
+		List<Integer> baseAxes = new ArrayList<Integer>();
+		int[] orderedAxes = new int[dimCount];
+		int orderedAxisCnt = 0;
+		for (int axis = 0; axis <= innerAxisIndex; axis++) {
+			String dim = axes[axis];
+			if (tupleAttrDims.contains(dim)) {
+				// Attribute dim - add to array
+				orderedAxes[orderedAxisCnt++] = axis;
+			} else {
+				// Base dim - process after all attribute dims have been added
+				baseAxes.add(axis);
+			}
+		}
+		for (int baseAxis : baseAxes) {
+			orderedAxes[orderedAxisCnt++] = baseAxis;
+		}
+		
+		// Expand inner axis
+		int innerAxis = orderedAxes[innerAxisIndex];
+		for (ViewTuple vt:origViewTuples) {   
+			expandedTuples.addAll(expandTuple(vt, innerAxis, axes[innerAxis], clientState));   
+		}
+
 		// Expand each symmetric tuple group (for tuples comprised of multiple dimensions)
-		for (int axisIndex = innerAxisIndex - 1; axisIndex >= 0; axisIndex--) {
-			expandedTuples = expandSymetricTupleGroups(axisIndex, expandedTuples.toArray(new ViewTuple[0]), axes, tupleAttrDims, pageAxisDims, pageAxisMembers, clientState);
+		for (int axisIndex = innerAxisIndex -1; axisIndex >= 0; axisIndex--) {
+			expandedTuples = expandSymmetricTupleGroups(orderedAxes, axisIndex, expandedTuples.toArray(new ViewTuple[0]), axes, tupleAttrDims, pageAxisDims, pageAxisMembers, clientState);
 		}
 
 		// Run the expanded tuples through some final editing and filtering
@@ -3004,10 +3026,11 @@ public class PafDataService {
 
 	/**
 	 *  Expand symmetric view tuple groups
-	 *
-	 * @param axisIndex
+	 *  
+	 * @param orderedAxes An array that contains a list of the axes in the order that they should be expanded
+	 * @param axisIndex Points to the ordered axis being expanded
 	 * @param origViewTuples
-	 * @param axes
+	 * @param axisDims Axis dimension names
 	 * @param tupleAttrDims Set containing any attribute dimensions contained in the view tuples
 	 * @param pageAxisDims 
 	 * @param pageAxisMembers 
@@ -3016,17 +3039,18 @@ public class PafDataService {
 	 * @return List<ViewTuple>
 	 * @throws PafException 
 	 */
-	public List<ViewTuple> expandSymetricTupleGroups(int axisIndex, ViewTuple[] origViewTuples, String[] axes, Set<String> tupleAttrDims, String[] pageAxisDims, String[] pageAxisMembers, PafClientState clientState) throws PafException {
+	public List<ViewTuple> expandSymmetricTupleGroups(int[] orderedAxes, int axisIndex, ViewTuple[] origViewTuples, String[] axisDims, Set<String> tupleAttrDims, String[] pageAxisDims, String[] pageAxisMembers, PafClientState clientState) throws PafException {
 
-		int tupleCount = origViewTuples.length;
-		int tupleInx = 0;
+		int tupleCount = origViewTuples.length, tupleInx = 0;
+		int axis = orderedAxes[axisIndex];		// TTN-2050
 		int groupNoPrefixSize = axisIndex + 1;
 		Integer[] prevGroupNoPrefix = new Integer[groupNoPrefixSize];
-		String dimToExpand = axes[axisIndex];
-		List <ViewTuple>expandedTuples = new ArrayList<ViewTuple>();
+		String dimToExpand = axisDims[axis];	// TTN-2050
+		final int AXIS_SIZING_FACTOR = 100;
+		List <ViewTuple>expandedTuples = new ArrayList<ViewTuple>(origViewTuples.length * AXIS_SIZING_FACTOR);	// TTN-2050
 		List <ViewTuple>tupleGroup = new ArrayList<ViewTuple>();
 
-		logger.debug("Expanding tuples along axis: " + axes[axisIndex]);
+		logger.debug("Expanding tuples along axis: " + dimToExpand);
 		
 	    // This method expands the supplied tuples from the second most inner axis
 		// dimension out to the first tuple axis dimension. Within each axis, the tuples
@@ -3035,7 +3059,7 @@ public class PafDataService {
         // The example, below, shows a set of tuples coming into this method. The inner
 		// axis members have already been resolved:
         //
-		// Symetric Group#		Members
+		// Symmetric Group#		Members
 		// ---------------		------------------------------
 		// [0][0]				@IDESC(DPT110),	@MEMBERS(BOP_RTL, SLS_RTL, SLS_AUR), WP 	
 		// [0][0]				@IDESC(DPT110),	@MEMBERS(BOP_RTL, SLS_RTL, SLS_AUR), LY 	
@@ -3046,7 +3070,7 @@ public class PafDataService {
 		//
 		// After the first pass through this set of tuples we have:
 		//
-		// Symetric Group#		Members
+		// Symmetric Group#		Members
 		// ---------------		------------------------------
 		// [0][0]				@IDESC(DPT110),	BOP_RTL, WP 								
 		// [0][0]				@IDESC(DPT110),	BOP_RTL, LY 					
@@ -3117,7 +3141,7 @@ public class PafDataService {
 		// [0][1]				CLS110-10,	WOS, OP 									
         //
 
-		// Perform pre-procssing for filtering of invalid attribute member intersections (TTN-1469)
+		// Perform pre-processing for filtering of invalid attribute member intersections (TTN-1469)
 		boolean hasAttributes = false;
 		List<String> expandedAxisDims = new ArrayList<String>();
 		Set<String> attrBaseDims = null;
@@ -3127,8 +3151,8 @@ public class PafDataService {
 			// Get the pending list of expanded axis dimensions (include page dimensions). This
 			// list determines which dimensions will be validated. Only dimension axes that
 			// have been expanded (resolved) can be filtered on.
-			for (int i = axes.length -1; i >= axisIndex; i--) {
-				expandedAxisDims.add(axes[i]);
+			for (int i = axisDims.length -1; i >= axisIndex; i--) {
+				expandedAxisDims.add(axisDims[orderedAxes[i]]);
 			}
 			expandedAxisDims.addAll(Arrays.asList(pageAxisDims));
 
@@ -3179,11 +3203,11 @@ public class PafDataService {
 
 			// Expand the tuple group by cloning the current set of tuples for each
 			// term in the set of expanded members for this axis.
-			List<ViewTuple> expandedTupleGroup = new ArrayList<ViewTuple>();
 			ViewTuple firstTuple = tupleGroup.get(0);
-			String groupTerm = firstTuple.getMemberDefs()[axisIndex];
+			String groupTerm = firstTuple.getMemberDefs()[axis];	// TTN-2050
 			boolean groupParentFirst = firstTuple.getParentFirst();
 			String[] expandedGroupTerms = expandExpression(groupTerm, groupParentFirst, dimToExpand , clientState, true);
+			List<ViewTuple> expandedTupleGroup = new ArrayList<ViewTuple>(tupleGroup.size() * expandedGroupTerms.length);
 			for (String expandedTerm:expandedGroupTerms) {
 				for (ViewTuple viewTuple:tupleGroup) {
 				
@@ -3216,13 +3240,14 @@ public class PafDataService {
 							}
 							
 							// Check previously expanded tuple axes
-							for (int i = axes.length -1; i > axisIndex; i--) {
-								String dim = axes[i];
+							for (int i = axisDims.length -1; i > axisIndex; i--) {
+								int tupleAxis = orderedAxes[i];		// TTN-2050
+								String dim = axisDims[tupleAxis];	// TTN-2050
 								if (dim.equals(baseDim)) {
-									baseMember = viewTuple.getMemberDefs()[i];
+									baseMember = viewTuple.getMemberDefs()[tupleAxis];	// TTN-2050
 								} else if (attrDimList.contains(dim)) {
 									attrDims[attrIsIndex] = dim;
-									attrIs[attrIsIndex++] = viewTuple.getMemberDefs()[i];
+									attrIs[attrIsIndex++] = viewTuple.getMemberDefs()[tupleAxis];	// TTN-2050
 								}
 							}
 							
@@ -3250,7 +3275,7 @@ public class PafDataService {
 					// Tuple expansion
 					if (validTupleExpansion) {
 						ViewTuple newViewTuple = viewTuple.clone();
-						newViewTuple.getMemberDefs()[axisIndex] = expandedTerm;
+						newViewTuple.getMemberDefs()[axis] = expandedTerm;		// TTN-2050
 						expandedTupleGroup.add(newViewTuple);
 					}
 				}
