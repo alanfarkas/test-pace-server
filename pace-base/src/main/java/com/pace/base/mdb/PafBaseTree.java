@@ -281,7 +281,7 @@ public class PafBaseTree extends PafDimTree {
 
     	// Get set of associated attributes assigned to base dimension;
     	if (!getAttributeDimInfo().isEmpty()) {
-    		attrDimNames = getAttributeDimInfo().keySet();
+    		attrDimNames.addAll(getAttributeDimInfo().keySet());
     	}
 
     	// Return associated attribute dimension names, or empty set if no match is found

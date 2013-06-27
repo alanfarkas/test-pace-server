@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -2880,6 +2882,7 @@ public class PafDataService {
 		// information will be used to in an initial pass at filtering out invalid member 
 		// intersections. (TTN-1469)
 		Set<String> tupleAttrDims = new HashSet<String>();
+		Set<String> axisAttrDims = new HashSet<String>();
 		List<String> axisDimList = Arrays.asList(axes);
 		List<String> pageDimList = Arrays.asList(pageAxisDims);
 		if (axes.length > 0 && attributeDims != null && attributeDims.length > 1) {
@@ -2888,28 +2891,75 @@ public class PafDataService {
 			for (String attrDim : attributeDims) {
 				if (axisDimList.contains(attrDim) || pageDimList.contains(attrDim)) {
 					tupleAttrDims.add(attrDim);
+					if (axisDimList.contains(attrDim)) axisAttrDims.add(attrDim);
 				}
 			}
 		}
 		
-		// Determine the axis expansion order. Expand the base dimensions first,
-		// followed by any attribute dimensions. Process inner dimensions before
-		// outer dimensions. Axes are listed in reverse order. (TTN-2050)
-		List<Integer> baseAxes = new ArrayList<Integer>();
+		// Modify the axis expansion order, as necessary, to improve the expansion time of
+		// attribute views with a larger number of attribute dimensions in an axis.
+		// Unfortunately, modifying the axis expansion order impacts the ordering and grouping
+		// or rows/columns. Therefore, the default expansion, from inner dimension to outer 
+		// dimension, will be performed whenever possible. (TTN-2050)
+		// 
+		// This default expansion order will only be modified to ensure that a base dimension,
+		// that has more than a certain number (2?) of attributes in the same axis, is expanded.
+		// before the attribute dims are. This is an imperfect solution to this problem.
+		// Anything better would probably require a complete re-write of the tuple 
+		// grouping / expansion logic.
+		//
+		// Axes are specified in reverse-processing order. 
+		//
 		int[] orderedAxes = new int[dimCount];
-		int orderedAxisCnt = 0;
-		for (int axis = 0; axis <= innerAxisIndex; axis++) {
-			String dim = axes[axis];
-			if (tupleAttrDims.contains(dim)) {
-				// Attribute dim - add to array
-				orderedAxes[orderedAxisCnt++] = axis;
-			} else {
-				// Base dim - process after all attribute dims have been added
-				baseAxes.add(axis);
+		int[] defaultOrder = new int[dimCount];
+		final int ATTR_EXPANSION_COUNT_THRESHHOLD = 2;
+		// -- default axis order
+		for (int i = 0; i < dimCount; i++) defaultOrder[i] = i;
+		// -- determine if the axis order should be altered
+		Map<String, Set<String>> axisAttrsByDim = new HashMap<String, Set<String>>();
+		Map<String, String> axisBaseDimByAttr = new HashMap<String, String>();
+		Set<String> axisBaseDims = new HashSet<String>(axisDimList);
+		axisBaseDims.removeAll(axisAttrDims);
+		Set<String> axisBaseDimsWithAttrs = getBaseDimNamesWithAttributes();
+		axisBaseDimsWithAttrs.retainAll(axisBaseDims);
+		// Determine the set of attribute dims for each base dimension
+		for (String baseDim : axisBaseDimsWithAttrs) {
+			PafBaseTree baseTree = getBaseTree(baseDim);
+			Set<String> attrDims = baseTree.getAttributeDimNames();
+			attrDims.retainAll(axisAttrDims);
+			if (attrDims.size() > ATTR_EXPANSION_COUNT_THRESHHOLD) {
+				axisAttrsByDim.put(baseDim, attrDims);
+				for (String attrDim : attrDims) {
+					axisBaseDimByAttr.put(attrDim, baseDim);
+				}
 			}
-		}
-		for (int baseAxis : baseAxes) {
-			orderedAxes[orderedAxisCnt++] = baseAxis;
+		} 
+		// -- determine the axis order
+		if (axisAttrsByDim.isEmpty()) {
+			orderedAxes = defaultOrder;
+		} else {
+			// 
+			LinkedList<Integer> remainingAxes = new LinkedList<Integer>();
+			Set<String> processedDims = new HashSet<String>();
+			for (int i = 0; i < dimCount; i++) remainingAxes.push(i);
+			for (int orderedAxisInx = dimCount -1; orderedAxisInx >= 0; orderedAxisInx--) {
+				// Ensure that no attribute is processed before it's corresponding base dimension (that meets threshold test)
+				Integer processedAxis = null;
+				for (Integer axis : remainingAxes) {
+					String axisDim = axes[axis];
+					String baseDim = axisBaseDimByAttr.get(axisDim);
+					if (baseDim == null || processedDims.contains(baseDim)) {
+						// If not a threshold attribute or the corresponding base dim has already been processed,
+						// then the current axis can be processed and added to ordered collection
+						processedAxis = axis;
+						orderedAxes[orderedAxisInx] = processedAxis;
+						processedDims.add(axisDim);
+						break;
+					}
+				}
+				// Remove process axis from queue
+				remainingAxes.remove(processedAxis);
+			}
 		}
 		
 		// Expand inner axis
