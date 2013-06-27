@@ -2909,6 +2909,7 @@ public class PafDataService {
 		// grouping / expansion logic.
 		//
 		// Axes are specified in reverse-processing order. 
+		//TODO Rewrite expansion & grouping logic for more foolproof and performant logic
 		//
 		int[] orderedAxes = new int[dimCount];
 		int[] defaultOrder = new int[dimCount];
